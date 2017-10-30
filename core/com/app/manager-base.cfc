@@ -17,7 +17,7 @@ add option for search indexing for search table.
 	ts={
 		// required
 		// optional
-
+		customAddMethods:[],
 		uniqueURLField:"", // adds a field for overriding the URL.
 		viewScriptName:"", // need when using uniqueURLField for url routing
 		activeField:"", // boolean that automates some search/indexing/url routing changes
@@ -685,7 +685,11 @@ displayAdminEditMenu(ts);
 		rsUpdate=variables[variables.methods.beforeUpdate]();
 		request.zArrErrorMessages=[];
 	}
-	if((form.method EQ "insert" or form.method EQ "insertBulk") and variables.methods.beforeInsert NEQ ""){
+	fm = {};
+	for(ss in variables.customAddMethods){
+		fm[variables.customAddMethods[ss]] = ss;
+	}
+	if((form.method EQ "insert" or structKeyExists(fm,form.method)) and variables.methods.beforeInsert NEQ ""){
 		request.zArrErrorMessages=["#variables.methods.beforeInsert#() function was called."];
 		rsInsert=variables[variables.methods.beforeInsert]();
 		request.zArrErrorMessages=[];
@@ -1047,7 +1051,6 @@ deleteSearchIndex(ts);
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
 	}
-
 	form.modalpopforced=application.zcore.functions.zso(form, "modalpopforced",true, 0);
 	if(form.modalpopforced EQ 1){
 		application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
@@ -1070,14 +1073,13 @@ deleteSearchIndex(ts);
 	// TODO - we have to remove the parent_id / foreign stuff from the url to avoid it being posted twice here.
 
 	*/
-
 	echo('<div class="z-manager-edit-head">');
-	if(currentMethod EQ "add" OR currentMethod EQ "addBulk"){
+	if(currentMethod EQ "add" OR structKeyExists(variables.customAddMethods,currentMethod)){
 		echo('<h2>Add #variables.label#</h2>');
 		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
 		formAction="#variables.prefixURL#";
-		if(currentMethod EQ "addBulk"){
-			formAction&="insertBulk";
+		if(structKeyExists(variables.customAddMethods,currentMethod)){ 
+			formAction &= variables.customAddMethods[currentMethod]; 
 		}else{
 			formAction&="insert";
 		}
@@ -1106,7 +1108,7 @@ deleteSearchIndex(ts);
 	echo('<div class="z-mb-10">* = required field</div>');
 	echo('</div>');
 	application.zcore.functions.zStatusHandler(request.zsid,true);  
- 
+
 	request.zArrErrorMessages=["#variables.methods.getEditForm#() function was called."];
 	rsEditForm=variables[variables.methods.getEditForm](); 
 
@@ -1185,7 +1187,11 @@ deleteSearchIndex(ts);
 	tabCom.setMenuName("member-#application.zcore.functions.zURLEncode(lcase(variables.label), "-")#-edit");
 	cancelURL=application.zcore.functions.zso(request.zsession, variables.primaryKeyField&'_return'&form[variables.primaryKeyField]); 
 	if(cancelURL EQ ""){
-		cancelURL="#variables.prefixURL#index?#variables.requiredParamsQS#";
+		if(Mid(currentMethod,1,4) EQ "user"){
+				cancelURL="#variables.prefixURL#userIndex?#variables.requiredParamsQS#";
+		} else{
+				cancelURL="#variables.prefixURL#index?#variables.requiredParamsQS#";
+		}		
 	}
 	tabCom.setCancelURL(cancelURL);
 	tabCom.enableSaveButtons();

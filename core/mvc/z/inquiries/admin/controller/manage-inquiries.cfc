@@ -31,6 +31,7 @@
 	//variables.displayPath="/zupload/inquiries/";
 	ts={
 		// required 
+		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk" },
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -79,10 +80,7 @@
 		requireFeatureAccess="Leads",
 		prefixURL:"/z/inquiries/admin/manage-inquiries/",
 		navLinks:[],
-		titleLinks:[{ 
-			label:"Bulk Add",
-			link:"/z/inquiries/admin/manage-inquiries/addBulk"
-		}],
+		titleLinks:[],
 		columnSortingEnabled:true,
 		columns:[{
 			fields:[{
@@ -124,6 +122,11 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
 	ts=getInitConfig();
+	arrayAppend(ts.titleLinks, { 
+			label:"Bulk Add",
+			link:"/z/inquiries/admin/manage-inquiries/addBulk"
+		}
+	);
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv"
@@ -142,11 +145,16 @@
 <cffunction name="userInit" localmode="modern" access="public">
 	<cfscript>
 	ts=getInitConfig();
+	arrayAppend(ts.titleLinks, { 
+			label:"Bulk Add",
+			link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
+		}
+	);
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/userIndex##exportLeadDiv"
 	});
-	ts.disableAddEdit=true;
+	ts.disableAddEdit=false;
 	ts.requireFeatureAccess="";
 	super.init(ts); 
 	
@@ -333,8 +341,6 @@
 	</cfscript>
 	
 </cffunction>
-
-
 
 <cffunction name="changeStatus" localmode="modern" access="remote" roles="member">
 	<cfscript>
@@ -592,6 +598,13 @@
 	update();
 	</cfscript>
 </cffunction>
+<cffunction name="userInsertBulk" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	super.update();
+	</cfscript>
+</cffunction>
+
 
 <cffunction name="update" localmode="modern" access="remote" roles="member">
 	<cfscript>
@@ -616,6 +629,13 @@
 <cffunction name="addBulk" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	edit();
+	</cfscript>
+</cffunction>
+<cffunction name="userAddBulk" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	variables.disableAddEdit = false;
+	super.edit();
 	</cfscript>
 </cffunction>
 
@@ -903,7 +923,7 @@
 	inquiries_deleted = #db.param(0)# and 
 	inquiries_id=#db.param(form.inquiries_id)#	"; 
 	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
-		db.sql&=" and user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+		db.sql&=" and inquiries.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 	}
 	rs={};
 	rs.qData=db.execute("qData");
