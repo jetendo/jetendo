@@ -44,6 +44,7 @@ add option for search indexing for search table.
 		primaryKeyField:"",
 		pageZSID:"zPageId",
 		requiredParams:[], // a list of field=value pairs to force to be passed throughout the manager form links.
+		editFormOverrideParams:[], // changes zQueryToStruct's overrideFields to have other fields.
 		requiredEditParams:[], // you may need fewer fields then requiredParams to make add/edit work without causing duplicate data.
 		requireFeatureAccess:"",
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
@@ -70,6 +71,21 @@ add option for search indexing for search table.
 		rowSortingEnabled:false
 	}; 
 	structappend(ss, ts, false);
+	tempMethods={ // callback functions to customize the manager data and layout
+		getListData:'', 
+		getListReturnData:'',
+		getListRow:'', // function receives struct named row 
+		getEditData:'',
+		getEditForm:'',
+		beforeUpdate:'',
+		afterUpdate:'',
+		beforeInsert:'',
+		afterInsert:'',
+		getDeleteData:'',
+		executeDelete:'',
+		beforeReturnInsertUpdate:''
+	};
+	structappend(ss.methods, tempMethods, false);
 	structappend(variables, ss, true);
 
 	structappend(ss.metaFields, ts.metaFields, false);
@@ -79,8 +95,9 @@ add option for search indexing for search table.
 		variables.metaCom=createObject("component", "zcorerootmapping.com.zos.meta");
 	}
 
+
 	if(variables.requireFeatureAccess NEQ ""){ 
-		if(form.method EQ "index" or form.method EQ "edit" or form.method EQ "add"){
+		if(form.method EQ "index" or form.method EQ "edit" or form.method EQ "add" OR form.method EQ "addBulk"){
 			application.zcore.adminSecurityFilter.requireFeatureAccess(variables.requireFeatureAccess);	
 		}else{
 			// all other methods might be writing
@@ -327,7 +344,7 @@ a version of index list with divs for the table instead of <table>
 					echo('</div>');
 				}
 				</cfscript>
-			</div>
+			</div>	
 			<div class="z-manager-quick-menu-side-links"> 
 				<cfif not variables.disableAddEdit>
 					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
@@ -652,6 +669,8 @@ displayAdminEditMenu(ts);
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
+
+
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
 	}
@@ -666,7 +685,7 @@ displayAdminEditMenu(ts);
 		rsUpdate=variables[variables.methods.beforeUpdate]();
 		request.zArrErrorMessages=[];
 	}
-	if(form.method EQ "insert" and variables.methods.beforeInsert NEQ ""){
+	if((form.method EQ "insert" or form.method EQ "insertBulk") and variables.methods.beforeInsert NEQ ""){
 		request.zArrErrorMessages=["#variables.methods.beforeInsert#() function was called."];
 		rsInsert=variables[variables.methods.beforeInsert]();
 		request.zArrErrorMessages=[];
@@ -838,8 +857,17 @@ displayAdminEditMenu(ts);
 			application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, field));
 		}
 	}
-	rowHTML=returnRow();
-	application.zcore.functions.zReturnJson({success:true, id:form[variables.primaryKeyField], rowHTML:rowHTML, newRecord:newRecord});
+	rowHTML=returnRow(); 
+	
+	if(variables.methods.beforeReturnInsertUpdate NEQ ""){
+		request.zArrErrorMessages=["#variables.methods.beforeReturnInsertUpdate#() function was called."];
+		rs=variables[variables.methods.beforeReturnInsertUpdate]();
+		request.zArrErrorMessages=[];
+	}else{
+		rs={success:true, id:form[variables.primaryKeyField], rowHTML:rowHTML, newRecord:newRecord};
+	}
+
+	application.zcore.functions.zReturnJson(rs);
 	</cfscript>
 </cffunction>
 
@@ -1044,11 +1072,22 @@ deleteSearchIndex(ts);
 	*/
 
 	echo('<div class="z-manager-edit-head">');
-	if(currentMethod EQ "add"){
+	if(currentMethod EQ "add" OR currentMethod EQ "addBulk"){
 		echo('<h2>Add #variables.label#</h2>');
 		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
-		formAction="#variables.prefixURL#insert?#variables.requiredEditParamsQS#"; 
-		application.zcore.functions.zQueryToStruct(rs.qData, form, arrayToList(variables.requiredParams, ", "));  
+		formAction="#variables.prefixURL#";
+		if(currentMethod EQ "addBulk"){
+			formAction&="insertBulk";
+		}else{
+			formAction&="insert";
+		}
+		formAction&="?#variables.requiredEditParamsQS#"; 
+
+		arrOverride=duplicate(variables.requiredParams);
+		for(param in variables.editFormOverrideParams){
+			arrayAppend(arrOverride, param);
+		}
+		application.zcore.functions.zQueryToStruct(rs.qData, form, arrayToList(arrOverride, ", "));
 	}else{
 		if(rs.qData.recordcount EQ 0){
 			application.zcore.status.setStatus(request.zsid, "#variables.label# doesn't exist.", form, true);
@@ -1066,10 +1105,11 @@ deleteSearchIndex(ts);
 
 	echo('<div class="z-mb-10">* = required field</div>');
 	echo('</div>');
-	application.zcore.functions.zStatusHandler(request.zsid,true); 
+	application.zcore.functions.zStatusHandler(request.zsid,true);  
  
 	request.zArrErrorMessages=["#variables.methods.getEditForm#() function was called."];
 	rsEditForm=variables[variables.methods.getEditForm](); 
+
 	request.zArrErrorMessages=[];
 	// loop everything here 
 
@@ -1198,10 +1238,9 @@ deleteSearchIndex(ts);
 				if(structkeyexists(field, 'required') and field.required){
 					echo(' *');
 				}
-
 				echo('</th>
-					<td>#field.field#</td>
-				</tr>');
+						<td>#field.field#</td>
+					</tr>');
 			}
 			echo('</table>');
 		}

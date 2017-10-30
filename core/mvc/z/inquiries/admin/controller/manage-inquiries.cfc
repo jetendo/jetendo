@@ -7,7 +7,7 @@
 	if(variables.hasLeadsAccess){
 		links=[
 			{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
-			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead" }, 
+			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead"}, 
 			{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
 			{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
 			{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
@@ -48,12 +48,15 @@
 			beforeInsert:'beforeInsert',
 			afterInsert:'afterInsert',
 			getDeleteData:'getDeleteData',
-			executeDelete:'executeDelete'
+			executeDelete:'executeDelete',
+			beforeReturnInsertUpdate:'beforeReturnInsertUpdate'
 		},
 
 		//optional
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
 		requiredParams:[],
+		
+		editFormOverrideParams:["inquiries_type_id", "user_id"],
 		customInsertUpdate:true, // true disables the normal zInsert/zUpdate calls, so you can implement them in afterInsert and afterUpdate instead
 		sortField:"",
 		hasSiteId:true,
@@ -76,7 +79,10 @@
 		requireFeatureAccess="Leads",
 		prefixURL:"/z/inquiries/admin/manage-inquiries/",
 		navLinks:[],
-		titleLinks:[],
+		titleLinks:[{ 
+			label:"Bulk Add",
+			link:"/z/inquiries/admin/manage-inquiries/addBulk"
+		}],
 		columnSortingEnabled:true,
 		columns:[{
 			fields:[{
@@ -110,6 +116,7 @@
 			label:'Admin'
 		}]
 	};
+	
 	return ts;
 	</cfscript>
 </cffunction>
@@ -580,6 +587,12 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="insertBulk" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	update();
+	</cfscript>
+</cffunction>
+
 <cffunction name="update" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	init();
@@ -597,6 +610,12 @@
 	<cfscript>
 	init();
 	super.edit();
+	</cfscript>
+</cffunction>
+
+<cffunction name="addBulk" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	edit();
 	</cfscript>
 </cffunction>
 
@@ -733,6 +752,17 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	rs=validateInsertUpdate();
+	var iti 	= "";
+	var luid	= "";
+	if(structkeyexists(form, "inquiries_type_id") AND form.inquiries_type_id NEQ ""){
+		iti = "#form.inquiries_type_id#";
+	}
+	if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
+		luid = "#form.user_id#";
+	} else if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
+		luid = "#form.user_id#";
+	}
+
 	if(not rs.success){
 		application.zcore.status.displayReturnJson(request.zsid);
 	} 
@@ -742,6 +772,19 @@
 	site_id=#db.param(request.zos.globals.id)# ";
 	qData=db.execute("qData");
 	return {success:true, qData:qData};
+	</cfscript>
+</cffunction>
+
+
+
+<cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>  
+	application.zcore.status.setStatus(request.zsid, "Lead added successfully");
+	var link = "#variables.prefixURL#addBulk?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
+	if(form.user_id NEQ "" AND IsNumeric(form.user_id)){
+		link &= "&user_id=" & form.user_id;
+	}
+	return {success:true, id:form[variables.primaryKeyField], redirect:1,redirectLink: link};
 	</cfscript>
 </cffunction>
 
@@ -890,7 +933,7 @@
 	fs=[];
 
 	savecontent variable="field"{
-		form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
+		//form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
 		selectStruct = StructNew();
 		selectStruct.name = "inquiries_type_id";
 		selectStruct.query = variables.qTypes;
