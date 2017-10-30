@@ -51,7 +51,8 @@
 		function init(options){
 			$cartDiv=$(".zcart."+options.name);
 			if($cartDiv.length === 0){
-				throw(options.name+" is not defined.  zCart requires a valid object or selector for the cart items to be rendered in.");
+				console.log("Cart selector had no matches: .zcart."+options.name+" | zCart requires a valid object or selector for the cart items to be rendered in. This can be ignored on pages where the cart is not needed.");
+				return;
 			}
 			// setup mouse events for add and remove buttons for this cart's name only.
 			$(".zcart-add."+options.name).bind('click', function(){
