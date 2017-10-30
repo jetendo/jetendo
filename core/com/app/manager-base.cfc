@@ -17,7 +17,7 @@ add option for search indexing for search table.
 	ts={
 		// required
 		// optional
-		customAddMethods:[],
+		customAddMethods:{},
 		uniqueURLField:"", // adds a field for overriding the URL.
 		viewScriptName:"", // need when using uniqueURLField for url routing
 		activeField:"", // boolean that automates some search/indexing/url routing changes

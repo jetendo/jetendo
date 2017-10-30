@@ -145,16 +145,20 @@
 <cffunction name="userInit" localmode="modern" access="public">
 	<cfscript>
 	ts=getInitConfig();
-	arrayAppend(ts.titleLinks, { 
-			label:"Bulk Add",
-			link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
-		}
-	);
+	if(request.zos.isTestServer){
+		ts.disableAddEdit=false;
+		arrayAppend(ts.titleLinks, { 
+				label:"Bulk Add",
+				link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
+			}
+		);
+	}else{
+		ts.disableAddEdit=true;
+	}
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/userIndex##exportLeadDiv"
 	});
-	ts.disableAddEdit=false;
 	ts.requireFeatureAccess="";
 	super.init(ts); 
 	
