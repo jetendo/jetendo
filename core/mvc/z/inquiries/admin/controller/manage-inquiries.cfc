@@ -31,7 +31,7 @@
 	//variables.displayPath="/zupload/inquiries/";
 	ts={
 		// required 
-		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk" },
+		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert"},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -642,6 +642,20 @@
 	super.edit();
 	</cfscript>
 </cffunction>
+<cffunction name="userAdd" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	variables.disableAddEdit = false;
+	super.edit();
+	</cfscript>
+</cffunction>
+<cffunction name="userInsert" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	variables.disableAddEdit = false;
+	super.edit();
+	</cfscript>
+</cffunction>
 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript> 
@@ -736,7 +750,13 @@
 	myForm.inquiries_email.email = true;
 	myForm.inquiries_first_name.required = true;
 	myForm.inquiries_first_name.friendlyName = "First Name";
-	if(form.method EQ "insert"){
+	
+	fm = {};
+	for(ss in variables.customAddMethods){
+		fm[variables.customAddMethods[ss]] = ss;
+	}
+	//CHECK OTHER TYPES BESIDES INSERT
+	if(form.method EQ "insert" or structKeyExists(fm,form.method)){
 		myForm.inquiries_datetime.createDateTime = true;
 	}
 	if(application.zcore.functions.zso(form,'inquiries_type_id') EQ '' and application.zcore.functions.zso(form,'inquiries_type_other') EQ ''){
@@ -756,12 +776,27 @@
 		form.inquiries_status_id=1;
 	} 
 
-	if(not application.zcore.user.checkGroupAccess("administrator")){
-		form.user_id=request.zsession.user.id;
-		form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
-		form.inquiries_status_id=2;
-	}
-
+	if(form.method EQ "userInsert" or structkeyexists(fm, form.method)){
+		// user version of assign check 
+		arrUser=listToArray(form.user_id, "|");
+		if(arraylen(arrUser) EQ 2){
+			form.user_id=arrUser[1];
+			form.user_id_siteIDType=arrUser[2];
+			// TODO: maybe it could be secured with assign's qAgent stuff | is this a user i have access to
+			// NOT TODAY
+		}else{
+			if(form.user_id NEQ ""){
+				throw("Invalid user_id format");
+			}
+		}
+		//	form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
+	}else{ 
+		if(not application.zcore.user.checkGroupAccess("administrator")){
+			form.user_id=request.zsession.user.id;
+			form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
+			form.inquiries_status_id=2;
+		}
+	} 
 	result = application.zcore.functions.zValidateStruct(form, myForm,request.zsid,true);
 	if(result){	
 		return {success:false};
@@ -776,17 +811,6 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	rs=validateInsertUpdate();
-	var iti 	= "";
-	var luid	= "";
-	if(structkeyexists(form, "inquiries_type_id") AND form.inquiries_type_id NEQ ""){
-		iti = "#form.inquiries_type_id#";
-	}
-	if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
-		luid = "#form.user_id#";
-	} else if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
-		luid = "#form.user_id#";
-	}
-
 	if(not rs.success){
 		application.zcore.status.displayReturnJson(request.zsid);
 	} 
@@ -799,13 +823,21 @@
 	</cfscript>
 </cffunction>
 
-
-
 <cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>  
-	application.zcore.status.setStatus(request.zsid, "Lead added successfully");
-	var link = "#variables.prefixURL#addBulk?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
-	if(form.user_id NEQ "" AND IsNumeric(form.user_id)){
+	//application.zcore.status.setStatus(request.zsid, "Lead added successfully");
+	fm = {};
+	for(ss in variables.customAddMethods){
+		fm[variables.customAddMethods[ss]] = ss;
+	}
+	urlPage = "";
+	if(structKeyExists(fm, form.method)){
+		urlPage = fm[form.method];
+	} else{
+		urlPage = variables.customAddMethods[form.method];
+	}
+	var link = "#variables.prefixURL#" & urlPage & "?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
+	if(structkeyexists(form, "user_id")){
 		link &= "&user_id=" & form.user_id;
 	}
 	return {success:true, id:form[variables.primaryKeyField], redirect:1,redirectLink: link};
@@ -1068,7 +1100,7 @@
 	}
 	arrayAppend(fs, {label:'Private Notes', field:field});
 
-	if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
+	/*if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
 		savecontent variable="field"{  
 			userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 			db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
@@ -1085,8 +1117,13 @@
 			selectStruct.queryValueField = 'user_id';
 			application.zcore.functions.zInputSelectBox(selectStruct);
 		}
-	}
+	}*/
+	var ass = new Assign();
+		savecontent variable="field"{  
+			echo(ass.getAssignLead(""));
+		}
 	arrayAppend(fs, {label:'Assign To', field:field});
+	//arrayAppend(fs, {label:'Assign To', field:field});
 
 	rs.tabs.basic.fields=fs;
 	// advanced fields

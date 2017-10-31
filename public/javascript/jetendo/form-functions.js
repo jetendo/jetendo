@@ -684,7 +684,9 @@ var zLastAjaxVarName=""; */
 					if(!zIsDeveloper()){
 						alert("Invalid response.  You may need to login again or refresh the page.");
 					}else{
-						alert("zAjax() Error: The following ajax URL MUST output the x_ajax_id as an http header.\n"+zAjaxData[obj.id].url);	
+						console.log(zAjaxData[obj.id]);
+						console.log(req);
+						alert("Unexpected response.  See console for request and response objects"); 
 					}
 					return;
 				}
@@ -1911,6 +1913,7 @@ var zLastAjaxVarName=""; */
 			var r=JSON.parse(r);
 			if(r.success){
 				if(typeof r.redirect != "undefined" && r.redirect){
+					alert("LINK IS " + r.redirectLink);
 					window.location.href=r.redirectLink;
 				}else{
 					if(r.newRecord){ 

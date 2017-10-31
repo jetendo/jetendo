@@ -346,8 +346,10 @@ a version of index list with divs for the table instead of <table>
 				</cfscript>
 			</div>	
 			<div class="z-manager-quick-menu-side-links"> 
-				<cfif not variables.disableAddEdit>
+				<cfif not variables.disableAddEdit AND application.zcore.user.checkGroupAccess("administrator")>
 					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
+				<cfelse>
+					<a href="#variables.prefixURL#userAdd?modalpopforced=0&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
 				</cfif>
 				<cfscript>
 				for(link in variables.titleLinks){
@@ -801,7 +803,7 @@ displayAdminEditMenu(ts);
 
 	newRecord=false;
 
-	if(form.method EQ 'insert'){
+	if(form.method EQ 'insert' OR structKeyExists(fm,form.method)){
 		newRecord=true;
 		if(not variables.customInsertUpdate){
 			form[variables.primaryKeyField] = application.zcore.functions.zInsert(ts);
