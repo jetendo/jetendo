@@ -762,7 +762,7 @@ displayAdminEditMenu(ts);
 				fail=true;
 			} 
 			if(application.zcore.user.checkServerAccess()){
-				if(rsUpdate.qData.page_unique_url NEQ form[variables.uniqueURLField]){
+				if(rsUpdate.qData[variables.uniqueURLField] NEQ form[variables.uniqueURLField]){
 					uniqueChanged=true;	
 				}
 			}
@@ -814,7 +814,7 @@ displayAdminEditMenu(ts);
 		}
 		if(variables.methods.afterInsert NEQ ""){
 			request.zArrErrorMessages=["#variables.methods.afterInsert#() function was called."];
-			rs=variables[variables.methods.afterInsert]();
+			rs=variables[variables.methods.afterInsert](rsInsert);
 			request.zArrErrorMessages=[];
 			if(not rs.success){
 				application.zcore.status.displayReturnJson(request.zsid);
@@ -834,7 +834,7 @@ displayAdminEditMenu(ts);
 		}
 		if(variables.methods.afterUpdate NEQ ""){
 			request.zArrErrorMessages=["#variables.methods.afterUpdate#() function was called."];
-			rs=variables[variables.methods.afterUpdate]();
+			rs=variables[variables.methods.afterUpdate](rsUpdate);
 			request.zArrErrorMessages=[];
 			if(not rs.success){
 				application.zcore.status.displayReturnJson(request.zsid);
@@ -1140,9 +1140,9 @@ deleteSearchIndex(ts);
 		savecontent variable="field"{
 
 			if(currentMethod EQ "add"){
-				echo(application.zcore.functions.zInputUniqueUrl("page_unique_url", true));
+				echo(application.zcore.functions.zInputUniqueUrl(variables.uniqueURLField, true));
 			}else{
-				echo(application.zcore.functions.zInputUniqueUrl("page_unique_url"));
+				echo(application.zcore.functions.zInputUniqueUrl(variables.uniqueURLField));
 			}
 		}
 		arrayAppend(fs, {label:"Unique URL", field:field});
