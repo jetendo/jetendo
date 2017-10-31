@@ -157,6 +157,11 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 		afterSectionHTML:""
 	};
 	structappend(ss, ts, false);
+	for(i in ss){
+		if(isSimpleValue(ss[i])){
+			ss[i]=trim(ss[i]);
+		}
+	} 
  
 	if(not structkeyexists(ss, 'currentSection')){
 		throw("ss.currentSection is required");
