@@ -102,9 +102,11 @@
 		<form action="#request.cgi_script_name#?action=list" method="get">
 			<table style="border-spacing:0px; width:100%;" class="table-list">
 				<tr class="table-shadow">
-					<td colspan="13" class="tiny"><h2 style="display:inline;">Sites | </h2><a href="/z/server-manager/admin/site/newDomain">Add Site</a> 
+					<td colspan="13" class="tiny"><h2 style="display:inline;">Sites</h2> &nbsp;&nbsp;
+						<a href="/z/server-manager/admin/site/newDomain" class="z-manager-search-button">Add Site</a> 
 					<cfif application.zcore.user.checkAllCompanyAccess()>
-						| <a href="/z/server-manager/admin/company/index">Companies</a>
+						<a href="/z/server-manager/admin/site-import/index" class="z-manager-search-button">Import Site</a>
+						<a href="/z/server-manager/admin/company/index">Companies</a>
 					</cfif>
 					<!--- | <a href="#request.cgi_script_name#?action=manageBudget">Manage Budgets</a>  --->
 						<cfif application.zcore.functions.zso(request.zsession, 'showInactiveSites', true, 0) EQ 1>
@@ -113,12 +115,16 @@
 							| <a href="/z/server-manager/admin/site-select/index?showInactiveSites=1">Show Inactive</a>
 						</cfif>
 						<cfif application.zcore.user.checkAllCompanyAccess()>
-						| <a href="/z/server-manager/admin/site-import/index">Import Site</a>
+						 
 							| <a href="/z/server-manager/admin/global-import/index">Import Global Database</a>
 						</cfif>
 					</td>
-					<td style="text-align:right" colspan="13" class="tiny"><input type="text" name="site_search" value="#application.zcore.functions.zso(form, 'site_search')#" size="35">
-						<input type="submit" name="searchSubmit" value="Search"> <input type="button" name="name11" value="Clear" onclick="window.location.href='/z/server-manager/admin/site-select/index';" /></td>
+					<td style="text-align:right" colspan="13" class="tiny"><input type="text" name="site_search" value="#application.zcore.functions.zso(form, 'site_search')#" style="min-width:100px; width:100%; max-width:200px;" size="35">
+						<input type="submit" name="searchSubmit" value="Search" class="z-manager-search-button"> 
+						<cfif application.zcore.functions.zso(form, 'site_search') NEQ "">
+							<input type="button" name="name11" value="Clear" onclick="window.location.href='/z/server-manager/admin/site-select/index';" class="z-manager-search-button" />
+						</cfif>
+					</td>
 				</tr>
 				<tr>
 					<cfscript>

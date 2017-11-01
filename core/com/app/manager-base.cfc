@@ -47,6 +47,7 @@ add option for search indexing for search table.
 		editFormOverrideParams:[], // changes zQueryToStruct's overrideFields to have other fields.
 		requiredEditParams:[], // you may need fewer fields then requiredParams to make add/edit work without causing duplicate data.
 		requireFeatureAccess:"",
+		disableAdd:false, // disables the add button from appearing and from insert/add functions working
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
 		columnSortingEnabled:false,
 		pagination:true,
@@ -346,7 +347,8 @@ a version of index list with divs for the table instead of <table>
 				</cfscript>
 			</div>	
 			<div class="z-manager-quick-menu-side-links"> 
-				<cfif not variables.disableAddEdit AND application.zcore.user.checkGroupAccess("administrator")>
+				<cfif not variables.disableAddEdit AND application.zcore.user.checkGroupAccess("administrator") and not disableAdd>
+
 					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
 				<cfelse>
 					<a href="#variables.prefixURL#userAdd?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
@@ -404,7 +406,7 @@ a version of index list with divs for the table instead of <table>
 				</div>
 			</div>
 		</cfif>
-		<cfif not variables.disableAddEdit and application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1>
+		<cfif not variables.disableAddEdit and not variables.disableAdd and application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1>
 			<script type="text/javascript">
 			zArrDeferredFunctions.push(function(){
 				$(".z-manager-quick-add-link").trigger("click");
@@ -672,7 +674,11 @@ displayAdminEditMenu(ts);
 	db=request.zos.queryObject;
 	init();
 
-
+	if(form.method EQ "insert"){
+		if(variables.disableAdd){
+			application.zcore.functions.z404("Add is disabled.");
+		}
+	}
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
 	}
@@ -1052,6 +1058,12 @@ deleteSearchIndex(ts);
 	}
 
 	var currentMethod=form.method;
+
+	if(currentMethod EQ "add"){
+		if(variables.disableAdd){
+			application.zcore.functions.z404("Add is disabled.");
+		}
+	}
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
 	}

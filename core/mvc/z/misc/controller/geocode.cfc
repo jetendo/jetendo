@@ -208,8 +208,7 @@ if(rs.status EQ "error"){
 	#db.trustedSQL(rs.selectSQL)#
 	from #db.table("zipcode", request.zos.globals.datasource)#  
 	where #db.param(1)# = #db.param(1)# 
-	#db.trustedSQL(rs.whereSQL)# 
-	having #db.trustedSQL(rs.havingSQL)#
+	#db.trustedSQL(rs.whereSQL)#  
 	ORDER BY `distance`";
 	qDistance=db.execute("qDistance"); 
 	// going to need to order by the subscription and better if that was converted to number in change.cfc.
@@ -816,9 +815,13 @@ rs=geocodeCom.getSearchSQL(ts);
       + sin( radians('#startLatitude#') ) 
       * sin( radians( #latitudeField# ) ) ) ) AS `#application.zcore.functions.zEscape(ss.fields.distance)#` ";
     rs.whereSQL=" and 
+    ( 3959 * acos( cos( radians('#startLatitude#') )
+      * cos( radians( #latitudeField# ) ) 
+      * cos( radians( #longitudeField# ) - radians('#startLongitude#') ) 
+      + sin( radians('#startLatitude#') ) 
+      * sin( radians( #latitudeField# ) ) ) ) <= #application.zcore.functions.zEscape(ss.miles)# and 
 	#latitudeIntegerField# between #application.zcore.functions.zEscape(int((ss.startPosition.latitude-latDegrees)*100000))# and #application.zcore.functions.zEscape(ceiling((ss.startPosition.latitude+latDegrees)*100000))# and 
-	#longitudeIntegerField# between #application.zcore.functions.zEscape(int((ss.startPosition.longitude-longDegrees)*100000))# and #application.zcore.functions.zEscape(ceiling((ss.startPosition.longitude+longDegrees)*100000))# ";
-	rs.havingSQL=" #distanceField# <= #application.zcore.functions.zEscape(ss.miles)# ";
+	#longitudeIntegerField# between #application.zcore.functions.zEscape(int((ss.startPosition.longitude-longDegrees)*100000))# and #application.zcore.functions.zEscape(ceiling((ss.startPosition.longitude+longDegrees)*100000))# "; 
 	return rs;
 	</cfscript>
 </cffunction>
