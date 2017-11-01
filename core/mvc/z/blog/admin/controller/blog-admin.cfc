@@ -1507,6 +1507,27 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 				form.blog_metadesc=left(replace(replace(rereplacenocase(trim(form.blog_story&" "&form.blog_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 			}
 		}
+
+		StructDelete(variables,'blog_og_image');
+		arrList=ArrayNew(1);
+		application.zcore.functions.zCreateDirectory(application.zcore.functions.zVar('privatehomedir')&"zupload/blog/");
+		if(form.method EQ 'insert'){
+			arrList = application.zcore.functions.zUploadResizedImagesToDb("blog_og_image", application.zcore.functions.zVar('privatehomedir')&"zupload/blog/", '2048x1070');
+		}else{
+			arrList = application.zcore.functions.zUploadResizedImagesToDb("blog_og_image", application.zcore.functions.zVar('privatehomedir')&"zupload/blog/", '2048x1070', 'blog', 'blog_id', "blog_og_image_delete",request.zos.zcoreDatasource);
+		}
+		if(isarray(arrList) EQ false){
+			application.zcore.status.setStatus(request.zsid, '<strong>PHOTO ERROR:</strong> invalid format or corrupted.  Please upload a small to medium size JPEG (i.e. a file that ends with ".jpg").');	
+			StructDelete(form,'blog_og_image');
+			StructDelete(variables,'blog_og_image');
+		}else if(ArrayLen(arrList) NEQ 0){
+			form.blog_og_image=arrList[1];
+		}else{
+			StructDelete(form,'blog_og_image');
+		}
+		if(application.zcore.functions.zso(form,'blog_og_image_delete',true) EQ 1){
+			form.blog_og_image='';	
+		}
 	}
 	if(left(form.blog_summary,100) NEQ left(form.blog_story,100)){
 		form.blog_search=application.zcore.functions.zCleanSearchText(form.blog_title&' '&form.blog_summary&' '&form.blog_story);
@@ -1788,7 +1809,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 
 		<cfscript>
 		hasMultipleLinks=false;
-		if(application.zcore.functions.zIsExternalCommentsEnabled()){
+		if(application.zcore.app.siteHasApp("listing")){
 			hasMultipleLinks=true;
 		}else if(not application.zcore.user.checkServerAccess() and row.blog_unique_name NEQ ""){
 			hasMultipleLinks=true;
@@ -1872,6 +1893,12 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		if(application.zcore.app.siteHasApp("listing")){
 		request.zos.listing.functions.zMLSSearchOptionsUpdate('delete',qlist.mls_saved_search_id);
 		}
+
+
+		if(qList.blog_og_image NEQ ""){
+			application.zcore.functions.zDeleteFile(request.zos.globals.privatehomedir&"zupload/blog/"&qList.blog_og_image);
+		}
+
 		application.zcore.siteOptionCom.deleteOptionAppId(qList.blog_site_option_app_id);
 		application.zcore.app.getAppCFC("blog").searchIndexDeleteBlogArticle(form.blog_id);
 		db.sql="delete
@@ -2586,17 +2613,17 @@ tabCom.enableSaveButtons();
 		</cfscript>
 		</td>
 		</tr>
-<tr> 
-<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Unique URL","member.blog.editTag blog_tag_unique_name")#</th>
-<td style="vertical-align:top; ">
-		<cfif form.method EQ "tagAdd">
-			#application.zcore.functions.zInputUniqueUrl("blog_tag_unique_name", true)#
-		<cfelse>
-			#application.zcore.functions.zInputUniqueUrl("blog_tag_unique_name")#
-		</cfif>
-	</td>
-</tr>
-</table>
+		<tr> 
+		<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Unique URL","member.blog.editTag blog_tag_unique_name")#</th>
+		<td style="vertical-align:top; ">
+				<cfif form.method EQ "tagAdd">
+					#application.zcore.functions.zInputUniqueUrl("blog_tag_unique_name", true)#
+				<cfelse>
+					#application.zcore.functions.zInputUniqueUrl("blog_tag_unique_name")#
+				</cfif>
+			</td>
+		</tr>
+		</table>
 		#application.zcore.hook.trigger("blog.tagEditCustomFields", {query=qEdit})#
 
 		#tabCom.endFieldSet()#
@@ -3122,8 +3149,12 @@ tabCom.enableSaveButtons();
 			<td>
 			 <input type="radio" name="blog_hide_time" value="0" <cfif form.blog_hide_time EQ 0 or form.blog_hide_time EQ "">checked="checked"</cfif>  style="background:none; border:none;"> Yes <input type="radio" name="blog_hide_time" value="1" style="background:none; border:none;" <cfif form.blog_hide_time EQ 1>checked="checked"</cfif>> No
 			</td></tr>
+			<tr>
+				<th>#application.zcore.functions.zOutputHelpToolTip("Open Graph Image","member.blog.edit blog_og_image")#</th>
+				<td>#application.zcore.functions.zInputImage('blog_og_image', application.zcore.functions.zVar('privatehomedir')&"zupload/blog/", "/zupload/blog/", 250)# </td>
+			</tr>
 			
-
+ 
 		<cfif application.zcore.functions.zso(request.zos.globals, 'enableManageSlideshow', true, 0) EQ 1>
 		
 			<cfsavecontent variable="db.sql">
