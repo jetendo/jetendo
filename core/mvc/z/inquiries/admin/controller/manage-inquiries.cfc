@@ -1693,7 +1693,7 @@
 			});
 		}
 		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") or structkeyexists(request.zos.userSession.groupAccess, "manager")){
-			if(row.inquiries_status_id NEQ 4 and row.inquiries_status_id NEQ 5 and row.inquiries_status_id NEQ 7){
+			if(row.inquiries_status_id NEQ 4 and row.inquiries_status_id NEQ 5 and row.inquiries_status_id NEQ 7 and row.inquiries_status_id NEQ 8){
 
 				arrayAppend(adminButtons, {
 					title:"Assign Lead",
