@@ -1983,7 +1983,7 @@ this.app_id=10;
 			}	
 			ts =structnew();
 			ts.image_library_id=qArticle.blog_image_library_id;
-			ts.size="1200x630";
+			ts.size="2048x1070";
 			ts.crop=0; 
 			ts.offset=0; 
 			ts.output=false; 
