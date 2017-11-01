@@ -31,10 +31,11 @@
 	//variables.displayPath="/zupload/inquiries/";
 	ts={
 		// required 
-		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userUpdate"},
+		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert","userEdit":"userUpdate"},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
+		addListInsertPosition:"top",
 		datasource:request.zos.zcoreDatasource,
 		deletedField:"inquiries_deleted",
 		primaryKeyField:"inquiries_id",
@@ -50,7 +51,7 @@
 			afterInsert:'afterInsert',
 			getDeleteData:'getDeleteData',
 			executeDelete:'executeDelete',
-			beforeReturnInsertUpdate:'beforeReturnInsertUpdate'
+			beforeReturnInsertUpdate:''
 		},
 
 		//optional
@@ -114,6 +115,9 @@
 			label:'Admin'
 		}]
 	};
+	if(form.method EQ "userInsertBulk" or form.method EQ "insertBulk"){
+		variables.methods.beforeReturnInsertUpdate = 'beforeReturnInsertUpdate';
+	}
 	
 	return ts;
 	</cfscript>
@@ -123,9 +127,6 @@
 	<cfscript> 
 	ts=getInitConfig();
 	//FOR REG USER DO NOT WANT TO REDIRECT
-	if(form.method EQ "insert"){
-		variables.methods.beforeReturnInsertUpdate = "";
-	}
 	arrayAppend(ts.titleLinks, { 
 			label:"Bulk Add",
 			link:"/z/inquiries/admin/manage-inquiries/addBulk"
@@ -148,21 +149,25 @@
 
 <cffunction name="userInit" localmode="modern" access="public">
 	<cfscript>
-	ts=getInitConfig();
-	if(request.zos.isTestServer){
-		ts.disableAddEdit=false;
-		arrayAppend(ts.titleLinks, { 
-				label:"Bulk Add",
-				link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
-			}
-		);
-	}else{
-		ts.disableAddEdit=true;
-	}
-
-	//ADDED OFFICE ID
+	ts=getInitConfig(); 
+	ts.disableAddButton=true;
+ 
+	arrayAppend(ts.titleLinks, { 
+			label:"Add",
+			link:"/z/inquiries/admin/manage-inquiries/userAdd?modalpopforced=1",
+			onclick:"zTableRecordAdd(this, 'sortRowTable', 'top'); return false;"
+		}
+	);
+	arrayAppend(ts.titleLinks, { 
+			label:"Bulk Add",
+			link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
+		}
+	); 
+ 
 	if(request.zsession.user.office_id NEQ ""){
-		request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+		if(not structkeyexists(request.zsession, 'selectedOfficeId')){
+			request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+		}
 		form["office_id"] = request.zsession.selectedOfficeId;
 	}
 
@@ -646,6 +651,7 @@
 	edit();
 	</cfscript>
 </cffunction>
+
 <cffunction name="userAddBulk" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
@@ -653,12 +659,28 @@
 	super.edit();
 	</cfscript>
 </cffunction>
+
 <cffunction name="userAdd" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
 	super.edit();
 	</cfscript>
 </cffunction>
+
+<cffunction name="userEdit" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	super.edit();
+	</cfscript>
+</cffunction>
+
+<cffunction name="userInsert" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit(); 
+	super.update();
+	</cfscript>
+</cffunction>
+
 <cffunction name="userUpdate" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
@@ -759,13 +781,9 @@
 	myForm.inquiries_email.email = true;
 	myForm.inquiries_first_name.required = true;
 	myForm.inquiries_first_name.friendlyName = "First Name";
-	
-	fm = {};
-	for(ss in variables.customAddMethods){
-		fm[variables.customAddMethods[ss]] = ss;
-	}
+	 
 	//CHECK OTHER TYPES BESIDES INSERT
-	if(form.method EQ "insert" or structKeyExists(fm,form.method)){
+	if(form.method EQ "insert" or structKeyExists(variables.reverseCustomAddMethods,form.method)){
 		myForm.inquiries_datetime.createDateTime = true;
 	}
 	if(application.zcore.functions.zso(form,'inquiries_type_id') EQ '' and application.zcore.functions.zso(form,'inquiries_type_other') EQ ''){
@@ -785,7 +803,7 @@
 		form.inquiries_status_id=1;
 	} 
 
-	if(form.method EQ "userInsert" or structkeyexists(fm, form.method)){
+	if(form.method EQ "userInsert" or structkeyexists(variables.reverseCustomAddMethods, form.method)){
 		// user version of assign check 
 		arrUser=listToArray(form.user_id, "|");
 		if(arraylen(arrUser) EQ 2){
@@ -833,15 +851,10 @@
 </cffunction>
 
 <cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
-	<cfscript>  
-	//application.zcore.status.setStatus(request.zsid, "Lead added successfully");
-	fm = {};
-	for(ss in variables.customAddMethods){
-		fm[variables.customAddMethods[ss]] = ss;
-	}
+	<cfscript>   
 	urlPage = "";
-	if(structKeyExists(fm, form.method)){
-		urlPage = fm[form.method];
+	if(structKeyExists(variables.reverseCustomAddMethods, form.method)){
+		urlPage = variables.reverseCustomAddMethods[form.method];
 	} else{
 		urlPage = form.method;
 	}
@@ -971,8 +984,12 @@
 	WHERE inquiries.site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_deleted = #db.param(0)# and 
 	inquiries_id=#db.param(form.inquiries_id)#	"; 
-	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
-		db.sql&=" and inquiries.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+	if(form.method EQ "userInsert" or form.method EQ "userUpdate"){ 
+		db.sql&=getUserLeadFilterSQL(db); 
+	}else{
+		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+			db.sql&=" and inquiries.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+		}
 	}
 	rs={};
 	rs.qData=db.execute("qData");

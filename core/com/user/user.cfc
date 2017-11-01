@@ -1784,6 +1784,7 @@ formString = userCom.loginForm(inputStruct);
 	}
 	db.sql&=" ORDER BY office_name";
 	qOffice=db.execute("qOffice");
+ 
 	if(qOffice.recordcount EQ 0){
 		request.zsession.selectedOfficeId=0;
 	}else if(qOffice.recordcount EQ 1){
