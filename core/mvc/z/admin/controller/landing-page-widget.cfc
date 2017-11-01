@@ -665,7 +665,7 @@
 	qLayout=db.execute("qLayout");  
 	application.zcore.functions.zStatusHandler(request.zsid); 
 	echo('
-	<a href="/z/admin/section/index">Sections</a> / 
+	<a href="/z/section/admin/section-admin/index">Sections</a> / 
 		<a href="/z/admin/landing-page/index?section_id=#form.section_id#">#qLanding.landing_page_meta_title#</a> /   
 		<a href="/z/admin/landing-page-row/index?section_id=#form.section_id#&landing_page_id=#form.landing_page_id#&layout_row_id=#form.layout_row_id#">Row #qRow.layout_row_sort#</a> /
 		<a href="/z/admin/landing-page-column/index?section_id=#form.section_id#&landing_page_id=#form.landing_page_id#&layout_row_id=#form.layout_row_id#&layout_column_id=#form.layout_column_id#">Column #qColumn.layout_column_sort#</a> / </p>'); 
@@ -770,7 +770,7 @@
 
 	// TODO: show breadcrumb for the layout column instead of this  
 	echo('<p> 
-		<a href="/z/admin/section/index">Sections</a> / 
+		<a href="/z/section/admin/section-admin/index">Sections</a> / 
 		<a href="/z/admin/landing-page/index?section_id=#form.section_id#">#qLanding.landing_page_meta_title#</a> /   
 		<a href="/z/admin/landing-page-row/index?section_id=#form.section_id#&landing_page_id=#form.landing_page_id#&layout_row_id=#form.layout_row_id#">Row #qRow.layout_row_sort#</a> /
 		<a href="/z/admin/landing-page-column/index?section_id=#form.section_id#&landing_page_id=#form.landing_page_id#&layout_row_id=#form.layout_row_id#&layout_column_id=#form.layout_column_id#">Column #qColumn.layout_column_sort#</a> /

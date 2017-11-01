@@ -908,8 +908,9 @@ a.z-manager-assign:hover span{ color:#369;}
 .z-manager-quick-menu{
 	float:left;
 	position:relative;
-	z-index:10000;
+	z-index:1000;
 }
+
 .z-manager-quick-menu h2{ display:inline-block; padding-right:15px;} 
 .z-manager-quick-menu .z-manager-quick-menu-links{
 	background-color:#d2eaee;

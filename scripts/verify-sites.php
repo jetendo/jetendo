@@ -471,6 +471,24 @@ if(!$fail){
 						}
 					}
 					if(!$hasTracking){
+						$r2=$cmysql2->query("select * from site_option, site_x_option where 
+							site_option.site_option_id = site_x_option.site_option_id and 
+							site_option.site_option_name = 'Global HTML Head Source Code' and 
+							site_x_option.site_id = '".$row["site_id"]."' and 
+							site_x_option_deleted='0' and 
+							site_option.site_option_deleted='0' and 
+							site_option.site_id = '0' ");
+						if($cmysql2->error != ""){ 
+							$fail=true;
+							array_push($arrError, "db error:".$cmysql2->error);	
+						} 
+						while($row2=$r2->fetch_array(MYSQLI_ASSOC)){
+							if(trim($row2['site_x_option_value']) != ""){
+								$hasTracking=true;
+							}
+						}
+					}
+					if(!$hasTracking){
 						array_push($arrError, $row["site_short_domain"]." doesn't have tracking code installed.");
 					}
 				}

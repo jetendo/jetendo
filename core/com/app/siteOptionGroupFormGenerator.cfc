@@ -5,6 +5,13 @@ consider implementing the getListValue for this.
 
 consider having parent_id indentation or click to view children (and carry through id everywhere)
 
+add options for: 
+	uniqueURLField:"page_unique_url",
+	metaFields:{
+		title:"page_metatitle",
+		keywords:"page_metakey",
+		description:"page_metadesc",
+	},
  --->
 
 <!--- /z/_com/app/siteOptionGroupFormGenerator?method=index --->
@@ -246,7 +253,7 @@ consider having parent_id indentation or click to view children (and carry throu
 			arrParent:[]
 		};
 	}
-	for(i in ds.groupStruct){
+	/*for(i in ds.groupStruct){
 		group=ds.groupStruct[i];
 		currentGroup=group;
 		n=0;
@@ -261,7 +268,7 @@ consider having parent_id indentation or click to view children (and carry throu
 				throw("Detected infinite loop in #group.site_option_group_name# parent ids");
 			}
 		}
-	}
+	}*/
 	var optionBase=createobject("component", "zcorerootmapping.com.app.option-base");
 	typeCFCStruct=optionBase.getOptionTypeCFCs();
 	for(i in typeCFCStruct){
@@ -519,7 +526,7 @@ consider having parent_id indentation or click to view children (and carry throu
 		ds.groupStruct[groupId].createTable=getCreateTable(ss, group); 
 	}
 	if(ss.enableSiteId){
-		ds.groupStruct[groupId].createTable&=chr(10)&chr(10)&'// you must also create the trigger for this table in the database upgrade script using the following code:'&chr(10)&' application.zcore.functions.zCreateSiteIdPrimaryKeyTrigger("#ss.datasource#", "#ss.tableName#", "#ss.tableName#_id"); ';
+		ds.groupStruct[groupId].createTable&=chr(10)&chr(10)&'// you must also create the trigger for this table in the database upgrade script using the following code:'&chr(10)&' application.zcore.functions.zCreateSiteIdPrimaryKeyTrigger(#ss.datasource#, "#ss.tableName#", "#ss.tableName#_id"); ';
 	}
 	return ds.groupStruct[ss.site_option_group_id];
 	</cfscript> 
@@ -815,6 +822,9 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 				label:"##request.q#ss.foreignTableName#.#ss.foreignNameField###",
 				link:"#ss.foreignAdminURL#index"
 			});
+			arrayAppend(ts.navLinks, {
+				label:"#ss.foreignFriendlyName#"
+			});
 		}
 		');
 	}
@@ -947,7 +957,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 		// select all children
 		db.sql="select * from ##db.table("#ss.childTableName#", #ss.datasource#)## 
 		WHERE 
-		#ss.tableName#_id = ##row.#ss.childPrimaryKeyId### ";
+		#ss.tableName#_id = ##db.param(row.#ss.childPrimaryKeyId)### ";
 		');
 		if(ss.childEnableSiteId){
 			echo('
@@ -1655,7 +1665,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 	if(ss.enableChildAdmin){
 		echo(',{
 			label:"Manage #ss.childFriendlyName#",
-			link:"{adminURL}index?{tableName}_id=##row.{tableName}_id##&#ss.parentIdField#=##row.#ss.parentIdField###&#replace(request.appendAdminURL, "#ss.parentIdField#=", "ztv1=", "all")#",
+			link:"{adminURL}index?{tableName}_id=##row.{tableName}_id##&#ss.parentIdField#=##row.#ss.primaryKeyField###&#replace(request.appendAdminURL, "#ss.parentIdField#=", "ztv1=", "all")#",
 		}
 		');
 	}
@@ -1759,7 +1769,8 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 	try{
 		// select all children
 		db.sql="select * from ##db.table("#ss.childTableName#", #ss.datasource#)## 
-		WHERE 
+		WHERE  
+		{tableName}_deleted=##db.param(0)## and 
 		{tableName}_id = ##db.param(form.{tableName}_id)## ";
 		');
 		if(ss.childEnableSiteId){
@@ -1780,6 +1791,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 	}catch(Any e){
 		echo("Failed to get children.");
 		writedump(e);
+		abort;
 	}
 	');
 	}

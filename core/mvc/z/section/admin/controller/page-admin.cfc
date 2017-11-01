@@ -1,395 +1,561 @@
-<cfcomponent>
+<cfcomponent extends="zcorerootmapping.com.app.manager-base"> 	
 <cfoutput>
-<cffunction name="init" localmode="modern" access="private">
-	<cfscript> 
-	form.pageStatus = application.zcore.functions.zso(form, "pageStatus", true, 1);
-    application.zcore.adminSecurityFilter.requireFeatureAccess("Pages");   
-	</cfscript>
-</cffunction>
-    
-<cffunction name="delete" localmode="modern" access="remote" roles="member">
-	<cfscript> 
-	var db=request.zos.queryObject;
-	init();
-    application.zcore.adminSecurityFilter.requireFeatureAccess("Pages", true); 
-	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#  
-	WHERE page_id = #db.param(form.page_id)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	page_deleted=#db.param(0)# ";
-	qCheck=db.execute("qCheck");
-	if(qCheck.recordcount EQ 0){ 
-		application.zcore.functions.zReturnJson({ success:false, errorMessage:'You don''t have permission to delete this page.'});  
-	} 
-	application.zcore.imageLibraryCom.deleteImageLibraryId(qCheck.page_image_library_id); 
-	// don't delete because rewrite rules must persist
-	application.zcore.app.getAppCFC("page").searchIndexDeletepage(form.page_id);
-	db.sql="UPDATE #db.table("page", request.zos.zcoreDatasource)# 
-	SET page_deleted=#db.param(1)#, 
-	page_updated_datetime=#db.param(request.zos.mysqlnow)#  
-	WHERE page_id = #db.param(form.page_id)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	page_deleted=#db.param(0)# ";
-	db.execute("q"); 
-	application.zcore.status.setStatus(request.zsid, 'Page deleted.'); 
-	application.zcore.functions.zDeleteUniqueRewriteRule(qCheck.page_unique_url);
 
-	application.zcore.functions.zReturnJson({ success:true});
+<!--- 
+// TODO: must make the urlId dynamic per site, and update in init
+ --->
+<cffunction name="getQuickLinks" localmode="modern" access="public">
+	<cfscript>
+	links=[];
+	/*
+	// This is an example of making quick links.  Change Section Link to the right feature
+	variables.hasAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Section Link");
+	if(variables.hasAccess){
+		arrayAppend(links, { link:"/z/section/admin/page-admin/index?zManagerAddOnLoad=1", label:"Add Section Link" }); 
+	}
+	*/
+	return links;
 	</cfscript>
 </cffunction>
-    
-<cffunction name="insert" localmode="modern" access="remote" roles="member">
+
+<cffunction name="init" localmode="modern" access="private">
+	<cfscript>  
+	db=request.zos.queryObject;
+	if(not application.zcore.app.siteHasApp("section")){
+		application.zcore.functions.z404("Section app not enabled on this site.");
+	}
+
+	form.section_id=application.zcore.functions.zso(form, "section_id", true);
+	db.sql="SELECT * 
+	 from #db.table("section", request.zos.zcoreDatasource)#  
+	WHERE  
+	section_deleted = #db.param(0)# and 
+	section_id = #db.param(form.section_id)#  and 
+		site_id=#db.param(request.zos.globals.id)# "; 
+	request.qsection=db.execute("qsection"); 
+	
+	if(request.qsection.recordcount EQ 0){
+		application.zcore.status.setStatus(request.zsid, "Invalid Section", form, true);
+		application.zcore.functions.zRedirect("/z/section/admin/section-admin/index?zsid=#request.zsid#");
+	}
+
+	variables.uploadPath=request.zos.globals.privateHomeDir&"zupload/page/";
+	variables.displayPath="/zupload/page/";
+	ts={
+		// required 
+		label:"Page Link",
+		pluralLabel:"Page Links",
+		tableName:"page",
+		datasource:request.zos.zcoreDatasource,
+		deletedField:"page_deleted",
+		primaryKeyField:"page_id",
+		methods:{ // callback functions to customize the manager data and layout
+			getListData:"getListData", 
+			getListReturnData:"getListReturnData",
+			getListRow:"getListRow", // function receives struct named row 
+			getEditData:"getEditData",
+			getEditForm:"getEditForm",
+			beforeUpdate:"beforeUpdate",
+			afterUpdate:"afterUpdate",
+			beforeInsert:"beforeInsert",
+			afterInsert:"afterInsert",
+			getDeleteData:"getDeleteData",
+			executeDelete:"executeDelete"
+		},
+		listAdminWidth:260,
+
+		searchIndexFields:{
+			title:"page_name", 
+			summary:"page_summary",
+			fullText:"fullText",
+			// image or image_library_id can be used
+			// image:"", 
+			image_library_id:"page_image_library_id",
+			datetime:"page_updated_datetime",
+			app_id:"page",
+		},
+		uniqueURLField:"page_unique_url",
+		urlID:application.zcore.app.getAppData("section").optionStruct.section_config_url_page_id, 
+		viewScriptName:"/z/section/page/view",
+		activeField:"page_status",
+		metaFields:{
+			title:"page_metatitle",
+			keywords:"page_metakey",
+			description:"page_metadesc",
+		},
+		//optional
+		requiredParams:["section_id" ],
+		requiredEditParams:[],
+
+		customInsertUpdate:false,
+		hasSiteId:true,
+		sortField:"page_sort",
+		rowSortingEnabled:true,
+		quickLinks:getQuickLinks(),
+		imageLibraryFields:["page_image_library_id"],
+		validateFields:{
+			"page_name":{ required:true } 
+		},
+		imageFields:[],
+		fileFields:[],
+		// optional
+		requireFeatureAccess:"Pages",
+		pagination:false,
+		paginationIndex:"zIndex",
+		pageZSID:"zPageId",
+		perpage:10,
+		title:"Pages",
+		prefixURL:"/z/section/admin/page-admin/",
+		navLinks:[{
+			label:"Sections",
+			link:"/z/section/admin/section-admin/index"
+		}],
+		titleLinks:[],
+		columnSortingEnabled:false,
+		columns:[{
+				label:"ID",
+				field:"page_id"
+			}, 
+			{
+				label:"Name",
+				field:"page_name"
+			},
+			{
+				label:"Updated",
+				field:"page_updated_datetime"
+			},
+			{
+				label:"Admin",
+				field:""
+			}
+		]
+	};
+	
+	// these are the foreign table breadcrumbs
+	if(request.qsection.recordcount NEQ 0){
+		arrayAppend(ts.navLinks, {
+			label:"Pages",
+			link:"/z/section/admin/section-admin/index"
+		});
+		arrayAppend(ts.navLinks, {
+			label:"#request.qsection.section_name# Pages"
+		});
+	}
+	super.init(ts);
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="delete" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	super.delete();
+	</cfscript>
+</cffunction>
+
+<cffunction name="insert" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	update();
 	</cfscript>
 </cffunction>
 
-<cffunction name="update" localmode="modern" access="remote" roles="member">
+<cffunction name="update" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
-	var myForm=structnew(); 
-	var db=request.zos.queryObject;
 	init();
-    application.zcore.adminSecurityFilter.requireFeatureAccess("Pages", true);
-	application.zcore.siteOptionCom.requireSectionEnabledSetId([""]);
-	form.modalpopforced=application.zcore.functions.zso(form, "modalpopforced",true, 0);
- 
-	
-	uniqueChanged=false;
-	oldURL='';
-	if(form.method EQ 'insert' and application.zcore.functions.zso(form, 'page_unique_url') NEQ ""){
-		uniqueChanged=true;
-	}
-	if(form.method EQ 'update'){
-		db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#  
-		WHERE page_id = #db.param(form.page_id)# and 
-		page_deleted = #db.param(0)# and 
-		site_id = #db.param(request.zos.globals.id)#";
-		qCheck=db.execute("qCheck");
-		if(qCheck.recordcount EQ 0){
-			application.zcore.status.setStatus(request.zsid, 'Invalid page.',form,true);
-			application.zcore.functions.zRedirect('/z/section/admin/page-admin/index?zsid=#request.zsid#');
-		} 
-		if(application.zcore.user.checkServerAccess()){
-			if(structkeyexists(form, 'page_unique_url') and qcheck.page_unique_url NEQ form.page_unique_url){
-				uniqueChanged=true;	
-			}
-		}
-	}  
-	myForm.page_name.required=true;
-	myForm.page_name.friendlyName="Title"; 
-	errors = application.zcore.functions.zValidateStruct(form, myForm, request.zsid, true);
-	if(application.zcore.functions.zso(form,'page_unique_url') NEQ "" and not application.zcore.functions.zValidateURL(application.zcore.functions.zso(form,'page_unique_url'), true, true)){
-		application.zcore.status.setStatus(request.zsid, "Override URL must be a valid URL beginning with / or ##, such as ""/z/misc/inquiry/index"" or ""##namedAnchor"". No special characters allowed except for this list of characters: a-z 0-9 . _ - and /.", form, true);
-		errors=true;
-	}
-	if(errors){
-		application.zcore.status.setStatus(request.zsid,false,form,true);
-		if(form.method EQ "update"){
-			application.zcore.functions.zRedirect("/z/section/admin/page-admin/edit?page_id=#form.page_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
-		}else{
-			application.zcore.functions.zRedirect("/z/section/admin/page-admin/add?zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
-		}
-	} 
-	csn=form.page_name&" "&form.page_id&" "& form.page_text&" "&form.page_text2&" "&form.page_text3;
-	form.page_search=application.zcore.functions.zCleanSearchText(csn, true);
-
-	 
-	if(application.zcore.functions.zso(form, 'convertLinks') EQ 1){
-		form.page_text=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name, form.page_text);
-		form.page_text2&"_2"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name&"_2", form.page_text2);
-		form.page_text3&"_3"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name&"_3", form.page_text3);
-		form.page_summary=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name, form.page_summary);
-	}
-	
-	ts=StructNew();
-	ts.table="page";
-	ts.struct=form;
-	ts.datasource=request.zos.zcoreDatasource;
-	form.page_updated_datetime=request.zos.mysqlnow;
-	if(form.method EQ 'insert'){
-		form.page_created_datetime = form.page_updated_datetime;
-		form.page_id = application.zcore.functions.zInsert(ts);
-		if(form.page_id EQ false){
-			application.zcore.status.setStatus(request.zsid, 'Failed to create page',form,true);
-			application.zcore.functions.zRedirect("/z/section/admin/page-admin/add?zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
-		}
-	}else{
-		if(application.zcore.functions.zUpdate(ts) EQ false){
-			application.zcore.status.setStatus(request.zsid, 'Page to update page',form,true);
-			application.zcore.functions.zRedirect("/z/section/admin/page-admin/edit?page_id=#form.page_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
-		}
-	}
-	application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'page_image_library_id'));
-	  
-	if(form.modalpopforced EQ 1){
-		application.zcore.functions.zRedirect("/z/section/admin/page-admin/getReturnLayoutRowHTML?page_id=#form.page_id#");
-	}else{
-		if(structkeyexists(form, 'page_id') and structkeyexists(request.zsession, 'page_return'&form.page_id) and uniqueChanged EQ false){	
-			tempURL = request.zsession['page_return'&form.page_id];
-			StructDelete(request.zsession, 'page_return'&form.page_id);
-			tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
-			application.zcore.functions.zRedirect(tempURL, true);
-		}else{	
-			application.zcore.functions.zRedirect('/z/section/admin/page-admin/index?zsid=#request.zsid#');
-		}
-	}
+	super.update();
 	</cfscript>
 </cffunction>
-    
-<cffunction name="add" localmode="modern" access="remote" roles="member">
+
+<cffunction name="add" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	edit();
 	</cfscript>
 </cffunction>
 
-<cffunction name="edit" localmode="modern" access="remote" roles="member">
-	<cfscript> 
-	var currentMethod=form.method;
-	var db=request.zos.queryObject; 
+<cffunction name="edit" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
 	init();
-	form.modalpopforced=application.zcore.functions.zso(form, "modalpopforced",true, 0);
-	if(form.modalpopforced EQ 1){
-		application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
-		application.zcore.functions.zSetModalWindow();
-	} 
-	form.page_id=application.zcore.functions.zso(form, 'page_id');
-	if(currentMethod EQ "add"){
-		application.zcore.template.appendTag('scripts','<script type="text/javascript">/* <![CDATA[ */ 
-		var zDisableBackButton=true;
-		zArrDeferredFunctions.push(function(){
-			zDisableBackButton=true;
-		});
-		/* ]]> */</script>');
-	}
-	 
-	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#  
-	WHERE page_id = #db.param(form.page_id)# and 
-	page_deleted=#db.param(0)# and 
-	page.site_id = #db.param(request.zos.globals.id)# ";
-	qpage=db.execute("qpage");
-	if(currentMethod EQ 'edit'){
-		if(qpage.recordcount EQ 0){
-			application.zcore.status.setStatus(request.zsid, 'Invalid page.',false,true);
-			application.zcore.functions.zRedirect('/z/section/admin/page-admin/index?zsid=#request.zsid#');
-		}
-	}  
-	application.zcore.functions.zQueryToStruct(qpage, form,'page_id,site_id');
-	application.zcore.functions.zStatusHandler(request.zsid,true, false, form);
-	if(structkeyexists(form, 'returnURL') and form.returnURL NEQ ""){
-		request.zsession["page_return"&form.page_id]=form.returnURL;
-	}
-	if(currentMethod EQ 'add'){
-		writeoutput('<h2>Add Page</h2>');
-		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
-	}else{
-		writeoutput('<h2>Edit Page</h2>');
-	}
-	ts=StructNew();
-	ts.name="zMLSSearchForm";
-	ts.ajax=false;
-	if(currentMethod EQ 'add'){
-		newAction="insert";
-	}else{
-		newAction="update";
-	}
-	ts.class="zFormCheckDirty";
-	ts.enctype="multipart/form-data";
-	ts.action="/z/section/admin/page-admin/#newAction#?page_id=#form.page_id#&modalpopforced=#form.modalpopforced#";
-	ts.method="post";
-	ts.successMessage=false; 
-	application.zcore.functions.zForm(ts);
-	 
-	tabCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.display.tab-menu");
-	tabCom.init();
-	tabCom.setTabs(["Basic", "Advanced"]); 
-	tabCom.setMenuName("member-page-edit");
-	cancelURL=application.zcore.functions.zso(request.zsession, 'page_return'&form.page_id); 
-	if(cancelURL EQ ""){
-		cancelURL="/z/section/admin/page-admin/index";
-	}
-	tabCom.setCancelURL(cancelURL);
-	tabCom.enableSaveButtons();
-	if(form.modalpopforced EQ 1){
-		echo('
-		<script type="text/javascript">
-		zArrDeferredFunctions.push(function(){
-			$(".tabCancelButton").on("click", function(e){
-				e.preventDefault();
-				window.parent.zCloseModal();
-				return false;
-			});
-		});
-		</script>
-		');
-	}
+	// TODO: need to get parent field to passthrough: page_parent_id
+	super.edit();
 	</cfscript>
-	#tabCom.beginTabMenu()#
-	#tabCom.beginFieldSet("Basic")# 
-	<table style="width:100%; border-spacing:0px;" class="table-list">
-		<tr> 
-			<th style="vertical-align:top; ">
-				Title *</th>
-			<td style="vertical-align:top; ">
-				<input type="text" name="page_name" value="#HTMLEditFormat(form.page_name)#" maxlength="150" size="100" />
-			</td>
-		</tr>
-
-		<tr> 
-			<th style="vertical-align:top; ">
-				#application.zcore.functions.zOutputHelpToolTip("Summary Text","member.page.edit page_summary")#</th>
-			<td style="vertical-align:top; ">
-				<cfscript>
-				htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
-				htmlEditor.instanceName	= "page_summary";
-				htmlEditor.value			= form.page_summary;
-				htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
-				htmlEditor.height		= 250;
-				htmlEditor.create();
-				</cfscript>   
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">
-				#application.zcore.functions.zOutputHelpToolTip("Body Column 1","member.page.edit page_text")#</th>
-			<td style="vertical-align:top; "> 
-				<cfscript>
-				htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
-				htmlEditor.instanceName	= "page_text";
-				htmlEditor.value			= form.page_text;
-				htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
-				htmlEditor.height		= 400;
-				htmlEditor.create();
-				</cfscript>  
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">
-				#application.zcore.functions.zOutputHelpToolTip("Body Column 2","member.page.edit page_text2")#</th>
-			<td style="vertical-align:top; ">
-				<cfif application.zcore.functions.zIsEditorHTMLEmpty(form.page_text2)>
-					<p class="bodyColumn2Add"><a href="##" onclick="$('.bodyColumn2').show(); $('.bodyColumn2Add').hide(); return false;">Edit Column 2 (optional)</a></p>
-				</cfif>
-	
-				<div class="bodyColumn2" style="<cfif application.zcore.functions.zIsEditorHTMLEmpty(form.page_text2)>display:none;</cfif>">
-					<cfscript>
-					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
-					htmlEditor.instanceName	= "page_text2";
-					htmlEditor.value			= form.page_text2;
-					htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
-					htmlEditor.height		= 400;
-					htmlEditor.create();
-					</cfscript>
-				</div>  
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">
-				#application.zcore.functions.zOutputHelpToolTip("Body Column 3","member.page.edit page_text3")#</th>
-			<td style="vertical-align:top; "> 
-				<cfif application.zcore.functions.zIsEditorHTMLEmpty(form.page_text3)>
-					<p class="bodyColumn3Add"><a href="##" onclick="$('.bodyColumn3').show(); $('.bodyColumn3Add').hide(); return false;">Edit Column 3 (optional)</a></p>
-				</cfif>
-	
-				<div class="bodyColumn3" style="<cfif application.zcore.functions.zIsEditorHTMLEmpty(form.page_text3)>display:none;</cfif>">
-					<cfscript>
-					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
-					htmlEditor.instanceName	= "page_text3";
-					htmlEditor.value			= form.page_text3;
-					htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
-					htmlEditor.height		= 400;
-					htmlEditor.create();
-					</cfscript>  
-				</div>
-			</td>
-		</tr>
-
-		<tr>
-			<th style="width:1%; white-space:nowrap;">Cache External Images:</th>
-			<td>
-			<cfscript>
-			form.convertLinks=application.zcore.functions.zso(form, 'convertLinks', true, 0); 
-			ts = StructNew();
-			ts.name = "convertLinks";
-			ts.radio=true;
-			ts.separator=" ";
-			ts.listValuesDelimiter="|";
-			ts.listLabelsDelimiter="|";
-			ts.listLabels="Yes|No";
-			ts.listValues="1|0";
-			application.zcore.functions.zInput_Checkbox(ts);
-			</cfscript> | Selecting "Yes", will cache the external images in the html editor to this domain.
-			</td>
-		</tr>
-		<tr>
-			<th style="width:1%; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Photos","member.page.edit page_image_library_id")#</th>
-			<td>
-				<cfscript>
-				ts=structnew();
-				ts.name="page_image_library_id";
-				ts.value=form.page_image_library_id;
-				application.zcore.imageLibraryCom.getLibraryForm(ts);
-				</cfscript>
-			</td>
-		</tr>
-
-		<tr>
-			<th style="width:1%; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Photo Layout","member.page.edit page_image_library_layout")#</th>
-			<td>
-				<cfscript>
-				ts=structnew();
-				ts.name="page_image_library_layout";
-				ts.value=form.page_image_library_layout;
-				application.zcore.imageLibraryCom.getLayoutTypeForm(ts);
-				</cfscript>
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">
-				#application.zcore.functions.zOutputHelpToolTip("META Title","member.page.edit page_metatitle")#</th>
-			<td style="vertical-align:top; ">
-				<input type="text" name="page_metatitle" value="#HTMLEditFormat(form.page_metatitle)#" maxlength="150" size="100" /><br /> (Meta title is optional and overrides the &lt;TITLE&gt; HTML element to be different from the visible page title.)
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Meta Keywords","member.page.edit page_metakey")#</th>
-			<td style="vertical-align:top; "> 
-				<textarea name="page_metakey" rows="5" cols="60">#form.page_metakey#</textarea>
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Meta Description","member.page.edit page_metadesc")#</th>
-			<td style="vertical-align:top; "> 
-				<textarea name="page_metadesc" cols="60" rows="5">#form.page_metadesc#</textarea>
-			</td>
-		</tr>		
-		<tr> 
-			<th style="vertical-align:top; ">Active</th>
-			<td style="vertical-align:top; ">
-				#application.zcore.functions.zInput_Boolean("page_status")#
-			</td>
-		</tr>
-		<tr> 
-			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Unique URL","member.page.edit page_unique_url")#</th>
-			<td style="vertical-align:top; "> 	
-				<cfif currentMethod EQ "add">
-					#application.zcore.functions.zInputUniqueUrl("page_unique_url", true)#
-				<cfelse>
-					#application.zcore.functions.zInputUniqueUrl("page_unique_url")#
-				</cfif>
-			</td>
-		</tr> 
-	</table>
-	#tabCom.endFieldSet()# 
-	#tabCom.beginFieldSet("Advanced")# 
-	<table style="width:100%; border-spacing:0px;" class="table-list">
-	 
-	</table>
- 
-	#tabCom.endFieldSet()#
-	#tabCom.endTabMenu()#
-	#application.zcore.functions.zEndForm()#
-	 
 </cffunction>
 
+<cffunction name="index" localmode="modern" access="remote" roles="administrator">
+	<cfscript> 
+ 	init();
+	super.index();
+	</cfscript>
+</cffunction> 
+
+<cffunction name="getDeleteData" localmode="modern" access="private">
+	<cfscript>
+	var db=request.zos.queryObject; 
+	rs={};
+	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#
+	WHERE page_id= #db.param(application.zcore.functions.zso(form,"page_id"))# and  
+	page_deleted = #db.param(0)#   and 
+		site_id=#db.param(request.zos.globals.id)# ";
+	rs.qData=db.execute("qData");
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="executeDelete" localmode="modern" access="private">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	var db=request.zos.queryObject;  
+	for(row in ss.qData){  
+		deleteRow(row);
+	}
+	return {success:true};
+	</cfscript>
+</cffunction>
+ 
+
+<cffunction name="deleteRow" localmode="modern" access="remote" roles="administrator">
+	<cfargument name="row" type="struct" required="yes">
+	<cfscript>
+	var db=request.zos.queryObject; 
+	row=arguments.row; 
+
+	db.sql="UPDATE #db.table("page", request.zos.zcoreDatasource)# 
+	SET page_deleted=#db.param(row.page_id)#, 
+	page_updated_datetime=#db.param(request.zos.mysqlnow)#  
+	WHERE page_id = #db.param(row.page_id)# and 
+	section_id=#db.param(row.section_id)# and 
+	site_id = #db.param(request.zos.globals.id)# and 
+	page_deleted=#db.param(0)# ";
+	db.execute("q"); 
+
+	return true; 
+	</cfscript> 
+</cffunction>
+
+
+<cffunction name="beforeUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	db=request.zos.queryObject;
+	rs={success:true};
+
+	// handle custom validation here
+	error=false;
+	 
+	form.section_id=application.zcore.functions.zso(form, "section_id", true);
+	if(form.section_id NEQ 0){ 
+		if(request.qsection.recordcount EQ 0){
+			application.zcore.status.setStatus(request.zsid, "Invalid Page selection.", form, true);
+			error=true;
+		}
+	}   
+	if(error){
+		return {success:false};
+	}
+	csn=form.page_name&" "&form.page_id&" "& form.page_summary&" "& form.page_text&" "&form.page_text2&" "&form.page_text3;
+	form.page_search=application.zcore.functions.zCleanSearchText(csn, true); 
+	if(application.zcore.functions.zso(form, 'convertLinks') EQ 1){
+		form.page_text=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name, form.page_text);
+		form.page_text2&"_2"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name&"_2", form.page_text2);
+		form.page_text3&"_3"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name&"_3", form.page_text3);
+		form.page_summary=application.zcore.functions.zProcessAndStoreLinksInHTML(form.page_name, form.page_summary);
+	} 
+	form.page_updated_datetime=request.zos.mysqlnow;
+
+	ts={
+		id:form.page_id,
+		title:form.page_name, 
+		summary:form.page_summary,
+		fullText:form.page_search,
+		// image or image_library_id can be used
+		// image:"", 
+		image_library_id:"page_image_library_id",
+		datetime:form.page_updated_datetime,
+		app_id:"page",
+		url:application.zcore.app.getAppCFC("section").getPageURL(form),
+		user_group_id:""
+	};
+
+	updateSearchIndex(ts);
+
+	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#
+	WHERE  
+	page_deleted = #db.param(0)# and  
+	section_id = #db.param(form.section_id)# and 
+	page_id=#db.param(form.page_id)# and 
+	site_id=#db.param(request.zos.globals.id)# ";
+	rs.qData=db.execute("qData"); 
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	rs={success:true};
+  
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="beforeInsert" localmode="modern" access="private" returntype="struct">
+	<cfscript> 
+	// you can optional make insert have custom validation
+
+	rs=beforeUpdate();
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="afterInsert" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	rs={success:true};
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getEditData" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	var db=request.zos.queryObject; 
+
+	form.page_id=application.zcore.functions.zso(form, "page_id", true, 0);
+	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#
+	WHERE  
+	page_deleted = #db.param(0)# and  
+	section_id=#db.param(form.section_id)# and 
+	page_id=#db.param(form.page_id)# and 
+	site_id=#db.param(request.zos.globals.id)# "; 
+	rs={}; 
+	rs.qData=db.execute("qData");
+
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getListReturnData" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	var db=request.zos.queryObject; 
+	form.page_id=application.zcore.functions.zso(form, "page_id", true, 0);
+	
+	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#
+	WHERE  
+	page_deleted = #db.param(0)# and  
+	section_id=#db.param(form.section_id)# and 
+	page_id=#db.param(form.page_id)# and 
+	site_id=#db.param(request.zos.globals.id)# ";
+		
+	rs={};
+	rs.qData=db.execute("qData");
+
+	return rs;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getEditForm" localmode="modern" access="private">
+	<cfscript>
+	var db=request.zos.queryObject; 
+
+	rs={
+		javascriptChangeCallback:"",
+		javascriptLoadCallback:"",
+		tabs:{
+			"Basic":{
+				fields:[]
+			},
+			"Advanced":{
+				fields:[]
+			}
+		}
+	};
+	// basic fields
+	fs=[];
+ 
+	savecontent variable="field"{
+		echo('<input type="hidden" name="section_id" id="section_id" value="#htmleditformat(application.zcore.functions.zso(form, "section_id"))#" /> '); 
+	}
+	arrayAppend(fs, {label:"", hidden:true, required:true, field:field});
+	   
+	savecontent variable="field"{
+		echo('<input type="text" name="page_name" id="page_name"  style="width:95%;"   value="#htmleditformat(application.zcore.functions.zso(form, "page_name"))#" /> ');
+	}
+	arrayAppend(fs, {label:"Name", required: true,  field:field});
+		 
+	
+	savecontent variable="field"{
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "page_summary";
+		htmlEditor.value			= form.page_summary;
+		htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
+		htmlEditor.height		= 250;
+		htmlEditor.create();
+	}
+	arrayAppend(fs, {label:"Summary Text", field:field});
+	
+	savecontent variable="field"{
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "page_text";
+		htmlEditor.value			= form.page_text;
+		htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
+		htmlEditor.height		= 400;
+		htmlEditor.create();
+	}
+	arrayAppend(fs, {label:"Body Column 1", field:field});
+	
+	savecontent variable="field"{
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "page_text2";
+		htmlEditor.value			= form.page_text2;
+		htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
+		htmlEditor.height		= 400;
+		htmlEditor.create();
+	}
+	arrayAppend(fs, {label:"Body Column 2", field:field});
+	
+	savecontent variable="field"{
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "page_text3";
+		htmlEditor.value			= form.page_text3;
+		htmlEditor.width			= "#request.zos.globals.maximagewidth#px";//"100%";
+		htmlEditor.height		= 400;
+		htmlEditor.create();
+	}
+	arrayAppend(fs, {label:"Body Column 3", field:field});
+	
+	savecontent variable="field"{
+		form.convertLinks=application.zcore.functions.zso(form, 'convertLinks', true, 0); 
+		ts = StructNew();
+		ts.name = "convertLinks";
+		ts.radio=true;
+		ts.separator=" ";
+		ts.listValuesDelimiter="|";
+		ts.listLabelsDelimiter="|";
+		ts.listLabels="Yes|No";
+		ts.listValues="1|0";
+		application.zcore.functions.zInput_Checkbox(ts);
+		echo(' | Selecting "Yes", will cache the external images in the html editor to this domain.');
+	}
+	arrayAppend(fs, {label:"Cache External Images", field:field});
+	
+	savecontent variable="field"{
+		ts=structnew();
+		ts.name="page_image_library_id";
+		ts.value=form.page_image_library_id;
+		application.zcore.imageLibraryCom.getLibraryForm(ts);
+	}
+	arrayAppend(fs, {label:"Photos", field:field});
+	
+	savecontent variable="field"{
+		ts=structnew();
+		ts.name="page_image_library_layout";
+		ts.value=form.page_image_library_layout;
+		application.zcore.imageLibraryCom.getLayoutTypeForm(ts);
+	}
+	arrayAppend(fs, {label:"Photo Layout", field:field});
+	/*
+	savecontent variable="field"{
+		echo('');
+	}
+	arrayAppend(fs, {label:"", field:field});
+  	*/
+	rs.tabs.basic.fields=fs;
+	// advanced fields
+	/*
+	fs=[];
+	savecontent variable="field"{
+		echo('<input type="text" name="page_advanced" value="#htmleditformat(form.page_advanced)#" />');
+	}
+	arrayAppend(fs, {label:"Advanced Field", field:field});
+
+	rs.tabs.advanced.fields=fs; 
+	*/
+
+	return rs;
+	</cfscript> 
+</cffunction>
+
+<cffunction name="getListData" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	var db=request.zos.queryObject; 
+
+	form.page_id=application.zcore.functions.zso(form, "page_id", true, 0); 
+	form.page_status=application.zcore.functions.zso(form, "page_status", false, "1"); 
+	db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)#  
+	WHERE  
+	section_id=#db.param(form.section_id)# and 
+	page_deleted = #db.param(0)# and    
+	site_id=#db.param(request.zos.globals.id)#  "; 
+	if(form.page_status NEQ ""){
+		db.sql&=" and page_status = #db.param(form.page_status)# ";
+	}
+	db.sql&=" ORDER BY page.page_sort ASC 
+	LIMIT #db.param((form.zIndex-1)*variables.perpage)#, #db.param(variables.perpage)# ";
+	rs={};
+	rs.qData=db.execute("qData");  
+
+	rs.searchFields=[ 
+		// TODO: add search fields{
+	{
+		fields:[{
+			formField:"Active: "&application.zcore.functions.zInput_Boolean("page_status"),
+			field:variables.activeField
+		}]
+	}
+	];
+ 
+	db.sql="SELECT count(*) count FROM #db.table("page", request.zos.zcoreDatasource)#
+	WHERE  
+	section_id=#db.param(form.section_id)# and 
+	page_deleted = #db.param(0)# and   
+		site_id=#db.param(request.zos.globals.id)# "; 
+	if(form.page_status NEQ ""){
+		db.sql&=" and page_status = #db.param(form.page_status)# ";
+	}
+	rs.qCount=db.execute("qCount");
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getListRow" localmode="modern" access="private">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="columns" type="array" required="yes">
+	<cfscript>
+	row=arguments.row;
+	columns=arguments.columns; 
+	arrayAppend(columns, {field: row.page_id});  
+
+	arrayAppend(columns, {field: row.page_name }); 
+	arrayAppend(columns, {field: application.zcore.functions.zTimeSinceDate(row.page_updated_datetime)});  
+	savecontent variable="field"{ 
+	 displayRowSortButton(row.page_id);
+		 
+		ts={
+			buttons:[{
+				title:"View",
+				icon:"eye",
+				link:application.zcore.app.getAppCFC("section").getPageURL(row),
+				label:"",
+				target:"_blank"
+			}, {
+				title:"Edit",
+				icon:"cog",
+				link:variables.prefixURL&"edit?page_id=#row.page_id#&modalpopforced=1&&section_id=#form.section_id#",
+				label:"",
+				enableEditAjax:true
+			}]
+		};  
+		arrayAppend(ts.buttons, {
+			title:"Delete",
+			icon:"trash",
+			link:"/z/section/admin/page-admin/delete?page_id=#row.page_id#&amp;returnJson=1&amp;confirm=1&section_id=#form.section_id#",
+			label:"",
+			enableDeleteAjax:true
+		});
+		displayAdminMenu(ts);
+
+	}
+	arrayAppend(columns, {field: field, class:"z-manager-admin", style:"width:200px; max-width:100%;"});
+	</cfscript> 
+</cffunction>	
+<!--- 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject; 
@@ -469,7 +635,7 @@
 	form.searchText=form.searchTextOriginal; 
 	g="";
 	arrNav=ArrayNew(1);
-	if(application.zcore.functions.zso(form, 'searchtext') EQ ''){
+	/*if(application.zcore.functions.zso(form, 'searchtext') EQ ''){
 		if(qsite.recordcount EQ 0){
 			cpi=application.zcore.functions.zso(form, 'page_parent_id',true);
 		}else{
@@ -477,11 +643,11 @@
 		}
 	}else{
 		cpi=0;
-	}
+	}*/
 	arrName=ArrayNew(1);
 	parentparentid='0';
 	parentChildGroupId=0; 
-	for(g=1;g LTE 255;g++){
+	/*for(g=1;g LTE 255;g++){
 		db.sql="SELECT * FROM #db.table("page", request.zos.zcoreDatasource)# page 
 		WHERE page_id = #db.param(cpi)# and 
 		site_id = #db.param(request.zos.globals.id)# and 
@@ -499,7 +665,7 @@
 		if(cpi EQ 0){
 			break;
 		}
-	} 
+	} */
 	arrSearch=listtoarray(form.searchtext," ");
 	if(arraylen(arrSearch) EQ 0){
 		arrSearch[1]="";	
@@ -527,10 +693,10 @@
 	<cfif qSite.recordcount EQ 0>
 		<div class="z-float z-mb-10">No page added yet. </div>
 	<cfelse>
-		<table <cfif form.mode EQ "sorting">id="sortRowTable"</cfif> style="border-spacing:0px; width:100%;" class="table-list">
+		<table id="sortRowTable" style="border-spacing:0px; width:100%;" class="table-list">
 			<thead>
 			<tr>
-				<th class="z-hide-at-767"><a href="#request.qSortCom.getColumnURL("page.page_id", Request.zScriptName2)#">ID</a> #request.qSortCom.getColumnIcon("page.page_id")#</th>
+				<th class="z-hide-at-767">ID</th>
 				<th class="z-hide-at-767">Photo</th>
 				<th>
 					Title
@@ -630,24 +796,9 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfscript>
 	row=arguments.row;  
-	indentCount=0;
-	parentId=row.page_parent_id;
+	indentCount=0; 
 	loopCount=0;
-	indentChars="";
-	while(true){
-		if(parentId NEQ 0 and structkeyexists(request.parentLookupStruct, parentId)){
-			parentId=request.parentLookupStruct[parentId];
-			indentCount++;
-			indentChars&="&nbsp;&nbsp;&nbsp;&nbsp;";
-		}else{
-			break;
-		}
-		loopCount++;
-		if(loopCount > 50){
-			throw("Infinite loop detected. page_id:#row.page_id#");
-		}
-	} 
-
+	indentChars=""; 
 	ts=structnew();
 	ts.image_library_id=row.page_image_library_id;
 	ts.output=false;
@@ -675,14 +826,12 @@
 	<td>#application.zcore.functions.zTimeSinceDate(row.page_updated_datetime)#</td>
 	<td style="vertical-align:top; " class="z-manager-admin">
 
-		<cfif form.mode EQ "sorting">
-			<cfif request.parentChildSorting EQ 0 and application.zcore.functions.zso(form, 'searchtext') EQ '' and request.sortComSQL EQ ''> 
-				<div class="z-manager-button-container">
-					#variables.queueSortCom.getAjaxHandleButton(row.page_id)#
-				</div>
-				
-			</cfif>
-		</cfif>
+		<cfif application.zcore.functions.zso(form, 'searchtext') EQ ''> 
+			<div class="z-manager-button-container">
+				#variables.queueSortCom.getAjaxHandleButton(row.page_id)#
+			</div>
+			
+		</cfif> 
 		<cfif row.page_status EQ 2>
 			<div class="z-manager-button-container">
 				<a title="Inactive"><i class="fa fa-times-circle" aria-hidden="true" style="color:##900;"></i></a>
@@ -693,7 +842,7 @@
 			</div>
 		</cfif>
 		<div class="z-manager-button-container"> 
-			<a href="<cfif row.page_url_only NEQ ''>#row.page_url_only#<cfelse><cfif row.page_unique_url NEQ ''>#row.page_unique_url#<cfelse>/#application.zcore.functions.zURLEncode(row.page_name,'-')#-#application.zcore.app.getAppData("page").optionStruct.page_config_url_article_id#-#row.page_id#.html</cfif></cfif><cfif row.page_status EQ 2>?preview=1</cfif>" class="z-manager-view" target="_blank" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a> 
+			<a href="<cfif row.page_unique_url_only NEQ ''>#row.page_unique_url_only#<cfelse><cfif row.page_unique_url NEQ ''>#row.page_unique_url#<cfelse>/#application.zcore.functions.zURLEncode(row.page_name,'-')#-#application.zcore.app.getAppData("page").optionStruct.page_config_url_article_id#-#row.page_id#.html</cfif></cfif><cfif row.page_status EQ 2>?preview=1</cfif>" class="z-manager-view" target="_blank" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a> 
 		</div>
 		<cfscript>
 		deleteDisabled=true;
@@ -751,5 +900,6 @@
 </cffunction>
  
 
+ --->
 </cfoutput>
 </cfcomponent>

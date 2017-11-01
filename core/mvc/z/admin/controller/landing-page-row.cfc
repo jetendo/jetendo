@@ -51,7 +51,7 @@
 	application.zcore.functions.zStatusHandler(request.zsid); 
 	</cfscript>
 	<p>
-		<a href="/z/admin/section/index">Sections</a> / 
+		<a href="/z/section/admin/section-admin/index">Sections</a> / 
 		<a href="/z/admin/landing-page/index?section_id=#form.section_id#">#qLanding.landing_page_meta_title#</a> /    
 	</p>
 	<h2>Manage Rows for Custom Layout Page</h2> 

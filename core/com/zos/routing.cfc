@@ -8,8 +8,7 @@
 		var inputStruct=""; 
 		var local=structnew();  
 		request.zos.currentController="";
-		request.zos.routingIsCFC=false;
-		request.zos.routingCurrentComponentObject="";
+		request.zos.routingIsCFC=false; 
 		request.zos.routingArrArguments=arraynew(1);
 		request.zos.routingArgumentsStruct=structnew();
 		request.zos.routingDisableComponentInvoke=false;
@@ -276,13 +275,13 @@
 			}
 		}
 		if(request.zos.routingIsCFC and structkeyexists(form,'method')){
-			this.checkCFCSecurity(request.zos.scriptNameTemplate, form.method);
+			rs=this.checkCFCSecurity(request.zos.scriptNameTemplate, form.method);
 			request.zos.requestLogEntry('routing.cfc after checkCFCSecurity');
 			request.zos.currentController=request.zos.scriptNameTemplate;
 			//writeoutput('in isCFC'&request.zos.routingDisableComponentInvoke);
 			if(request.zos.routingDisableComponentInvoke EQ false){  
-				request.zArrErrorMessages=["#form.method#() function was called."];
-				request.zos.routingCurrentComponentObject[form.method](argumentcollection=request.zos.routingArgumentsStruct);
+				request.zArrErrorMessages=["#form.method#() function of #request.zos.currentController# was called in routing.cfc"];
+				rs.routingCurrentComponentObject[form.method](argumentcollection=request.zos.routingArgumentsStruct);
 				request.zArrErrorMessages=[];
 				request.zos.onrequestcompleted=true;
 				if(request.zos.routingCfcMethodWasMissing){
@@ -312,6 +311,7 @@
 		var isServerCFC=false;
 		var tempcommeta=0;
 		var comTempPath=arguments.scriptName;
+		rs={};
 		arguments.method=arguments.method;
 		comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-5),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
 		if(left(comPath, 17) EQ "zcorerootmapping."){
@@ -335,25 +335,25 @@
 		notFound=true;
 		if(not request.zos.isTestServer){
 			if(isServerCFC EQ false and structkeyexists(application.sitestruct[request.zos.globals.id].controllerComponentCache, comPath)){
-				request.zos.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].controllerComponentCache[comPath]);
+				rs.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].controllerComponentCache[comPath]);
 				notFound=false;
 			}else if(structkeyexists(application.zcore.controllerComponentCache, comPath)){
-				request.zos.routingCurrentComponentObject=duplicate(application.zcore.controllerComponentCache[comPath]);
+				rs.routingCurrentComponentObject=duplicate(application.zcore.controllerComponentCache[comPath]);
 				notFound=false;
 			}else if(Structkeyexists(application.sitestruct[request.zos.globals.id].comCache, comPath)){
-				request.zos.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].comCache[comPath]);
+				rs.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].comCache[comPath]);
 				notFound=false;
 			}
 		}
 		if(notFound){
 			if(request.zos.isTestServer){
-				request.zos.routingCurrentComponentObject=createobject("component",comPath);
+				rs.routingCurrentComponentObject=createobject("component",comPath);
 			}else{
-				request.zos.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath, true);
-				application.sitestruct[request.zos.globals.id].comCache[comPath]=request.zos.routingCurrentComponentObject;
+				rs.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath, true);
+				application.sitestruct[request.zos.globals.id].comCache[comPath]=rs.routingCurrentComponentObject;
 			}
 		}
-		if(structkeyexists(request.zos.routingCurrentComponentObject,arguments.method) EQ false){
+		if(structkeyexists(rs.routingCurrentComponentObject,arguments.method) EQ false){
 			application.zcore.functions.z404("Component method doesn't exist. Method = ""#arguments.method#""");
 		}
 		if(isServerCFC){
@@ -362,13 +362,13 @@
 			cacheStruct=application.sitestruct[request.zos.globals.id].cfcMetaDataCache;
 		}
 		if(request.zos.isTestServer or structkeyexists(cacheStruct, comPath) EQ false){
-			commeta=GetMetaData(request.zos.routingCurrentComponentObject);
+			commeta=GetMetaData(rs.routingCurrentComponentObject);
 			cacheStruct[comPath]=commeta;
 		}else{
 			commeta=cacheStruct[comPath];
 		}
 		if(request.zos.isTestServer or structkeyexists(cacheStruct,comPath&":"&arguments.method) EQ false){
-			tempcommeta=GetMetaData(request.zos.routingCurrentComponentObject[arguments.method]);
+			tempcommeta=GetMetaData(rs.routingCurrentComponentObject[arguments.method]);
 			cacheStruct[comPath&":"&arguments.method]=tempcommeta;
 		}else{
 			tempcommeta=cacheStruct[comPath&":"&arguments.method];
@@ -384,7 +384,7 @@
 			}
 		}
 
-		if(structkeyexists(request.zos.routingCurrentComponentObject, '__injectDependencies')){
+		if(structkeyexists(rs.routingCurrentComponentObject, '__injectDependencies')){
 			ds={
 				context:application.zcore.componentObjectCache.context
 			};
@@ -408,7 +408,7 @@
 					}
 				}
 			}
-			request.zos.routingCurrentComponentObject.__injectDependencies(ds);
+			rs.routingCurrentComponentObject.__injectDependencies(ds);
 		}
 		for(i=1;i LTE arraylen(request.zos.routingArrArguments);i++){
 			if(i LTE arraylen(tempcommeta.parameters)){
@@ -460,6 +460,7 @@
 				application.zcore.functions.zDisableContentTransition();
 			}
 		}
+		return rs;
 		</cfscript>
     </cffunction>
     

@@ -189,7 +189,7 @@ D:\desktop\layout.ai
 
 					if(qSection.recordcount EQ 0){
 						application.zcore.status.setStatus(request.zsid, "You must add at least 1 section first.", form, true);
-						application.zcore.functions.zRedirect("/z/admin/section/index?zsid=#request.zsid#");
+						application.zcore.functions.zRedirect("/z/section/admin/section-admin/index?zsid=#request.zsid#");
 					}
 					//selectStruct.queryParseLabelVars=true;
 					selectStruct.queryLabelField = "section_name";
@@ -381,7 +381,7 @@ D:\desktop\layout.ai
 	qSection=db.execute("qSection");
  
 	</cfscript>
-	<p><a href="/z/admin/section/index">Sections</a> / 
+	<p><a href="/z/section/admin/section-admin/index">Sections</a> / 
 	<cfif qSection.recordcount>
 		#qSection.section_name# /
 	</cfif>

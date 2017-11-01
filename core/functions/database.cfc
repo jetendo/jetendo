@@ -1215,22 +1215,21 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 	<cfargument name="currentRow" type="numeric" required="no" default="1">
 	<cfargument name="errors" type="boolean" required="no" default="#false#">
 	<cfscript>
-	var fields = "";
-	var n = 0;
-	var columnName = "";
-	var overridden = "";
-	var struct = "";
-	var arrColumn=listtoarray(arguments.queryName.columnList,",");
-	var columnCount=arraylen(arrColumn);
+	arrColumn=listtoarray(arguments.queryName.columnList,",");
+	columnCount=arraylen(arrColumn);
+
+	overrideStruct={};
+	if(arguments.overrideFields NEQ ""){
+		arrOverride=listToArray(arguments.overrideFields, ",");
+		for(field in arrOverride){
+			overrideStruct[trim(field)]=true;
+		}
+	} 
 	struct=arguments.structScope;
 	if(arguments.errors){
 		for(n=1;n LTE columnCount;n++){
-			columnName=arrColumn[n];
-			overridden = false;
-			if(","&arguments.overrideFields&"," CONTAINS ","&columnName&arguments.currentRow&","){
-				overridden = true;
-			}	
-			if(overridden EQ false or not structkeyexists(struct, columnName&arguments.currentRow)){
+			columnName=arrColumn[n]; 
+			if(not structkeyexists(overrideStruct, columnName&arguments.currentRow) or not structkeyexists(struct, columnName&arguments.currentRow)){
 				if(arguments.currentRow GT arguments.queryName.recordcount){
 					struct[columnName&arguments.currentRow]="";
 				}else{
@@ -1240,19 +1239,15 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		}
 	}else{
 		for(n=1;n LTE columnCount;n++){
-			columnName=arrColumn[n];
-			overridden = false;
-			if(","&arguments.overrideFields&"," CONTAINS ","&columnName&","){
-				overridden = true;
-			}
-			if(overridden EQ false or not structkeyexists(struct, columnName)){
+			columnName=arrColumn[n]; 
+			if(not structkeyexists(overrideStruct, columnName) or not structkeyexists(struct, columnName)){
 				if(arguments.currentRow GT arguments.queryName.recordcount){
 					struct[columnName]="";
 				}else{
-					struct[columnName]=arguments.queryName[columnName][arguments.currentRow];
+					struct[columnName]=arguments.queryName[columnName];
 				}
 			}
-		}
+		} 
 	}
 	</cfscript>
 </cffunction> 

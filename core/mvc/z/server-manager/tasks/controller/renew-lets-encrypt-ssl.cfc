@@ -26,7 +26,8 @@
 	site.site_active=#db.param('1')# and 
 	site_deleted=#db.param('0')# and 
 	ssl_letsencrypt=#db.param(1)# AND 
-	ssl_expiration_datetime <=#db.param(twoWeeksAgo)# and
+	ssl_expiration_datetime >=#db.param(twoWeeksAgo)# and
+	ssl_expiration_datetime <=#db.param(request.zos.mysqlnow)# and
 	ssl_deleted=#db.param('0')# 
 	ORDER BY ssl_expiration_datetime ASC ";
 	qSSL=db.execute("qSSL");
@@ -35,6 +36,7 @@
 	// run query
 	// loop sites
 	renewCount=0;
+	arrRenew=[];
 	for(row in qSSL){ 
  		
 		row.ssl_domain_list=replace(replace(replace(replace(row.ssl_domain_list, "/", "", "all"), "\", "", "all"), chr(10), ",", "all"), chr(13), "", "all");
@@ -105,6 +107,7 @@
 					ssl_expiration_datetime:form.ssl_expiration_datetime
 				}
 			}
+			arrayAppend(arrRenew, row.ssl_common_name&" Let's Encrypt secure certificate renewed");
 			renewCount++;
 			application.zcore.functions.zUpdate(ts);
 			
@@ -119,7 +122,16 @@
 			}
 		} 
 	} 
-	echo("Renewed #renewCount# LetsEncrypt.org Certificates");
+	if(renewCount NEQ 0){
+		ts={
+			from:request.zos.developerEmailFrom,
+			to:request.zos.developerEmailTo,
+			subject:"LetsEncrypt.org Certificate(s) Renewed",
+			text:"The following certificates were renewed"&chr(10)&chr(10)&arrayToList(arrRenew, chr(10))
+		};
+		application.zcore.email.send(ts);
+	}
+	echo("Renewed #renewCount# LetsEncrypt.org Certificates<br><br>"&arrayToList(arrRenew, "<br>"));
 	abort;
 	</cfscript>
 </cffunction>

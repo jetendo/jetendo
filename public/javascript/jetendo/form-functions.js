@@ -1926,7 +1926,7 @@ var zLastAjaxVarName=""; */
 				window.scrollTo(0,0);
 			}
 		};
-		tempObj.errorCallback=function(){
+		tempObj.errorCallback=function(resp){
 			$(".z-manager-edit-errors").html('<div style="background-color:#900; color:#FFF; padding:10px; float:left; width:100%;">Sorry, there was a problem with your submission, please try again later.</div>');
 			zResetManagerTabEdit();
 			window.scrollTo(0,0);

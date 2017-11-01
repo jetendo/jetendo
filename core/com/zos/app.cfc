@@ -512,28 +512,25 @@
 	var db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
 	var local=structnew();
-	</cfscript>
-	<cfsavecontent variable="db.sql">
-	SELECT * FROM #db.table("app", request.zos.zcoreDatasource)# app,
+	db.sql="SELECT * FROM #db.table("app", request.zos.zcoreDatasource)# app,
 	#db.table("app_x_site", request.zos.zcoreDatasource)# app_x_site 
 	WHERE app.app_id=app_x_site.app_id and 
 	app.app_built_in=#db.param(0)# and 
 	app_deleted = #db.param(0)# and 
 	app_x_site_deleted = #db.param(0)# and 
 	app_x_site_id = #db.param(form.app_x_site_id)# and 
-	app_x_site.site_id = #db.param(form.sid)#
-	</cfsavecontent><cfscript>qa=db.execute("qa");
+	app_x_site.site_id = #db.param(form.sid)#";
+	qa=db.execute("qa");
 	if(qa.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid,"Application instance no longer exists.");
 		application.zcore.functions.zReturnRedirect(request.cgi_script_name&"?method=instanceList&app_id=#form.app_id#","zsid=#request.zsid#");
 	}
-	</cfscript>
-	<cfsavecontent variable="db.sql">
-	DELETE FROM #db.table("app_reserve", request.zos.zcoreDatasource)#  
+	db.sql="DELETE FROM #db.table("app_reserve", request.zos.zcoreDatasource)#  
 	WHERE 
+	app_id=#db.param(qa.app_id)# and 
 	site_id = #db.param(form.sid)# and 
-	app_reserve_deleted = #db.param(0)#
-	</cfsavecontent><cfscript>qRemove=db.execute("qRemove");
+	app_reserve_deleted = #db.param(0)#";
+	qRemove=db.execute("qRemove");
 	form.sid=qa.site_id;
 	form.site_id=qa.site_id;
 	form.app_x_site_id=form.app_x_site_id;
@@ -1598,7 +1595,7 @@ if(rCom.isOK() EQ false){
 	qD=db.execute("qD");
 	</cfscript>
 	<cfsavecontent variable="out">
-	<cfif not isDefined('request.zos.selectAppUrlIdOutputScript')>
+	<cfif not structkeyexists(request.zos, 'selectAppUrlIdOutputScript')>
 		<cfscript>
 		request.zos.selectAppUrlIdOutputScript=true;
 		request.zos.selectAppUrlIdCount=0;

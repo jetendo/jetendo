@@ -256,16 +256,7 @@ this.app_id=12;
 			ts.link='/z/content/admin/content-admin/index';
 			ts.children=structnew();
 			arguments.linkStruct["Content Manager"]=ts;
-		}
-		if(request.zos.isTestServer){
-
-			if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Sections") EQ false){
-				ts=structnew();
-				ts.featureName="Sections";
-				ts.link='/z/admin/section/index';
-				arguments.linkStruct["Content Manager"].children["Sections"]=ts;
-			} 
-		}
+		} 
 		if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Pages") EQ false){
 			ts=structnew();
 			ts.featureName="Pages";
@@ -376,12 +367,13 @@ this.app_id=12;
 				arguments.linkStruct["Content Manager"].children["Layouts"]=ts;
 			}
 			if(request.zos.istestserver){
+				/*
 				if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Sections") EQ false){
 					ts=structnew();
 					ts.featureName="Sections";
-					ts.link="/z/admin/section/index";
+					ts.link="/z/section/admin/section-admin/index";
 					arguments.linkStruct["Content Manager"].children["Sections"]=ts;
-				}
+				}*/
 				/*
 				if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Theme Options") EQ false){
 					ts=structnew();

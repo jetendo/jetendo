@@ -7,7 +7,7 @@
 	if(variables.hasLeadsAccess){
 		links=[
 			{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
-			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead" }, 
+			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead"}, 
 			{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
 			{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
 			{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
@@ -31,6 +31,7 @@
 	//variables.displayPath="/zupload/inquiries/";
 	ts={
 		// required 
+		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk" },
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -48,12 +49,15 @@
 			beforeInsert:'beforeInsert',
 			afterInsert:'afterInsert',
 			getDeleteData:'getDeleteData',
-			executeDelete:'executeDelete'
+			executeDelete:'executeDelete',
+			beforeReturnInsertUpdate:'beforeReturnInsertUpdate'
 		},
 
 		//optional
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
 		requiredParams:[],
+		
+		editFormOverrideParams:["inquiries_type_id", "user_id"],
 		customInsertUpdate:true, // true disables the normal zInsert/zUpdate calls, so you can implement them in afterInsert and afterUpdate instead
 		sortField:"",
 		hasSiteId:true,
@@ -71,7 +75,7 @@
 		pagination:true,
 		paginationIndex:"zIndex",
 		pageZSID:"zPageId",
-		perpage:10,
+		perpage:30,
 		title:"Lead",
 		requireFeatureAccess="Leads",
 		prefixURL:"/z/inquiries/admin/manage-inquiries/",
@@ -110,6 +114,7 @@
 			label:'Admin'
 		}]
 	};
+	
 	return ts;
 	</cfscript>
 </cffunction>
@@ -117,6 +122,11 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
 	ts=getInitConfig();
+	arrayAppend(ts.titleLinks, { 
+			label:"Bulk Add",
+			link:"/z/inquiries/admin/manage-inquiries/addBulk"
+		}
+	);
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv"
@@ -135,11 +145,20 @@
 <cffunction name="userInit" localmode="modern" access="public">
 	<cfscript>
 	ts=getInitConfig();
+	if(request.zos.isTestServer){
+		ts.disableAddEdit=false;
+		arrayAppend(ts.titleLinks, { 
+				label:"Bulk Add",
+				link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
+			}
+		);
+	}else{
+		ts.disableAddEdit=true;
+	}
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/userIndex##exportLeadDiv"
 	});
-	ts.disableAddEdit=true;
 	ts.requireFeatureAccess="";
 	super.init(ts); 
 	
@@ -326,8 +345,6 @@
 	</cfscript>
 	
 </cffunction>
-
-
 
 <cffunction name="changeStatus" localmode="modern" access="remote" roles="member">
 	<cfscript>
@@ -580,6 +597,19 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="insertBulk" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	update();
+	</cfscript>
+</cffunction>
+<cffunction name="userInsertBulk" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	super.update();
+	</cfscript>
+</cffunction>
+
+
 <cffunction name="update" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	init();
@@ -596,6 +626,19 @@
 <cffunction name="edit" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	init();
+	super.edit();
+	</cfscript>
+</cffunction>
+
+<cffunction name="addBulk" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	edit();
+	</cfscript>
+</cffunction>
+<cffunction name="userAddBulk" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	variables.disableAddEdit = false;
 	super.edit();
 	</cfscript>
 </cffunction>
@@ -733,6 +776,17 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	rs=validateInsertUpdate();
+	var iti 	= "";
+	var luid	= "";
+	if(structkeyexists(form, "inquiries_type_id") AND form.inquiries_type_id NEQ ""){
+		iti = "#form.inquiries_type_id#";
+	}
+	if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
+		luid = "#form.user_id#";
+	} else if(structkeyexists(form, "user_id") AND form.user_id NEQ ""){
+		luid = "#form.user_id#";
+	}
+
 	if(not rs.success){
 		application.zcore.status.displayReturnJson(request.zsid);
 	} 
@@ -742,6 +796,19 @@
 	site_id=#db.param(request.zos.globals.id)# ";
 	qData=db.execute("qData");
 	return {success:true, qData:qData};
+	</cfscript>
+</cffunction>
+
+
+
+<cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>  
+	application.zcore.status.setStatus(request.zsid, "Lead added successfully");
+	var link = "#variables.prefixURL#addBulk?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
+	if(form.user_id NEQ "" AND IsNumeric(form.user_id)){
+		link &= "&user_id=" & form.user_id;
+	}
+	return {success:true, id:form[variables.primaryKeyField], redirect:1,redirectLink: link};
 	</cfscript>
 </cffunction>
 
@@ -860,7 +927,7 @@
 	inquiries_deleted = #db.param(0)# and 
 	inquiries_id=#db.param(form.inquiries_id)#	"; 
 	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
-		db.sql&=" and user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+		db.sql&=" and inquiries.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 	}
 	rs={};
 	rs.qData=db.execute("qData");
@@ -890,7 +957,7 @@
 	fs=[];
 
 	savecontent variable="field"{
-		form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
+		//form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
 		selectStruct = StructNew();
 		selectStruct.name = "inquiries_type_id";
 		selectStruct.query = variables.qTypes;
@@ -1291,8 +1358,7 @@
 	if(request.zsession.leademailgrouping EQ '1'){
 		db.sql&=" and inquiries_primary = #db.param('1')#";
 	} 
-	rs.qCount=db.execute("qCount");  
-
+	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 
 
 	savecontent variable="typeField"{

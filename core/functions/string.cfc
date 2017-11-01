@@ -1398,7 +1398,7 @@ zEmailValidateList(addressList, displayFormat);
     </cfscript>
 </cffunction>
 
-<!--- application.zcore.functions.zValidateURL(link, true); --->
+<!--- application.zcore.functions.zValidateURL(link, true, false); --->
 <cffunction name="zValidateURL" access="public" localmode="modern"> 
 	<cfargument name="link" type="string" required="yes">
 	<cfargument name="disableSpecialCharacters" type="boolean" required="yes">

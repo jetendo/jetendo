@@ -1,5 +1,5 @@
 <!--- 
-need to connect page-admin, section-menu-link and more to this
+need to connect page-admin, section-link and more to this
  --->
 
 <cfcomponent extends="zcorerootmapping.com.zos.controller">
@@ -7,6 +7,9 @@ need to connect page-admin, section-menu-link and more to this
 <cfoutput>
 <cffunction name="init" localmode="modern" access="private" roles="member">
 	<cfscript>
+	if(not application.zcore.app.siteHasApp("section")){
+		application.zcore.functions.z404("Section app not enabled on this site.");
+	}
 	
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Sections");	
 	var queueSortStruct = StructNew();
@@ -16,7 +19,7 @@ need to connect page-admin, section-menu-link and more to this
 	queueSortStruct.sortFieldName = "section_sort";
 	queueSortStruct.primaryKeyName = "section_id";
 	queueSortStruct.where="site_id = '#request.zos.globals.id#' and section_deleted='0' ";
-	queueSortStruct.ajaxURL="/z/admin/section/index";
+	queueSortStruct.ajaxURL="/z/section/admin/section-admin/index";
 	queueSortStruct.ajaxTableId="sortRowTable";
 	variables.queueSortCom.init(queueSortStruct);
 	variables.queueSortCom.returnJson();*/
@@ -36,7 +39,7 @@ need to connect page-admin, section-menu-link and more to this
 	form.returnJson=application.zcore.functions.zso(form, 'returnJson', true, 0);
 	if(qCheck.recordcount EQ 0){
 		application.zcore.status.setStatus(Request.zsid, 'section no longer exists', false,true);
-		application.zcore.functions.zRedirect('/z/admin/section/index?zsid=#request.zsid#');
+		application.zcore.functions.zRedirect('/z/section/admin/section-admin/index?zsid=#request.zsid#');
 	}
 	if(structkeyexists(form,'confirm')){
 		//application.zcore.imageLibraryCom.deleteImageLibraryId(qCheck.section_image_library_id);
@@ -50,14 +53,14 @@ need to connect page-admin, section-menu-link and more to this
 			application.zcore.functions.zReturnJson({success:true});
 		}else{
 			application.zcore.status.setStatus(Request.zsid, 'Section deleted');
-			application.zcore.functions.zRedirect('/z/admin/section/index?zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/section/admin/section-admin/index?zsid=#request.zsid#');
 		} 
 	}else{
 		echo('<div style="font-size:14px; font-weight:bold; text-align:center; "> Are you sure you want to delete this section?<br />
 			<br />
 			#qCheck.section_name#<br />
 			<br />
-			<a href="/z/admin/section/delete?confirm=1&amp;section_id=#form.section_id#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/admin/section/index">No</a> 
+			<a href="/z/section/admin/section-admin/delete?confirm=1&amp;section_id=#form.section_id#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/section/admin/section-admin/index">No</a> 
 		</div>');
 	}
 	</cfscript>
@@ -81,9 +84,9 @@ need to connect page-admin, section-menu-link and more to this
 	if(result){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true);
 		if(form.method EQ 'insert'){
-			application.zcore.functions.zRedirect('/z/admin/section/add?zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/section/admin/section-admin/add?zsid=#request.zsid#');
 		}else{
-			application.zcore.functions.zRedirect('/z/admin/section/edit?section_id=#form.section_id#&zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/section/admin/section-admin/edit?section_id=#form.section_id#&zsid=#request.zsid#');
 		}
 	}
 	ts=StructNew();
@@ -94,7 +97,7 @@ need to connect page-admin, section-menu-link and more to this
 		form.section_id = application.zcore.functions.zInsert(ts);
 		if(form.section_id EQ false){
 			application.zcore.status.setStatus(request.zsid, 'Failed to save section.',form,true);
-			application.zcore.functions.zRedirect('/z/admin/section/add?zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/section/admin/section-admin/add?zsid=#request.zsid#');
 		}else{
 			application.zcore.status.setStatus(request.zsid, 'Section saved.');
 			//variables.queueSortCom.sortAll();
@@ -102,7 +105,7 @@ need to connect page-admin, section-menu-link and more to this
 	}else{
 		if(application.zcore.functions.zUpdate(ts) EQ false){
 			application.zcore.status.setStatus(request.zsid, 'Failed to save section.',form,true);
-			application.zcore.functions.zRedirect('/z/admin/section/edit?section_id=#form.section_id#&zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/section/admin/section-admin/edit?section_id=#form.section_id#&zsid=#request.zsid#');
 		}else{
 			application.zcore.status.setStatus(request.zsid, 'Section updated.');
 		}
@@ -110,9 +113,9 @@ need to connect page-admin, section-menu-link and more to this
 	}
 	//application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'section_image_library_id'));
 	if(form.modalpopforced EQ 1){
-		application.zcore.functions.zRedirect('/z/admin/section/getReturnSectionRowHTML?section_id=#form.section_id#');
+		application.zcore.functions.zRedirect('/z/section/admin/section-admin/getReturnSectionRowHTML?section_id=#form.section_id#');
 	}else{
-		application.zcore.functions.zRedirect('/z/admin/section/index?zsid=#request.zsid#');
+		application.zcore.functions.zRedirect('/z/section/admin/section-admin/index?zsid=#request.zsid#');
 	}
 	</cfscript>
 </cffunction>
@@ -162,6 +165,9 @@ need to connect page-admin, section-menu-link and more to this
 	<cfscript>
 	sections=arguments.sections;
 	arrSection=arguments.arrSection;
+	if(not structkeyexists(sections, arguments.sectionParentId)){
+		return;
+	}
 	ps=sections[arguments.sectionParentId];
 	for(section in ps){
 		arrayAppend(arrSection, section);
@@ -216,7 +222,7 @@ need to connect page-admin, section-menu-link and more to this
 		Section</h2>
 
 
-	<form class="zFormCheckDirty" action="/z/admin/section/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?section_id=#form.section_id#" method="post">
+	<form class="zFormCheckDirty" action="/z/section/admin/section-admin/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?section_id=#form.section_id#" method="post">
 		<input type="hidden" name="modalpopforced" value="#form.modalpopforced#" />
 		<table style="width:100%;" class="table-list">
 			<tr>
@@ -263,7 +269,7 @@ need to connect page-admin, section-menu-link and more to this
 					<cfif form.modalpopforced EQ 1>
 						<button type="button" name="cancel" onclick="window.parent.zCloseModal();">Cancel</button>
 					<cfelse>
-						<button type="button" name="cancel" onclick="window.location.href = '/z/admin/section/index';">Cancel</button>
+						<button type="button" name="cancel" onclick="window.location.href = '/z/section/admin/section-admin/index';">Cancel</button>
 					</cfif>
 				</td>
 			</tr>
@@ -308,14 +314,14 @@ need to connect page-admin, section-menu-link and more to this
 
 		<a href="##" class="z-manager-edit" id="z-manager-edit#row.section_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a> 
 		<div class="z-manager-edit-menu"> 
-			<a href="/z/admin/section/edit?section_id=#row.section_id#&amp;modalpopforced=1" onclick="zTableRecordEdit(this);  return false;" class="z-manager-edit" target="_blank" title="Edit">Edit</a> 
+			<a href="/z/section/admin/section-admin/edit?section_id=#row.section_id#&amp;modalpopforced=1" onclick="zTableRecordEdit(this);  return false;" class="z-manager-edit" target="_blank" title="Edit">Edit</a> 
 			<a href="/z/admin/landing-page/index?section_id=#row.section_id#&section_parent_id=0">Manage Content</a>   
 			<a href="/z/section/admin/page-admin/index?section_id=#row.section_id#&section_parent_id=0">Manage Pages</a>   
-			<a href="/z/section/admin/section-menu-link/index?section_id=#row.section_id#&section_parent_id=0">Manage Menu Links</a>   
+			<a href="/z/section/admin/section-link/index?section_id=#row.section_id#&section_parent_id=0">Manage Menu Links</a>   
 		</div>
 	</div>
 	<div class="z-manager-button-container">
-		<a href="##" class="z-manager-delete" title="Delete" onclick="zDeleteTableRecordRow(this, ''/z/admin/section/delete?section_id=#row.section_id#&amp;returnJson=1&amp;confirm=1''); return false;"><i class="fa fa-trash" aria-hidden="true"></i></a>
+		<a href="##" class="z-manager-delete" title="Delete" onclick="zDeleteTableRecordRow(this, ''/z/section/admin/section-admin/delete?section_id=#row.section_id#&amp;returnJson=1&amp;confirm=1''); return false;"><i class="fa fa-trash" aria-hidden="true"></i></a>
 	</div>
 
 	</td>');
@@ -371,7 +377,7 @@ need to connect page-admin, section-menu-link and more to this
 			</div>
 		</div>
 		<div class="z-manager-quick-menu-side-links">
-			<a href="/z/admin/section/add" class="z-manager-search-button">Add</a>
+			<a href="/z/section/admin/section-admin/add" class="z-manager-search-button">Add</a>
 		</div>
 	</div>
 	<cfif qSection.recordcount EQ 0>

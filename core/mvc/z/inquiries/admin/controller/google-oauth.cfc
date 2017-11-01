@@ -718,7 +718,7 @@ $headers = array(
 
 	// force ricerose for now: 
 	if(request.zos.isTestServer){
-		form.sid=528;
+		form.sid=298;
 	}else{
 		//form.sid=422;
 	} 
@@ -967,7 +967,7 @@ $headers = array(
 	sort=-ga:pageviews
 	*/
 	if(request.zos.isTestServer){
-		form.sid=528;
+		form.sid=298;
 	}else{
 		//form.sid=422;
 	} 
@@ -1072,6 +1072,236 @@ $headers = array(
 	</cfscript> 
 </cffunction>
 
+
+<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>  
+	init();
+	db=request.zos.queryObject;
+	/*
+	documented here: https://developers.google.com/analytics/devguides/reporting/core/v3/common-queries
+
+	dimensions=ga:source,ga:medium
+	metrics=ga:sessions,ga:pageviews,ga:sessionDuration,ga:exits
+	sort=-ga:sessions
+
+	or
+
+	paid search:
+	dimensions=ga:source
+	metrics=ga:pageviews,ga:sessionDuration,ga:exits
+	filters=ga:medium==cpa,ga:medium==cpc,ga:medium==cpm,ga:medium==cpp,ga:medium==cpv,ga:medium==ppc
+	sort=-ga:pageviews
+	*/
+	if(request.zos.isTestServer){
+		form.sid=298;
+	}else{
+		//form.sid=422;
+	} 
+
+
+	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# 
+	WHERE site_active=#db.param(1)# and 
+	site_deleted=#db.param(0)# and 
+	site_id<>#db.param(-1)# and 
+	site_google_analytics_goal_count <> #db.param(0)# and
+	site_google_analytics_view_id<>#db.param('')#";
+	if(application.zcore.functions.zso(form, 'sid', true) NEQ 0){
+		db.sql&=" and site_id = #db.param(form.sid)# ";
+	}
+	qSite=db.execute("qSite"); 
+
+	count=0;
+	yearLimit=30; // to avoid infinite loop
+	startDate=dateformat(dateadd("yyyy", -1, dateformat(now(), "yyyy-mm")&"-01"), "yyyy-mm-dd"); 
+	endDate=dateformat(now(), "yyyy-mm-dd"); 
+ 	for(row in qSite){
+ 		/*if(count EQ 5){
+ 			break;
+ 		}*/
+		
+		tempStartDate=startDate;
+		tempEndDate=endDate; 
+
+	
+		/*if(request.zos.isTestServer){
+			tempStartDate="2017-09-01";
+			tempEndDate="2017-09-30"; 
+		}*/
+ 		count++;
+ 		tempYearLimit=yearLimit; 
+ 		// uncomment to force import of all time again
+ 		//row.site_google_analytics_overview_last_import_datetime="";
+ 		if(row.site_google_analytics_overview_last_import_datetime NEQ ""){
+ 			tempYearLimit=1; // only pull current year if we already pulled the past.
+ 		} 
+		var goalMax = row.site_google_analytics_goal_count + (row.site_google_analytics_goal_count mod 4)
+ 		for(g=1;g<=tempYearLimit;g++){
+ 			for(h=1; h <= goalMax; h+=4){
+				if(structkeyexists(application, 'googleAnalyticsOverviewCancel')){
+					application.googleAnalyticsOverviewStatus="";
+					structdelete(application, 'googleAnalyticsOverviewCancel');
+					echo('Cancelled');
+					abort;
+				} 
+				application.googleAnalyticsOverviewStatus="Processing #row.site_short_domain# at #tempStartDate# to #tempEndDate#"; 
+				js={
+				  "reportRequests":
+				  [
+				    {
+						"viewId": row.site_google_analytics_view_id,
+						"dateRanges": [
+							{"startDate": dateFormat(tempStartDate, "yyyy-mm-dd"), 
+							"endDate": dateFormat(tempEndDate, "yyyy-mm-dd")
+							}
+						],
+				      	"dimensions": [
+				      		{"name": "ga:nthMonth"},
+				      		//{"name": "ga:goalCompletionLocation"}
+				      		{"name": "ga:source"},
+				      		{"name": "ga:channelGrouping"},
+				      		//{"name": "ga:acquisitionTrafficChannel"}
+				      	],
+			      		"metrics": [ 
+			      			// only 10 metrics are allowed in single call 
+			      			{"expression": "ga:sessions"},
+							{"expression": "ga:visits"},
+							{"expression": "ga:goal#h#ConversionRate"},	
+							{"expression": "ga:goal#h#Completions"},
+							{"expression": "ga:goal#h+1#ConversionRate"},	
+							{"expression": "ga:goal#h+1#Completions"},
+							{"expression": "ga:goal#h+2#ConversionRate"},	
+							{"expression": "ga:goal#h+2#Completions"},
+							{"expression": "ga:goal#h+3#ConversionRate"},	
+							{"expression": "ga:goal#h+3#Completions"}
+						],
+						//"samplingLevel" : "2",
+						"orderBys":[
+						{
+							"fieldName":"ga:nthMonth",
+							"orderType":"VALUE",
+							"sortOrder":"ASCENDING"
+						}],
+						"pageToken": "0",
+						"pageSize": "10000"
+				    }
+				  ]
+				}; 
+				ds={};
+				ds.js=js;
+				ds.site_short_domain=row.site_short_domain;
+				ds.site_id=row.site_id;
+				ds.startDate=tempStartDate;
+				ds.ga_month_type=1; 
+
+				result=processChannelGoalReport(ds, row.site_google_analytics_goal_count);
+				echo('processed google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate# for goal(s) #h# - #h+3#<br>');
+				if(result NEQ true){
+					if(result EQ false){
+						echo('stopped google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
+					}
+					break;
+				}
+				sleep(1000); // sleep to avoid hitting google's api limit
+			}
+			tempStartDate=dateformat(dateadd("yyyy", -1, tempStartDate), "yyyy-mm-dd"); 
+			tempEndDate=dateformat(dateadd("yyyy", -1, tempEndDate), "yyyy-mm-dd"); 
+			sleep(1000); // sleep to avoid hitting google's api limit
+			if(dateformat(tempStartDate, "yyyymmdd") < 20050101){
+				echo('stopped google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
+				break;
+			} 
+		}
+		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
+		site_google_analytics_channel_goal_last_import_datetime=#db.param(request.zos.mysqlnow)#,
+		site_updated_datetime=#db.param(request.zos.mysqlnow)# 
+		WHERE site_id=#db.param(row.site_id)# and 
+		site_deleted=#db.param(0)#";
+		qUpdate=db.execute("qUpdate"); 
+	}
+
+	application.googleAnalyticsOverviewStatus="";
+	//echo('done: #count#');
+	//abort;
+	</cfscript> 
+</cffunction>
+
+
+<cffunction name="processChannelGoalReport" localmode="modern" access="public">
+	<cfargument name="ds2" type="struct" required="yes">
+	<cfargument name="maxGoals" type="number" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	ds2=arguments.ds2;  
+	js=doAPICall(ds2.js);  
+	//writedump(js);
+	//return;
+
+	if(not structkeyexists(js, 'reports')){
+		echo('missing reports<br>');
+		return false;
+	}
+	for(i=1;i<=arraylen(js.reports);i++){
+		rs=js.reports[i];
+		if(not structkeyexists(rs.data, 'rows')){
+			echo('missing rows<br>');
+			return false;
+		}
+		for(n=1;n<=arraylen(rs.data.rows);n++){
+			ds=rs.data.rows[n]; 
+			values=ds.metrics[1].values;
+			ss={};
+			tempMonth=ds.dimensions[1];
+			ss.site_id=ds2.site_id;
+			ss.ga_month_channel_source_goal_date 			= dateformat(dateadd("m", tempMonth, ds2.startDate), "yyyy-mm-dd");
+			ss.ga_month_channel_source_goal_source 			= ds.dimensions[2];
+			ss.ga_month_channel_source_goal_channel 		= ds.dimensions[3];
+			ss.ga_month_channel_source_goal_sessions 		= values[1];
+			ss.ga_month_channel_source_goal_visits			= values[2];
+			for(g=3; g<=10;g+=2){
+				var tmp = rs.columnHeader.metricHeader.metricHeaderEntries[g].name;
+				tmp = replaceNoCase(tmp, "ga:goal", "");
+				tmp = replaceNoCase(tmp, "ConversionRate", "");
+				if(!isNumeric(tmp)){
+					echo("ERROR CLEANING " & tmp & " CHECK that token is in the form of ga:goal##ConversionRate <br />");
+					return false;
+				}
+				ss.ga_month_channel_source_goal_name 			= tmp;
+				ss.ga_month_channel_source_goal_conversion_rate = values[g];
+				ss.ga_month_channel_source_goal_conversions 	= values[g+1];
+				db.sql="select * from #db.table("ga_month_channel_source_goal", request.zos.zcoreDatasource)# 
+				WHERE site_id = #db.param(ss.site_id)# and 
+				ga_month_channel_source_goal_source = #db.param(ds.dimensions[2])# and
+				ga_month_channel_source_goal_channel = #db.param(ds.dimensions[3])# and
+				ga_month_channel_source_goal_name = #db.param(tmp)# and
+				ga_month_channel_source_goal_deleted=#db.param(0)# and 
+				ga_month_channel_source_goal_date=#db.param(dateformat(ss.ga_month_channel_source_goal_date, "yyyy-mm-dd"))#";
+				qRank=db.execute("qRank");
+				//writedump(ss);
+				var tsGoal={
+					table:"ga_month_channel_source_goal",
+					datasource:request.zos.zcoreDatasource,
+					struct:ss 
+				};  			
+				if(qRank.recordcount EQ 0){
+					//echo("Zeeeeeeeeeeeeeero <br />");
+					ga_month_channel_source_goal_id = application.zcore.functions.zInsert(tsGoal); 
+				}else{
+					ss.ga_month_channel_source_goal_id = qRank.ga_month_channel_source_goal_id; 
+					//echo("Updated <br />");
+					application.zcore.functions.zUpdate(tsGoal); 
+				}
+				var testTmp = LSParseNumber(tmp);
+				if(testTmp GT arguments.maxGoals){
+					//echo("Processed up to " & testTmp & " <br />"); 
+					return 100;
+				}
+			}
+		}
+	}
+	return true;
+	</cfscript>
+</cffunction>
+
 <cffunction name="organic" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
 	init();
@@ -1084,7 +1314,7 @@ $headers = array(
 	sort=-ga:pageviews
 	*/ 
 	if(request.zos.isTestServer){
-		form.sid=528;
+		form.sid=298;
 	}else{
 		//form.sid=422;
 	} 
@@ -1231,7 +1461,7 @@ $headers = array(
 
 	// force ricerose for now: 
 	if(request.zos.isTestServer){
-		form.sid=528;
+		form.sid=298;
 	}else{
 		//form.sid=422;
 	} 

@@ -27,9 +27,20 @@
 		options.selectedButtonText=zso(options, 'selectedButtonText', false, 'Already in cart');
 		options.checkoutCallback=zso(options, 'checkoutCallback', false,  function(){self.checkout(); }); 
 		options.changeCallback=zso(options, 'changeCallback', false, function(){});
+
+		var quantityWasWrong=false;
 		function setQuantity(){
 			var itemId=this.getAttribute("data-zcart-id");
 			var quantity=parseInt(this.value);
+			if(quantity<=0){
+				if(!quantityWasWrong){
+					alert("You must enter a quantity of 1 or more.");
+				} 
+				quantityWasWrong=true;
+				return false;
+			}else{
+				quantityWasWrong=false;
+			}
 			if(isNaN(quantity)){
 				this.value=1;
 				return false;
@@ -40,7 +51,8 @@
 		function init(options){
 			$cartDiv=$(".zcart."+options.name);
 			if($cartDiv.length === 0){
-				throw(options.name+" is not defined.  zCart requires a valid object or selector for the cart items to be rendered in.");
+				console.log("Cart selector had no matches: .zcart."+options.name+" | zCart requires a valid object or selector for the cart items to be rendered in. This can be ignored on pages where the cart is not needed.");
+				return;
 			}
 			// setup mouse events for add and remove buttons for this cart's name only.
 			$(".zcart-add."+options.name).bind('click', function(){
@@ -141,7 +153,7 @@
 			if(options.debug) console.log("From cookie:"+arrId.join(","));
 			for(var i in arrId){
 				if(arrId[i] !== ""){
-					var arrItem=arrId[i].split("|");
+					var arrItem=arrId[i].split("|"); 
 					if(options.debug) console.log("Added from cookie: "+options.arrData[arrItem[0]].id);
 					options.arrData[arrItem[0]].quantity=arrItem[1];
 					self.add(options.arrData[arrItem[0]]);
@@ -160,6 +172,7 @@
 			if(count===0){
 				$cartDiv.html(options.emptyCartMessage);
 			}
+
 			self.updateCookie();
 			self.renderCount();
 			if(cartLoaded){
@@ -182,6 +195,10 @@
 		}
 		self.add=function(jsonObj){
 			// mark all other "add" buttons as saved too if their id matches.
+			if(jsonObj.quantity <= 0){
+				alert("You must enter a quantity of 1 or more.");
+				return;
+			}
 			if(zKeyExists(itemIds, jsonObj.id)){ 
 				self.remove(jsonObj.id);
 				return;
@@ -238,8 +255,8 @@
 			
 			$(".zcart-add."+options.name).each(function(){
 				if($(this).hasClass("zcart-add-saved")){
-					var tempJsonObj=eval("("+this.getAttribute("data-zcart-json")+")"); 
-					if(itemId === tempJsonObj.id){
+					var tempJsonObj=eval("("+this.getAttribute("data-zcart-json")+")");  
+					if(itemId == tempJsonObj.id){
 						$(this).removeClass("zcart-add-saved").html(tempJsonObj.addHTML);
 					}
 				}
@@ -270,7 +287,7 @@
 			var tempObj={};
 			for(var i in obj){
 				tempObj[i]=obj[i];
-			}
+			} 
 			tempObj.itemId=options.name+'zcart-item'+id;
 			tempObj.deleteId=options.name+'zcart-item-delete-link'+id;
 			var newHTML=$(self.replaceTags(itemTemplate, tempObj));
@@ -281,7 +298,10 @@
 				}
 			});
 			$("a", newHTML).each(function(){
-				this.href=this.getAttribute("data-url");
+				var h=this.getAttribute("data-url");
+				if(h){
+					this.href=h;
+				}
 			});
 			newHTML.addClass(options.name);
 			return newHTML[0].outerHTML;
