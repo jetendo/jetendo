@@ -1913,7 +1913,6 @@ var zLastAjaxVarName=""; */
 			var r=JSON.parse(r);
 			if(r.success){
 				if(typeof r.redirect != "undefined" && r.redirect){
-					alert("LINK IS " + r.redirectLink);
 					window.location.href=r.redirectLink;
 				}else{
 					if(r.newRecord){ 

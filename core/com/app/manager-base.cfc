@@ -349,7 +349,7 @@ a version of index list with divs for the table instead of <table>
 				<cfif not variables.disableAddEdit AND application.zcore.user.checkGroupAccess("administrator")>
 					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
 				<cfelse>
-					<a href="#variables.prefixURL#userAdd?modalpopforced=0&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
+					<a href="#variables.prefixURL#userAdd?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
 				</cfif>
 				<cfscript>
 				for(link in variables.titleLinks){
@@ -676,7 +676,7 @@ displayAdminEditMenu(ts);
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
 	}
- 
+
 	ts=variables.validateFields;
 	fail = application.zcore.functions.zValidateStruct(form, ts, request.zsid,true);
 
@@ -691,7 +691,7 @@ displayAdminEditMenu(ts);
 	for(ss in variables.customAddMethods){
 		fm[variables.customAddMethods[ss]] = ss;
 	}
-	if((form.method EQ "insert" or structKeyExists(fm,form.method)) and variables.methods.beforeInsert NEQ ""){
+	if((form.method EQ "insert" OR structKeyExists(fm,form.method)) and variables.methods.beforeInsert NEQ ""){
 		request.zArrErrorMessages=["#variables.methods.beforeInsert#() function was called."];
 		rsInsert=variables[variables.methods.beforeInsert]();
 		request.zArrErrorMessages=[];
@@ -775,7 +775,7 @@ displayAdminEditMenu(ts);
 		}
 	}
 
-	if(fail){	
+	if(fail){
 		application.zcore.status.displayReturnJson(request.zsid);
 	} 
 	if(variables.metaField NEQ ""){
@@ -803,7 +803,7 @@ displayAdminEditMenu(ts);
 
 	newRecord=false;
 
-	if(form.method EQ 'insert' OR structKeyExists(fm,form.method)){
+	if(form.method EQ 'insert' OR structKeyExists(fm,form.method) OR structKeyExists(variables.customAddMethods,form.method)){
 		newRecord=true;
 		if(not variables.customInsertUpdate){
 			form[variables.primaryKeyField] = application.zcore.functions.zInsert(ts);
@@ -841,8 +841,6 @@ displayAdminEditMenu(ts);
 			if(not rs.success){
 				application.zcore.status.displayReturnJson(request.zsid);
 			}
-
-
 			if(variables.uniqueURLField NEQ ""){
 				if(uniqueChanged){
 					ts={
@@ -857,7 +855,6 @@ displayAdminEditMenu(ts);
 			}
 		}
 	}
-
 	if(arrayLen(variables.imageLibraryFields)){
 		for(field in variables.imageLibraryFields){
 			application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, field));
@@ -1049,6 +1046,11 @@ deleteSearchIndex(ts);
 	<cfscript>
 	var db=request.zos.queryObject;
 	init();
+	fm = {};
+	for(ss in variables.customAddMethods){
+		fm[variables.customAddMethods[ss]] = ss;
+	}
+
 	var currentMethod=form.method;
 	if(variables.disableAddEdit){
 		application.zcore.functions.z404("Add/edit is disabled.");
@@ -1076,12 +1078,14 @@ deleteSearchIndex(ts);
 
 	*/
 	echo('<div class="z-manager-edit-head">');
-	if(currentMethod EQ "add" OR structKeyExists(variables.customAddMethods,currentMethod)){
+	if(currentMethod EQ "add" OR structKeyExists(variables.customAddMethods,currentMethod) OR structKeyExists(fm,currentMethod)){
 		echo('<h2>Add #variables.label#</h2>');
 		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
 		formAction="#variables.prefixURL#";
 		if(structKeyExists(variables.customAddMethods,currentMethod)){ 
 			formAction &= variables.customAddMethods[currentMethod]; 
+		} else if(structKeyExists(fm,currentMethod)){ 
+			formAction &= fm[currentMethod]; 
 		}else{
 			formAction&="insert";
 		}

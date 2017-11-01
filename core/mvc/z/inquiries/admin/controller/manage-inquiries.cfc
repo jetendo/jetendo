@@ -31,7 +31,7 @@
 	//variables.displayPath="/zupload/inquiries/";
 	ts={
 		// required 
-		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert"},
+		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userUpdate"},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -122,6 +122,10 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
 	ts=getInitConfig();
+	//FOR REG USER DO NOT WANT TO REDIRECT
+	if(form.method EQ "insert"){
+		variables.methods.beforeReturnInsertUpdate = "";
+	}
 	arrayAppend(ts.titleLinks, { 
 			label:"Bulk Add",
 			link:"/z/inquiries/admin/manage-inquiries/addBulk"
@@ -155,6 +159,13 @@
 	}else{
 		ts.disableAddEdit=true;
 	}
+
+	//ADDED OFFICE ID
+	if(request.zsession.user.office_id NEQ ""){
+		request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+		form["office_id"] = request.zsession.selectedOfficeId;
+	}
+
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/userIndex##exportLeadDiv"
@@ -645,15 +656,13 @@
 <cffunction name="userAdd" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
-	variables.disableAddEdit = false;
 	super.edit();
 	</cfscript>
 </cffunction>
-<cffunction name="userInsert" localmode="modern" access="remote" roles="user">
+<cffunction name="userUpdate" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
-	variables.disableAddEdit = false;
-	super.edit();
+	super.update();
 	</cfscript>
 </cffunction>
 
@@ -834,12 +843,16 @@
 	if(structKeyExists(fm, form.method)){
 		urlPage = fm[form.method];
 	} else{
-		urlPage = variables.customAddMethods[form.method];
+		urlPage = form.method;
 	}
 	var link = "#variables.prefixURL#" & urlPage & "?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
 	if(structkeyexists(form, "user_id")){
 		link &= "&user_id=" & form.user_id;
 	}
+	if(structkeyexists(form, "office_id") AND application.zcore.user.checkGroupAccess("administrator")){
+		link &= "&office_id=" & form.office_id;
+	}
+
 	return {success:true, id:form[variables.primaryKeyField], redirect:1,redirectLink: link};
 	</cfscript>
 </cffunction>
