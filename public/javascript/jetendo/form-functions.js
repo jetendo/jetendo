@@ -657,6 +657,23 @@ var zLastAjaxVarName=""; */
 		if(zAjaxData[obj.id].cache && zAjaxData[obj.id].cacheData[obj.url] && zAjaxData[obj.id].cacheData[obj.url].success){
 			zAjaxData[obj.id].callback(zAjaxData[obj.id].cacheData[obj.url].responseText);
 		}
+		req.showRequestError=function(m){ 
+			if(zIsDeveloper() || zIsTestServer()){
+				alert("Unexpected response.  See console for request and response objects.  Click ok to view response."); 
+				console.log("zAjax Request Object");
+				console.log(zAjaxData[obj.id]); 
+				console.log("zAjax Response Object");
+				console.log(req); 
+				document.write(req.responseText);  
+			}else{
+				if(m!= ""){
+					alert(m);
+				}
+			}
+		}
+		req.onerror = function(e){ 
+			req.showRequestError("Sorry, but that server request failed to load right now, please refresh your browser or come back later.");
+		}
 		req.onreadystatechange = function(){  
 			if(req.readyState === 4 || req.readyState === "complete" || (zMSIEBrowser!==-1 && zMSIEVersion<=7 && this.readyState==="loaded")){
 				var id=req.getResponseHeader("x_ajax_id");
@@ -667,26 +684,26 @@ var zLastAjaxVarName=""; */
 					if(id===null || id===""){
 						if(zAjaxLastRequestId !== false){
 							id=zAjaxLastRequestId;
+							req.showRequestError();
 							zAjaxData[id].errorCallback(req);
 						}else{
-							alert("Sorry, but that page failed to load right now, please refresh your browser or come back later.");
-						//document.write(req.responseText);
+							req.showRequestError("Sorry, but that request response failed to load right now, please refresh your browser or come back later.");
 						}
 					}else{
 						if(zAjaxData[id].debug){
-							document.write('AJAX SERVER ERROR - (Click back and refresh to continue):<br />'+req.responseText);
-						}else{
+							req.showRequestError(""); 
+						}else{ 
+							req.showRequestError("");
 							zAjaxData[id].errorCallback(req);
 						}
 					}
 					//return;
 				}else if(id===null || id===""){
 					if(!zIsDeveloper()){
-						alert("Invalid response.  You may need to login again or refresh the page.");
+						req.showRequestError("Invalid response.  You may need to login again or refresh the page.");
 					}else{
-						console.log(zAjaxData[obj.id]);
-						console.log(req);
-						alert("Unexpected response.  See console for request and response objects"); 
+						req.showRequestError(""); 
+						document.write(req.responseText);
 					}
 					return;
 				}
@@ -714,7 +731,10 @@ var zLastAjaxVarName=""; */
 			} 
 		};
 		var randomNumber = Math.random()*1000;
-		var derrUrl="&zFPE=1";
+		var derrUrl="";
+		if(!zIsDeveloper() && !zIsTestServer()){
+			derrUrl="&zFPE=1";
+		}
 		if(zAjaxData[obj.id].debug){
 			derrUrl="";
 		}
@@ -1671,20 +1691,26 @@ var zLastAjaxVarName=""; */
 	}
 	var zRowBeingEdited=false;
 	var zBodyBeingEdited=false;
+	var zBodyInsertPosition="bottom";
 	var zRowEditIndex=0;
 	var zCurrentHash="";
-	function zTableRecordAdd(obj, id){
-		// store table body
+	function zTableRecordAdd(obj, id, position){
+		// store table body 
+		if(typeof position == "undefined"){
+			position="bottom";
+		}
+		zBodyInsertPosition=position;
 		try{
 			zShowModalStandard(obj.href, 2000,2000, true, true);
 			zCurrentHash="#zAddTableRecord"+new Date().getTime()+"-"+Math.random();
 			window.location.href=zCurrentHash;
-			zBodyBeingEdited=window.parent.$("#"+id+" tbody");
+			zBodyBeingEdited=window.parent.$("#"+id+" tbody");  
 			if(zBodyBeingEdited.length==0){
 				//alert('Invalid table html structure, tbody missing.');
 				zBodyBeingEdited=false;
 			} 
 		}catch(e){
+			console.log('error in zTableRecordAdd');
 			console.log(e);
 		}
 	}
@@ -1707,12 +1733,17 @@ var zLastAjaxVarName=""; */
 		}
 		zRowBeingEdited=obj;
 	}
-	function zAddTableRecordRow(id, html){ 
+	function zAddTableRecordRow(id, html){  
 		if(typeof zBodyBeingEdited == "boolean"){
 			window.location.reload();
 			return;
+		} 
+		var s='<tr id="newSortRowTable_row'+id+'" data-ztable-sort-primary-key-id="'+id+'">'+html+'</tr>';
+		if(zBodyInsertPosition == "bottom"){
+			zBodyBeingEdited.append(s); 
+		}else{
+			zBodyBeingEdited.prepend(s); 
 		}
-		zBodyBeingEdited.append('<tr id="newSortRowTable_row'+id+'" data-ztable-sort-primary-key-id="'+id+'">'+html+'</tr>'); 
 		zBodyBeingEdited=false;
 		zSetupAjaxTableSortAgain();
 	}

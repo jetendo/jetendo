@@ -18,6 +18,7 @@ add option for search indexing for search table.
 		// required
 		// optional
 		customAddMethods:{},
+		addListInsertPosition:"bottom",
 		uniqueURLField:"", // adds a field for overriding the URL.
 		viewScriptName:"", // need when using uniqueURLField for url routing
 		activeField:"", // boolean that automates some search/indexing/url routing changes
@@ -46,8 +47,8 @@ add option for search indexing for search table.
 		requiredParams:[], // a list of field=value pairs to force to be passed throughout the manager form links.
 		editFormOverrideParams:[], // changes zQueryToStruct's overrideFields to have other fields.
 		requiredEditParams:[], // you may need fewer fields then requiredParams to make add/edit work without causing duplicate data.
-		requireFeatureAccess:"",
-		disableAdd:false, // disables the add button from appearing and from insert/add functions working
+		requireFeatureAccess:"", 
+		disableAddButton:false, // disables the add button from appearing and from insert/add functions working
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
 		columnSortingEnabled:false,
 		pagination:true,
@@ -88,6 +89,12 @@ add option for search indexing for search table.
 	};
 	structappend(ss.methods, tempMethods, false);
 	structappend(variables, ss, true);
+
+	variables.reverseCustomAddMethods={};
+	for(i in variables.customAddMethods){
+		variables.reverseCustomAddMethods[variables.customAddMethods[i]]=i;
+	}
+
 
 	structappend(ss.metaFields, ts.metaFields, false);
 	structappend(ss.searchIndexFields, ts.searchIndexFields, false);
@@ -347,15 +354,16 @@ a version of index list with divs for the table instead of <table>
 				</cfscript>
 			</div>	
 			<div class="z-manager-quick-menu-side-links"> 
-				<cfif not variables.disableAddEdit AND application.zcore.user.checkGroupAccess("administrator") and not disableAdd>
-
-					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
-				<cfelse>
-					<a href="#variables.prefixURL#userAdd?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
+				<cfif not variables.disableAddButton and not variables.disableAddEdit> 
+					<a href="#variables.prefixURL#add?modalpopforced=1&#variables.requiredParamsQS#" onclick="zTableRecordAdd(this, 'sortRowTable', '#variables.addListInsertPosition#'); return false;" class="z-manager-search-button z-manager-quick-add-link">Add</a>
 				</cfif>
 				<cfscript>
 				for(link in variables.titleLinks){
-					echo('<a href="#link.link#" class="z-manager-search-button">#link.label#</a>');
+					echo('<a href="#link.link#" ');
+					if(structkeyexists(link, 'onclick')){
+						echo(' onclick="#link.onclick#"');
+					}
+					echo(' class="z-manager-search-button">#link.label#</a>');
 				}
 				</cfscript>
 			</div>
@@ -406,7 +414,7 @@ a version of index list with divs for the table instead of <table>
 				</div>
 			</div>
 		</cfif>
-		<cfif not variables.disableAddEdit and not variables.disableAdd and application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1>
+		<cfif not variables.disableAddEdit and not variables.disableAddButton and application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1>
 			<script type="text/javascript">
 			zArrDeferredFunctions.push(function(){
 				$(".z-manager-quick-add-link").trigger("click");
@@ -675,7 +683,7 @@ displayAdminEditMenu(ts);
 	init();
 
 	if(form.method EQ "insert"){
-		if(variables.disableAdd){
+		if(variables.disableAddButton){
 			application.zcore.functions.z404("Add is disabled.");
 		}
 	}
@@ -692,12 +700,8 @@ displayAdminEditMenu(ts);
 		request.zArrErrorMessages=["#variables.methods.beforeUpdate#() function was called."];
 		rsUpdate=variables[variables.methods.beforeUpdate]();
 		request.zArrErrorMessages=[];
-	}
-	fm = {};
-	for(ss in variables.customAddMethods){
-		fm[variables.customAddMethods[ss]] = ss;
-	}
-	if((form.method EQ "insert" OR structKeyExists(fm,form.method)) and variables.methods.beforeInsert NEQ ""){
+	} 
+	if((form.method EQ "insert" OR structKeyExists(variables.reverseCustomAddMethods,form.method)) and variables.methods.beforeInsert NEQ ""){
 		request.zArrErrorMessages=["#variables.methods.beforeInsert#() function was called."];
 		rsInsert=variables[variables.methods.beforeInsert]();
 		request.zArrErrorMessages=[];
@@ -809,7 +813,7 @@ displayAdminEditMenu(ts);
 
 	newRecord=false;
 
-	if(form.method EQ 'insert' OR structKeyExists(fm,form.method) OR structKeyExists(variables.customAddMethods,form.method)){
+	if(form.method EQ 'insert' OR structKeyExists(variables.reverseCustomAddMethods,form.method)){
 		newRecord=true;
 		if(not variables.customInsertUpdate){
 			form[variables.primaryKeyField] = application.zcore.functions.zInsert(ts);
@@ -1051,16 +1055,12 @@ deleteSearchIndex(ts);
 <cffunction name="edit" localmode="modern" access="private">
 	<cfscript>
 	var db=request.zos.queryObject;
-	init();
-	fm = {};
-	for(ss in variables.customAddMethods){
-		fm[variables.customAddMethods[ss]] = ss;
-	}
+	init(); 
 
 	var currentMethod=form.method;
 
 	if(currentMethod EQ "add"){
-		if(variables.disableAdd){
+		if(variables.disableAddButton){
 			application.zcore.functions.z404("Add is disabled.");
 		}
 	}
@@ -1090,14 +1090,14 @@ deleteSearchIndex(ts);
 
 	*/
 	echo('<div class="z-manager-edit-head">');
-	if(currentMethod EQ "add" OR structKeyExists(variables.customAddMethods,currentMethod) OR structKeyExists(fm,currentMethod)){
+	if(currentMethod EQ "add" OR structKeyExists(variables.customAddMethods,currentMethod)){
 		echo('<h2>Add #variables.label#</h2>');
 		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
 		formAction="#variables.prefixURL#";
 		if(structKeyExists(variables.customAddMethods,currentMethod)){ 
 			formAction &= variables.customAddMethods[currentMethod]; 
-		} else if(structKeyExists(fm,currentMethod)){ 
-			formAction &= fm[currentMethod]; 
+		} else if(structKeyExists(variables.reverseCustomAddMethods,currentMethod)){ 
+			formAction &= variables.reverseCustomAddMethods[currentMethod]; 
 		}else{
 			formAction&="insert";
 		}
