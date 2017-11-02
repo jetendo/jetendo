@@ -416,41 +416,6 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 		</div>
 		<div class="z-2of5 z-ph-0">
 		<!--- <td style="vertical-align:top; width:30%;padding-left:10px; padding-right:0px;"> --->
-			<cfsavecontent variable="db.sql"> SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
-			WHERE user_id = #db.param(request.zsession.user.id)# and 
-			#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL("user", request.zos.globals.id))# and 
-			user_server_administrator=#db.param('0')# and 
-			user_deleted = #db.param(0)# </cfsavecontent>
-			<cfscript>
-			qAgent=db.execute("qAgent");
-			db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# 
-			LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
-			inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
-			inquiries_lead_template.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_lead_template_x_site.inquiries_lead_template_x_site_siteidtype"))# and 
-			inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# and 
-			inquiries_lead_template_x_site_deleted = #db.param(0)#
-			WHERE inquiries_lead_template_x_site.site_id IS NULL and
-			inquiries_lead_template_deleted = #db.param(0)# and  
-			inquiries_lead_template_type = #db.param('2')# and 
-			inquiries_lead_template.site_id IN (#db.param('0')#,#db.param(request.zos.globals.id)#) ";
-			if(application.zcore.app.siteHasApp("listing") EQ false){
-				db.sql&=" and inquiries_lead_template_realestate = #db.param('0')# ";
-			}
-			db.sql&=" ORDER BY inquiries_lead_template_sort ASC, inquiries_lead_template_name ASC ";
-			qTemplate=db.execute("qTemplate");
-
-			</cfscript> 
-			<cfif qagent.recordcount NEQ 0>
-				<cfsavecontent variable="signature">#qAgent.member_first_name# #qAgent.member_last_name##chr(10)##qAgent.member_title##chr(10)##qAgent.member_phone##chr(10)##qAgent.member_website#</cfsavecontent>
-				<cfscript>
-				tags=StructNew();
-				tags['{agent name}']=qAgent.member_first_name&' '&qAgent.member_last_name;
-				tags["{agent's company}"]=qAgent.member_company;
-				</cfscript>
-			<cfelse>
-				<cfset tags=structnew()>
-				<cfset signature="">
-			</cfif>
 			<cfsavecontent variable="db.sql"> SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# inquiries_lead_template
 			LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 			inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
@@ -466,6 +431,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			ORDER BY inquiries_lead_template_sort ASC, inquiries_lead_template_name ASC </cfsavecontent>
 			<cfscript>
 			qTemplate=db.execute("qTemplate");
+			tags=StructNew();
 			</cfscript>
 			<script type="text/javascript">
 			/* <![CDATA[ */
@@ -541,11 +507,26 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 						</tr>
 						<tr>
 							<td colspan="2">Change lead status:<br />
+
+								<cfscript> 
+								db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# inquiries_status 
+								WHERE inquiries_status_deleted = #db.param(0)# and 
+								inquiries_status_id <> #db.param(1)# 
+								ORDER BY inquiries_status_name ";
+								qInquiryStatus=db.execute("qInquiryStatus");
+								selectStruct = StructNew();
+								selectStruct.hideSelect=true;
+								selectStruct.name = "inquiries_status_id";
+								selectStruct.query = qInquiryStatus;
+								selectStruct.queryLabelField = "inquiries_status_name";
+								selectStruct.queryValueField = 'inquiries_status_id';
+								application.zcore.functions.zInputSelectBox(selectStruct); 
+								</cfscript>
 								<!--- <input type="radio" name="inquiries_status_id" value="1" class="input-plain" <cfif form.inquiries_status_id EQ 1>checked="checked"</cfif>>
 								New
 								<input type="radio" name="inquiries_status_id" value="2" class="input-plain" <!--- <cfif form.inquiries_status_id EQ 2>checked="checked"</cfif> --->>
 								Assigned --->
-								<div style="float:left; white-space:nowrap;">
+								<!--- <div style="float:left; white-space:nowrap;">
 									<input type="radio" name="inquiries_status_id" id="inquiries_status_id3" value="3" class="input-plain" <cfif form.inquiries_status_id EQ 2 or application.zcore.functions.zso(form, 'inquiries_status_id',false,3) EQ 3>checked="checked"</cfif>>
 									<label for="inquiries_status_id3">Contacted</label>
 								</div>
@@ -558,9 +539,13 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 									<label for="inquiries_status_id5">Closed with Sale</label>
 								</div>
 								<div style="float:left; white-space:nowrap;">
+									<input type="radio" name="inquiries_status_id" id="inquiries_status_id8" value="8" class="input-plain"<cfif application.zcore.functions.zso(form, 'inquiries_status_id') EQ 8>checked="checked"</cfif>>
+									<label for="inquiries_status_id8">Closed as Service Request</label>
+								</div> 
+								<div style="float:left; white-space:nowrap;">
 									<input type="radio" name="inquiries_status_id" id="inquiries_status_id7" value="7" class="input-plain"<cfif application.zcore.functions.zso(form, 'inquiries_status_id') EQ 7>checked="checked"</cfif>>
 									<label for="inquiries_status_id7">Spam/Fake</label>
-								</div>
+								</div> --->
 							</td>
 						</tr>
 						<tr>

@@ -1981,24 +1981,34 @@ this.app_id=10;
 			if(description EQ ""){
 				description=qArticle.blog_metadesc;
 			}	
-			ts =structnew();
-			ts.image_library_id=qArticle.blog_image_library_id;
-			ts.size="1200x630";
-			ts.crop=0; 
-			ts.offset=0; 
-			ts.output=false; 
-			ts.limit=1; 
-			ts.layoutType='';
-			arrImage=application.zcore.imageLibraryCom.displayImages(ts); 
+			if(qArticle.blog_og_image NEQ ""){
+				ogImage="/zupload/blog/"&qArticle.blog_og_image;
+			}else{
+				ts =structnew();
+				ts.image_library_id=qArticle.blog_image_library_id;
+				ts.size="2048x1070";
+				ts.crop=0; 
+				ts.offset=0; 
+				ts.pregenerate=true;
+				ts.output=false; 
+				ts.limit=1; 
+				ts.layoutType='';
+				arrImage=application.zcore.imageLibraryCom.displayImages(ts); 
+				if(arrayLen(arrImage) NEQ 0){
+					ogImage=arrImage[1].link;
+				}else{
+					ogImage="";
+				}
+			}
 			</cfscript>
 		<cfsavecontent variable="tempMeta">
 			<cfif qArticle.blog_metakey NEQ ""><meta name="Keywords" content="#htmleditformat(qArticle.blog_metakey)#" /></cfif>
 			<meta name="Description" content="<cfif qArticle.blog_metadesc NEQ "">#htmleditformat(qArticle.blog_metadesc)#<cfelse>#htmleditformat(application.zcore.functions.zLimitStringLength(application.zcore.functions.zStripHTMLTags(qArticle.blog_story), 100))#</cfif>" />
 			<meta property="og:title" content="#htmleditformat(qArticle.blog_title)#"/>
-			<cfif arrayLen(arrImage)> 
-				<meta property="og:image" content="#request.zos.globals.domain&arrImage[1].link#"/>
+			<cfif ogImage NEQ ""> 
+				<meta property="og:image" content="#request.zos.globals.domain&ogImage#"/>
 				<cfif request.zos.globals.domain CONTAINS "https:"> 
-					<meta property="og:image:secure_url" content="#request.zos.globals.domain&arrImage[1].link#"/>
+					<meta property="og:image:secure_url" content="#request.zos.globals.domain&ogImage#"/>
 				</cfif>
 			</cfif>
 			<meta property="og:url" content="#request.zos.globals.domain&request.zos.originalURL#"/>
