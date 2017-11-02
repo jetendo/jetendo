@@ -158,7 +158,31 @@
 		return;
 	}
 	db=request.zos.queryObject; 
+
+	application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
+	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
+	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
+
 	</cfscript>
+
+	<script type="text/javascript">
+		zArrDeferredFunctions.push( function() {
+			$('##inquiries_cc').attr( 'multiple', 'multiple' );
+			$('##inquiries_cc').tokenize2( {
+				dataSource: '/z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
+				searchFromStart: false,
+				tokensAllowCustom: true
+			} );
+
+			$('##inquiries_bcc').attr( 'multiple', 'multiple' );
+			$('##inquiries_bcc').tokenize2( {
+				dataSource: '/z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
+				searchFromStart: false,
+				tokensAllowCustom: true
+			} );
+		} );
+	</script>
+
 	<div class="z-manager-edit-head">
 		<h2 style="display:inline;font-weight:normal; color:##369;">Send Email</h2> &nbsp;&nbsp; 
 		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator")> 
@@ -326,13 +350,73 @@
 					<!--- probably lock this to the selected contact instead --->
 					<!--- <input name="inquiries_to" id="inquiries_to" type="text" size="50" maxlength="50" value="#htmleditformat(form.inquiries_to)#" > ---></td>
 			</tr>
+				<cfscript>
+					// The selected options are pulled from the inquiries_x_contact table
+					// inquiries_x_contact_type = cc or bcc respectively
+
+					db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, contact.contact_first_name, contact.contact_last_name
+						FROM #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# AS inquiries_x_contact,
+							#db.table( 'contact', request.zos.zcoreDatasource )# AS contact
+						WHERE inquiries_x_contact.site_id = #db.param( request.zos.globals.id )#
+							AND inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
+							AND contact.contact_id = inquiries_x_contact.contact_id
+							AND contact.site_id = inquiries_x_contact.site_id
+							AND contact.contact_deleted = #db.param( 0 )#
+						ORDER BY contact.contact_email ASC';
+					qContact = db.execute( 'qContact' );
+
+					ccArray = [];
+					bccArray = [];
+
+					if ( qContact.recordcount GT 0 ) {
+						for ( row in qContact ) {
+							if ( row.inquiries_x_contact_type EQ 'cc' ) {
+								arrayAppend( ccArray, row );
+							} else if ( row.inquiries_x_contact_type EQ 'bcc' ) {
+								arrayAppend( bccArray, row );
+							}
+						}
+					}
+				</cfscript>
 			<tr>
 				<th>Cc:</th>
-				<td><input name="inquiries_cc" id="inquiries_cc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_cc)#" ></td>
+				<td>
+					<!--- <input name="inquiries_cc" id="inquiries_cc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_cc)#" > --->
+					<select id="inquiries_cc" name="inquiries_cc" multiple="multiple">
+						<cfloop from="1" to="#arrayLen( ccArray )#" index="ccItemIndex">
+							<cfscript>ccItem = ccArray[ ccItemIndex ];</cfscript>
+							<cfif ccItem.contact_first_name NEQ ''>
+								<cfif ccItem.contact_last_name NEQ ''>
+									<option value="#ccItem.contact_id#" selected="selected">#ccItem.contact_first_name# #ccItem.contact_last_name# (#ccItem.contact_email#)</option>
+								<cfelse>
+									<option value="#ccItem.contact_id#" selected="selected">#ccItem.contact_first_name# (#ccItem.contact_email#)</option>
+								</cfif>
+							<cfelse>
+								<option value="#ccItem.contact_id#" selected="selected">(#ccItem.contact_email#)</option>
+							</cfif>
+						</cfloop>
+					</select>
+				</td>
 			</tr>
 			<tr>
 				<th>Bcc:</th>
-				<td><input name="inquiries_bcc" id="inquiries_bcc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_bcc)#" ></td>
+				<td>
+					<!--- <input name="inquiries_bcc" id="inquiries_bcc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_bcc)#" > --->
+					<select id="inquiries_bcc" name="inquiries_bcc" multiple="multiple">
+						<cfloop from="1" to="#arrayLen( bccArray )#" index="bccItemIndex">
+							<cfscript>bccItem = bccArray[ bccItemIndex ];</cfscript>
+							<cfif bccItem.contact_first_name NEQ ''>
+								<cfif bccItem.contact_last_name NEQ ''>
+									<option value="#bccItem.contact_id#" selected="selected">#bccItem.contact_first_name# #bccItem.contact_last_name# (#bccItem.contact_email#)</option>
+								<cfelse>
+									<option value="#bccItem.contact_id#" selected="selected">#bccItem.contact_first_name# (#bccItem.contact_email#)</option>
+								</cfif>
+							<cfelse>
+								<option value="#bccItem.contact_id#" selected="selected">(#bccItem.contact_email#)</option>
+							</cfif>
+						</cfloop>
+					</select>
+				</td>
 			</tr>
 			<tr>
 				<th>Subject:</th>

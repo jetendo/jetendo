@@ -44,6 +44,7 @@
 
 .tokenize > .tokens-container > .token-search {
 	margin: 0;
+	overflow: hidden;
 }
 .tokenize > .tokens-container > .token-search > input {
 	border: 0;
