@@ -579,7 +579,7 @@
 				<cfif currentMethod EQ "userView">
 					<div class="z-manager-button-container">
 						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
-							<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 1000, 600); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
+							<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
 						</cfif>
 						<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
 							<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a> 
@@ -596,7 +596,7 @@
 					</cfif> 
 					<div class="z-manager-button-container">
 						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
-							<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 1000, 600); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
+							<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
 						</cfif>
 						<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a>
 					</div>

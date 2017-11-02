@@ -305,7 +305,7 @@
 	</script>
 
 	<div class="z-manager-edit-head">
-		<h2 style="display:inline;font-weight:normal; color:##369;">Send Email</h2> &nbsp;&nbsp; 
+		<h2 style="display:inline;font-weight:normal; color:##369;">New Message</h2> &nbsp;&nbsp; 
 		<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
 		<cfif application.zcore.user.checkGroupAccess("administrator")> 
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
@@ -487,11 +487,15 @@
 	}
 	/* ]]> */
 	</script>
+	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
+		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
+		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
 	<table class="table-list" style="width:100%; ">
-		<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
-			<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
-			<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
+			<tr>
+				<td colspan="2"><button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:140%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button></td>
+			</tr>
 			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
 				<tr>
 					<th colspan="2"> Select a template or fill in the following fields:</th>
@@ -555,24 +559,19 @@
 			<tr>
 				<th>Message:</th>
 				<td>
-					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:200px; ">#htmleditformat(form.inquiries_message)#</textarea></td>
+					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:50px; ">#htmleditformat(form.inquiries_message)#</textarea></td>
 			</tr>
-			<tr>
-				<th>&nbsp;</th>
-				<td><button type="submit" name="submitForm" class="z-manager-search-button">Send Email</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button></td>
-			</tr>
-		</form>
-	</table>
+		</table>
+	</form>
 
 	<script type="text/javascript">
 	zArrDeferredFunctions.push(function(){ 
 		tinymce.init({
-		  selector: '##inquiries_message',
-		  height: 300,
+		  selector: '##inquiries_message', 
 		  menubar: false,
+		  autoresize_min_height: 100,
 		  plugins: [
-		    'advlist autolink lists link image charmap print preview anchor textcolor',
+		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
 		    'searchreplace visualblocks code fullscreen',
 		    'insertdatetime media table contextmenu paste code'
 		  ],
