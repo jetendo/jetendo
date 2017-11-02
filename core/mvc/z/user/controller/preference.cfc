@@ -219,6 +219,10 @@
 	this.init();
 	form.submitPref=application.zcore.functions.zso(form, 'submitPref',false,'Update Communication Preferences');
 	form.returnurl=application.zcore.functions.zso(form, 'returnurl');
+
+
+	// secure the member_signature html, and limit which tags are allowed.
+	form.member_signature=application.zcore.email.cleanHTML(form.member_signature);
 	
 	form.user_password=trim(replace(application.zcore.functions.zso(form, 'user_password'),chr(160),"","all"));
 	if(trim(form.user_password) EQ ''){
@@ -812,9 +816,7 @@ If the link does not work, please copy and paste the entire link in your browser
 		<hr />
 		<br />
 	</cfif>
-	<cfif application.zcore.user.checkGroupAccess("member")>
-		<span style="font-size:130%; ">Navigation Options: <a href="/member/">Site Manager</a> | <a href="/">Home Page</a></span><br /><br />
-	</cfif>
+	
 	<form class="zFormCheckDirty" name="defineContact" action="/z/user/preference/update?e=#urlencodedformat(form.e)#&amp;k=#urlencodedformat(form.k)#&amp;modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#" method="post">
 		<div style=" width:100%; float:left;">
 		<cfif structkeyexists(form, 'custommarketingmessage')>
@@ -844,7 +846,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			</cfsavecontent>
 		</cfif>
 		<cfif variables.qcheckemail.recordcount eq 0 and form.user_password EQ ''>
-			<div style="float:left; padding-right:20px;width:50%;">
+			<div class="z-user-preference-left">
 			<p style="font-size:130%; font-weight:bold;">Your Personal Information</p>
 			<cfset local.hideAllPrefFields=false>
 		<cfelseif openIdCom.isAdminChangeAllowed() EQ false>
@@ -852,7 +854,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			<div style="float:left; padding-right:0px;width:100%;">
 			<cfset local.hideAllPrefFields=true>
 		<cfelse>
-			<div style="float:left; padding-right:20px;width:50%;">
+			<div class="z-user-preference-left">
 			<p style="font-size:130%; font-weight:bold;">Your Personal Information</p>
 			<cfset local.hideAllPrefFields=false>
 		</cfif>
@@ -883,7 +885,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			</div>
 			</div>
 			<div class="zmember-openid-buttons">
-				<button type="button" name="submitPref3" onclick="window.location.href='/z/user/preference/index?zlogout=1';" value="" style="font-size:120%; padding:5px; margin-bottom:5px;">Log out</button>
+				<button type="button" name="submitPref3" onclick="window.location.href='/z/user/preference/index?zlogout=1';" value="" style="font-size:120%; padding:5px; margin-bottom:5px;">Logout</button>
 			</div>
 			<cfif not openIdCom.isAdminChangeAllowed()>
 				<cfset local.hideAllPrefFields=true>
@@ -950,6 +952,30 @@ If the link does not work, please copy and paste the entire link in your browser
 					<td>Zip Code</td>
 					<td><input type="text" name="user_zip" style=" width:100%;" value="#htmleditformat(form.user_zip)#" /></td>
 				</tr>
+				<tr>
+					<td colspan="2">Email Signature&nbsp;<br>
+						<cfscript>
+						application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js");
+						</cfscript>
+						<textarea name="member_signature" id="member_signature" style="width:100%; height:200px; ">#htmleditformat(form.member_signature)#</textarea>
+						<script type="text/javascript">
+						zArrDeferredFunctions.push(function(){ 
+							tinymce.init({
+							  selector: '##member_signature',
+							  height: 300,
+							  menubar: false,
+							  plugins: [
+							    'advlist autolink lists link image charmap print preview anchor textcolor',
+							    'searchreplace visualblocks code fullscreen',
+							    'insertdatetime media table contextmenu paste code'
+							  ],
+							  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
+							  content_css: []
+							}); 
+						});
+						</script>
+					</td>
+				</tr>
 			</table>
 		</cfif>
 		<cfif local.hideAllPrefFields EQ false>
@@ -960,7 +986,7 @@ If the link does not work, please copy and paste the entire link in your browser
 				    </cfscript>
 			</cfif>
 			</div>
-			<div style="float:left; width:50%;">
+			<div class="z-user-preference-right">
 				<p style="font-size:130%; font-weight:bold;">How may we reach you?</p>
 				<table style="border-spacing:0px; width:98%;" class="zinquiry-form-table">
 					<tr>
@@ -1061,6 +1087,9 @@ If the link does not work, please copy and paste the entire link in your browser
 		</cfif>
 		</div>
 	</form>
+	<!--- <cfif application.zcore.user.checkGroupAccess("member")>
+		<div class="z-float" style="font-size:130%; "><a href="/member/">Site Manager</a> | <a href="/">Home Page</a></div>
+	</cfif> --->
 </cffunction>
 
 <cffunction name="newMemberWelcome" localmode="modern" access="remote">
@@ -1151,7 +1180,7 @@ If the link does not work, please copy and paste the entire link in your browser
 		<cfif application.zcore.user.checkGroupAccess("user")>
 			<div style="width:100%; float:left;">
 				<h2>You're already logged into another account.</h2>
-				<p>If you want to create a new account, please <a href="/z/user/preference/register?zlogout=1">click here to log out and register</a></p>
+				<p>If you want to create a new account, please <a href="/z/user/preference/register?zlogout=1">click here to logout and register</a></p>
 			</div>
 			</div>
 			<cfreturn>
@@ -1162,7 +1191,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			<h2>Sign in with OpenID</h2>
 			<p>Click the button to register with an existing account.</p>
 			<div style="width:100%; float:left;">
-				<div style="float:left; padding-right:20px;width:50%;">
+				<div class="z-user-preference-left">
 					<cfscript>
 					local.openIdCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.user.openid");
 					local.openIdCom.disableDeveloperLoginLinks();
@@ -1184,7 +1213,7 @@ If the link does not work, please copy and paste the entire link in your browser
 					}
 					</cfscript>
 				</div>
-				<div style="float:left;width:50%;">
+				<div class="z-user-preference-right">
 					<h3>About OpenID</h3>
 					<ul>
 						<li>Faster and can be more secure</li>
@@ -1198,7 +1227,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			</div>
 		</cfif>
 		<div style="width:100%;clear:both; float:left;border-top:1px dotted ##999; padding-top:10px;">
-			<div style="float:left; padding-right:20px;width:50%;">
+			<div class="z-user-preference-left">
 				<cfif request.zos.globals.disableOpenID EQ 0 or (request.zos.globals.parentID NEQ 0 and application.zcore.functions.zvar('disableOpenId', request.zos.globals.parentID) EQ 0)>
 					<div style="width:100%; float:left;">If you don't have one of the above accounts:</div>
 				</cfif>
@@ -1220,7 +1249,7 @@ If the link does not work, please copy and paste the entire link in your browser
 					</div>
 				</div>
 			</div>
-			<div style="float:left; padding-top:20px;width:40%;">
+			<div class="z-user-preference-right">
 				<div style="width:100%; float:left; margin-bottom:0px; padding-bottom:5px;"><strong>Password Stength</strong></div>
 				<div style="width:100%; float:left;">
 					<div id="scorebarBorder">

@@ -12,8 +12,7 @@
 	db=request.zos.queryObject;
 	if(not application.zcore.user.checkGroupAccess("user")){
 		application.zcore.functions.zRedirect("/z/user/preference/index");
-	}
-	application.zcore.functions.zStatusHandler(request.zsid);
+	} 
 	form.redirectOnLogin=application.zcore.functions.zso(form, 'redirectOnLogin');
 	if(form.redirectOnLogin NEQ "" and form.redirectOnLogin DOES NOT CONTAIN "redirectOnLogin"){
 		application.zcore.functions.zRedirect(form.redirectOnLogin);
@@ -109,7 +108,7 @@
 			<li><a href="/z/listing/property/your-saved-searches">Your Saved Searches</a></li>
 			<li><a href="/z/listing/sl/view">Your Saved Listings</a></li>
 		</cfif>
-		<li><a href="/z/user/preference/index?zlogout=1">Log Out</a></li>
+		<li><a href="/z/user/preference/index?zlogout=1">Logout</a></li>
 		</ul>
 		</div>
 	</div>

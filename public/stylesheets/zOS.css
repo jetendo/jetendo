@@ -961,12 +961,18 @@ a.z-manager-assign:hover span{ color:#369;}
 .z-manager-search-field-form{float:left; }
 
 
+.z-user-preference-left{float:left; padding-right:20px;width:50%;  min-width:300px;}
+.z-user-preference-right{float:left; width:50%;  min-width:300px;}
+
 @media (max-width:1362px){
 	.z-manager-quick-menu-side-links{ padding-top:5px;}
 }
 
 @media (max-width:992px){
-.z-inquiry-note-box{border:none; padding-left:0px; float:left;}
+
+	.z-user-preference-left{width:100%; padding-right:0px;}
+	.z-user-preference-right{width:100%;}
+	.z-inquiry-note-box{border:none; padding-left:0px; float:left;}
 	.zcontent-subpage-div{display:block; float:left; width:100%;margin-bottom:20px; }
 	.zcontent-imagethumbwidth{width:30% !important; min-width:150px; float:left; display:block;}
 	.z-content-text-div{vertical-align:top; width:70% !important; max-width:100% !important; display:block; float:left;}

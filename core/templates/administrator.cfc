@@ -237,8 +237,9 @@
 					{link:"/z/admin/admin-home/index", label:"Site Manager"},
 					{link:"/z/server-manager/admin/site-select/index?action=select&sid=#request.zos.globals.id#", label:"Edit This Site"}
 				];
-			}
-			arrayAppend(ts.arrLink, {link:"/z/admin/admin-home/index?zlogout=1", label:"Log Out"});
+			} 
+			arrayAppend(ts.arrLink, {link:"/z/user/preference/form", label:"Profile"});
+			arrayAppend(ts.arrLink, {link:"/z/admin/admin-home/index?zlogout=1", label:"Logout"});
 			echo('<div class="z-manager-mobile-menu">');
 				request.managerMobileHeaderCom.displayMobileMenu(ts);
 			echo('</div>');
@@ -287,8 +288,9 @@
 					<div style="min-width:200px; width:50%; padding:0.5%; text-align:right;float:right;">
 
 
-						<div style="width:70px; float:right;" class="zapp-shell-logout">
-						<a href="/z/admin/admin-home/index?zlogout=1">Log Off</a>
+						<div style="width:140px; float:right;" class="zapp-shell-logout">
+							<a href="/z/user/preference/form" title="Click here to edit your profile">Profile</a>
+							<a href="/z/admin/admin-home/index?zlogout=1">Logout</a>
 						</div>
 							<cfscript>
 							if(request.zos.isDeveloper and request.zsession.user.site_id EQ request.zos.globals.serverId and application.zcore.user.checkServerAccess()){

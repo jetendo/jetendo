@@ -306,8 +306,8 @@
 
 	<div class="z-manager-edit-head">
 		<h2 style="display:inline;font-weight:normal; color:##369;">Send Email</h2> &nbsp;&nbsp; 
+		<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
 		<cfif application.zcore.user.checkGroupAccess("administrator")> 
-			<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
 			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
 		</cfif>
