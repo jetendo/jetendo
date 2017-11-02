@@ -1,5 +1,9 @@
 <cfcomponent>
 <cfoutput>
+<!--- 
+
+// TODO: possibly support file attachments someday.  We would need to protect it slightly from abuse through size and file type filters.
+ --->
 
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript>
@@ -8,6 +12,8 @@
 	// decided i shouldn't call init
 	//feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
 	//feedbackCom.init();
+
+
 
 	form.contact_id=application.zcore.functions.zso(form, 'contact_id');
 	form.inquiries_from=application.zcore.functions.zso(form, 'inquiries_from');
@@ -74,20 +80,9 @@
 	qCheck=0;
 	result=0;
 	inputStruct=0;
-	q=0;  
-	//form.leadEmailUseSubmission=true;
-	// form validation struct
-	myForm.inquiries_id.required = true;
-	myForm.inquiries_id.friendlyName = "Inquiry ID";
-	// i removed these fields.
-	myForm.inquiries_from.required = true;
-	myForm.inquiries_from.email=true;
-	myForm.inquiries_to.required = true;
-	myForm.inquiries_to.email=true; 
-	myForm.inquiries_subject.required = true;
-	myForm.inquiries_subject.allownull = false;
-	myForm.inquiries_message.required = true;
-	myForm.inquiries_feedback_datetime.createDateTime = true;
+	q=0;   
+	myForm.inquiries_subject.required = true; 
+	myForm.inquiries_message.required = true; 
 	result = application.zcore.functions.zValidateStruct(form, myForm, request.zsid,true);
 	if(result){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true);
@@ -102,6 +97,13 @@
 	form.inquiries_feedback_bcc=form.inquiries_bcc;
 	form.inquiries_feedback_subject=form.inquiries_subject;
 	form.inquiries_feedback_comments=form.inquiries_message;
+	form.inquiries_feedback_type=2;
+	form.inquiries_feedback_deleted=0;
+	form.inquiries_feedback_datetime=request.zos.mysqlnow;
+	form.inquiries_feedback_created_datetime=request.zos.mysqlnow;
+	form.inquiries_feedback_updated_datetime=request.zos.mysqlnow;
+	form.user_id=request.zsession.user.id;
+	form.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
  
 	writedump(form);
 	if(form.inquiries_id EQ 0){
@@ -115,8 +117,8 @@
 			inquiries_type_id:19, // type: Email
 			inquiries_type_id_siteIdType:4, 
 
-			user_id:request.zsession.user.id,
-			user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id), 
+			user_id:form.user_id,
+			user_id_siteidtype:form.user_id_siteidtype, 
 
 			inquiries_email:form.inquiries_feedback_to,
 			inquiries_status_id:3,
@@ -132,7 +134,12 @@
 		}
 		writedump(ts);
 		abort;
-		inquiries_id=application.zcore.functions.zImportLead(ts); 
+		form.inquiries_id=application.zcore.functions.zImportLead(ts); 
+
+		if(form.inquiries_id EQ false){
+			application.zcore.status.setStatus(request.zsid, "Failed to send email. Please try again later.", form, true);
+			application.zcore.status.displayReturnJson(request.zsid);
+		}
 	}
 	abort;
 	inputStruct = StructNew();
@@ -147,7 +154,12 @@
 	/*mail to="#form.inquiries_to#" from="#form.inquiries_from#" bcc="#form.inquiries_bcc#" subject="#form.inquiries_subject#"{
 		writeoutput(form.inquiries_message);
 	}*/
-	application.zcore.functions.zReturnJson({success:true});
+	application.zcore.status.setStatus(request.zsid, "Email sent");
+	if(application.zcore.user.checkGroupAccess("member")){
+		application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink:"/z/inquiries/admin/manage-inquiries/index?zsid=#request.zsid#"});
+	}else{
+		application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink:"/z/inquiries/admin/manage-inquiries/userIndex?zsid=#request.zsid#"});
+	}
 	</cfscript>
 </cffunction> 
 
@@ -161,12 +173,13 @@
 	</cfscript>
 	<div class="z-manager-edit-head">
 		<h2 style="display:inline;font-weight:normal; color:##369;">Send Email</h2> &nbsp;&nbsp; 
-		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator")> 
+		<cfif application.zcore.user.checkGroupAccess("administrator")> 
 			<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
 			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
 		</cfif>
 	</div> 
+	<div class="z-manager-edit-errors z-float"></div>
 	<cfscript>
 	tags=StructNew(); 
 	signature="";
@@ -291,7 +304,7 @@
 	/* ]]> */
 	</script>
 	<table class="table-list" style="width:100%; ">
-		<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/feedback/sendemail?inquiries_id=#form.inquiries_id#" method="post">
+		<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/feedback/sendemail?inquiries_id=#form.inquiries_id#" method="post" enctype="multipart/form-data" onsubmit="return zSubmitManagerEditForm(this); ">
 			<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
 			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
 				<tr>
@@ -335,11 +348,11 @@
 				<td><input name="inquiries_bcc" id="inquiries_bcc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_bcc)#" ></td>
 			</tr>
 			<tr>
-				<th>Subject:</th>
+				<th>Subject: *</th>
 				<td><input name="inquiries_subject" id="inquiries_subject" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_subject)#" /></td>
 			</tr>
 			<tr>
-				<th>Message:</th>
+				<th>Message: *</th>
 				<td>
 					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:200px; ">#htmleditformat(form.inquiries_message)#</textarea></td>
 			</tr>
@@ -350,7 +363,7 @@
 			</tr>
 		</form>
 	</table>
-	<script type="text/javascript">
+	<!--- <script type="text/javascript">
 	zArrDeferredFunctions.push(function(){
 		function processSendEmailResponse(r){
 			var r=JSON.parse(r);
@@ -378,7 +391,7 @@
 			sendEmail();
 		});
 	});
-	</script>
+	</script> --->
 	<script type="text/javascript">
 	/* <![CDATA[ */<cfif application.zcore.functions.zso(form, 'leadEmailUseSubmission') EQ ''>
 	updateEmailForm('');
