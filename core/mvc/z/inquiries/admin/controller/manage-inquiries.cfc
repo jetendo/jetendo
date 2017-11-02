@@ -1733,5 +1733,34 @@
 	</cfscript> 
 </cffunction>	
 
+<cffunction name="inquiryTokenSearch" localmode="modern" access="remote">
+	<cfscript>
+		form.search = application.zcore.functions.zso( form, 'search' );
+		form.start = application.zcore.functions.zso( form, 'start', true, 0 );
+
+		var db = request.zos.queryObject;
+
+		userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+		db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
+		WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+		user_deleted = #db.param(0)# and
+		user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# and (user_server_administrator=#db.param(0)# )
+		ORDER BY member_first_name ASC, member_last_name ASC ";
+		qAgents=db.execute("qAgents");
+
+		response = [];
+
+		for ( row in qAgents ) {
+			matches = reMatchNoCase( ( form.start ? '^' : '' ) & form.search, row.user_email );
+			if ( arrayLen( matches ) GT 0 ) {
+				arrayAppend( response, { text: row.user_email, value: row.user_email } );
+			}
+		}
+
+		echo( serializeJSON( response ) );
+		abort;
+	</cfscript>
+</cffunction>
+
 </cfoutput>
 </cfcomponent>
