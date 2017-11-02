@@ -109,6 +109,7 @@ application.zcore.functions.zInsertLead();
 	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
 	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
+	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
 	form.site_id = request.zOS.globals.id;
 	form.inquiries_primary=1;
 
@@ -161,6 +162,7 @@ application.zcore.functions.zImportLead(ts); --->
 	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
 	ss.site_id = request.zOS.globals.id;
 	ss.inquiries_primary=1;
+	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
