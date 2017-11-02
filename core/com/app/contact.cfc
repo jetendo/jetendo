@@ -1018,7 +1018,7 @@ scheduleLeadEmail(ts);
 				contact_email:arguments.email,
 				contact_deleted:0,
 				contact_first_name:firstName,
-				contact_first_name:lastName,
+				contact_last_name:lastName,
 				contact_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
 				contact_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
 				contact_key:hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha-256'),

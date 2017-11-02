@@ -2327,6 +2327,19 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 		request.zos.retsPhotoPath=request.zos.currentHostName&'/zretsphotos/';
 	}
 	if(request.zos.allowRequestCFC){
+		totalTime=0;
+		while(true){
+			if(not structkeyexists(application.zcore, 'listingStruct')){
+				// wait a second to see if it exists then
+				sleep(500);
+				totalTime+=500;
+			}else{
+				break;
+			}
+			if(totalTime GT 5000){
+				throw("It took too long for the application to reload application.zcore.listingStruct");
+			}
+		}
 		request.zos["listing"]=application.zcore.listingStruct;
 		request.zos["listingApp"]=application.sitestruct[request.zos.globals.id].app.appCache[this.app_id];
 		request.zos["listingCom"]=this;
