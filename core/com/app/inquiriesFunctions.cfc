@@ -214,7 +214,7 @@
 
 
 
-	<cfscript>
+	<!--- <cfscript>
 		application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
 		application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
 		application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
@@ -233,14 +233,14 @@
 				searchFromStart: false
 			} );
 		} );
-	</script>
+	</script> --->
 
 	<span #tablestyle#>
 	<table #tablestyle# class="table-list">
 
 
 
-		<tr>
+		<!--- <tr>
 			<th style="#thstyle#">To:</th>
 			<td style="#tdstyle#">
 				<cfscript>
@@ -307,27 +307,9 @@
 				</select>
 
 				<button type="button" onclick="javascript:alert($('##feedback_to').val());">Test</button>
-
-<!---
-				<cfscript>
-					userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
-					db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
-					WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-					user_deleted = #db.param(0)# and
-					user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# and (user_server_administrator=#db.param(0)# )
-					ORDER BY member_first_name ASC, member_last_name ASC ";
-					qAgents=db.execute("qAgents");
-					selectStruct = StructNew();
-					selectStruct.name = "feedback_cc";
-					selectStruct.query = qAgents;
-					selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-					selectStruct.queryParseLabelVars = true;
-					selectStruct.queryValueField = 'user_id';
-					application.zcore.functions.zInputSelectBox(selectStruct);
-				</cfscript>
---->
+ 
 			</td>
-		</tr>
+		</tr> --->
 
 
 

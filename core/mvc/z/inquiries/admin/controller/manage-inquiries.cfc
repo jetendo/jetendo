@@ -561,18 +561,29 @@
 		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid="&request.zsid);
 	}
 	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin"); 
+
+
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	if(qInquiry.inquiries_email NEQ ""){
+		contact = contactCom.getContactByEmail(qInquiry.inquiries_email, qInquiry.inquiries_first_name&" "&qInquiry.inquiries_last_name, request.zos.globals.id);
+	}
 	</cfscript>
 	<p><a href="/z/inquiries/admin/manage-inquiries/<cfif currentMethod EQ "userView">userIndex<cfelse>index</cfif>">Leads</a> /</p>
 	
 	<cfloop query="qinquiry">
 		<div class="z-float  z-mb-10">
 			<div class="z-float-left">
-				<h2 style="display:inline;">Lead Details</h2>
+				<h2 style="display:inline;">Lead</h2>
 			</div>
 			<div class="z-float-left z-pt-10">
-				<cfif currentMethod EQ "userView" and application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) NEQ "">
+				<cfif currentMethod EQ "userView">
 					<div class="z-manager-button-container">
-						<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a> 
+						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+							<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 1000, 600); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
+						</cfif>
+						<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
+							<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a> 
+						</cfif>
 					</div>
 				<cfelseif currentMethod EQ "view">
 			
@@ -584,6 +595,9 @@
 						</div> --->
 					</cfif> 
 					<div class="z-manager-button-container">
+						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+							<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 1000, 600); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
+						</cfif>
 						<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a>
 					</div>
 					<!--- <cfif qinquiry.inquiries_reservation EQ 1>
@@ -1731,36 +1745,50 @@
 	}
 	arrayAppend(columns, {field: field, class:"z-manager-admin", style:"width:200px; max-width:100%;"});
 	</cfscript> 
-</cffunction>	
+</cffunction>
 
-<cffunction name="inquiryTokenSearch" localmode="modern" access="remote">
+<cffunction name="userInquiryTokenSearch" localmode="modern" access="remote" roles="user">
 	<cfscript>
-		form.search = application.zcore.functions.zso( form, 'search' );
-		form.start = application.zcore.functions.zso( form, 'start', true, 0 );
-
-		var db = request.zos.queryObject;
-
-		userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
-		db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
-		WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-		user_deleted = #db.param(0)# and
-		user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# and (user_server_administrator=#db.param(0)# )
-		ORDER BY member_first_name ASC, member_last_name ASC ";
-		qAgents=db.execute("qAgents");
-
-		response = [];
-
-		for ( row in qAgents ) {
-			matches = reMatchNoCase( ( form.start ? '^' : '' ) & form.search, row.user_email );
-			if ( arrayLen( matches ) GT 0 ) {
-				arrayAppend( response, { text: row.user_email, value: row.user_email } );
-			}
-		}
-
-		echo( serializeJSON( response ) );
-		abort;
+	inquiryTokenSearch();
 	</cfscript>
 </cffunction>
+
+<!--- 
+this was a previous way to use tokenize server-side, but it is not used currently.  it would reduce the initial bandwidth, but increase server load for searching
+<cffunction name="inquiryTokenSearch" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	form.search = application.zcore.functions.zso( form, 'search' );
+	form.start = application.zcore.functions.zso( form, 'start', true, 0 );
+
+	var db = request.zos.queryObject;
+
+	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+	db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# 
+	WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+	user_deleted = #db.param(0)# and ";
+	if(form.start EQ 1){
+		db.sql&=" ( user_email like #db.param(form.search&"%")# or concat(user_first_name, #db.param(" ")#, user_last_name) like #db.param(form.search&"%")# ) ";
+	}else{
+		db.sql&=" concat(user_first_name, user_last_name, user_email) like #db.param("%"&form.search&"%")# ";
+	}
+	if(form.method EQ "userInquiryTokenSearch"){
+		// grab all the people in the offices this user has access to,  of if office disabled, only themselves.
+		//db.sql&=" user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# ";
+	}
+	db.sql&=" and (user_server_administrator=#db.param(0)# )
+	ORDER BY member_first_name ASC, member_last_name ASC ";
+	qAgents=db.execute("qAgents");
+
+	response = [];
+
+	for ( row in qAgents ) { 
+		arrayAppend( response, { text: row.user_email, value: row.user_email } ); 
+	}
+
+	echo( serializeJSON( response ) );
+	abort;
+	</cfscript>
+</cffunction> --->
 
 </cfoutput>
 </cfcomponent>

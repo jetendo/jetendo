@@ -1930,7 +1930,7 @@ var zLastAjaxVarName=""; */
 
 
 
-	function zSubmitManagerEditForm(obj){
+	function zSubmitManagerEditForm(obj, customCallback){
 		if(typeof tinyMCE != "undefined"){
 			tinyMCE.triggerSave();
 		}
@@ -1943,6 +1943,10 @@ var zLastAjaxVarName=""; */
 		tempObj.callback=function(r){ 
 			var r=JSON.parse(r);
 			if(r.success){
+				if(typeof customCallback != "undefined"){
+					customCallback(r);
+					return;
+				}
 				if(typeof r.redirect != "undefined" && r.redirect){
 					window.location.href=r.redirectLink;
 				}else{

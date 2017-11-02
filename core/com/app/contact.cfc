@@ -224,12 +224,10 @@ contactCom.updateContactEmail(oldEmail, newEmail, site_id);
 
 <!---  
 ts={ 
-	// contact_id or user_id is required
-	contact_id:"",
-	user_id:"",		
+	contact_id:"", // required
 	debug:false,
-	inquiries_id:"", 
-	validHash:true, 
+	inquiries_id:"", // required to exist
+	validHash:true,  
 	messageStruct:{}, // queue_pop struct
 	jsonStruct:{} // decoded json queue_pop_message_json
 };
@@ -573,11 +571,12 @@ contactCom.processMessage(ts);
  
 
 	// remove the person who sent the current message
-	structdelete(emailStruct, skipEmail);
-	if(debug){
-		echo('Removed sender email contact, #skipEmail#, from outgoing email<br>');
+	if(not request.zos.isTestServer){
+		structdelete(emailStruct, skipEmail);
+		if(debug){
+			echo('Removed sender email contact, #skipEmail#, from outgoing email<br>');
+		}
 	}
-
 
 
 	// loop all recipients
@@ -634,7 +633,7 @@ contactCom.processMessage(ts);
 			inquiries_feedback_message_json:serializeJSON(ss.jsonStruct),
 			inquiries_feedback_draft:0,
 			inquiries_feedback_download_key:hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha-256'),
-			inquiries_feedback_type:1 // 0 is note, 1 is external email, 2 is internal email
+			inquiries_feedback_type:1 // 0 is private note, 1 is email
 		}
 	} 
 
@@ -664,8 +663,9 @@ contactCom.processMessage(ts);
 			rs.subject=ss.jsonStruct.subject;
 			rs.from=typeStruct[i].email;
 			rs.to=typeStruct[i].originalEmail;
-
-			echo(rs.html&'<hr>');
+			if(debug){
+				echo(rs.html&'<hr>');
+			}
 			arrayAppend(arrEmail, rs);
 		}
 	} 
@@ -759,6 +759,9 @@ contactCom.processMessage(ts);
 	} else { 
 	}
 	*/
+	if(debug){
+		abort;
+	}
 	cs={
 		success:true
 	};

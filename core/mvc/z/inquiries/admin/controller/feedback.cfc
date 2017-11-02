@@ -398,8 +398,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 
 	application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
 	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
-	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
-
+	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );  
 	</cfscript>
 
 	<div class="z-float">
@@ -598,8 +597,8 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 .z-feedback-old .z-feedback-message{display:none;}
 .z-feedback-old .z-feedback-attachments{display:none;}
 .z-feedback-show-message .z-feedback-attachments{display:block !important;}
-.z-feedback-show-message .z-feedback-message{display:block !important;}
-.z-feedback-show-message-button{ display:block; float:left; text-decoration:none; color:##369; width:100%; padding:5px; }
+.z-feedback-show-message .z-feedback-message{display:block !important; background-color:##FFF;border-bottom-left-radius:5px; border-bottom-right-radius:5px; }
+.z-feedback-show-message-button{ display:block; float:left; text-decoration:none; color:##369; background-color:##FFF; border-bottom-left-radius:5px; border-bottom-right-radius:5px; width:100%; padding:5px; }
 </style>
 <script type="text/javascript">
 function setupInquiriesFeedback(){
@@ -610,7 +609,9 @@ function setupInquiriesFeedback(){
 		}   
 		$(".z-feedback-container").addClass("z-feedback-show-message"); 
 		$(".z-feedback-show-all-button").parent().remove();
+		$(".z-feedback-show-message-button").remove();
 		$(this).hide();
+		resizeFrames();
 	});
 	$(".z-feedback-show-message-button").on("click", function(e){
 		e.preventDefault();
@@ -625,6 +626,7 @@ function setupInquiriesFeedback(){
 			$(this).parent().addClass("z-feedback-show-message");
 			$(this).hide();
 		} 
+		resizeFrames();
 	});
 	$(".z-feedback-delete-button").on("click", function(e){
 		e.preventDefault();
@@ -673,11 +675,13 @@ zArrDeferredFunctions.push(function(){
 		<h2>Emails &amp; Notes</h2>
 		<cfscript>  
 		showAllDisplayed=false;
+		readCount=0;
 		for(row in qFeedback){
 			echo('<div id="inquiriesFeedbackMessageId#row.inquiries_feedback_id#" class="z-feedback-container ');
 			
 			if(row.isRead EQ 1 and row.inquiries_feedback_id NEQ qFeedback.inquiries_feedback_id[1]){  
 				echo(' z-feedback-old ');
+				readCount++;
 			}else{
 				echo(' z-feedback-new ');
 			}
@@ -755,14 +759,12 @@ zArrDeferredFunctions.push(function(){
 						inquiries_feedback_x_user_deleted:0
 					}
 				};
-				application.zcore.functions.zInsert(ts); 
-			}else{
-				if(!showAllDisplayed and qFeedBack.recordcount GTE 1 and qFeedback.isRead EQ 1){
-					echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');
-				}
-				showAllDisplayed=true; 
+				application.zcore.functions.zInsert(ts);  
 			}
 		}
+		if(qFeedBack.recordcount GT 1 and qFeedback.recordcount NEQ readCount){
+			echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');
+		} 
 		</cfscript>
 		
 

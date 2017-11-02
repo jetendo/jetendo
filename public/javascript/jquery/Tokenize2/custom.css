@@ -1,7 +1,7 @@
 .tokenize {
 	border: 1px solid #AAAAAA;
 	background-color: #FFF;
-	font-size: 12px;
+	font-size: 14px;
 	color: #000000;
 	font-weight: normal;
 	font-family: Open Sans, Arial, Verdana, Helvetica, sans-serif;
@@ -38,6 +38,9 @@
 	display: block;
 	padding: 5px;
 }
+.tokenize-dropdown .dropdown-item a:hover{
+	color:#FFF !important;
+}
 .tokenize-dropdown .tokenize-highlight {
 	font-weight: bold;
 }
@@ -51,4 +54,10 @@
 }
 .tokenize > .tokens-container > .token {
 	margin: 0 2px;
+}
+
+@media screen and (max-width: 992px) {
+	.tokenize {
+	font-size: 16px;
+	}
 }

@@ -864,6 +864,13 @@ userCom.checkLogin(inputStruct);
 		// abort with login form
 		application.zcore.template.abort(overrideContent);
 	}
+	// how does a contact get associated with an office - does it matter at time of login?
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	contact = contactCom.getContactByEmail(qUser.user_email, qUser.user_first_name&" "&qUser.user_last_name, request.zos.globals.id);
+	if(structcount(contact) EQ 0){
+		throw("Failed to create contact for #qUser.user_id# - #qUser.user_email#.");
+	}
+	request.zsession[userSiteId].contact_id= contact.contact_id;
 	request.zsession[userSiteId].first_name = qUser.user_first_name;
 	request.zsession[userSiteId].last_name = qUser.user_last_name;
 	request.zsession[userSiteId].office_id = qUser.office_id;
@@ -888,7 +895,7 @@ userCom.checkLogin(inputStruct);
 	
 	// have to use query for other site group access
 	if(qUser.site_id NEQ request.zos.globals.id){
-		hasAllGroups=false
+		hasAllGroups=false;
 		if(request.zsession[userSiteId].server_administrator EQ 1 or request.zsession[userSiteId].site_administrator EQ 1 or (request.zsession[userSiteId].site_id NEQ ss.site_id and request.zsession[userSiteId].access_site_children EQ 1)){
 			hasAllGroups=true;
 		}
