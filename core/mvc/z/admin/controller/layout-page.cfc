@@ -227,7 +227,7 @@ D:\desktop\layout.ai
 
 <cffunction name="nav" localmode="modern" access="public" roles="member">
 	<cfscript>
-	sectionCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.section");
+	sectionCom=createobject("component", "zcorerootmapping.mvc.z.section.admin.controller.section-admin");
 	sectionCom.nav();
 	</cfscript> 
 

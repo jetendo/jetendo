@@ -825,7 +825,7 @@
  
 <cffunction name="instanceList" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	sectionCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.section");
+	sectionCom=createobject("component", "zcorerootmapping.mvc.z.section.admin.controller.section-admin");
 	sectionCom.nav();
 	db=request.zos.queryObject;
 	application.zcore.functions.zStatusHandler(request.zsid);
@@ -885,7 +885,7 @@
 
 <cffunction name="settingsInstance" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	sectionCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.section");
+	sectionCom=createobject("component", "zcorerootmapping.mvc.z.section.admin.controller.section-admin");
 	sectionCom.nav();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Layouts");	
 	application.zcore.functions.zStatusHandler(request.zsid);
@@ -924,7 +924,7 @@
 	
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	sectionCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.section");
+	sectionCom=createobject("component", "zcorerootmapping.mvc.z.section.admin.controller.section-admin");
 	sectionCom.nav();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Layouts");	
 	echo('<div style="width:100%; float:left; padding-left:5px; padding-right:5px;">');

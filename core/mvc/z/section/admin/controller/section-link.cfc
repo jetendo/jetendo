@@ -232,7 +232,7 @@
 	var db=request.zos.queryObject;  
 	for(row in ss.qData){
 		
-		childCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.section-link");
+		childCom=createobject("component", "zcorerootmapping.mvc.z.section.admin.controller.section-admin-link");
 
 		// select all children
 		db.sql="select * from #db.table("section_link", request.zos.zcoreDatasource)# 
