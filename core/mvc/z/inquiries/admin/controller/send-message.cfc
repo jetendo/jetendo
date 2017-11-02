@@ -37,13 +37,13 @@
 	form.inquiries_id=application.zcore.functions.zso(form, 'inquiries_id', true, 0);
 
 	variables.manageInquiryCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
+	if(form.method EQ "userSend" or form.method EQ "userIndex"){
+		variables.manageInquiryCom.userInit();
+	}
 
 	if(form.inquiries_id EQ 0){
 		// ok to add lead
 	}else{
-		if(form.method EQ "userSend"){
-			variables.manageInquiryCom.userInit();
-		}
 
 		// test if user has access to inquiries_id
 		db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)# 
@@ -114,48 +114,11 @@
 	 	writedump(request.zsession.user);
 		writedump(form);
 	}
-	if(form.inquiries_id EQ 0){
-		// store new inquiries_id with very basic information and no lead routing alerts.
-		ts={ 
-			inquiries_first_name:variables.contact.contact_first_name,
-			inquiries_last_name:variables.contact.contact_last_name,
-			inquiries_phone1:variables.contact.contact_phone1,
-			contact_id:form.contact_id,
-
-			inquiries_type_id:19, // type: Email
-			inquiries_type_id_siteIdType:4, 
-
-			user_id:form.user_id,
-			user_id_siteidtype:form.user_id_siteidtype, 
-
-			inquiries_email:variables.contact.contact_email,
-			inquiries_status_id:3,
-			inquiries_datetime:request.zos.mysqlnow,
-			inquiries_updated_datetime:request.zos.mysqlnow,
-			inquiries_primary:1,
-			site_id:request.zos.globals.id,
-			inquiries_priority:5
-		}; 
-		
-		if(structkeyexists(request.zsession, 'selectedOfficeId')){
-			ts.office_id = request.zsession.selectedOfficeId;
-		}
-		if(debug){
-			writedump(ts); 
-		}else{
-			form.inquiries_id=application.zcore.functions.zImportLead(ts); 
-
-			if(form.inquiries_id EQ false){
-				application.zcore.status.setStatus(request.zsid, "Failed to send email. Please try again later.", form, true);
-				application.zcore.status.displayReturnJson(request.zsid);
-			}
-		}
-	}
  
 	ts={  
 		contact_id:request.zsession.user.contact_id,  
 		debug:false,
-		inquiries_id:form.inquiries_id, 
+		inquiries_id:"", 
 		validHash:true, 
 		jsonStruct:{
 		   "headers":{
@@ -210,11 +173,12 @@
 		inquiries_cc:"cc",
 		inquiries_bcc:"bcc"
 	};
+	fail=false;
 	for(field in ts2){
 		if(form[field] NEQ ""){
 			arrTemp=listToArray(form[field], ",");
 			for(email in arrTemp){
-				arrEmail=listToArray(email, chr(9));
+				arrEmail=listToArray(email, "`");
 				ts3={
 					name:"",
 					plusId:""
@@ -225,15 +189,62 @@
 				}else{
 					ts3.email=email;
 				}
+				if(not application.zcore.functions.zEmailValidate(ts3.email)){
+					application.zcore.status.setStatus(request.zsid, '"#ts3.email#" is not a valid email address', form, true);
+					fail=true;
+				}
 				ts.originalEmail=email; 
 				arrayAppend(ts.jsonStruct[ts2[field]], ts3);
 			}
 		}
 	} 
+	if(fail){
+		application.zcore.status.displayReturnJson(request.zsid);
+	}
+	if(form.inquiries_id EQ 0){
+		// store new inquiries_id with very basic information and no lead routing alerts.
+		ts3={ 
+			inquiries_first_name:variables.contact.contact_first_name,
+			inquiries_last_name:variables.contact.contact_last_name,
+			inquiries_phone1:variables.contact.contact_phone1,
+			contact_id:form.contact_id,
+
+			inquiries_type_id:19, // type: Email
+			inquiries_type_id_siteIdType:4, 
+
+			user_id:form.user_id,
+			user_id_siteidtype:form.user_id_siteidtype, 
+
+			inquiries_email:variables.contact.contact_email,
+			inquiries_status_id:3,
+			inquiries_datetime:request.zos.mysqlnow,
+			inquiries_updated_datetime:request.zos.mysqlnow,
+			inquiries_primary:1,
+			site_id:request.zos.globals.id,
+			inquiries_priority:5
+		}; 
+		
+		if(structkeyexists(request.zsession, 'selectedOfficeId')){
+			ts3.office_id = request.zsession.selectedOfficeId;
+		}
+		if(debug){
+			writedump(ts3); 
+		}else{
+			form.inquiries_id=application.zcore.functions.zImportLead(ts3); 
+
+			if(form.inquiries_id EQ false){
+				application.zcore.status.setStatus(request.zsid, "Failed to send email. Please try again later.", form, true);
+				application.zcore.status.displayReturnJson(request.zsid);
+			}
+			ts.inquiries_id=form.inquiries_id
+		}
+	}
+
 	if(debug){
 		writedump(ts);
 		abort;
 	}
+
 	/*if(request.zos.isTestServer){
 		// modify to/cc/bcc to prevent accident emails to real people from test server
 		ts.jsonStruct.from.name="From Developer";
@@ -283,37 +294,7 @@
 	application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
 	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
 	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
-
-	</cfscript>
-
-	<script type="text/javascript">
-		zArrDeferredFunctions.push( function() {
-			$('##inquiries_cc').attr( 'multiple', 'multiple' );
-			$('##inquiries_cc').tokenize2( {
-				dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
-				searchFromStart: false,
-				tokensAllowCustom: true
-			} );
-
-			$('##inquiries_bcc').attr( 'multiple', 'multiple' );
-			$('##inquiries_bcc').tokenize2( {
-				dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
-				searchFromStart: false,
-				tokensAllowCustom: true
-			} );
-		} );
-	</script>
-
-	<div class="z-manager-edit-head">
-		<h2 style="display:inline;font-weight:normal; color:##369;">New Message</h2> &nbsp;&nbsp; 
-		<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
-		<cfif application.zcore.user.checkGroupAccess("administrator")> 
-			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
-			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
-		</cfif>
-	</div> 
-	<div class="z-manager-edit-errors z-float"></div>
-	<cfscript>
+ 
 	tags=StructNew(); 
 	signature="";
 	db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
@@ -367,24 +348,7 @@
 	}else{
 		tags=structnew();
 		signature="";
-	}
-	</cfscript> 
-	<script type="text/javascript">
-	/* <![CDATA[ */
-	var arrEmailTemplate=[];
-	var greeting="#JSStringFormat(trim('Hello '&application.zcore.functions.zFirstLetterCaps(variables.contact.contact_first_name))&',<br><br>')#";
-	<cfloop query="qTemplate">
-		<cfscript>
-		tm=qTemplate.inquiries_lead_template_message;
-		for(i in tags){
-			tm=replaceNoCase(tm,i,tags[i],'ALL');
-		}
-		</cfscript>
-		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#]={};
-		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#].subject="#jsstringformat(qTemplate.inquiries_lead_template_subject)#";
-		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#].message="#jsstringformat(tm)#";
-	</cfloop>
-	<cfscript>
+	}  
 	// TODO: might need to have some or all of the inquiry details in the reply someday.
 	originalMessage="";//inquiryHTML;
 	// remove admin comments
@@ -423,42 +387,74 @@
 		originalMessage="";
 	}
 
+
 	db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
-		FROM #db.table( 'contact', request.zos.zcoreDatasource )# 
+		FROM (#db.table( 'contact', request.zos.zcoreDatasource )#, 
+		#db.table("inquiries", request.zos.zcoreDatasource)#) 
 		LEFT JOIN #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# ON 
 			inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
 			AND contact.contact_id = inquiries_x_contact.contact_id
 			AND contact.site_id = inquiries_x_contact.site_id
 		WHERE
-		contact.site_id = #db.param( request.zos.globals.id )#
-		AND contact.contact_deleted = #db.param( 0 )#
+		inquiries.site_id = contact.site_id and 
+		inquiries.contact_id = contact.contact_id and 
+		inquiries_deleted=#db.param(0)# ';
+		if(form.method EQ "userIndex"){
+			db.sql&=variables.manageInquiryCom.getUserLeadFilterSQL(db); 
+		}else{
+			if(not application.zcore.user.checkGroupAccess("administrator")){
+				// has to be limited to leads assigned to this user only or other users who have member or higher access.
+				db.sql&=" and (inquiries.user_id = #db.param(request.zsession.user.id)# and inquiries.user_id_siteidtype=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# ";
+			}
+		}
+		db.sql&=' and contact.site_id = #db.param( request.zos.globals.id )#
+		AND contact.contact_deleted = #db.param( 0 )# 
+		GROUP BY contact.contact_id 
 		ORDER BY contact.contact_first_name ASC, contact.contact_last_name ASC, contact.contact_email ASC';
-	qContact = db.execute( 'qContact' );
-	/*
-	db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, contact.contact_first_name, contact.contact_last_name
-		FROM #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# AS inquiries_x_contact,
-			#db.table( 'contact', request.zos.zcoreDatasource )# AS contact
-		WHERE inquiries_x_contact.site_id = #db.param( request.zos.globals.id )#
-			AND inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
-			AND contact.contact_id = inquiries_x_contact.contact_id
-			AND contact.site_id = inquiries_x_contact.site_id
-			AND contact.contact_deleted = #db.param( 0 )#
-		ORDER BY contact.contact_email ASC';
-	qContact = db.execute( 'qContact' );
-	*/
+	qContact = db.execute( 'qContact' ); 
+
+	arrContactQuery=[qContact];
+
 	arrContact=[];
 	arrTo=[];
 	arrLabelTo=[];
+	if(application.zcore.user.checkGroupAccess("member")){
+		// do a second query to get the member and higher contacts (easier)
+		// need a list of the groups that have access to member
+		qUser=application.zcore.user.getUsersWithGroupAccess("member", false, true);
 
-	if ( qContact.recordcount GT 0 ) {
-		for ( row in qContact ) {
+		arrContactId=[];
+		for(row in qUser){
+			// TODO: fix inefficient loop of queries - unavoidable for now - need to add attribute to getUsersWithGroupAccess that will return contact record in left join
+			contact=variables.contactCom.getContactByEmail(row.user_email, row.user_first_name&" "&row.user_last_name, request.zos.globals.id);
+			arrayAppend(arrContactId, contact.contact_id); 
+		}
+		if(arrayLen(arrContactId) NEQ 0){
+		db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
+			FROM #db.table( 'contact', request.zos.zcoreDatasource )# 
+			LEFT JOIN #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# ON 
+				inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
+				AND contact.contact_id = inquiries_x_contact.contact_id
+				AND contact.site_id = inquiries_x_contact.site_id
+			WHERE 
+			contact.contact_id IN (#db.trustedSQL(arrayToList(arrContactId, ","))#) and 
+			contact.site_id = #db.param( request.zos.globals.id )#
+			AND contact.contact_deleted = #db.param( 0 )#
+			GROUP BY contact.contact_id 
+			ORDER BY contact.contact_first_name ASC, contact.contact_last_name ASC, contact.contact_email ASC';
+			qContactMember = db.execute( 'qContactMember' ); 
+			arrayAppend(arrContactQuery, qContactMember);
+		}
+ 	}
+ 	for(q in arrContactQuery){
+		for ( row in q ) {
 			if(row.fullName NEQ ''){
 				label=row.fullName&" <"&row.contact_email&">";
 			}else{
 				label=row.contact_email;
 			}
 			if(row.inquiries_x_contact_type EQ "to"){
-				arrayAppend(arrTo, row.fullName&chr(9)&row.contact_email);
+				arrayAppend(arrTo, replace(row.fullName, "`", "'", "all")&"`"&row.contact_email);
 				arrayAppend(arrLabelTo, label);
 			}
 			if(row.inquiries_x_contact_id NEQ ""){
@@ -467,13 +463,28 @@
 				arrayAppend(arrContact, {row:row, label:label, selected:false});
 			}
 		}
-	}
+	} 
 	if(form.method EQ "index"){
 		action="send";
 	}else{
 		action="userSend";
 	}
 	</cfscript>
+	<script type="text/javascript">
+	/* <![CDATA[ */
+	var arrEmailTemplate=[];
+	var greeting="#JSStringFormat(trim('Hello '&application.zcore.functions.zFirstLetterCaps(variables.contact.contact_first_name))&',<br><br>')#";
+	<cfloop query="qTemplate">
+		<cfscript>
+		tm=qTemplate.inquiries_lead_template_message;
+		for(i in tags){
+			tm=replaceNoCase(tm,i,tags[i],'ALL');
+		}
+		</cfscript>
+		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#]={};
+		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#].subject="#jsstringformat(qTemplate.inquiries_lead_template_subject)#";
+		arrEmailTemplate[#qTemplate.inquiries_lead_template_id#].message="#jsstringformat(tm)#";
+	</cfloop>
 	var originalMessage="#jsstringformat(originalMessage)#";
 	var signature="#jsstringformat('<br><br>--<br>#trim(signature)#')#";
 	function updateEmailForm(v){
@@ -487,15 +498,27 @@
 	}
 	/* ]]> */
 	</script>
+	<!--- <div class="z-manager-edit-head">
+		<h2 style="display:inline;font-weight:normal; color:##369;">New Message</h2>  
+		<cfif application.zcore.user.checkGroupAccess("administrator")> 
+			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
+			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
+		</cfif>
+	</div>  ---> 
 	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
 		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
 		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
-	<table class="table-list" style="width:100%; ">
-			<tr>
-				<td colspan="2"><button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:140%;">Send</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button></td>
-			</tr>
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+		</div> 
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+		</div> 
+		<div class="z-manager-edit-errors z-float"></div>
+		<table class="table-list z-index-1" style="width:100%; "> 
 			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
 				<tr>
 					<th colspan="2"> Select a template or fill in the following fields:</th>
@@ -532,7 +555,7 @@
 			</tr>
 			<tr>
 				<th>Cc:</th>
-				<td> 
+				<td class="inquiriesCCContainer"> 
 					<select id="inquiries_cc" name="inquiries_cc" multiple="multiple" style="display:none;">
 						<cfloop from="1" to="#arrayLen(arrContact)#" index="i">
 							<cfscript>item = arrContact[i];</cfscript>
@@ -543,7 +566,7 @@
 			</tr>
 			<tr>
 				<th>Bcc:</th>
-				<td> 
+				<td class="inquiriesBCCContainer"> 
 					<select id="inquiries_bcc" name="inquiries_bcc" multiple="multiple" style="display:none;">
 						<cfloop from="1" to="#arrayLen( arrContact )#" index="i">
 							<cfscript>item = arrContact[ i ];</cfscript>
@@ -559,13 +582,61 @@
 			<tr>
 				<th>Message:</th>
 				<td>
-					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:50px; ">#htmleditformat(form.inquiries_message)#</textarea></td>
+					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:50px; ">#htmleditformat(form.inquiries_message)#</textarea>
+
+					<div class="z-float z-pv-10">
+						<p>Note: You can edit your email signature in your profile. &nbsp;&nbsp;
+						<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank" title="Click here to edit your profile in a new window.">Edit Profile</a></p>
+					</div>
+				</td>
 			</tr>
 		</table>
+		
 	</form>
 
 	<script type="text/javascript">
-	zArrDeferredFunctions.push(function(){ 
+	zArrDeferredFunctions.push( function() {
+		$('##inquiries_cc, ##inquiries_bcc, ##inquiries_subject').keypress(function(e) { 
+			// detect ENTER key 
+			if (e.keyCode == 13) { 
+				e.stopImmediatePropagation();
+				e.preventDefault();
+				return false;
+			}
+		});
+		$('##inquiries_cc').attr( 'multiple', 'multiple' );
+		$('##inquiries_cc').tokenize2( {
+			dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
+			searchFromStart: false,
+			tokensAllowCustom: true
+		} );
+
+
+		$('##inquiries_bcc').attr( 'multiple', 'multiple' );
+		$('##inquiries_bcc').tokenize2( {
+			dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
+			searchFromStart: false,
+			tokensAllowCustom: true
+		} );
+
+		function forceSetEmail(obj, field){
+			if(obj.value != ""){
+				if(!zEmailValidate(obj.value)){
+					alert('"'+obj.value+'", is not a valid email address.');
+					return false;
+				}
+				$(field).trigger('tokenize:tokens:add', [obj.value, obj.value, true]);
+				obj.value="";
+			}
+			return true;
+		}
+
+		$(document).on("blur", ".inquiriesCCContainer .token-search input", function(){
+			forceSetEmail(this, "##inquiries_cc");
+		});
+		$(document).on("blur", ".inquiriesBCCContainer .token-search input", function(){
+			forceSetEmail(this, "##inquiries_bcc");
+		}); 
 		tinymce.init({
 		  selector: '##inquiries_message', 
 		  menubar: false,
@@ -583,8 +654,20 @@
 		}
 		$("##sendEmailForm").on("submit", function(e){
 			//e.preventDefault();
+			var valid=true;
+			var valid2=true;
+			var valid3=true;
+			$(".inquiriesCCContainer .token-search input").each(function(){
+				valid=forceSetEmail(this, "##inquiries_cc");
+			});
+			$(".inquiriesBCCContainer .token-search input").each(function(){
+				valid2=forceSetEmail(this, "##inquiries_bcc");
+			}); 
 			if($("##inquiries_subject").val()=="" || $("##inquiries_message").val()==""){
 				alert("Subject and message are required.");
+				valid3=false;
+			}
+			if(!valid || !valid2 || !valid3){
 				return false;
 			}
 			return zSubmitManagerEditForm(this, emailSentCallback); 

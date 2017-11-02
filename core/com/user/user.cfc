@@ -1682,6 +1682,7 @@ formString = userCom.loginForm(inputStruct);
 <cffunction name="getUsersWithGroupAccess" localmode="modern" access="public">
 	<cfargument name="user_group_name" type="string" required="no" default="user">
 	<cfargument name="excludeParentSite" type="boolean" required="no" default="#false#">
+	<cfargument name="includeContactId" type="boolean" required="no" default="#false#">
 	<cfscript> 
 	db=request.zos.queryObject;
 	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
@@ -1712,10 +1713,18 @@ formString = userCom.loginForm(inputStruct);
 	for(row in qGroup){
 		arrayAppend(arrGroup, row.user_group_id);
 	}
-	db.sql="SELECT * FROM  #db.table("user", request.zos.zcoreDatasource)#  
-	WHERE 
-	((user_group_id IN (#db.trustedSQL("'"&arrayToList(arrGroup, "','")&"'")#) and 
-	site_id = #db.param(request.zos.globals.id)#) ";
+	if(arguments.includeContactId){
+ 		db.sql="SELECT user.*, contact.contact_id FROM  ( #db.table("user", request.zos.zcoreDatasource)#, 
+ 			#db.table("contact", request.zos.zcoreDatasource)#)
+		WHERE user.user_username = contact.contact_email and 
+		contact.site_id = #db.param(request.zos.globals.id)# and 
+		contact_deleted=#db.param(0)# ";
+	}else{
+ 		db.sql="SELECT * FROM  #db.table("user", request.zos.zcoreDatasource)#  
+		WHERE ";
+	}
+	db.sql&=" ((user_group_id IN (#db.trustedSQL("'"&arrayToList(arrGroup, "','")&"'")#) and 
+	user.site_id = #db.param(request.zos.globals.id)#) ";
 	if(not arguments.excludeParentSite){
 		if(parentSiteId NEQ 0){
 			arrGroup=[];
@@ -1730,7 +1739,7 @@ formString = userCom.loginForm(inputStruct);
 	user_deleted = #db.param(0)# and   
 	user_server_administrator=#db.param(0)# 
 	ORDER BY user_first_name ASC, user_last_name ASC, member_company ASC";
-	qUser=db.execute("qUser"); 
+	qUser=db.execute("qUser");  
 	return qUser;
 	</cfscript>
 </cffunction>
