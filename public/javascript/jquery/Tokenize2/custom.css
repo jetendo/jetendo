@@ -1,0 +1,54 @@
+.tokenize {
+	border: 1px solid #AAAAAA;
+	background-color: #FFF;
+	font-size: 12px;
+	color: #000000;
+	font-weight: normal;
+	font-family: Open Sans, Arial, Verdana, Helvetica, sans-serif;
+	padding: 2px;
+	max-width: 100%;
+}
+
+.tokenize > .tokens-container {
+	padding: 0;
+	min-height: 0;
+}
+
+.tokenize-dropdown {
+	background-color: #FFF;
+	border: 1px solid #AAAAAA;
+}
+.tokenize-dropdown .dropdown-menu {
+	list-style: none;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+.tokenize-dropdown .dropdown-item {
+	list-style: none;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+.tokenize-dropdown .dropdown-item.active {
+	background-color: #336699;
+	color: #FFFFFF;
+}
+.tokenize-dropdown .dropdown-item a {
+	display: block;
+	padding: 5px;
+}
+.tokenize-dropdown .tokenize-highlight {
+	font-weight: bold;
+}
+
+.tokenize > .tokens-container > .token-search {
+	margin: 0;
+	overflow: hidden;
+}
+.tokenize > .tokens-container > .token-search > input {
+	border: 0;
+}
+.tokenize > .tokens-container > .token {
+	margin: 0 2px;
+}

@@ -395,6 +395,11 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	}
 	application.zcore.functions.zQueryToStruct(qInquiry, form);
 	application.zcore.functions.zStatusHandler(request.zsid,true);
+
+	application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
+	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
+	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
+
 	</cfscript>
 
 	<div class="z-float">
