@@ -159,11 +159,12 @@
 	}
 	db=request.zos.queryObject; 
 	</cfscript>
-	<div class="z-float z-mb-10">
-		<h2 style="display:inline;">Send Email</h2> &nbsp;&nbsp; 
+	<div class="z-manager-edit-head">
+		<h2 style="display:inline;font-weight:normal; color:##369;">Send Email</h2> &nbsp;&nbsp; 
 		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator")> 
+			<a href="/z/user/preference/form" class="z-manager-search-button" target="_blank">Edit Signature</a> 
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
-			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Email Template</a> 
+			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
 		</cfif>
 	</div> 
 	<cfscript>
@@ -171,10 +172,9 @@
 	signature="";
 	db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
 	WHERE user_id = #db.param(request.zsession.user.id)# and 
-	#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL("user", request.zos.globals.id))# and 
-	user_server_administrator=#db.param('0')# and 
+	site_id=#db.param(request.zsession.user.site_id)# and	 
 	user_deleted = #db.param(0)# ";
-	qAgent=db.execute("qAgent");
+	qAgent=db.execute("qAgent"); 
 
 	db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# 
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
@@ -197,7 +197,7 @@
 			if(qAgent.member_signature NEQ ""){
 				echo(qAgent.member_signature);
 			}else{
-				echo('#qAgent.user_first_name# #qAgent.user_last_name##chr(10)#');
+				echo('#request.zsession.user.first_name# #request.zsession.user.last_name##chr(10)#');
 				if(qAgent.member_title NEQ ""){
 					echo('#qAgent.member_title##chr(10)#');
 				}
@@ -207,8 +207,8 @@
 				if(qAgent.member_phone NEQ ""){
 					echo('#qAgent.member_phone##chr(10)#');
 				}
-				if(qAgent.user_email NEQ ""){
-					echo('#qAgent.user_email##chr(10)#');
+				if(request.zsession.user.email NEQ ""){
+					echo('#request.zsession.user.email##chr(10)#');
 				}
 				if(qAgent.member_website NEQ ""){
 					echo('#qAgent.member_website#');
@@ -216,7 +216,7 @@
 			}
 		}
 		tags=StructNew();
-		tags['{agent name}']=qAgent.member_first_name&' '&qAgent.member_last_name;
+		tags['{agent name}']="#request.zsession.user.first_name# #request.zsession.user.last_name#";
 		tags["{agent's company}"]=qAgent.member_company;
 	}else{
 		tags=structnew();
@@ -271,69 +271,81 @@
 	originalMessage=arraytolist(arrM,chr(10));
 	*/
 	// put the full original message here with 
-	originalMessage=chr(10)&chr(10)&"--"&chr(10)&"This message was in response your original inquiry ###form.inquiries_id#."&chr(10)&chr(10)&(originalMessage);
+	if(form.inquiries_id NEQ 0){
+		originalMessage=chr(10)&chr(10)&"This message was in response your original inquiry ###form.inquiries_id#."&chr(10)&chr(10)&(originalMessage);
+	}else{
+		originalMessage="";
+	}
 	</cfscript>
 	var originalMessage="#jsstringformat(originalMessage)#";
 	var signature="#jsstringformat(chr(10)&chr(10)&'--'&chr(10)&trim(signature))#";
 	function updateEmailForm(v){
 		if(v!=""){
-			document.myForm2.inquiries_subject.value=arrEmailTemplate[v].subject;
-			document.myForm2.inquiries_message.value=greeting+arrEmailTemplate[v].message+signature+originalMessage;
+			document.sendEmailForm.inquiries_subject.value=arrEmailTemplate[v].subject;
+			document.sendEmailForm.inquiries_message.value=greeting+arrEmailTemplate[v].message+signature+originalMessage;
 		}else{
-			document.myForm2.inquiries_subject.value="";
-			document.myForm2.inquiries_message.value=greeting+signature+originalMessage;
+			document.sendEmailForm.inquiries_subject.value="";
+			document.sendEmailForm.inquiries_message.value=greeting+signature+originalMessage;
 		}
 	}
 	/* ]]> */
 	</script>
-	<table class="table-list" style="width:100%; border-left:2px solid ##999;border-right:1px solid ##999;">
+	<table class="table-list" style="width:100%; ">
 		<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/feedback/sendemail?inquiries_id=#form.inquiries_id#" method="post">
 			<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
+			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
+				<tr>
+					<th colspan="2"> Select a template or fill in the following fields:</th>
+				</tr>
+				<tr>
+					<th style="width:100px;">Template:</th>
+					<td><cfscript>
+					selectStruct = StructNew();
+					selectStruct.name = "inquiries_lead_template_id";
+					selectStruct.query = qTemplate;
+					selectStruct.onChange="updateEmailForm(this.options[this.selectedIndex].value);";
+					selectStruct.queryLabelField = "inquiries_lead_template_name";
+					selectStruct.queryValueField = 'inquiries_lead_template_id';
+					application.zcore.functions.zInputSelectBox(selectStruct);
+					</cfscript></td>
+				</tr>
+			</cfif> 
 			<tr>
-				<th colspan="2"> Select a template or fill in the following fields:</th>
+				<th>Inquiry</th>
+				<td><cfif form.inquiries_id EQ 0>New Message<cfelse>###form.inquiries_id#</cfif></td>
 			</tr>
 			<tr>
-				<td style="width:100px;">Template:</td>
-				<td><cfscript>
-				selectStruct = StructNew();
-				selectStruct.name = "inquiries_lead_template_id";
-				selectStruct.query = qTemplate;
-				selectStruct.onChange="updateEmailForm(this.options[this.selectedIndex].value);";
-				selectStruct.queryLabelField = "inquiries_lead_template_name";
-				selectStruct.queryValueField = 'inquiries_lead_template_id';
-				application.zcore.functions.zInputSelectBox(selectStruct);
-				</cfscript></td>
-			</tr>
-			<tr>
-				<td>From:</td>
+				<th>From:</th>
 				<td>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#)
 
 					<!--- <input name="inquiries_from" id="inquiries_from" type="text" size="50" maxlength="50" value="#htmleditformat(form.member_email)#" > ---></td>
 			</tr> 
 			<tr>
-				<td>To Email:</td>
+				<th>To Email:</th>
 				<td>#variables.contact.contact_first_name# #variables.contact.contact_last_name# (#variables.contact.contact_email#)
 					<!--- probably lock this to the selected contact instead --->
 					<!--- <input name="inquiries_to" id="inquiries_to" type="text" size="50" maxlength="50" value="#htmleditformat(form.inquiries_to)#" > ---></td>
 			</tr>
 			<tr>
-				<td>Cc:</td>
+				<th>Cc:</th>
 				<td><input name="inquiries_cc" id="inquiries_cc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_cc)#" ></td>
 			</tr>
 			<tr>
-				<td>Bcc:</td>
+				<th>Bcc:</th>
 				<td><input name="inquiries_bcc" id="inquiries_bcc" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_bcc)#" ></td>
 			</tr>
 			<tr>
-				<td>Subject:</td>
+				<th>Subject:</th>
 				<td><input name="inquiries_subject" id="inquiries_subject" type="text" size="50" maxlength="255" value="#htmleditformat(form.inquiries_subject)#" /></td>
 			</tr>
 			<tr>
-				<td colspan="2">Message:<br />
+				<th>Message:</th>
+				<td>
 					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:200px; ">#htmleditformat(form.inquiries_message)#</textarea></td>
 			</tr>
 			<tr>
-				<td colspan="2"><button type="submit" name="submitForm" class="z-manager-search-button">Send Email</button>
+				<th>&nbsp;</th>
+				<td><button type="submit" name="submitForm" class="z-manager-search-button">Send Email</button>
 					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button></td>
 			</tr>
 		</form>
