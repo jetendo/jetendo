@@ -79,8 +79,17 @@ display:table-cell; padding:3px;
 }
 .mce-floatpanel.mce-window{ z-index:1000000 !important;}
 .mce-floatpanel.mce-menu-align{ z-index:1000001 !important;}
-
-
+.mce-container, .mce-container *, .mce-widget, .mce-widget *, .mce-reset {
+     
+    -moz-box-sizing: content-box !important;
+    -webkit-box-sizing: content-box !important;
+    box-sizing: content-box !important;
+}
+.mce-btn *{
+    -moz-box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
 .zSiteOptionSave{font-size:11px; text-decoration:none; font-weight:bold; padding:4px; display:block; float:right; border:1px solid #999;}
 
 .addthisevent{visibility:hidden;}

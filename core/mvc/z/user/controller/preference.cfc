@@ -221,8 +221,6 @@
 	form.returnurl=application.zcore.functions.zso(form, 'returnurl');
 
 
-	// secure the member_signature html, and limit which tags are allowed.
-	form.member_signature=application.zcore.email.cleanHTML(form.member_signature);
 	
 	form.user_password=trim(replace(application.zcore.functions.zso(form, 'user_password'),chr(160),"","all"));
 	if(trim(form.user_password) EQ ''){
@@ -240,6 +238,9 @@
 			application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
 		}
 	}
+
+	// secure the member_signature html, and limit which tags are allowed.
+	form.member_signature=application.zcore.email.cleanHTML(application.zcore.functions.zso(form, 'member_signature'));
 	
 	if(form.submitPref EQ 'Create Password'){
 		form.submitPref ='Update Communication Preferences';
