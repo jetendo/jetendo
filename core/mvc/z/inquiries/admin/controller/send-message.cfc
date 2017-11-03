@@ -283,6 +283,8 @@
 	</cfscript>
 </cffunction>
 
+
+
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript> 
 	result=init(); 
@@ -290,10 +292,7 @@
 		return;
 	}
 	db=request.zos.queryObject; 
-	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js");
-	application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
-	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
-	application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
+	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
  
 	tags=StructNew(); 
 	signature="";
@@ -446,7 +445,7 @@
 			arrayAppend(arrContactId, contact.contact_id); 
 		}
 		if(arrayLen(arrContactId) NEQ 0){
-		db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
+			db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
 			FROM #db.table( 'contact', request.zos.zcoreDatasource )# 
 			LEFT JOIN #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# ON 
 				inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
@@ -461,23 +460,30 @@
 			qContactMember = db.execute( 'qContactMember' ); 
 			arrayAppend(arrContactQuery, qContactMember);
 		}
- 	}
+ 	} 
+ 	arrCCSelected=[];
+ 	arrBCCSelected=[];
  	for(q in arrContactQuery){
 		for ( row in q ) {
+			ts={};
 			if(row.fullName NEQ ''){
-				label=row.fullName&" <"&row.contact_email&">";
+				ts.label=row.fullName&" <"&row.contact_email&">";
 			}else{
-				label=row.contact_email;
+				ts.label=row.contact_email;
 			}
+			ts.value=replace(row.fullName, "`", "'", "all")&"`"&row.contact_email;
 			if(row.inquiries_x_contact_type EQ "to"){
-				arrayAppend(arrTo, replace(row.fullName, "`", "'", "all")&"`"&row.contact_email);
-				arrayAppend(arrLabelTo, label);
+				arrayAppend(arrTo, ts.value);
+				arrayAppend(arrLabelTo, ts.label);
 			}
 			if(row.inquiries_x_contact_id NEQ ""){
-				arrayAppend(arrContact, {row:row, label:label, selected:true});
-			}else{
-				arrayAppend(arrContact, {row:row, label:label, selected:false});
+				if(row.inquiries_x_contact_type EQ "cc"){
+					arrayAppend(arrCCSelected, ts.value);
+				}else if(row.inquiries_x_contact_type EQ "bcc"){
+					arrayAppend(arrBCCSelected, ts.value);
+				}
 			}
+			arrayAppend(arrContact, ts);
 		}
 	} 
 	if(form.method EQ "index"){
@@ -524,21 +530,7 @@
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
 			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
 		</cfif>
-	</div>  ---> 
-	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
-		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
-		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
-		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
-		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
-			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
-		</div> 
-		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
-			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
-		</div> 
-		<div class="z-manager-edit-errors z-float"></div>
-		<table class="table-list z-index-1" style="width:100%; "> 
+	</div> 
 			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
 				<tr>
 					<th colspan="2"> Select a template or fill in the following fields:</th>
@@ -555,10 +547,24 @@
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					</cfscript></td>
 				</tr>
-			</cfif> 
+			</cfif> ---> 
+	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
+		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
+		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+		</div> 
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+		</div> 
+		<div class="z-manager-edit-errors z-float"></div>
+		<table class="table-list z-index-1" style="width:100%; ">  
 			<tr>
-				<th>Inquiry</th>
-				<td><cfif form.inquiries_id EQ 0>New Message<cfelse>###form.inquiries_id#</cfif></td>
+				<th colspan="2"><cfif form.inquiries_id EQ 0>New Message<cfelse>Replying to Inquiry ###form.inquiries_id#</cfif>
+			</td>
 			</tr>
 			<tr>
 				<th>From:</th>
@@ -576,29 +582,27 @@
 			<tr>
 				<th>Cc:</th>
 				<td> 
-					<div class="inquiriesCCContainer">
-						<select id="inquiries_cc" name="inquiries_cc" multiple="multiple" style="display:none;">
-							<cfloop from="1" to="#arrayLen(arrContact)#" index="i">
-								<cfscript>item = arrContact[i];</cfscript>
-								<option value="#item.row.fullName&"`"&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "cc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
-							</cfloop>
-						</select>
-						<div id="inquiries_cc_error" class="z-float" style="display:none; color:##900;"></div>
-					</div>
+					<cfscript> 
+					form.inquiries_cc=arrayToList(arrCCSelected, ",");
+					ts={
+						field:"inquiries_cc",
+						arrData:arrContact
+					}
+					echo(application.zcore.functions.zEmailTokenAutocompleteInput(ts));
+					</cfscript> 
 				</td>
 			</tr>
 			<tr>
 				<th>Bcc:</th>
 				<td> 
-					<div class="inquiriesBCCContainer">
-						<select id="inquiries_bcc" name="inquiries_bcc" multiple="multiple" style="display:none;">
-							<cfloop from="1" to="#arrayLen( arrContact )#" index="i">
-								<cfscript>item = arrContact[ i ];</cfscript>
-								<option value="#item.row.fullName&"`"&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "bcc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
-							</cfloop>
-						</select>
-						<div id="inquiries_bcc_error" class="z-float" style="display:none; color:##900;"></div>
-					</div>
+					<cfscript> 
+					form.inquiries_bcc=arrayToList(arrBCCSelected, ",");
+					ts={
+						field:"inquiries_bcc",
+						arrData:arrContact
+					}
+					echo(application.zcore.functions.zEmailTokenAutocompleteInput(ts));
+					</cfscript> 
 				</td>
 			</tr>
 			<tr>
@@ -622,88 +626,13 @@
 
 	<script type="text/javascript">
 	zArrDeferredFunctions.push( function() {
-		$('##inquiries_cc, ##inquiries_bcc, ##inquiries_subject').keypress(function(e) { 
+		$('##inquiries_subject').keypress(function(e) { 
 			// detect ENTER key 
 			if (e.keyCode == 13) { 
 				e.stopImmediatePropagation();
 				e.preventDefault();
 				return false;
 			}
-		});
-		$('##inquiries_cc').attr( 'multiple', 'multiple' );
-		$('##inquiries_cc').tokenize2( {
-			dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
-			searchFromStart: false,
-			tokensAllowCustom: true
-		} );
-
-		var arrReplaceInput=[];
-		function preventInvalidToken(obj, e, token, errorId){
-			arrToken=token.split("`");
-			var email=arrToken.pop().trim();
-			if(!zEmailValidate(email)){ 
-				$(obj).trigger('tokenize:tokens:remove', [token]);   
-				var h="";
-				// tracking whether to append or not
-				if(obj.lastActionCount!=obj.currentActionCount){
-					h=$(errorId).html();
-				} 
-				obj.lastActionCount++;
-				if(h !=""){
-					h+=", ";
-				} 
-				h+='"'+token+'" is not a valid email address';
-				$(errorId).show().html(h);
-			}
-		}
-		$('##inquiries_cc').on("tokenize:tokens:add", function(e, token){
-			preventInvalidToken(this, e, token, "##inquiries_cc_error"); 
-		});
-		$('##inquiries_bcc').on("tokenize:tokens:add", function(e, token){
-			preventInvalidToken(this, e, token, "##inquiries_bcc_error"); 
-		});
-
-
-		$('##inquiries_bcc').attr( 'multiple', 'multiple' );
-		$('##inquiries_bcc').tokenize2( {
-			dataSource: 'select',///z/inquiries/admin/manage-inquiries/inquiryTokenSearch',
-			searchFromStart: false,
-			tokensAllowCustom: true
-		} );
-
-		function forceSetEmail(obj, field, triggerAdd){
-			var fieldElement=$(field)[0];
-			if(typeof fieldElement.lastActionCount == "undefined"){
-				fieldElement.lastActionCount=0;
-				fieldElement.currentActionCount=0;
-			}
-			fieldElement.lastActionCount++;
-			fieldElement.currentActionCount=fieldElement.lastActionCount;
-			if(obj.value != ""){
-				if(!zEmailValidate(obj.value.trim())){
-					//$(field+"_error").show().html('"'+obj.value+'", is not a valid email address.');
-					return false;
-				}
-				$(field+"_error").hide();
-				if(triggerAdd){
-					$(field).trigger('tokenize:tokens:add', [obj.value, obj.value, true]);
-					obj.value="";
-				}
-			}
-			return true;
-		}
-
-		$(document).on("keyup paste", ".inquiriesCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_cc", false);
-		});
-		$(document).on("keyup paste", ".inquiriesBCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_bcc", false);
-		}); 
-		$(document).on("blur", ".inquiriesCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_cc", true);
-		});
-		$(document).on("blur", ".inquiriesBCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_bcc", true);
 		}); 
 		tinymce.init({
 		  selector: '##inquiries_message', 
@@ -722,7 +651,7 @@
 		}
 		$("##sendEmailForm").on("submit", function(e){
 			//e.preventDefault();
-			var valid=true;
+			/*var valid=true;
 			var valid2=true;
 			var valid3=true;
 			$(".inquiriesCCContainer .token-search input").each(function(){
@@ -736,6 +665,14 @@
 				valid3=false;
 			}
 			if(!valid || !valid2 || !valid3){
+				return false;
+			}*/
+			var valid3=true;
+			if($("##inquiries_subject").val()=="" || $("##inquiries_message").val()==""){
+				alert("Subject and message are required.");
+				valid3=false;
+			}
+			if(!valid3){
 				return false;
 			}
 			return zSubmitManagerEditForm(this, emailSentCallback); 

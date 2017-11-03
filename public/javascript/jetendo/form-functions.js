@@ -2036,6 +2036,77 @@ var zLastAjaxVarName=""; */
 		
 	}
 
+
+	var zEmailTokenInput={};
+	zEmailTokenInput.setupTokenizeInput=function(field){ 
+		var $field=$('#'+field);
+		$field.keypress(function(e) { 
+			// detect ENTER key 
+			if (e.keyCode == 13) { 
+				e.stopImmediatePropagation();
+				e.preventDefault();
+				return false;
+			}
+		});
+		$field.attr( 'multiple', 'multiple' );
+		$field.tokenize2( {
+			dataSource: 'select',
+			searchFromStart: false,
+			tokensAllowCustom: true
+		} );
+		$field.on("tokenize:tokens:add", function(e, token){
+			zEmailTokenInput.preventInvalidToken(this, e, token, field); 
+		}); 
+		$(document).on("keyup paste", "#"+field+"_container .token-search input", function(){ 
+			zEmailTokenInput.forceSetEmail(this, "#"+field, false);
+		}); 
+		$(document).on("blur", "#"+field+"_container .token-search input", function(){  
+			zEmailTokenInput.forceSetEmail(this, "#"+field, true);
+		}); 
+	}
+	zEmailTokenInput.preventInvalidToken=function(obj, e, token, field){
+		var arrToken=token.split("`");
+		var email=arrToken.pop().trim();
+		if(!zEmailValidate(email)){ 
+			$(obj).trigger('tokenize:tokens:remove', [token]);    
+			// add it back as text to avoid frustration
+			$("#"+field+"_container .token-search input").val(token);
+			var h="";
+			// tracking whether to append or not
+			if(obj.lastActionCount!=obj.currentActionCount){
+				h=$("#"+field+"_error").html();
+			} 
+			obj.lastActionCount++;
+			if(h !=""){
+				h+=", ";
+			} 
+			h+='"'+token+'" is not a valid email address';
+			$("#"+field+"_error").show().html(h);
+		}
+	}
+
+	zEmailTokenInput.forceSetEmail=function(obj, f, triggerAdd){
+		var fieldElement=$(f)[0];
+		if(typeof fieldElement.lastActionCount == "undefined"){
+			fieldElement.lastActionCount=0;
+			fieldElement.currentActionCount=0;
+		}
+		fieldElement.lastActionCount++;
+		fieldElement.currentActionCount=fieldElement.lastActionCount; 
+		if(obj.value != ""){
+			/*if(!zEmailValidate(obj.value.trim())){
+				$(f+"_error").show().html('"'+obj.value+'", is not a valid email address.');
+				return false;
+			}*/
+			//$(f+"_error").hide();
+			if(triggerAdd){
+				$(f).trigger('tokenize:tokens:add', [obj.value, obj.value, true]);
+				obj.value="";
+			}
+		}
+		return true;
+	} 
+	window.zEmailTokenInput=zEmailTokenInput;  
 	window.zSubmitManagerEditForm=zSubmitManagerEditForm;
 	window.zCalculateTableCells=zCalculateTableCells;
 	window.zTableRecordEdit=zTableRecordEdit;

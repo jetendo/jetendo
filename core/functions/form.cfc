@@ -3645,5 +3645,56 @@ echo(application.zcore.functions.zMapLocationPicker(ts));
 	return output;
 	</cfscript>
 </cffunction>
+
+
+<!--- 
+form.inquiries_cc=arrayToList(arrSelected, ",");
+ts={
+	field:"inquiries_cc",
+	arrData:[{label:"Label", value:"Label`test@test.com"}]
+}
+application.zcore.functions.zEmailTokenAutocompleteInput(ts);
+ --->
+<cffunction name="zEmailTokenAutocompleteInput" localmode="modern" access="remote" roles="user">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript> 
+	ss=arguments.ss;
+	if(not structkeyexists(request.zos, 'emailTokenAutocompleteInputLoaded')){
+		request.zos.emailTokenAutocompleteInputLoaded=true;
+		application.zcore.skin.includeJS( '/z/javascript/jquery/Tokenize2/tokenize2.min.js' );
+		application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/tokenize2.min.css' );
+		application.zcore.skin.includeCSS( '/z/javascript/jquery/Tokenize2/custom.css' );
+	}
+	arrSelected=listToArray(application.zcore.functions.zso(form, ss.field), ",");
+	selectedStruct={};
+	for(selected in arrSelected){
+		selectedStruct[selected]=true;
+	}
+	</cfscript>
+	<cfsavecontent variable="out">
+		<div id="#ss.field#_container">
+			<select id="#ss.field#" name="#ss.field#" multiple="multiple" style="display:none;">
+				<cfscript>
+				for(item in ss.arrData){
+					echo('<option value="#item.value#" ');
+					if(structkeyexists(selectedStruct, item.value)){
+						echo('selected="selected"');
+					}
+					echo('>'&htmleditformat(item.label)&'</option>');
+				}
+				</cfscript>
+			</select>
+			<div id="#ss.field#_error" class="z-float" style="display:none; color:##900;"></div>
+		</div>
+		<script type="text/javascript">
+		zArrDeferredFunctions.push( function() {
+			zEmailTokenInput.setupTokenizeInput("#ss.field#");
+		});
+		</script>
+	</cfsavecontent>
+	<cfscript>
+	return out;
+	</cfscript> 
+</cffunction>
 </cfoutput>
 </cfcomponent>

@@ -670,6 +670,86 @@ zArrDeferredFunctions.push(function(){
 });
 </script>
 
+	<cfscript>
+	if(request.zos.isTestServer){
+		// display list of contacts attached to this lead. 
+ 
+		db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, contact.contact_first_name, contact.contact_last_name
+			FROM (#db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )#,
+				#db.table( 'contact', request.zos.zcoreDatasource )#)
+			WHERE inquiries_x_contact.site_id = #db.param( request.zos.globals.id )#
+				AND inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
+				AND contact.contact_id = inquiries_x_contact.contact_id
+				AND inquiries_x_contact.inquiries_id=#db.param(form.inquiries_id)# 
+				AND contact.site_id = inquiries_x_contact.site_id
+				AND contact.contact_deleted = #db.param( 0 )#
+			ORDER BY contact.contact_email ASC';
+		qContact = db.execute( 'qContact' );
+
+		toArray = [];
+		ccArray = [];
+		bccArray=[];
+
+		if ( qContact.recordcount GT 0 ) {
+			for ( row in qContact ) {
+				if ( row.inquiries_x_contact_type EQ 'to' ) {
+					arrayAppend( toArray, row );
+				} else if ( row.inquiries_x_contact_type EQ 'cc' ) {
+					arrayAppend( ccArray, row );
+				} else if ( row.inquiries_x_contact_type EQ 'bcc' ) {
+					arrayAppend( bccArray, row );
+				}
+			}
+		}
+		echo('<div class="z-float">
+			To: ');
+		for(row in toArray){
+			// TODO: need to complete here feedbackContactXInquiry
+		}
+		echo('</div>');
+		/*		</cfscript>
+
+				<select id="feedback_to" name="feedback_to" multiple="multiple">
+					<cfloop from="1" to="#arrayLen( toArray )#" index="toItemIndex">
+						<cfscript>toItem = toArray[ toItemIndex ];</cfscript>
+						<cfif toItem.contact_first_name NEQ ''>
+							<cfif toItem.contact_last_name NEQ ''>
+								<option value="#toItem.contact_id#" selected="selected">#toItem.contact_first_name# #toItem.contact_last_name# (#toItem.contact_email#)</option>
+							<cfelse>
+								<option value="#toItem.contact_id#" selected="selected">#toItem.contact_first_name# (#toItem.contact_email#)</option>
+							</cfif>
+						<cfelse>
+							<option value="#toItem.contact_id#" selected="selected">(#toItem.contact_email#)</option>
+						</cfif>
+					</cfloop>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th style="#thstyle#">CC:</th>
+			<td style="#tdstyle#">
+				<select id="feedback_cc" name="feedback_cc" multiple="multiple">
+					<cfloop from="1" to="#arrayLen( ccArray )#" index="ccItemIndex">
+						<cfscript>ccItem = ccArray[ ccItemIndex ];</cfscript>
+						<cfif ccItem.contact_first_name NEQ ''>
+							<cfif ccItem.contact_last_name NEQ ''>
+								<option value="#ccItem.contact_id#" selected="selected">#ccItem.contact_first_name# #ccItem.contact_last_name# (#ccItem.contact_email#)</option>
+							<cfelse>
+								<option value="#ccItem.contact_id#" selected="selected">#ccItem.contact_first_name# (#ccItem.contact_email#)</option>
+							</cfif>
+						<cfelse>
+							<option value="#ccItem.contact_id#" selected="selected">(#ccItem.contact_email#)</option>
+						</cfif>
+					</cfloop>
+				</select>
+
+				<button type="button" onclick="javascript:alert($('##feedback_to').val());">Test</button>
+ 
+			</td>
+		</tr> */
+	}
+	</cfscript>
+
 	<cfif qFeedBack.recordcount NEQ 0>
 		<hr />
 		<h2>Emails &amp; Notes</h2>
