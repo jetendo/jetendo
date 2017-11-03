@@ -381,10 +381,26 @@
 	originalMessage=arraytolist(arrM,chr(10));
 	*/
 	// put the full original message here with 
+	defaultSubject="";
 	if(form.inquiries_id NEQ 0){
 		originalMessage="<br><br>This message was in response your original inquiry ###form.inquiries_id#.<br><br>"&originalMessage;
+
+		// get lead type of inquiry
+		db.sql="select * from #db.table("inquiries_type", request.zos.zcoreDatasource)# 
+		WHERE inquiries_type_deleted=#db.param(0)# and 
+		inquiries_type_id=#db.param(variables.qCheck.inquiries_type_id)# and 
+		site_id=#db.param(application.zcore.functions.zGetSiteIdFromSiteIdType(variables.qCheck.inquiries_type_id_siteidtype))# ";
+		qType=db.execute("qType");
+		if(qType.recordcount NEQ 0){
+			defaultSubject="RE: #qType.inquiries_type_name# submission on #request.zos.globals.shortDomain#";
+		}else{
+			defaultSubject="RE: Your submission on #request.zos.globals.shortDomain#";
+		} 
 	}else{
 		originalMessage="";
+	}
+	if(form.inquiries_subject EQ ""){
+		form.inquiries_subject=defaultSubject;
 	}
 
 
@@ -438,8 +454,8 @@
 				AND contact.site_id = inquiries_x_contact.site_id
 			WHERE 
 			contact.contact_id IN (#db.trustedSQL(arrayToList(arrContactId, ","))#) and 
-			contact.site_id = #db.param( request.zos.globals.id )#
-			AND contact.contact_deleted = #db.param( 0 )#
+			contact.site_id = #db.param( request.zos.globals.id )# AND 
+			contact.contact_deleted = #db.param( 0 )#
 			GROUP BY contact.contact_id 
 			ORDER BY contact.contact_first_name ASC, contact.contact_last_name ASC, contact.contact_email ASC';
 			qContactMember = db.execute( 'qContactMember' ); 
@@ -489,11 +505,15 @@
 	var signature="#jsstringformat('<br><br>--<br>#trim(signature)#')#";
 	function updateEmailForm(v){
 		if(v!=""){
-			document.sendEmailForm.inquiries_subject.value=arrEmailTemplate[v].subject;
-			document.sendEmailForm.inquiries_message.value=greeting+arrEmailTemplate[v].message+signature+originalMessage;
+			if(arrEmailTemplate[v].subject != ""){
+				document.sendEmailForm.inquiries_subject.value=arrEmailTemplate[v].subject;
+			}
+			if(arrEmailTemplate[v].message != ""){
+				document.sendEmailForm.inquiries_message.value=greeting+arrEmailTemplate[v].message+signature+originalMessage;
+			}
 		}else{
-			document.sendEmailForm.inquiries_subject.value="";
-			document.sendEmailForm.inquiries_message.value=greeting+signature+originalMessage;
+			//document.sendEmailForm.inquiries_subject.value="";
+			//document.sendEmailForm.inquiries_message.value=greeting+signature+originalMessage;
 		}
 	}
 	/* ]]> */
@@ -555,24 +575,30 @@
 			</tr>
 			<tr>
 				<th>Cc:</th>
-				<td class="inquiriesCCContainer"> 
-					<select id="inquiries_cc" name="inquiries_cc" multiple="multiple" style="display:none;">
-						<cfloop from="1" to="#arrayLen(arrContact)#" index="i">
-							<cfscript>item = arrContact[i];</cfscript>
-							<option value="#item.row.fullName&chr(9)&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "cc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
-						</cfloop>
-					</select>
+				<td> 
+					<div class="inquiriesCCContainer">
+						<select id="inquiries_cc" name="inquiries_cc" multiple="multiple" style="display:none;">
+							<cfloop from="1" to="#arrayLen(arrContact)#" index="i">
+								<cfscript>item = arrContact[i];</cfscript>
+								<option value="#item.row.fullName&"`"&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "cc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
+							</cfloop>
+						</select>
+						<div id="inquiries_cc_error" class="z-float" style="display:none; color:##900;"></div>
+					</div>
 				</td>
 			</tr>
 			<tr>
 				<th>Bcc:</th>
-				<td class="inquiriesBCCContainer"> 
-					<select id="inquiries_bcc" name="inquiries_bcc" multiple="multiple" style="display:none;">
-						<cfloop from="1" to="#arrayLen( arrContact )#" index="i">
-							<cfscript>item = arrContact[ i ];</cfscript>
-							<option value="#item.row.fullName&chr(9)&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "bcc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
-						</cfloop>
-					</select>
+				<td> 
+					<div class="inquiriesBCCContainer">
+						<select id="inquiries_bcc" name="inquiries_bcc" multiple="multiple" style="display:none;">
+							<cfloop from="1" to="#arrayLen( arrContact )#" index="i">
+								<cfscript>item = arrContact[ i ];</cfscript>
+								<option value="#item.row.fullName&"`"&item.row.contact_email#" <cfif item.row.inquiries_x_contact_type EQ "bcc" and item.selected>selected="selected"</cfif>>#htmleditformat(item.label)#</option>
+							</cfloop>
+						</select>
+						<div id="inquiries_bcc_error" class="z-float" style="display:none; color:##900;"></div>
+					</div>
 				</td>
 			</tr>
 			<tr>
@@ -611,6 +637,32 @@
 			tokensAllowCustom: true
 		} );
 
+		var arrReplaceInput=[];
+		function preventInvalidToken(obj, e, token, errorId){
+			arrToken=token.split("`");
+			var email=arrToken.pop().trim();
+			if(!zEmailValidate(email)){ 
+				$(obj).trigger('tokenize:tokens:remove', [token]);   
+				var h="";
+				// tracking whether to append or not
+				if(obj.lastActionCount!=obj.currentActionCount){
+					h=$(errorId).html();
+				} 
+				obj.lastActionCount++;
+				if(h !=""){
+					h+=", ";
+				} 
+				h+='"'+token+'" is not a valid email address';
+				$(errorId).show().html(h);
+			}
+		}
+		$('##inquiries_cc').on("tokenize:tokens:add", function(e, token){
+			preventInvalidToken(this, e, token, "##inquiries_cc_error"); 
+		});
+		$('##inquiries_bcc').on("tokenize:tokens:add", function(e, token){
+			preventInvalidToken(this, e, token, "##inquiries_bcc_error"); 
+		});
+
 
 		$('##inquiries_bcc').attr( 'multiple', 'multiple' );
 		$('##inquiries_bcc').tokenize2( {
@@ -619,23 +671,39 @@
 			tokensAllowCustom: true
 		} );
 
-		function forceSetEmail(obj, field){
+		function forceSetEmail(obj, field, triggerAdd){
+			var fieldElement=$(field)[0];
+			if(typeof fieldElement.lastActionCount == "undefined"){
+				fieldElement.lastActionCount=0;
+				fieldElement.currentActionCount=0;
+			}
+			fieldElement.lastActionCount++;
+			fieldElement.currentActionCount=fieldElement.lastActionCount;
 			if(obj.value != ""){
-				if(!zEmailValidate(obj.value)){
-					alert('"'+obj.value+'", is not a valid email address.');
+				if(!zEmailValidate(obj.value.trim())){
+					//$(field+"_error").show().html('"'+obj.value+'", is not a valid email address.');
 					return false;
 				}
-				$(field).trigger('tokenize:tokens:add', [obj.value, obj.value, true]);
-				obj.value="";
+				$(field+"_error").hide();
+				if(triggerAdd){
+					$(field).trigger('tokenize:tokens:add', [obj.value, obj.value, true]);
+					obj.value="";
+				}
 			}
 			return true;
 		}
 
+		$(document).on("keyup paste", ".inquiriesCCContainer .token-search input", function(){
+			forceSetEmail(this, "##inquiries_cc", false);
+		});
+		$(document).on("keyup paste", ".inquiriesBCCContainer .token-search input", function(){
+			forceSetEmail(this, "##inquiries_bcc", false);
+		}); 
 		$(document).on("blur", ".inquiriesCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_cc");
+			forceSetEmail(this, "##inquiries_cc", true);
 		});
 		$(document).on("blur", ".inquiriesBCCContainer .token-search input", function(){
-			forceSetEmail(this, "##inquiries_bcc");
+			forceSetEmail(this, "##inquiries_bcc", true);
 		}); 
 		tinymce.init({
 		  selector: '##inquiries_message', 
@@ -658,10 +726,10 @@
 			var valid2=true;
 			var valid3=true;
 			$(".inquiriesCCContainer .token-search input").each(function(){
-				valid=forceSetEmail(this, "##inquiries_cc");
+				valid=forceSetEmail(this, "##inquiries_cc", true);
 			});
 			$(".inquiriesBCCContainer .token-search input").each(function(){
-				valid2=forceSetEmail(this, "##inquiries_bcc");
+				valid2=forceSetEmail(this, "##inquiries_bcc", true);
 			}); 
 			if($("##inquiries_subject").val()=="" || $("##inquiries_message").val()==""){
 				alert("Subject and message are required.");

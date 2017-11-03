@@ -51,6 +51,8 @@
 }
 .tokenize > .tokens-container > .token-search > input {
 	border: 0;
+	min-width:1px !important;
+	width:100% !important;
 }
 .tokenize > .tokens-container > .token {
 	margin: 0 2px;

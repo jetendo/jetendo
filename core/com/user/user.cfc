@@ -1718,7 +1718,7 @@ formString = userCom.loginForm(inputStruct);
  			#db.table("contact", request.zos.zcoreDatasource)#)
 		WHERE user.user_username = contact.contact_email and 
 		contact.site_id = #db.param(request.zos.globals.id)# and 
-		contact_deleted=#db.param(0)# ";
+		contact_deleted=#db.param(0)# and ";
 	}else{
  		db.sql="SELECT * FROM  #db.table("user", request.zos.zcoreDatasource)#  
 		WHERE ";
@@ -1732,7 +1732,7 @@ formString = userCom.loginForm(inputStruct);
 				arrayAppend(arrGroup, row.user_group_id);
 			}
 			db.sql&=" or (user_group_id IN (#db.trustedSQL("'"&arrayToList(arrGroup, "','")&"'")#) and 
-			site_id = #db.param(request.zos.globals.parentId)#) ";
+			user.site_id = #db.param(request.zos.globals.parentId)#) ";
 		}
 	}
  	db.sql&=") and 
