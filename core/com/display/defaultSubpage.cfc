@@ -27,6 +27,7 @@ ts={
 	defaultSectionMobileImage:"",
 	currentSection:currentSection, // required
 	bodyHTML:"Body", // optional, can be empty string
+	sidebarEnabled:true, // set to false to turn off sidebar for certain pages
 	sidebarTopHTML:"Top", // optional, can be empty string
 	sidebarBottomHTML:"Bottom" // optional, can be empty string
 }
@@ -154,7 +155,9 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 		sidebarTopHTML:"", 
 		sidebarBottomHTML:"",
 		bodyHTML:"",
-		afterSectionHTML:""
+		afterSectionHTML:"",
+		sidebarEnabled:true,
+		enableContentContainer:true
 	};
 	structappend(ss, ts, false);
 	for(i in ss){
@@ -210,8 +213,8 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	<cfif ss.afterSectionHTML NEQ "">
 		#ss.afterSectionHTML#
 	</cfif>
-	<cfif arraylen(arrSide) NEQ 0 or ss.sidebarTopHTML NEQ "" or ss.sidebarBottomHTML NEQ "">
-		<div class="z-container">
+	<cfif ss.sidebarEnabled and arraylen(arrSide) NEQ 0 or ss.sidebarTopHTML NEQ "" or ss.sidebarBottomHTML NEQ ""> 
+		<div class="z-container"> 
 			<div class="z-default-subpage-subpage">
 				<div class="z-default-subpage-row">
 					<div class="z-default-subpage-right-panel">
@@ -243,21 +246,26 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 							<div class="z-default-subpage-left-panel-bottom">
 								#ss.sidebarBottomHTML#
 							</div>
-						</cfif>
+						</cfif> 
 					</div> 
 				</div>
 			</div>
-		</div>
+		</div> 
 	<cfelse>  
-		<div class="z-container">
-			<div class="z-default-subpage-subpage float_l">
-				<div class="z-default-subpage-subcontent z-default-subpage-subcontent-full"> 
-					<div class="z-default-subpage-subcontent-spacer">
+		<cfif ss.enableContentContainer>
+			<div class="z-container">
+				<div class="z-default-subpage-subpage float_l">
+					<div class="z-default-subpage-subcontent z-default-subpage-subcontent-full"> 
+						<div class="z-default-subpage-subcontent-spacer">
+		</cfif>
 						#ss.bodyHTML#
+		<cfif ss.enableContentContainer>
 					</div>
 				</div>
 			</div>
+		
 		</div>
+		</cfif>
 	</cfif> 
 </cffunction>  
 </cfoutput>
