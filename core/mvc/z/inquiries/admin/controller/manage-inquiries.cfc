@@ -110,12 +110,15 @@
 		},{
 			label:'Received'
 		},{
+			label:'Last Updated'
+		},{
 			label:'Type'
 		},{
 			label:'Admin'
 		}]
 	};
-	if(form.method EQ "userInsertBulk" or form.method EQ "insertBulk"){
+	form.editSource=application.zcore.functions.zso(form, 'editSource');
+	if(form.method EQ "userInsertBulk" or form.method EQ "insertBulk" or form.editSource EQ "contact"){
 		variables.methods.beforeReturnInsertUpdate = 'beforeReturnInsertUpdate';
 	}
 	
@@ -512,19 +515,376 @@
 		</table>
 		#searchNav#
 	</cfif>
-</cffunction>
+</cffunction> 
 
-<cffunction name="userInsertStatus" localmode="modern" access="remote" roles="user">
+<cffunction name="userInsertPrivateNote" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
-	feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
-	feedbackCom.insert();
+	insertPrivateNote();
 	</cfscript>
 </cffunction> 
- 
+
+<cffunction name="insertPrivateNote" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	form.editSource=application.zcore.functions.zso(form, 'editSource');
+	form.modalpopforced=application.zcore.functions.zso(form, "modalpopforced",true, 0);
+	db=request.zos.queryObject; 
+	myForm={}; 
+	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id', true, 1);
+	if(form.method EQ "insertPrivateNote"){
+		init();
+	}else{
+		userInit();
+	}
+	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
+	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
+	user.user_id = inquiries.user_id and 
+	user.user_deleted=#db.param(0)# and 
+	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.user_id_siteIDType"))#
+	WHERE inquiries.inquiries_id = #db.param(form.inquiries_id)# and 
+	inquiries_deleted=#db.param(0)# and
+	inquiries.site_id = #db.param(request.zos.globals.id)# ";
+	qCheck = db.execute("qCheck");  
+
+	// form validation struct
+	myForm.inquiries_id.required = true;
+	myForm.inquiries_id.friendlyName = "Inquiry ID";
+	myForm.inquiries_feedback_datetime.createDateTime = true;
+	result = application.zcore.functions.zValidateStruct(form, myForm, request.zsid,true);
+	if(result){	
+		application.zcore.status.setStatus(Request.zsid, false,form,true); 
+		application.zcore.functions.zRedirect(errorReturnURL); 
+	}
+	if(form.inquiries_status_id EQ 4 or form.inquiries_status_id EQ 5 or form.inquiries_status_id EQ 7 or form.inquiries_status_id EQ 8){		
+		// ignore validation
+	}else if(application.zcore.functions.zso(form, 'inquiries_feedback_subject') EQ ''){
+		application.zcore.status.setStatus(Request.zsid, 'Subject is required.'); 
+		application.zcore.status.displayReturnJson(request.zsid);
+	}
+	form.user_id = request.zsession.user.id;
+	form.user_id_siteIdType = application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
+	form.contact_id=request.zsession.user.contact_id;
+	form.site_id = request.zOS.globals.id;
+	
+	//	Insert Into Inquiry Database
+	inputStruct = StructNew();
+	inputStruct.struct=form;
+	inputStruct.table = "inquiries_feedback";
+	inputstruct.datasource=request.zos.zcoreDatasource;
+	form.inquiries_feedback_id = application.zcore.functions.zInsert(inputStruct); 
+	if(form.inquiries_feedback_id EQ false){
+		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
+		application.zcore.functions.zRedirect(errorReturnURL); 
+	}else{
+		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead updated.");
+		if(structkeyexists(form,'inquiries_status_id') and (form.inquiries_status_id EQ 4 or form.inquiries_status_id EQ 5 or form.inquiries_status_id EQ 7 or form.inquiries_status_id EQ 8)){								 
+		}else if(qCheck.inquiries_status_id EQ 2){
+			form.inquiries_status_id=3;		
+		}else if(qCheck.inquiries_status_id EQ 1){
+			form.inquiries_status_id=6;		
+		}else{
+			form.inquiries_status_id=3;
+		}
+		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries SET 
+		inquiries_updated_datetime = #db.param(form.inquiries_feedback_datetime)#, 
+		inquiries_status_id = #db.param(form.inquiries_status_id)# 
+		WHERE inquiries_id = #db.param(form.inquiries_id)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		inquiries_deleted=#db.param(0)# ";
+		db.execute("r");
+	}
+	if(form.user_id NEQ qCheck.user_id and qCheck.user_email NEQ ""){
+		if(qCheck.recordcount NEQ 0){
+			// TODO: need to send the normal email broadcast instead of this brief version.
+			toEmail=qCheck.user_email;
+			if(request.zos.isTestServer){
+				toEmail=request.zos.developerEmailTo;
+			}
+			mail  to="#toEmail#" from="#request.fromemail#" subject="Lead ###form.inquiries_id# was updated."{
+echo('Lead ###form.inquiries_id# was updated.
+
+Please login in and view your lead by clicking the following link: #request.zos.currentHostName#/z/inquiries/admin/feedback/view?inquiries_id=#form.inquiries_id# Do not reply to this email. ');
+			}
+		}
+	} 
+	if(form.method EQ "userInsertPrivateNote"){
+		if(form.editSource EQ "contact"){
+			link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
+		}else{
+			link="/z/inquiries/admin/manage-inquiries/userView?inquiries_id=#form.inquiries_id#";
+		}
+	}else{
+		if(form.editSource EQ "contact"){
+			link="/z/inquiries/admin/feedback/viewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
+		}else{
+			link="/z/inquiries/admin/feedback/view?inquiries_id=#form.inquiries_id#";
+		}
+	}
+	application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink:link}); 
+	</cfscript>
+</cffunction>
+
+
+
+<cffunction name="userAddPrivateNote" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	</cfscript>
+</cffunction> 
+
+<cffunction name="addPrivateNote" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	if(form.method EQ "addPrivateNote"){
+		init();
+	}
+	form.modalpopforced=application.zcore.functions.zso(form, "modalpopforced",true, 0);
+	if(form.modalpopforced EQ 1){
+		application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
+		application.zcore.functions.zSetModalWindow();
+	}
+	echo('<div class="z-float">');
+	ts={};
+	displayAddNoteForm(ts);
+	echo('</div>');
+	</cfscript>
+</cffunction> 
+
+<cffunction name="displayAddNoteForm" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	ss=arguments.ss;
+	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
+	db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# inquiries_lead_template
+	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
+	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
+	inquiries_lead_template_x_site_deleted = #db.param(0)# and 
+	inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# 
+	WHERE inquiries_lead_template_x_site.site_id IS NULL and 
+	inquiries_lead_template_deleted = #db.param(0)# and 
+	inquiries_lead_template_type = #db.param('1')# and 
+	inquiries_lead_template.site_id IN (#db.param('0')#,#db.param(request.zos.globals.id)#)";
+	if(application.zcore.app.siteHasApp("listing") EQ false){
+		db.sql&=" and inquiries_lead_template_realestate = #db.param('0')#";
+	}
+	db.sql&=" ORDER BY inquiries_lead_template_sort ASC, inquiries_lead_template_name ASC ";
+	qTemplate=db.execute("qTemplate");
+	tags=StructNew();
+
+	db.sql="SELECT * from #db.table("inquiries_feedback", request.zos.zcoreDatasource)#  
+	WHERE inquiries_feedback.inquiries_id = #db.param(form.inquiries_id)# and 
+	inquiries_feedback.inquiries_feedback_id = #db.param(application.zcore.functions.zso(form, 'inquiries_feedback_id',false,''))# and 
+	inquiries_feedback.site_id = #db.param(request.zos.globals.id)# and 
+	inquiries_feedback.inquiries_feedback_deleted=#db.param(0)#"; 
+	qFeedback=db.execute("qFeedback"); 
+	application.zcore.functions.zQueryToStruct(qFeedback, form, 'inquiries_id');
+	</cfscript>
+	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/manage-inquiries/<cfif form.method EQ "userAddPrivateNote">userInsertPrivateNote<cfelse>insertPrivateNote</cfif>?contact_id=#form.contact_id#&amp;inquiries_id=#form.inquiries_id#"  method="post" enctype="multipart/form-data">
+		<cfif form.method EQ "viewContact">
+			<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
+				<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+						<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+				<cfif application.zcore.user.checkGroupAccess("administrator")>   
+					<a href="/z/inquiries/admin/lead-template/index" target="_blank" class="z-manager-search-button">Templates</a> 
+				</cfif>
+			</div> 
+			<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
+				<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+						<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+				<cfif application.zcore.user.checkGroupAccess("administrator")>  
+					<a href="/z/inquiries/admin/lead-template/index" target="_blank" class="z-manager-search-button">Templates</a> 
+				</cfif>
+			</div> 
+		</cfif>
+		<div class="z-float z-p-10">
+			Submitting this form will add a private note that is not visible to the outside contacts.
+		</div>
+
+		<div class="z-manager-edit-errors z-float"></div>  
+		<script type="text/javascript">
+		/* <![CDATA[ */
+		var arrNoteTemplate=[];
+		<cfloop query="qTemplate">
+			<cfscript>
+			tm=qTemplate.inquiries_lead_template_message;
+			for(i in tags){
+				tm=replaceNoCase(tm,i,tags[i],'ALL');
+			}
+			</cfscript>
+		arrNoteTemplate[#qTemplate.inquiries_lead_template_id#]={};
+		arrNoteTemplate[#qTemplate.inquiries_lead_template_id#].subject="#jsstringformat(qTemplate.inquiries_lead_template_subject)#";
+		arrNoteTemplate[#qTemplate.inquiries_lead_template_id#].message="#jsstringformat(tm)#";
+		</cfloop>
+		function updateNoteForm(v){
+			if(v!=""){
+				document.myForm.inquiries_feedback_subject.value=arrNoteTemplate[v].subject;
+				document.myForm.inquiries_feedback_comments.value=arrNoteTemplate[v].message;
+			}else{
+				document.myForm.inquiries_feedback_subject.value='';
+				document.myForm.inquiries_feedback_comments.value='';
+			}
+		}
+		/* ]]> */
+		</script> 
+		<table class="table-list" style="width:100%; "> 
+			<tr>
+				<th style="width:100px;" title="Selecting a template will prefill the subject and message with a prewritten response.">Template:</th>
+				<td><cfscript>
+				selectStruct = StructNew();
+				selectStruct.name = "inquiries_lead_template_id";
+				selectStruct.query = qTemplate;
+				selectStruct.onChange="updateNoteForm(this.options[this.selectedIndex].value);";
+				selectStruct.queryLabelField = "inquiries_lead_template_name";
+				selectStruct.queryValueField = 'inquiries_lead_template_id';
+				application.zcore.functions.zInputSelectBox(selectStruct);
+				</cfscript></td>
+			</tr>
+			<tr>
+				<th>Status:</th>
+				<td>
+					<cfscript> 
+					db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# inquiries_status 
+					WHERE inquiries_status_deleted = #db.param(0)# and 
+					inquiries_status_id <> #db.param(1)# 
+					ORDER BY inquiries_status_name ";
+					qInquiryStatus=db.execute("qInquiryStatus");
+					selectStruct = StructNew();
+					selectStruct.hideSelect=true;
+					selectStruct.name = "inquiries_status_id";
+					selectStruct.query = qInquiryStatus;
+					selectStruct.queryLabelField = "inquiries_status_name";
+					selectStruct.queryValueField = 'inquiries_status_id';
+					application.zcore.functions.zInputSelectBox(selectStruct); 
+					</cfscript> 
+				</td>
+			</tr> 
+			<tr>
+				<th>Subject:</th>
+				<td><input name="inquiries_feedback_subject" id="inquiries_feedback_subject" type="text" maxlength="50" value="" style="min-width:100%; width:100%; max-width:100%;" /></td> 
+			</tr>
+			<tr>
+				<th>Message:</th>
+				<td>
+					<textarea name="inquiries_feedback_comments" id="inquiries_feedback_comments" style="width:100%; height:120px; min-width:100%; max-width:100%; ">#form.inquiries_feedback_comments#</textarea></td>
+			</tr>
+		</table>
+		<cfif form.method EQ "view" or form.method EQ "userView">
+			<div class="z-float z-p-10 z-bg-white z-index-3">
+				<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+			</div> 
+		</cfif>
+	</form>
+	<br>
+	<script type="text/javascript">
+	zArrDeferredFunctions.push( function() {
+		tinymce.init({
+		  selector: '##inquiries_feedback_comments', 
+		  menubar: false,
+		  autoresize_min_height: 100,
+		  plugins: [
+		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
+		    'searchreplace visualblocks code fullscreen',
+		    'insertdatetime media table contextmenu paste code'
+		  ],
+		  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
+		  content_css: []
+		});
+		function emailSentCallback(r){
+			window.parent.location.reload();
+		}
+		$("##sendEmailForm").on("submit", function(e){ 
+			var valid3=true;
+			if($("##inquiries_feedback_subject").val()==""){
+				alert("Subject is required.");
+				valid3=false;
+			}
+			if(!valid3){
+				return false;
+			}
+			return zSubmitManagerEditForm(this, emailSentCallback); 
+		});
+	});
+	</script>
+</cffunction>
+
+
+<cffunction name="userSubscribeToLead" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	subscribeToLead();
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="subscribeToLead" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	form.inquiries_id=application.zcore.functions.zso(form, 'inquiries_id', true, 0);
+	if(form.method EQ "subscribeToLead"){
+		init(); 
+	}
+	form.contact_id=application.zcore.functions.zso(form, 'contact_id', true, request.zsession.user.contact_id);
+	if(form.contact_id NEQ request.zsession.user.contact_id and not application.zcore.user.checkGroupAccess("administrator")){
+		application.zcore.functions.zReturnJson({succcess:false, errorMessage:"You don't have permission to do this."});
+	}
+	db=request.zos.queryObject;
+	db.sql="select * from #db.table("inquiries_x_contact", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_id=#db.param(form.inquiries_id)# and
+	contact_id=#db.param(form.contact_id)# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	inquiries_x_contact_deleted=#db.param(0)#";
+	qContact=db.execute("qContact");
+	if(qContact.recordcount EQ 0){
+		ts={
+			table:"inquiries_x_contact",
+			datasource:request.zos.zcoreDatasource,
+			struct:{
+				inquiries_id:form.inquiries_id,
+				contact_id:form.contact_id,
+				site_id:request.zos.globals.id,
+				inquiries_x_contact_deleted:0,
+				inquiries_x_contact_type:"to",
+				inquiries_x_contact_updated_datetime:request.zos.mysqlnow
+			}
+		};
+		application.zcore.functions.zInsert(ts);
+	}
+	application.zcore.functions.zReturnJson({success:true, subscribed:true});
+	</cfscript>
+</cffunction>
+
+<cffunction name="userUnsubscribeToLead" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	userInit();
+	unsubscribeToLead();
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="unsubscribeToLead" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	form.inquiries_id=application.zcore.functions.zso(form, 'inquiries_id', true, 0);
+	form.contact_id=application.zcore.functions.zso(form, 'contact_id', true, request.zsession.user.contact_id);
+	if(form.contact_id NEQ request.zsession.user.contact_id and not application.zcore.user.checkGroupAccess("administrator")){
+		application.zcore.functions.zReturnJson({succcess:false, errorMessage:"You don't have permission to do this."});
+	}
+	if(form.method EQ "unsubscribeToLead"){
+		init(); 
+	}
+	db=request.zos.queryObject;
+	db.sql="delete from #db.table("inquiries_x_contact", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_id=#db.param(form.inquiries_id)# and
+	contact_id=#db.param(form.contact_id)# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	inquiries_x_contact_deleted=#db.param(0)#";
+	db.execute("qDelete");
+	application.zcore.functions.zReturnJson({success:true, subscribed:false});
+	</cfscript>
+</cffunction>
 
 <cffunction name="view" localmode="modern" access="remote" roles="member">
-	<cfscript>
+	<cfscript>  
 	var db=request.zos.queryObject; 
 	currentMethod=form.method;
 	if(currentMethod EQ "userView"){
@@ -559,59 +919,131 @@
 	if(qinquiry.recordcount EQ 0){		
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "This inquiry doesn't exist.", false,true);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid="&request.zsid);
-	}
-	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin"); 
-
-
+	} 
 	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 	if(qInquiry.inquiries_email NEQ ""){
 		contact = contactCom.getContactByEmail(qInquiry.inquiries_email, qInquiry.inquiries_first_name&" "&qInquiry.inquiries_last_name, request.zos.globals.id);
 	}
 	</cfscript>
-	<p><a href="/z/inquiries/admin/manage-inquiries/<cfif currentMethod EQ "userView">userIndex<cfelse>index</cfif>">Leads</a> /</p>
-	
-	<cfloop query="qinquiry">
-		<div class="z-float  z-mb-10">
-			<div class="z-float-left">
-				<h2 style="display:inline;">Lead</h2>
-			</div>
-			<div class="z-float-left z-pt-10">
-				<cfif currentMethod EQ "userView">
-					<div class="z-manager-button-container">
-						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
-							<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
-						</cfif>
-						<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
-							<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a> 
-						</cfif>
-					</div>
-				<cfelseif currentMethod EQ "view">
-			
-					<cfif qinquiry.inquiries_readonly EQ 1>
-						<!--- | Read-only | Edit is disabled --->
-					<cfelse>
-						<!--- <div class="z-manager-button-container">
-							<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
-						</div> --->
-					</cfif> 
-					<div class="z-manager-button-container">
-						<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
-							<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:0px;"></i><span>Reply</span></a> 
-						</cfif>
-						<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:0px;"></i><span>Assign</span></a>
-					</div>
-					<!--- <cfif qinquiry.inquiries_reservation EQ 1>
-						<a href="/z/rental/admin/reservations/cancel?inquiries_id=#qinquiry.inquiries_id#">Cancel Reservation</a>
-					</cfif> --->
-		 
-				</cfif>
-			</div>
+
+<script type="text/javascript">
+zArrDeferredFunctions.push(function(){
+	function placeLeadMenu(){
+		setTimeout(function(){
+			// must delay to ensure it happens last
+			var p=zGetAbsPosition(document.getElementById("leadDetailMenuBarPlaceholder"));   
+			var top=0;
+			var left=0;
+			var $mobileHeader=$(".z-mobile-header");
+			if(zWindowSize.width < 479){
+				$(".zLeadEditButton").hide();
+				$(".zLeadAssignButton").hide();
+			}
+			$("##leadDetailMenuBarPlaceholder").css({
+				"height":$("##leadDetailMenuBar").height()+"px"
+			});
+			if($mobileHeader.length && $mobileHeader.css("position")=="fixed"){
+				if(zScrollPosition.top > p.y-$mobileHeader.height()){
+					var top=Math.max(zScrollPosition.top+$mobileHeader.height(), p.y);
+				}else{
+					var top=p.y;
+				}
+			}else{
+				var top=Math.max(zScrollPosition.top, p.y);
+			}
+			$("##leadDetailMenuBar").css({
+				"width":p.width+"px",
+				"top":top+"px",
+				"left":p.x+"px"
+			});
+		},1);
+	}
+	zArrScrollFunctions.push({functionName:placeLeadMenu});
+	zArrResizeFunctions.push({functionName:placeLeadMenu});
+	$("##leadDetailMenuBar").show();
+	placeLeadMenu();
+});
+</script>
+	<cfif currentMethod EQ "userViewContact" or currentMethod EQ "viewContact">
+		<div id="leadDetailMenuBarPlaceholder" class="z-float " style="height:37px; position:relative;">
 		</div>
-		<cfscript> 
-		viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-		viewIncludeCom.getViewInclude(qinquiry);
-        </cfscript>
-	</cfloop>
+		<div id="leadDetailMenuBar" style="position:absolute; top:0px; left:0px; z-index:1000; display:none; width:100px; background-color:##FFF; padding:5px; ">
+			<h3 style="display:inline-block;">Lead</h3> &nbsp;&nbsp;
+
+			<cfif currentMethod EQ "userView" or currentMethod EQ "userViewContact"> 
+				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+					<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
+				</cfif>
+				<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
+					<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+				</cfif> 
+				<a href="/z/inquiries/admin/manage-inquiries/userAddPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1&editSource=contact"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
+			<cfelseif currentMethod EQ "view" or currentMethod EQ "viewContact">
+		
+				<cfif qinquiry.inquiries_readonly EQ 1>
+					<!--- | Read-only | Edit is disabled --->
+				<cfelse>
+					<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#form.inquiries_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button">Edit</a>
+				</cfif>  
+				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+					<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
+				</cfif>
+				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+				<a href="/z/inquiries/admin/manage-inquiries/addPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
+	 
+			</cfif> 
+		</div> 
+		<div class="z-float z-contact-container">
+			<cfscript> 
+			viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+			viewIncludeCom.getViewInclude(qinquiry);
+	        </cfscript>
+	    </div>
+	<cfelse>
+		<p><a href="/z/inquiries/admin/manage-inquiries/<cfif currentMethod EQ "userView">userIndex<cfelse>index</cfif>">Leads</a> /</p>
+		<cfloop query="qinquiry">
+			<div class="z-float  z-mb-10">
+				<div class="z-float-left">
+					<h2 style="display:inline;">Lead</h2>
+				</div>
+				<div class="z-float-left z-pt-10">
+					<cfif currentMethod EQ "userView">
+						<div class="z-manager-button-container">
+							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+								<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
+							</cfif>
+							<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
+								<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+							</cfif>
+						</div>
+					<cfelseif currentMethod EQ "view">
+				
+						<cfif qinquiry.inquiries_readonly EQ 1>
+							<!--- | Read-only | Edit is disabled --->
+						<cfelse>
+							<!--- <div class="z-manager-button-container">
+								<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
+							</div> --->
+						</cfif> 
+						<div class="z-manager-button-container">
+							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
+								<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
+							</cfif>
+							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
+						</div>
+						<!--- <cfif qinquiry.inquiries_reservation EQ 1>
+							<a href="/z/rental/admin/reservations/cancel?inquiries_id=#qinquiry.inquiries_id#">Cancel Reservation</a>
+						</cfif> --->
+			 
+					</cfif>
+				</div>
+			</div>
+			<cfscript> 
+			viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+			viewIncludeCom.getViewInclude(qinquiry);
+	        </cfscript>
+		</cfloop>
+	</cfif>
 </cffunction>
 
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
@@ -860,6 +1292,10 @@
 	inquiries_id=#db.param(form.inquiries_id)# and 
 	site_id=#db.param(request.zos.globals.id)# ";
 	qData=db.execute("qData");
+	if(qData.recordcount NEQ 0){
+		// used by beforeReturnInsertUpdate when method is update
+		form.contact_id=qData.contact_id;
+	}
 	return {success:true, qData:qData};
 	</cfscript>
 </cffunction>
@@ -867,6 +1303,19 @@
 <cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>   
 	urlPage = "";
+	if(form.method EQ "update"){
+		if(form.contact_id EQ 0){
+			link="/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid=#request.zsid#";
+		}
+		link="/z/inquiries/admin/feedback/viewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
+		return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
+	}else if(form.method EQ "userUpdate"){
+		if(form.contact_id EQ 0){
+			link="/z/inquiries/admin/manage-inquiries/userIndex?zPageId=#form.zPageId#&zsid=#request.zsid#";
+		}
+		link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
+		return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
+	}
 	if(structKeyExists(variables.reverseCustomAddMethods, form.method)){
 		urlPage = variables.reverseCustomAddMethods[form.method];
 	} else{
@@ -880,7 +1329,7 @@
 		link &= "&office_id=" & form.office_id;
 	}
 
-	return {success:true, id:form[variables.primaryKeyField], redirect:1,redirectLink: link};
+	return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
 	</cfscript>
 </cffunction>
 
@@ -1031,9 +1480,11 @@
 	};
 	// basic fields
 	fs=[];
-
+	arrayAppend(fs, {label:'', hidden:true, field:'<input type="hidden" name="editSource" value="#htmleditformat(application.zcore.functions.zso(form, 'editSource'))#">'}); 
 	savecontent variable="field"{
-		//form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
+		if(form.inquiries_type_id DOES NOT CONTAIN "|"){
+			form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
+		}
 		selectStruct = StructNew();
 		selectStruct.name = "inquiries_type_id";
 		selectStruct.query = variables.qTypes;
@@ -1185,7 +1636,7 @@
 	</cfscript>  
 </cffunction>
 
-<cffunction name="loadListLookupData" localmode="modern" access="private" returntype="struct">
+<cffunction name="loadListLookupData" localmode="modern" access="public" returntype="struct">
 	<cfscript>
 	var db=request.zos.queryObject; 
 	db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# ";
@@ -1223,6 +1674,8 @@
 	for(row in qOffice){
 		variables.officeLookup[row.office_id]=row;
 	}
+
+	return { statusName:variables.statusName, typeNameLookup:variables.typeNameLookup, officeLookup:variables.officeLookup};
 	</cfscript> 
 
 </cffunction>
@@ -1675,6 +2128,7 @@
 	}
 	arrayAppend(columns, {field: field});  
 	arrayAppend(columns, {field: DateFormat(row.inquiries_datetime, "m/d/yy")&" "&TimeFormat(row.inquiries_datetime, "h:mm tt")}); 
+	arrayAppend(columns, {field: DateFormat(row.inquiries_updated_datetime, "m/d/yy")&" "&TimeFormat(row.inquiries_updated_datetime, "h:mm tt")}); 
 	savecontent variable="field"{
 		if(structkeyexists(variables.typeNameLookup, row.inquiries_type_id&"|"&row.inquiries_type_id_siteIdType)){
 			echo(variables.typeNameLookup[row.inquiries_type_id&"|"&row.inquiries_type_id_siteIdType]);

@@ -73,6 +73,73 @@
 					This will be used for the touch icons and the favicon.  This feature generates many different images sizes.
 				</td>
 			</tr>
+<!---
+Consider creation of setting table.
+ CREATE TABLE `setting`(  
+  `setting_id` INT UNSIGNED NOT NULL,
+  `site_id` INT UNSIGNED NOT NULL,
+  `setting_name` VARCHAR(100) NOT NULL,
+  `setting_address` VARCHAR(100) NOT NULL,
+  `setting_address2` VARCHAR(100) NOT NULL,
+  `setting_city` VARCHAR(100) NOT NULL,
+  `setting_state` VARCHAR(2) NOT NULL,
+  `setting_zip` VARCHAR(10) NOT NULL,
+  `setting_country` VARCHAR(2) NOT NULL,
+  `setting_map_location` VARCHAR(50) NOT NULL,
+  `setting_phone` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`site_id`, `setting_id`),
+  INDEX `NewIndex1` (`site_id`)
+)
+			<tr>
+				<th>Company</th>
+				<td><input type="text" name="setting_company" id="setting_company" value="#htmleditformat(form.setting_company)#"></td>
+			</tr>
+			<tr>
+				<th>Address</th>
+				<td><input type="text" name="setting_address" id="setting_address" value="#htmleditformat(form.setting_address)#"></td>
+			</tr>
+			<tr>
+				<th>Address 2</th>
+				<td><input type="text" name="setting_address2" id="setting_address2" value="#htmleditformat(form.setting_address2)#"></td>
+			</tr>
+			<tr>
+				<th>City</th>
+				<td><input type="text" name="setting_city" id="setting_city" value="#htmleditformat(form.setting_cityty)#"></td>
+			</tr>
+			<tr>
+				<th>State</th>
+				<td>#application.zcore.functions.zStateSelect("setting_state")#</td>
+			</tr>
+			<tr>
+				<th>Postal Code</th>
+				<td><input type="text" name="setting_zip" id="setting_zip" value="#htmleditformat(form.setting_zip)#"></td>
+			</tr>
+			<tr>
+				<th>Country</th>
+				<td>#application.zcore.functions.zCountrySelect("setting_country")#</td>
+			</tr>
+			<tr>
+				<th>Map Location</th>
+				<td>
+					<cfscript>
+					ts={
+						name:"setting_map_location",
+						fields:{
+							address:"setting_address",
+							city:"setting_city",
+							state:"setting_state",
+							zip:"setting_zip",
+							country:"setting_country",
+						}
+					};
+					echo(application.zcore.functions.zMapLocationPicker(ts));
+					</cfscript>
+				</td>
+			</tr>
+			<tr>
+				<th>Phone</th>
+				<td><input type="text" name="setting_phone" id="setting_phone" value="#htmleditformat(form.setting_phone)#"></td>
+			</tr>  --->
 			<tr>
 				<th>&nbsp;</th>
 				<td><input type="submit" name="submit1" value="Save" class="z-manager-search-button" /></td>

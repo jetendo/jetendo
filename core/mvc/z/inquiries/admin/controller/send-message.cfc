@@ -684,7 +684,7 @@
 	updateEmailForm('');
 	</cfif>/* ]]> */
 	</script> 
-	<br /><!---  --->
+	<br />
 </cffunction>
 </cfoutput>
 </cfcomponent>			

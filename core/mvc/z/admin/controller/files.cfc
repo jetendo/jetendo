@@ -750,7 +750,7 @@
 			alert("Link Text is required.");
 			return false;
 		}
-	    var theHTML='<a href="'+fileLink+'">'+fileLabel+'</a>';
+	    var theHTML='<a href="'+fileLink+'" target="_blank">'+fileLabel+'</a>';
 	    
 
 		window.parent.zInsertGalleryFile(theHTML); 

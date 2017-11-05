@@ -553,13 +553,13 @@ Email Only
 		<cfif trim(t.inquiries_phone2) NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;" >Phone 2:</th>
-				<td style="#tdstyle#">#t.inquiries_phone2#(cell)&nbsp;</td>
+				<td style="#tdstyle#">#t.inquiries_phone2# (cell)&nbsp;</td>
 			</tr>
 		</cfif>
-		<cfif isDefined('t.inquiries_phone3') and trim(t.inquiries_phone3) NEQ ''>
+		<cfif structkeyexists(t, 'inquiries_phone3') and trim(t.inquiries_phone3) NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;" >Phone 3:</th>
-				<td style="#tdstyle#">#t.inquiries_phone3#(home)&nbsp;</td>
+				<td style="#tdstyle#">#t.inquiries_phone3# (home)&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(application.zcore.functions.zso(t, 'inquiries_address')) NEQ ''>
@@ -910,7 +910,7 @@ Email Only
 			#propInfo222#
 		</cfif>
 		<!--- </cfif> --->
-		<cfif isDefined('t.inquiries_loan_city') and trim(t.inquiries_loan_city&t.inquiries_loan_own&t.inquiries_loan_price) NEQ "">
+		<cfif structkeyexists(t, 'inquiries_loan_city') and trim(t.inquiries_loan_city&t.inquiries_loan_own&t.inquiries_loan_price) NEQ "">
 			<tr>
 				<th style="#thstyle# text-align:left;" width="120">Loan Property Location</th>
 				<td style="#tdstyle#">#t.inquiries_loan_city#</td>
@@ -950,8 +950,8 @@ Email Only
 			</tr>
 		</cfif>
 		<!-- endadmincomments -->
-	</table>
-	<br />
+	</table> 
+
 	<cfif t.rental_id NEQ "" and t.rental_id NEQ "0">
 		<h2>Selected Rental</h2>
 		<cfscript>
@@ -961,7 +961,9 @@ Email Only
 		var rentalFrontCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.rental.controller.rental-front");
 		rentalFrontCom.includeRentalById(ts);
 		</cfscript>
+		<br>
 	</cfif>
+
 	<cfif application.zcore.app.siteHasApp("listing")>
 		<cfscript>
 		db.sql="SELECT * FROM #db.table("mls_saved_search", request.zos.zcoreDatasource)# mls_saved_search 
@@ -979,9 +981,9 @@ Email Only
 				<tr>
 					<td style="#tdstyle#"><cfloop from="1" to="#qsearch.recordcount#" index="i">
 						<cfscript>
-searchStr=StructNew();
-application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
-</cfscript>
+						searchStr=StructNew();
+						application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
+						</cfscript>
 						Saved Search #i#: #ArrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(searchStr),', ')#<br />
 						<br />
 						</cfloop></td>
@@ -991,13 +993,13 @@ application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
 	</cfif>
 	<cfif application.zcore.app.siteHasApp("content")>
 		<cfscript>
-	ts4=structnew();
-	ts4.contentEmailFormat=true;
-	ts4.showmlsnumber=true;
-	application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts4);
+		ts4=structnew();
+		ts4.contentEmailFormat=true;
+		ts4.showmlsnumber=true;
+		application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts4);
 		propertyDataCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyData");
 		propDisplayCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyDisplay");
-	</cfscript>
+		</cfscript>
 		<cfif application.zcore.functions.zso(t,'content_id') NEQ 0 and application.zcore.functions.zso(t,'content_id') NEQ "">
 			<br />
 			<h2>Inquiring about
@@ -1021,8 +1023,8 @@ application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
 				propDisplayCom.contentEmailTemplate(local.row);
 			}
 			</cfscript>
+			<br />
 		</cfif>
-		<br />
 		<cfscript>
 	
 		if(application.zcore.functions.zso(t,'property_id') NEQ '' and application.zcore.functions.zso(t,'property_id') NEQ '0'){
@@ -1064,14 +1066,14 @@ application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
 						res=propDisplayCom.display();
 						writeoutput(res);
 					}else{
-						writeoutput('This listing is no longer active, please look in the MLS for more information.<hr /><br />');
+						writeoutput('<p>This listing is no longer active, please look in the MLS for more information.</p>');
 					}
 				}
 			}
 		}
 		</cfscript>
+		<br />
 	</cfif>
-	<br />
 	</span>
 </cffunction>
 </cfoutput>

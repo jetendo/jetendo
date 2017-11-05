@@ -684,6 +684,14 @@ contactCom.processMessage(ts);
 			echo('Marked inquiry as status: assigned, contacted<br>');
 		} 
 	}
+	// update date
+	db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+	SET 
+	inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
+	WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
+	site_id = #db.param(ss.messageStruct.site_id)# and 
+	inquiries_deleted=#db.param(0)# ";
+	db.execute("qUpdateInquiry"); 
 
 	arrError=[];
 	for(emailStruct in arrEmail){

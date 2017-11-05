@@ -1948,7 +1948,7 @@ var zLastAjaxVarName=""; */
 					return;
 				}
 				if(typeof r.redirect != "undefined" && r.redirect){
-					window.location.href=r.redirectLink;
+					window.parent.location.href=r.redirectLink;
 				}else{
 					if(r.newRecord){ 
 						window.parent.zAddTableRecordRow(r.id, r.rowHTML);
