@@ -659,11 +659,12 @@ Please login in and view your lead by clicking the following link: #request.zos.
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
 	inquiries_lead_template_x_site_deleted = #db.param(0)# and 
+	inquiries_lead_template_x_site_siteidtype=#db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_lead_template.site_id"))# and 
 	inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# 
 	WHERE inquiries_lead_template_x_site.site_id IS NULL and 
 	inquiries_lead_template_deleted = #db.param(0)# and 
 	inquiries_lead_template_type = #db.param('1')# and 
-	inquiries_lead_template.site_id IN (#db.param('0')#,#db.param(request.zos.globals.id)#)";
+	inquiries_lead_template.site_id IN (#db.param('0')#, #db.param(request.zos.globals.id)#)";
 	if(application.zcore.app.siteHasApp("listing") EQ false){
 		db.sql&=" and inquiries_lead_template_realestate = #db.param('0')#";
 	}
@@ -680,7 +681,7 @@ Please login in and view your lead by clicking the following link: #request.zos.
 	application.zcore.functions.zQueryToStruct(qFeedback, form, 'inquiries_id');
 	</cfscript>
 	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/manage-inquiries/<cfif form.method EQ "userAddPrivateNote">userInsertPrivateNote<cfelse>insertPrivateNote</cfif>?contact_id=#form.contact_id#&amp;inquiries_id=#form.inquiries_id#"  method="post" enctype="multipart/form-data">
-		<cfif form.method EQ "viewContact">
+		<cfif form.method EQ "addPrivateNote" or form.method EQ "userAddPrivateNote">
 			<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
 				<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
 						<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
@@ -717,11 +718,11 @@ Please login in and view your lead by clicking the following link: #request.zos.
 		</cfloop>
 		function updateNoteForm(v){
 			if(v!=""){
-				document.myForm.inquiries_feedback_subject.value=arrNoteTemplate[v].subject;
-				document.myForm.inquiries_feedback_comments.value=arrNoteTemplate[v].message;
+				document.sendEmailForm.inquiries_feedback_subject.value=arrNoteTemplate[v].subject;
+				tinymce.get('inquiries_feedback_comments').setContent(arrNoteTemplate[v].message); 
 			}else{
-				document.myForm.inquiries_feedback_subject.value='';
-				document.myForm.inquiries_feedback_comments.value='';
+				document.sendEmailForm.inquiries_feedback_subject.value='';
+				tinymce.get('inquiries_feedback_comments').setContent(arrNoteTemplate[v].message); 
 			}
 		}
 		/* ]]> */

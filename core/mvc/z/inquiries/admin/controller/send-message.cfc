@@ -305,6 +305,7 @@
 	db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# 
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
+	inquiries_lead_template_x_site_siteidtype=#db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_lead_template.site_id"))# and 
 	inquiries_lead_template.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_lead_template_x_site.inquiries_lead_template_x_site_siteidtype"))# and 
 	inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_lead_template_x_site_deleted = #db.param(0)#

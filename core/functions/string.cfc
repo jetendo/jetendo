@@ -952,8 +952,8 @@ USUAGE
 	if(arguments.value EQ ""){
 		return "";
 	}else{
-		arguments.value = replace(arguments.value, chr(10), "<br />", "ALL");//arguments.value = paragraphFormat(arguments.value);
-		return arguments.value;//left(arguments.value,len(arguments.value)-4);
+		v=replace(replace(arguments.value, chr(13), "", "all"), chr(10), "<br>", "ALL");
+		return '<p>'&replacenocase(v, '<br><br>', '</p><p>', "all")&'</p>';
 	}
 	</cfscript>
 </cffunction>

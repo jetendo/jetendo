@@ -131,6 +131,37 @@
 	</cfscript>
 </cffunction>
 
+<!--- 
+<cffunction name="fixLeadTemplates" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="SELECT * FROM #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# 
+	WHERE inquiries_lead_template_message<>#db.param('')# and 
+	site_id <> #db.param(-1)# and 
+	inquiries_lead_template_deleted=#db.param(0)#  ";
+	qD=db.execute("qD");
+	updateCount=0;
+	skipCount=0;
+	for(row in qD){
+		if(row.inquiries_lead_template_message CONTAINS '<p>'){
+			skipCount++;
+			continue;
+		}
+		t=application.zcore.functions.zparagraphformat(row.inquiries_lead_template_message);  
+		db.sql="UPDATE #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# SET 
+		inquiries_lead_template_message=#db.param(t)#, 
+		inquiries_lead_template_updated_datetime=#db.param(request.zos.mysqlnow)# 
+		WHERE inquiries_lead_template_id=#db.param(row.inquiries_lead_template_id)# and 
+		site_id =#db.param(row.site_id)# and 
+		inquiries_lead_template_deleted=#db.param(0)#  ";
+		db.execute("qUpdate"); 
+		updateCount++;
+	}
+	echo(updateCount&" updated | skipCount:"&skipCount);
+	abort;
+	</cfscript>
+</cffunction> --->
+
 <cffunction name="add" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	this.edit();
@@ -142,6 +173,7 @@
 	var db=request.zos.queryObject;
 	var qTypes=0;
 	var currentMethod=form.method;
+	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
 	variables.init();
 	application.zcore.functions.zSetPageHelpId("4.6");
 	form.sid=application.zcore.functions.zGetSiteIdFromSiteIdType(application.zcore.functions.zso(form, 'siteIdType',false,1));
@@ -184,15 +216,15 @@
 			</tr>
 			<tr>
 				<th>Template Name:</th>
-				<td><input type="text" name="inquiries_lead_template_name" value="#form.inquiries_lead_template_name#" /></td>
+				<td><input type="text" name="inquiries_lead_template_name" value="#htmleditformat(form.inquiries_lead_template_name)#" /></td>
 			</tr>
 			<tr>
 				<th>Subject:</th>
-				<td><input name="inquiries_lead_template_subject" id="inquiries_lead_template_subject" type="text" size="50" maxlength="50" value="#form.inquiries_lead_template_subject#" /></td>
+				<td><input name="inquiries_lead_template_subject" id="inquiries_lead_template_subject" type="text" size="50" maxlength="50" value="#htmleditformat(form.inquiries_lead_template_subject)#" /></td>
 			</tr>
 			<tr>
 				<th>Message:</th>
-				<td><textarea name="inquiries_lead_template_message" id="inquiries_lead_template_message" style="width:100%; height:250px; ">#form.inquiries_lead_template_message#</textarea></td>
+				<td><textarea name="inquiries_lead_template_message" id="inquiries_lead_template_message" style="width:100%; height:250px; ">#htmleditformat(form.inquiries_lead_template_message)#</textarea></td>
 			</tr>
 			<cfif application.zcore.user.checkServerAccess(request.zos.globals.id)>
 				<tr>
@@ -223,6 +255,23 @@
 			</tr>
 		</form>
 	</table>
+
+	<script type="text/javascript">
+	zArrDeferredFunctions.push( function() {
+		tinymce.init({
+		  selector: '##inquiries_lead_template_message', 
+		  menubar: false,
+		  autoresize_min_height: 100,
+		  plugins: [
+		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
+		    'searchreplace visualblocks code fullscreen',
+		    'insertdatetime media table contextmenu paste code'
+		  ],
+		  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
+		  content_css: []
+		}); 
+	});
+	</script>
 </cffunction>
 
 <cffunction name="hide" localmode="modern" access="remote" roles="administrator">
@@ -270,6 +319,7 @@
 	from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# inquiries_lead_template
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
+	inquiries_lead_template_x_site_siteidtype=#db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_lead_template.site_id"))# and 
 	inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_lead_template_x_site_deleted = #db.param(0)#
 	WHERE inquiries_lead_template.site_id IN (#db.param(0)#,#db.param(request.zos.globals.id)#) and 
@@ -279,7 +329,7 @@
 	</cfif>
 	ORDER BY inquiries_lead_template_name ASC </cfsavecontent>
 	<cfscript>
-	qTypes=db.execute("qTypes"); 
+	qTypes=db.execute("qTypes");   
 	application.zcore.functions.zStatusHandler(request.zsid);
 	</cfscript>
 	<h2 style="display:inline; ">Lead Templates </h2>

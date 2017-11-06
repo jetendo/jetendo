@@ -352,8 +352,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 							if(isSubscribed){
 								echo('<p>Me <a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadUnsubscribeLink z-manager-search-button">Unsubscribe</a></p>');
 							}else{	
-								echo('<p>You are not subscribed to this message yet.</p>');
-								// TODO: need to implement subscribe button in feedback.cfc
+								echo('<p>You are not subscribed to this message yet.</p>'); 
 								echo('<p><a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadSubscribeLink z-manager-search-button">Subscribe</a></p>');
 							}
 						echo('</div>');
