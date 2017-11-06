@@ -53,6 +53,7 @@
 
 
 <cffunction name="getEmailTemplate" localmode="modern" access="public">
+	<cfargument name="customNote" type="string" required="no" default="">
 	<cfscript>
 	var tempText=0;
 	var qinquiry=0;
@@ -99,12 +100,16 @@
 				<cfif structkeyexists(form, 'groupemail') and form.groupEmail>
 					One of your leads has been updated by the client.<br />
 					<br />
-					<cfelse>
+				<cfelse>
 					A lead has been assigned to you.<br />
 					<br />
 				</cfif>
 			</cfif>
-			<cfif isDefined('request.noleadsystemlinks') EQ false>
+			<cfif arguments.customNote NEQ "">
+				#arguments.customNote#
+				<p>&nbsp;</p>
+			</cfif>
+			<cfif not structkeyexists(request, 'noleadsystemlinks')>
 				<cfscript>
 				assignDomain=request.zos.currentHostName;
 				loginURL="#assignDomain#/z/inquiries/admin/feedback/view";
@@ -117,9 +122,7 @@
 					}
 				}
 				</cfscript>
-				You should leave feedback on the lead's status: <br />
-				<a href="#loginURL#?inquiries_id=<cfif structkeyexists(form, 'groupemail') and form.groupEmail>#form.inquiries_parent_id#<cfelse>#form.inquiries_id#</cfif>"><strong>Click here to login and leave feedback</strong></a> <br />
-				<br />
+				<h3><a href="#loginURL#?inquiries_id=<cfif structkeyexists(form, 'groupemail') and form.groupEmail>#form.inquiries_parent_id#<cfelse>#form.inquiries_id#</cfif>">View/Edit Lead ###form.inquiries_id#</a></h3>
 			</cfif>
 			<cfscript>
 			// move latest track_user to track_user so the email has the newest tracking information.

@@ -70,22 +70,14 @@
 		form.inquiries_type_id_siteidtype=4;
 		form.inquiries_status_id = 1;
 		form.inquiries_datetime=request.zos.mysqlnow;
-		form.property_id='';
-		form.inquiries_primary=1;
+		form.property_id=''; 
 		form.inquiries_session_id=application.zcore.session.getSessionId();
 
 		arrCriteria=request.zos.listing.functions.getSearchCriteriaDisplay(form);
 		savecontent variable="form.inquiries_comments"{
 			echo('This person has signed up for a new listing email alert with the following search criteria: #chr(10)#
 			#arraytolist(arrCriteria, ", ")#');
-		}
-		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-		SET inquiries_primary=#db.param(0)#, 
-		inquiries_updated_datetime=#db.param(request.zos.mysqlnow)#  
-		WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-		site_id = #db.param(request.zos.globals.id)# and 
-		inquiries_deleted = #db.param(0)#";
-		db.execute("q"); 
+		} 
 		form.inquiries_id=application.zcore.functions.zInsertLead();
 		if(form.inquiries_id EQ false){
 			request.zsid = application.zcore.status.setStatus(Request.zsid, "Your inquiry has not been sent due to an error.", false,true);

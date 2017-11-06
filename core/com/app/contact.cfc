@@ -227,9 +227,19 @@ ts={
 	contact_id:"", // required
 	debug:false,
 	inquiries_id:"", // required to exist
-	validHash:true,  
+	validHash:true, 
+	privateMessage:false,
+	enableCopyToSelf:false,  // set to true to allow the sender to receive a copy of his own message.
 	messageStruct:{}, // queue_pop struct
 	jsonStruct:{} // decoded json queue_pop_message_json
+	// optionally filter the contacts by various parameters
+	,
+	filterContacts:{
+		managers:true,
+		offices:[office_id]
+	}
+	// optional set the new status id
+	,inquiries_status_id:3
 };
 contactCom.processMessage(ts);
  --->
@@ -257,6 +267,7 @@ contactCom.processMessage(ts);
 	if(qInquiry.recordcount EQ 0){
 		// invalid request, we can store this as a new lead, or discard the message.
 		// for now, we discard the message by returning true
+		// TODO: inquiry creation code was already handled in send-message if we ever want to integrate that here instead for incoming imap.
 		if(debug){
 			echo('inquiry missing<br>');
 		}
@@ -332,14 +343,16 @@ contactCom.processMessage(ts);
 	// tested successfully
 	// send to main contact if they are not the current message sender.
 	if(structcount(mainContact) EQ 0){ 
-		if(mainContact.contact_id NEQ fromContactId){
+		if(mainContact.contact_id NEQ fromContactId or (ss.enableCopyToSelf and mainContact.contact_id EQ request.zsession.user.contact_id)){
 			ts={
 				site_id:ss.messageStruct.site_id,
 				contact_id:mainContact.contact_id,
 				contact_des_key:mainContact.contact_des_key,
 				contact_email:mainContact.contact_email,
 				contact_first_name:mainContact.contact_first_name,
-				contact_last_name:mainContact.contact_last_name,
+				contact_last_name:mainContact.contact_last_name, 
+				user_id:mainContact.user_id,
+				user_id_siteidtype:mainContact.user_id_siteidtype,
 				isUser:mainContact.isUser,
 				isManagerUser:mainContact.isManagerUser,
 				addressType:"to" // to, cc, bcc (bcc is visible only to internal users)
@@ -354,7 +367,7 @@ contactCom.processMessage(ts);
 
 	// get all the contacts subscribed to the current inquiry
 	// tested successfully
-	db.sql="SELECT contact.*, inquiries_x_contact.*, user.user_group_id, user.site_id userSiteId FROM 
+	db.sql="SELECT contact.*, inquiries_x_contact.*, user.user_group_id, user.user_id, user.site_id userSiteId FROM 
 	#db.table("contact", request.zos.zcoreDatasource)#, 
 	#db.table("inquiries_x_contact", request.zos.zcoreDatasource)# 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
@@ -387,6 +400,8 @@ contactCom.processMessage(ts);
 				addressType:row.inquiries_x_contact_type // to, cc, bcc (bcc is visible only to internal users)
 			};
 			if(row.userSiteId NEQ ""){
+				ts.user_id=row.user_id;
+				ts.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(row.userSiteId);
 				ts.isUser=true; 
 				if(application.zcore.user.groupIdHasAccessToGroup(row.user_group_id, "member", row.userSiteId)){
 					ts.isManagerUser=true;
@@ -420,7 +435,9 @@ contactCom.processMessage(ts);
 						contact_des_key:contact.contact_des_key,
 						contact_email:contact.contact_email,
 						contact_first_name:contact.contact_first_name,
-						contact_last_name:contact.contact_last_name,
+						contact_last_name:contact.contact_last_name, 
+						user_id:contact.user_id,
+						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
 						isManagerUser:contact.isManagerUser,
 						addressType:"cc"
@@ -445,7 +462,9 @@ contactCom.processMessage(ts);
 					contact_des_key:contact.contact_des_key,
 					contact_email:contact.contact_email,
 					contact_first_name:contact.contact_first_name,
-					contact_last_name:contact.contact_last_name,
+					contact_last_name:contact.contact_last_name, 
+					user_id:contact.user_id,
+					user_id_siteidtype:contact.user_id_siteidtype,
 					isUser:contact.isUser,
 					isManagerUser:contact.isManagerUser,
 					addressType:"to"
@@ -485,7 +504,9 @@ contactCom.processMessage(ts);
 							contact_des_key:contact.contact_des_key,
 							contact_email:contact.contact_email,
 							contact_first_name:contact.contact_first_name,
-							contact_last_name:contact.contact_last_name,
+							contact_last_name:contact.contact_last_name, 
+							user_id:contact.user_id,
+							user_id_siteidtype:contact.user_id_siteidtype,
 							isUser:contact.isUser,
 							isManagerUser:contact.isManagerUser,
 							addressType:"to"
@@ -508,6 +529,8 @@ contactCom.processMessage(ts);
 						contact_email:contact.contact_email,
 						contact_first_name:contact.contact_first_name,
 						contact_last_name:contact.contact_last_name,
+						user_id:contact.user_id,
+						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
 						isManagerUser:contact.isManagerUser,
 						addressType:"to"
@@ -523,6 +546,8 @@ contactCom.processMessage(ts);
 					contact_email:row.contact_email,
 					contact_first_name:row.contact_first_name,
 					contact_last_name:row.contact_last_name,
+					user_id:row.user_id,
+					user_id_siteidtype:row.user_id_siteidtype,
 					isUser:true,
 					isManagerUser:false,
 					addressType:"to"
@@ -585,8 +610,27 @@ contactCom.processMessage(ts);
 		cc:[],
 		bcc:[]
 	}; 
+	allowedUserStruct={};
+	if(structkeyexists(ss.filterContacts, 'offices') and arrayLen(ss.filterContacts.offices)){
+		qOfficeUsers=application.zcore.user.getUsersByOfficeIdList(arrayToList(ss.filterContacts.offices, ","));
+		for(row in qOfficeUsers){
+			allowedUserStruct[row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)]=row;
+		}
+	}
 	for(i in emailStruct){
 		contact=emailStruct[i]; 
+
+		if(structcount(ss.filterContacts) EQ 0){
+			// ok to email anyone
+		}else if(structkeyexists(ss.filterContacts, 'managers') and ss.filterContacts.managers and contact.isManagerUser){
+			// ok to email
+		}else if(structkeyexists(ss.filterContacts, 'offices') and contact.isUser and structkeyexists(allowedUserStruct, contact.user_id&"|"&contact.user_id_siteidtype)){
+			// ok to email
+		}else{
+			// contact not ok for private messages
+			continue;
+		}
+
 		// generate unique from address 
 		idString=contact.contact_id&"."&ss.inquiries_id;
 		tempEmail=getFromAddressForContactByStruct(contact, idString); 
@@ -611,8 +655,13 @@ contactCom.processMessage(ts);
 		echo('Final email list for outgoing email<br>');
 		writedump(emailSendStruct);
 	}
+	processedHTML=buildFeedbackWebmail(ss);
+	if(structkeyexists(ss.jsonStruct, 'htmlWeb') and ss.jsonStruct.htmlWeb NEQ ""){
+		ss.jsonStruct.htmlProcessed=ss.jsonStruct.htmlWeb;
+	}else{
+		ss.jsonStruct.htmlProcessed=processedHTML;
+	}
 
-	ss.jsonStruct.htmlProcessed=buildFeedbackWebmail(ss);
 	// insert to inquiries_feedback
 	tsFeedback={
 		table:"inquiries_feedback",
@@ -626,16 +675,19 @@ contactCom.processMessage(ts);
 			contact_id:fromContactId,
 			inquiries_id:ss.inquiries_id,
 			site_id:ss.messageStruct.site_id,
-			//user_id_siteIDType:user_id_siteIDType,
+			//user_id_siteIDType:user_id_siteIDType, 
 			inquiries_feedback_created_datetime:ss.jsonStruct.date,
 			inquiries_feedback_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
 			inquiries_feedback_deleted:0,
-			inquiries_feedback_message_json:serializeJSON(ss.jsonStruct),
+			inquiries_feedback_message_json:serializeJSON(ss.jsonStruct), 
 			inquiries_feedback_draft:0,
 			inquiries_feedback_download_key:hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha-256'),
 			inquiries_feedback_type:1 // 0 is private note, 1 is email
 		}
 	} 
+	if(ss.privateMessage){
+		tsFeedback.struct.inquiries_feedback_type=2;
+	}
 
 	// build email html  
 	inquiries_feedback_id=application.zcore.functions.zInsert(tsFeedback);
@@ -654,8 +706,8 @@ contactCom.processMessage(ts);
 	}
 
 	arrEmail=[];
-	ss.inquiries_feedback_download_key=tsFeedback.struct.inquiries_feedback_download_key;
-	ss.jsonStruct.html=ss.jsonStruct.htmlProcessed;
+	ss.inquiries_feedback_download_key=tsFeedback.struct.inquiries_feedback_download_key;  
+	ss.jsonStruct.htmlProcessed=processedHTML; 
 	for(type in emailSendStruct){
 		typeStruct=emailSendStruct[type];
 		for(i=1;i<=arraylen(typeStruct);i++){   
@@ -672,17 +724,23 @@ contactCom.processMessage(ts);
   
 	// change inquiry status to contacted if it is still a new lead status and the response wasn't detected as a non-human reply or the original sender. 
 	if(mainContact.contact_id NEQ fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0){ 
+		ss.inquiries_status_id=application.zcore.functions.zso(ss, "inquiries_status_id", true, 0);
+		if(ss.inquiries_status_id NEQ 0){
+			newStatusId=ss.inquiries_status_id;
+		}else if(qInquiry.inquiries_status_id EQ 2){
+			newStatusId=3;		
+		}else if(qInquiry.inquiries_status_id EQ 1){
+			newStatusId=6;		
+		}else{
+			newStatusId=3;
+		}
 		db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
-		SET inquiries_status_id=#db.param('3')#, 
+		SET inquiries_status_id=#db.param(newStatusId)#, 
 		inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
 		WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
-		site_id = #db.param(ss.messageStruct.site_id)# and 
-		inquiries_status_id IN (#db.param(1)#, #db.param(2)#) and 
+		site_id = #db.param(ss.messageStruct.site_id)# and  
 		inquiries_deleted=#db.param(0)# ";
-		db.execute("qUpdateInquiry");
-		if(debug){
-			echo('Marked inquiry as status: assigned, contacted<br>');
-		} 
+		db.execute("qUpdateInquiry"); 
 	}
 	// update date
 	db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
@@ -696,14 +754,17 @@ contactCom.processMessage(ts);
 	arrError=[];
 	for(emailStruct in arrEmail){
 		if(request.zos.istestserver){
+			emailStruct.html=replace(emailStruct.html, '</body>', '<p>Test server debug message: This email would have been sent to #emailStruct.to#</p></body>');
 			emailStruct.to=request.zos.developerEmailTo;
 			emailStruct.cc="";
 			emailStruct.bcc="";
+
 		} 
 		// TODO: remove when we're done testing:
 		emailStruct.to=request.zos.developerEmailTo;
 		emailStruct.cc="";
 		emailStruct.bcc="";
+ 
 
 		rCom=application.zcore.email.send(emailStruct);
 		if(rCom.isOK() EQ false){
@@ -1046,7 +1107,7 @@ scheduleLeadEmail(ts);
 		qContact=db.execute("qContact");
 	}
 
-	db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# WHERE 
+	db.sql="select user_id, user_group_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 	user_username = #db.param(arguments.email)# and 
 	user_active=#db.param(1)# and 
 	user_deleted = #db.param(0)# and
@@ -1060,7 +1121,9 @@ scheduleLeadEmail(ts);
 	for(row in qContact){
 		if(qUser.recordcount EQ 0){
 			row.isUser=false;
-			row.isManagerUser=false;
+			row.isManagerUser=false; 
+			row.user_id=0;
+			row.user_id_siteidtype=0;
 		}else{
 			row.isUser=true;
 			// test if qUser.user_group_id is manager or not
@@ -1069,6 +1132,8 @@ scheduleLeadEmail(ts);
 			}else{
 				row.isManagerUser=false;
 			}
+			row.user_id=qUser.user_id;
+			row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id);
 		}
 		return row;
 	}
@@ -1095,8 +1160,8 @@ scheduleLeadEmail(ts);
 	}
 	if(qContact.recordcount){
 
-		for(row2 in qContact){ 
-			db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# WHERE 
+		for(row2 in qContact){
+			db.sql="select user_id, user_group_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 			user_username = #db.param(row2.contact_email)# and 
 			user_active=#db.param(1)# and 
 			user_deleted = #db.param(0)# and
@@ -1111,6 +1176,8 @@ scheduleLeadEmail(ts);
 			if(qUser.recordcount EQ 0){ 
 				row.isUser=false;
 				row.isManagerUser=false; 
+				row.user_id=0;
+				row.user_id_siteidtype=0;
 			}else{
 				row.isUser=true;
 				// test if qUser.user_group_id is manager or not
@@ -1119,6 +1186,8 @@ scheduleLeadEmail(ts);
 				}else{
 					row.isManagerUser=false;
 				}
+				row.user_id=qUser.user_id;
+				row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id);
 			}
 			request.zos.contactIDCache[arguments.contact_id&"."&arguments.site_id]=row;
 		}

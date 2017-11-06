@@ -220,8 +220,7 @@
 			t9={};
 			t9.inquiries_external_id="ctm-#call.id#";
 			t9.site_id=request.zos.globals.id;
-			t9.inquiries_deleted=0;
-			t9.inquiries_primary=1;
+			t9.inquiries_deleted=0; 
 			d=left(call.called_at, 19); 
 			if(isdate(d)){
 				t9.inquiries_datetime=dateformat(d, "yyyy-mm-dd")&" "&timeformat(d, "HH:mm:ss");

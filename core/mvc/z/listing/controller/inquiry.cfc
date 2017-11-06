@@ -177,15 +177,7 @@
 	//	Insert Into Inquiry Database
 	form.site_id = request.zOS.globals.id;
 	form.property_id = form.listing_id;
-	form.inquiries_datetime = dateformat(now(), 'yyyy-mm-dd') &" "&timeformat(now(), 'HH:mm:ss');
-	form.inquiries_primary=1;
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-	SET inquiries_primary=#db.param(0)#,
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)#  
-	WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	inquiries_deleted = #db.param(0)#";
-	db.execute("q"); 
+	form.inquiries_datetime = dateformat(now(), 'yyyy-mm-dd') &" "&timeformat(now(), 'HH:mm:ss'); 
 	form.inquiries_id=application.zcore.functions.zInsertLead();
 	if(form.inquiries_id EQ false){
 		if(structkeyexists(form, 'x_ajax_id')){

@@ -47,12 +47,7 @@
 		request.zsession.leadcontactfilter=form.leadcontactfilter;		
 	}else if(isDefined('request.zsession.leadcontactfilter') EQ false){
 		request.zsession.leadcontactfilter='all';
-	}
-	if(structkeyexists(form, 'grouping')){
-		request.zsession.leademailgrouping=form.grouping;
-	}else if(structkeyexists(request.zsession, 'leademailgrouping') EQ false){
-		request.zsession.leademailgrouping='0';
-	}
+	} 
 	db.sql="select min(inquiries_datetime) as inquiries_datetime 
 	from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
 	where site_id = #db.param(request.zos.globals.id)# and  
@@ -266,10 +261,7 @@
 		}else if(request.zsession.leadcontactfilter EQ 'forced'){
 			db.sql&=" and inquiries_phone_time<>#db.param('')# ";
 		} 
-	}
-	if(request.zsession.leademailgrouping EQ '1'){
-		db.sql&=" and inquiries_primary = #db.param('1')#";
-	}
+	} 
 	db.sql &= " GROUP BY  inquiries.inquiries_type_id ";
 	db.sql&=" ORDER BY Num ASC ";
 	form.zPageId3=application.zcore.functions.zso(form, 'zPageId3');

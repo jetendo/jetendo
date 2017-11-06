@@ -270,14 +270,7 @@ if(r_approved EQ 'APPROVED'){
 	inquiries_reservation_status='1';
 	inquiries_start_date=DateFormat(inquiries_start_date,'yyyy-mm-dd');
 	inquiries_end_date=DateFormat(inquiries_end_date,'yyyy-mm-dd');
-	// create reservation as inquiries record
-	inquiries_primary=1;
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-	set inquiries_primary=#db.param(0)#,
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	where inquiries_email=#db.param(inquiries_email)# and 
-	inquiries_deleted = #db.param(0)#";
-	db.execute("q"); 
+	// create reservation as inquiries record 
 	inquiries_id=application.zcore.functions.zInsertLead();
 	if(inquiries_id EQ false){
 		// failed but deposit was made - yikes.
@@ -349,14 +342,7 @@ if(r_approved EQ 'APPROVED'){
 				inquiries_email_opt_in=0;
 			}
 			inquiries_reservation_status='0';
-			
-			inquiries_primary=1;
-			db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-			set inquiries_primary=#db.param(0)#,
-			inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# 
-			 where inquiries_email=#db.param(inquiries_email)# and 
-			 inquiries_deleted = #db.param(0)#";
-			db.execute("q"); 
+			 
 			inquiries_id=application.zcore.functions.zInsertLead();
 			if(inquiries_id EQ false){
 				// failed but deposit was made - yikes.

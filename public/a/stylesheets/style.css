@@ -36,9 +36,9 @@ body { margin:0px; font-size:13px; font-family:Open Sans, Arial, Verdana, Helvet
 	font-size:14px;
 	font-weight: bold; text-decoration:none;
 }
-ul,ol{margin:0px; padding:0px; padding-bottom:15px; padding-left:35px;} 
+ul,ol{margin:0px; padding:0px; padding-bottom:10px; padding-left:35px;} 
   p {
-   margin:0px; padding-top:0px; padding-bottom:15px;
+   margin:0px; padding-top:0px; padding-bottom:10px;
   }
   h1{
   	font-size:30px; 

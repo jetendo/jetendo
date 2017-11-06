@@ -112,15 +112,7 @@
 	}
 	form.site_id = request.zOS.globals.id;
 	form.inquiries_session_id=application.zcore.session.getSessionId();
-	
-	form.inquiries_primary=1;
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-	SET inquiries_primary=#db.param(0)#,
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)#  
-	WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-	inquiries_deleted = #db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)# ";
-	db.execute("q"); 
+	 
 	//	Insert Into Inquiry Database
 	form.inquiries_id=application.zcore.functions.zInsertLead();
 	

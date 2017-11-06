@@ -259,10 +259,7 @@
 							}else if(request.zsession.leadcontactfilter EQ 'forced'){
 								writeoutput(' and inquiries_phone_time<>#db.param('')#');
 							}
-						}
-						if(isDefined('request.zsession.leademailgrouping') and request.zsession.leademailgrouping EQ '1'){
-							writeoutput(' and inquiries_primary = #db.param('1')#');
-						}
+						} 
 						if(application.zcore.functions.zso(form, 'exporttype') EQ 1){
 							writeoutput(' GROUP BY inquiries_email');
 						}else if(application.zcore.functions.zso(form, 'exporttype') EQ 2){

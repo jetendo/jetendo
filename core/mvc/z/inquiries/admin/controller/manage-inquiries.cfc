@@ -206,8 +206,10 @@
 		} 
 	} 
 	request.userIdList="";  
+	request.groupIdList="";
 	if(structcount(groupStruct) NEQ 0){
 		groupIdList=structkeylist(groupStruct);
+		request.groupIdList=groupIdList;
 		// build a userIdList of user that belong to request.zsession.user.office_id and the user groups this user can manage 
 		request.userIdList=getUserIdListByOfficeIdListAndGroupIdList(request.zsession.user.office_id, groupIdList); 
 	}  
@@ -532,9 +534,7 @@
 	myForm={}; 
 	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id', true, 1);
 	if(form.method EQ "insertPrivateNote"){
-		init();
-	}else{
-		userInit();
+		init(); 
 	}
 	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
@@ -553,7 +553,7 @@
 	result = application.zcore.functions.zValidateStruct(form, myForm, request.zsid,true);
 	if(result){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true); 
-		application.zcore.functions.zRedirect(errorReturnURL); 
+		application.zcore.status.displayReturnJson(Request.zsid);
 	}
 	if(form.inquiries_status_id EQ 4 or form.inquiries_status_id EQ 5 or form.inquiries_status_id EQ 7 or form.inquiries_status_id EQ 8){		
 		// ignore validation
@@ -564,49 +564,85 @@
 	form.user_id = request.zsession.user.id;
 	form.user_id_siteIdType = application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
 	form.contact_id=request.zsession.user.contact_id;
-	form.site_id = request.zOS.globals.id;
-	
-	//	Insert Into Inquiry Database
-	inputStruct = StructNew();
-	inputStruct.struct=form;
-	inputStruct.table = "inquiries_feedback";
-	inputstruct.datasource=request.zos.zcoreDatasource;
-	form.inquiries_feedback_id = application.zcore.functions.zInsert(inputStruct); 
-	if(form.inquiries_feedback_id EQ false){
-		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
-		application.zcore.functions.zRedirect(errorReturnURL); 
-	}else{
-		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead updated.");
-		if(structkeyexists(form,'inquiries_status_id') and (form.inquiries_status_id EQ 4 or form.inquiries_status_id EQ 5 or form.inquiries_status_id EQ 7 or form.inquiries_status_id EQ 8)){								 
-		}else if(qCheck.inquiries_status_id EQ 2){
-			form.inquiries_status_id=3;		
-		}else if(qCheck.inquiries_status_id EQ 1){
-			form.inquiries_status_id=6;		
-		}else{
-			form.inquiries_status_id=3;
-		}
-		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries SET 
-		inquiries_updated_datetime = #db.param(form.inquiries_feedback_datetime)#, 
-		inquiries_status_id = #db.param(form.inquiries_status_id)# 
-		WHERE inquiries_id = #db.param(form.inquiries_id)# and 
-		site_id = #db.param(request.zos.globals.id)# and 
-		inquiries_deleted=#db.param(0)# ";
-		db.execute("r");
+	form.site_id = request.zOS.globals.id; 
+	savecontent variable="customNote"{
+		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
+		<h3>#form.inquiries_feedback_subject#</h3>
+		#form.inquiries_feedback_comments#');
 	}
-	if(form.user_id NEQ qCheck.user_id and qCheck.user_email NEQ ""){
-		if(qCheck.recordcount NEQ 0){
-			// TODO: need to send the normal email broadcast instead of this brief version.
-			toEmail=qCheck.user_email;
-			if(request.zos.isTestServer){
-				toEmail=request.zos.developerEmailTo;
-			}
-			mail  to="#toEmail#" from="#request.fromemail#" subject="Lead ###form.inquiries_id# was updated."{
-echo('Lead ###form.inquiries_id# was updated.
+	savecontent variable="emailHTML"{
+		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	    iemailCom.getEmailTemplate(customNote);
+	}
+	ts={  
+		contact_id:request.zsession.user.contact_id,  
+		debug:false,
+		inquiries_id:form.inquiries_id,
+		validHash:true, 
+		jsonStruct:{
+		   "headers":{
+		      "raw":"",
+		      "parsed":{ 
+		      }
+		   },
+		   "from":{
+		      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+		      "email":request.zsession.user.email
+		   },
+		   "to":[
+		      {
+		         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+		         "email":request.zsession.user.email,
+		         "plusId":"",
+		         "originalEmail":request.zsession.user.email
+		      }
+		   ],
+		   "cc":[],
+		   "bcc":[],
+		   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
+		   "html":emailHTML,
+		   "htmlWeb":form.inquiries_feedback_comments,
+		   "htmlProcessed":"",
+		   "files":[/*
+		      {
+		         "size":2715,
+		         "filePath":"elkdgjicjkbkdbjf2.jpg",
+		         "fileName":"elkdgjicjkbkdbjf.jpg"
+		      }*/
+		   ],
+		   "plusId":"", // nothing for internal mail
+		   "size":0, // measure below
+		   "date":request.zos.mysqlnow,
+		   "version":1,
+		   "humanReplyStruct":{
+		      "isHumanReply":true,
+		      "humanTriggers":[],
+		      "roboScore":0,
+		      "roboTriggers":[],
+		      "score":1,
+		      "humanScore":1
+		   } 
+		},
+		messageStruct:{
+			site_id:request.zos.globals.id
+		},
+		filterContacts:{ managers:true },
+		inquiries_status_id:form.inquiries_status_id,
+		privateMessage:true,
+		enableCopyToSelf:true
+	};  
 
-Please login in and view your lead by clicking the following link: #request.zos.currentHostName#/z/inquiries/admin/feedback/view?inquiries_id=#form.inquiries_id# Do not reply to this email. ');
-			}
-		}
-	} 
+	// slightly inaccurate since it doesn't include all fields and attachment sizes
+	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+	//ts.debug=true;
+	if(request.zsession.user.office_id NEQ "0" and request.zsession.user.office_id NEQ ""){
+		ts.filterContacts.offices=listToArray(request.zsession.user.office_id, ",");
+	}
+	//writedump(ts);	abort; 
+
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	rs=contactCom.processMessage(ts);  
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){
 			link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
@@ -680,7 +716,7 @@ Please login in and view your lead by clicking the following link: #request.zos.
 	qFeedback=db.execute("qFeedback"); 
 	application.zcore.functions.zQueryToStruct(qFeedback, form, 'inquiries_id');
 	</cfscript>
-	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/manage-inquiries/<cfif form.method EQ "userAddPrivateNote">userInsertPrivateNote<cfelse>insertPrivateNote</cfif>?contact_id=#form.contact_id#&amp;inquiries_id=#form.inquiries_id#"  method="post" enctype="multipart/form-data">
+	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/manage-inquiries/<cfif form.method EQ "userAddPrivateNote" or form.method EQ "userView">userInsertPrivateNote<cfelse>insertPrivateNote</cfif>?contact_id=#form.contact_id#&amp;inquiries_id=#form.inquiries_id#"  method="post" enctype="multipart/form-data">
 		<cfif form.method EQ "addPrivateNote" or form.method EQ "userAddPrivateNote">
 			<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
 				<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
@@ -1274,8 +1310,7 @@ zArrDeferredFunctions.push(function(){
 	result = application.zcore.functions.zValidateStruct(form, myForm,request.zsid,true);
 	if(result){	
 		return {success:false};
-	} 
-	form.inquiries_primary=1;
+	}  
 
 	return {success:true};
 	</cfscript>
@@ -1337,15 +1372,7 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
-	rs={success:true};
-	// set other leads with same email to primary 0
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries
-	SET inquiries_primary=#db.param(0)#, 
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-	inquiries_deleted = #db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)#"; 
-	db.execute("qUpdate");
+	rs={success:true}; 
 	result=application.zcore.functions.zUpdateLead();  
 	if(result EQ false){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
@@ -1370,15 +1397,7 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="afterInsert" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
-	rs={success:true};
-	// set other leads with same email to primary 0
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries
-	SET inquiries_primary=#db.param(0)#, 
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-	inquiries_deleted = #db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)#"; 
-	db.execute("qUpdate");
+	rs={success:true}; 
 
 	form.inquiries_session_id=application.zcore.session.getSessionId(); 
 	form.inquiries_status_id = 1;
@@ -1705,12 +1724,7 @@ zArrDeferredFunctions.push(function(){
 		request.zsession.leadcontactfilter=form.leadcontactfilter;		
 	}else if(isDefined('request.zsession.leadcontactfilter') EQ false){
 		request.zsession.leadcontactfilter='all';
-	}
-	if(structkeyexists(form, 'grouping')){
-		request.zsession.leademailgrouping=form.grouping;
-	}else if(structkeyexists(request.zsession, 'leademailgrouping') EQ false){
-		request.zsession.leademailgrouping='0';
-	}
+	} 
 	/*if(structkeyexists(form, 'viewspam')){
 		request.zsession.leadviewspam=form.viewspam;
 	}else if(not structkeyexists(request.zsession, 'leadviewspam')){*/
@@ -1819,10 +1833,7 @@ zArrDeferredFunctions.push(function(){
 		}else if(request.zsession.leadcontactfilter EQ 'forced'){
 			db.sql&=" and inquiries_phone_time<>#db.param('')# ";
 		} 
-	}
-	if(request.zsession.leademailgrouping EQ '1'){
-		db.sql&=" and inquiries_primary = #db.param('1')#";
-	}
+	} 
 	sortColumnSQL=getSortColumnSQL();
 	if(sortColumnSQL NEQ ''){
 		db.sql&=" ORDER BY #sortColumnSQL# inquiries_id ASC";
@@ -1832,11 +1843,7 @@ zArrDeferredFunctions.push(function(){
 	db.sql&=" LIMIT #db.param(max(0,(form.zIndex-1))*30)#,#db.param(30)#";
 	rs.qData=db.execute("qData");  
 
-	db.sql="SELECT count( ";
-	if(request.zsession.leademailgrouping EQ '1'){
-		db.sql&=" DISTINCT ";
-	}
-	db.sql&=" inquiries.inquiries_email) count 
+	db.sql="SELECT count(inquiries.inquiries_email) count 
 	from #db.table("inquiries", request.zos.zcoreDatasource)# 
 	WHERE inquiries.site_id = #db.param(request.zos.globals.id)# and ";
 	if(form.inquiries_status_id EQ ""){ 
@@ -1889,9 +1896,6 @@ zArrDeferredFunctions.push(function(){
 		}else if(request.zsession.leadcontactfilter EQ 'forced'){
 			db.sql&=" and inquiries_phone_time<>#db.param('')#";
 		} 
-	}
-	if(request.zsession.leademailgrouping EQ '1'){
-		db.sql&=" and inquiries_primary = #db.param('1')#";
 	} 
 	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 

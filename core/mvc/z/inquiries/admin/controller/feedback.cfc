@@ -1120,7 +1120,7 @@ zArrDeferredFunctions.push(function(){
 			function resizeFrames() {
 				for ( var i = 0, j = theFrames.length; i < j; i++ ) {
 					theFrames[ i ].style.height = '120px';
-					theFrames[ i ].style.height = ( theFrames[ i ].contentWindow.document.body.offsetHeight + 16 ) + 'px';
+					theFrames[ i ].style.height = ( theFrames[ i ].contentWindow.document.body.offsetHeight ) + 'px'; /// + 16 
 				}
 			}
 
@@ -1140,7 +1140,7 @@ zArrDeferredFunctions.push(function(){
 				} else {
 					theFrames.load( function() {
 						this.style.height = '120px';
-						this.style.height = ( this.contentWindow.document.body.offsetHeight + 16 ) + 'px';
+						this.style.height = ( this.contentWindow.document.body.offsetHeight  ) + 'px'; // + 16
 					} );
 				}
 

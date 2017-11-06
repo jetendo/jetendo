@@ -2884,16 +2884,8 @@ Define this function in another CFC to override the default email format
 	}
 	form.inquiries_datetime=request.zos.mysqlnow;
 	form.inquiries_status_id = 1;
-	form.site_id = request.zOS.globals.id;
-	form.inquiries_primary=1;
-	if(application.zcore.functions.zso(form, 'inquiries_email') NEQ ""){
-		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-		SET inquiries_primary=#db.param(0)#,
-		inquiries_updated_datetime=#db.param(request.zos.mysqlnow)#  
-		WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-		inquiries_deleted = #db.param(0)# and
-		site_id = #db.param(request.zos.globals.id)# ";
-		db.execute("q"); 
+	form.site_id = request.zOS.globals.id; 
+	if(application.zcore.functions.zso(form, 'inquiries_email') NEQ ""){ 
 		application.zcore.tracking.setUserEmail(form.inquiries_email);
 	} 
 	form.inquiries_id=application.zcore.functions.zInsertLead();

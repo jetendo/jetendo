@@ -66,15 +66,7 @@ application.zcore.functions.zRecordLead();
 	}
 	form.inquiries_status_id = 1; 
 	form.site_id = request.zOS.globals.id;
-	
-	form.inquiries_primary=1;
-	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
-	SET inquiries_primary=#db.param(0)#,
-	inquiries_updated_datetime=#db.param(request.zos.mysqlnow)#  
-	WHERE inquiries_email=#db.param(form.inquiries_email)# and 
-	inquiries_deleted = #db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)# ";
-	db.execute("q"); 
+	 
 	form.inquiries_session_id=application.zcore.session.getSessionId();
 	//	Insert Into Inquiry Database
 	form.inquiries_id=application.zcore.functions.zInsertLead();
@@ -110,8 +102,7 @@ application.zcore.functions.zInsertLead();
 	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
 	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
-	form.site_id = request.zOS.globals.id;
-	form.inquiries_primary=1;
+	form.site_id = request.zOS.globals.id; 
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -160,8 +151,7 @@ application.zcore.functions.zImportLead(ts); --->
 	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
 	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
 	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
-	ss.site_id = request.zOS.globals.id;
-	ss.inquiries_primary=1;
+	ss.site_id = request.zOS.globals.id; 
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
 
 	inputStruct = StructNew();

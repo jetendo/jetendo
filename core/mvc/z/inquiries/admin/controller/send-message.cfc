@@ -115,10 +115,21 @@
 		writedump(form);
 	}
  
+	savecontent variable="customNote"{ 
+		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
+		<h3>#form.inquiries_subject#</h3>
+		#form.inquiries_message#');
+	}
+	savecontent variable="emailHTML"{
+		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	    iemailCom.getEmailTemplate(customNote);
+	}
 	ts={  
 		contact_id:request.zsession.user.contact_id,  
 		debug:false,
-		inquiries_id:"", 
+		inquiries_id:form.inquiries_id,
+		privateMessage:false,
+		enableCopyToSelf:true, 
 		validHash:true, 
 		jsonStruct:{
 		   "headers":{
@@ -141,7 +152,8 @@
 		   "cc":[],
 		   "bcc":[],
 		   "subject":form.inquiries_subject,
-		   "html":form.inquiries_message,
+		   "html":emailHTML,
+		   "htmlWeb":form.inquiries_message,
 		   "files":[/*
 		      {
 		         "size":2715,
@@ -218,8 +230,7 @@
 			inquiries_email:variables.contact.contact_email,
 			inquiries_status_id:3,
 			inquiries_datetime:request.zos.mysqlnow,
-			inquiries_updated_datetime:request.zos.mysqlnow,
-			inquiries_primary:1,
+			inquiries_updated_datetime:request.zos.mysqlnow, 
 			site_id:request.zos.globals.id,
 			inquiries_priority:5
 		}; 
@@ -261,6 +272,7 @@
 	// slightly inaccurate since it doesn't include all fields and attachment sizes
 	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
 	//ts.debug=true;
+	ts.filterContacts={};
 	rs=variables.contactCom.processMessage(ts);
 	if(not rs.success){
 		// TODO: might want to delete the lead that was just inserted if the emails never went out to avoid clutter / confusion.  Be sure not to delete existing leads though.
@@ -382,7 +394,7 @@
 	// put the full original message here with 
 	defaultSubject="";
 	if(form.inquiries_id NEQ 0){
-		originalMessage="<br><br>This message was in response your original inquiry ###form.inquiries_id#.<br><br>"&originalMessage;
+		originalMessage="<br><br>This message was in response to lead ###form.inquiries_id#.<br><br>"&originalMessage;
 
 		// get lead type of inquiry
 		db.sql="select * from #db.table("inquiries_type", request.zos.zcoreDatasource)# 

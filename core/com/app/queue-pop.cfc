@@ -173,8 +173,11 @@
 	rs={
 		success:true,
 		debug:false,
+		privateMessage:false,
+		enableCopyToSelf:false,
 		messageStruct:arguments.messageStruct,
-		jsonStruct:arguments.jsonStruct
+		jsonStruct:arguments.jsonStruct,
+		filterContacts:{}
 	}; 
 	// process and route based on jsonStruct.plusId
 	if(jsonStruct.plusId EQ ""){
@@ -205,8 +208,7 @@
   
 			}else{
 				return {success:false, errorMessage:"Expected contact/user id to start with C or U"};
-			} 
-
+			}  
 			return request.contactCom.processMessage(rs); 
 		}else{
 			// TODO: haven't implemented this routing yet - add a site option to allow a catch all address for emails that can't be automatically routed.
