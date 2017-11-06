@@ -305,8 +305,7 @@
 	db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# 
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
-	inquiries_lead_template_x_site_siteidtype=#db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_lead_template.site_id"))# and 
-	inquiries_lead_template.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_lead_template_x_site.inquiries_lead_template_x_site_siteidtype"))# and 
+	inquiries_lead_template_x_site_siteidtype=#db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_lead_template.site_id"))# and  
 	inquiries_lead_template_x_site.site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_lead_template_x_site_deleted = #db.param(0)#
 	WHERE inquiries_lead_template_x_site.site_id IS NULL and
@@ -317,7 +316,7 @@
 		db.sql&=" and inquiries_lead_template_realestate = #db.param('0')# ";
 	}
 	db.sql&=" ORDER BY inquiries_lead_template_sort ASC, inquiries_lead_template_name ASC ";
-	qTemplate=db.execute("qTemplate");
+	qTemplate=db.execute("qTemplate"); 
  
 	if(qagent.recordcount NEQ 0){
 		savecontent variable="signature"{
@@ -515,12 +514,12 @@
 			if(arrEmailTemplate[v].subject != ""){
 				document.sendEmailForm.inquiries_subject.value=arrEmailTemplate[v].subject;
 			}
-			if(arrEmailTemplate[v].message != ""){
-				document.sendEmailForm.inquiries_message.value=greeting+arrEmailTemplate[v].message+signature+originalMessage;
+			if(arrEmailTemplate[v].message != ""){ 
+				tinymce.get('inquiries_message').setContent(greeting+arrEmailTemplate[v].message+signature+originalMessage);  
 			}
 		}else{
-			//document.sendEmailForm.inquiries_subject.value="";
-			//document.sendEmailForm.inquiries_message.value=greeting+signature+originalMessage;
+			document.sendEmailForm.inquiries_subject.value="";
+			tinymce.get('inquiries_message').setContent(greeting+signature+originalMessage);  
 		}
 	}
 	/* ]]> */
@@ -531,13 +530,38 @@
 			<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Edit Templates</a> 
 			<a href="/z/inquiries/admin/lead-template/add?inquiries_lead_template_type=2&amp;siteIDType=1" class="z-manager-search-button" target="_blank">Add Template</a> 
 		</cfif>
-	</div> 
+	</div>  ---> 
+	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
+		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
+		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+			<cfif application.zcore.user.checkGroupAccess("administrator")> 
+				<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Templates</a> 
+			</cfif>
+			</div> 
+		</div> 
+		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
+			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
+					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
+			<cfif application.zcore.user.checkGroupAccess("administrator")> 
+				<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Templates</a> 
+			</cfif>
+			</div> 
+		<div class="z-manager-edit-errors z-float"></div>
+		<table class="table-list z-index-1" style="width:100%; ">  
+			<tr>
+				<th colspan="2"><cfif form.inquiries_id EQ 0>New Message<cfelse>Replying to Inquiry ###form.inquiries_id#</cfif>
+				</th>
+			</tr>
 			<cfif application.zcore.user.checkGroupAccess("member") and qTemplate.recordcount NEQ 0>
 				<tr>
 					<th colspan="2"> Select a template or fill in the following fields:</th>
 				</tr>
 				<tr>
-					<th style="width:80px;">Template:</th>
+					<th>Template:</th>
 					<td><cfscript>
 					selectStruct = StructNew();
 					selectStruct.name = "inquiries_lead_template_id";
@@ -548,25 +572,7 @@
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					</cfscript></td>
 				</tr>
-			</cfif> ---> 
-	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
-		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
-		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
-		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
-		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
-			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
-		</div> 
-		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
-			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
-					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
-		</div> 
-		<div class="z-manager-edit-errors z-float"></div>
-		<table class="table-list z-index-1" style="width:100%; ">  
-			<tr>
-				<th colspan="2"><cfif form.inquiries_id EQ 0>New Message<cfelse>Replying to Inquiry ###form.inquiries_id#</cfif>
-			</td>
-			</tr>
+			</cfif>
 			<tr>
 				<th>From:</th>
 				<td>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#)
@@ -679,11 +685,6 @@
 			return zSubmitManagerEditForm(this, emailSentCallback); 
 		});
 	});
-	</script><!---  --->
-	<script type="text/javascript">
-	/* <![CDATA[ */<cfif application.zcore.functions.zso(form, 'leadEmailUseSubmission') EQ ''>
-	updateEmailForm('');
-	</cfif>/* ]]> */
 	</script> 
 	<br />
 </cffunction>
