@@ -12,7 +12,7 @@
 	if(form.method EQ "showPublicUsers"){
 		form.returnMethod="showPublicUsers";
 	}
-	if(not structkeyexists(request.zos.userSession.groupAccess, "administrator") and not structkeyexists(request.zos.userSession.groupAccess, "manager")){
+	if(not application.zcore.user.checkGroupAccess("administrator") and not structkeyexists(request.zos.userSession.groupAccess, "manager")){
 		if(form.method EQ "index"){
 			application.zcore.functions.zRedirect("/z/admin/member/edit?user_id=#request.zsession.user.id#");
 		}
@@ -331,6 +331,10 @@ site_id = #db.param(request.zos.globals.id)# ";
 		user_deleted = #db.param(0)# and 
 		site_id = #db.param(request.zos.globals.id)#";
 		qU2=db.execute("qU2");
+		if(not application.zcore.user.checkGroupAccess("administrator")){
+			// force same office
+			form.office_id=qU2.office_id;
+		}
 	}
 	form.member_phone=application.zcore.functions.zso(form, 'member_phone');
 	structappend(ts,form);
@@ -594,7 +598,7 @@ site_id = #db.param(request.zos.globals.id)# ";
 		#tabCom.beginTabMenu()# 
 		#tabCom.beginFieldSet("Basic")#
 		<table  class="table-list">
-			<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") and (request.zsession.user.id NEQ form.user_id or request.zsession.user.site_id NEQ request.zos.globals.id)>
+			<cfif application.zcore.user.checkGroupAccess("administrator") and (request.zsession.user.id NEQ form.user_id or request.zsession.user.site_id NEQ request.zos.globals.id)>
 				<cfscript>
 				db.sql="SELECT * FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group WHERE 
 				user_group_deleted = #db.param(0)# and 
@@ -628,26 +632,28 @@ site_id = #db.param(request.zos.globals.id)# ";
 					</td>
 				</tr>
 			</cfif>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Office","member.member.edit office_id")#</th>
-				<td><cfscript>
-					db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
-					WHERE site_id = #db.param(request.zos.globals.id)# and 
-					office_deleted = #db.param(0)# 
-					ORDER BY office_name";
-					qOffice=db.execute("qOffice");
-					selectStruct = StructNew();
-					selectStruct.name = "office_id";
-					selectStruct.query = qOffice;
-					selectStruct.hideSelect=true;
-					selectStruct.queryParseLabelVars=true;
-					selectStruct.queryLabelField = "##office_name##, ##office_address##";
-					selectStruct.queryValueField = "office_id";
-					selectStruct.multiple=true;
-					application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'office_id'));
-					application.zcore.functions.zInputSelectBox(selectStruct);
-					</cfscript></td>
-			</tr>
+			<cfif application.zcore.user.checkGroupAccess("administrator")>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Office","member.member.edit office_id")#</th>
+					<td><cfscript>
+						db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
+						WHERE site_id = #db.param(request.zos.globals.id)# and 
+						office_deleted = #db.param(0)# 
+						ORDER BY office_name";
+						qOffice=db.execute("qOffice");
+						selectStruct = StructNew();
+						selectStruct.name = "office_id";
+						selectStruct.query = qOffice;
+						selectStruct.hideSelect=true;
+						selectStruct.queryParseLabelVars=true;
+						selectStruct.queryLabelField = "##office_name##, ##office_address##";
+						selectStruct.queryValueField = "office_id";
+						selectStruct.multiple=true;
+						application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'office_id'));
+						application.zcore.functions.zInputSelectBox(selectStruct);
+						</cfscript></td>
+				</tr>
+			</cfif>
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("First Name","member.member.edit member_first_name")#</th>
 				<td><input type="text" name="member_first_name" value="<cfif form.member_first_name EQ ''>#form.user_first_name#<cfelse>#form.member_first_name#</cfif>" size="30" /></td>
