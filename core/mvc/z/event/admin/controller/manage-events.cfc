@@ -719,7 +719,8 @@
 			<tr>
 				<th>End Date</th>
 				<td><input type="text" name="event_end_datetime_date" style="max-width:80px;min-width:80px;" onchange="#onChangeJavascript#" onkeyup="#onChangeJavascript#" onpaste="#onChangeJavascript#" id="event_end_datetime_date" value="#htmleditformat(dateformat(eventEndDate, 'm/dd/yyyy'))#" size="10" />
-					<input type="text" name="event_end_datetime_time" style="max-width:80px;min-width:80px;" id="event_end_datetime_time" value="<cfif isdate(eventEndTime) and timeformat(eventEndTime, 'h:mm tt') NEQ "12:00 am">#htmleditformat(timeformat(eventEndTime, 'h:mm tt'))#</cfif>" size="9" /> *
+					<input type="text" name="event_end_datetime_time" style="max-width:80px;min-width:80px;" id="event_end_datetime_time" value="<cfif isdate(eventEndTime) and timeformat(eventEndTime, 'h:mm tt') NEQ "12:00 am">#htmleditformat(timeformat(eventEndTime, 'h:mm tt'))#</cfif>" size="9" /> *<br><br>
+					Note: If this is a recurring event, you should make the Start Date and End Date the length of one occurrence of the event.  The End Date is typically the same date, but with a later time in the day.
 				</td>
 			</tr>  
 			<tr>
