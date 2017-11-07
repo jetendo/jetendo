@@ -120,6 +120,7 @@
 		<h3>#form.inquiries_subject#</h3>
 		#form.inquiries_message#');
 	}
+	request.noleadsystemlinks=true;
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote);

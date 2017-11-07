@@ -54,6 +54,7 @@
 
 <cffunction name="getEmailTemplate" localmode="modern" access="public">
 	<cfargument name="customNote" type="string" required="no" default="">
+	<cfargument name="showPrivate" type="boolean" required="no" default="#false#">
 	<cfscript>
 	var tempText=0;
 	var qinquiry=0;
@@ -96,7 +97,7 @@
 
 			application.zcore.functions.zQueryToStruct(qinquiry, form);
 			</cfscript>
-			<cfif form.user_id NEQ 0>
+			<!--- <cfif form.user_id NEQ 0>
 				<cfif structkeyexists(form, 'groupemail') and form.groupEmail>
 					One of your leads has been updated by the client.<br />
 					<br />
@@ -104,7 +105,7 @@
 					A lead has been assigned to you.<br />
 					<br />
 				</cfif>
-			</cfif>
+			</cfif> --->
 			<cfif arguments.customNote NEQ "">
 				#arguments.customNote#
 				<p>&nbsp;</p>
@@ -120,10 +121,14 @@
 					if(not application.zcore.user.groupIdHasAccessToGroup(form.user_group_id, "member")){ 
 						loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/userView";
 					}
+				} 
+				if(not arguments.showPrivate and qInquiry.inquiries_admin_comments NEQ ''){
+					echo('<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">Click here to view private comments</a></h3>');
 				}
-				</cfscript>
-				<h3><a href="#loginURL#?inquiries_id=<cfif structkeyexists(form, 'groupemail') and form.groupEmail>#form.inquiries_parent_id#<cfelse>#form.inquiries_id#</cfif>">View/Edit Lead ###form.inquiries_id#</a></h3>
+				</cfscript> 
+				<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">View/Edit Lead ###form.inquiries_id#</a></h3>
 			</cfif>
+			<p>Original inquiry is listed below</p>
 			<cfscript>
 			// move latest track_user to track_user so the email has the newest tracking information.
 			application.zcore.tracking.updateLogs();
@@ -134,7 +139,7 @@
 			<cfscript>
 			request.usestyleonly=true;
 	        viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-			viewIncludeCom.getViewInclude(qinquiry);
+			viewIncludeCom.getViewInclude(qinquiry, arguments.showPrivate);
 			</cfscript> 
 	</body>
 	</html>
@@ -198,6 +203,7 @@
 
 <cffunction name="getViewInclude" localmode="modern" access="public">
 	<cfargument name="qinquiry" type="query" required="yes">
+	<cfargument name="showPrivate" type="boolean" required="no" default="#true#">
 	<cfscript> 
  	var db=request.zos.queryObject; 
 	var t=structnew();
@@ -219,229 +225,272 @@
 	<span #tablestyle#>
 	<table #tablestyle# class="table-list">
   
-		<!--- <cfif isReservationSystem EQ false> --->
-		<cfif t.inquiries_referer NEQ '' or t.inquiries_referer2 NEQ ''>
+		<cfif arguments.showPrivate>
+			<!-- startadmincomments -->
+			<!--- <cfif isReservationSystem EQ false> --->
+			<cfif t.inquiries_referer NEQ '' or t.inquiries_referer2 NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left; ">Last 2 Pages:</th>
+					<td style="#tdstyle#">Clicking on these links can help you understand what the user was looking at when submitting the inquiry.<br />
+						<cfif t.inquiries_referer CONTAINS 'google.com/aclk'>
+	Link 1 disabled since this may cause a duplicate google adwords PPC click						<br />
+							<cfelseif t.inquiries_referer NEQ ''>
+							<a href="#t.inquiries_referer#" target="_blank">Click to view referring page 1</a><br />
+						</cfif>
+						<cfif t.inquiries_referer2 CONTAINS 'google.com/aclk'>
+	Link 2 disabled since this may cause a duplicate google adwords PPC click						<br />
+							<cfelseif t.inquiries_referer2 NEQ ''>
+							<a href="#t.inquiries_referer2#" target="_blank">Click to view referring page 2</a><br />
+						</cfif></td>
+				</tr>
+			</cfif>
+			<cfif t.inquiries_email NEQ "">
+				<cfscript>
+				db.sql="SELECT * FROM #db.table("track_user", request.zos.zcoreDatasource)# track_user 
+				WHERE track_user.site_id =#db.param(request.zOS.globals.id)# AND 
+				((track_user_email =#db.param(t.inquiries_email)# and 
+				track_user_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')#) or 
+				inquiries_id=#db.param(t.inquiries_id)#)  and 
+				track_user_deleted = #db.param(0)#
+				LIMIT #db.param(0)#,#db.param(1)#";
+				qTrack=db.execute("qTrack");
+
+
+				</cfscript>
+				<cfif qTrack.recordcount NEQ 0>
+					<cfloop query="qTrack">
+					<tr>
+						<th style="#thstyle# text-align:left;">Tracking:</th>
+						<td style="#tdstyle#">
+							
+						<cfif dateformat(qTrack.track_user_datetime,'yyyymmdd') GT 20111121>
+							<cfif qTrack.track_user_ppc EQ 1 or qTrack.track_user_first_page CONTAINS "gclid=">
+								<strong>Google Adwords Pay Per Click Lead</strong><br />
+							</cfif>
+							<cfif qTrack.track_user_source NEQ "">
+							<strong>Source: #qTrack.track_user_source#</strong><br />
+							</cfif>
+						<cfelse>
+							<cfscript>
+							db.sql="SELECT count(track_page_id) count 
+							FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
+							WHERE site_id =#db.param(request.zOS.globals.id)# and 
+							track_user_id =#db.param(track_user_id)# and 
+							track_page_deleted = #db.param(0)# and 
+							track_page_qs LIKE #db.param('%gclid=%')#";
+							qPage=db.execute("qPage");
+							</cfscript>
+							<cfif qPage.recordcount NEQ 0 and qPage.count NEQ 0>
+								<strong>Google Adwords Pay Per Click Lead</strong><br />
+							</cfif>
+						</cfif>
+						
+						<cfif qTrack.track_user_referer NEQ "">
+							<cfif qTrack.track_user_ppc EQ 1>
+								<cfscript>
+								    arrU=listtoarray(qTrack.track_user_referer,"&");
+								    for(i894=1;i894 LTE arraylen(arrU);i894++){
+									if(left(arrU[i894],2) EQ "q="){
+									    writeoutput("Google PPC Keyword: "&urldecode(removechars(arrU[i894],1,2))&"<br />");
+									}
+								    }
+								    </cfscript>
+							<cfelse>
+								Source URL: <a href="#qTrack.track_user_referer#" target="_blank">#left(qTrack.track_user_referer,50)#...</a><br />
+							</cfif>
+						</cfif>
+						<cfif qTrack.track_user_keywords NEQ "">
+							Keyword:#qTrack.track_user_keywords#<br />
+						</cfif>
+						<cfscript>
+
+							formattedDate=DateFormat(qTrack.track_user_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_datetime,'HH:mm:ss');
+							firstDate=parsedatetime(formattedDate);
+							formattedDate2=DateFormat(qTrack.track_user_recent_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_recent_datetime,'HH:mm:ss');
+							if(isdate(formattedDate2)){
+							lastDate=parsedatetime(formattedDate2);
+							}else{
+								lastDate=firstDate;	
+							}
+							seconds=DateDiff("s", formattedDate, formattedDate2);
+
+							if(qTrack.track_user_session_length NEQ 0){
+								seconds=qTrack.track_user_session_length;
+								if(seconds GT 86400){
+									minutes=fix(seconds/60/60/24)&' days ';
+								}else{
+									minutes=fix(seconds/60)&' minutes ';
+									if(fix(seconds/60) EQ 0){
+										minutes="";
+									}
+									if(seconds MOD 60 NEQ 0){
+										minutes=minutes&(seconds MOD 60)&' seconds';
+									}
+								}
+								echo('Length of visit: #minutes#<br />');
+							}
+							if(qTrack.track_user_seconds_since_first_visit NEQ 0){
+								seconds=qTrack.track_user_seconds_since_first_visit;
+								if(seconds GT 86400){
+									minutes=fix(seconds/60/60/24)&' days ';
+								}else{
+									minutes=fix(seconds/60)&' minutes ';
+									if(fix(seconds/60) EQ 0){
+										minutes="";
+									}
+									if(seconds MOD 60 NEQ 0){
+										minutes=minutes&(seconds MOD 60)&' seconds';
+									}
+								}
+								echo('Time since first visit: #minutes#<br />');
+							}
+							if(qTrack.track_user_hits GT 1){
+								echo('Clicks: #qTrack.track_user_hits#<br />');
+							}
+							if(qTrack.track_user_first_page NEQ ""){
+								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" target="_blank">Click here</a> to view the first page they visited on the web site.');
+							}
+						/*
+						// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
+						db.sql="SELECT count(track_page_id) count, min(track_page_datetime) minDate , max(track_page_datetime) maxDate 
+						FROM #db.table("track_page", request.zos.zcoreDatasource)#  
+						WHERE site_id =#db.param(request.zOS.globals.id)# and 
+						track_user_id =#db.param(qTrack.track_user_id)# and 
+						track_page_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')# and 
+						track_page_deleted = #db.param(0)#
+						LIMIT #db.param(0)#,#db.param(1)#";
+						qTrackPage=db.execute("qTrackPage"); 
+
+						if(qTrackPage.recordcount and qTrackPage.count GT 1){ 
+							formattedDate=DateFormat(qTrackPage.minDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.minDate,'HH:mm:ss');
+							firstDate=parsedatetime(formattedDate);
+							formattedDate2=DateFormat(qTrackPage.maxDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.maxDate,'HH:mm:ss');
+							if(isdate(formattedDate2)){
+							lastDate=parsedatetime(formattedDate2);
+							}else{
+								lastDate=firstDate;	
+							}
+							seconds=DateDiff("s", formattedDate, formattedDate2);
+							minutes=fix(seconds/60)&'mins ';
+							if(fix(seconds/60) EQ 0){
+								minutes="";
+							}
+							if(seconds MOD 60 NEQ 0){
+								minutes=minutes&(seconds MOD 60)&'secs';
+							}
+							echo('Length of Visit:#minutes#<br />');
+							echo('Clicks:#qTrackPage.count#<br />');
+							db.sql="SELECT * FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
+							WHERE site_id =#db.param(request.zOS.globals.id)# AND 
+							track_user_id =#db.param(qTrack.track_user_id)# and 
+							track_page_datetime <=#db.param(dateformat(qTrack.track_user_recent_datetime, 'yyyy-mm-dd')&' '&timeformat(qTrack.track_user_recent_datetime,'HH:mm:ss'))# and 
+							track_page_deleted = #db.param(0)# 
+							ORDER BY track_page_datetime ASC 
+							LIMIT #db.param(0)#,#db.param(1)#";
+							qTrack2=db.execute("qTrack2");
+							echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" target="_blank">Click here</a> to view the first page they visited on the web site.');
+
+
+						} */
+						</cfscript>
+						</td>
+					</tr>
+					</cfloop>
+				</cfif>
+			</cfif> 
 			<tr>
-				<th style="#thstyle# text-align:left; ">Last 2 Pages:</th>
-				<td style="#tdstyle#">Clicking on these links can help you understand what the user was looking at when submitting the inquiry.<br />
-					<cfif t.inquiries_referer CONTAINS 'google.com/aclk'>
-Link 1 disabled since this may cause a duplicate google adwords PPC click						<br />
-						<cfelseif t.inquiries_referer NEQ ''>
-						<a href="#t.inquiries_referer#" target="_blank">Click to view referring page 1</a><br />
+				<th style="#thstyle# text-align:left;">Type:</th>
+				<td style="#tdstyle#">
+					<cfif arguments.qinquiry.inquiries_type_name EQ ''>
+						#t.inquiries_type_other#
+					<cfelse>
+						#arguments.qinquiry.inquiries_type_name#
 					</cfif>
-					<cfif t.inquiries_referer2 CONTAINS 'google.com/aclk'>
-Link 2 disabled since this may cause a duplicate google adwords PPC click						<br />
-						<cfelseif t.inquiries_referer2 NEQ ''>
-						<a href="#t.inquiries_referer2#" target="_blank">Click to view referring page 2</a><br />
+					&nbsp;
+					<cfif trim(t.inquiries_phone_time) NEQ ''>
+	/					<strong>Forced</strong>
 					</cfif></td>
 			</tr>
-		</cfif>
-		<cfif t.inquiries_email NEQ "">
-			<cfscript>
-			db.sql="SELECT * FROM #db.table("track_user", request.zos.zcoreDatasource)# track_user 
-			WHERE track_user.site_id =#db.param(request.zOS.globals.id)# AND 
-			((track_user_email =#db.param(t.inquiries_email)# and 
-			track_user_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')#) or 
-			inquiries_id=#db.param(t.inquiries_id)#)  and 
-			track_user_deleted = #db.param(0)#
-			LIMIT #db.param(0)#,#db.param(1)#";
-			qTrack=db.execute("qTrack");
-
-
-			</cfscript>
-			<cfif qTrack.recordcount NEQ 0>
-				<cfloop query="qTrack">
+			<tr>
+				<th style="#thstyle# text-align:left;" >Status:</th>
+				<td style="#tdstyle#">
+							#t.inquiries_status_name#
+				</td>
+			</tr>
+			<cfif t.office_id NEQ 0>
 				<tr>
-					<th style="#thstyle# text-align:left;">Tracking:</th>
-					<td style="#tdstyle#">
-						
-					<cfif dateformat(qTrack.track_user_datetime,'yyyymmdd') GT 20111121>
-						<cfif qTrack.track_user_ppc EQ 1 or qTrack.track_user_first_page CONTAINS "gclid=">
-							<strong>Google Adwords Pay Per Click Lead</strong><br />
-						</cfif>
-						<cfif qTrack.track_user_source NEQ "">
-						<strong>Source: #qTrack.track_user_source#</strong><br />
-						</cfif>
-					<cfelse>
+					<th style="#thstyle# text-align:left;" >Assigned&nbsp;Office:</th>
+					<td style="#tdstyle#"> 
 						<cfscript>
-						db.sql="SELECT count(track_page_id) count 
-						FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-						WHERE site_id =#db.param(request.zOS.globals.id)# and 
-						track_user_id =#db.param(track_user_id)# and 
-						track_page_deleted = #db.param(0)# and 
-						track_page_qs LIKE #db.param('%gclid=%')#";
-						qPage=db.execute("qPage");
+					    db=request.zos.queryObject;
+					    db.sql="select * FROM #db.table("office", request.zos.zcoreDatasource)# WHERE 
+					    site_id=#db.param(request.zos.globals.id)# and 
+					    office_deleted=#db.param(0)# 
+					    ORDER BY office_name ASC";
+					    qOffice=db.execute("qOffice");
+					    if(qOffice.recordcount EQ 0){
+					    	echo('(Office deleted)');
+					    }else{
+					    	echo('<strong>'&qOffice.office_name&'</strong>');
+					    	if(qOffice.office_address NEQ ""){
+					    		echo('<br>'&qOffice.office_address);
+					    	}
+					    	if(qOffice.office_address2 NEQ ""){
+					    		echo('<br>'&qOffice.office_address2);
+					    	}
+					    	if(qOffice.office_city NEQ ""){
+					    		echo('<br>'&qOffice.office_city);
+					    	}
+					    	if(qOffice.office_state NEQ ""){
+					    		echo(', '&qOffice.office_state);
+					    	}
+					    	if(qOffice.office_zip NEQ ""){
+					    		echo(" "&qOffice.office_zip);
+					    	}
+					    	if(qOffice.office_country NEQ ""){
+					    		echo(" "&qOffice.office_country);
+					    	}
+						}
 						</cfscript>
-						<cfif qPage.recordcount NEQ 0 and qPage.count NEQ 0>
-							<strong>Google Adwords Pay Per Click Lead</strong><br />
-						</cfif>
-					</cfif>
-					
-					<cfif qTrack.track_user_referer NEQ "">
-						<cfif qTrack.track_user_ppc EQ 1>
-							<cfscript>
-							    arrU=listtoarray(qTrack.track_user_referer,"&");
-							    for(i894=1;i894 LTE arraylen(arrU);i894++){
-								if(left(arrU[i894],2) EQ "q="){
-								    writeoutput("Google PPC Keyword: "&urldecode(removechars(arrU[i894],1,2))&"<br />");
-								}
-							    }
-							    </cfscript>
-						<cfelse>
-							Source URL: <a href="#qTrack.track_user_referer#" target="_blank">#left(qTrack.track_user_referer,50)#...</a><br />
-						</cfif>
-					</cfif>
-					<cfif qTrack.track_user_keywords NEQ "">
-						Keyword:#qTrack.track_user_keywords#<br />
-					</cfif>
-					<cfscript>
-
-						formattedDate=DateFormat(qTrack.track_user_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_datetime,'HH:mm:ss');
-						firstDate=parsedatetime(formattedDate);
-						formattedDate2=DateFormat(qTrack.track_user_recent_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_recent_datetime,'HH:mm:ss');
-						if(isdate(formattedDate2)){
-						lastDate=parsedatetime(formattedDate2);
-						}else{
-							lastDate=firstDate;	
-						}
-						seconds=DateDiff("s", formattedDate, formattedDate2);
-
-						if(qTrack.track_user_session_length NEQ 0){
-							seconds=qTrack.track_user_session_length;
-							if(seconds GT 86400){
-								minutes=fix(seconds/60/60/24)&' days ';
-							}else{
-								minutes=fix(seconds/60)&' minutes ';
-								if(fix(seconds/60) EQ 0){
-									minutes="";
-								}
-								if(seconds MOD 60 NEQ 0){
-									minutes=minutes&(seconds MOD 60)&' seconds';
-								}
-							}
-							echo('Length of visit: #minutes#<br />');
-						}
-						if(qTrack.track_user_seconds_since_first_visit NEQ 0){
-							seconds=qTrack.track_user_seconds_since_first_visit;
-							if(seconds GT 86400){
-								minutes=fix(seconds/60/60/24)&' days ';
-							}else{
-								minutes=fix(seconds/60)&' minutes ';
-								if(fix(seconds/60) EQ 0){
-									minutes="";
-								}
-								if(seconds MOD 60 NEQ 0){
-									minutes=minutes&(seconds MOD 60)&' seconds';
-								}
-							}
-							echo('Time since first visit: #minutes#<br />');
-						}
-						if(qTrack.track_user_hits GT 1){
-							echo('Clicks: #qTrack.track_user_hits#<br />');
-						}
-						if(qTrack.track_user_first_page NEQ ""){
-							echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" target="_blank">Click here</a> to view the first page they visited on the web site.');
-						}
-					/*
-					// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
-					db.sql="SELECT count(track_page_id) count, min(track_page_datetime) minDate , max(track_page_datetime) maxDate 
-					FROM #db.table("track_page", request.zos.zcoreDatasource)#  
-					WHERE site_id =#db.param(request.zOS.globals.id)# and 
-					track_user_id =#db.param(qTrack.track_user_id)# and 
-					track_page_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')# and 
-					track_page_deleted = #db.param(0)#
-					LIMIT #db.param(0)#,#db.param(1)#";
-					qTrackPage=db.execute("qTrackPage"); 
-
-					if(qTrackPage.recordcount and qTrackPage.count GT 1){ 
-						formattedDate=DateFormat(qTrackPage.minDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.minDate,'HH:mm:ss');
-						firstDate=parsedatetime(formattedDate);
-						formattedDate2=DateFormat(qTrackPage.maxDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.maxDate,'HH:mm:ss');
-						if(isdate(formattedDate2)){
-						lastDate=parsedatetime(formattedDate2);
-						}else{
-							lastDate=firstDate;	
-						}
-						seconds=DateDiff("s", formattedDate, formattedDate2);
-						minutes=fix(seconds/60)&'mins ';
-						if(fix(seconds/60) EQ 0){
-							minutes="";
-						}
-						if(seconds MOD 60 NEQ 0){
-							minutes=minutes&(seconds MOD 60)&'secs';
-						}
-						echo('Length of Visit:#minutes#<br />');
-						echo('Clicks:#qTrackPage.count#<br />');
-						db.sql="SELECT * FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-						WHERE site_id =#db.param(request.zOS.globals.id)# AND 
-						track_user_id =#db.param(qTrack.track_user_id)# and 
-						track_page_datetime <=#db.param(dateformat(qTrack.track_user_recent_datetime, 'yyyy-mm-dd')&' '&timeformat(qTrack.track_user_recent_datetime,'HH:mm:ss'))# and 
-						track_page_deleted = #db.param(0)# 
-						ORDER BY track_page_datetime ASC 
-						LIMIT #db.param(0)#,#db.param(1)#";
-						qTrack2=db.execute("qTrack2");
-						echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" target="_blank">Click here</a> to view the first page they visited on the web site.');
-
-
-					} */
-					</cfscript>
 					</td>
 				</tr>
-				</cfloop>
 			</cfif>
-		</cfif>
-		<tr>
-			<th style="#thstyle# text-align:left;">Type:</th>
-			<td style="#tdstyle#"><cfif arguments.qinquiry.inquiries_type_name EQ ''>
-#t.inquiries_type_other#
-					<cfelse>
-					#arguments.qinquiry.inquiries_type_name#
-				</cfif>
-				&nbsp;
-				<cfif trim(t.inquiries_phone_time) NEQ ''>
-/					<strong>Forced</strong>
+			<tr>
+				<th style="#thstyle# text-align:left;" >Assigned&nbsp;To:</th>
+				<td style="#tdstyle#"> 
+				 <cfif t.inquiries_assign_email NEQ ''> 
+					<cfscript>
+					arrEmail=listToArray(t.inquiries_assign_email, ",");
+					for(i=1;i<=arraylen(arrEmail);i++){
+						e=arrEmail[i];
+						if(i NEQ 1){
+							echo(', ');
+						}
+						echo('<a href="mailto:#e#">');
+						if(structkeyexists(t, 'inquiries_assign_name') and t.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
+							echo(t.inquiries_assign_name);
+						}else{
+							echo(e);
+						}
+						echo('</a>');
+					}
+					</cfscript> 
+				<cfelse>
+					<cfif t.user_id NEQ 0>
+						<cfif t.user_first_name NEQ "">
+							<a href="mailto:#t.user_username#">#t.user_first_name# #t.user_last_name# 
+							<cfif t.member_company NEQ "">
+								(#t.member_company#)
+							</cfif></a>
+						<cfelse>
+							<a href="mailto:#t.user_username#">#t.user_username#</a>
+						</cfif> 
+					</cfif>
 				</cfif></td>
-		</tr>
-		<tr>
-			<th style="#thstyle# text-align:left;" >Status:</th>
-			<td style="#tdstyle#">
-						#t.inquiries_status_name#
-			</td>
-		</tr>
-		<tr>
-			<th style="#thstyle# text-align:left;" >Assigned&nbsp;To:</th>
-			<td style="#tdstyle#"> 
-			 <cfif t.inquiries_assign_email NEQ ''> 
-				<cfscript>
-				arrEmail=listToArray(t.inquiries_assign_email, ",");
-				for(i=1;i<=arraylen(arrEmail);i++){
-					e=arrEmail[i];
-					if(i NEQ 1){
-						echo(', ');
-					}
-					echo('<a href="mailto:#e#">');
-					if(structkeyexists(t, 'inquiries_assign_name') and t.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
-						echo(t.inquiries_assign_name);
-					}else{
-						echo(e);
-					}
-					echo('</a>');
-				}
-				</cfscript> 
-			<cfelse>
-				<cfif t.user_id NEQ 0>
-					<cfif t.user_first_name NEQ "">
-						<a href="mailto:#t.user_username#">#t.user_first_name# #t.user_last_name# 
-						<cfif t.member_company NEQ "">
-							(#t.member_company#)
-						</cfif></a>
-					<cfelse>
-						<a href="mailto:#t.user_username#">#t.user_username#</a>
-					</cfif> 
-				</cfif>
-			</cfif></td>
-		</tr>
-		<!-- endadmincomments -->
+			</tr>
+			<!-- endadmincomments -->
+		</cfif>
+
 		<cfif t.inquiries_spam EQ 1>
 		<tr>
 			<th style="#thstyle# text-align:left;" >&nbsp;</th>
@@ -460,25 +509,7 @@ Link 2 disabled since this may cause a duplicate google adwords PPC click						<
 				<th style="#thstyle# text-align:left;" >Image:</th>
 				<td style="#tdstyle#"><a href="/z/misc/download/index?fp=#urlencodedformat('/zupload/user/#t.inquiries_image#')#">Download File</a></td>
 			</tr>
-		</cfif>
-		<!--- <cfif isReservationSystem>
-	<tr>
-		<th style="#thstyle# text-align:left;" width="80">Reservation:</th>
-		<td style="#tdstyle#"><cfif t.inquiries_reservation EQ 1>Yes<cfelse>No</cfif></td>
-	</tr>
-	<cfsavecontent variable="db.sql">
-	SELECT * FROM #db.table("property", request.zos.zcoreDatasource)# property 
-	WHERE property_id = #db.param(t.property_id)# and 
-	property_deleted = #db.param(0)# 
-	</cfsavecontent><cfscript>qprop=db.execute("qprop");</cfscript>
-	
-	<cfif qprop.recordcount NEQ 0>
-	<tr>
-		<th style="#thstyle# text-align:left;" >Property:</th>
-		<td style="#tdstyle#"><a href="#qprop.property_url#" target="_blank">#qprop.property_name#</a></td>
-	</tr>
-	</cfif>
-	</cfif> --->
+		</cfif> 
 		<cfif application.zcore.functions.zso(t, 'inquiries_start_date') NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;" >Start Date:</th>
@@ -494,9 +525,10 @@ Link 2 disabled since this may cause a duplicate google adwords PPC click						<
 		<cfif trim(application.zcore.functions.zso(t, 'inquiries_buyer')) NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;">Looking to:</th>
-				<td style="#tdstyle#"><cfif t.inquiries_buyer EQ 1 or t.inquiries_type_id NEQ 6>
-Buy Real Estate
-						<cfelse>
+				<td style="#tdstyle#">
+					<cfif t.inquiries_buyer EQ 1 or t.inquiries_type_id NEQ 6>
+						Buy Real Estate
+					<cfelse>
 						<strong>Sell Real Estate</strong>
 					</cfif></td>
 			</tr>
@@ -525,11 +557,12 @@ Buy Real Estate
 		<cfif trim(t.inquiries_phone_time) NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;" >Contact by:</th>
-				<td style="#tdstyle#"><cfif t.inquiries_phone_time EQ 'email'>
-Email Only
-						<cfelseif t.inquiries_phone_time EQ 'evening'>
+				<td style="#tdstyle#">
+					<cfif t.inquiries_phone_time EQ 'email'>
+						Email Only
+					<cfelseif t.inquiries_phone_time EQ 'evening'>
 						Phone in the Evening
-						<cfelseif t.inquiries_phone_time EQ 'day'>
+					<cfelseif t.inquiries_phone_time EQ 'day'>
 						Phone during the day
 					</cfif>
 					&nbsp;</td>
@@ -942,17 +975,20 @@ Email Only
 				<th style="#thstyle# text-align:left;" width="120">Loan Property Type</th>
 				<td style="#tdstyle#">#t.inquiries_loan_property_type#</td>
 			</tr>
-		</cfif> 
-		<!-- startadmincomments -->
-		<cfif t.inquiries_admin_comments NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" colspan="2">Office Administrative Comments</th>
-			</tr>
-			<tr>
-				<td colspan="2">#application.zcore.functions.zParagraphFormat(t.inquiries_admin_comments)#</td>
-			</tr>
+		</cfif>  
+
+		<cfif arguments.showPrivate>
+			<!-- startadmincomments -->  
+				<cfif t.inquiries_admin_comments NEQ ''>
+					<tr>
+						<th style="#thstyle# text-align:left;" colspan="2">Private Comments</th>
+					</tr>
+					<tr>
+						<td colspan="2">#t.inquiries_admin_comments#</td>
+					</tr>
+				</cfif> 
+			<!-- endadmincomments --> 
 		</cfif>
-		<!-- endadmincomments -->
 	</table> 
 
 	<cfif t.rental_id NEQ "" and t.rental_id NEQ "0">

@@ -196,7 +196,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<li><a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=1&amp;contact_id=#form.contact_id#" class=" <cfif form.contactTab EQ 1>active</cfif>"><i class="fa fa-address-card" aria-hidden="true"></i> Contact</a></li>
 			<li><a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=2&amp;contact_id=#form.contact_id#" class="<cfif form.contactTab EQ 2>active</cfif>"><i class="fa fa-list" aria-hidden="true"></i> Leads</a></li>
 			<cfif form.inquiries_id NEQ 0>
-				<li><div class="z-manager-lead-unclickable-button <cfif form.contactTab EQ 4>active</cfif>"><i class="fa fa-envelope-open" aria-hidden="true"></i> <div style="float:left;">Lead</div> 
+				<li><div class="z-manager-lead-unclickable-button <cfif form.contactTab EQ 4>active</cfif>"><i class="fa fa-envelope-open" aria-hidden="true"></i> <div style="float:left;">Lead ###form.inquiries_id#</div> 
 						<a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=2&amp;contact_id=#form.contact_id#" class="z-manager-lead-close-button"><i class="fa fa-times" aria-hidden="true" style="margin-right:0px;"></i></a>
 					</div></li>
 			</cfif>
@@ -292,9 +292,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<div class="z-float">
 				<div class="z-3of4 z-p-0">
 					<cfscript> 
-					variables.inquiriesCom.view();
-					//viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-					//viewIncludeCom.getViewInclude(qinquiry);
+					variables.inquiriesCom.view(); 
 			        </cfscript> 
 
 					<cfscript>
@@ -563,10 +561,11 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	</cfscript>
 
 	<table style="width: 100%; border-spacing: 0px;" class="table-list"> 
-		<cfif contact.office_id NEQ 0>
-			<cfscript>
+		<cfif contact.office_id NEQ 0 and contact.office_id NEQ "">
+			<cfscript> 
 			db.sql="Select * from #db.table("office", request.zos.zcoreDatasource)# WHERE 
 			office_id = #db.param(contact.office_id)# and 
+			site_id=#db.param(contact.site_id)# and 
 			office_deleted=#db.param(0)# ";
 			qOffice=db.execute("qOffice");
 			</cfscript>
@@ -1019,9 +1018,11 @@ zArrDeferredFunctions.push(function(){
 	<cfif qFeedBack.recordcount NEQ 0> 
 		<h3>Messages</h3>
 		<cfscript>  
-		showAllDisplayed=false;
+		showAllDisplayed=0;
 		readCount=0;
+		rowCount=0;
 		for(row in qFeedback){
+			rowCount++;
 			echo('<div id="inquiriesFeedbackMessageId#row.inquiries_feedback_id#" class="z-feedback-container ');
 			
 			if(row.isRead EQ 1 and row.inquiries_feedback_id NEQ qFeedback.inquiries_feedback_id[1]){  
@@ -1090,6 +1091,12 @@ zArrDeferredFunctions.push(function(){
 				echo('</div>');
 			}
 			echo('</div>');
+			if(row.isRead EQ 1 and showAllDisplayed EQ 0){
+				showAllDisplayed=rowCount;
+				if(qFeedBack.recordcount GT 1 and qFeedback.recordcount NEQ readCount){
+					echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');
+				}
+			}
 			if(row.isRead EQ 0){
 				ts={
 					table:"inquiries_feedback_x_user",
@@ -1105,9 +1112,9 @@ zArrDeferredFunctions.push(function(){
 					}
 				};
 				application.zcore.functions.zInsert(ts);  
-			}
+			} 
 		}
-		if(qFeedBack.recordcount GT 1 and qFeedback.recordcount NEQ readCount){
+		if(qFeedBack.recordcount GT 1 and qFeedback.recordcount NEQ readCount and showAllDisplayed NEQ qFeedBack.recordcount){
 			echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');
 		} 
 		</cfscript>

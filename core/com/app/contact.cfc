@@ -235,8 +235,10 @@ ts={
 	// optionally filter the contacts by various parameters
 	,
 	filterContacts:{
+		// remove one or more of these to remove filters. these filters use "or", not "and" logic
 		managers:true,
-		offices:[office_id]
+		offices:[office_id],
+		userGroupIds:[user_group_id]
 	}
 	// optional set the new status id
 	,inquiries_status_id:3
@@ -259,7 +261,7 @@ contactCom.processMessage(ts);
 	// remember, we must individual address each email because from address must be different for each one
 
 	//	get inquiries record
-	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# 
+	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)#  
 	WHERE site_id = #db.param(ss.messageStruct.site_id)# and 
 	inquiries_deleted=#db.param(0)# and 
 	inquiries_id=#db.param(ss.inquiries_id)#";
@@ -351,6 +353,8 @@ contactCom.processMessage(ts);
 				contact_email:mainContact.contact_email,
 				contact_first_name:mainContact.contact_first_name,
 				contact_last_name:mainContact.contact_last_name, 
+				office_id:mainContact.office_id,
+				user_group_id:mainContact.user_group_id,
 				user_id:mainContact.user_id,
 				user_id_siteidtype:mainContact.user_id_siteidtype,
 				isUser:mainContact.isUser,
@@ -367,10 +371,11 @@ contactCom.processMessage(ts);
 
 	// get all the contacts subscribed to the current inquiry
 	// tested successfully
-	db.sql="SELECT contact.*, inquiries_x_contact.*, user.user_group_id, user.user_id, user.site_id userSiteId FROM 
-	#db.table("contact", request.zos.zcoreDatasource)#, 
-	#db.table("inquiries_x_contact", request.zos.zcoreDatasource)# 
+	db.sql="SELECT contact.*, inquiries_x_contact.*, user.user_group_id, user.office_id userOfficeId, user.user_id, user.site_id userSiteId FROM 
+	(#db.table("contact", request.zos.zcoreDatasource)#, 
+	#db.table("inquiries_x_contact", request.zos.zcoreDatasource)# )
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
+	user_username=contact_email and 
 	user.site_id IN (#db.param(request.zos.globals.id)#, ";
 	if(request.zos.globals.parentId NEQ 0){
 		db.sql&=" #db.param(request.zos.globals.parentId)#, ";
@@ -395,6 +400,10 @@ contactCom.processMessage(ts);
 				contact_email:row.contact_email,
 				contact_first_name:row.contact_first_name,
 				contact_last_name:row.contact_last_name,
+				office_id:row.userOfficeId,
+				user_id:0,
+				user_id_siteidtype:0,
+				user_group_id:row.user_group_id,
 				isUser:false,
 				isManagerUser:false,
 				addressType:row.inquiries_x_contact_type // to, cc, bcc (bcc is visible only to internal users)
@@ -436,6 +445,8 @@ contactCom.processMessage(ts);
 						contact_email:contact.contact_email,
 						contact_first_name:contact.contact_first_name,
 						contact_last_name:contact.contact_last_name, 
+						office_id:contact.office_id,
+						user_group_id:contact.user_group_id,
 						user_id:contact.user_id,
 						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
@@ -463,6 +474,8 @@ contactCom.processMessage(ts);
 					contact_email:contact.contact_email,
 					contact_first_name:contact.contact_first_name,
 					contact_last_name:contact.contact_last_name, 
+					office_id:contact.office_id,
+					user_group_id:contact.user_group_id,
 					user_id:contact.user_id,
 					user_id_siteidtype:contact.user_id_siteidtype,
 					isUser:contact.isUser,
@@ -479,7 +492,7 @@ contactCom.processMessage(ts);
 	// tested successfully
 	if(qInquiry.user_id NEQ "0"){ 
 		// get assigned user, and their user_alternate_email
-		db.sql="select contact.*, user_alternate_email, user_username, user_first_name, user_last_name, user.user_group_id, user.site_id userSiteId from 
+		db.sql="select contact.*, user_alternate_email, user_username, user_first_name, user.office_id userOfficeId, user_last_name, user.user_id, user.user_group_id, user.site_id userSiteId from 
 		#db.table("user", request.zos.zcoreDatasource)# 
 		LEFT JOIN #db.table("contact", request.zos.zcoreDatasource)# ON 
 		user_username=contact_email and  
@@ -505,6 +518,8 @@ contactCom.processMessage(ts);
 							contact_email:contact.contact_email,
 							contact_first_name:contact.contact_first_name,
 							contact_last_name:contact.contact_last_name, 
+							user_group_id:contact.user_group_id,
+							office_id:contact.office_id,
 							user_id:contact.user_id,
 							user_id_siteidtype:contact.user_id_siteidtype,
 							isUser:contact.isUser,
@@ -529,6 +544,8 @@ contactCom.processMessage(ts);
 						contact_email:contact.contact_email,
 						contact_first_name:contact.contact_first_name,
 						contact_last_name:contact.contact_last_name,
+						user_group_id:contact.user_group_id,
+						office_id:contact.office_id,
 						user_id:contact.user_id,
 						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
@@ -537,6 +554,9 @@ contactCom.processMessage(ts);
 					};
 					emailStruct[contact.contact_email]=ts; 
 					row.contact_email=contact.contact_email;
+					if(debug){
+						echo('Added inquiry assigned user contact, #row.contact_email#, to outgoing email<br>');
+					}
 				}
 			}else{
 				ts={
@@ -546,8 +566,10 @@ contactCom.processMessage(ts);
 					contact_email:row.contact_email,
 					contact_first_name:row.contact_first_name,
 					contact_last_name:row.contact_last_name,
+					user_group_id:row.user_group_id,
+					office_id:row.userOfficeId,
 					user_id:row.user_id,
-					user_id_siteidtype:row.user_id_siteidtype,
+					user_id_siteidtype:application.zcore.functions.zGetSiteIdType(row.userSiteId),
 					isUser:true,
 					isManagerUser:false,
 					addressType:"to"
@@ -559,9 +581,9 @@ contactCom.processMessage(ts);
 					ts.isManagerUser=false;
 				} 
 				emailStruct[row.contact_email]=ts; 
-			}
-			if(debug){
-				echo('Added inquiry assigned user contact, #row.contact_email#, to outgoing email<br>');
+				if(debug){
+					echo('Added inquiry assigned user contact, #row.contact_email#, to outgoing email<br>');
+				}
 			}
 		}
 	}
@@ -612,24 +634,91 @@ contactCom.processMessage(ts);
 	}; 
 	allowedUserStruct={};
 	if(structkeyexists(ss.filterContacts, 'offices') and arrayLen(ss.filterContacts.offices)){
-		qOfficeUsers=application.zcore.user.getUsersByOfficeIdList(arrayToList(ss.filterContacts.offices, ","));
+		qOfficeUsers=application.zcore.user.getUsersByOfficeIdList(arrayToList(ss.filterContacts.offices, ",")); 
 		for(row in qOfficeUsers){
 			allowedUserStruct[row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)]=row;
 		}
 	}
-	for(i in emailStruct){
-		contact=emailStruct[i]; 
+	allowedUserGroupIdStruct={};
+	if(structkeyexists(ss.filterContacts, 'userGroupIds') and arrayLen(ss.filterContacts.userGroupIds)){
+		for(group in ss.filterContacts.userGroupIds){
+			allowedUserGroupIdStruct[group]=true;
+		}
+	} 
 
+	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+	for(i in emailStruct){
+		contact=emailStruct[i];  
 		if(structcount(ss.filterContacts) EQ 0){
 			// ok to email anyone
+			if(debug){
+				echo('sending to #contact.contact_email# | no filtering is being applied<br>');
+			}
 		}else if(structkeyexists(ss.filterContacts, 'managers') and ss.filterContacts.managers and contact.isManagerUser){
 			// ok to email
+			if(debug){
+				echo('sending to #contact.contact_email# | is a manager user<br>');
+			}
 		}else if(structkeyexists(ss.filterContacts, 'offices') and contact.isUser and structkeyexists(allowedUserStruct, contact.user_id&"|"&contact.user_id_siteidtype)){
 			// ok to email
+			if(debug){
+				echo('sending to #contact.contact_email# | has access to assigned office<br>');
+			}
 		}else{
+			if(structkeyexists(ss.filterContacts, 'userGroupIds') and arrayLen(ss.filterContacts.userGroupIds)){
+				if(not contact.isUser){
+					if(debug){
+						echo('not sending to #contact.contact_email# | not a user<br>');
+					}
+					continue;
+				}
+				if(not structkeyexists(allowedUserGroupIdStruct, contact.user_group_id)){
+					if(debug){
+						echo('not sending to #contact.contact_email# | group not allowed: #contact.user_group_id#<br>');
+					}
+					continue;
+				}
+			}
 			// contact not ok for private messages
+			if(debug){
+				echo('not sending to #contact.contact_email# | not an authorized user or has no access to assigned office<br>');
+			}
 			continue;
+		} 
+		contact.isAssignedUser=contact.isManagerUser; 
+		if(not contact.isAssignedUser and qInquiry.user_id NEQ 0){
+			if(qInquiry.user_id EQ contact.user_id and qInquiry.user_id_siteidtype EQ contact.user_id_siteidtype){
+				// lead is assigned directly to the contact
+				contact.isAssignedUser=true;
+			}
 		}
+		if(not contact.isAssignedUser and qInquiry.office_id NEQ 0){
+			if(contact.office_id NEQ "" and contact.office_id NEQ "0"){
+				arrContactOffice=listToArray(contact.office_id, ",");
+				for(contactOffice in arrContactOffice){
+					if(qInquiry.office_id EQ contactOffice){
+						// check if contact.user_group_id has permission to view the current lead
+						contactGroupName=userGroupCom.getGroupName(contact.user_group_id);
+						if(structkeyexists(request.manageLeadUserGroupStruct, contactGroupName)){
+							groupUserCanManageStruct=request.manageLeadUserGroupStruct[contactGroupName];
+							if(qInquiry.user_id NEQ 0){ 
+								assignedUserGroupName=userGroupCom.getGroupName(qUser.user_group_id);
+								if(structkeyexists(groupUserCanManageStruct, assignedUserGroupName)){
+									// lead is assigned to an office and a group that the contact can manage leads for.
+									contact.isAssignedUser=true;
+									break;
+								}
+							}else{
+								// lead is assigned to everyone in the office.
+								contact.isAssignedUser=true;
+								break;
+							}
+						}
+
+					}
+				}
+			}
+		} 
 
 		// generate unique from address 
 		idString=contact.contact_id&"."&ss.inquiries_id;
@@ -645,11 +734,11 @@ contactCom.processMessage(ts);
 		}
 		name=trim(contact.contact_first_name&" "&contact.contact_last_name);
 		if(name NEQ ""){
-			arrayAppend(emailSendStruct[contact.addressType], {email:application.zcore.email.formatEmailWithName(tempEmail, name), originalEmail:contact.contact_email,isUser:contact.isUser, isManagerUser:contact.isManagerUser});
+			arrayAppend(emailSendStruct[contact.addressType], {email:application.zcore.email.formatEmailWithName(tempEmail, name), originalEmail:contact.contact_email,isUser:contact.isUser, isAssignedUser:contact.isAssignedUser, isManagerUser:contact.isManagerUser});
 		}else{
-			arrayAppend(emailSendStruct[contact.addressType], {email:tempEmail, originalEmail:contact.contact_email, isUser:contact.isUser, isManagerUser:contact.isManagerUser});
+			arrayAppend(emailSendStruct[contact.addressType], {email:tempEmail, originalEmail:contact.contact_email, isUser:contact.isUser, isAssignedUser:contact.isAssignedUser, isManagerUser:contact.isManagerUser});
 		}  
-	}
+	} 
 
 	if(debug){
 		echo('Final email list for outgoing email<br>');
@@ -686,7 +775,7 @@ contactCom.processMessage(ts);
 		}
 	} 
 	if(ss.privateMessage){
-		tsFeedback.struct.inquiries_feedback_type=2;
+		tsFeedback.struct.inquiries_feedback_type=0;
 	}
 
 	// build email html  
@@ -710,8 +799,8 @@ contactCom.processMessage(ts);
 	ss.jsonStruct.htmlProcessed=processedHTML; 
 	for(type in emailSendStruct){
 		typeStruct=emailSendStruct[type];
-		for(i=1;i<=arraylen(typeStruct);i++){   
-			rs=buildFeedbackEmail(ss, typeStruct[i].email, typeStruct[i].isUser, typeStruct[i].isManagerUser);
+		for(i=1;i<=arraylen(typeStruct);i++){    
+			rs=buildFeedbackEmail(ss, typeStruct[i].email, typeStruct[i].isAssignedUser, typeStruct[i].isManagerUser);
 			rs.subject=ss.jsonStruct.subject;
 			rs.from=typeStruct[i].email;
 			rs.to=typeStruct[i].originalEmail;
@@ -897,7 +986,7 @@ contactCom.processMessage(ts);
 <cffunction name="buildFeedbackEmail" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfargument name="email" type="string" required="yes">
-	<cfargument name="isUser" type="boolean" required="yes">
+	<cfargument name="isAssignedUser" type="boolean" required="yes"> 
 	<cfargument name="isManagerUser" type="boolean" required="yes">
 	<cfscript>
 	ss=arguments.ss;
@@ -923,6 +1012,9 @@ contactCom.processMessage(ts);
 	attachments=[];
 	fileIndex=1;
 	html=ss.jsonStruct.htmlProcessed;
+	if(not arguments.isAssignedUser){
+		html=rereplace(html, "<!-- startadmincomments -->.*?<!-- endadmincomments -->","","ALL");
+	}
 	for ( messageFile in ss.jsonStruct.files ) { 
 		// insert a key in url that bypasses authentication so that embedded files don't need authentication.
 		if(html CONTAINS '"emailAttachShortURL"' & messageFile.filePath){
@@ -956,7 +1048,7 @@ contactCom.processMessage(ts);
 				echo('<p>'&attachments[i]&'</p>');
 			}
 		}
-		if(arguments.isUser){
+		if(arguments.isAssignedUser){
 			echo('<hr>
 				<p><a href="#viewLeadLink#">View/Edit Lead</a> | <a href="#viewContactLink#">View Contact</a></p> 
 			'); 
@@ -1107,23 +1199,26 @@ scheduleLeadEmail(ts);
 		qContact=db.execute("qContact");
 	}
 
-	db.sql="select user_id, user_group_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
-	user_username = #db.param(arguments.email)# and 
-	user_active=#db.param(1)# and 
-	user_deleted = #db.param(0)# and
-	site_id IN (#db.param(arguments.site_id)#, ";
-	if(request.zos.globals.parentId NEQ 0){
-		db.sql&=" #db.param(request.zos.globals.parentId)#, ";
-	}
-	db.sql&=" #db.param(request.zos.globals.serverId)# ) 
-	LIMIT #db.param(0)#, #db.param(1)#";
-	qUser=db.execute("qUser");
 	for(row in qContact){
+		db.sql="select user_id, user_group_id, office_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
+		user_username = #db.param(row.contact_email)# and 
+		user_active=#db.param(1)# and 
+		user_deleted = #db.param(0)# and
+		site_id IN (#db.param(arguments.site_id)#, ";
+		parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
+		if(parentId NEQ 0){
+			db.sql&=" #db.param(parentId)#, ";
+		}
+		db.sql&=" #db.param(request.zos.globals.serverId)# ) 
+		LIMIT #db.param(0)#, #db.param(1)#";
+		qUser=db.execute("qUser"); 
 		if(qUser.recordcount EQ 0){
 			row.isUser=false;
 			row.isManagerUser=false; 
 			row.user_id=0;
+			row.office_id="";
 			row.user_id_siteidtype=0;
+			row.user_group_id=0;
 		}else{
 			row.isUser=true;
 			// test if qUser.user_group_id is manager or not
@@ -1132,8 +1227,10 @@ scheduleLeadEmail(ts);
 			}else{
 				row.isManagerUser=false;
 			}
+			row.office_id=qUser.office_id;
+			row.user_group_id=qUser.user_group_id;
 			row.user_id=qUser.user_id;
-			row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id);
+			row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id); 
 		}
 		return row;
 	}
@@ -1161,23 +1258,26 @@ scheduleLeadEmail(ts);
 	if(qContact.recordcount){
 
 		for(row2 in qContact){
-			db.sql="select user_id, user_group_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
+			db.sql="select user_id, user_group_id, office_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 			user_username = #db.param(row2.contact_email)# and 
 			user_active=#db.param(1)# and 
 			user_deleted = #db.param(0)# and
 			site_id IN (#db.param(arguments.site_id)#, ";
-			if(request.zos.globals.parentId NEQ 0){
-				db.sql&=" #db.param(request.zos.globals.parentId)#, ";
+			parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
+			if(parentId NEQ 0){
+				db.sql&=" #db.param(parentId)#, ";
 			}
 			db.sql&=" #db.param(request.zos.globals.serverId)# ) 
 			LIMIT #db.param(0)#, #db.param(1)#";
-			qUser=db.execute("qUser");
+			qUser=db.execute("qUser"); 
 			row=row2;
 			if(qUser.recordcount EQ 0){ 
 				row.isUser=false;
 				row.isManagerUser=false; 
 				row.user_id=0;
+				row.office_id="";
 				row.user_id_siteidtype=0;
+				row.user_group_id=0;
 			}else{
 				row.isUser=true;
 				// test if qUser.user_group_id is manager or not
@@ -1186,6 +1286,8 @@ scheduleLeadEmail(ts);
 				}else{
 					row.isManagerUser=false;
 				}
+				row.office_id=qUser.office_id;
+				row.user_group_id=qUser.user_group_id;
 				row.user_id=qUser.user_id;
 				row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id);
 			}

@@ -132,6 +132,36 @@
 </cffunction>
 
 <!--- 
+/z/inquiries/admin/lead-template/fixAdminComments --->
+<cffunction name="fixAdminComments" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# 
+	WHERE inquiries_admin_comments<>#db.param('')# and 
+	site_id <> #db.param(-1)# and 
+	inquiries_deleted=#db.param(0)#  ";
+	qD=db.execute("qD");
+	updateCount=0;
+	skipCount=0;
+	for(row in qD){
+		if(row.inquiries_admin_comments CONTAINS '<p>'){
+			skipCount++;
+			continue;
+		}
+		t=application.zcore.functions.zparagraphformat(row.inquiries_admin_comments);  
+		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET 
+		inquiries_admin_comments=#db.param(t)# 
+		WHERE inquiries_id=#db.param(row.inquiries_id)# and 
+		site_id =#db.param(row.site_id)# and 
+		inquiries_deleted=#db.param(0)#  ";
+		db.execute("qUpdate"); 
+		updateCount++;
+	}
+	echo(updateCount&" updated | skipCount:"&skipCount);
+	abort;
+	</cfscript>
+</cffunction>
+<!--- 
 <cffunction name="fixLeadTemplates" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	db=request.zos.queryObject;

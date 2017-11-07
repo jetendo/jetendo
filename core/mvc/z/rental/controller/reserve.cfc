@@ -542,7 +542,7 @@ Login and view inquiry:
       </cfif>
         <cfscript>
 		viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-		viewIncludeCom.getViewInclude(qinquiry);
+		viewIncludeCom.getViewInclude(qinquiry, true);
 		</cfscript>
       <br />
 	   

@@ -1,6 +1,76 @@
 <cfcomponent output="false">
 <cfoutput>
-	
+<!--- 	
+<cfscript>
+htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+htmlEditor.instanceName	= "member_description";
+htmlEditor.value			= form.member_description;
+htmlEditor.width			= "100%";
+htmlEditor.height		= 150;
+htmlEditor.createSimple();
+</cfscript> --->
+<cffunction name="CreateSimple" localmode="modern"
+	access="public"
+	output="true"
+	returntype="any"
+	hint="Outputs the editor HTML in the place where the function is called"
+> 
+	<cfparam name="this.instanceName" type="string" />
+	<cfparam name="this.width" type="string" default="100%" />
+	<cfparam name="this.height" type="string" default="200" /> 
+	<cfparam name="this.value" type="string" default="" />  
+
+	<cfscript>
+	if(right(this.width, 2) EQ "px"){
+		this.width=left(this.width, len(this.width)-2);
+	} 
+	if(not structkeyexists(request.zos, 'zTinyMceIncluded')){
+    	request.zos.zTinyMceIncluded=true;
+    	request.zos.zTinyMceIndex=0;
+    	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js");
+	}
+	request.zos.zTinyMceIndex++;  
+	savecontent variable="theReturn"{
+		echo('<textarea id="#this.instanceName#" name="#this.instanceName#" class="tinyMceTextarea#request.zos.zTinyMceIndex#" cols="10" rows="10" style="width:#this.width#');
+		if(this.width DOES NOT CONTAIN "%" and this.width DOES NOT CONTAIN "px"){
+			echo('px');
+		}
+		echo('; height:#this.height#');
+		if(this.height DOES NOT CONTAIN "%" and this.height DOES NOT CONTAIN "px"){
+			echo('px');
+		}
+		echo(';">#htmleditformat(this.value)#</textarea>
+		<style type="text/css">
+		##newvalue23_ifr{max-width:100% !important;}
+		</style>');
+	}
+	</cfscript> 
+
+	<cfsavecontent variable="theScript"><script type="text/javascript">
+	zArrDeferredFunctions.push(function(){
+
+		tinymce.init({
+			selector : "tinyMceTextarea#request.zos.zTinyMceIndex#",
+			menubar: false,
+			//theme: 'modern',
+			autoresize_min_height: 100,
+			plugins: [
+			'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
+			'searchreplace visualblocks code fullscreen',
+			'insertdatetime media table contextmenu paste code'
+			],
+			toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
+			content_css: []
+		});  
+		tinymce.EditorManager.execCommand('mceAddEditor', true, "#this.instanceName#");
+	});
+	</script></cfsavecontent>
+	<cfscript>
+	application.zcore.template.appendTag("scripts",theScript);
+	</cfscript>
+	#theReturn#
+</cffunction>
+
 <!--- 
 <cfscript>
 htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
@@ -23,9 +93,7 @@ htmlEditor.create();
 	<cfparam name="this.width" type="string" default="100%" />
 	<cfparam name="this.height" type="string" default="200" />
 	<cfparam name="this.toolbarSet" type="string" default="Default" />
-	<cfparam name="this.value" type="string" default="" />
-	<cfparam name="this.basePath" type="string" default="/" />
-	<cfparam name="this.checkBrowser" type="boolean" default="true" />
+	<cfparam name="this.value" type="string" default="" /> 
 	<cfparam name="this.config" type="struct" default="#structNew()#" />
 
 	<cfscript>
@@ -79,10 +147,6 @@ application.zcore.functions.zRequireFontFaceUrls();
 </cfsavecontent>
 <cfscript>
 application.zcore.template.prependTag("scripts",theMeta);
-if(structkeyexists(request,'zTinyMceIncludedCount') EQ false){
-	request.zTinyMceIncludedCount=1;
-}
-request.zTinyMceIncludedCount++;
 </cfscript>
 </cfif>
 	<cfsavecontent variable="theReturn"><textarea id="#this.instanceName#" name="#this.instanceName#" class="tinyMceTextarea#request.zos.zTinyMceIndex#" cols="10" rows="10" style="width:#this.width#<cfif this.width DOES NOT CONTAIN "%" and this.width DOES NOT CONTAIN "px">px</cfif>; height:#this.height#<cfif this.height DOES NOT CONTAIN "%" and this.height DOES NOT CONTAIN "px">px</cfif>;">#htmleditformat(this.value)#</textarea>

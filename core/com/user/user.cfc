@@ -952,7 +952,7 @@ userCom.checkLogin(inputStruct);
 		
 	}else{
 		
-		if(isDefined('request.zsession.user.server_administrator') and (request.zsession[userSiteId].server_administrator EQ 1 or request.zsession[userSiteId].site_administrator EQ 1 or (request.zsession[userSiteId].site_id NEQ ss.site_id and request.zsession[userSiteId].access_site_children EQ 1))){
+		if((request.zsession[userSiteId].server_administrator EQ 1 or request.zsession[userSiteId].site_administrator EQ 1 or (request.zsession[userSiteId].site_id NEQ ss.site_id and request.zsession[userSiteId].access_site_children EQ 1))){
 		// give access to all groups for server administrator or site administrator
 			if(isDefined('Request.zOS.globals.user_group.primary') EQ false){
 				application.zcore.template.fail("#this.comName#: updateSession: This site is missing a primary user group<br /><br /><a href=""#request.zOS.globals.serverDomain#/z/server-manager/admin/user/editSitePermissions?sid=#ss.site_id#"" target=""_blank"">Edit Site Permissions</a>",true);
@@ -1057,7 +1057,7 @@ userCom.checkLogin(inputStruct);
 		userSiteId='user'&arguments.site_id;			
 	}
 	
-	if(isDefined('request.zsession.#userSiteId#.groupAccess')){
+	if(structkeyexists(request.zsession, userSiteId)){
 		v=request.zsession[userSiteId].groupAccess;
 		for(i in v){
 			if(v[i] EQ arguments.user_group_id){
@@ -1080,7 +1080,7 @@ userCom.checkLogin(inputStruct);
 	if(structkeyexists(request.zos,'checkSiteAccessCached'&userSiteId)){
 		return request.zos['checkSiteAccessCached'&userSiteId];
 	}
-	if(isDefined('request.zsession') and structkeyexists(request.zsession,userSiteId) and ( request.zsession[userSiteId].server_administrator EQ 1 or request.zsession[userSiteId].site_administrator EQ 1  )){
+	if(structkeyexists(request, 'zsession') and structkeyexists(request.zsession,userSiteId) and ( request.zsession[userSiteId].server_administrator EQ 1 or request.zsession[userSiteId].site_administrator EQ 1  )){
 		request.zos['checkSiteAccessCached'&userSiteId]=true;
 		return true;
 	}else{
@@ -1098,7 +1098,7 @@ userCom.checkLogin(inputStruct);
 	if(arguments.site_id NEQ request.zos.globals.id){
 		userSiteId='user'&arguments.site_id;			
 	}
-	if(isDefined('request.zsession') and structkeyexists(request.zsession,userSiteId) and structkeyexists(request.zsession[userSiteId],'server_administrator') and request.zsession[userSiteId].server_administrator EQ 1){
+	if(structkeyexists(request, 'zsession') and structkeyexists(request.zsession,userSiteId) and structkeyexists(request.zsession[userSiteId],'server_administrator') and request.zsession[userSiteId].server_administrator EQ 1){
 		if(not structkeyexists(request.zsession[userSiteId], 'server_admin_site_id_list') or request.zsession[userSiteId].server_admin_site_id_list NEQ ""){
 			if(","&request.zsession[userSiteId].server_admin_site_id_list&"," CONTAINS ",#arguments.site_id#,"){
 				return true;
@@ -1946,6 +1946,7 @@ arrOffice=application.zcore.user.searchOfficesByStruct(ts);
     </cfscript>
 </cffunction>
 
+<!--- application.zcore.user.groupIdHasAccessToGroup(groupId, checkGroupName, site_id) --->
 <cffunction name="groupIdHasAccessToGroup" localmode="modern" access="public">
 	<cfargument name="groupId" type="string" required="yes">
 	<cfargument name="checkGroupName" type="string" required="yes">
@@ -1969,6 +1970,32 @@ arrOffice=application.zcore.user.searchOfficesByStruct(ts);
 	}else{
 		return false;
 	}
+	</cfscript>
+</cffunction>
+
+
+<!--- application.zcore.user.getGroupAccessByGroupId(groupId, site_id) --->
+<cffunction name="getGroupAccessByGroupId" localmode="modern" access="public" returntype="arrGroup">
+	<cfargument name="groupId" type="string" required="yes">
+	<cfargument name="checkGroupName" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="SELECT user_group_id, user_group_name FROM 
+	#db.table("user_group_x_group", request.zos.zcoreDatasource)#, 
+	#db.table("user_group", request.zos.zcoreDatasource)# 
+	WHERE user_group_x_group.user_group_id=#db.param(arguments.groupId)# AND 
+	user_group_x_group.site_id = #db.param(arguments.site_id)# AND 
+	user_group_x_group.user_group_child_id=user_group.user_group_id AND 
+	user_group_x_group.site_id = user_group.site_id AND 
+	user_group_x_group.user_group_x_group_deleted=#db.param(0)# AND 
+	user_group.user_group_deleted=#db.param(0)#";
+	qCheckGroup=db.execute("qCheckGroup");
+	arrGroup=[];
+	for(row in qCheckGroup){
+		arrayAppend(arrGroup, row);
+	}
+	return arrGroup;
 	</cfscript>
 </cffunction>
 </cfoutput>
