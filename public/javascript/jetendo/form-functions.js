@@ -665,10 +665,12 @@ var zLastAjaxVarName=""; */
 				console.log("zAjax Response Object");
 				console.log(req); 
 				document.write(req.responseText);  
+				return false;
 			}else{
 				if(m!= ""){
 					alert(m);
 				}
+				return true;
 			}
 		}
 		req.onerror = function(e){ 
@@ -684,8 +686,10 @@ var zLastAjaxVarName=""; */
 					if(id===null || id===""){
 						if(zAjaxLastRequestId !== false){
 							id=zAjaxLastRequestId;
-							req.showRequestError();
-							zAjaxData[id].errorCallback(req);
+							var continueExecution=req.showRequestError();
+							if(continueExecution){
+								zAjaxData[id].errorCallback(req);
+							}
 						}else{
 							req.showRequestError("Sorry, but that request response failed to load right now, please refresh your browser or come back later.");
 						}
@@ -693,8 +697,10 @@ var zLastAjaxVarName=""; */
 						if(zAjaxData[id].debug){
 							req.showRequestError(""); 
 						}else{ 
-							req.showRequestError("");
-							zAjaxData[id].errorCallback(req);
+							var continueExecution=req.showRequestError("");
+							if(continueExecution){
+								zAjaxData[id].errorCallback(req);
+							}
 						}
 					}
 					//return;
@@ -702,8 +708,7 @@ var zLastAjaxVarName=""; */
 					if(!zIsDeveloper()){
 						req.showRequestError("Invalid response.  You may need to login again or refresh the page.");
 					}else{
-						req.showRequestError(""); 
-						document.write(req.responseText);
+						req.showRequestError("");  
 					}
 					return;
 				}
