@@ -133,7 +133,7 @@
 
 <!--- 
 /z/inquiries/admin/lead-template/fixAdminComments --->
-<cffunction name="fixAdminComments" localmode="modern" access="remote" roles="administrator">
+<!--- <cffunction name="fixAdminComments" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# 
@@ -160,7 +160,8 @@
 	echo(updateCount&" updated | skipCount:"&skipCount);
 	abort;
 	</cfscript>
-</cffunction>
+</cffunction> --->
+
 <!--- 
 <cffunction name="fixLeadTemplates" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
