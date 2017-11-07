@@ -557,6 +557,7 @@
 	db=request.zos.queryObject; 
 	myForm={}; 
 	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id', true, 1);
+	backupStatusId=form.inquiries_status_id;
 	if(form.method EQ "insertPrivateNote"){
 		init(); 
 	}
@@ -570,6 +571,7 @@
 	inquiries.site_id = #db.param(request.zos.globals.id)# ";
 	qCheck = db.execute("qCheck");  
 
+
 	// form validation struct
 	myForm.inquiries_id.required = true;
 	myForm.inquiries_id.friendlyName = "Inquiry ID";
@@ -579,7 +581,7 @@
 		application.zcore.status.setStatus(Request.zsid, false,form,true); 
 		application.zcore.status.displayReturnJson(Request.zsid);
 	}
-	if(form.inquiries_status_id EQ 4 or form.inquiries_status_id EQ 5 or form.inquiries_status_id EQ 7 or form.inquiries_status_id EQ 8){		
+	if(backupStatusId EQ 4 or backupStatusId EQ 5 or backupStatusId EQ 7 or backupStatusId EQ 8){		
 		// ignore validation
 	}else if(application.zcore.functions.zso(form, 'inquiries_feedback_subject') EQ ''){
 		application.zcore.status.setStatus(Request.zsid, 'Subject is required.'); 
@@ -658,7 +660,7 @@
 				site_id:request.zos.globals.id
 			},
 			filterContacts:{ managers:true },
-			inquiries_status_id:form.inquiries_status_id,
+			inquiries_status_id:backupStatusId,
 			privateMessage:true,
 			enableCopyToSelf:true
 		};  
@@ -672,6 +674,7 @@
 		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
 			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
 		}  
+		//writedump(ts);abort;
 		//writedump(ts);	abort; 
 	 
 		contactCom=createobject("component", "zcorerootmapping.com.app.contact");

@@ -811,12 +811,18 @@ contactCom.processMessage(ts);
 		}
 	} 
   
-	// change inquiry status to contacted if it is still a new lead status and the response wasn't detected as a non-human reply or the original sender. 
-	if(mainContact.contact_id NEQ fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0){ 
-		ss.inquiries_status_id=application.zcore.functions.zso(ss, "inquiries_status_id", true, 0);
-		if(ss.inquiries_status_id NEQ 0){
-			newStatusId=ss.inquiries_status_id;
-		}else if(qInquiry.inquiries_status_id EQ 2){
+	// change inquiry status to contacted if it is still a new lead status and the response wasn't detected as a non-human reply or the original sender.
+	ss.inquiries_status_id=application.zcore.functions.zso(ss, "inquiries_status_id", true, 0);
+	if(ss.inquiries_status_id NEQ 0){ 
+		db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+		SET inquiries_status_id=#db.param(ss.inquiries_status_id)#, 
+		inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
+		WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
+		site_id = #db.param(ss.messageStruct.site_id)# and  
+		inquiries_deleted=#db.param(0)# ";
+		db.execute("qUpdateInquiry");  
+	}else if(mainContact.contact_id NEQ fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0){ 
+		if(qInquiry.inquiries_status_id EQ 2){
 			newStatusId=3;		
 		}else if(qInquiry.inquiries_status_id EQ 1){
 			newStatusId=6;		
@@ -827,18 +833,20 @@ contactCom.processMessage(ts);
 		SET inquiries_status_id=#db.param(newStatusId)#, 
 		inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
 		WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
+		inquiries_status_id IN (#db.param(1)#, #db.param(2)#) and 
 		site_id = #db.param(ss.messageStruct.site_id)# and  
 		inquiries_deleted=#db.param(0)# ";
 		db.execute("qUpdateInquiry"); 
+	}else{
+		// update date
+		db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+		SET 
+		inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
+		WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
+		site_id = #db.param(ss.messageStruct.site_id)# and 
+		inquiries_deleted=#db.param(0)# ";
+		db.execute("qUpdateInquiry"); 
 	}
-	// update date
-	db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
-	SET 
-	inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
-	WHERE inquiries_id=#db.param(ss.inquiries_id)# and 
-	site_id = #db.param(ss.messageStruct.site_id)# and 
-	inquiries_deleted=#db.param(0)# ";
-	db.execute("qUpdateInquiry"); 
 
 	arrError=[];
 	for(emailStruct in arrEmail){

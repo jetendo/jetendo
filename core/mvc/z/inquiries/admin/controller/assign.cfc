@@ -709,7 +709,12 @@
 			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 			iemailCom.getEmailTemplate(customNote, true);
 		} 
-		if(request.zos.isTestServer){
+		db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)#  
+		WHERE inquiries_id = #db.param(form.inquiries_id)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		inquiries_deleted=#db.param(0)#"; 
+		qInquiry=db.execute("qInquiry"); 
+		if(false and request.zos.isTestServer){
 			ts={  
 				contact_id:request.zsession.user.contact_id,  
 				debug:false,
@@ -771,8 +776,8 @@
 			// slightly inaccurate since it doesn't include all fields and attachment sizes
 			ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
 			//ts.debug=true;
-			if(qCheck.office_id NEQ "0"){
-				ts.filterContacts.offices=[qCheck.office_id];
+			if(qInquiry.office_id NEQ "0"){
+				ts.filterContacts.offices=[qInquiry.office_id];
 			}
 			if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
 				ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
@@ -783,26 +788,26 @@
 			rs=contactCom.processMessage(ts);  
 		}else{
 			// send email to the assigned user.
-			toEmail=qCheck.user_email;
+			toEmail=qMember.user_email;
 			if(request.zos.isTestServer){
 				toEmail=request.zos.developerEmailTo;
 			}
 			ts={
 				to:toEmail,
 				from:request.fromEmail,
-				subject:"#form.inquiries_feedback_subject#",
+				subject:"You're assigned to lead ###form.inquiries_id# on #request.zos.globals.shortDomain#", //#form.inquiries_feedback_subject#",
 				html:emailHTML
 			};
 			application.zcore.email.send(ts);
 		}
 		</cfscript>
 
-		<cfmail  to="#toEmail#" cc="#qMember.user_alternate_email#" from="#request.fromemail#" replyto="#qGetInquiry.inquiries_email#" subject="A new lead assigned to you" type="html">
+		<!--- <cfmail  to="#toEmail#" cc="#qMember.user_alternate_email#" from="#request.fromemail#" replyto="#qGetInquiry.inquiries_email#" subject="A new lead assigned to you" type="html">
 			<cfscript>
 			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 			iemailCom.getEmailTemplate();
 			</cfscript>
-		</cfmail>
+		</cfmail> --->
 		<cfscript>
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead assigned to #qMember.member_first_name# #qMember.member_last_name#, An email has been sent to this user to notify them."); 
 		if(form.method EQ "userAssign"){
