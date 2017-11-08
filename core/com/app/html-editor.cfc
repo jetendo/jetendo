@@ -59,6 +59,13 @@ htmlEditor.createSimple();
 			'searchreplace visualblocks code fullscreen',
 			'insertdatetime media table contextmenu paste code'
 			],
+			setup : function(ed) {
+				ed.on('blur', function(e) {
+					if(typeof tinyMCE != "undefined"){
+						tinyMCE.triggerSave();
+					} 
+				});
+			},
 			toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
 			content_css: []
 		});  
@@ -168,6 +175,13 @@ zArrDeferredFunctions.push(function(){
 		paste_remove_spans: 1,
 		remove_script_host : 0,
 		relative_urls : 0,
+		setup : function(ed) {
+			ed.on('blur', function(e) {
+				if(typeof tinyMCE != "undefined"){
+					tinyMCE.triggerSave();
+				} 
+			});
+		},
 		<cfscript>
 		if(this.width NEQ "" and this.width DOES NOT CONTAIN "%"){
 		    echo(' width: #max(200, this.width)#, '&chr(10));

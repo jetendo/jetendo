@@ -723,6 +723,9 @@ contactCom.processMessage(ts);
 				}
 			}
 		} 
+		if(fromContact.contact_id EQ contact.contact_id){
+			fromContact.isAssignedUser=contact.isAssignedUser;
+		}
 
 		// generate unique from address 
 		idString=contact.contact_id&"."&ss.inquiries_id;
