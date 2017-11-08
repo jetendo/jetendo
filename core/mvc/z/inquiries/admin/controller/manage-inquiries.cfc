@@ -130,6 +130,7 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
 	ts=getInitConfig();
+ 
 	//FOR REG USER DO NOT WANT TO REDIRECT
 	arrayAppend(ts.titleLinks, { 
 			label:"Bulk Add",

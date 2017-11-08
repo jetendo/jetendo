@@ -1866,21 +1866,21 @@ formString = userCom.loginForm(inputStruct);
 <!--- 
 ts={
 	"office_name":"Name",
-	"Meta Field":"Value",
-	site_id:request.zos.globals.id,
+	"Meta Field":"Value"
 };
-arrOffice=application.zcore.user.searchOfficesByStruct(ts);
+arrOffice=application.zcore.user.searchOfficesByStruct(ts, request.zos.globals.id);
  --->
 <cffunction name="searchOfficesByStruct" localmode="modern" access="public" returntype="array">
     <cfargument name="ss" type="struct" required="yes">
+    <cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
     <cfscript> 
     ss=arguments.ss; 
 	ts={
 		sortBy:"name", // name or sort or omit
-		site_id:ss.site_id
-	}
+		site_id:arguments.site_id
+	}; 
 	arrAllOffice=getOffices(ts);  
-    arrOffice=[];
+    arrOffice=[]; 
     for(row in arrAllOffice){ 
     	structappend(row, row.metaData);
     	match=true;
@@ -1980,7 +1980,8 @@ getOffices(ts);
 	};
 	structappend(ss, ts, false);
 	if(not structkeyexists(application.siteStruct[ss.site_id], 'offices')){
-		updateOfficeCache();
+		officeCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.office");
+		officeCom.updateOfficeCache();
 	}
 	ts=application.siteStruct[ss.site_id].offices;
 	arrOffice=[];
@@ -2016,11 +2017,11 @@ getOffices(ts);
 		if(ss.returnType EQ "struct"){
 			return ts.officeLookupStruct;
 		}
-		if(ts.sortBy EQ "name"){
+		if(ss.sortBy EQ "name"){
 			for(office_id in ts.arrOfficeNameSorted){
 				arrayAppend(arrOffice, ts.officeLookupStruct[office_id]);
 			}
-		}else if(ts.sortBy EQ "sort" or ts.sortBy EQ ""){
+		}else if(ss.sortBy EQ "sort" or ss.sortBy EQ ""){
 			for(office_id in ts.arrOfficeNameSorted){
 				arrayAppend(arrOffice, ts.officeLookupStruct[office_id]);
 			}

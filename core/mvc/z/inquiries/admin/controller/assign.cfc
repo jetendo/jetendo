@@ -812,7 +812,7 @@
 			</cfscript>
 		</cfmail> --->
 		<cfscript>
-		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead assigned to #qMember.member_first_name# #qMember.member_last_name#, An email has been sent to this user to notify them."); 
+		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead assigned to #qMember.user_first_name# #qMember.user_last_name# (#qMember.user_username#), An email has been sent to this user to notify them."); 
 		if(form.method EQ "userAssign"){
 			application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/userIndex?zPageId=#form.zPageId#&zsid="&request.zsid);
 		}else{

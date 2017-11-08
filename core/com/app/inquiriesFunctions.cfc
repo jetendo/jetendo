@@ -348,7 +348,7 @@
 								echo('Clicks: #qTrack.track_user_hits#<br />');
 							}
 							if(qTrack.track_user_first_page NEQ ""){
-								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" target="_blank">Click here</a> to view the first page they visited on the web site.');
+								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
 							}
 						/*
 						// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
@@ -388,7 +388,7 @@
 							ORDER BY track_page_datetime ASC 
 							LIMIT #db.param(0)#,#db.param(1)#";
 							qTrack2=db.execute("qTrack2");
-							echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" target="_blank">Click here</a> to view the first page they visited on the web site.');
+							echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
 
 
 						} */
