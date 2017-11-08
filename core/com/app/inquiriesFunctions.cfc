@@ -67,8 +67,8 @@
 	var g=0;
 	var db=request.zos.queryObject;
 	var viewIncludeCom=0;
-        request.znotemplate=1;
-        </cfscript>
+    request.znotemplate=1;
+    </cfscript>
 	<cfsavecontent variable="tempText">#application.zcore.functions.zHTMLDoctype()#
 	<head>
 	<meta charset="utf-8" />
@@ -268,7 +268,7 @@
 								<strong>Google Adwords Pay Per Click Lead</strong><br />
 							</cfif>
 							<cfif qTrack.track_user_source NEQ "">
-							<strong>Source: #qTrack.track_user_source#</strong><br />
+								<strong>Source: #qTrack.track_user_source#</strong><br />
 							</cfif>
 						<cfelse>
 							<cfscript>
@@ -408,13 +408,13 @@
 					</cfif>
 					&nbsp;
 					<cfif trim(t.inquiries_phone_time) NEQ ''>
-	/					<strong>Forced</strong>
+						/ <strong>Forced</strong>
 					</cfif></td>
 			</tr>
 			<tr>
 				<th style="#thstyle# text-align:left;" >Status:</th>
 				<td style="#tdstyle#">
-							#t.inquiries_status_name#
+					#t.inquiries_status_name#
 				</td>
 			</tr>
 			<cfif t.office_id NEQ 0>
@@ -423,33 +423,34 @@
 					<td style="#tdstyle#"> 
 						<cfscript>
 					    db=request.zos.queryObject;
-					    db.sql="select * FROM #db.table("office", request.zos.zcoreDatasource)# WHERE 
-					    site_id=#db.param(request.zos.globals.id)# and 
-					    office_deleted=#db.param(0)# 
-					    ORDER BY office_name ASC";
-					    qOffice=db.execute("qOffice");
-					    if(qOffice.recordcount EQ 0){
+					    ts={
+					    	ids:[t.office_id]
+						};
+					    arrOffice=application.zcore.user.getOffices(ts);
+					    if(arrayLen(arrOffice) EQ 0){
 					    	echo('(Office deleted)');
 					    }else{
-					    	echo('<strong>'&qOffice.office_name&'</strong>');
-					    	if(qOffice.office_address NEQ ""){
-					    		echo('<br>'&qOffice.office_address);
-					    	}
-					    	if(qOffice.office_address2 NEQ ""){
-					    		echo('<br>'&qOffice.office_address2);
-					    	}
-					    	if(qOffice.office_city NEQ ""){
-					    		echo('<br>'&qOffice.office_city);
-					    	}
-					    	if(qOffice.office_state NEQ ""){
-					    		echo(', '&qOffice.office_state);
-					    	}
-					    	if(qOffice.office_zip NEQ ""){
-					    		echo(" "&qOffice.office_zip);
-					    	}
-					    	if(qOffice.office_country NEQ ""){
-					    		echo(" "&qOffice.office_country);
-					    	}
+					    	for(office in arrOffice){
+						    	echo('<strong>'&office.office_name&'</strong>');
+						    	if(office.office_address NEQ ""){
+						    		echo('<br>'&office.office_address);
+						    	}
+						    	if(office.office_address2 NEQ ""){
+						    		echo('<br>'&office.office_address2);
+						    	}
+						    	if(office.office_city NEQ ""){
+						    		echo('<br>'&office.office_city);
+						    	}
+						    	if(office.office_state NEQ ""){
+						    		echo(', '&office.office_state);
+						    	}
+						    	if(office.office_zip NEQ ""){
+						    		echo(" "&office.office_zip);
+						    	}
+						    	if(office.office_country NEQ ""){
+						    		echo(" "&office.office_country);
+						    	}
+						    }
 						}
 						</cfscript>
 					</td>
@@ -492,12 +493,12 @@
 		</cfif>
 
 		<cfif t.inquiries_spam EQ 1>
-		<tr>
-			<th style="#thstyle# text-align:left;" >&nbsp;</th>
-			<td style="#tdstyle# width:90%;"><strong>This inquiry may be SPAM</strong><br>
-				Spam Filter Reported: #t.inquiries_spam_description#
-			</td>
-		</tr>
+			<tr>
+				<th style="#thstyle# text-align:left;" >&nbsp;</th>
+				<td style="#tdstyle# width:90%;"><strong>This inquiry may be SPAM</strong><br>
+					Spam Filter Reported: #t.inquiries_spam_description#
+				</td>
+			</tr>
 		</cfif>
 		<tr>
 			<th style="#thstyle# text-align:left;" >Date Received:</th>
@@ -539,19 +540,10 @@
 				<td style="#tdstyle#">#application.zcore.functions.zFirstLetterCaps(t.inquiries_first_name)# #application.zcore.functions.zFirstLetterCaps(t.inquiries_last_name)#&nbsp;</td>
 			</tr>
 		</cfif>
-		<cfif trim(t.inquiries_email) NEQ ''>
-			<cfif isDefined('request.zsession.user.id')>
-				<cfscript>
-				db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
-				WHERE user_id =#db.param(request.zsession.user.id)# and 
-				user_deleted = #db.param(0)# and 
-				site_id =#db.param(request.zsession.user.site_id)#";
-				qmem2=db.execute("qmem2");
-				</cfscript>
-			</cfif>
+		<cfif trim(t.inquiries_email) NEQ ''> 
 			<tr>
 				<th style="#thstyle# text-align:left;" >Email:</th>
-				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#<cfif isDefined('request.zsession.user.id')>?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name&' '&t.inquiries_last_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'On '&DateFormat(t.inquiries_datetime, "mmmm d")&', you wrote: '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif></cfif>">#t.inquiries_email#</a>&nbsp;</td>
+				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'This message was sent in response to your inquiry on '&DateFormat(t.inquiries_datetime, "mmmm d")&': '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif>">#t.inquiries_email#</a>&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(t.inquiries_phone_time) NEQ ''>
@@ -795,157 +787,156 @@
 			</tr>
 		</cfif>
 		<cfsavecontent variable="propInfo222">
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_property_type')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Property Type:</th>
-				<td style="#tdstyle#">#t.inquiries_property_type#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_view')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >View/Frontage:</th>
-				<td style="#tdstyle#">#t.inquiries_view#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_type_other')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Other Property Type:</th>
-				<td style="#tdstyle#">#t.inquiries_type_other#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_property_city')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >City:</th>
-				<td style="#tdstyle#">#t.inquiries_property_city#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_price_low',true)) NEQ '0'>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Price:</th>
-				<td style="#tdstyle#">#DollarFormat(t.inquiries_price_low)#-#DollarFormat(t.inquiries_price_high)#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_bedrooms')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Bedrooms:</th>
-				<td style="#tdstyle#">#t.inquiries_bedrooms#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_bathrooms')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Bathrooms:</th>
-				<td style="#tdstyle#">#t.inquiries_bathrooms#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_sqfoot')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >
-					<cfif t.inquiries_type_id EQ 6>
-						Home Sq/Ft
-					<cfelse>
-						Square Foot
-					</cfif>
-					:</th>
-				<td style="#tdstyle#">#t.inquiries_sqfoot#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_lot_sqfoot')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Lot Sq/Ft:</th>
-				<td style="#tdstyle#">#t.inquiries_lot_sqfoot#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_location')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Location:</th>
-				<td style="#tdstyle#">#t.inquiries_location#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_location2')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Location 2:</th>
-				<td style="#tdstyle#">#t.inquiries_location2#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_location3')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Location 3:</th>
-				<td style="#tdstyle#">#t.inquiries_location3#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_garage')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Garage:</th>
-				<td style="#tdstyle#">#t.inquiries_garage#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_pool')) EQ '1'>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Pool:</th>
-				<td style="#tdstyle#">Yes&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_target_price', true)) NEQ '0'>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Target Price:</th>
-				<td style="#tdstyle#">$#numberformat(t.inquiries_target_price)#</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_prequalified')) EQ '1'>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Prequalified:</th>
-				<td style="#tdstyle#">Yes&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_when_move')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">Wants to move in:#t.inquiries_when_move#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_own_home')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">
-					<cfif t.inquiries_own_home EQ 1>
-						Owns a home
-					<cfelseif t.inquiries_own_home EQ 0>
-						Doesn't own a home
-					</cfif></td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_sell_home')) NEQ '' and t.inquiries_sell_home EQ 1>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">Would like to sell their home </td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_referred_by')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">Referred By:#t.inquiries_referred_by#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_look_time')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">Has been looking for a property for:#t.inquiries_look_time#&nbsp;</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_other_realtors')) EQ '1'>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle#">Working with another agent: Yes&nbsp;</td>
-			</tr>
-		</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_property_type')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Property Type:</th>
+					<td style="#tdstyle#">#t.inquiries_property_type#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_view')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >View/Frontage:</th>
+					<td style="#tdstyle#">#t.inquiries_view#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_type_other')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Other Property Type:</th>
+					<td style="#tdstyle#">#t.inquiries_type_other#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_property_city')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >City:</th>
+					<td style="#tdstyle#">#t.inquiries_property_city#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_price_low',true)) NEQ '0'>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Price:</th>
+					<td style="#tdstyle#">#DollarFormat(t.inquiries_price_low)#-#DollarFormat(t.inquiries_price_high)#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_bedrooms')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Bedrooms:</th>
+					<td style="#tdstyle#">#t.inquiries_bedrooms#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_bathrooms')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Bathrooms:</th>
+					<td style="#tdstyle#">#t.inquiries_bathrooms#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_sqfoot')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >
+						<cfif t.inquiries_type_id EQ 6>
+							Home Sq/Ft
+						<cfelse>
+							Square Foot
+						</cfif>
+						:</th>
+					<td style="#tdstyle#">#t.inquiries_sqfoot#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_lot_sqfoot')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Lot Sq/Ft:</th>
+					<td style="#tdstyle#">#t.inquiries_lot_sqfoot#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_location')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Location:</th>
+					<td style="#tdstyle#">#t.inquiries_location#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_location2')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Location 2:</th>
+					<td style="#tdstyle#">#t.inquiries_location2#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_location3')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Location 3:</th>
+					<td style="#tdstyle#">#t.inquiries_location3#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_garage')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Garage:</th>
+					<td style="#tdstyle#">#t.inquiries_garage#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_pool')) EQ '1'>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Pool:</th>
+					<td style="#tdstyle#">Yes&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_target_price', true)) NEQ '0'>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Target Price:</th>
+					<td style="#tdstyle#">$#numberformat(t.inquiries_target_price)#</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_prequalified')) EQ '1'>
+				<tr>
+					<th style="#thstyle# text-align:left;" >Prequalified:</th>
+					<td style="#tdstyle#">Yes&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_when_move')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">Wants to move in:#t.inquiries_when_move#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_own_home')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">
+						<cfif t.inquiries_own_home EQ 1>
+							Owns a home
+						<cfelseif t.inquiries_own_home EQ 0>
+							Doesn't own a home
+						</cfif></td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_sell_home')) NEQ '' and t.inquiries_sell_home EQ 1>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">Would like to sell their home </td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_referred_by')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">Referred By:#t.inquiries_referred_by#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_look_time')) NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">Has been looking for a property for:#t.inquiries_look_time#&nbsp;</td>
+				</tr>
+			</cfif>
+			<cfif trim(application.zcore.functions.zso(t, 'inquiries_other_realtors')) EQ '1'>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle#">Working with another agent: Yes&nbsp;</td>
+				</tr>
+			</cfif>
 		</cfsavecontent>
 		<cfif trim(propInfo222) NEQ ''>
 			<tr>
 				<th style="#thstyle# text-align:left;" colspan="2">Property Information</th>
 			</tr>
 			#propInfo222#
-		</cfif>
-		<!--- </cfif> --->
+		</cfif> 
 		<cfif structkeyexists(t, 'inquiries_loan_city') and trim(t.inquiries_loan_city&t.inquiries_loan_own&t.inquiries_loan_price) NEQ "">
 			<tr>
 				<th style="#thstyle# text-align:left;" width="120">Loan Property Location</th>

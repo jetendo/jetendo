@@ -1768,18 +1768,12 @@ formString = userCom.loginForm(inputStruct);
 
 	arrUserOffice=listToArray(request.zsession.user.office_id, ",");
 	// verify user has access to office
-	db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
-	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	office_deleted = #db.param(0)# and 
-	office_id = #db.param(form.select_office_id)# ";
-	if(arraylen(arrUserOffice) EQ 0){
-		db.sql&=" and office_id =#db.param(-1)# ";
-	}else{
-		db.sql&=" and office_id IN (#db.trustedSQL(arrayToList(arrUserOffice, ","))#) ";
-	}
-	qOffice=db.execute("qOffice"); 
-	if(qOffice.recordcount NEQ 0){
-		request.zsession.selectedOfficeId=form.select_office_id;
+	for(office_id in arrUserOffice){
+		if(form.select_office_id EQ office_id){
+			// yes, they do
+			request.zsession.selectedOfficeId=form.select_office_id;
+			break;
+		}
 	} 
 	application.zcore.functions.zRedirect(form.redirectURL); 
 	</cfscript>	
@@ -1790,24 +1784,23 @@ formString = userCom.loginForm(inputStruct);
 	<cfscript>
 	var db=request.zos.queryObject;  
 	arrUserOffice=listToArray(request.zsession.user.office_id, ",");
-	db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	office_deleted = #db.param(0)# ";
-	if(arraylen(arrUserOffice) EQ 0){
-		db.sql&=" and office_id =#db.param(-1)# ";
-	}else{
-		db.sql&=" and office_id IN (#db.trustedSQL(arrayToList(arrUserOffice, ","))#) ";
-	}
-	db.sql&=" ORDER BY office_name";
-	qOffice=db.execute("qOffice");
+	arrOffice=[];
+	if(arraylen(arrUserOffice) EQ 0){ 
+		ts={
+			ids:arrUserOffice,
+			sortBy:"name", // name or sort or omit
+			site_id:request.zos.globals.id
+		}
+		arrOffice=getOffices(ts);
+	} 
  
-	if(qOffice.recordcount EQ 0){
+	if(arrayLen(arrOffice) EQ 0){
 		request.zsession.selectedOfficeId=0;
-	}else if(qOffice.recordcount EQ 1){
-		request.zsession.selectedOfficeId=qOffice.office_id;
+	}else if(arrayLen(arrOffice) EQ 1){
+		request.zsession.selectedOfficeId=arrOffice[1].office_id;
 	}else{
 		if(not structkeyexists(request.zsession, 'selectedOfficeId')){
-			request.zsession.selectedOfficeId=qOffice.office_id;
+			request.zsession.selectedOfficeId=arrOffice[1].office_id;
 		}
 		form.select_office_id=application.zcore.functions.zso(request.zsession, 'selectedOfficeId');
 		echo('<form action="/z/_com/user/user?method=selectOfficeSave" method="post">
@@ -1816,7 +1809,7 @@ formString = userCom.loginForm(inputStruct);
 		selectStruct = StructNew();
 		selectStruct.hideSelect=true;
 		selectStruct.name = "select_office_id";
-		selectStruct.query = qOffice;
+		selectStruct.arrData = arrOffice;
 		selectStruct.queryParseLabelVars=true;
 		selectStruct.queryLabelField = "##office_name##, ##office_address##";
 		selectStruct.queryValueField = "office_id";
@@ -1829,13 +1822,14 @@ formString = userCom.loginForm(inputStruct);
 
 <cffunction name="getUsersByOfficeIdList" localmode="modern" access="public">
     <cfargument name="officeIdList" type="string" required="yes">
+    <cfargument name="site_id" type="string" required="yes">
     <cfscript> 
     db=request.zos.queryObject;
 
     arrId=listToArray(arguments.officeIdList, ",");
 
     db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# 
-    WHERE site_id = #db.param(request.zos.globals.id)# AND 
+    WHERE site_id = #db.param(arguments.site_id)# AND 
     user_deleted=#db.param(0)# and 
     user_active=#db.param(1)#";
     if(arrayLen(arrId) GT 0){
@@ -1857,32 +1851,14 @@ formString = userCom.loginForm(inputStruct);
 
 <cffunction name="getOfficesByOfficeIdList" localmode="modern" access="public">
     <cfargument name="officeIdList" type="string" required="yes">
-    <cfscript> 
-    db=request.zos.queryObject;
-
-    arrId=listToArray(arguments.officeIdList, ",");
-
-    db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-    WHERE site_id = #db.param(request.zos.globals.id)# AND 
-    office_deleted=#db.param(0)#";
-    if(application.zcore.user.checkGroupAccess("administrator")){
-    	// do all
-    }else if(arrayLen(arrId) EQ 0){
-    	db.sql&=" and  office_id=#db.param(-1)# ";
-    }else{
-    	db.sql&=" and  office_id IN (";
-        for(i=1;i LTE arraylen(arrId);i++){
-            id=arrId[i];
-            if(i NEQ 1){
-            	db.sql&=", ";
-            }
-            db.sql&=db.param(id);
-        }
-        db.sql&=" ) "; 
-    }
-    db.sql&=" ORDER BY office_name ASC";
-    qUser=db.execute("qUser"); 
-    return qUser;
+    <cfargument name="site_id" type="string" required="yes" default="#request.zos.globals.id#">
+    <cfscript>  
+	ts={
+		ids:listToArray(arguments.officeIdList, ","),
+		sortBy:"name", // name or sort or omit
+		site_id:arguments.site_id
+	}
+	return getOffices(ts); 
     </cfscript>
 </cffunction>
 
@@ -1890,26 +1866,23 @@ formString = userCom.loginForm(inputStruct);
 <!--- 
 ts={
 	"office_name":"Name",
-	"Meta Field":"Value"
+	"Meta Field":"Value",
+	site_id:request.zos.globals.id,
 };
 arrOffice=application.zcore.user.searchOfficesByStruct(ts);
  --->
 <cffunction name="searchOfficesByStruct" localmode="modern" access="public" returntype="array">
     <cfargument name="ss" type="struct" required="yes">
     <cfscript> 
-    ss=arguments.ss;
-    db=request.zos.queryObject;
-    db.sql="select * FROM #db.table("office", request.zos.zcoreDatasource)# WHERE 
-    site_id=#db.param(request.zos.globals.id)# and 
-    office_deleted=#db.param(0)# 
-    ORDER BY office_name ASC";
-    qOffice=db.execute("qOffice");
+    ss=arguments.ss; 
+	ts={
+		sortBy:"name", // name or sort or omit
+		site_id:ss.site_id
+	}
+	arrAllOffice=getOffices(ts);  
     arrOffice=[];
-    for(row in qOffice){
-    	if(row.office_meta_json NEQ ""){
-    		js=deserializeJson(row.office_meta_json);
-    	}
-    	structappend(row, js.data);
+    for(row in arrAllOffice){ 
+    	structappend(row, row.metaData);
     	match=true;
     	for(field in ss){
     		value=ss[field];
@@ -1935,8 +1908,7 @@ arrOffice=application.zcore.user.searchOfficesByStruct(ts);
 					match=false;
 					break;
 				}
-			}
-    		//writedump(row);
+			} 
     	}
     	if(match){
     		arrayAppend(arrOffice, row);
@@ -1951,24 +1923,17 @@ arrOffice=application.zcore.user.searchOfficesByStruct(ts);
 	<cfargument name="groupId" type="string" required="yes">
 	<cfargument name="checkGroupName" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
-	<cfscript>
-	db=request.zos.queryObject;
-	db.sql="
-	SELECT * FROM 
-	#db.table("user_group_x_group", request.zos.zcoreDatasource)#, 
-	#db.table("user_group", request.zos.zcoreDatasource)# 
-	WHERE user_group_x_group.user_group_id=#db.param(arguments.groupId)# AND 
-	user_group_x_group.site_id = #db.param(arguments.site_id)# AND 
-	user_group_x_group.user_group_child_id=user_group.user_group_id AND 
-	user_group_x_group.site_id = user_group.site_id AND 
-	user_group_x_group.user_group_x_group_deleted=#db.param(0)# AND 
-	user_group.user_group_deleted=#db.param(0)# AND 
-	user_group_name=#db.param(arguments.checkGroupName)# ";
-	qCheckGroup=db.execute("qCheckGroup");
-	if(qCheckGroup.recordcount NEQ 0){
-		return true;
+	<cfscript> 
+	// might need zGetSite here if site_id doesn't exist someday
+	ss=application.siteStruct[arguments.site_id].globals.user_group;
+	if(structkeyexists(ss.access, arguments.groupId)){
+		if(structkeyexists(ss.access[arguments.groupId], arguments.checkGroupName)){
+			return true;
+		}else{
+			return false;
+		}
 	}else{
-		return false;
+		throw('"#arguments.groupId#" is not a valid user_group_id');
 	}
 	</cfscript>
 </cffunction>
@@ -1976,26 +1941,94 @@ arrOffice=application.zcore.user.searchOfficesByStruct(ts);
 
 <!--- application.zcore.user.getGroupAccessByGroupId(groupId, site_id) --->
 <cffunction name="getGroupAccessByGroupId" localmode="modern" access="public" returntype="arrGroup">
-	<cfargument name="groupId" type="string" required="yes">
-	<cfargument name="checkGroupName" type="string" required="yes">
+	<cfargument name="groupId" type="string" required="yes"> 
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	db=request.zos.queryObject;
-	db.sql="SELECT user_group_id, user_group_name FROM 
-	#db.table("user_group_x_group", request.zos.zcoreDatasource)#, 
-	#db.table("user_group", request.zos.zcoreDatasource)# 
-	WHERE user_group_x_group.user_group_id=#db.param(arguments.groupId)# AND 
-	user_group_x_group.site_id = #db.param(arguments.site_id)# AND 
-	user_group_x_group.user_group_child_id=user_group.user_group_id AND 
-	user_group_x_group.site_id = user_group.site_id AND 
-	user_group_x_group.user_group_x_group_deleted=#db.param(0)# AND 
-	user_group.user_group_deleted=#db.param(0)#";
-	qCheckGroup=db.execute("qCheckGroup");
 	arrGroup=[];
-	for(row in qCheckGroup){
-		arrayAppend(arrGroup, row);
+	ss=application.siteStruct[arguments.site_id].globals.user_group;
+	if(structkeyexists(ss.access, arguments.groupId)){
+		for(groupName in ss.access[arguments.groupId]){
+			arrayAppend(arrGroup, { user_group_id:ss.access[arguments.groupId][groupName], user_group_name:groupName});
+		}
+	}else{
+		throw('"#arguments.groupId#" is not a valid user_group_id');
 	}
 	return arrGroup;
+	</cfscript>
+</cffunction>
+
+
+
+<!--- 
+ts={
+	ids:[], // leave empty to get all
+	sortBy:"name", // name or sort or omit
+	site_id:request.zos.globals.id,
+	returnType:"array" // array or struct | sortBy is ignored when returnType is struct
+}
+getOffices(ts);
+ --->
+<cffunction name="getOffices" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	ts={
+		ids:[],
+		sortBy:"",
+		site_id:request.zos.globals.id,
+		returnType:"array"
+	};
+	structappend(ss, ts, false);
+	if(not structkeyexists(application.siteStruct[ss.site_id], 'offices')){
+		updateOfficeCache();
+	}
+	ts=application.siteStruct[ss.site_id].offices;
+	arrOffice=[];
+	if(structkeyexists(ss, 'ids') and arrayLen(ss.ids) NEQ 0){
+		if(ss.sortBy NEQ ""){
+			officeStruct={};
+			for(office_id in ss.ids){
+				if(structkeyexists(ts.officeLookupStruct, office_id)){
+					officeStruct[office_id]=ts.officeLookupStruct[office_id];
+				}
+			}
+			if(ss.returnType EQ "struct"){
+				return officeStruct;
+			}
+			if(ss.sortBy EQ "name"){
+				arrKey=structsort(officeStruct, "text", "asc", "office_name");
+			}else if(ss.sortBy EQ "sort"){
+				arrKey=structsort(officeStruct, "text", "asc", "office_name");
+			}else{
+				throw('ss.sortBy must be "name" or "sort".');
+			}
+			for(key in arrKey){
+				arrayAppend(arrOffice, officeStruct[key]);
+			}
+		}else{
+			for(office_id in ss.ids){
+				if(structkeyexists(ts.officeLookupStruct, office_id)){
+					arrayAppend(arrOffice, ts.officeLookupStruct[office_id]);
+				}
+			}
+		}
+	}else{
+		if(ss.returnType EQ "struct"){
+			return ts.officeLookupStruct;
+		}
+		if(ts.sortBy EQ "name"){
+			for(office_id in ts.arrOfficeNameSorted){
+				arrayAppend(arrOffice, ts.officeLookupStruct[office_id]);
+			}
+		}else if(ts.sortBy EQ "sort" or ts.sortBy EQ ""){
+			for(office_id in ts.arrOfficeNameSorted){
+				arrayAppend(arrOffice, ts.officeLookupStruct[office_id]);
+			}
+		}else{
+			throw('ss.sortBy must be "name" or "sort".');
+		}
+	}
+	return arrOffice;
 	</cfscript>
 </cffunction>
 </cfoutput>

@@ -49,7 +49,8 @@
 			beforeInsert:'beforeInsert',
 			afterInsert:'afterInsert',
 			getDeleteData:'getDeleteData',
-			executeDelete:'executeDelete'
+			executeDelete:'executeDelete',
+			afterSort:'afterSort'
 		},
 
 		//optional
@@ -105,6 +106,14 @@
 	</cfscript>
 </cffunction>	 
 
+
+<cffunction name="afterSort" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	updateOfficeCache(); 
+	</cfscript>
+</cffunction>
+
 <cffunction name="delete" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	init();
@@ -145,6 +154,53 @@
 	</cfscript>
 </cffunction> 
 
+<cffunction name="getOfficeCacheStruct" localmode="modern" access="public" returntype="struct">
+	<cfargument name="site_id" type="string" required="yes">
+	<cfscript>
+	var db=request.zos.queryObject;  
+	metaCom=createObject("component", "zcorerootmapping.com.zos.meta");
+	db.sql="SELECT * 
+	FROM #db.table("office", request.zos.zcoreDatasource)#  
+	WHERE office.site_id = #db.param(arguments.site_id)# and 
+	office_deleted = #db.param(0)# 
+	ORDER BY office.office_sort, office.office_name "; 
+	qOffice=db.execute("qOffice");
+	ts={};
+	ts.arrOfficeSorted=[];
+	ts.arrOfficeNameSorted=[];
+	ts.officeLookupStruct={};
+	for(row in qOffice){
+		if(row.office_meta_json NEQ ""){
+			row.metaData=metaCom.getData("office", row);
+		}else{
+			row.metaData={};
+		}
+		ts.officeLookupStruct[row.office_id]=row;
+		arrayAppend(ts.arrOfficeNameSorted, row.office_id);
+	}
+
+	db.sql="SELECT * 
+	FROM #db.table("office", request.zos.zcoreDatasource)#  
+	WHERE office.site_id = #db.param(arguments.site_id)# and 
+	office_deleted = #db.param(0)# 
+	ORDER BY office.office_name "; 
+	qOffice=db.execute("qOffice");
+	arrOffice=[];
+	for(row in qOffice){ 
+		arrayAppend(ts.arrOfficeSorted, row.office_id);
+	}
+	return ts;
+	</cfscript>
+</cffunction>
+
+<cffunction name="updateOfficeCache" localmode="modern" access="public">
+	<cfscript>
+	ts=getOfficeCacheStruct(request.zos.globals.id);
+	application.siteStruct[request.zos.globals.id].offices=ts;
+	</cfscript>
+</cffunction>
+
+
 <cffunction name="executeDelete" localmode="modern" access="private">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
@@ -156,6 +212,7 @@
 	site_id = #db.param(request.zos.globals.id)# ";
 	q=db.execute("q");
 
+	updateOfficeCache();
 	return {success:true};
 	</cfscript>
 </cffunction>
@@ -207,6 +264,7 @@
 <cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	rs={success:true};
+	updateOfficeCache();
 	return rs;
 	</cfscript>
 </cffunction>
@@ -221,6 +279,7 @@
 <cffunction name="afterInsert" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	rs={success:true};
+	updateOfficeCache();
 	return rs;
 	</cfscript>
 </cffunction>

@@ -32,17 +32,20 @@
 		<!--- office search is only useful when there is more then one office --->
 		<cfif application.zcore.user.checkGroupAccess("administrator") and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1> 
 			<cfscript> 
-				if(application.zcore.user.checkGroupAccess("administrator")){ 
-					db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-					WHERE site_id = #db.param(request.zos.globals.id)# and 
-					office_deleted = #db.param(0)# 
-					ORDER BY office_name ASC"; 
-					qOffice=db.execute("qOffice"); 
-				}else{
-					qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
+			if(application.zcore.user.checkGroupAccess("administrator")){ 
+				ts={
+					sortBy:"name"
 				}
+				arrOffice=application.zcore.user.getOffices(ts);
+			}else{
+				ts={
+					ids:listToArray(request.zsession.user.office_id, ","),
+					sortBy:"name"
+				}
+				arrOffice=application.zcore.user.getOffices(ts); 
+			} 
 			</cfscript> 
-			<cfif qOffice.recordcount GT 0>
+			<cfif arrayLen(arrOffice) GT 0>
 				<tr><th style="text-align:left;">1) Office:</th></tr>
 				 <tr><td style="padding:10px;"> 
 					<p>An office is a group of 1 or more users who will be able to access this lead.</p>
@@ -50,14 +53,14 @@
 						<cfscript> 
 						selectStruct = StructNew();
 						selectStruct.name = "office_id"; 
-						selectStruct.query = qOffice;
+						selectStruct.arrData = arrOffice;
 						selectStruct.size=1; 
 						selectStruct.onChange="assignSelectOffice();";
 						selectStruct.queryLabelField = "office_name";
 						selectStruct.inlineStyle="width:100%; max-width:100%;";
 						selectStruct.queryValueField = 'office_id';
 
-						if(qOffice.recordcount GT 3){
+						if(arrayLen(arrOffice) GT 3){
 							echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
 							application.zcore.functions.zInputSelectBox(selectStruct);
 							application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
@@ -84,7 +87,7 @@
 		if(form.method EQ arguments.form_type){ 
 			// only allow assigning to people who belong to the same offices that this user does. 
 			if(request.zsession.user.office_id NEQ ""){
-				qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id);
+				qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 			}else{
 				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
 				WHERE site_id=#db.param(request.zos.globals.id)# and 
@@ -325,7 +328,7 @@
 				ORDER BY office_name ASC"; 
 				qOffice=db.execute("qOffice"); 
 			}else{
-				qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
+				qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 			}
 			</cfscript> 
 			<cfif qOffice.recordcount GT 0>
@@ -370,7 +373,7 @@
 	if(form.method EQ "userIndex"){ 
 		// only allow assigning to people who belong to the same offices that this user does. 
 		if(request.zsession.user.office_id NEQ ""){
-			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id);
+			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
 			WHERE site_id=#db.param(request.zos.globals.id)# and 

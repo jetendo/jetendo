@@ -488,6 +488,8 @@ if(not rs.success){
 	
 	application.zcore.functions.zUpdateSiteMVCData(ts);
 
+	officeCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.office");
+	ts.offices=officeCom.getOfficeCacheStruct(ts.site_id);
 	
 	ts.imageLibraryStruct=structnew();
 	ts.imageLibraryStruct.sizeStruct=structnew();
@@ -2028,16 +2030,16 @@ User's IP: #request.zos.cgi.remote_addr#
 		// force the parent group to have access to itself
 		tempStruct.user_group.access[row["user_group_id"]][row["user_group_name"]]=row["user_group_id"]; 
 	} 
-	for(i=1;i LTE qGroupX.recordcount;i=i+1){
+	for(row in qGroupX){
 		// add the child user groups to each access struct
-		if(qGroupX.user_group_modify_user[i] EQ 1){
-			StructInsert(tempStruct.user_group.modify_user[qGroupX["user_group_id"][i]], qGroupX["user_group_name"][i], qGroupX["user_group_child_id"][i], true);		
+		if(row.user_group_modify_user EQ 1){
+			tempStruct.user_group.modify_user[row["user_group_id"]][row["user_group_name"]]=row["user_group_child_id"];		
 		}
-		if(qGroupX.user_group_login_access[i] EQ 1){
-			StructInsert(tempStruct.user_group.access[qGroupX["user_group_id"][i]], qGroupX["user_group_name"][i], qGroupX["user_group_child_id"][i], true);
+		if(row.user_group_login_access EQ 1){
+			tempStruct.user_group.access[row["user_group_id"]][row["user_group_name"]]=row["user_group_child_id"];
 		}
-		if(qGroupX.user_group_share_user[i] EQ 1){
-			StructInsert(tempStruct.user_group.share_user[qGroupX["user_group_id"][i]], qGroupX["user_group_name"][i], qGroupX["user_group_child_id"][i], true);
+		if(row.user_group_share_user EQ 1){
+			tempStruct.user_group.share_user[row["user_group_id"]][row["user_group_name"]]=row["user_group_child_id"];
 		}
 	}
 

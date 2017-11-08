@@ -416,18 +416,18 @@
 	}
 
 	if(application.zcore.user.checkGroupAccess("administrator")){ 
-		db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-		WHERE site_id = #db.param(request.zos.globals.id)# and 
-		office_deleted = #db.param(0)# 
-		ORDER BY office_name ASC"; 
-		qOffice=db.execute("qOffice"); 
+		ts={ 
+			ids:[],
+			returnType:"struct" 
+		};
+		variables.officeLookup=application.zcore.user.getOffices(ts); 
 	}else{
-		qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
-	}
-	variables.officeLookup={};
-	for(row in qOffice){
-		variables.officeLookup[row.office_id]=row;
-	}
+		ts={ 
+			ids:listToArray(request.zsession.user.office_id, ","),
+			returnType:"struct" 
+		};
+		variables.officeLookup=application.zcore.user.getOffices(ts); 
+	} 
 	</cfscript> 
 
 </cffunction>

@@ -376,9 +376,10 @@ contactCom.processMessage(ts);
 	#db.table("inquiries_x_contact", request.zos.zcoreDatasource)# )
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
 	user_username=contact_email and 
-	user.site_id IN (#db.param(request.zos.globals.id)#, ";
-	if(request.zos.globals.parentId NEQ 0){
-		db.sql&=" #db.param(request.zos.globals.parentId)#, ";
+	user.site_id IN (#db.param(ss.messageStruct.site_id)#, ";
+	parentId=application.zcore.functions.zvar("parentId", ss.messageStruct.site_id);
+	if(parentId NEQ 0){
+		db.sql&=" #db.param(parentId)#, ";
 	}
 	db.sql&=" #db.param(request.zos.globals.serverId)# ) and
 	user_active=#db.param(1)# and 
@@ -410,7 +411,7 @@ contactCom.processMessage(ts);
 			};
 			if(row.userSiteId NEQ ""){
 				ts.user_id=row.user_id;
-				ts.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(row.userSiteId);
+				ts.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(row.userSiteId, ss.messageStruct.site_id);
 				ts.isUser=true; 
 				if(application.zcore.user.groupIdHasAccessToGroup(row.user_group_id, "member", row.userSiteId)){
 					ts.isManagerUser=true;
@@ -427,13 +428,16 @@ contactCom.processMessage(ts);
 
 	// tested successfully
 	if(qInquiry.office_id NEQ 0){
-		db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-		WHERE site_id = #db.param(ss.messageStruct.site_id)# and 
-		office_deleted=#db.param(0)# and 
-		office_manager_email_list <> #db.param('')# and 
-		office_id=#db.param(qInquiry.office_id)#";
-		qOffice=db.execute("qOffice");  
-		for(row in qOffice){
+
+		ts={
+			ids:[qInquiry.office_id],
+			site_id:ss.messageStruct.site_id
+		}
+		arrOffice=application.zcore.user.getOffices(ts); 
+		for(row in arrOffice){
+			if(row.office_manager_email_list EQ ""){
+				continue;
+			}
 			arrEmail=listToArray(row.office_manager_email_list, ",");
 			for(email in arrEmail){
 				contact=getContactByEmail(trim(email), "", ss.messageStruct.site_id);
@@ -569,7 +573,7 @@ contactCom.processMessage(ts);
 					user_group_id:row.user_group_id,
 					office_id:row.userOfficeId,
 					user_id:row.user_id,
-					user_id_siteidtype:application.zcore.functions.zGetSiteIdType(row.userSiteId),
+					user_id_siteidtype:application.zcore.functions.zGetSiteIdType(row.userSiteId, ss.messageStruct.site_id),
 					isUser:true,
 					isManagerUser:false,
 					addressType:"to"
@@ -633,10 +637,10 @@ contactCom.processMessage(ts);
 		bcc:[]
 	}; 
 	allowedUserStruct={};
-	if(structkeyexists(ss.filterContacts, 'offices') and arrayLen(ss.filterContacts.offices)){
-		qOfficeUsers=application.zcore.user.getUsersByOfficeIdList(arrayToList(ss.filterContacts.offices, ",")); 
+	if(structkeyexists(ss.filterContacts, 'offices') and arrayLen(ss.filterContacts.offices)){ 
+		qOfficeUsers=application.zcore.user.getUsersByOfficeIdList(arrayToList(ss.filterContacts.offices, ","), ss.messageStruct.site_id); 
 		for(row in qOfficeUsers){
-			allowedUserStruct[row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)]=row;
+			allowedUserStruct[row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id, ss.messageStruct.site_id)]=row;
 		}
 	}
 	allowedUserGroupIdStruct={};
@@ -698,11 +702,11 @@ contactCom.processMessage(ts);
 				for(contactOffice in arrContactOffice){
 					if(qInquiry.office_id EQ contactOffice){
 						// check if contact.user_group_id has permission to view the current lead
-						contactGroupName=userGroupCom.getGroupName(contact.user_group_id);
+						contactGroupName=userGroupCom.getGroupName(contact.user_group_id, ss.messageStruct.site_id);
 						if(structkeyexists(request.manageLeadUserGroupStruct, contactGroupName)){
 							groupUserCanManageStruct=request.manageLeadUserGroupStruct[contactGroupName];
 							if(qInquiry.user_id NEQ 0){ 
-								assignedUserGroupName=userGroupCom.getGroupName(qUser.user_group_id);
+								assignedUserGroupName=userGroupCom.getGroupName(qUser.user_group_id, ss.messageStruct.site_id);
 								if(structkeyexists(groupUserCanManageStruct, assignedUserGroupName)){
 									// lead is assigned to an office and a group that the contact can manage leads for.
 									contact.isAssignedUser=true;
@@ -908,7 +912,7 @@ contactCom.processMessage(ts);
 			email_queue_cc: cc,
 			email_queue_bcc: '',
 			email_queue_text: jsonStruct.text,
-			site_id: request.zos.globals.id
+			site_id: ss.messageStruct.site_id
 		}
 	};
 
@@ -952,10 +956,9 @@ contactCom.processMessage(ts);
 	html=rereplacenocase(html,"<!DOCTYPE.*?>", "", 'ALL');
 
 	// This isn't going to work since monterey code isn't run by the cron job.  I'd have to convert this to site global
-	if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
-		domain=request.zos.globals.publicUserManagerDomain; 
-	}else{
-		domain=request.zos.globals.domain;
+	domain=application.zcore.functions.zvar("publicUserManagerDomain", ss.messageStruct.site_id);
+	if(domain EQ ""){
+		domain=application.zcore.functions.zvar("domain", ss.messageStruct.site_id);
 	}
 	var fileIndex = 1;
 	// this code might be fragile until we do real html parsing since the editor could rewrite the <p> tag to something else or add undesired line breaks. 
@@ -1003,12 +1006,11 @@ contactCom.processMessage(ts);
 	allowInsecureAttachmentDownload=true; 
 
 	// This isn't going to work since monterey code isn't run by the cron job.  I'd have to convert this to site global
-
-	if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
-		domain=request.zos.globals.publicUserManagerDomain; 
-	}else{
-		domain=request.zos.globals.domain;
-	}
+ 
+	domain=application.zcore.functions.zvar("publicUserManagerDomain", ss.messageStruct.site_id);
+	if(domain EQ ""){
+		domain=application.zcore.functions.zvar("domain", ss.messageStruct.site_id);
+	} 
 	if(arguments.isManagerUser){
 		viewLeadLink="#domain#/z/inquiries/admin/feedback/view?inquiries_id=#ss.inquiries_id#";
 		viewContactLink="#domain#/z/inquiries/admin/feedback/viewContact?contact_id=#ss.contact_id#";
@@ -1238,7 +1240,7 @@ scheduleLeadEmail(ts);
 			row.office_id=qUser.office_id;
 			row.user_group_id=qUser.user_group_id;
 			row.user_id=qUser.user_id;
-			row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id); 
+			row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id, arguments.site_id); 
 		}
 		return row;
 	}
@@ -1297,7 +1299,7 @@ scheduleLeadEmail(ts);
 				row.office_id=qUser.office_id;
 				row.user_group_id=qUser.user_group_id;
 				row.user_id=qUser.user_id;
-				row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id);
+				row.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(qUser.site_id, qUser.site_id);
 			}
 			request.zos.contactIDCache[arguments.contact_id&"."&arguments.site_id]=row;
 		}
@@ -1337,7 +1339,8 @@ scheduleLeadEmail(ts);
 <!--- 
 ts={ 
      email: "someone@somewhere.com", 
-     phone: "badly formatted number" 
+     phone: "badly formatted number",
+     site_id:request.zos.globals.id
 }; 
 contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 rs=contactCom.getContact(ts); 
@@ -1355,31 +1358,31 @@ if(rs.success){
 	var response = structNew();
 	response.success = false;
 
-	if ( NOT structKeyExists( ss, 'email' ) ) {
-		throw( 'ss.email is missing for getContact' );
+	if ( NOT structKeyExists( ss, 'email' ) or NOT structKeyExists( ss, 'phone' ) or NOT structKeyExists( ss, 'site_id' ) ) {
+		throw( 'getContact() - ss.site_id, ss.email and ss.phone are required' );
 	}
-
-	if ( NOT structKeyExists( ss, 'phone' ) ) {
-		throw( 'ss.phone is missing for getContact' );
-	}
-
-	if ( NOT application.zcore.functions.zEmailValidate( ss.email ) ) {
+	if(trim(ss.email&ss.phone) EQ ""){
 		return response;
-	}
-
+	} 
 	ss.phone = application.zcore.functions.zFormatInquiryPhone( ss.phone );
 
 	db.sql = 'SELECT *
-		FROM #db.table( 'contact', request.zos.zcoreDatasource )#
-		WHERE site_id = #db.param( request.zos.globals.id )#
-			AND contact_email = #db.param( ss.email )#
-			AND (
-				contact_phone1_formatted = #db.param( ss.phone )#
-				OR contact_phone2_formatted = #db.param( ss.phone )#
-				OR contact_phone3_formatted = #db.param( ss.phone )#
-			)
-			AND contact_deleted = #db.param( 0 )#
-		LIMIT #db.param( 1 )#';
+	FROM #db.table( 'contact', request.zos.zcoreDatasource )#
+	WHERE site_id = #db.param( ss.site_id )# ';
+
+	if(ss.email NEQ ""){
+		db.sql&=" AND contact_email = #db.param( ss.email )# ";
+	}
+	if(ss.phone NEQ ""){
+		db.sql&=" AND (
+			contact_phone1_formatted = #db.param( ss.phone )#
+			OR contact_phone2_formatted = #db.param( ss.phone )#
+			OR contact_phone3_formatted = #db.param( ss.phone )#
+		) ";
+	}
+	db.sql&="
+	AND contact_deleted = #db.param( 0 )#
+	LIMIT #db.param( 1 )# ";
 	qContact = db.execute( 'qContact' );
 
 	contactStruct = structNew();

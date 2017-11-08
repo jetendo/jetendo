@@ -142,6 +142,9 @@
 	});
 	ts.quickLinks=getQuickLinks();
 	ts.requireFeatureAccess="Leads";
+	if(form.method EQ "viewContact"){
+		ts.readOnlyRequest=true;
+	}
 	super.init(ts); 
 
 	loadManageLeadGroupData();
@@ -680,6 +683,16 @@
 		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 		rs=contactCom.processMessage(ts);  
 	}else{
+
+		if(backupStatusId NEQ 0){ 
+			db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+			SET inquiries_status_id=#db.param(backupStatusId)#, 
+			inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
+			WHERE inquiries_id=#db.param(form.inquiries_id)# and 
+			site_id = #db.param(request.zos.globals.id)# and  
+			inquiries_deleted=#db.param(0)# ";
+			db.execute("qUpdateInquiry");  
+		}
 		// send email to the assigned user.
 		toEmail=qCheck.user_email;
 		if(request.zos.isTestServer){
@@ -1753,18 +1766,19 @@ zArrDeferredFunctions.push(function(){
 	}
 
 	if(application.zcore.user.checkGroupAccess("administrator")){ 
-		db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-		WHERE site_id = #db.param(request.zos.globals.id)# and 
-		office_deleted = #db.param(0)# 
-		ORDER BY office_name ASC"; 
-		qOffice=db.execute("qOffice"); 
+		ts={
+			sortBy:"name",
+			returnType:"struct"
+		};
+		variables.officeLookup=application.zcore.user.getOffices(ts);
 	}else{
-		qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
-	}
-	variables.officeLookup={};
-	for(row in qOffice){
-		variables.officeLookup[row.office_id]=row;
-	}
+		ts={
+			ids:listToArray(request.zsession.user.office_id, ","),
+			sortBy:"name",
+			returnType:"struct"
+		};
+		variables.officeLookup=application.zcore.user.getOffices(ts); 
+	} 
 
 	return { statusName:variables.statusName, typeNameLookup:variables.typeNameLookup, officeLookup:variables.officeLookup};
 	</cfscript> 
@@ -2060,18 +2074,18 @@ zArrDeferredFunctions.push(function(){
 		}]
 	});
 
-	qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
-	if(application.zcore.user.checkGroupAccess("administrator") or qOffice.recordcount GT 1){
+	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+	if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
 		savecontent variable="officeField"{
 			selectStruct = StructNew();
 			selectStruct.name = "search_office_id"; 
-			selectStruct.query = qOffice;
+			selectStruct.arrData = arrOffice;
 			selectStruct.size=3; 
 			selectStruct.queryLabelField = "office_name";
 			selectStruct.inlineStyle="width:100%; max-width:100%;";
 			selectStruct.queryValueField = 'office_id';
 
-			if(qOffice.recordcount GT 3){
+			if(arrayLen(arrOffice) GT 3){
 				echo('Office:<br>
 					Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
 				application.zcore.functions.zInputSelectBox(selectStruct);

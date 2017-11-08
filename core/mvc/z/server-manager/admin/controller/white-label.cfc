@@ -92,6 +92,7 @@
 	for(row in qSite){
 		if(structkeyexists(application.siteStruct, row.site_id)){
 			application.siteStruct[row.site_id].administratorTemplateMenuCache={};
+			structdelete(application.siteStruct[row.site_id], 'whiteLabelStruct');
 		}
 	}
 	</cfscript>
@@ -260,6 +261,7 @@
 		application.zcore.functions.zUpdate(ts);
 	}
 	variables["queueSortCom"&form.whitelabel_button_public].sortAll();
+	clearMenuCache(form.site_id);
 	application.zcore.status.setStatus(request.zsid, "Button saved");
 	application.zcore.functions.zRedirect("/z/server-manager/admin/white-label/manageButtons?zsid=#request.zsid#&whitelabel_id=#form.whitelabel_id#&sid=#form.sid#");
 	</cfscript>

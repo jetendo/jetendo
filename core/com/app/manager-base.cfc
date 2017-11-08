@@ -70,7 +70,8 @@ add option for search indexing for search table.
 			sortable:true,
 
 		}*/],
-		rowSortingEnabled:false
+		rowSortingEnabled:false,
+		readOnlyRequest:false // set to true when you want to force requireFeatureAccess to read-only
 	}; 
 	structappend(ss, ts, false);
 	tempMethods={ // callback functions to customize the manager data and layout
@@ -85,7 +86,8 @@ add option for search indexing for search table.
 		afterInsert:'',
 		getDeleteData:'',
 		executeDelete:'',
-		beforeReturnInsertUpdate:''
+		beforeReturnInsertUpdate:'',
+		afterSort:''
 	};
 	structappend(ss.methods, tempMethods, false);
 	structappend(variables, ss, true);
@@ -105,7 +107,7 @@ add option for search indexing for search table.
 
 
 	if(variables.requireFeatureAccess NEQ ""){ 
-		if(form.method EQ "index" or form.method EQ "edit" or form.method EQ "add" OR form.method EQ "addBulk"){
+		if(variables.readOnlyRequest or form.method EQ "index" or form.method EQ "edit" or form.method EQ "add" OR form.method EQ "addBulk" OR form.method EQ "view"){
 			application.zcore.adminSecurityFilter.requireFeatureAccess(variables.requireFeatureAccess);	
 		}else{
 			// all other methods might be writing
@@ -163,6 +165,11 @@ add option for search indexing for search table.
 		queueSortStruct.ajaxURL=variables.prefixURL&"index?#variables.requiredParamsQS#";
 		queueSortStruct.ajaxTableId="sortRowTable";
 		variables.queueSortCom.init(queueSortStruct);
+		if(structkeyexists(form, variables.queueSortCom.sortVarNameAjax)){ 
+			if(variables.methods.afterSort NEQ ""){
+				variables[variables.methods.afterSort]();
+			}
+		}
 		variables.queueSortCom.returnJson();
  	}
 	</cfscript>

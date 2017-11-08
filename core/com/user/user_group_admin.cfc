@@ -440,29 +440,25 @@
         <cfscript>
 		var local=structnew();
 		var db=request.zos.queryObject;
-		</cfscript>
-		<cfif request.zos.globals.id NEQ arguments.site_id>
-			<cfsavecontent variable="db.sql">
-			SELECT user_group_name FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
+		if(request.zos.globals.id NEQ arguments.site_id){
+			db.sql="SELECT user_group_name FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
 			WHERE user_group_id=#db.param(arguments.user_group_id)# and 
 			user_group_deleted = #db.param(0)# and 
-			site_id=#db.param(arguments.site_id)#
-			</cfsavecontent><cfscript>qSite=db.execute("qSite");
+			site_id=#db.param(arguments.site_id)#";
+			qSite=db.execute("qSite");
 			try{
 				return qSite.user_group_name;
 			}catch(Any excpt){
 				application.zcore.template.fail("#this.comName#: getGroupId: user_group_name, #arguments.user_group_name#, doesn't exist.");
 			}
-			</cfscript>
-		<cfelse>
-			<cfscript>
+		}else{
 			try{
 				return request.zos.globals.user_group.ids[arguments.user_group_id];
 			}catch(Any excpt){
 				application.zcore.template.fail("#this.comName#: getGroupId: user_group_id, #user_group_id#, doesn't exist.");
 			}
-			</cfscript>
-		</cfif>
+		}
+		</cfscript>
 	</cffunction>
 	
 	<!--- userGroupCom.getGroupDisplayName(user_group_id, site_id); --->

@@ -1136,7 +1136,7 @@
 		}]
 	});
 
-	qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id); 
+	qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 	if(application.zcore.user.checkGroupAccess("administrator") or qOffice.recordcount GT 1){
 		savecontent variable="officeField"{
 			selectStruct = StructNew();

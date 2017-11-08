@@ -317,6 +317,10 @@
 <cffunction name="getWhitelabelStruct" localmode="modern" access="public" roles="member">
 	<cfscript>
 	db=request.zos.queryObject;
+	if(structkeyexists(application.siteStruct[request.zos.globals.id], 'whiteLabelStruct')){
+		return application.siteStruct[request.zos.globals.id].whiteLabelStruct;
+	}	
+
 	if(structkeyexists(request, 'whiteLabelStruct')){
 		return request.whiteLabelStruct;
 	}
@@ -375,6 +379,7 @@
 		}
 
 	}
+	application.siteStruct[request.zos.globals.id].whiteLabelStruct=ts;
 	request.whiteLabelStruct=ts;
 	if(ts.whitelabel_css NEQ ""){
 		ts.whitelabel_css=replaceNoCase(ts.whitelabel_css, "url(/", "url("&application.zcore.functions.zvar("domain", qData.site_id)&"/", "all");
