@@ -203,8 +203,7 @@
 	<cfscript>
 	var db=request.zos.queryObject;
 	var qTypes=0;
-	var currentMethod=form.method;
-	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
+	var currentMethod=form.method; 
 	variables.init();
 	application.zcore.functions.zSetPageHelpId("4.6");
 	form.sid=application.zcore.functions.zGetSiteIdFromSiteIdType(application.zcore.functions.zso(form, 'siteIdType',false,1));
@@ -255,7 +254,15 @@
 			</tr>
 			<tr>
 				<th>Message:</th>
-				<td><textarea name="inquiries_lead_template_message" id="inquiries_lead_template_message" style="width:100%; height:250px; ">#htmleditformat(form.inquiries_lead_template_message)#</textarea></td>
+				<td>
+				<cfscript>
+				htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+				htmlEditor.instanceName	= "inquiries_lead_template_message";
+				htmlEditor.value			= form.inquiries_lead_template_message;
+				htmlEditor.width			= "100%";
+				htmlEditor.height		= 150;
+				htmlEditor.createSimple();
+				</cfscript> </td>
 			</tr>
 			<cfif application.zcore.user.checkServerAccess(request.zos.globals.id)>
 				<tr>
@@ -286,23 +293,6 @@
 			</tr>
 		</form>
 	</table>
-
-	<script type="text/javascript">
-	zArrDeferredFunctions.push( function() {
-		tinymce.init({
-		  selector: '##inquiries_lead_template_message', 
-		  menubar: false,
-		  autoresize_min_height: 100,
-		  plugins: [
-		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
-		    'searchreplace visualblocks code fullscreen',
-		    'insertdatetime media table contextmenu paste code'
-		  ],
-		  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
-		  content_css: []
-		}); 
-	});
-	</script>
 </cffunction>
 
 <cffunction name="hide" localmode="modern" access="remote" roles="administrator">

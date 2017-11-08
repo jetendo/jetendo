@@ -215,8 +215,7 @@
 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript> 
-	var db=request.zos.queryObject;
-	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
+	var db=request.zos.queryObject; 
 	var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 	application.zcore.functions.zSetPageHelpId("4.1.2");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Leads");

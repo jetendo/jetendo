@@ -954,27 +954,16 @@ If the link does not work, please copy and paste the entire link in your browser
 					<td><input type="text" name="user_zip" style=" width:100%;" value="#htmleditformat(form.user_zip)#" /></td>
 				</tr>
 				<tr>
-					<td colspan="2">Email Signature&nbsp;<br>
+					<td colspan="2">Email Signature&nbsp;<br> 
+
 						<cfscript>
-						application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js");
-						</cfscript>
-						<textarea name="member_signature" id="member_signature" style="width:100%; height:200px; ">#htmleditformat(form.member_signature)#</textarea>
-						<script type="text/javascript">
-						zArrDeferredFunctions.push(function(){ 
-							tinymce.init({
-							  selector: '##member_signature',
-							  height: 300,
-							  menubar: false,
-							  plugins: [
-							    'advlist autolink lists link image charmap print preview anchor textcolor',
-							    'searchreplace visualblocks code fullscreen',
-							    'insertdatetime media table contextmenu paste code'
-							  ],
-							  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
-							  content_css: []
-							}); 
-						});
-						</script>
+						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+						htmlEditor.instanceName	= "member_signature";
+						htmlEditor.value			= form.member_signature;
+						htmlEditor.width			= "100%";
+						htmlEditor.height		= 150;
+						htmlEditor.createSimple();
+						</cfscript>  
 					</td>
 				</tr>
 			</table>

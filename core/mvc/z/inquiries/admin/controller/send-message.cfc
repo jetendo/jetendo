@@ -304,8 +304,7 @@
 	if(not result){
 		return;
 	}
-	db=request.zos.queryObject; 
-	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
+	db=request.zos.queryObject;  
  
 	tags=StructNew(); 
 	signature="";
@@ -632,7 +631,15 @@
 			<tr>
 				<th>Message:</th>
 				<td>
-					<textarea name="inquiries_message" id="inquiries_message" style="width:98%; height:50px; ">#htmleditformat(form.inquiries_message)#</textarea>
+					
+					<cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "inquiries_message";
+					htmlEditor.value			= form.inquiries_message;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 150;
+					htmlEditor.createSimple();
+					</cfscript> 
 
 					<div class="z-float z-pv-10">
 						<p>Note: You can edit your email signature in your profile. &nbsp;&nbsp;
@@ -653,19 +660,7 @@
 				e.preventDefault();
 				return false;
 			}
-		}); 
-		tinymce.init({
-		  selector: '##inquiries_message', 
-		  menubar: false,
-		  autoresize_min_height: 100,
-		  plugins: [
-		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
-		    'searchreplace visualblocks code fullscreen',
-		    'insertdatetime media table contextmenu paste code'
-		  ],
-		  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
-		  content_css: []
-		});
+		});  
 		function emailSentCallback(r){
 			window.parent.location.reload();
 		}

@@ -130,7 +130,7 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
 	ts=getInitConfig();
- 
+
 	//FOR REG USER DO NOT WANT TO REDIRECT
 	arrayAppend(ts.titleLinks, { 
 			label:"Bulk Add",
@@ -753,8 +753,7 @@
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	ss=arguments.ss;
-	application.zcore.skin.includeJS("/z/a/scripts/tiny_mce/tinymce.min.js"); 
+	ss=arguments.ss; 
 	db.sql="SELECT * from #db.table("inquiries_lead_template", request.zos.zcoreDatasource)# inquiries_lead_template
 	LEFT JOIN #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# inquiries_lead_template_x_site ON 
 	inquiries_lead_template_x_site.inquiries_lead_template_id = inquiries_lead_template.inquiries_lead_template_id and 
@@ -887,7 +886,15 @@
 			<tr>
 				<th>Message:</th>
 				<td>
-					<textarea name="inquiries_feedback_comments" id="inquiries_feedback_comments" style="width:100%; height:120px; min-width:100%; max-width:100%; ">#form.inquiries_feedback_comments#</textarea></td>
+					<cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "inquiries_feedback_comments";
+					htmlEditor.value			= form.inquiries_feedback_comments;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 150;
+					htmlEditor.createSimple();
+					</cfscript> 
+				</td>
 			</tr>
 		</table>
 		<cfif form.method EQ "view" or form.method EQ "userView">
@@ -898,19 +905,7 @@
 	</form>
 	<br>
 	<script type="text/javascript">
-	zArrDeferredFunctions.push( function() {
-		tinymce.init({
-		  selector: '##inquiries_feedback_comments', 
-		  menubar: false,
-		  autoresize_min_height: 100,
-		  plugins: [
-		    'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
-		    'searchreplace visualblocks code fullscreen',
-		    'insertdatetime media table contextmenu paste code'
-		  ],
-		  toolbar: 'undo redo |  formatselect | bold italic | alignleft aligncenter alignright alignjustify | link bullist numlist outdent indent | removeformat',
-		  content_css: []
-		});
+	zArrDeferredFunctions.push( function() { 
 		function emailSentCallback(r){
 			window.parent.location.reload();
 		}

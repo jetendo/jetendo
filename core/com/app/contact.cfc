@@ -825,7 +825,7 @@ contactCom.processMessage(ts);
 		site_id = #db.param(ss.messageStruct.site_id)# and  
 		inquiries_deleted=#db.param(0)# ";
 		db.execute("qUpdateInquiry");  
-	}else if(mainContact.contact_id NEQ fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0){ 
+	}else if(mainContact.contact_id NEQ fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0 and fromContact.isAssignedUser){ 
 		if(qInquiry.inquiries_status_id EQ 2){
 			newStatusId=3;		
 		}else if(qInquiry.inquiries_status_id EQ 1){
