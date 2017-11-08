@@ -649,6 +649,7 @@ contactCom.processMessage(ts);
 			allowedUserGroupIdStruct[group]=true;
 		}
 	} 
+	enablePlusEmailRouting=application.zcore.functions.zvar("enablePlusEmailRouting", ss.messageStruct.site_id, "0");
 
 	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 	for(i in emailStruct){
@@ -726,18 +727,23 @@ contactCom.processMessage(ts);
 		if(fromContact.contact_id EQ contact.contact_id){
 			fromContact.isAssignedUser=contact.isAssignedUser;
 		}
-
-		// generate unique from address 
-		idString=contact.contact_id&"."&ss.inquiries_id;
-		tempEmail=getFromAddressForContactByStruct(contact, idString); 
-		if(debug){
-			writedump(contact);
-		}
 		if(not structkeyexists(emailSendStruct, contact.addressType)){
 			throw("Invalid contact.addressType: ""#contact.addressType#"".  Only to, cc, and bcc are valid values.");
 		}
+
+		// generate unique from address 
+		idString=contact.contact_id&"."&ss.inquiries_id;
+
+		if(enablePlusEmailRouting EQ 1){
+			tempEmail=getFromAddressForContactByStruct(contact, idString); 
+		}else{
+			tempEmail=contact.contact_email;
+		}
 		if(debug){
 			echo('#contact.contact_email# changed to #tempEmail#<br>');
+		}
+		if(debug){
+			writedump(contact);
 		}
 		name=trim(contact.contact_first_name&" "&contact.contact_last_name);
 		if(name NEQ ""){
@@ -1041,10 +1047,13 @@ contactCom.processMessage(ts);
 		}
 		fileIndex++;
 	}
+	enablePlusEmailRouting=application.zcore.functions.zvar("enablePlusEmailRouting", ss.messageStruct.site_id, "0");
 
 	savecontent variable="rs.html"{
-		echo('<!DOCTYPE html><html><head><title></title></head><body>
-			<p style="color:##999; font-size:13px;">## Please reply ABOVE THIS LINE to make a comment.</p>');
+		echo('<!DOCTYPE html><html><head><title></title></head><body>');
+		if(enablePlusEmailRouting EQ 1){
+			echo('<p style="color:##999; font-size:13px;">## Please reply ABOVE THIS LINE to make a comment.</p>');
+		}
 		if(ss.jsonStruct.humanReplyStruct.score < 0){
 			echo('<p>This message may be an auto-reply or spam. Score: #ss.jsonStruct.humanReplyStruct.score#</p>');
 			if(request.zos.istestserver){

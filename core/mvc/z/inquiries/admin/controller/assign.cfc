@@ -9,23 +9,23 @@
 <cffunction name="getAssignLead" localmode="modern" access="remote">
 	<cfargument name="form_type" type="string" required="yes">
 	<cfscript>
-		var db=request.zos.queryObject;
-		var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
-		var luid = "";
-		if(structkeyexists(form, "user_id")){
-			luid = "#form.user_id#";
-		} else{    
-			luid = "";
-		}
-		if(!structkeyexists(form, 'user_id_siteIDType')){
-			form["user_id_siteIDType"] = "";
-		}
-		if(!structkeyexists(form, 'inquiries_admin_comments')){
-			form["inquiries_admin_comments"] = "";
-		}
-		if(!structkeyexists(form, 'zPageId')){
-			form["zPageId"] = 0;
-		}
+	var db=request.zos.queryObject;
+	var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+	var luid = "";
+	if(structkeyexists(form, "user_id")){
+		luid = "#form.user_id#";
+	} else{    
+		luid = "";
+	}
+	if(!structkeyexists(form, 'user_id_siteIDType')){
+		form["user_id_siteIDType"] = "";
+	}
+	if(!structkeyexists(form, 'inquiries_admin_comments')){
+		form["inquiries_admin_comments"] = "";
+	}
+	if(!structkeyexists(form, 'zPageId')){
+		form["zPageId"] = 0;
+	}
 	</cfscript>
 <div style="float:left;">
 	<table style="width:100%; border-spacing:0px;"> 
@@ -35,13 +35,13 @@
 			if(application.zcore.user.checkGroupAccess("administrator")){ 
 				ts={
 					sortBy:"name"
-				}
+				};
 				arrOffice=application.zcore.user.getOffices(ts);
 			}else{
 				ts={
 					ids:listToArray(request.zsession.user.office_id, ","),
 					sortBy:"name"
-				}
+				};
 				arrOffice=application.zcore.user.getOffices(ts); 
 			} 
 			</cfscript> 
@@ -321,16 +321,19 @@
 		<cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1> 
 			<cfscript> 
 			if(application.zcore.user.checkGroupAccess("administrator")){ 
-				db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# 
-				WHERE site_id = #db.param(request.zos.globals.id)# and 
-				office_deleted = #db.param(0)# 
-				ORDER BY office_name ASC"; 
-				qOffice=db.execute("qOffice"); 
+				ts={
+					sortBy:"name"
+				}
+				arrOffice=application.zcore.user.getOffices(ts);
 			}else{
-				qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+				ts={
+					ids:listToArray(request.zsession.user.office_id, ","),
+					sortBy:"name"
+				}
+				arrOffice=application.zcore.user.getOffices(ts); 
 			}
 			</cfscript> 
-			<cfif qOffice.recordcount GT 0>
+			<cfif arrayLen(arrOffice) GT 0>
 				<tr><th style="text-align:left;">1) Office:</th></tr>
 				 <tr><td style="padding:10px;"> 
 					<p>An office is a group of 1 or more users who will be able to access this lead.</p>
@@ -338,14 +341,14 @@
 						<cfscript> 
 						selectStruct = StructNew();
 						selectStruct.name = "office_id"; 
-						selectStruct.query = qOffice;
+						selectStruct.arrData = arrOffice;
 						selectStruct.size=1; 
 						selectStruct.onChange="assignSelectOffice();";
 						selectStruct.queryLabelField = "office_name";
 						selectStruct.inlineStyle="width:100%; max-width:100%;";
 						selectStruct.queryValueField = 'office_id';
 
-						if(qOffice.recordcount GT 3){
+						if(arrayLen(arrOffice) GT 3){
 							echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
 							application.zcore.functions.zInputSelectBox(selectStruct);
 							application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");

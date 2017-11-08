@@ -1265,7 +1265,7 @@ deleteSearchIndex(ts);
 					continue;
 				}
 				echo('<tr>
-					<th>#field.label#');
+					<th style="width:140px;" class="z-fluid-at-992">#field.label#');
 				if(structkeyexists(field, 'required') and field.required){
 					echo(' *');
 				}

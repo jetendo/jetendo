@@ -77,7 +77,7 @@
 		paginationIndex:"zIndex",
 		pageZSID:"zPageId",
 		perpage:30,
-		title:"Lead",
+		title:"Leads",
 		requireFeatureAccess="Leads",
 		prefixURL:"/z/inquiries/admin/manage-inquiries/",
 		navLinks:[],
@@ -1161,6 +1161,9 @@ zArrDeferredFunctions.push(function(){
 	        </cfscript>
 		</cfloop>
 	</cfif>
+	<cfscript>
+	return qInquiry;
+	</cfscript>
 </cffunction>
 
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
@@ -1449,6 +1452,113 @@ zArrDeferredFunctions.push(function(){
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	db=request.zos.queryObject; 
+	savecontent variable="customNote"{
+		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
+		<h3>#form.inquiries_feedback_subject#</h3>
+		#form.inquiries_feedback_comments#');
+	}
+	if(request.zos.isTestServer){
+		// this should be happening on live server when the new lead interface is all done
+		request.noleadsystemlinks=true;
+	}
+	savecontent variable="emailHTML"{
+		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	    iemailCom.getEmailTemplate(customNote, true);
+	} 
+	if(request.zos.isTestServer){
+		ts={  
+			contact_id:request.zsession.user.contact_id,  
+			debug:false,
+			inquiries_id:form.inquiries_id,
+			validHash:true, 
+			jsonStruct:{
+			   "headers":{
+			      "raw":"",
+			      "parsed":{ 
+			      }
+			   },
+			   "from":{
+			      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			      "email":request.zsession.user.email
+			   },
+			   "to":[
+			      {
+			         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			         "email":request.zsession.user.email,
+			         "plusId":"",
+			         "originalEmail":request.zsession.user.email
+			      }
+			   ],
+			   "cc":[],
+			   "bcc":[],
+			   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
+			   "html":emailHTML,
+			   "htmlWeb":form.inquiries_feedback_comments,
+			   "htmlProcessed":"",
+			   "files":[/*
+			      {
+			         "size":2715,
+			         "filePath":"elkdgjicjkbkdbjf2.jpg",
+			         "fileName":"elkdgjicjkbkdbjf.jpg"
+			      }*/
+			   ],
+			   "plusId":"", // nothing for internal mail
+			   "size":0, // measure below
+			   "date":request.zos.mysqlnow,
+			   "version":1,
+			   "humanReplyStruct":{
+			      "isHumanReply":true,
+			      "humanTriggers":[],
+			      "roboScore":0,
+			      "roboTriggers":[],
+			      "score":1,
+			      "humanScore":1
+			   } 
+			},
+			messageStruct:{
+				site_id:request.zos.globals.id
+			},
+			filterContacts:{ managers:true },
+			privateMessage:true,
+			enableCopyToSelf:true
+		};  
+
+		// slightly inaccurate since it doesn't include all fields and attachment sizes
+		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+		//ts.debug=true;
+		if(qCheck.office_id NEQ "0"){
+			ts.filterContacts.offices=[qCheck.office_id];
+		}
+		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+		}  
+		//writedump(ts);abort;
+		//writedump(ts);	abort; 
+	 
+		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+		rs=contactCom.processMessage(ts);  
+	}else{ 
+		// send email to the assigned user.
+		toEmail=qCheck.user_email;
+		if(request.zos.isTestServer){
+			toEmail=request.zos.developerEmailTo;
+		}
+		ts={
+			to:toEmail,
+			from:request.fromEmail,
+			subject:"#form.inquiries_feedback_subject#",
+			html:emailHTML
+		};
+		application.zcore.email.send(ts);
+	}
+	</cfscript>
+</cffunction>
+
 <cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
@@ -1460,6 +1570,8 @@ zArrDeferredFunctions.push(function(){
 	}else{
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead Updated.");
 	}
+	sendLeadUpdatedEmail("Lead ###form.inquiries_id# was updated");
+
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1489,6 +1601,7 @@ zArrDeferredFunctions.push(function(){
 	}else{
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead Added.");
 	}
+	sendLeadUpdatedEmail("Lead ###form.inquiries_id# was added");
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1714,9 +1827,9 @@ zArrDeferredFunctions.push(function(){
 		}
 	}*/
 	var ass = new Assign();
-		savecontent variable="field"{  
-			echo(ass.getAssignLead(""));
-		}
+	savecontent variable="field"{  
+		echo(ass.getAssignLead(""));
+	}
 	arrayAppend(fs, {label:'Assign To', field:field});
 	//arrayAppend(fs, {label:'Assign To', field:field});
 

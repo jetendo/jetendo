@@ -243,8 +243,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<div class="z-float">
 				<!--- allow editing a contact from here, and refresh the page here instead of manage-contact --->
 				<h3 style="display:inline-block;">Contact</h3> &nbsp;&nbsp;
-				<a href="/z/inquiries/admin/manage-contact/edit?contact_id=#form.contact_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-button z-contact-edit-button">Edit</a>
-				TODO: Assign button?
+				<a href="/z/inquiries/admin/manage-contact/edit?contact_id=#form.contact_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-button z-contact-edit-button">Edit</a> 
 			</div>
 			<cfscript> 
 			displayContact(contact);
@@ -292,7 +291,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<div class="z-float">
 				<div class="z-3of4 z-p-0">
 					<cfscript> 
-					variables.inquiriesCom.view(); 
+					qInquiry=variables.inquiriesCom.view(); 
 			        </cfscript> 
 
 					<cfscript>
@@ -302,6 +301,56 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			    </div>
 			    <div class="z-1of4 z-p-0">
 					<cfscript> 
+
+					if(qInquiry.office_id NEQ 0){
+						// get the office_manager_email_list for this lead, and prevent deleting these
+						ts={
+							ids:[qInquiry.office_id],
+							site_id:request.zos.globals.id
+						}
+						arrOffice=application.zcore.user.getOffices(ts); 
+						if(arrayLen(arrOffice)){ 
+							arrManager=listToArray(arrOffice[1].office_manager_email_list, ",");
+						}
+					}
+					/*
+
+		ts={
+			ids:[qInquiry.office_id],
+			site_id:ss.messageStruct.site_id
+		}
+		arrOffice=application.zcore.user.getOffices(ts); 
+		for(row in arrOffice){
+			if(row.office_manager_email_list EQ ""){
+				continue;
+			}
+			arrEmail=listToArray(row.office_manager_email_list, ",");
+			for(email in arrEmail){
+				contact=getContactByEmail(trim(email), "", ss.messageStruct.site_id);
+				if(structcount(contact) NEQ 0){
+					ts={
+						site_id:ss.messageStruct.site_id,
+						contact_id:contact.contact_id,
+						contact_des_key:contact.contact_des_key,
+						contact_email:contact.contact_email,
+						contact_first_name:contact.contact_first_name,
+						contact_last_name:contact.contact_last_name, 
+						office_id:contact.office_id,
+						user_group_id:contact.user_group_id,
+						user_id:contact.user_id,
+						user_id_siteidtype:contact.user_id_siteidtype,
+						isUser:contact.isUser,
+						isManagerUser:contact.isManagerUser,
+						addressType:"cc"
+					};
+					emailStruct[contact.contact_email]=ts;
+					if(debug){
+						echo('Added office manager email list contact, #contact.contact_email#, to outgoing email<br>');
+					}
+				}
+			}
+					*/
+
 					// display list of contacts attached to this lead. 
 			 
 					db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, contact.contact_first_name, contact.contact_last_name
@@ -1217,6 +1266,9 @@ zArrDeferredFunctions.push(function(){
 		qOther=db.execute("qOther");
  
 		</cfscript>
+		<cfif qOther.recordcount EQ 0>
+			<p>No leads found for this contact.</p>
+		</cfif>
 		<div style="width:100%; float:left; padding:5px;">
 			<cfif qOther.recordcount GTE 2>
 				<table class="table-list z-radius-5" style="border-spacing:0px; width:100%; border:1px solid ##CCCCCC;">

@@ -2,15 +2,8 @@
 <cfoutput>   
 <cffunction name="getQuickLinks" localmode="modern" access="public">
 	<cfscript>
-	links=[]; 
-	variables.hasLeadsAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Leads");
-	if(variables.hasLeadsAccess){
-		links=[
-			{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
-			{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
-			{ link:"/z/inquiries/admin/manage-contact/index##exportContactDiv", label:"Contact Export" }		]; 
-	}
-	return links;
+	inquiriesCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
+	return inquiriesCom.getQuickLinks();
 	</cfscript>
 </cffunction>
 
@@ -65,7 +58,7 @@
 		paginationIndex:"zIndex",
 		pageZSID:"zPageId",
 		perpage:30,
-		title:"Contact",
+		title:"Contacts",
 		requireFeatureAccess="Leads",
 		prefixURL:"/z/inquiries/admin/manage-contact/",
 		navLinks:[],
@@ -119,10 +112,10 @@
 	<cfscript> 
 	ts=getInitConfig();
 	//FOR REG USER DO NOT WANT TO REDIRECT
-	arrayAppend(ts.titleLinks, {
+	/*arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-contact/index##exportContactDiv"
-	});
+	});*/
 	ts.quickLinks=getQuickLinks();
 	ts.requireFeatureAccess="Leads";
 	super.init(ts); 
@@ -152,11 +145,11 @@
 		}
 		form["office_id"] = request.zsession.selectedOfficeId;
 	}
-
+/*
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-contact/userIndex##exportContactDiv"
-	});
+	});*/
 	ts.requireFeatureAccess="";
 	super.init(ts); 
 	
@@ -283,7 +276,7 @@
 </cffunction>
 
 
-
+<!--- 
 <cffunction name="userExport" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
@@ -291,7 +284,7 @@
 	exportCom.index();
 	</cfscript>
 	
-</cffunction>
+</cffunction> --->
 
 <cffunction name="userHasAccessToContact" localmode="modern" access="public" roles="user">
 	<cfargument name="contact_id" type="string" required="yes">
@@ -418,7 +411,7 @@
 	</cfscript>
 
 
-	<cfif application.zcore.user.checkGroupAccess("member") or form.method EQ "userIndex">
+	<!--- <cfif application.zcore.user.checkGroupAccess("member") or form.method EQ "userIndex">
 	
 		<script type="text/javascript">
 		/* <![CDATA[ */
@@ -470,7 +463,7 @@
 			<!--- <cfif form.searchType NEQ "">
 			</cfif> --->
 		</div>
-	</cfif> 
+	</cfif>  --->
 </cffunction> 
 
 <cffunction name="executeDelete" localmode="modern" access="private">
@@ -656,7 +649,7 @@
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_first_name" value="#htmleditformat(form.contact_first_name)#" />');
 	}
-	arrayAppend(fs, {label:'First Name', field:field}); 
+	arrayAppend(fs, {label:'First Name', required:true, field:field}); 
 
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_last_name" value="#htmleditformat(form.contact_last_name)#" />');
@@ -1136,18 +1129,18 @@
 		}]
 	});
 
-	qOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
-	if(application.zcore.user.checkGroupAccess("administrator") or qOffice.recordcount GT 1){
+	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+	if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice) GT 1){
 		savecontent variable="officeField"{
 			selectStruct = StructNew();
 			selectStruct.name = "search_office_id"; 
-			selectStruct.query = qOffice;
+			selectStruct.arrData = arrOffice;
 			selectStruct.size=3; 
 			selectStruct.queryLabelField = "office_name";
 			selectStruct.inlineStyle="width:100%; max-width:100%;";
 			selectStruct.queryValueField = 'office_id';
 
-			if(qOffice.recordcount GT 3){
+			if(arrayLen(arrOffice) GT 3){
 				echo('Office:<br>
 					Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
 				application.zcore.functions.zInputSelectBox(selectStruct);
