@@ -1279,9 +1279,9 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 		}
 	}
 	</cfscript>
-	<table style="width:100%; border-spacing:0px;">
+	<table style="width:100%; border-spacing:0px; margin-bottom:10px;">
 		<tr>
-			<td style="vertical-align:top;padding:5px;width:100px;"><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="   font-weight:normal;  ">
+			<td style="vertical-align:top;padding:5px;width:100px;border-bottom:none;"><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="   font-weight:normal;  ">
 				<cfif fileexists(request.zos.globals.homedir&'images/content/'&arguments.query.content_thumbnail)>
 					<img src="#request.zos.currentHostName&'/images/content/'##arguments.query.content_thumbnail#" class="listing-d-img" id="zclistingdimg#arguments.query.content_id#" width="100" height="78">
 				<cfelse>
@@ -1291,16 +1291,15 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 				<cfif contentConfig.showmlsnumber EQ false and arguments.query.content_mls_number NEQ "">
 					ID ###listgetat(arguments.query.content_mls_number,2,'-')#
 				</cfif></td>
-			<td style="vertical-align:top;padding:5px;text-align:left;"><h2><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="text-decoration:none;">#arguments.query.content_name#</a>
+			<td style="vertical-align:top;padding:5px;text-align:left;border-bottom:none;"><h3><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="text-decoration:none;">#arguments.query.content_name#</a>
 					<cfif arguments.query.content_price NEQ 0>
 						<br />
 						$#numberformat(arguments.query.content_price)#
 					</cfif>
-				</h2>
-				<a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="margin-right:3px; display:block;  font-weight:bold; float:left; padding:4px; line-height:20px; text-decoration:none; 	border-bottom:1px solid ##CCCCCC; " class="zcontent-readmore-link">Read More</a></td>
+				</h3>
+				<a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="margin-right:3px; display:block;  font-weight:bold; float:left; padding:4px; line-height:20px; text-decoration:none;  " class="z-manager-search-button zcontent-readmore-link ">Read More</a></td>
 		</tr>
-	</table>
-	<hr />
+	</table> 
 </cffunction>
 
 <cffunction name="descriptionLinkTemplate" localmode="modern" output="yes" returntype="any">

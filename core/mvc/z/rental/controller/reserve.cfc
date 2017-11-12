@@ -464,7 +464,7 @@ Login and view inquiry:
           <cfset request.usestyleonly=true>
 			<cfscript>
 			iEmailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-			iEmailCom.getEmailTemplate();
+			iEmailCom.getEmailTemplate("", false);
 			</cfscript>
           <cfset StructDelete(request,'usestyleonly')>
 		  

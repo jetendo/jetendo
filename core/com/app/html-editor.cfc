@@ -50,6 +50,7 @@ htmlEditor.createSimple();
 	zArrDeferredFunctions.push(function(){
 
 		tinymce.init({
+			branding: false,
 			selector : "tinyMceTextarea#request.zos.zTinyMceIndex#",
 			menubar: false,
 			//theme: 'modern',
@@ -166,6 +167,7 @@ application.zcore.template.prependTag("scripts",theMeta);
 zArrDeferredFunctions.push(function(){
 
 	tinymce.init({ 
+		branding: false,
 		fix_table_elements: 0,  
         selector : "tinyMceTextarea#request.zos.zTinyMceIndex#",
 		document_base_url:'/',

@@ -911,17 +911,15 @@
 	if(application.zcore.functions.zvarso('zofficeemail') NEQ ""){
 		request.officeEmail= application.zcore.functions.zvarso('zofficeemail');
 	}
-	if(request.zos.globals.adminEmail NEQ ""){
+	if(request.zos.isTestServer){
+		request.fromEmail=request.zos.developerEmailFrom;
+	}else if(request.zos.globals.emailCampaignFrom NEQ ""){
+		request.fromemail=request.zos.globals.emailCampaignFrom;
+	}else if(request.zos.globals.adminEmail EQ ""){ 
 		request.fromemail=request.zos.globals.adminEmail;
-	//if(request.zos.globals.emailCampaignFrom NEQ ""){
-	//	request.fromemail=request.zos.globals.emailCampaignFrom;
-	//}else if(request.officeEmail NEQ ""){
-	//	request.fromemail=listgetat(request.officeEmail,1,",");
 	}else{
-		request.fromemail=request.zos.developerEmailFrom;
-	}
-	
-	
+		throw("Can't set request.fromemail for this site. Email Campaign From and Admin Email are required in site globals.");
+	} 
 	</cfscript>
 </cffunction>
 

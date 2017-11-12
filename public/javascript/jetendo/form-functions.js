@@ -29,6 +29,7 @@ var zMotionObjClicked="";
 var zFormOnEnterValues=new Array();
 var zInputBoxLinkValues=[];
 var zIsDirty=false;
+var zCurrentHash="";
 
 /*var zLastAjaxTableId="";
 var zLastAjaxURL="";
@@ -664,7 +665,8 @@ var zLastAjaxVarName=""; */
 				console.log(zAjaxData[obj.id]); 
 				console.log("zAjax Response Object");
 				console.log(req); 
-				document.write(req.responseText);  
+				zShowModal(req.responseText,{'width':zWindowSize.width-100,'height':zWindowSize.height-100});
+				zResetManagerTabEdit();
 				return false;
 			}else{
 				if(m!= ""){
@@ -1698,7 +1700,6 @@ var zLastAjaxVarName=""; */
 	var zBodyBeingEdited=false;
 	var zBodyInsertPosition="bottom";
 	var zRowEditIndex=0;
-	var zCurrentHash="";
 	function zTableRecordAdd(obj, id, position){
 		// store table body 
 		if(typeof position == "undefined"){
@@ -1861,8 +1862,7 @@ var zLastAjaxVarName=""; */
 		} 
 		$(window).bind("hashchange", function() {
 
-			if (window.location.hash.indexOf(zCurrentHash) == -1){
-
+			if (window.location.hash.indexOf(zCurrentHash) == -1){ 
 				var iframe=document.getElementById(window.zCurrentModalIframeId);
 				if(iframe){
 					iframe.contentWindow.zCheckFormDataForChanges(); 
@@ -1882,6 +1882,9 @@ var zLastAjaxVarName=""; */
 				return;
 			}  
 			if(unloadCalled){
+				return;
+			}
+			if(e.target && e.target.activeElement && e.target.activeElement.href.indexOf("mailto:") != -1){
 				return;
 			}
 			unloadCalled=true;

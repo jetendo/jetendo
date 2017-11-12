@@ -3,6 +3,7 @@
     z-index: 1;
     position: relative; }
 .z-default-subpage-title{ display:inline-block; margin-top:278px; color:#FFF; margin-bottom:20px; padding:20px; font-size:48px;}
+.z-default-subpage-body-full{width:100%; float:left;}
 .z-default-subpage-subpage{ display:table; width:100%; direction:rtl; border-spacing:0px; }
 .z-default-subpage-row{ display:table-row; }
 .z-default-subpage-left-panel{ display:table-cell; width:280px; direction:ltr; background-color:#CCC; vertical-align:top;}

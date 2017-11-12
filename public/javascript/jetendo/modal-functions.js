@@ -53,6 +53,7 @@
 		}
 		window.zCurrentModalIframeId="zModalIframe"+modalIndexId;
 
+
 		modalIndexId++;
 		var modalContent1='<iframe id="'+window.zCurrentModalIframeId+'" src="'+url+'ztv='+Math.random()+'" scrolling="yes" frameborder="0"  style=" margin:0px; border:none; overflow:auto; -webkit-overflow-scrolling: touch; position:relative; " seamless="seamless" width="100%" height="98%" />';		
 		zShowModal(modalContent1,{
@@ -192,7 +193,7 @@
 			b='<div class="zCloseModalButton'+zModalIndex+'" style="width:80px; text-align:right; left:0px; top:0px; position:relative; float:left;  font-weight:bold;"><a href="#" onclick="zCloseModal();return false;" style="color:#FFF !important;">X Close</a></div>';  
 		}
 		var h='<div id="zModalOverlayDivContainer'+zModalIndex+'" class="zModalOverlayDiv">'+b+'<div id="zModalOverlayDivInner'+zModalIndex+'" class="zModalOverlayDiv2" style=" -webkit-overflow-scrolling: touch !important; overflow:auto !important;"></div></div>'; 
-
+  
 
 
   
@@ -325,6 +326,9 @@
 			"top":(top-25)+"px"
 		});
 		zModalPosIntervalId=setInterval(zFixModalPos,500);
+		zCurrentHash="#zModal-"+new Date().getTime()+"-"+Math.random();
+		window.location.href=zCurrentHash;  
+
 	}
 	function zSetModalSideReduce(r){
 		zModalSideReduce=r;

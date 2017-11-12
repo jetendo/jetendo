@@ -259,15 +259,9 @@ application.zcore.template.setTag("pagenav",tempPageNav);
 	form.inquiries_session_id=application.zcore.session.getSessionId();
 	form.site_id=request.zos.globals.id;
 //	Insert Into Inquiry Database
-	inputStruct = StructNew();
-	if(application.zcore.app.siteHasApp("content")){ 
-		form.inquiries_id=application.zcore.functions.zInsertLead();
-	}else{ 
-		inputStruct={}; // goes in the site datasource
-		inputStruct.table = "inquiries";
-		inputStruct.struct=form; 
-		form.inquiries_id = application.zcore.functions.zInsert(inputStruct);  
-	}
+	inputStruct = StructNew(); 
+	form.inquiries_id=application.zcore.functions.zInsertLead(); 
+	
 	if(form.inquiries_id EQ false){
 		application.zcore.status.setStatus(Request.zsid, "Your inquiry has not been sent due to an error.", false,true);
 		application.zcore.functions.zRedirect("/z/misc/mortgage-quote/index?modalpopforced=#form.modalpopforced#&zsid="&request.zsid);

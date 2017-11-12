@@ -289,20 +289,23 @@
 				t9.inquiries_custom_json=serializeJson(t992);
 			}
 
-			db.sql="select inquiries_id from #db.table("inquiries", request.zos.zcoreDatasource)# 
+			db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
 			WHERE inquiries_deleted=#db.param(0)# and 
 			inquiries_external_id = #db.param(t9.inquiries_external_id)# and 
 			inquiries_type_id = #db.param(15)# and 
 			inquiries_type_id_siteIDType=#db.param(4)# and 
 			site_id = #db.param(request.zos.globals.id)# ";
 			qId=db.execute("qId");
+			for(row in qId){
+				structappend(form, row, false);
+			}
 
 			structappend(form, t9 , true);
 			if(qId.recordcount){
 				form.inquiries_id=qId.inquiries_id;
 				structdelete(form, 'inquiries_status_id'); 
 				updateCount++;
-				application.zcore.functions.zUpdateLead();
+				application.zcore.functions.zUpdateLead(form);
 			}else{ 
 				insertCount++;
 				application.zcore.functions.zInsertLead();
