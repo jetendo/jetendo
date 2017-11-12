@@ -55,19 +55,8 @@
 <cffunction name="getEmailTemplate" localmode="modern" access="public">
 	<cfargument name="customNote" type="string" required="no" default="">
 	<cfargument name="showPrivate" type="boolean" required="no" default="#false#">
-	<cfscript>
-	var tempText=0;
-	var qinquiry=0;
-	var tt2=0;
-	var pos=0;
-	var arrSMS=0;
-	var running=0;
-	var n=1;
-	var cur=0;
-	var g=0;
-	var db=request.zos.queryObject;
-	var viewIncludeCom=0;
-    request.znotemplate=1;
+	<cfscript> 
+	var db=request.zos.queryObject;  
     </cfscript>
 	<cfsavecontent variable="tempText">#application.zcore.functions.zHTMLDoctype()#
 	<head>
@@ -76,71 +65,52 @@
 	</head>
 	
 	<body> 
-			<cfscript>
-			db.sql="SELECT * FROM (#db.table("inquiries", request.zos.zcoreDatasource)# inquiries, 
-			#db.table("inquiries_status", request.zos.zcoreDatasource)# inquiries_status) 
-			LEFT JOIN #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type ON 
-			inquiries.inquiries_type_id = inquiries_type.inquiries_type_id and 
-			inquiries_type.site_id IN (#db.param(0)#,#db.param(request.zos.globals.id)#) and 
-			inquiries_type.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.inquiries_type_id_siteIDType"))# and 
-			inquiries_type_deleted = #db.param(0)#
-			LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
-			user.user_id = inquiries.user_id and 
-			user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.user_id_siteIDType"))# and 
-			user_deleted = #db.param(0)#
-			WHERE inquiries.site_id = #db.param(request.zOS.globals.id)# and 	
-			inquiries_deleted = #db.param(0)# and 
-			inquiries_status_deleted = #db.param(0)# and 
-			inquiries.inquiries_status_id = inquiries_status.inquiries_status_id and 
-			inquiries_id = #db.param(form.inquiries_id)# ";
-			qinquiry=db.execute("qinquiry");
+		<cfscript>
+		db.sql="SELECT * FROM (#db.table("inquiries", request.zos.zcoreDatasource)# inquiries, 
+		#db.table("inquiries_status", request.zos.zcoreDatasource)# inquiries_status) 
+		LEFT JOIN #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type ON 
+		inquiries.inquiries_type_id = inquiries_type.inquiries_type_id and 
+		inquiries_type.site_id IN (#db.param(0)#,#db.param(request.zos.globals.id)#) and 
+		inquiries_type.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.inquiries_type_id_siteIDType"))# and 
+		inquiries_type_deleted = #db.param(0)#
+		LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
+		user.user_id = inquiries.user_id and 
+		user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.user_id_siteIDType"))# and 
+		user_deleted = #db.param(0)#
+		WHERE inquiries.site_id = #db.param(request.zOS.globals.id)# and 	
+		inquiries_deleted = #db.param(0)# and 
+		inquiries_status_deleted = #db.param(0)# and 
+		inquiries.inquiries_status_id = inquiries_status.inquiries_status_id and 
+		inquiries_id = #db.param(form.inquiries_id)# ";
+		qinquiry=db.execute("qinquiry");
 
-			application.zcore.functions.zQueryToStruct(qinquiry, form);
-			</cfscript>
-			<!--- <cfif form.user_id NEQ 0>
-				<cfif structkeyexists(form, 'groupemail') and form.groupEmail>
-					One of your leads has been updated by the client.<br />
-					<br />
-				<cfelse>
-					A lead has been assigned to you.<br />
-					<br />
-				</cfif>
-			</cfif> --->
-			<cfif arguments.customNote NEQ "">
-				#arguments.customNote#
-				<p>&nbsp;</p>
-			</cfif>
-			<cfif not structkeyexists(request, 'noleadsystemlinks')>
-				<cfscript>
-				assignDomain=request.zos.currentHostName;
-				loginURL="#assignDomain#/z/inquiries/admin/feedback/view";
-				if(form.user_id NEQ 0 and form.user_id_siteIDType EQ 1){ 
-					if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
-						assignDomain=request.zos.globals.publicUserManagerDomain;
-					}
-					if(not application.zcore.user.groupIdHasAccessToGroup(form.user_group_id, "member")){ 
-						loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/userView";
-					}
-				} 
-				if(not arguments.showPrivate and qInquiry.inquiries_admin_comments NEQ ''){
-					echo('<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">Click here to view private comments</a></h3>');
+		application.zcore.functions.zQueryToStruct(qinquiry, form);
+		if(arguments.customNote NEQ ""){
+			echo('#arguments.customNote#
+			<p>&nbsp;</p>');
+		}
+		if(not structkeyexists(request, 'noleadsystemlinks')){
+			assignDomain=request.zos.currentHostName;
+			loginURL="#assignDomain#/z/inquiries/admin/feedback/view";
+			if(form.user_id NEQ 0 and form.user_id_siteIDType EQ 1){ 
+				if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
+					assignDomain=request.zos.globals.publicUserManagerDomain;
 				}
-				</cfscript> 
-				<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">View/Edit Lead ###form.inquiries_id#</a></h3>
-			</cfif>
-			<p>Original inquiry is listed below</p>
-			<cfscript>
-			// move latest track_user to track_user so the email has the newest tracking information.
-			application.zcore.tracking.updateLogs();
-			</cfscript>
-			<cfif structkeyexists(form, 'groupemail') and form.groupEmail>
-				Updated Information:#chr(10)#
-			</cfif>
-			<cfscript>
-			request.usestyleonly=true;
-	        viewIncludeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-			viewIncludeCom.getViewInclude(qinquiry, arguments.showPrivate);
-			</cfscript> 
+				if(not application.zcore.user.groupIdHasAccessToGroup(form.user_group_id, "member")){ 
+					loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/userView";
+				}
+			} 
+			if(not arguments.showPrivate and qInquiry.inquiries_admin_comments NEQ ''){
+				echo('<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">Click here to view private comments</a></h3>');
+			}
+			echo('<h3><a href="#loginURL#?inquiries_id=#form.inquiries_id#">View/Edit Lead ###form.inquiries_id#</a></h3>');
+		}
+		echo('<p>Original inquiry is listed below</p>');
+		// move latest track_user to track_user so the email has the newest tracking information.
+		application.zcore.tracking.updateLogs(); 
+		request.usestyleonly=true;
+		getViewInclude(qinquiry, arguments.showPrivate);
+		</cfscript> 
 	</body>
 	</html>
 	</cfsavecontent>
@@ -211,7 +181,7 @@
 	tdstyle="";
 	application.zcore.functions.zquerytostruct(arguments.qinquiry, t);
 	tablestyle=' style="border-spacing:0px; width:100%;" ';
-	if(isDefined('request.usestyleonly')){
+	if(structkeyexists(request, 'usestyleonly')){
 		tdstyle = ' font-size:12px; text-align:left;  padding:3px; width: 520px;';
 		thstyle = 'white-space:nowrap; font-size:12px; text-align:left; font-weight:bold; padding:3px; background-color:##EFEFEF; width:120px;';
 		tablestyle=' width="640" style="font-family:Verdana, Arial, Geneva, sans-serif; font-size:12px; width:640px;" ';
@@ -225,325 +195,16 @@
 	<span #tablestyle#>
 	<table #tablestyle# class="table-list">
   
-		<cfif arguments.showPrivate>
-			<!-- startadmincomments -->
-			<!--- <cfif isReservationSystem EQ false> --->
-			<cfif t.inquiries_referer NEQ '' or t.inquiries_referer2 NEQ ''>
-				<tr>
-					<th style="#thstyle# text-align:left; ">Last 2 Pages:</th>
-					<td style="#tdstyle#">Clicking on these links can help you understand what the user was looking at when submitting the inquiry.<br />
-						<cfif t.inquiries_referer CONTAINS 'google.com/aclk'>
-	Link 1 disabled since this may cause a duplicate google adwords PPC click						<br />
-							<cfelseif t.inquiries_referer NEQ ''>
-							<a href="#t.inquiries_referer#" target="_blank">Click to view referring page 1</a><br />
-						</cfif>
-						<cfif t.inquiries_referer2 CONTAINS 'google.com/aclk'>
-	Link 2 disabled since this may cause a duplicate google adwords PPC click						<br />
-							<cfelseif t.inquiries_referer2 NEQ ''>
-							<a href="#t.inquiries_referer2#" target="_blank">Click to view referring page 2</a><br />
-						</cfif></td>
-				</tr>
-			</cfif>
-			<cfif t.inquiries_email NEQ "">
-				<cfscript>
-				db.sql="SELECT * FROM #db.table("track_user", request.zos.zcoreDatasource)# track_user 
-				WHERE track_user.site_id =#db.param(request.zOS.globals.id)# AND 
-				((track_user_email =#db.param(t.inquiries_email)# and 
-				track_user_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')#) or 
-				inquiries_id=#db.param(t.inquiries_id)#)  and 
-				track_user_deleted = #db.param(0)#
-				LIMIT #db.param(0)#,#db.param(1)#";
-				qTrack=db.execute("qTrack");
-
-
-				</cfscript>
-				<cfif qTrack.recordcount NEQ 0>
-					<cfloop query="qTrack">
-					<tr>
-						<th style="#thstyle# text-align:left;">Tracking:</th>
-						<td style="#tdstyle#">
-							
-						<cfif dateformat(qTrack.track_user_datetime,'yyyymmdd') GT 20111121>
-							<cfif qTrack.track_user_ppc EQ 1 or qTrack.track_user_first_page CONTAINS "gclid=">
-								<strong>Google Adwords Pay Per Click Lead</strong><br />
-							</cfif>
-							<cfif qTrack.track_user_source NEQ "">
-								<strong>Source: #qTrack.track_user_source#</strong><br />
-							</cfif>
-						<cfelse>
-							<cfscript>
-							db.sql="SELECT count(track_page_id) count 
-							FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-							WHERE site_id =#db.param(request.zOS.globals.id)# and 
-							track_user_id =#db.param(track_user_id)# and 
-							track_page_deleted = #db.param(0)# and 
-							track_page_qs LIKE #db.param('%gclid=%')#";
-							qPage=db.execute("qPage");
-							</cfscript>
-							<cfif qPage.recordcount NEQ 0 and qPage.count NEQ 0>
-								<strong>Google Adwords Pay Per Click Lead</strong><br />
-							</cfif>
-						</cfif>
-						
-						<cfif qTrack.track_user_referer NEQ "">
-							<cfif qTrack.track_user_ppc EQ 1>
-								<cfscript>
-								    arrU=listtoarray(qTrack.track_user_referer,"&");
-								    for(i894=1;i894 LTE arraylen(arrU);i894++){
-									if(left(arrU[i894],2) EQ "q="){
-									    writeoutput("Google PPC Keyword: "&urldecode(removechars(arrU[i894],1,2))&"<br />");
-									}
-								    }
-								    </cfscript>
-							<cfelse>
-								Source URL: <a href="#qTrack.track_user_referer#" target="_blank">#left(qTrack.track_user_referer,50)#...</a><br />
-							</cfif>
-						</cfif>
-						<cfif qTrack.track_user_keywords NEQ "">
-							Keyword:#qTrack.track_user_keywords#<br />
-						</cfif>
-						<cfscript>
-
-							formattedDate=DateFormat(qTrack.track_user_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_datetime,'HH:mm:ss');
-							firstDate=parsedatetime(formattedDate);
-							formattedDate2=DateFormat(qTrack.track_user_recent_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_recent_datetime,'HH:mm:ss');
-							if(isdate(formattedDate2)){
-							lastDate=parsedatetime(formattedDate2);
-							}else{
-								lastDate=firstDate;	
-							}
-							seconds=DateDiff("s", formattedDate, formattedDate2);
-
-							if(qTrack.track_user_session_length NEQ 0){
-								seconds=qTrack.track_user_session_length;
-								if(seconds GT 86400){
-									minutes=fix(seconds/60/60/24)&' days ';
-								}else{
-									minutes=fix(seconds/60)&' minutes ';
-									if(fix(seconds/60) EQ 0){
-										minutes="";
-									}
-									if(seconds MOD 60 NEQ 0){
-										minutes=minutes&(seconds MOD 60)&' seconds';
-									}
-								}
-								echo('Length of visit: #minutes#<br />');
-							}
-							if(qTrack.track_user_seconds_since_first_visit NEQ 0){
-								seconds=qTrack.track_user_seconds_since_first_visit;
-								if(seconds GT 86400){
-									minutes=fix(seconds/60/60/24)&' days ';
-								}else{
-									minutes=fix(seconds/60)&' minutes ';
-									if(fix(seconds/60) EQ 0){
-										minutes="";
-									}
-									if(seconds MOD 60 NEQ 0){
-										minutes=minutes&(seconds MOD 60)&' seconds';
-									}
-								}
-								echo('Time since first visit: #minutes#<br />');
-							}
-							if(qTrack.track_user_hits GT 1){
-								echo('Clicks: #qTrack.track_user_hits#<br />');
-							}
-							if(qTrack.track_user_first_page NEQ ""){
-								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
-							}
-						/*
-						// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
-						db.sql="SELECT count(track_page_id) count, min(track_page_datetime) minDate , max(track_page_datetime) maxDate 
-						FROM #db.table("track_page", request.zos.zcoreDatasource)#  
-						WHERE site_id =#db.param(request.zOS.globals.id)# and 
-						track_user_id =#db.param(qTrack.track_user_id)# and 
-						track_page_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')# and 
-						track_page_deleted = #db.param(0)#
-						LIMIT #db.param(0)#,#db.param(1)#";
-						qTrackPage=db.execute("qTrackPage"); 
-
-						if(qTrackPage.recordcount and qTrackPage.count GT 1){ 
-							formattedDate=DateFormat(qTrackPage.minDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.minDate,'HH:mm:ss');
-							firstDate=parsedatetime(formattedDate);
-							formattedDate2=DateFormat(qTrackPage.maxDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.maxDate,'HH:mm:ss');
-							if(isdate(formattedDate2)){
-							lastDate=parsedatetime(formattedDate2);
-							}else{
-								lastDate=firstDate;	
-							}
-							seconds=DateDiff("s", formattedDate, formattedDate2);
-							minutes=fix(seconds/60)&'mins ';
-							if(fix(seconds/60) EQ 0){
-								minutes="";
-							}
-							if(seconds MOD 60 NEQ 0){
-								minutes=minutes&(seconds MOD 60)&'secs';
-							}
-							echo('Length of Visit:#minutes#<br />');
-							echo('Clicks:#qTrackPage.count#<br />');
-							db.sql="SELECT * FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-							WHERE site_id =#db.param(request.zOS.globals.id)# AND 
-							track_user_id =#db.param(qTrack.track_user_id)# and 
-							track_page_datetime <=#db.param(dateformat(qTrack.track_user_recent_datetime, 'yyyy-mm-dd')&' '&timeformat(qTrack.track_user_recent_datetime,'HH:mm:ss'))# and 
-							track_page_deleted = #db.param(0)# 
-							ORDER BY track_page_datetime ASC 
-							LIMIT #db.param(0)#,#db.param(1)#";
-							qTrack2=db.execute("qTrack2");
-							echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
-
-
-						} */
-						</cfscript>
-						</td>
-					</tr>
-					</cfloop>
-				</cfif>
-			</cfif> 
-			<tr>
-				<th style="#thstyle# text-align:left;">Type:</th>
-				<td style="#tdstyle#">
-					<cfif arguments.qinquiry.inquiries_type_name EQ ''>
-						#t.inquiries_type_other#
-					<cfelse>
-						#arguments.qinquiry.inquiries_type_name#
-					</cfif>
-					&nbsp;
-					<cfif trim(t.inquiries_phone_time) NEQ ''>
-						/ <strong>Forced</strong>
-					</cfif></td>
-			</tr>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Status:</th>
-				<td style="#tdstyle#">
-					#t.inquiries_status_name#
-				</td>
-			</tr>
-			<cfif t.office_id NEQ 0>
-				<tr>
-					<th style="#thstyle# text-align:left;" >Assigned&nbsp;Office:</th>
-					<td style="#tdstyle#"> 
-						<cfscript>
-					    db=request.zos.queryObject;
-					    ts={
-					    	ids:[t.office_id]
-						};
-					    arrOffice=application.zcore.user.getOffices(ts);
-					    if(arrayLen(arrOffice) EQ 0){
-					    	echo('(Office deleted)');
-					    }else{
-					    	for(office in arrOffice){
-						    	echo('<strong>'&office.office_name&'</strong>');
-						    	if(office.office_address NEQ ""){
-						    		echo('<br>'&office.office_address);
-						    	}
-						    	if(office.office_address2 NEQ ""){
-						    		echo('<br>'&office.office_address2);
-						    	}
-						    	if(office.office_city NEQ ""){
-						    		echo('<br>'&office.office_city);
-						    	}
-						    	if(office.office_state NEQ ""){
-						    		echo(', '&office.office_state);
-						    	}
-						    	if(office.office_zip NEQ ""){
-						    		echo(" "&office.office_zip);
-						    	}
-						    	if(office.office_country NEQ ""){
-						    		echo(" "&office.office_country);
-						    	}
-						    }
-						}
-						</cfscript>
-					</td>
-				</tr>
-			</cfif>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Assigned&nbsp;To:</th>
-				<td style="#tdstyle#"> 
-				 <cfif t.inquiries_assign_email NEQ ''> 
-					<cfscript>
-					arrEmail=listToArray(t.inquiries_assign_email, ",");
-					for(i=1;i<=arraylen(arrEmail);i++){
-						e=arrEmail[i];
-						if(i NEQ 1){
-							echo(', ');
-						}
-						echo('<a href="mailto:#e#">');
-						if(structkeyexists(t, 'inquiries_assign_name') and t.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
-							echo(t.inquiries_assign_name);
-						}else{
-							echo(e);
-						}
-						echo('</a>');
-					}
-					</cfscript> 
-				<cfelse>
-					<cfif t.user_id NEQ 0>
-						<cfif t.user_first_name NEQ "">
-							<a href="mailto:#t.user_username#">#t.user_first_name# #t.user_last_name# 
-							<cfif t.member_company NEQ "">
-								(#t.member_company#)
-							</cfif></a>
-						<cfelse>
-							<a href="mailto:#t.user_username#">#t.user_username#</a>
-						</cfif> 
-					</cfif>
-				</cfif></td>
-			</tr>
-			<!-- endadmincomments -->
-		</cfif>
-
-		<cfif t.inquiries_spam EQ 1>
-			<tr>
-				<th style="#thstyle# text-align:left;" >&nbsp;</th>
-				<td style="#tdstyle# width:90%;"><strong>This inquiry may be SPAM</strong><br>
-					Spam Filter Reported: #t.inquiries_spam_description#
-				</td>
-			</tr>
-		</cfif>
-		<tr>
-			<th style="#thstyle# text-align:left;" >Date Received:</th>
-			<td style="#tdstyle# width:90%;">#DateFormat(t.inquiries_datetime, "m/dd/yyyy")# at #Timeformat(t.inquiries_datetime, "h:mm tt")#</td>
-		</tr>
-		<!-- beginplaintext -->
-		<cfif application.zcore.functions.zso(t, 'inquiries_image') NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Image:</th>
-				<td style="#tdstyle#"><a href="/z/misc/download/index?fp=#urlencodedformat('/zupload/user/#t.inquiries_image#')#">Download File</a></td>
-			</tr>
-		</cfif> 
-		<cfif application.zcore.functions.zso(t, 'inquiries_start_date') NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >Start Date:</th>
-				<td style="#tdstyle#">#DateFormat(t.inquiries_start_date, "m/dd/yyyy")#</td>
-			</tr>
-		</cfif>
-		<cfif application.zcore.functions.zso(t, 'inquiries_end_date') NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;" >End Date:</th>
-				<td style="#tdstyle#">#DateFormat(t.inquiries_end_date, "m/dd/yyyy")#</td>
-			</tr>
-		</cfif>
-		<cfif trim(application.zcore.functions.zso(t, 'inquiries_buyer')) NEQ ''>
-			<tr>
-				<th style="#thstyle# text-align:left;">Looking to:</th>
-				<td style="#tdstyle#">
-					<cfif t.inquiries_buyer EQ 1 or t.inquiries_type_id NEQ 6>
-						Buy Real Estate
-					<cfelse>
-						<strong>Sell Real Estate</strong>
-					</cfif></td>
-			</tr>
-		</cfif>
 		<cfif trim(t.inquiries_first_name) NEQ '' or trim(t.inquiries_last_name) NEQ ''>
 			<tr>
-				<th style="#thstyle# text-align:left;">Name:</th>
+				<th width="130" style="#thstyle# text-align:left;">Name:</th>
 				<td style="#tdstyle#">#application.zcore.functions.zFirstLetterCaps(t.inquiries_first_name)# #application.zcore.functions.zFirstLetterCaps(t.inquiries_last_name)#&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(t.inquiries_email) NEQ ''> 
 			<tr>
-				<th style="#thstyle# text-align:left;" >Email:</th>
-				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'This message was sent in response to your inquiry on '&DateFormat(t.inquiries_datetime, "mmmm d")&': '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif>">#t.inquiries_email#</a>&nbsp;</td>
+				<th width="130" style="#thstyle# text-align:left;" >Email:</th>
+				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'This message was sent in response to your inquiry on '&DateFormat(t.inquiries_datetime, "mmmm d")&': '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif>" class="z-manager-search-button">#t.inquiries_email#</a>&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(t.inquiries_phone_time) NEQ ''>
@@ -562,7 +223,7 @@
 		</cfif>
 		<cfif trim(t.inquiries_phone1) NEQ ''>
 			<tr>
-				<th style="#thstyle# text-align:left;" >Phone 1:</th>
+				<th width="130" style="#thstyle# text-align:left;" >Phone 1:</th>
 				<td style="#tdstyle#">#t.inquiries_phone1#&nbsp;</td>
 			</tr>
 		</cfif>
@@ -624,6 +285,36 @@
 			<tr>
 				<th style="#thstyle# text-align:left;" >Zip Code:</th>
 				<td style="#tdstyle#">#t.inquiries_zip#&nbsp;</td>
+			</tr>
+		</cfif>
+		<!-- beginplaintext -->
+		<cfif application.zcore.functions.zso(t, 'inquiries_image') NEQ ''>
+			<tr>
+				<th style="#thstyle# text-align:left;" >Image:</th>
+				<td style="#tdstyle#"><a href="/z/misc/download/index?fp=#urlencodedformat('/zupload/user/#t.inquiries_image#')#">Download File</a></td>
+			</tr>
+		</cfif> 
+		<cfif application.zcore.functions.zso(t, 'inquiries_start_date') NEQ ''>
+			<tr>
+				<th style="#thstyle# text-align:left;" >Start Date:</th>
+				<td style="#tdstyle#">#DateFormat(t.inquiries_start_date, "m/dd/yyyy")#</td>
+			</tr>
+		</cfif>
+		<cfif application.zcore.functions.zso(t, 'inquiries_end_date') NEQ ''>
+			<tr>
+				<th style="#thstyle# text-align:left;" >End Date:</th>
+				<td style="#tdstyle#">#DateFormat(t.inquiries_end_date, "m/dd/yyyy")#</td>
+			</tr>
+		</cfif>
+		<cfif trim(application.zcore.functions.zso(t, 'inquiries_buyer')) NEQ ''>
+			<tr>
+				<th style="#thstyle# text-align:left;">Looking to:</th>
+				<td style="#tdstyle#">
+					<cfif t.inquiries_buyer EQ 1 or t.inquiries_type_id NEQ 6>
+						Buy Real Estate
+					<cfelse>
+						<strong>Sell Real Estate</strong>
+					</cfif></td>
 			</tr>
 		</cfif>
 		<cfif trim(application.zcore.functions.zso(t, 'inquiries_owner_relationship')) NEQ ''>
@@ -939,36 +630,418 @@
 		</cfif> 
 		<cfif structkeyexists(t, 'inquiries_loan_city') and trim(t.inquiries_loan_city&t.inquiries_loan_own&t.inquiries_loan_price) NEQ "">
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Property Location</th>
+				<th style="#thstyle# text-align:left;">Loan Property Location</th>
 				<td style="#tdstyle#">#t.inquiries_loan_city#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Rent or Own:</th>
+				<th style="#thstyle# text-align:left;">Loan Rent or Own:</th>
 				<td style="#tdstyle#">#t.inquiries_loan_own#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Purchase Price</th>
+				<th style="#thstyle# text-align:left;">Loan Purchase Price</th>
 				<td style="#tdstyle#">#t.inquiries_loan_price#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Amount</th>
+				<th style="#thstyle# text-align:left;">Loan Amount</th>
 				<td style="#tdstyle#">#t.inquiries_loan_amount#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Program</th>
+				<th style="#thstyle# text-align:left;">Loan Program</th>
 				<td style="#tdstyle#">#t.inquiries_loan_program#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Property Use</th>
+				<th style="#thstyle# text-align:left;">Loan Property Use</th>
 				<td style="#tdstyle#">#t.inquiries_loan_property_use#</td>
 			</tr>
 			<tr>
-				<th style="#thstyle# text-align:left;" width="120">Loan Property Type</th>
+				<th style="#thstyle# text-align:left;">Loan Property Type</th>
 				<td style="#tdstyle#">#t.inquiries_loan_property_type#</td>
 			</tr>
 		</cfif>  
+		<cfif t.rental_id NEQ "" and t.rental_id NEQ "0"> 
+			<tr>
+				<th style="#thstyle# text-align:left;">Selected Rental</th>
+				<td style="#tdstyle#">
+					<cfscript>
+					ts=structnew();
+					ts.rental_id_list=t.rental_id;
+					ts.email=true;
+					var rentalFrontCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.rental.controller.rental-front");
+					rentalFrontCom.includeRentalById(ts);
+					</cfscript>
+				</td>
+			</tr>  
+		</cfif>
+		<cfif application.zcore.app.siteHasApp("content")>
+			<cfscript>
+			ts4=structnew();
+			ts4.contentEmailFormat=true;
+			ts4.showmlsnumber=true;
+			application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts4);
+			propertyDataCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyData");
+			propDisplayCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyDisplay");
+			</cfscript>
+			<cfif application.zcore.functions.zso(t,'content_id') NEQ 0 and application.zcore.functions.zso(t,'content_id') NEQ ""> 
+				<tr>
+					<th style="#thstyle# text-align:left; vertical-align:top;">Inquired on <cfif t.content_id CONTAINS ",">
+						these page(s)
+					<cfelse>
+						this page
+					</cfif></th>
+					<td style="#tdstyle#">
+						<cfscript>
+						contentIdList="'"&replace(replace(application.zcore.functions.zso(t,'content_id'),"'","","ALL"),",","','","ALL")&"'";
+						db.sql="SELECT * FROM #db.table("content", request.zos.zcoreDatasource)# content 
+						WHERE content.site_id =#db.param(request.zOS.globals.id)# and 
+						content_id IN (#db.trustedSQL(contentIdList)#)  and 
+						content_for_sale <>#db.param(2)# and 
+						content_deleted =#db.param(0)#
+						ORDER BY content_sort ASC, content_datetime DESC, content_created_datetime DESC 
+						LIMIT #db.param(0)# , #db.param(1)#";
+						qC39821n=db.execute("qC39821n");
+						for(local.row in qC39821n){
+							propDisplayCom.contentEmailTemplate(local.row);
+						}
+						</cfscript>
+					</td>
+				</tr>
+			</cfif>
+			<cfscript> 
+			if(application.zcore.functions.zso(t,'property_id') NEQ '' and application.zcore.functions.zso(t,'property_id') NEQ '0'){
+				echo('<tr>
+				<th style="#thstyle# text-align:left; vertical-align:top;">Property Inquiry</th>
+				<td style="#tdstyle#">'); 
+				writeoutput('<p>The contact is asking about these listing(s).</p>');
+				arrP=listtoarray(t.property_id);
+				for(i=1;i LTE arraylen(arrP);i++){
+					ts = StructNew();
+					ts.offset = 0;
+					ts.perpage = 100;
+					ts.distance = 30; // in miles
+					ts.arrMLSPID=ArrayNew(1);
+					ArrayAppend(ts.arrMLSPID, arrP[i]);
+					if(listlen(arrP[i],"-") NEQ 2){
+						application.zcore.template.fail("Inquiry ###t.inquiries_id# has the wrong listing_id format, ""#ts.arrMLSPid[i]#""");
+					}
+					tempMlsId=listgetat(arrP[i],1,"-");
+					tempMlsPid=listgetat(arrP[i],2,"-");
+					tempMLSStruct=application.zcore.listingCom.getMLSStruct(tempMLSId);
+					if(isStruct(tempMLSStruct)){
+						if(tempMLSStruct.mls_login_url NEQ ''){
+							writeoutput('MLS ###tempMLSPid# from <a href="#tempMLSStruct.mls_login_url#" target="_blank" class="z-manager-search-button" title="Click here to login to the MLS">#tempMLSStruct.mls_name# MLS</a><br />');
+						}else{
+							writeoutput('MLS ###tempMLSPid# from #tempMLSStruct.mls_name# MLS<br />');
+						}
+						returnStruct = propertyDataCom.getProperties(ts);
+						structdelete(variables,'ts');
+						//	zdump(returnstruct);
+						if(returnStruct.count NEQ 0){	
+							ts = StructNew();
+							//ts.showInactive=true;
+							ts.searchScript=false;
+							ts.emailFormat=true;
+							ts.hideMLSNumber=true;
+							ts.compact=true;
+							ts.permanentImages=true;
+							ts.dataStruct = returnStruct;
+							propDisplayCom.init(ts);
+							res=propDisplayCom.display();
+							writeoutput(res);
+						}else{
+							writeoutput('<p>This listing is no longer active, please look in the MLS for more information.</p>');
+						}
+					}
+				}
+				echo('
+					</td>
+				</tr> ');
+			}
+			</cfscript> 
+		</cfif>
+		</table>
+
+		<h3 style="margin-top:10px;">Tracking Details</h3>
+		
+		<table #tablestyle# class="table-list">
+		<tr>
+			<th width="130" style="#thstyle# text-align:left;" >Date Received:</th>
+			<td style="#tdstyle# ">#DateFormat(t.inquiries_datetime, "m/dd/yyyy")# at #Timeformat(t.inquiries_datetime, "h:mm tt")#</td>
+		</tr>
+
+		<cfif t.office_id NEQ 0>
+			<tr>
+				<th style="#thstyle# text-align:left;" >Assigned&nbsp;Office:</th>
+				<td style="#tdstyle#"> 
+					<cfscript>
+				    db=request.zos.queryObject;
+				    ts={
+				    	ids:[t.office_id]
+					};
+				    arrOffice=application.zcore.user.getOffices(ts);
+				    if(arrayLen(arrOffice) EQ 0){
+				    	echo('(Office deleted)');
+				    }else{
+				    	for(office in arrOffice){
+					    	echo('<strong>'&office.office_name&'</strong>');
+					    	if(office.office_address NEQ ""){
+					    		echo('<br>'&office.office_address);
+					    	}
+					    	if(office.office_address2 NEQ ""){
+					    		echo('<br>'&office.office_address2);
+					    	}
+					    	if(office.office_city NEQ ""){
+					    		echo('<br>'&office.office_city);
+					    	}
+					    	if(office.office_state NEQ ""){
+					    		echo(', '&office.office_state);
+					    	}
+					    	if(office.office_zip NEQ ""){
+					    		echo(" "&office.office_zip);
+					    	}
+					    	if(office.office_country NEQ ""){
+					    		echo(" "&office.office_country);
+					    	}
+					    }
+					}
+					</cfscript>
+				</td>
+			</tr>
+		</cfif>
+		<tr>
+			<th style="#thstyle# text-align:left;" >Assigned&nbsp;To:</th>
+			<td style="#tdstyle#"> 
+			 <cfif t.inquiries_assign_email NEQ ''> 
+				<cfscript>
+				arrEmail=listToArray(t.inquiries_assign_email, ",");
+				for(i=1;i<=arraylen(arrEmail);i++){
+					e=arrEmail[i];
+					if(i NEQ 1){
+						echo(', ');
+					}
+					echo('<a href="mailto:#e#" class="z-manager-search-button">');
+					if(structkeyexists(t, 'inquiries_assign_name') and t.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
+						echo(t.inquiries_assign_name);
+					}else{
+						echo(e);
+					}
+					echo('</a>');
+				}
+				</cfscript> 
+			<cfelse>
+				<cfif t.user_id NEQ 0>
+					<cfif t.user_first_name NEQ "">
+						<a href="mailto:#t.user_username#" class="z-manager-search-button">#t.user_first_name# #t.user_last_name# 
+						<cfif t.member_company NEQ "">
+							(#t.member_company#)
+						</cfif></a>
+					<cfelse>
+						<a href="mailto:#t.user_username#" class="z-manager-search-button">#t.user_username#</a>
+					</cfif> 
+				</cfif>
+			</cfif></td>
+		</tr>  
 
 		<cfif arguments.showPrivate>
+ 
+			<!--- <cfif isReservationSystem EQ false> --->
+			<cfif t.inquiries_referer NEQ '' or t.inquiries_referer2 NEQ ''>
+				<tr>
+					<th style="#thstyle# text-align:left; ">Last 2 Pages:</th>
+					<td style="#tdstyle#">Clicking on these links can help you understand what the user was looking at when submitting the inquiry.<br />
+						<cfif t.inquiries_referer CONTAINS 'google.com/aclk'>
+	Link 1 disabled since this may cause a duplicate google adwords PPC click						<br />
+							<cfelseif t.inquiries_referer NEQ ''>
+							<a href="#t.inquiries_referer#" target="_blank">Click to view referring page 1</a><br />
+						</cfif>
+						<cfif t.inquiries_referer2 CONTAINS 'google.com/aclk'>
+	Link 2 disabled since this may cause a duplicate google adwords PPC click						<br />
+							<cfelseif t.inquiries_referer2 NEQ ''>
+							<a href="#t.inquiries_referer2#" target="_blank">Click to view referring page 2</a><br />
+						</cfif></td>
+				</tr>
+			</cfif>
+			<cfif t.inquiries_email NEQ "">
+				<cfscript>
+				db.sql="SELECT * FROM #db.table("track_user", request.zos.zcoreDatasource)# track_user 
+				WHERE track_user.site_id =#db.param(request.zOS.globals.id)# AND 
+				((track_user_email =#db.param(t.inquiries_email)# and 
+				track_user_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')#) or 
+				inquiries_id=#db.param(t.inquiries_id)#)  and 
+				track_user_deleted = #db.param(0)#
+				LIMIT #db.param(0)#,#db.param(1)#";
+				qTrack=db.execute("qTrack");
+
+
+				</cfscript>
+				<cfif qTrack.recordcount NEQ 0>
+					<cfloop query="qTrack">
+					<tr>
+						<th style="#thstyle# text-align:left;">Tracking:</th>
+						<td style="#tdstyle#">
+							
+						<cfif dateformat(qTrack.track_user_datetime,'yyyymmdd') GT 20111121>
+							<cfif qTrack.track_user_ppc EQ 1 or qTrack.track_user_first_page CONTAINS "gclid=">
+								<strong>Google Adwords Pay Per Click Lead</strong><br />
+							</cfif>
+							<cfif qTrack.track_user_source NEQ "">
+								<strong>Source: #qTrack.track_user_source#</strong><br />
+							</cfif>
+						<cfelse>
+							<cfscript>
+							db.sql="SELECT count(track_page_id) count 
+							FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
+							WHERE site_id =#db.param(request.zOS.globals.id)# and 
+							track_user_id =#db.param(track_user_id)# and 
+							track_page_deleted = #db.param(0)# and 
+							track_page_qs LIKE #db.param('%gclid=%')#";
+							qPage=db.execute("qPage");
+							</cfscript>
+							<cfif qPage.recordcount NEQ 0 and qPage.count NEQ 0>
+								<strong>Google Adwords Pay Per Click Lead</strong><br />
+							</cfif>
+						</cfif>
+						
+						<cfif qTrack.track_user_referer NEQ "">
+							<cfif qTrack.track_user_ppc EQ 1>
+								<cfscript>
+								    arrU=listtoarray(qTrack.track_user_referer,"&");
+								    for(i894=1;i894 LTE arraylen(arrU);i894++){
+									if(left(arrU[i894],2) EQ "q="){
+									    writeoutput("Google PPC Keyword: "&urldecode(removechars(arrU[i894],1,2))&"<br />");
+									}
+								    }
+								    </cfscript>
+							<cfelse>
+								Source URL: <a href="#qTrack.track_user_referer#" target="_blank">#left(qTrack.track_user_referer,50)#...</a><br />
+							</cfif>
+						</cfif>
+						<cfif qTrack.track_user_keywords NEQ "">
+							Keyword:#qTrack.track_user_keywords#<br />
+						</cfif>
+						<cfscript>
+
+							formattedDate=DateFormat(qTrack.track_user_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_datetime,'HH:mm:ss');
+							firstDate=parsedatetime(formattedDate);
+							formattedDate2=DateFormat(qTrack.track_user_recent_datetime,'yyyy-mm-dd')&' '&TimeFormat(qTrack.track_user_recent_datetime,'HH:mm:ss');
+							if(isdate(formattedDate2)){
+							lastDate=parsedatetime(formattedDate2);
+							}else{
+								lastDate=firstDate;	
+							}
+							seconds=DateDiff("s", formattedDate, formattedDate2);
+
+							if(qTrack.track_user_session_length NEQ 0){
+								seconds=qTrack.track_user_session_length;
+								if(seconds GT 86400){
+									minutes=fix(seconds/60/60/24)&' days ';
+								}else{
+									minutes=fix(seconds/60)&' minutes ';
+									if(fix(seconds/60) EQ 0){
+										minutes="";
+									}
+									if(seconds MOD 60 NEQ 0){
+										minutes=minutes&(seconds MOD 60)&' seconds';
+									}
+								}
+								echo('Length of visit: #minutes#<br />');
+							}
+							if(qTrack.track_user_seconds_since_first_visit NEQ 0){
+								seconds=qTrack.track_user_seconds_since_first_visit;
+								if(seconds GT 86400){
+									minutes=fix(seconds/60/60/24)&' days ';
+								}else{
+									minutes=fix(seconds/60)&' minutes ';
+									if(fix(seconds/60) EQ 0){
+										minutes="";
+									}
+									if(seconds MOD 60 NEQ 0){
+										minutes=minutes&(seconds MOD 60)&' seconds';
+									}
+								}
+								echo('Time since first visit: #minutes#<br />');
+							}
+							if(qTrack.track_user_hits GT 1){
+								echo('Clicks: #qTrack.track_user_hits#<br />');
+							}
+							if(qTrack.track_user_first_page NEQ ""){
+								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
+							}
+						/*
+						// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
+						db.sql="SELECT count(track_page_id) count, min(track_page_datetime) minDate , max(track_page_datetime) maxDate 
+						FROM #db.table("track_page", request.zos.zcoreDatasource)#  
+						WHERE site_id =#db.param(request.zOS.globals.id)# and 
+						track_user_id =#db.param(qTrack.track_user_id)# and 
+						track_page_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')# and 
+						track_page_deleted = #db.param(0)#
+						LIMIT #db.param(0)#,#db.param(1)#";
+						qTrackPage=db.execute("qTrackPage"); 
+
+						if(qTrackPage.recordcount and qTrackPage.count GT 1){ 
+							formattedDate=DateFormat(qTrackPage.minDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.minDate,'HH:mm:ss');
+							firstDate=parsedatetime(formattedDate);
+							formattedDate2=DateFormat(qTrackPage.maxDate,'yyyy-mm-dd')&' '&TimeFormat(qTrackPage.maxDate,'HH:mm:ss');
+							if(isdate(formattedDate2)){
+							lastDate=parsedatetime(formattedDate2);
+							}else{
+								lastDate=firstDate;	
+							}
+							seconds=DateDiff("s", formattedDate, formattedDate2);
+							minutes=fix(seconds/60)&'mins ';
+							if(fix(seconds/60) EQ 0){
+								minutes="";
+							}
+							if(seconds MOD 60 NEQ 0){
+								minutes=minutes&(seconds MOD 60)&'secs';
+							}
+							echo('Length of Visit:#minutes#<br />');
+							echo('Clicks:#qTrackPage.count#<br />');
+							db.sql="SELECT * FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
+							WHERE site_id =#db.param(request.zOS.globals.id)# AND 
+							track_user_id =#db.param(qTrack.track_user_id)# and 
+							track_page_datetime <=#db.param(dateformat(qTrack.track_user_recent_datetime, 'yyyy-mm-dd')&' '&timeformat(qTrack.track_user_recent_datetime,'HH:mm:ss'))# and 
+							track_page_deleted = #db.param(0)# 
+							ORDER BY track_page_datetime ASC 
+							LIMIT #db.param(0)#,#db.param(1)#";
+							qTrack2=db.execute("qTrack2");
+							echo('Landing Page:<a href="#qTrack2.track_page_script#?#htmleditformat(qTrack2.track_page_qs)#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
+
+
+						} */
+						</cfscript>
+						</td>
+					</tr>
+					</cfloop>
+				</cfif>
+			</cfif> 
+			<tr>
+				<th style="#thstyle# text-align:left;">Type:</th>
+				<td style="#tdstyle#">
+					<cfif arguments.qinquiry.inquiries_type_name EQ ''>
+						#t.inquiries_type_other#
+					<cfelse>
+						#arguments.qinquiry.inquiries_type_name#
+					</cfif>
+					&nbsp;
+					<cfif trim(t.inquiries_phone_time) NEQ ''>
+						/ <strong>Forced</strong>
+					</cfif></td>
+			</tr>
+			<tr>
+				<th style="#thstyle# text-align:left;" >Status:</th>
+				<td style="#tdstyle#">
+					#t.inquiries_status_name#
+				</td>
+			</tr>
+
+			<cfif t.inquiries_spam EQ 1>
+				<tr>
+					<th style="#thstyle# text-align:left;" >&nbsp;</th>
+					<td style="#tdstyle# width:90%;"><strong>This inquiry may be SPAM</strong><br>
+						Spam Filter Reported: #t.inquiries_spam_description#
+					</td>
+				</tr>
+			</cfif> 
 			<!-- startadmincomments -->  
 				<cfif t.inquiries_admin_comments NEQ ''>
 					<tr>
@@ -982,128 +1055,7 @@
 		</cfif>
 	</table> 
 
-	<cfif t.rental_id NEQ "" and t.rental_id NEQ "0">
-		<h2>Selected Rental</h2>
-		<cfscript>
-		ts=structnew();
-		ts.rental_id_list=t.rental_id;
-		ts.email=true;
-		var rentalFrontCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.rental.controller.rental-front");
-		rentalFrontCom.includeRentalById(ts);
-		</cfscript>
-		<br>
-	</cfif>
-
-	<cfif application.zcore.app.siteHasApp("listing")>
-		<cfscript>
-		db.sql="SELECT * FROM #db.table("mls_saved_search", request.zos.zcoreDatasource)# mls_saved_search 
-		WHERE saved_search_email<>#db.param('')# and 
-		mls_saved_search_deleted = #db.param(0)# and 
-		saved_search_email =#db.param(t.inquiries_email)# and 
-		site_id =#db.param(request.zOS.globals.id)#";
-		qSearch=db.execute("qSearch");
-		</cfscript>
-		<cfif qSearch.recordcount NEQ 0>
-			<table class="table-list" #tablestyle#>
-				<tr>
-					<th style="#thstyle# text-align:left;" >Saved Searches</th>
-				</tr>
-				<tr>
-					<td style="#tdstyle#"><cfloop from="1" to="#qsearch.recordcount#" index="i">
-						<cfscript>
-						searchStr=StructNew();
-						application.zcore.functions.zquerytostruct(qsearch,searchStr,'',i);
-						</cfscript>
-						Saved Search #i#: #ArrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(searchStr),', ')#<br />
-						<br />
-						</cfloop></td>
-				</tr>
-			</table>
-		</cfif>
-	</cfif>
-	<cfif application.zcore.app.siteHasApp("content")>
-		<cfscript>
-		ts4=structnew();
-		ts4.contentEmailFormat=true;
-		ts4.showmlsnumber=true;
-		application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts4);
-		propertyDataCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyData");
-		propDisplayCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyDisplay");
-		</cfscript>
-		<cfif application.zcore.functions.zso(t,'content_id') NEQ 0 and application.zcore.functions.zso(t,'content_id') NEQ "">
-			<br />
-			<h2>Inquiring about
-				<cfif t.content_id CONTAINS ",">
-					these page(s)
-				<cfelse>
-					this page
-				</cfif>
-				:</h2>
-			<cfscript>
-			contentIdList="'"&replace(replace(application.zcore.functions.zso(t,'content_id'),"'","","ALL"),",","','","ALL")&"'";
-			db.sql="SELECT * FROM #db.table("content", request.zos.zcoreDatasource)# content 
-			WHERE content.site_id =#db.param(request.zOS.globals.id)# and 
-			content_id IN (#db.trustedSQL(contentIdList)#)  and 
-			content_for_sale <>#db.param(2)# and 
-			content_deleted =#db.param(0)#
-			ORDER BY content_sort ASC, content_datetime DESC, content_created_datetime DESC 
-			LIMIT #db.param(0)# , #db.param(1)#";
-			qC39821n=db.execute("qC39821n");
-			for(local.row in qC39821n){
-				propDisplayCom.contentEmailTemplate(local.row);
-			}
-			</cfscript>
-			<br />
-		</cfif>
-		<cfscript>
-	
-		if(application.zcore.functions.zso(t,'property_id') NEQ '' and application.zcore.functions.zso(t,'property_id') NEQ '0'){
-			writeoutput('<h2>Property Inquiry</h2>');
-			writeoutput('<p>The listings below were selected by this contact.</p>');
-			arrP=listtoarray(t.property_id);
-			for(i=1;i LTE arraylen(arrP);i++){
-				ts = StructNew();
-				ts.offset = 0;
-				ts.perpage = 100;
-				ts.distance = 30; // in miles
-				ts.arrMLSPID=ArrayNew(1);
-				ArrayAppend(ts.arrMLSPID, arrP[i]);
-				if(listlen(arrP[i],"-") NEQ 2){
-					application.zcore.template.fail("Inquiry ###t.inquiries_id# has the wrong listing_id format, ""#ts.arrMLSPid[i]#""");
-				}
-				tempMlsId=listgetat(arrP[i],1,"-");
-				tempMlsPid=listgetat(arrP[i],2,"-");
-				tempMLSStruct=application.zcore.listingCom.getMLSStruct(tempMLSId);
-				if(isStruct(tempMLSStruct)){
-					if(tempMLSStruct.mls_login_url NEQ ''){
-						writeoutput('MLS ###tempMLSPid# found in #tempMLSStruct.mls_name# MLS, <a href="#tempMLSStruct.mls_login_url#" target="_blank">click here to login to MLS</a><br />');
-					}else{
-						writeoutput('MLS ###tempMLSPid# found in #tempMLSStruct.mls_name# MLS<br />');
-					}
-					returnStruct = propertyDataCom.getProperties(ts);
-					structdelete(variables,'ts');
-					//	zdump(returnstruct);
-					if(returnStruct.count NEQ 0){	
-						ts = StructNew();
-						//ts.showInactive=true;
-						ts.searchScript=false;
-						ts.emailFormat=true;
-						ts.hideMLSNumber=true;
-						ts.compact=true;
-						ts.permanentImages=true;
-						ts.dataStruct = returnStruct;
-						propDisplayCom.init(ts);
-						res=propDisplayCom.display();
-						writeoutput(res);
-					}else{
-						writeoutput('<p>This listing is no longer active, please look in the MLS for more information.</p>');
-					}
-				}
-			}
-		}
-		</cfscript>
-		<br />
-	</cfif>
+ 	
 	</span>
 </cffunction>
 </cfoutput>

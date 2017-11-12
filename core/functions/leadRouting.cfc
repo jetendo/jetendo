@@ -92,47 +92,73 @@ application.zcore.functions.zRecordLead();
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="zBeforeInquiryInsertUpdate" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	ss.inquiries_email=application.zcore.functions.zso(ss, 'inquiries_email');
+	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
+	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
+	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
+	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
+	ss.site_id = request.zOS.globals.id; 
+
+	ss.contact_id=application.zcore.functions.zso(ss, 'contact_id', true);
+	if(ss.contact_id EQ 0){
+		if(trim(ss.inquiries_email&ss.inquiries_phone1_formatted&ss.inquiries_phone2_formatted&ss.inquiries_phone3_formatted) NEQ ""){
+			contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+
+			tsContact={ 
+				dataStruct:ss,
+				site_id:ss.site_id
+			};
+			rsContact=contactCom.storeContactForInquiry(tsContact);
+			if(rsContact.success){
+				ss.contact_id=rsContact.contact_id;
+			}
+		}
+	}
+	</cfscript>
+</cffunction>
+
  <!--- 
 // this function is used to insert correctly formatted data to the inquiries table.  It will run some last reformatting / validation as a consolidated filter.
 application.zcore.functions.zInsertLead();
   --->
 <cffunction name="zInsertLead" localmode="modern" access="public">
 	<cfscript>
-	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
-	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
-	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
-	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
-	form.site_id = request.zOS.globals.id; 
 
+	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
 	inputstruct.datasource=request.zos.zcoreDatasource;
 	inputStruct.struct=form;
 	inquiries_id = application.zcore.functions.zInsert(inputStruct); 
+ 
+	ds=application.zcore.functions.zGetInquiryById(inquiries_id);
 
-	//if(request.zos.isTestServer){
-		ds=application.zcore.functions.zGetInquiryById(inquiries_id);
-		if(structcount(ds) GT 0 and ds.inquiries_email NEQ ""){
-			// send autoresponder
-			ts={
-				// required
-				inquiries_type_id:ds.inquiries_type_id,
-				inquiries_type_id_siteidtype:ds.inquiries_type_id_siteidtype,
-				to:ds.inquiries_email,
-				from:request.officeEmail,
-				dataStruct:{
-					firstName:ds.inquiries_first_name,
-					email:ds.inquiries_email,
-					interestedInModel:ds.inquiries_interested_in_model,  
-					//officeName:"",
-					//officeFullInfo:"",
-					officeID:application.zcore.functions.zso(request, 'autoresponderOfficeId')
-				} 
-			}; 
-			autoResponderCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.autoresponder");
-			rs=autoResponderCom.sendAutoresponder(ts);  
-		} 
-	//}
+	if(structcount(ds) GT 0 and ds.inquiries_email NEQ ""){
+		// send autoresponder
+		ts={
+			// required
+			inquiries_type_id:ds.inquiries_type_id,
+			inquiries_type_id_siteidtype:ds.inquiries_type_id_siteidtype,
+			to:ds.inquiries_email,
+			from:request.officeEmail,
+			dataStruct:{
+				firstName:ds.inquiries_first_name,
+				email:ds.inquiries_email,
+				interestedInModel:ds.inquiries_interested_in_model,  
+				//officeName:"",
+				//officeFullInfo:"",
+				officeID:application.zcore.functions.zso(request, 'autoresponderOfficeId')
+			} 
+		}; 
+		autoResponderCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.autoresponder");
+		rs=autoResponderCom.sendAutoresponder(ts);  
+	}  
 
 	return inquiries_id;
 	</cfscript>
@@ -148,11 +174,8 @@ application.zcore.functions.zImportLead(ts); --->
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss;
-	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
-	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
-	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
-	ss.site_id = request.zOS.globals.id; 
-	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
+	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -169,16 +192,15 @@ application.zcore.functions.zImportLead(ts); --->
 application.zcore.functions.zUpdateLead();
   --->
 <cffunction name="zUpdateLead" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
-	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
-	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
-	form.site_id = request.zOS.globals.id;
+	ss=arguments.ss; 
+	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
 	inputstruct.datasource=request.zos.zcoreDatasource;
-	inputStruct.struct=form;
+	inputStruct.struct=ss;
 	return application.zcore.functions.zUpdate(inputStruct); 
 	</cfscript>
 </cffunction>
@@ -403,15 +425,83 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 			abort;
 		}
 	}
+	rs.office_id=application.zcore.functions.zso(rs, 'office_id', true);
 	form.inquiries_id=inquiries_id;
 	if(not structkeyexists(request.zos, 'debugleadrouting')){
+  
+		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+		ts=contactCom.getDefaultMessageConfig(); 
+		ts.contact_id=application.zcore.functions.zso(form, 'contact_id', true);
+		//ts.debug=false;
+		ts.inquiries_id=form.inquiries_id;
+		if(rs.user_id EQ 0){ 
+			assignEmail=rs.assignEmail;
+			assignName="";
+			ts.jsonStruct.subject="Lead ###form.inquiries_id# assigned to #rs.assignEmail# on #request.zos.globals.shortDomain#";
+		}else{
+			userStruct=application.zcore.user.getUserById(rs.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(rs.user_id_siteIDType));
+			assignName="#userStruct.user_first_name# #userStruct.user_last_name#";
+			assignEmail=userStruct.user_username;
+			ts.jsonStruct.subject="Lead ###form.inquiries_id# assigned to#trim(' '&userStruct.user_first_name&' '&userStruct.user_last_name)# (#userStruct.user_username#) on #request.zos.globals.shortDomain#";
+		}
+		if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
+			// this should be happening on live server when the new lead interface is all done
+			request.noleadsystemlinks=true;
+		}
+		savecontent variable="htmlWeb"{ 
+			echo('<p>&nbsp;</p>');
+		}
+		savecontent variable="emailHTML"{
+			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+		    iemailCom.getEmailTemplate("", false);
+		} 
+
+		ts.jsonStruct.html=emailHTML;
+		ts.jsonStruct.htmlWeb=htmlWeb;
+		ts.messageStruct.site_id=request.zos.globals.id;
+		ts.filterContacts.managers=true; 
+		ts.privateMessage=true;
+		ts.enableCopyToSelf=true;
+
+		ts.jsonStruct.from={
+			name:assignName,
+			email:assignEmail
+		};
+		ts.jsonStruct.to=[{
+			name:assignName,
+			email:assignEmail,
+			plusId:"",
+			originalEmail:assignEmail
+		}];
+ 
+		for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
+			arrayAppend(ts.jsonStruct.files, {
+				"size":0,
+				"filePath":arguments.ss.arrAttachments[n],
+				"fileName":getFileFromPath(arguments.ss.arrAttachments[n])
+			});
+		} 
+
+		// slightly inaccurate since it doesn't include all fields and attachment sizes
+		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+		//ts.debug=true;
+		if(rs.office_id NEQ "0"){
+			ts.filterContacts.offices=[rs.office_id];
+		}
+		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+		}  
+		//writedump(ts);    abort; 
+	  
+		rs=contactCom.processMessage(ts);   
+		/*
 		mail spoolenable="no" to="#rs.assignEmail#" cc="#rs.cc#" bcc="#rs.bcc#" from="#request.fromemail#" replyto="#rs.leademail#" subject="#arguments.ss.subject#" type="html"{
 			for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
 				mailparam file="#arguments.ss.arrAttachments[n]#" disposition="attachment";
 			}
 			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-		    iemailCom.getEmailTemplate();
-		}
+		    iemailCom.getEmailTemplate("", true);
+		}*/
 	}else{
 		echo("Would send email to #rs.assignEmail#<br />");
 	}

@@ -120,10 +120,14 @@
 		<h3>#form.inquiries_subject#</h3>
 		#form.inquiries_message#');
 	}
-	request.noleadsystemlinks=true;
+
+	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
+		// this should be happening on live server when the new lead interface is all done
+		request.noleadsystemlinks=true;
+	}
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-	    iemailCom.getEmailTemplate(customNote);
+	    iemailCom.getEmailTemplate(customNote, false);
 	}
 	ts={  
 		contact_id:request.zsession.user.contact_id,  
@@ -425,6 +429,7 @@
 		WHERE
 		inquiries.site_id = contact.site_id and 
 		inquiries.contact_id = contact.contact_id and 
+		inquiries.inquiries_id = #db.param(form.inquiries_id)# and 
 		inquiries_deleted=#db.param(0)# ';
 		if(form.method EQ "userIndex"){
 			db.sql&=variables.manageInquiryCom.getUserLeadFilterSQL(db); 
@@ -463,6 +468,7 @@
 				inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
 				AND contact.contact_id = inquiries_x_contact.contact_id
 				AND contact.site_id = inquiries_x_contact.site_id
+				AND inquiries_x_contact.inquiries_id = #db.param(form.inquiries_id)#
 			WHERE 
 			contact.contact_id IN (#db.trustedSQL(arrayToList(arrContactId, ","))#) and 
 			contact.site_id = #db.param( request.zos.globals.id )# AND 
@@ -561,7 +567,7 @@
 			<cfif application.zcore.user.checkGroupAccess("administrator")> 
 				<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Templates</a> 
 			</cfif>
-			</div> 
+		</div> 
 		<div class="z-manager-edit-errors z-float"></div>
 		<table class="table-list z-index-1" style="width:100%; ">  
 			<tr>

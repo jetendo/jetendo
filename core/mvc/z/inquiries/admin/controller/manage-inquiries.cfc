@@ -343,6 +343,7 @@
 	</cfscript>
 	
 </cffunction>
+
 <cffunction name="userView" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
@@ -351,6 +352,17 @@
 	</cfscript>
 	
 </cffunction> 
+
+<cffunction name="userViewContact" localmode="modern" access="remote" roles="user">
+	<cfscript>
+	// need to secure the contact_id by checking if user has access to 1 or more inquiries for this contact.
+	// already wrote this somewhere else (send-message or manage-inquiries?)
+ 	
+	userInit();
+	feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
+	feedbackCom.viewContact();
+	</cfscript>
+</cffunction>
 
 <cffunction name="userHasAccessToLead" localmode="modern" access="public" roles="user">
 	<cfargument name="inquiries_id" type="string" required="yes">
@@ -601,112 +613,88 @@
 		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
 		<h3>#form.inquiries_feedback_subject#</h3>
 		#form.inquiries_feedback_comments#');
-	}
-	if(request.zos.isTestServer){
+	} 
+	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
 	}
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote, true);
-	} 
-	if(request.zos.isTestServer){
-		ts={  
-			contact_id:request.zsession.user.contact_id,  
-			debug:false,
-			inquiries_id:form.inquiries_id,
-			validHash:true, 
-			jsonStruct:{
-			   "headers":{
-			      "raw":"",
-			      "parsed":{ 
-			      }
-			   },
-			   "from":{
-			      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-			      "email":request.zsession.user.email
-			   },
-			   "to":[
-			      {
-			         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-			         "email":request.zsession.user.email,
-			         "plusId":"",
-			         "originalEmail":request.zsession.user.email
-			      }
-			   ],
-			   "cc":[],
-			   "bcc":[],
-			   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
-			   "html":emailHTML,
-			   "htmlWeb":form.inquiries_feedback_comments,
-			   "htmlProcessed":"",
-			   "files":[/*
-			      {
-			         "size":2715,
-			         "filePath":"elkdgjicjkbkdbjf2.jpg",
-			         "fileName":"elkdgjicjkbkdbjf.jpg"
-			      }*/
-			   ],
-			   "plusId":"", // nothing for internal mail
-			   "size":0, // measure below
-			   "date":request.zos.mysqlnow,
-			   "version":1,
-			   "humanReplyStruct":{
-			      "isHumanReply":true,
-			      "humanTriggers":[],
-			      "roboScore":0,
-			      "roboTriggers":[],
-			      "score":1,
-			      "humanScore":1
-			   } 
-			},
-			messageStruct:{
-				site_id:request.zos.globals.id
-			},
-			filterContacts:{ managers:true },
-			inquiries_status_id:backupStatusId,
-			privateMessage:true,
-			enableCopyToSelf:true
-		};  
+	}  
+	ts={  
+		contact_id:request.zsession.user.contact_id,  
+		debug:false,
+		inquiries_id:form.inquiries_id,
+		validHash:true, 
+		jsonStruct:{
+		   "headers":{
+		      "raw":"",
+		      "parsed":{ 
+		      }
+		   },
+		   "from":{
+		      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+		      "email":request.zsession.user.email
+		   },
+		   "to":[
+		      {
+		         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+		         "email":request.zsession.user.email,
+		         "plusId":"",
+		         "originalEmail":request.zsession.user.email
+		      }
+		   ],
+		   "cc":[],
+		   "bcc":[],
+		   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
+		   "html":emailHTML,
+		   "htmlWeb":form.inquiries_feedback_comments,
+		   "htmlProcessed":"",
+		   "files":[/*
+		      {
+		         "size":2715,
+		         "filePath":"elkdgjicjkbkdbjf2.jpg",
+		         "fileName":"elkdgjicjkbkdbjf.jpg"
+		      }*/
+		   ],
+		   "plusId":"", // nothing for internal mail
+		   "size":0, // measure below
+		   "date":request.zos.mysqlnow,
+		   "version":1,
+		   "humanReplyStruct":{
+		      "isHumanReply":true,
+		      "humanTriggers":[],
+		      "roboScore":0,
+		      "roboTriggers":[],
+		      "score":1,
+		      "humanScore":1
+		   } 
+		},
+		messageStruct:{
+			site_id:request.zos.globals.id
+		},
+		filterContacts:{ managers:true },
+		inquiries_status_id:backupStatusId,
+		privateMessage:true,
+		enableCopyToSelf:true
+	};  
 
-		// slightly inaccurate since it doesn't include all fields and attachment sizes
-		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
-		//ts.debug=true;
-		if(qCheck.office_id NEQ "0"){
-			ts.filterContacts.offices=[qCheck.office_id];
-		}
-		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
-			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
-		}  
-		//writedump(ts);abort;
-		//writedump(ts);	abort; 
-	 
-		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
-		rs=contactCom.processMessage(ts);  
-	}else{
-
-		if(backupStatusId NEQ 0){ 
-			db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
-			SET inquiries_status_id=#db.param(backupStatusId)#, 
-			inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
-			WHERE inquiries_id=#db.param(form.inquiries_id)# and 
-			site_id = #db.param(request.zos.globals.id)# and  
-			inquiries_deleted=#db.param(0)# ";
-			db.execute("qUpdateInquiry");  
-		}
-		// send email to the assigned user.
-		toEmail=qCheck.user_email;
-		if(request.zos.isTestServer){
-			toEmail=request.zos.developerEmailTo;
-		}
-		ts={
-			to:toEmail,
-			from:request.fromEmail,
-			subject:"#form.inquiries_feedback_subject#",
-			html:emailHTML
-		};
-		application.zcore.email.send(ts);
+	// slightly inaccurate since it doesn't include all fields and attachment sizes
+	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+	//ts.debug=true;
+	if(qCheck.office_id NEQ "0"){
+		ts.filterContacts.offices=[qCheck.office_id];
 	}
+	if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+		ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+	}  
+	//writedump(ts);abort;
+	//writedump(ts);	abort; 
+ 
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	rs=contactCom.processMessage(ts);  
+ 
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){
 			link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
@@ -729,6 +717,7 @@
 <cffunction name="userAddPrivateNote" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
+	addPrivateNote();
 	</cfscript>
 </cffunction> 
 
@@ -1004,7 +993,7 @@
 	<cfscript>  
 	var db=request.zos.queryObject; 
 	currentMethod=form.method;
-	if(currentMethod EQ "userView"){
+	if(currentMethod EQ "userView" or currentMethod EQ "userViewContact"){
 		userInit();
 	}else{
 		init();
@@ -1026,7 +1015,7 @@
 	(( inquiries_id = #db.param(form.inquiries_id)# and 
 	inquiries_parent_id = #db.param(0)# ) or 
 	(inquiries_parent_id = #db.param(form.inquiries_id)# )) ";
-	if(currentMethod EQ "userView"){
+	if(currentMethod EQ "userView" or currentMethod EQ "userViewContact"){
 		db.sql&=getUserLeadFilterSQL(db);
 	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
@@ -1052,6 +1041,7 @@ zArrDeferredFunctions.push(function(){
 			var top=0;
 			var left=0;
 			var $mobileHeader=$(".z-mobile-header");
+			$("##leadDetailMenuBar").show();
 			if(zWindowSize.width < 479){
 				$(".zLeadEditButton").hide();
 				$(".zLeadAssignButton").hide();
@@ -1077,7 +1067,6 @@ zArrDeferredFunctions.push(function(){
 	}
 	zArrScrollFunctions.push({functionName:placeLeadMenu});
 	zArrResizeFunctions.push({functionName:placeLeadMenu});
-	$("##leadDetailMenuBar").show();
 	placeLeadMenu();
 });
 </script>
@@ -1092,7 +1081,7 @@ zArrDeferredFunctions.push(function(){
 					<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 				</cfif>
 				<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
-					<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+					<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 				</cfif> 
 				<a href="/z/inquiries/admin/manage-inquiries/userAddPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1&editSource=contact"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
 			<cfelseif currentMethod EQ "view" or currentMethod EQ "viewContact">
@@ -1105,7 +1094,7 @@ zArrDeferredFunctions.push(function(){
 				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 					<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 				</cfif>
-				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 				<a href="/z/inquiries/admin/manage-inquiries/addPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
 	 
 			</cfif> 
@@ -1130,27 +1119,21 @@ zArrDeferredFunctions.push(function(){
 								<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 							</cfif>
 							<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
-								<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+								<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 							</cfif>
 						</div>
 					<cfelseif currentMethod EQ "view">
 				
 						<cfif qinquiry.inquiries_readonly EQ 1>
 							<!--- | Read-only | Edit is disabled --->
-						<cfelse>
-							<!--- <div class="z-manager-button-container">
-								<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
-							</div> --->
+						<cfelse> 
 						</cfif> 
 						<div class="z-manager-button-container">
 							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 								<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 							</cfif>
-							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
-						</div>
-						<!--- <cfif qinquiry.inquiries_reservation EQ 1>
-							<a href="/z/rental/admin/reservations/cancel?inquiries_id=#qinquiry.inquiries_id#">Cancel Reservation</a>
-						</cfif> --->
+							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
+						</div> 
 			 
 					</cfif>
 				</div>
@@ -1300,7 +1283,7 @@ zArrDeferredFunctions.push(function(){
 			<input type="radio" name="whichfields" id="whichfields1" value="1" <cfif application.zcore.functions.zso(form, 'whichfields',false,1) EQ 1>checked="checked"</cfif> style="vertical-align:middle; margin:0px; background:none; border:none;" />
 			All Fields
 			<cfif request.zos.istestserver>
-	
+				| WARNING: basic field export is not working yet. This is hidden on live server.<br>
 				<input type="radio" name="whichfields" value="0" <cfif application.zcore.functions.zso(form, 'whichfields',false,1) EQ 0>checked="checked"</cfif> style="vertical-align:middle; background:none; margin:0px;margin-left:10px; border:none;" /> Basic Fields 
 			</cfif></p>
 			<p>Filter:
@@ -1411,6 +1394,8 @@ zArrDeferredFunctions.push(function(){
 	inquiries_id=#db.param(form.inquiries_id)# and 
 	site_id=#db.param(request.zos.globals.id)# ";
 	qData=db.execute("qData");
+
+	variables.qBeforeUpdateInquiry=qData;
 	if(qData.recordcount NEQ 0){
 		// used by beforeReturnInsertUpdate when method is update
 		form.contact_id=qData.contact_id;
@@ -1453,16 +1438,53 @@ zArrDeferredFunctions.push(function(){
 </cffunction>
 
 
-<cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
+<cffunction name="sendLeadUpdatedEmail" localmode="modern" access="private">
 	<cfscript>
 	db=request.zos.queryObject; 
-	savecontent variable="customNote"{
-		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
-		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
-		<h3>#form.inquiries_feedback_subject#</h3>
-		#form.inquiries_feedback_comments#');
+ 
+	assignmentChanged=false;
+
+	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)#
+	WHERE inquiries_deleted = #db.param(0)# and  
+	inquiries_id=#db.param(form.inquiries_id)# and 
+	site_id=#db.param(request.zos.globals.id)# ";
+	qData=db.execute("qData");
+	if(not structkeyexists(variables, 'qBeforeUpdateInquiry') or variables.qBeforeUpdateInquiry.recordcount EQ 0){
+		if(qData.inquiries_assign_email NEQ ""){
+			assignmentChanged=true;
+		}else if(qData.user_id NEQ 0){
+			assignmentChanged=true;
+		}
+	}else{
+		// TODO: must detect if assignment changed somehow so we don't send 2 emails.
+		if(qData.inquiries_assign_email NEQ "" and qData.inquiries_assign_email NEQ variables.qBeforeUpdateInquiry.inquiries_assign_email){
+			assignmentChanged=true;
+		}else if(qData.user_id NEQ 0 and qData.user_id&"|"&qData.user_id_siteIDType NEQ variables.qBeforeUpdateInquiry.user_id&"|"&variables.qBeforeUpdateInquiry.user_id_siteIDType){
+			assignmentChanged=true;
+		}
 	}
-	if(request.zos.isTestServer){
+	if(assignmentChanged){
+		userStruct=application.zcore.user.getUserById(qData.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(qData.user_id_siteIDType));
+		subject="Lead ###form.inquiries_id# assigned to #userStruct.user_first_name# #userStruct.user_last_name# (#userStruct.user_username#) on #request.zos.globals.shortDomain#";
+	}else if(form.method EQ "update" or form.method EQ "userUpdate"){
+		subject="Lead ###form.inquiries_id# updated by #request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) on #request.zos.globals.shortDomain#";
+	}else{
+		subject="Lead ###form.inquiries_id# added by #request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) on #request.zos.globals.shortDomain#";
+	}
+	savecontent variable="htmlWeb"{ 
+		echo('<p>#subject#</p>');
+		echo(form.inquiries_admin_comments);
+	}
+	savecontent variable="customNote"{
+		echo('<p>#subject#</p>');
+		if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
+			echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+			if(form.inquiries_admin_comments NEQ ""){
+				echo(form.inquiries_admin_comments);
+			} 
+		}
+	}
+	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
 	}
@@ -1470,92 +1492,43 @@ zArrDeferredFunctions.push(function(){
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote, true);
 	} 
-	if(request.zos.isTestServer){
-		ts={  
-			contact_id:request.zsession.user.contact_id,  
-			debug:false,
-			inquiries_id:form.inquiries_id,
-			validHash:true, 
-			jsonStruct:{
-			   "headers":{
-			      "raw":"",
-			      "parsed":{ 
-			      }
-			   },
-			   "from":{
-			      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-			      "email":request.zsession.user.email
-			   },
-			   "to":[
-			      {
-			         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-			         "email":request.zsession.user.email,
-			         "plusId":"",
-			         "originalEmail":request.zsession.user.email
-			      }
-			   ],
-			   "cc":[],
-			   "bcc":[],
-			   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
-			   "html":emailHTML,
-			   "htmlWeb":form.inquiries_feedback_comments,
-			   "htmlProcessed":"",
-			   "files":[/*
-			      {
-			         "size":2715,
-			         "filePath":"elkdgjicjkbkdbjf2.jpg",
-			         "fileName":"elkdgjicjkbkdbjf.jpg"
-			      }*/
-			   ],
-			   "plusId":"", // nothing for internal mail
-			   "size":0, // measure below
-			   "date":request.zos.mysqlnow,
-			   "version":1,
-			   "humanReplyStruct":{
-			      "isHumanReply":true,
-			      "humanTriggers":[],
-			      "roboScore":0,
-			      "roboTriggers":[],
-			      "score":1,
-			      "humanScore":1
-			   } 
-			},
-			messageStruct:{
-				site_id:request.zos.globals.id
-			},
-			filterContacts:{ managers:true },
-			privateMessage:true,
-			enableCopyToSelf:true
-		};  
-
-		// slightly inaccurate since it doesn't include all fields and attachment sizes
-		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
-		//ts.debug=true;
-		if(qCheck.office_id NEQ "0"){
-			ts.filterContacts.offices=[qCheck.office_id];
-		}
-		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
-			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
-		}  
-		//writedump(ts);abort;
-		//writedump(ts);	abort; 
-	 
-		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
-		rs=contactCom.processMessage(ts);  
-	}else{ 
-		// send email to the assigned user.
-		toEmail=qCheck.user_email;
-		if(request.zos.isTestServer){
-			toEmail=request.zos.developerEmailTo;
-		}
-		ts={
-			to:toEmail,
-			from:request.fromEmail,
-			subject:"#form.inquiries_feedback_subject#",
-			html:emailHTML
-		};
-		application.zcore.email.send(ts);
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	ts=contactCom.getDefaultMessageConfig();
+	ts.contact_id=request.zsession.user.contact_id;
+	//ts.debug=false;
+	ts.inquiries_id=form.inquiries_id;
+	ts.jsonStruct.subject=subject;
+	ts.jsonStruct.html=emailHTML;
+	ts.jsonStruct.htmlWeb=htmlWeb;
+	ts.messageStruct.site_id=request.zos.globals.id;
+	ts.filterContacts.managers=true; 
+	ts.privateMessage=true;
+	ts.enableCopyToSelf=true;
+	ts.jsonStruct.to=[{
+		name:form.assign_name,
+		email:form.assign_email
+	}];  
+	if(assignmentChanged){
+		ts.inquiries_status_id=3;
 	}
+
+	// slightly inaccurate since it doesn't include all fields and attachment sizes
+	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+	//ts.debug=true;
+	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)#  
+	WHERE inquiries_id = #db.param(form.inquiries_id)# and 
+	site_id = #db.param(request.zos.globals.id)# and 
+	inquiries_deleted=#db.param(0)#"; 
+	qInquiry=db.execute("qInquiry"); 
+	if(qInquiry.office_id NEQ "0"){
+		ts.filterContacts.offices=[qInquiry.office_id];
+	}
+	if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+		ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+	}   
+	//writedump(ts);	abort; 
+ 
+	rs=contactCom.processMessage(ts);   
 	</cfscript>
 </cffunction>
 
@@ -1563,7 +1536,8 @@ zArrDeferredFunctions.push(function(){
 	<cfscript>
 	db=request.zos.queryObject; 
 	rs={success:true}; 
-	result=application.zcore.functions.zUpdateLead();  
+	structappend(form, variables.qBeforeUpdateInquiry, false);
+	result=application.zcore.functions.zUpdateLead(form);  
 	if(result EQ false){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
 		application.zcore.status.displayReturnJson(request.zsid);
@@ -1571,7 +1545,7 @@ zArrDeferredFunctions.push(function(){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead Updated.");
 	}
 	sendLeadUpdatedEmail("Lead ###form.inquiries_id# was updated");
-
+	structdelete(variables, 'qBeforeUpdateInquiry');
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1826,9 +1800,13 @@ zArrDeferredFunctions.push(function(){
 			application.zcore.functions.zInputSelectBox(selectStruct);
 		}
 	}*/
-	var ass = new Assign();
+	var assignCom = createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.assign");
 	savecontent variable="field"{  
-		echo(ass.getAssignLead(""));
+		if(form.method EQ "userEdit"){
+			assignCom.getAssignLead("user");
+		}else{
+			assignCom.getAssignLead("member");
+		}
 	}
 	arrayAppend(fs, {label:'Assign To', field:field});
 	//arrayAppend(fs, {label:'Assign To', field:field});
@@ -2366,6 +2344,7 @@ zArrDeferredFunctions.push(function(){
 					title:"Assign Lead",
 					icon:"mail-forward",
 					link:"/z/inquiries/admin/assign/index?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#",
+					enableEditAjax:true,
 					label:"Assign"
 				}); 
 			}
@@ -2384,6 +2363,7 @@ zArrDeferredFunctions.push(function(){
 				title:"Assign Lead",
 				icon:"mail-forward",
 				link:"/z/inquiries/admin/assign/userIndex?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#",
+				enableEditAjax:true,
 				label:"Assign"
 			});  
 		}
