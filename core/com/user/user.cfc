@@ -1784,25 +1784,28 @@ formString = userCom.loginForm(inputStruct);
 	<cfscript>
 	var db=request.zos.queryObject;  
 	arrUserOffice=listToArray(request.zsession.user.office_id, ",");
-	arrOffice=[];
-	if(arraylen(arrUserOffice) EQ 0){ 
+	arrOffice=[]; 
+	if(arraylen(arrUserOffice) NEQ 0){ 
 		ts={
 			ids:arrUserOffice,
 			sortBy:"name", // name or sort or omit
 			site_id:request.zos.globals.id
 		}
 		arrOffice=getOffices(ts);
-	} 
+	}  
  
 	if(arrayLen(arrOffice) EQ 0){
 		request.zsession.selectedOfficeId=0;
 	}else if(arrayLen(arrOffice) EQ 1){
 		request.zsession.selectedOfficeId=arrOffice[1].office_id;
 	}else{
-		if(not structkeyexists(request.zsession, 'selectedOfficeId')){
+		request.zsession.selectedOfficeId=application.zcore.functions.zso(request.zsession, 'selectedOfficeId', true);
+		if(request.zsession.selectedOfficeId EQ 0){
 			request.zsession.selectedOfficeId=arrOffice[1].office_id;
 		}
-		form.select_office_id=application.zcore.functions.zso(request.zsession, 'selectedOfficeId');
+		if(not structkeyexists(form, 'select_office_id')){
+			form.select_office_id=request.zsession.selectedOfficeId;
+		}
 		echo('<form action="/z/_com/user/user?method=selectOfficeSave" method="post">
 			<input type="hidden" name="redirectURL" value="#request.zos.originalURL#?#request.zos.cgi.query_string#">
 		');
@@ -1985,14 +1988,15 @@ getOffices(ts);
 	}
 	ts=application.siteStruct[ss.site_id].offices;
 	arrOffice=[];
-	if(structkeyexists(ss, 'ids') and arrayLen(ss.ids) NEQ 0){
+	if(arrayLen(ss.ids) NEQ 0){
 		if(ss.sortBy NEQ ""){
+
 			officeStruct={};
 			for(office_id in ss.ids){
 				if(structkeyexists(ts.officeLookupStruct, office_id)){
-					officeStruct[office_id]=ts.officeLookupStruct[office_id];
+					officeStruct[office_id]=ts.officeLookupStruct[office_id]; 
 				}
-			}
+			} 
 			if(ss.returnType EQ "struct"){
 				return officeStruct;
 			}
@@ -2002,7 +2006,7 @@ getOffices(ts);
 				arrKey=structsort(officeStruct, "text", "asc", "office_name");
 			}else{
 				throw('ss.sortBy must be "name" or "sort".');
-			}
+			} 
 			for(key in arrKey){
 				arrayAppend(arrOffice, officeStruct[key]);
 			}
