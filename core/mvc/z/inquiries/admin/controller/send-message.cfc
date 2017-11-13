@@ -114,9 +114,14 @@
 	 	writedump(request.zsession.user);
 		writedump(form);
 	}
- 
+
+ 	if(request.zsession.user.first_name&request.zsession.user.last_name EQ ""){
+		name=request.zsession.user.email;
+	}else{
+		name=request.zsession.user.first_name&' '&request.zsession.user.last_name;
+	} 
 	savecontent variable="customNote"{ 
-		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
+		echo('<p>#name# replied to lead ###form.inquiries_id#:</p>
 		<h3>#form.inquiries_subject#</h3>
 		#form.inquiries_message#');
 	}

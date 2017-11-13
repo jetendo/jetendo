@@ -68,6 +68,7 @@ application.zcore.functions.zRecordLead();
 	form.site_id = request.zOS.globals.id;
 	 
 	form.inquiries_session_id=application.zcore.session.getSessionId();
+ 
 	//	Insert Into Inquiry Database
 	form.inquiries_id=application.zcore.functions.zInsertLead();
 	if(form.inquiries_id NEQ false){
@@ -442,7 +443,12 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 			userStruct=application.zcore.user.getUserById(rs.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(rs.user_id_siteIDType));
 			assignName="#userStruct.user_first_name# #userStruct.user_last_name#";
 			assignEmail=userStruct.user_username;
-			ts.jsonStruct.subject="Lead ###form.inquiries_id# assigned to#trim(' '&userStruct.user_first_name&' '&userStruct.user_last_name)# (#userStruct.user_username#) on #request.zos.globals.shortDomain#";
+			if(userStruct.user_first_name&userStruct.user_last_name EQ ""){
+				name=userStruct.user_username;
+			}else{
+				name=userStruct.user_first_name&' '&userStruct.user_last_name;
+			}
+			ts.jsonStruct.subject="Lead ###form.inquiries_id# assigned to #name# on #request.zos.globals.shortDomain#";
 		}
 		if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
 			// this should be happening on live server when the new lead interface is all done
@@ -473,14 +479,7 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 			plusId:"",
 			originalEmail:assignEmail
 		}];
- 
-		for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
-			arrayAppend(ts.jsonStruct.files, {
-				"size":0,
-				"filePath":arguments.ss.arrAttachments[n],
-				"fileName":getFileFromPath(arguments.ss.arrAttachments[n])
-			});
-		} 
+ 		ts.emailFileAttachments=arguments.ss.arrAttachments;
 
 		// slightly inaccurate since it doesn't include all fields and attachment sizes
 		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  

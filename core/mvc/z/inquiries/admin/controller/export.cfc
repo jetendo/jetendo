@@ -177,7 +177,7 @@
 						}
 						if(form.method EQ "userExport"){
 							echo(inquiriesCom.getUserLeadFilterSQL(db));
-						}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+						}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 							writeoutput(' AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 							user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#');
 						}
@@ -217,7 +217,7 @@
 						
 						if(form.method EQ "userExport"){ 
 							echo(inquiriesCom.getUserLeadFilterSQL(db)); 
-						}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+						}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 							writeoutput(' AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 							user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#');
 						}

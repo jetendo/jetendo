@@ -56,7 +56,7 @@
 	inquiries_deleted = #db.param(0)# ";
 	if(form.method EQ "userIndex"){
 		db.sql&=getUserLeadFilterSQL(db);
-	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" AND user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -217,7 +217,7 @@
 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #getUserLeadFilterSQL(db)#";
-	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}

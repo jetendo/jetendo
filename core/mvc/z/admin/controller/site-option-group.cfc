@@ -2328,7 +2328,7 @@ displayGroupCom.ajaxInsert();
 					if(not application.zcore.app.siteHasApp("rental")){
 						db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
 					}
-					db.sql&="ORDER BY inquiries_type_sort ASC, inquiries_type_name ASC ";
+					db.sql&="ORDER BY inquiries_type_name ASC ";
 					local.qType=db.execute("qType");
 					selectStruct=structnew();
 					selectStruct.name="inquiries_type_id";

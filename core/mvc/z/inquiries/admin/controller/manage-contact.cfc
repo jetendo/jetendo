@@ -488,22 +488,12 @@
 	db=request.zos.queryObject;
 	rs={success:true};
  
-	var myForm={}; 
-	myForm.contact_email.allowNull = true;
-	myForm.contact_email.friendlyName = "Email Address";
-	myForm.contact_email.email = true;
-	myForm.contact_first_name.required = true;
-	myForm.contact_first_name.friendlyName = "First Name";
-
-	//CHECK OTHER TYPES BESIDES INSERT
-	if(form.method EQ "insert" or structKeyExists(variables.reverseCustomAddMethods,form.method)){
-		myForm.contact_datetime.createDateTime = true;
+ 	if(form.contact_email EQ "" and form.contact_phone1 EQ ""){
+ 		return {success:false, errorMessage:"Email and/or phone are required."};
+ 	}
+	if(form.method EQ "insert" or form.method EQ "userInsert"){
+		form.contact_datetime=request.zos.mysqlnow;
 	}
-
-	result = application.zcore.functions.zValidateStruct(form, myForm,request.zsid,true);
-	if(result){	
-		return {success:false};
-	} 
 	form.contact_parent_id=0;
 
 	return {success:true};
@@ -581,7 +571,7 @@
 	WHERE site_id =#db.param(request.zos.globals.id)# and 
 	contact_deleted = #db.param(0)# and 
 	contact_id=#db.param(form.contact_id)#";
-	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" and user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 	}
 	rs.qData=db.execute("qData");
@@ -607,7 +597,7 @@
 	if(form.method EQ "userInsert" or form.method EQ "userUpdate"){ 
 		db.sql&=getUserContactFilterSQL(db); 
 	}else{
-		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 			db.sql&=" and contact.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 		}
 	}
@@ -639,7 +629,7 @@
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_email" value="#htmleditformat(form.contact_email)#" />');
 	}
-	arrayAppend(fs, {label:'Email', required:true, field:field});
+	arrayAppend(fs, {label:'Email', field:field});
 
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_salutation" value="#htmlEditFormat( form.contact_salutation )#" />');
@@ -649,7 +639,7 @@
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_first_name" value="#htmleditformat(form.contact_first_name)#" />');
 	}
-	arrayAppend(fs, {label:'First Name', required:true, field:field}); 
+	arrayAppend(fs, {label:'First Name', field:field}); 
 
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_last_name" value="#htmleditformat(form.contact_last_name)#" />');
@@ -973,7 +963,7 @@
 	contact_deleted = #db.param(0)# ";
 	if(form.method EQ "userIndex"){
 		db.sql&=getUserContactFilterSQL(db);
-	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" AND user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -1025,7 +1015,7 @@
 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #getUserContactFilterSQL(db)#";
-	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" AND contact.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -1063,7 +1053,7 @@
 	and contact_parent_id = #db.param(0)#"; 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #getUserContactFilterSQL(db)#";
-	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
 		db.sql&=" AND contact.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}

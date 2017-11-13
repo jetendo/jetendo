@@ -66,7 +66,7 @@
 		inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# and 
 	</cfif>
 	inquiries_parent_id = #db.param(0)#
-	<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false>
+	<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false>
 		AND user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#
 	</cfif>
@@ -94,7 +94,7 @@
 		inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# and 
 	</cfif>
 	inquiries_parent_id = #db.param(0)#
-	<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false>
+	<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false>
 		AND user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#
 	</cfif>
@@ -153,7 +153,7 @@
 			and inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# 
 		</cfif>
 		 and inquiries_parent_id = #db.param(0)#
-		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false>
+		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false>
 			AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 			user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#
 		</cfif>
@@ -193,7 +193,7 @@
 			and inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# 
 		</cfif>
 		 and inquiries_parent_id = #db.param(0)#
-		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false>
+		<cfif structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false>
 			AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 			user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#
 		</cfif>

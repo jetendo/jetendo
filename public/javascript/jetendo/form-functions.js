@@ -1955,7 +1955,9 @@ var zLastAjaxVarName=""; */
 					customCallback(r);
 					return;
 				}
-				if(typeof r.redirect != "undefined" && r.redirect){
+				if(typeof r.reload != "undefined" && r.reload){
+					window.parent.location.reload();
+				}else if(typeof r.redirect != "undefined" && r.redirect){
 					window.parent.location.href=r.redirectLink;
 				}else{
 					if(r.newRecord){ 

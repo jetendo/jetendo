@@ -488,8 +488,6 @@ if(not rs.success){
 	
 	application.zcore.functions.zUpdateSiteMVCData(ts);
 
-	officeCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.office");
-	ts.offices=officeCom.getOfficeCacheStruct(ts.site_id);
 	
 	ts.imageLibraryStruct=structnew();
 	ts.imageLibraryStruct.sizeStruct=structnew();

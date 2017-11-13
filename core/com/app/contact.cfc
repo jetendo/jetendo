@@ -40,19 +40,19 @@ if(rs.success){
 	db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# where 
 	(";
 	if(phone NEQ ""){
-		db.sql&=" contact_phone1 = #db.param(phone)# or contact_phone2 = #db.param(phone)# or contact_phone3 = #db.param(phone)# ";
+		db.sql&=" contact_phone1_formatted = #db.param(phone)# or contact_phone2_formatted = #db.param(phone)# or contact_phone3_formatted = #db.param(phone)# ";
 	}
 	if(phone2 NEQ ""){
 		if(phone NEQ ""){
 			db.sql&=" or ";
 		}
-		db.sql&=" contact_phone1 = #db.param(phone2)# or contact_phone2 = #db.param(phone2)# or contact_phone3 = #db.param(phone2)# ";
+		db.sql&=" contact_phone1 = #db.param(phone2)# or contact_phone2_formatted = #db.param(phone2)# or contact_phone3_formatted = #db.param(phone2)# ";
 	}
 	if(phone3 NEQ ""){
 		if(phone NEQ "" or phone2 NEQ ""){
 			db.sql&=" or ";
 		}
-		db.sql&=" contact_phone1 = #db.param(phone3)# or contact_phone2 = #db.param(phone3)# or contact_phone3 = #db.param(phone3)# ";
+		db.sql&=" contact_phone1_formatted = #db.param(phone3)# or contact_phone2_formatted = #db.param(phone3)# or contact_phone3_formatted = #db.param(phone3)# ";
 	}
 	if(email NEQ ""){
 		if(phone NEQ "" or phone2 NEQ "" or phone3 NEQ ""){
@@ -251,7 +251,8 @@ ts={
 		managers:true,
 		offices:[office_id],
 		userGroupIds:[user_group_id]
-	}
+	},
+	emailFileAttachments:[]
 	// optional set the new status id
 	,inquiries_status_id:3
 };
@@ -415,7 +416,10 @@ contactCom.processMessage(ts);
 		emailStruct.to=request.zos.developerEmailTo;
 		emailStruct.cc="";
 		emailStruct.bcc="";
-  
+  	
+  		if(structkeyexists(ss, 'emailFileAttachments')){
+  			emailStruct.attachments=ss.emailFileAttachments;
+  		}
 
 		rCom=application.zcore.email.send(emailStruct);
 		if(rCom.isOK() EQ false){
@@ -620,13 +624,13 @@ contactCom.processMessage(ts);
 
 	// get all the contacts subscribed to the current inquiry
 	// tested successfully
+	parentId=application.zcore.functions.zvar("parentId", ss.messageStruct.site_id);
 	db.sql="SELECT contact.*, inquiries_x_contact.*, user.user_group_id, user.office_id userOfficeId, user.user_id, user.site_id userSiteId FROM 
 	(#db.table("contact", request.zos.zcoreDatasource)#, 
 	#db.table("inquiries_x_contact", request.zos.zcoreDatasource)# )
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
 	user_username=contact_email and 
 	user.site_id IN (#db.param(ss.messageStruct.site_id)#, ";
-	parentId=application.zcore.functions.zvar("parentId", ss.messageStruct.site_id);
 	if(parentId NEQ 0){
 		db.sql&=" #db.param(parentId)#, ";
 	}
@@ -1362,12 +1366,12 @@ scheduleLeadEmail(ts);
 	}
 
 	for(row in qContact){
+		parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
 		db.sql="select user_id, user_group_id, office_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 		user_username = #db.param(row.contact_email)# and 
 		user_active=#db.param(1)# and 
 		user_deleted = #db.param(0)# and
 		site_id IN (#db.param(arguments.site_id)#, ";
-		parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
 		if(parentId NEQ 0){
 			db.sql&=" #db.param(parentId)#, ";
 		}
@@ -1420,12 +1424,12 @@ scheduleLeadEmail(ts);
 	if(qContact.recordcount){
 
 		for(row2 in qContact){
+			parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
 			db.sql="select user_id, user_group_id, office_id, site_id from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 			user_username = #db.param(row2.contact_email)# and 
 			user_active=#db.param(1)# and 
 			user_deleted = #db.param(0)# and
 			site_id IN (#db.param(arguments.site_id)#, ";
-			parentId=application.zcore.functions.zVar("parentId", arguments.site_id);
 			if(parentId NEQ 0){
 				db.sql&=" #db.param(parentId)#, ";
 			}

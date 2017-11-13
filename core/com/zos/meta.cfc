@@ -175,7 +175,7 @@ if(arrayLen(arrError)){
 
 	tempCom=createObject("component", metaStruct.cfcPath);
 	ds[metaStruct.config.field]=application.zcore.functions.zso(ds, metaStruct.config.field);
-	if(ds.office_meta_json EQ ""){
+	if(ds[metaStruct.config.field] EQ ""){
 		return duplicate(metaStruct.config.defaultStruct);
 	}
 	jsonStruct=deserializeJson(ds[metaStruct.config.field]);

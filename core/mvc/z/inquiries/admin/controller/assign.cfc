@@ -239,21 +239,6 @@
 	}
 	application.zcore.functions.zstatushandler(request.zsid,true);
 
-
-	/*if(qinquiry.user_id NEQ 0){
-		db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# user
-		WHERE user_id = #db.param(qinquiry.user_id)# and 
-		user_deleted=#db.param(0)# and 
-		site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdFromSiteIdType(qinquiry.user_id_siteIDType))#";
-		qUserTemp=db.execute("qUserTemp");
-		if(qUserTemp.recordcount NEQ 0){
-			previousAssignee=qUserTemp.user_first_name&" "&qUserTemp.user_last_name&" "&qUserTemp.user_username;
-			previousDate=dateformat(qinquiry.inquiries_datetime, "m/d/yy ")&timeformat(qinquiry.inquiries_datetime, 'h:mm tt');
-		}
-	}else if(qinquiry.inquiries_assign_email NEQ ""){
-		previousAssignee='#qinquiry.inquiries_assign_name# #qinquiry.inquiries_assign_email# ';
-		previousDate=dateformat(qinquiry.inquiries_datetime, "m/d/yy ")&timeformat(qinquiry.inquiries_datetime, 'h:mm tt');
-	}else{*/
 	db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
 	WHERE inquiries_id <> #db.param(form.inquiries_id)# and 
 	inquiries_email = #db.param(form.inquiries_email)# and
@@ -300,180 +285,7 @@
 			}else{
 				getAssignLead("member");
 			}
-			</cfscript>
-		<!--- 	
-		<!--- office search is only useful when there is more then one office --->
-			<cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1> 
-				<cfscript> 
-				if(application.zcore.user.checkGroupAccess("administrator")){ 
-					ts={
-						sortBy:"name"
-					}
-					arrOffice=application.zcore.user.getOffices(ts);
-				}else{
-					ts={
-						ids:listToArray(request.zsession.user.office_id, ","),
-						sortBy:"name"
-					}
-					arrOffice=application.zcore.user.getOffices(ts); 
-				}
-				</cfscript> 
-				<cfif arrayLen(arrOffice) GT 0>
-					<h3 style="color:##369; font-weight:normal;">1) Select An Office:</h3>
-
-					<p>An office is a group of 1 or more users who will be able to access this lead.</p>
-					<div style="float:left; max-width:100%; padding-right:10px; padding-bottom:10px; ">
-						<cfscript> 
-						selectStruct = StructNew();
-						selectStruct.name = "office_id"; 
-						selectStruct.arrData = arrOffice;
-						selectStruct.size=1; 
-						selectStruct.onChange="assignSelectOffice();";
-						selectStruct.queryLabelField = "office_name";
-						selectStruct.inlineStyle="width:100%; max-width:100%;";
-						selectStruct.queryValueField = 'office_id';
-
-						if(arrayLen(arrOffice) GT 3){
-							echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
-							application.zcore.functions.zInputSelectBox(selectStruct);
-							application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
-						}else{
-							selectStruct.size=1;
-							echo('<div style="width:50px; float:left;">Office:</div><div style="width:200px;float:left;">');
-							application.zcore.functions.zInputSelectBox(selectStruct);
-							echo('</div>');
-						}
-						</cfscript>
-					</div> 
-				</cfif> 
-			</cfif>
-		
- 		<div class="z-float">
-			<h3 style="color:##369; font-weight:normal;"><cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>2a) </cfif>
-			Assign to a user on this web site:</h3>
-		</div>
-		<cfscript>
-		if(form.method EQ "userIndex"){ 
-			// only allow assigning to people who belong to the same offices that this user does. 
-			if(request.zsession.user.office_id NEQ ""){
-				qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
-			}else{
-				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-				WHERE site_id=#db.param(request.zos.globals.id)# and 
-				user_deleted = #db.param(0)# and
-				user_id =#db.param(-1)#";
-				qAgents=db.execute("qAgents"); 
-			} 
-		}else{
-			// TODO: find only the users this user should have access to 
-			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-			user_deleted = #db.param(0)# and
-			user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
-			 and (user_server_administrator=#db.param(0)#)
-			ORDER BY member_first_name ASC, member_last_name ASC";
-			qAgents=db.execute("qAgents");
-		}
-		
-		</cfscript> 
-		<script type="text/javascript">
-		/* <![CDATA[ */
-		function showAgentPhoto(id){
-			var d1=document.getElementById("agentPhotoDiv");
-			if(id!="" && arrAgentPhoto[id]!=""){
-				d1.innerHTML='<img src="'+arrAgentPhoto[id]+'" width="100">';
-			}else{
-				d1.innerHTML="";	
-			}
-		}
-		function assignSelectOffice(){ 
-			var officeElement=document.getElementById("office_id");
-			var userElement=document.getElementById("user_id"); 
-			if(typeof officeElement.options != "undefined" && officeElement.options.length ==0){
-				for(var i=0;i<userElement.options.length;i++){
-					userElement.options[i].style.display="block"; 
-				}
-				return;
-			}
-			var officeId=officeElement.options[officeElement.selectedIndex].value;
-
-			for(var i=0;i<userElement.options.length;i++){
-				var optionOfficeId=userElement.options[i].getAttribute("data-office-id");
-				if(userElement.options[i].value == ""){
-					userElement.options[i].style.display="block"; 
-				}else if(officeId == "" || optionOfficeId.indexOf(','+officeId+',') != -1){
-					userElement.options[i].style.display="block"; 
-				}else{
-					userElement.options[i].style.display="none"; 
-				}
-			} 
-			userElement.selectedIndex=0;
-		}
-		var arrAgentPhoto=new Array();
-		<cfif qAgents.recordcount>
-			<cfloop query="qAgents">
-			arrAgentPhoto["#qAgents.user_id#|#qAgents.site_id#"]=<cfif qAgents.member_photo NEQ "">"#jsstringformat('#application.zcore.functions.zvar('domain',qAgents.userSiteId)##request.zos.memberImagePath##qAgents.member_photo#')#"<cfelse>""</cfif>;
-			</cfloop>
-		</cfif>
-		/* ]]> */
-		</script>  
-		<cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>
-			<!--- do nothing --->
-		<cfelse>
-			<div style="width:100%; float:left;">
-				<div style="float:left; width:100%;">Type to filter users:</div>
-				<div style="float:left; width:100%;"> 
-					<input type="text" name="assignInputField" id="assignInputField" value="" style="width:240px; min-width:auto; max-width:auto; margin-bottom:5px;">
-				</div>
-			</div>
-		</cfif>
-
-		<div style="width:100%; margin-bottom:20px;float:left;">
-			<div style="float:left; width:100%;">Select a user:</div>
-			<div style="float:left; width:100%;"> 
-
-
-				<cfscript> 
-				// when user selects office, the user drop down should change to show only users in that office.
-				form.user_id = form.user_id&"|"&application.zcore.functions.zGetSiteIdFromSiteIdType(form.user_id_siteIDType);
-				echo('<select name="user_id" id="user_id" size="1" onchange="showAgentPhoto(this.options[this.selectedIndex].value);" style="width:100%;">');
-				echo('<option value="" data-office-id="">-- Select --</option>');
-				for(row in qAgents){
-					userGroupName=userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
-					echo('<option value="'&row.user_id&"|"&row.site_id&'" data-office-id=",'&row.office_id&',"');
-					if(form.user_id EQ row.user_id&"|"&row.site_id){
-						echo(' selected="selected" ');
-					}
-					arrName=[];
-					if(trim(row.user_first_name&" "&row.user_last_name) NEQ ""){
-						arrayAppend(arrName, row.user_first_name&" "&row.user_last_name);
-					}
-					if(row.user_username NEQ ""){
-						arrayAppend(arrName, row.user_username)
-					}
-					if(row.member_company NEQ ""){
-						arrayAppend(arrName, row.member_company);
-					}
-					echo('>'&arrayToList(arrName, " / ")&' / #userGroupName#</option>');
-				}
-				echo('</select>'); 
-				application.zcore.skin.addDeferredScript("  $('##user_id').filterByText($('##assignInputField'), true); ");
-
-				</cfscript>
-			</div>
-		</div> 
- 		<div class="z-float">
-			<h3 style="color:##369; font-weight:normal;"><cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>2b) </cfif>
-			Or assign this lead to anyone outside the web site:</h3>
-		</div>
-
-		<div style="width:100%; margin-bottom:10px;float:left;"> 
-			<p>External Name:<br><input type="text" name="assign_name" style="min-width:100%; width:100%;" value="#application.zcore.functions.zso(form, 'assign_name')#" /></p>
-			<p>External Email(s):<br>
-			<input type="text" name="assign_email" style="min-width:100%; width:100%;" value="#application.zcore.functions.zso(form, 'assign_email')#" /><br>
-			(Comma separate multiple emails)</p>
-		</div>
-		<div id="agentPhotoDiv" style="display:none;"></div> --->
+			</cfscript> 
 		
  		<div class="z-float">
 			<h3 style="color:##369; font-weight:normal;">Private Comments (Optional)</h3>
@@ -693,7 +505,13 @@
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
 	}
-	subject="Lead ###form.inquiries_id# assigned to #form.assign_name# (#form.assign_email#) on #request.zos.globals.shortDomain#";
+
+	if(form.assign_name EQ ""){
+		name=form.assign_email;
+	}else{
+		name=form.assign_name;
+	}
+	subject="Lead ###form.inquiries_id# assigned to #name# on #request.zos.globals.shortDomain#";
 	savecontent variable="customNote"{ 
 		echo('<p>#subject#</p>');
 		if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
@@ -704,7 +522,7 @@
 		}
 	}
 	savecontent variable="htmlWeb"{ 
-		echo('<p>#subject#</p>');
+		echo('<p>&nbsp;</p>');
 		echo(form.inquiries_admin_comments);
 	} 
 	savecontent variable="emailHTML"{
