@@ -62,6 +62,46 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="fixPhoneFormats" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	setting requesttimeout="10000";
+	c=0;
+	db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE contact_phone1_formatted = #db.param('')# AND contact_phone1 <> #db.param('')# and contact_deleted=#db.param(0)# and site_id <> #db.param(-1)#";
+	q=db.execute("q");
+	for(row in q){
+		c++;
+		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+		contact_phone1_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone1))#,
+		contact_phone2_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone2))#,
+		contact_phone3_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone3))#
+		WHERE contact_deleted=#db.param(0)# and 
+		site_id = #db.param(row.site_id)# and 
+		contact_id=#db.param(row.contact_id)# ";
+		db.execute("qUpdate");
+
+	}
+	
+	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE inquiries_phone1_formatted = #db.param('')# AND inquiries_phone1 <> #db.param('')# and 
+	inquiries_deleted=#db.param(0)# and site_id <> #db.param(-1)#
+	";
+	c2=0;
+	q=db.execute("q");
+	for(row in q){
+		c2++;
+		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET 
+		inquiries_phone1_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone1))#,
+		inquiries_phone2_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone2))#,
+		inquiries_phone3_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone3))#
+		WHERE inquiries_deleted=#db.param(0)# and 
+		site_id = #db.param(row.site_id)# and 
+		inquiries_id=#db.param(row.inquiries_id)# ";
+		db.execute("qUpdate");
+	}
+	echo(c&":"&c2);
+	abort;
+	</cfscript>
+</cffunction>
 <cffunction name="fixContactIdStatus" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	echo(application.zcore.functions.zso(application, 'fixContactIdStatus'));
