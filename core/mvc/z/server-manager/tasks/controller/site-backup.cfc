@@ -82,7 +82,8 @@ TODO: figure out why site backup doesn't get compressed.
 		"facebook_post":true,
 		"facebook_page_month":true,
 		"facebook_page":true,
-		"facebook_month":true
+		"facebook_month":true,
+		"site_x_deploy_server":true
 	};
 	return ts;
 	</cfscript>
