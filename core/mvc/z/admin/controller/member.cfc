@@ -1312,10 +1312,10 @@ site_id = #db.param(request.zos.globals.id)# ";
 			<th>ID</th>
 			<th>Company</th>
 			<th>Name</th>
-			<th>Photo</th>
 			<th>Email</th>
 			<th>Phone</th>
 			<th>Access Rights</th>
+			<th>Photo</th>
 			<th>Last Login</th> 
 			<th>Updated</th> 
 			<th>Admin</th>
@@ -1342,13 +1342,13 @@ site_id = #db.param(request.zos.globals.id)# ";
 						#qMember.member_email#
 					</cfif>
 					&nbsp;</td>
+				<td>#qMember.member_phone#&nbsp;</td>
+				<td>#qMember.user_group_friendly_name#</td>
 				<td><cfif qMember.member_photo NEQ ''>
 						<img src="#application.zcore.functions.zvar('domain',qMember.userSiteId)##request.zos.memberImagePath##qMember.member_photo#" width="90" />
 					<cfelse>
 						&nbsp;
 					</cfif></td> 
-				<td>#qMember.member_phone#&nbsp;</td>
-				<td>#qMember.user_group_friendly_name#</td>
 				<td>#dateformat(qMember.user_last_login_datetime, "m/d/yyyy")&" "&timeformat(qMember.user_last_login_datetime, "h:mm tt")#</td>  
 				<td>#application.zcore.functions.zTimeSinceDate(qMember.user_updated_datetime)#</td>
 				<td class="z-manager-admin">

@@ -1073,145 +1073,145 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			</cfif>
 			<cfif contact.contact_interested_in_type NEQ "">
 				<tr>
-					<th>Interested in Type</th>
+					<th>Type</th>
 					<td>#contact.contact_interested_in_type#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_year NEQ "">
 				<tr>
-					<th>Interested in Year</th>
+					<th>Year</th>
 					<td>#contact.contact_interested_in_year#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_make NEQ "">
 				<tr>
-					<th>Interested in Make</th>
+					<th>Make</th>
 					<td>#contact.contact_interested_in_make#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_model NEQ "">
 				<tr>
-					<th>Interested in Model</th>
+					<th>Model</th>
 					<td>#contact.contact_interested_in_model#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_category NEQ "">
 				<tr>
-					<th>Interested in Category</th>
+					<th>Category</th>
 					<td>#contact.contact_interested_in_category#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_name NEQ "">
 				<tr>
-					<th>Interested in Name</th>
+					<th>Name</th>
 					<td>#contact.contact_interested_in_name#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_hin_vin NEQ "">
 				<tr>
-					<th>Interested in HIN VIN</th>
+					<th>HIN VIN</th>
 					<td>#contact.contact_interested_in_hin_vin#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_stock NEQ "">
 				<tr>
-					<th>Interested in Stock</th>
+					<th>Stock</th>
 					<td>#contact.contact_interested_in_stock#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_length NEQ "">
 				<tr>
-					<th>Interested in Length</th>
+					<th>Length</th>
 					<td>#contact.contact_interested_in_length#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_currently_owned_type NEQ "">
 				<tr>
-					<th>Interested in Currently Owned Type</th>
+					<th>Currently Owned Type</th>
 					<td>#contact.contact_interested_in_currently_owned_type#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_read NEQ "">
 				<tr>
-					<th>Interested in Read</th>
+					<th>Read</th>
 					<td>#contact.contact_interested_in_read#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_age NEQ "">
 				<tr>
-					<th>Interested in Age</th>
+					<th>Age</th>
 					<td>#contact.contact_interested_in_age#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_bounce_reason NEQ "">
 				<tr>
-					<th>Interested in Bounce Reason</th>
+					<th>Bounce Reason</th>
 					<td>#contact.contact_interested_in_bounce_reason#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_home_phone NEQ "">
 				<tr>
-					<th>Interested in Home Phone</th>
+					<th>Home Phone</th>
 					<td>#contact.contact_interested_in_home_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_work_phone NEQ "">
 				<tr>
-					<th>Interested in Work Phone</th>
+					<th>Work Phone</th>
 					<td>#contact.contact_interested_in_work_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_mobile_phone NEQ "">
 				<tr>
-					<th>Interested in Mobile Phone</th>
+					<th>Mobile Phone</th>
 					<td>#contact.contact_interested_in_mobile_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_fax NEQ "">
 				<tr>
-					<th>Interested in Fax</th>
+					<th>Fax</th>
 					<td>#contact.contact_interested_in_fax#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_buying_horizon NEQ "">
 				<tr>
-					<th>Interested in Buying Horizon</th>
+					<th>Buying Horizon</th>
 					<td>#contact.contact_interested_in_buying_horizon#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_status NEQ "">
 				<tr>
-					<th>Interested in Status</th>
+					<th>Status</th>
 					<td>#contact.contact_interested_in_status#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_interest_level NEQ "">
 				<tr>
-					<th>Interested in Interest Level</th>
+					<th>Interest Level</th>
 					<td>#contact.contact_interested_in_interest_level#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_sales_stage NEQ "">
 				<tr>
-					<th>Interested in Sales Stage</th>
+					<th>Sales Stage</th>
 					<td>#contact.contact_interested_in_sales_stage#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_contact_source NEQ "">
 				<tr>
-					<th>Interested in Contact Source</th>
+					<th>Contact Source</th>
 					<td>#contact.contact_interested_in_contact_source#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_dealership NEQ "">
 				<tr>
-					<th>Interested in Dealership</th>
+					<th>Dealership</th>
 					<td>#contact.contact_interested_in_dealership#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_assigned_to NEQ "">
 				<tr>
-					<th>Interested in Assigned To</th>
+					<th>Assigned To</th>
 					<td>#contact.contact_interested_in_assigned_to#</td>
 				</tr>
 			</cfif>
@@ -1223,50 +1223,50 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			</cfif>
 			<cfif contact.contact_interested_in_owners_magazine EQ "1">
 				<tr>
-					<th>Interested in Owners Magazine</th>
+					<th>Owners Magazine</th>
 					<td>Yes</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_purchased EQ "1">
 				<tr>
-					<th>Interested in Purchased</th>
+					<th>Purchased</th>
 					<td>Yes</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_service_date NEQ "">
 				<tr>
-					<th>Interested in Service Date</th>
+					<th>Service Date</th>
 					<td>#contact.contact_interested_in_service_date#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_date_delivered NEQ "">
 				<tr>
-					<th>Interested in Date Delivered</th>
+					<th>Date Delivered</th>
 					<td>#contact.contact_interested_in_date_delivered#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_date_sold NEQ "">
 				<tr>
-					<th>Interested in Date Sold</th>
+					<th>Date Sold</th>
 					<td>#contact.contact_interested_in_date_sold#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_warranty_date NEQ "">
 				<tr>
-					<th>Interested in Warranty Date</th>
+					<th>Warranty Date</th>
 					<td>#contact.contact_interested_in_warranty_date#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_lead_comments NEQ "">
 				<tr>
-					<th>Interested in Lead Comments</th>
+					<th>Lead Comments</th>
 					<td>#contact.contact_interested_in_lead_comments#</td>
 				</tr> 
 			</cfif>
 		</cfsavecontent>
 		<cfif trim(interests) NEQ "">
 			<tr>
-				<th><h2>Interested In</h2>
+				<th colspan="2"><h3>Interested In</h3>
 				</th>
 			</tr>
 			#interests#
