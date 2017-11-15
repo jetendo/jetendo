@@ -1130,6 +1130,9 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	<cfscript>
 	var local=structnew();
 	var qU="";
+	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
+		throw(arguments.url);
+	}
 	arguments.url=replace(replace(arguments.url, chr(10), '', 'all'), chr(13), '', 'all');
 	</cfscript>
     <cfif structkeyexists(request.zos,'znoredirect')>
@@ -1162,6 +1165,9 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	<cfscript>
 	var local=structnew();
 	var qU="";
+	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
+		throw(arguments.url);
+	}
 	arguments.url=replace(replace(arguments.url, chr(10), '', 'all'), chr(13), '', 'all');
 	if(trim(arguments.url) EQ ""){
 		arguments.url="/";
@@ -1189,6 +1195,9 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 <cffunction name="z302Redirect" localmode="modern" returntype="any" output="true" hint="alias for zRedirect">
 	<cfargument name="url" type="string" required="yes">
 	<cfscript>
+	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
+		throw(arguments.url);
+	}
 	application.zcore.functions.zRedirect(arguments.url);
 	</cfscript>
 </cffunction>
