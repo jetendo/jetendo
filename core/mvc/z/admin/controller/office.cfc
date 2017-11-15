@@ -348,10 +348,10 @@
 		echo('<input type="text" name="office_name" value="#htmleditformat(form.office_name)#" />');
 	}
 	arrayAppend(fs, {label:'Office Name', required:true, field:field});
-	if(application.zcore.functions.zso(request.zos.globals, 'enableLeadReminderOfficeManagerCC', true, 0) EQ 1){
-		savecontent variable="field"{
-		echo('<input type="text" name="office_manager_email_list" value="#htmleditformat(form.office_manager_email_list)#" />
-		<br>Note: Managers are CC''d on lead notifications if this feature is enabled.');
+	savecontent variable="field"{
+		echo('<input type="text" name="office_manager_email_list" value="#htmleditformat(form.office_manager_email_list)#" />');
+		if(application.zcore.functions.zso(request.zos.globals, 'enableLeadReminderOfficeManagerCC', true, 0) EQ 1){
+			echo('<br>Note: Managers are CC''d on lead notifications if this feature is enabled.');
 		}
 	}
 	arrayAppend(fs, {label:'Manager Email List', field:field});
