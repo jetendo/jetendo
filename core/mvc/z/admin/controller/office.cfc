@@ -368,17 +368,6 @@
 	}
 	arrayAppend(fs, {label:'Description', field:field});
 				
-
-	savecontent variable="field"{
-		echo('<input type="text" name="office_address" value="#htmleditformat(form.office_address)#" />');
-	}
-	arrayAppend(fs, {label:'Address', field:field});
-
-	savecontent variable="field"{
-		echo('<input type="text" name="office_address2" value="#htmleditformat(form.office_address2)#" />');
-	}
-	arrayAppend(fs, {label:'Address 2', field:field});
-
 	savecontent variable="field"{
 		echo('<input type="text" name="office_phone" value="#htmleditformat(form.office_phone)#" />');
 	}
@@ -394,6 +383,17 @@
 	}
 	arrayAppend(fs, {label:'Fax', field:field});
 
+
+	savecontent variable="field"{
+		echo('<input type="text" name="office_address" value="#htmleditformat(form.office_address)#" />');
+	}
+	arrayAppend(fs, {label:'Address', field:field});
+
+	savecontent variable="field"{
+		echo('<input type="text" name="office_address2" value="#htmleditformat(form.office_address2)#" />');
+	}
+	arrayAppend(fs, {label:'Address 2', field:field});
+
 	savecontent variable="field"{
 		echo('<input type="text" name="office_city" value="#htmleditformat(form.office_city)#" />');
 	}
@@ -405,14 +405,14 @@
 	arrayAppend(fs, {label:'State', field:field});
 
 	savecontent variable="field"{
+		echo('<input type="text" name="office_zip" value="#htmleditformat(form.office_zip)#" />');
+	}
+	arrayAppend(fs, {label:'Postal Code', field:field});
+	savecontent variable="field"{
 		echo(application.zcore.functions.zCountrySelect("office_country", application.zcore.functions.zso(form,'office_country')));
 	}
 	arrayAppend(fs, {label:'Country', field:field});
 
-	savecontent variable="field"{
-		echo('<input type="text" name="office_zip" value="#htmleditformat(form.office_zip)#" />');
-	}
-	arrayAppend(fs, {label:'Postal Code', field:field});
   
 	savecontent variable="field"{
 		ts=structnew();
@@ -510,9 +510,14 @@
 	arrayAppend(columns, {field: row.office_name});
 
 	savecontent variable="field"{
-		echo('#row.office_address#<br />
-		#row.office_address#<br />
-		#row.office_city#, #row.office_state# 
+		echo('#row.office_address#<br />');
+		if(row.office_address2 NEQ ""){
+			echo('#row.office_address2#<br />');
+		}
+		if(row.office_city NEQ ""){
+			echo('#row.office_city#, ');
+		}
+		echo('#row.office_state# 
 		#row.office_zip# #row.office_country#');
 	}
 	arrayAppend(columns, {field: field});
