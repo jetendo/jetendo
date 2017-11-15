@@ -18,6 +18,7 @@ add option for search indexing for search table.
 		// required
 		// optional
 		customAddMethods:{},
+		customEditMethods:{},
 		addListInsertPosition:"bottom",
 		uniqueURLField:"", // adds a field for overriding the URL.
 		viewScriptName:"", // need when using uniqueURLField for url routing
@@ -96,6 +97,10 @@ add option for search indexing for search table.
 	for(i in variables.customAddMethods){
 		variables.reverseCustomAddMethods[variables.customAddMethods[i]]=i;
 	}
+	variables.reverseCustomEditMethods={};
+	for(i in variables.customEditMethods){
+		variables.reverseCustomEditMethods[variables.customEditMethods[i]]=i;
+	}
 
 
 	structappend(ss.metaFields, ts.metaFields, false);
@@ -107,7 +112,7 @@ add option for search indexing for search table.
 
 
 	if(variables.requireFeatureAccess NEQ ""){ 
-		if(variables.readOnlyRequest or form.method EQ "index" or form.method EQ "edit" or form.method EQ "add" OR form.method EQ "addBulk" OR form.method EQ "view"){
+		if(variables.readOnlyRequest or form.method EQ "index" or form.method EQ "edit" or form.method EQ "add" OR form.method EQ "addBulk" OR form.method EQ "view" OR structKeyExists(variables.customAddMethods, form.method) OR structKeyExists(variables.customEditMethods, form.method)){
 			application.zcore.adminSecurityFilter.requireFeatureAccess(variables.requireFeatureAccess);	
 		}else{
 			// all other methods might be writing
@@ -174,6 +179,31 @@ add option for search indexing for search table.
  	}
 	</cfscript>
 </cffunction>	
+
+
+<cffunction name="displayQuickMenu" localmode="modern" access="public"> 
+	<cfscript>
+	</cfscript>
+	<div class="z-manager-quick-menu">
+		<h2>#variables.title#</h2>
+		<cfscript>
+		if(arrayLen(variables.quickLinks)){
+			echo('<div class="z-manager-quick-menu-links">');
+			for(link in variables.quickLinks){
+				echo('<a href="#link.link#"');
+				if(structkeyexists(link, 'target')){
+					echo(' target="#link.target#"');
+				}
+				if(structkeyexists(link, 'onclick')){
+					echo(' onclick="#link.onclick#"');
+				}
+				echo('>#link.label#</a>');
+			}
+			echo('</div>');
+		}
+		</cfscript>
+	</div>	
+</cffunction>
 
 <cffunction name="getSortColumnSQL" localmode="modern" access="private"> 
 	<cfscript> 
@@ -703,7 +733,7 @@ displayAdminEditMenu(ts);
 
 	rsInsert={success:true};
 	rsUpdate={success:true};
-	if(form.method EQ "update" and variables.methods.beforeUpdate NEQ ""){
+	if((form.method EQ "update" OR structKeyExists(variables.reverseCustomEditMethods,form.method)) and variables.methods.beforeUpdate NEQ ""){
 		request.zArrErrorMessages=["#variables.methods.beforeUpdate#() function was called."];
 		rsUpdate=variables[variables.methods.beforeUpdate]();
 		request.zArrErrorMessages=[];
@@ -1121,7 +1151,17 @@ deleteSearchIndex(ts);
 			application.zcore.functions.zRedirect("#variables.prefixURL#index?#variables.requiredParamsQS#&zsid=#request.zsid#");
 		}
 		echo('<h2>Edit #variables.label#</h2>');
-		formAction="#variables.prefixURL#update?#variables.primaryKeyField#=#urlencodedformat(form[variables.primaryKeyField])#&#variables.requiredEditParamsQS#";
+
+		formAction="#variables.prefixURL#";
+		if(structKeyExists(variables.customEditMethods,currentMethod)){ 
+			formAction &= variables.customEditMethods[currentMethod]; 
+		} else if(structKeyExists(variables.reversecustomEditMethods,currentMethod)){ 
+			formAction &= variables.reversecustomEditMethods[currentMethod]; 
+		}else{
+			formAction&="update";
+		}
+		formAction&="?#variables.primaryKeyField#=#urlencodedformat(form[variables.primaryKeyField])#&#variables.requiredEditParamsQS#"; 
+ 
 		for(row in rs.qData){
 			structappend(form, row, false);
 		}

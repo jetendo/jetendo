@@ -39,7 +39,9 @@
 		}
 	}
 	if(form.method EQ "userView" or form.method EQ "userViewContact"){
+		variables.inquiriesCom.userInit();
 	}else{
+		variables.inquiriesCom.init();
 	    application.zcore.adminSecurityFilter.requireFeatureAccess("Leads");
 
 	    if(form.method EQ "viewContact"){
@@ -434,18 +436,23 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<h3><a href="/z/inquiries/admin/manage-contact/index">Contacts</a> /  #contactName#</h3>
 		</div>');*/
 	} 
-	echo('<div class="z-float z-mb-10">
+
+	variables.inquiriesCom.displayQuickMenu();
+	/*echo('<div class="z-float z-mb-10">
 		<h2>Leads</h2>
-	</div>');
+	</div>');  */
 	if(currentMethod EQ "userViewContact"){
+		contactLink="/z/inquiries/admin/manage-contact/userIndex";
 		leadLink="/z/inquiries/admin/manage-inquiries/userIndex?zPageId=#form.zPageId#";
 	}else{
+		contactLink="/z/inquiries/admin/manage-contact/index";
 		leadLink="/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#";
 	}
 	</cfscript>
 	
 	<div class="z-float z-manager-lead-tab-buttons">
 		<ul>
+			<li><a href="#contactLink#"><i class="fa fa-list" aria-hidden="true"></i> Contacts</a></li>
 			<li><a href="#leadLink#"><i class="fa fa-list" aria-hidden="true"></i> Leads</a></li>
 			<cfif form.inquiries_id NEQ 0>
 				<li><div class="z-manager-lead-unclickable-button <cfif form.contactTab EQ 4>active</cfif>">

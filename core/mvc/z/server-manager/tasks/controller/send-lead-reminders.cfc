@@ -131,6 +131,7 @@
     <cfloop query="qI">
         <cfscript>		
 		ts={};
+		ts.to="";
 		ts.from=request.fromemail;
 		ts.cc="";
 		uid=qI.user_id&"|"&qI.user_id_siteIdType; 

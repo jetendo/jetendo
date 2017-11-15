@@ -1159,10 +1159,10 @@ contactCom.processMessage(ts);
 	} 
 	if(arguments.isManagerUser){
 		viewLeadLink="#domain#/z/inquiries/admin/feedback/view?inquiries_id=#ss.inquiries_id#";
-		viewContactLink="#domain#/z/inquiries/admin/feedback/viewContact?contact_id=#arguments.contact_id#";
+		viewContactLink="#domain#/z/inquiries/admin/feedback/viewContact?contact_id=#arguments.contact_id#&inquiries_id=#ss.inquiries_id#";
 	}else{
 		viewLeadLink="#domain#/z/inquiries/admin/manage-inquiries/userView?inquiries_id=#ss.inquiries_id#";
-		viewContactLink="#domain#/z/inquiries/admin/manage-inquiries/userViewContact?contact_id=#arguments.contact_id#";
+		viewContactLink="#domain#/z/inquiries/admin/manage-inquiries/userViewContact?contact_id=#arguments.contact_id#&inquiries_id=#ss.inquiries_id#";
 	} 
 	if(arguments.contact_id EQ 0){	
 		viewContactLink="";
