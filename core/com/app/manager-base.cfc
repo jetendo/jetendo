@@ -1297,6 +1297,26 @@ deleteSearchIndex(ts);
 				}
 			}
 		}
+
+		    if(structkeyexists(rsEditForm.tabs, tab)){ 
+               echo('<table style="width:100%;" class="table-list">'); 
+               for(field in rsEditForm.tabs[tab].fields){ 
+                    if(structkeyexists(field, 'hidden') and field.hidden){ 
+                         arrayAppend(arrHidden, field.field); 
+                         continue; 
+                    } 
+                    echo('<tr> 
+                         <th style="width:140px;" class="z-fluid-at-992">#field.label#'); 
+                    if(structkeyexists(field, 'required') and field.required){ 
+                         echo(' *'); 
+                    } 
+                    echo('</th> 
+                              <td>#field.field#</td> 
+                         </tr>'); 
+               } 
+               echo('</table>'); 
+          }
+          /*
 		if(structkeyexists(rsEditForm.tabs, tab)){
 			echo('<table style="width:100%;" class="table-list">');
 			for(field in rsEditForm.tabs[tab].fields){
@@ -1304,17 +1324,22 @@ deleteSearchIndex(ts);
 					arrayAppend(arrHidden, field.field);
 					continue;
 				}
-				echo('<tr>
-					<th style="width:140px;" class="z-fluid-at-992">#field.label#');
-				if(structkeyexists(field, 'required') and field.required){
-					echo(' *');
+
+				if(Trim(field.field) EQ ""){
+					echo('<tr><th colspan="2" style="width:400px;" class="z-fluid-at-992">#field.label#</th></tr>');
+				} else{
+					echo('<tr>
+						<th style="width:140px;" class="z-fluid-at-992">#field.label#');
+					if(structkeyexists(field, 'required') and field.required){
+						echo(' *');
+					}
+					echo('</th>
+							<td>#field.field#</td>
+						</tr>');
 				}
-				echo('</th>
-						<td>#field.field#</td>
-					</tr>');
 			}
 			echo('</table>');
-		}
+		}*/
 		echo(tabCom.endFieldSet());
 	}
 	echo(tabCom.endTabMenu());
