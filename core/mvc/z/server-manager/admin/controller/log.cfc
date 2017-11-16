@@ -116,7 +116,7 @@
 	<cfsavecontent variable="db.sql">
 	UPDATE #db.table("log", request.zos.zcoreDatasource)# log 
 	SET log_status = #db.param('Resolved')# 
-	WHERE log_id = #db.param(form.log_id)#
+	WHERE log_id = #db.param(form.log_id)# and log_deleted=#db.param(0)# 
 	</cfsavecontent><cfscript>qFix=db.execute("qFix");
 	application.zcore.status.setStatus(request.zsid, "Error Status changed to resolved.");
 	application.zcore.functions.zRedirect("#Request.zScriptName#&action=list&zsid=#request.zsid#", true);
@@ -127,7 +127,7 @@
 	<cfsavecontent variable="db.sql">
 	UPDATE #db.table("log", request.zos.zcoreDatasource)# log 
 	SET log_status = #db.param('New')# 
-	WHERE log_id = #db.param(form.log_id)#
+	WHERE log_id = #db.param(form.log_id)# and log_deleted=#db.param(0)# 
 	</cfsavecontent><cfscript>qFix=db.execute("qFix");
 	application.zcore.status.setStatus(request.zsid, "Error Status changed to unresolved.");
 	application.zcore.functions.zRedirect("#Request.zScriptName#&action=list&zsid=#request.zsid#", true);
@@ -142,7 +142,7 @@
 				 db.sql="UPDATE #db.table("log", request.zos.zcoreDatasource)# log 
 				 SET log_status = #db.param('Resolved')#, 
 				 log_updated_datetime=#db.param(request.zos.mysqlnow)#  
-				WHERE log_id = #db.param(currentId)#";
+				WHERE log_id = #db.param(currentId)# and log_deleted=#db.param(0)# ";
 				db.execute("q");
 		}
 	}

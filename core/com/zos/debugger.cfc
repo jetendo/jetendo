@@ -48,6 +48,12 @@
 					}else{
 						structdelete(application, 'zReadOnlyModeEnabled');
 					}
+				}else if(form.zOS_MODE EQ "enableThrowOnRedirect"){
+					if(form.zOS_modeValue EQ "true"){
+						application.zEnableThrowOnRedirect=true;
+					}else{
+						structdelete(application, 'zEnableThrowOnRedirect');
+					}
 
 				}
 				if(structkeyexists(form, 'zOS_modeValue') and form.zOS_modeValue){
@@ -182,7 +188,13 @@
                  <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','false');return false;" title="Click to turn off read-only mode">On</a>
                 <cfelse>
                 &nbsp; <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','true');return false;" title="Click to turn on read-only mode">Off</a>
-                </cfif>
+                </cfif><br>
+                Throw on redirect: 
+                <cfif structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect>
+	                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','false');return false;" title="Click to turn off throw on redirect">On</a>
+	            <cfelse>
+	                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','true');return false;" title="Click to turn on throw on redirect">Off</a>
+	            </cfif>
                 <br />
                 <cfif structkeyexists(request.zos.requestData.headers, 'ssl_session_id')>
 					<cfif structkeyexists(request.zsession, 'ssl_session_id')>

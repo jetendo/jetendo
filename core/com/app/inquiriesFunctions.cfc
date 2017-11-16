@@ -1,11 +1,7 @@
 <cfcomponent>
 <cfoutput>
 <cffunction name="displayHeader" localmode="modern" access="public" output="yes">
-	<cfscript>
-	var selectStruct=0;
-	var qAgents=0;
-	var userGroupCom=0;
-	var user_group_id=0;
+	<cfscript> 
 	var db=request.zos.queryObject; 
 	application.zcore.template.setTag("title", "Leads");
 	</cfscript>

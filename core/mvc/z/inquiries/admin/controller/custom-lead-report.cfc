@@ -1090,7 +1090,7 @@ $(document).ready(function(){
 <cffunction name="tableOfContents" localmode="modern" access="public">
 	
 	<h2 style="font-weight:normal;">Table Of Contents</h2>
-	<p>Checking boxes and clicking update will exclude the section
+	<p class="hide-on-print">Checking boxes and clicking update will exclude the section</p>
 	<form action="#request.zos.originalURL#" method="get">
 	<table class="tableOfContentsTable">
 		<tr style="{SummaryStyle}">
