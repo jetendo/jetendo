@@ -34,6 +34,12 @@
 			nextButton: "&#10093;",
 			previousButton: "&#10092;",
 			equalHeights: true,
+			videoSlides: true,
+			videoSelector: 'video',
+			videoResponsive: false,
+			videoResponsiveBreakpoint: 992,
+			videoDesktopSelector: '.video-desktop video',
+			videoMobileSelector: '.video-mobile video',
 			debug: false
 		}, options );
 
@@ -65,7 +71,7 @@
 				console.log( "Total Slides: " + totalSlides );
 			}
 
-			var pager, previousButton, nextButton, sliderInterval;
+			var pager, previousButton, nextButton, sliderInterval, videoObj;
 
 			slider.addClass( 'content-slider' );
 			slides.addClass( 'content-slide' ).hide();
@@ -103,27 +109,21 @@
 						// We are already animating a slide, need to wait until it has finished.
 						return false;
 					}
+					if ( slider.hasClass( 'playing' ) ) {
+						return false;
+					}
 
 					var lastSlide    = $( slides[ lastSlideIndex ] );
 					var currentSlide = $( slides[ slideIndex ] );
 					slider.currentSlide=currentSlide;
-					
-					/*
-					if(waitForVideo and currentSlide.isVideoSlide){
-						$("video", currentSlide).on("ended", function(e){
-							slider.executeAnimateSlide( slideIndex, lastSlideIndex, forceDirection );
-						});
-						return;
-					}
-					*/
-					 
+
 					// preloading goes here.
 					var currentSlideImages=$("img", currentSlide);
 					if(currentSlideImages.length){
 						var loadImageCount=currentSlideImages.length;
 						var loadedImagesCount=0;
 						currentSlideImages.each(function(){
-							var original=$(this).attr("data-original"); 
+							var original=$(this).attr("data-original");
 							currentSlide.show();
 							var isHidden=false;//(this.offsetParent === null);
 							if(!isHidden && typeof window.getComputedStyle != "undefined" && window.getComputedStyle(this).display == "none"){
@@ -172,7 +172,7 @@
 
 						// Fade the last slide out.
 						lastSlide.removeClass( 'active' ).fadeTo( settings.animationDuration, 0, function() {
-							lastSlide.hide()
+							lastSlide.hide();
 						} );
 
 						// Fade the current slide in.
@@ -274,6 +274,79 @@
 						$( 'span', pager ).removeClass( 'active' );
 						$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
 					}
+
+					if ( settings.videoSlides ) {
+						if ( settings.videoResponsive ) {
+							if ( window.innerWidth < settings.videoResponsiveBreakpoint ) {
+								if ( settings.debug ) {
+									console.log( '--- MOBILE VIDEO SELECTOR USED ---' );
+								}
+								videoObj = $( settings.videoMobileSelector, slider.currentSlide );
+							} else {
+								if ( settings.debug ) {
+									console.log( '--- DESKTOP VIDEO SELECTOR USED ---' );
+								}
+								videoObj = $( settings.videoDesktopSelector, slider.currentSlide );
+							}
+						} else {
+							if ( settings.debug ) {
+								console.log( '--- DEFAULT VIDEO SELECTOR USED ---' );
+							}
+							videoObj = $( settings.videoSelector, slider.currentSlide );
+						}
+
+						if ( videoObj.length > 0 ) {
+							if ( settings.debug ) {
+								console.log( '--- SLIDE HAS VIDEO ---' );
+							}
+
+							if ( ! slider.hasClass( 'playing' ) ) {
+								if ( settings.debug ) {
+									console.log( '--- PLAYING VIDEO ---' );
+								}
+
+								clearInterval( sliderInterval );
+
+								slider.animateSlide( slideIndex, lastSlideIndex, forceDirection );
+
+								slider.addClass( 'playing' );
+								videoObj.attr( 'currenttime', 0 );
+								videoObj.trigger( 'play' );
+
+								videoObj.unbind( 'ended' );
+								videoObj.bind( 'ended', function() {
+									if ( settings.debug ) {
+										console.log( '--- VIDEO ENDED ---' );
+									}
+									slider.removeClass( 'playing' );
+									$( this ).attr( 'currenttime', 0 );
+
+									lastSlideIndex = activeSlideIndex;
+
+									if ( activeSlideIndex < ( totalSlides - 1 ) ) {
+										activeSlideIndex++;
+									} else {
+										activeSlideIndex = 0;
+									}
+
+									if ( settings.auto ) {
+										slider.resetInterval();
+									}
+
+									videoObj = null;
+
+									if ( settings.pager ) {
+										$( 'span', pager ).removeClass( 'active' );
+										$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
+									}
+
+									slides.removeClass( 'active' );
+									slider.setActiveSlide( activeSlideIndex, true, slideIndex, forceDirection );
+									return;
+								} );
+							}
+						}
+					}
 				},
 				attachPager: function() {
 					slider.append( '<div class="slider-pager ' + settings.pagerStyle + '"></div>' );
@@ -301,6 +374,26 @@
 						if ( pagerSlideIndex == activeSlideIndex ) {
 							// Don't switch slides if we clicked on the active slide pager.
 							return false;
+						}
+
+						if ( settings.videoSlides ) {
+							if ( videoObj.length !== 'undefined' ) {
+								if ( videoObj.length > 0 ) {
+									if ( slider.hasClass( 'playing' ) ) {
+										if ( settings.debug ) {
+											console.log( '--- VIDEO INTERRUPTED ---' );
+										}
+										videoObj.unbind( 'ended' );
+										videoObj.trigger( 'pause' );
+										videoObj.attr( 'currenttime', 0 );
+										slider.removeClass( 'playing' );
+									}
+								} else {
+									slider.removeClass( 'playing' );
+								}
+							} else {
+								slider.removeClass( 'playing' );
+							}
 						}
 
 						lastSlideIndex   = activeSlideIndex;
