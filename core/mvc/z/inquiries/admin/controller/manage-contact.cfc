@@ -483,6 +483,41 @@
 	}
 	form.contact_parent_id=0;
 
+	form.office_id=application.zcore.functions.zso(form, 'office_id', true);
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		// allow posted office
+	}else if(application.zcore.user.checkGroupAccess("agent")){
+		arrOffice=listToArray(request.zsession.user.office_id, ",");
+		found=false;
+		for(officeId in arrOffice){
+			if(form.office_id EQ officeId){
+				found=true;
+				break;
+			}
+		}
+		if(not found){
+			return {success:false, errorMessage:"You don't have access to the selected office."};
+		}
+	}else{
+		if(not structkeyexists(request.zsession, 'selectedOfficeId')){
+			request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+		}
+		form.office_id=request.zsession.selectedOfficeId;
+		if(form.office_id EQ 0){
+			return {success:false, errorMessage:"You don't have access to any offices so you can't create a contact."};
+		}
+	}
+	if(form.office_id EQ 0){
+		// no office selected
+	}else{
+		ts={
+			ids:[form.office_id]
+		};
+		arrOffice=application.zcore.user.getOffices(ts);
+		if(arrayLen(arrOffice) EQ 0){
+			return {success:false, errorMessage:"Selected office is missing."};
+		}
+	}
 	return {success:true};
 	</cfscript>
 </cffunction>
@@ -625,6 +660,13 @@
 	};
 	// basic fields
 	fs=[];
+	savecontent variable="field"{
+		ts={
+			name:"office_id"
+		};
+		application.zcore.user.selectOfficeField(ts);
+	}
+	arrayAppend(fs, {label:'Office', field:field});
 
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_email" value="#htmleditformat(form.contact_email)#" />');

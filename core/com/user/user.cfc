@@ -1780,20 +1780,27 @@ formString = userCom.loginForm(inputStruct);
 </cffunction>
 
 <!--- #application.zcore.user.selectOfficeForm()# --->
-<cffunction name="selectOfficeForm" localmode="modern" access="public" roles="user">
+<cffunction name="selectOfficeForm" localmode="modern" access="public"> 
 	<cfscript>
 	var db=request.zos.queryObject;  
-	arrUserOffice=listToArray(request.zsession.user.office_id, ",");
-	arrOffice=[]; 
-	if(arraylen(arrUserOffice) NEQ 0){ 
-		ts={
-			ids:arrUserOffice,
-			sortBy:"name", // name or sort or omit
+	if(request.zsession.user.office_id EQ 0){
+		ts={ 
+			sortBy:"name", 
 			site_id:request.zos.globals.id
 		}
 		arrOffice=getOffices(ts);
-	}  
- 
+	}else{
+		arrUserOffice=listToArray(request.zsession.user.office_id, ",");
+		arrOffice=[]; 
+		if(arraylen(arrUserOffice) NEQ 0){ 
+			ts={
+				ids:arrUserOffice,
+				sortBy:"name", // name or sort or omit
+				site_id:request.zos.globals.id
+			}
+			arrOffice=getOffices(ts);
+		}  
+ 	}
 	if(arrayLen(arrOffice) EQ 0){
 		request.zsession.selectedOfficeId=0;
 	}else if(arrayLen(arrOffice) EQ 1){
@@ -1820,6 +1827,56 @@ formString = userCom.loginForm(inputStruct);
 		echo(' <input type="submit" name="select1" value="Select"> 
 		</form>');
 	}
+	</cfscript>
+</cffunction>
+
+
+<!--- 
+ts={
+	name:"office_id"
+};
+application.zcore.user.selectOfficeField(ts);
+ --->
+<cffunction name="selectOfficeField" localmode="modern" access="public"> 
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	var db=request.zos.queryObject;  
+
+	if(request.zsession.user.office_id EQ 0){
+		if(not application.zcore.user.checkGroupAccess("member")){
+			// don't allow accidental access to all offices for non manager users
+			arrOffice=[];
+		}else{
+			ts={ 
+				sortBy:"name", 
+				site_id:request.zos.globals.id
+			}
+			arrOffice=getOffices(ts);
+		}
+	}else{
+		arrUserOffice=listToArray(request.zsession.user.office_id, ",");
+		arrOffice=[]; 
+		if(arraylen(arrUserOffice) NEQ 0){ 
+			ts={
+				ids:arrUserOffice,
+				sortBy:"name", // name or sort or omit
+				site_id:request.zos.globals.id
+			}
+			arrOffice=getOffices(ts);
+		}
+ 	}  
+	if(not structkeyexists(form, ss.name)){
+		form[ss.name]=application.zcore.functions.zso(request.zsession, 'selectedOfficeId', true);
+	} 
+	selectStruct = StructNew();
+	selectStruct.hideSelect=true;
+	selectStruct.name = ss.name;
+	selectStruct.arrData = arrOffice;
+	selectStruct.queryParseLabelVars=true;
+	selectStruct.queryLabelField = "##office_name##, ##office_address##";
+	selectStruct.queryValueField = "office_id";
+	application.zcore.functions.zInputSelectBox(selectStruct); 
 	</cfscript>
 </cffunction>
 
