@@ -705,8 +705,8 @@
 		application.zcore.functions.zredirect(qSite.site_domain&"/z/server-manager/admin/deploy/deploySite?sid=#form.sid#"); 
 	}
 	</cfscript>
-		<h2>Deploy</h2> 
-		<div style="font-size:150%; line-height:150%;  width:100%; float:left;">
+		<h2>Deploy Site</h2> 
+		<div style="font-size:120%; line-height:1.3;  width:100%; float:left;">
 	<cfif application.zcore.functions.zso(form, 'sid') NEQ ""> 
 			<p id="deployStatusId" style="display:none;">Please wait while the deploy process executes. (This could take a while if the changed files were large.)</p>
 		<cfscript>
@@ -719,53 +719,50 @@
 		site_x_deploy_server_deleted = #db.param(0)#";
 		var qDeploy=db.execute("qDeploy");
 		</cfscript>
-		<cfif request.zos.isTestServer>
-			<h2>Current Server: Test Server</h2>
+		<!--- <cfif request.zos.isTestServer>
+			<h3>Current Server: Test Server</h3>
 		<cfelse>
-			<h2>Current Server: Live Server</h2>
-		</cfif>
-		
-		<p>Configure excluded directories and files for this site on the <a href="/z/server-manager/admin/site/edit?sid=#form.sid#">globals</a> page.</p>
-		<cfif qDeploy.recordcount>
-			<p id="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#" onclick="document.getElementById('deployButtonsId').style.display='none';document.getElementById('deployStatusId').style.display='block';" class="z-manager-search-button">Deploy</a> 
-			<a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#&amp;preview=1" onclick="document.getElementById('deployButtonsId').style.display='none';document.getElementById('deployStatusId').style.display='block';" class="z-manager-search-button">Preview Changes</a> 
-			<a href="/z/server-manager/tasks/verify-conventions/verifySiteConventions?sid=#form.sid#" target="_blank" class="z-manager-search-button">Verify Conventions</a> 
-			<a href="/z/server-manager/admin/compress-images/compressSiteHomedirImages?sid=#form.sid#" target="_blank" class="z-manager-search-button">Compress Homedir Images</a></p>
-		</cfif>
-		<cfscript>
-		filePath=application.zcore.functions.zGetDomainWritableInstallPath(application.zcore.functions.zvar('shortDomain', form.sid))&"__zdeploy-changes.txt";
-		if(fileexists(filePath)){
-			curDate=application.zcore.functions.zGetFileAttrib(filePath).datelastmodified;
-			echo('<h2>Itemized Changes (updated #dateformat(curDate, "m/d/yyyy")&" at "&timeformat(curDate, "h:mm:ss tt")#)</h2>
-				<p>Note: If you see host key authentication error the first time using this on a new server, you may need to run the command once as root via ssh to accept the server''s key.</p>
-			<textarea name="changes" cols="100" row="20" style="width:95% !important; height:200px;">'&application.zcore.functions.zreadfile(filePath)&'</textarea>');
-		}
-		</cfscript>
-		
-		<p><a href="/z/server-manager/admin/deploy/editSite?sid=#form.sid#" class="z-manager-search-button">Edit Site Deployment Configuration</a> <a href="/z/server-manager/admin/deploy/editAllSites" class="z-manager-search-button">Edit All Sites At Once</a></p> 
-		<cfscript>
-		echo('<h2>Deployment Configuration</h2>');
+			<h3>Current Server: Live Server</h3>
+		</cfif> --->
+		<cfscript> 
 		if(qDeploy.recordcount EQ 0){
 			echo('<p>No servers have been configured for this site.</p>');
 		}
-		echo('<table class="table-list"><tr>
-		<th>Remote Host</th>
-		<th>Remote Site</th>
-		</tr>'); 
+		echo('<table class="table-list z-mb-10">'); 
 		for(row in qDeploy){
 			if(row.site_id NEQ ""){
 				rs=variables.getSiteJson(row);
-				echo("<tr><td>"&row.deploy_server_host&"</td><td>");
+				echo("
+				<tr>
+				<th>Local Site</th> 
+				<td>#application.zcore.functions.zvar("shortDomain", form.sid)#</td>
+				</tr>
+				<tr>
+				<th>Remote Site</th>
+				<td>");
 				if(rs.success){
-					echo('<a href="http://'&rs.dataStruct.shortDomain&'" target="_blank">'&rs.dataStruct.shortDomain&'</a>');
+					echo('#rs.dataStruct.shortDomain#</td></tr><tr><th>&nbsp;</th><td><span id="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#" onclick="document.getElementById(''deployButtonsId'').style.display=''none'';document.getElementById(''deployStatusId'').style.display=''block'';" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#&amp;preview=1" onclick="document.getElementById(''deployButtonsId'').style.display=''none'';document.getElementById(''deployStatusId'').style.display=''block'';" class="z-manager-search-button">Preview Changes</a></span>');
 				}else{
 					echo(rs.errorMessage);
 				}
 				echo('</td></tr>');
 			}
 		}
-		echo ('</table><hr />');
+		echo ('</table> ');
+
+		filePath=application.zcore.functions.zGetDomainWritableInstallPath(application.zcore.functions.zvar('shortDomain', form.sid))&"__zdeploy-changes.txt";
+		if(fileexists(filePath)){
+			curDate=application.zcore.functions.zGetFileAttrib(filePath).datelastmodified;
+			echo('<h3>Itemized Changes (updated #dateformat(curDate, "m/d/yyyy")&" at "&timeformat(curDate, "h:mm:ss tt")#)</h3>
+				<p>Note: If you see host key authentication error the first time using this on a new server, you may need to run the command once as root via ssh to accept the server''s key.</p>
+			<textarea name="changes" cols="100" row="20" style="width:95% !important; height:200px;">'&application.zcore.functions.zreadfile(filePath)&'</textarea>');
+		}
 		</cfscript>
+		
+		<p><a href="/z/server-manager/admin/deploy/editSite?sid=#form.sid#" class="z-manager-search-button">Edit Site Deployment Configuration</a> <a href="/z/server-manager/admin/deploy/editAllSites" class="z-manager-search-button">Edit All Sites At Once</a> 
+			<a href="/z/server-manager/tasks/verify-conventions/verifySiteConventions?sid=#form.sid#" target="_blank" class="z-manager-search-button">Verify Conventions</a> 
+			<a href="/z/server-manager/admin/compress-images/compressSiteHomedirImages?sid=#form.sid#" target="_blank" class="z-manager-search-button">Compress Homedir Images</a></p> 
+		<p>Configure excluded directories and files for this site on the <a href="/z/server-manager/admin/site/edit?sid=#form.sid#">globals</a> page.</p>
 	<cfelse> 
 		<p><a href="/z/server-manager/admin/deploy-server/index">Manage Deploy Server(s)</a></p>
 		<p><a href="/z/server-manager/admin/deploy/editAllSites">Edit Deployment Configuration For All Sites</a></p>
