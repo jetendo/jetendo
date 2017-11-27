@@ -45,6 +45,7 @@
 		// required 
 		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert","userEdit":"userUpdate"},
 		customEditMethods:{"userEdit":"userUpdate"},
+		customReadOnlyMethods:{"userIndex"},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -289,24 +290,57 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="getContactLeadFilterSQL" localmode="modern" access="public">
+	<cfargument name="db" type="component" required="yes">
+	<cfscript>
+	db=arguments.db;
+	if(not structkeyexists(request, 'userIdList')){
+		loadManageLeadGroupData();
+	}
+
+	savecontent variable="out"{
+		if(not application.zcore.user.checkGroupAccess("administrator")){
+			echo(' and ( ');
+
+			if(request.zsession.user.office_id NEQ ""){
+				echo(' (contact.contact_assign_user_id=#db.param(0)# and contact.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+			}
+			if(request.userIdList NEQ ""){
+				echo(' (contact.contact_assign_user_id IN (#db.trustedSQL(request.userIdList)#) and contact.contact_assign_user_id_siteIdType=#db.param(1)#) or ');
+			}
+			// current user 
+			echo(' (contact.contact_assign_user_id = #db.param(request.zsession.user.id)# and 
+			contact.contact_assign_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
+			) ');
+		}
+	}
+	return out;
+	</cfscript>
+</cffunction>
+
 <cffunction name="getUserLeadFilterSQL" localmode="modern" access="public">
 	<cfargument name="db" type="component" required="yes">
 	<cfscript>
 	db=arguments.db;
+	if(not structkeyexists(request, 'userIdList')){
+		loadManageLeadGroupData();
+	}
 
 	savecontent variable="out"{
-		echo(' and ( ');
+		if(not application.zcore.user.checkGroupAccess("administrator")){
+			echo(' and ( ');
 
-		if(request.zsession.user.office_id NEQ ""){
-			echo(' (inquiries.user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+			if(request.zsession.user.office_id NEQ ""){
+				echo(' (inquiries.user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+			}
+			if(request.userIdList NEQ ""){
+				echo(' (inquiries.user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries.user_id_siteIdType=#db.param(1)#) or ');
+			}
+			// current user 
+			echo(' (inquiries.user_id = #db.param(request.zsession.user.id)# and 
+			inquiries.user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
+			) ');
 		}
-		if(request.userIdList NEQ ""){
-			echo(' (inquiries.user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries.user_id_siteIdType=#db.param(1)#) or ');
-		}
-		// current user 
-		echo(' (inquiries.user_id = #db.param(request.zsession.user.id)# and 
-		inquiries.user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
-		) ');
 	}
 	return out;
 	</cfscript>

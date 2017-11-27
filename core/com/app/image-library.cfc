@@ -1810,6 +1810,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		if(ts.caption EQ ""){
 			ts.caption=arguments.ss.defaultAltText;
 		} 
+		ts.originalLink="/zupload/library/"&qImages.image_library_id&"/"&qImages.image_file;
 		ts.id=qImages.image_id;
 		ts.file=qImages.image_file;
 		ts.updatedDatetime=qImages.image_updated_datetime;

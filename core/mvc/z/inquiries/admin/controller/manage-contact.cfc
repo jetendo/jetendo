@@ -207,6 +207,9 @@
 	</cfscript>
 </cffunction> 
 
+
+
+
 <cffunction name="getUserIdListByOfficeIdListAndGroupIdList" localmode="modern" access="public">
     <cfargument name="officeIdList" type="string" required="yes">
     <cfargument name="groupIdList" type="string" required="yes">

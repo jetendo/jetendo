@@ -41,6 +41,18 @@ add option for search indexing for search table.
 		customInsertUpdate:false, // true disables the normal zInsert/zUpdate calls, so you can implement them in afterInsert and afterUpdate instead
 		methods:{}, // function receives struct named row
 		fileFields:[],
+		imageFields:[
+		/*
+		{
+			originalField:"field_original",
+			field:"field",
+			size:"500x300",
+			crop:0,
+			displayPath:"",
+			uploadPath:""
+		} 
+		*/
+		],
 		imageLibraryFields:[],
 		validateFields:[],
 		primaryKeyField:"",
@@ -1305,14 +1317,18 @@ deleteSearchIndex(ts);
                          arrayAppend(arrHidden, field.field); 
                          continue; 
                     } 
-                    echo('<tr> 
-                         <th style="width:140px;" class="z-fluid-at-992">#field.label#'); 
-                    if(structkeyexists(field, 'required') and field.required){ 
-                         echo(' *'); 
-                    } 
-                    echo('</th> 
-                              <td>#field.field#</td> 
-                         </tr>'); 
+                    echo('<tr> ');
+                    if(not structkeyexists(field, 'hideLabel') or not field.hideLabel){
+                    	echo('<th style="width:140px;" class="z-fluid-at-992">#field.label#'); 
+	                    if(structkeyexists(field, 'required') and field.required){ 
+	                         echo(' *'); 
+	                    } 
+	                    echo('</th> ');
+	                    echo('<td>#field.field#</td>');
+                    }else{
+                    	echo('<td colspan="2">#field.field#</td>');
+                    }
+                    echo('</tr>'); 
                } 
                echo('</table>'); 
           }

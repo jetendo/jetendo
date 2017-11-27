@@ -1766,15 +1766,19 @@ formString = userCom.loginForm(inputStruct);
 	form.select_office_id=application.zcore.functions.zso(form, 'select_office_id', true);
 	form.redirectURL=application.zcore.functions.zso(form, 'redirectURL');
 
-	arrUserOffice=listToArray(request.zsession.user.office_id, ",");
-	// verify user has access to office
-	for(office_id in arrUserOffice){
-		if(form.select_office_id EQ office_id){
-			// yes, they do
-			request.zsession.selectedOfficeId=form.select_office_id;
-			break;
-		}
-	} 
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		request.zsession.selectedOfficeId=form.select_office_id;
+	}else{
+		arrUserOffice=listToArray(request.zsession.user.office_id, ",");
+		// verify user has access to office
+		for(office_id in arrUserOffice){
+			if(form.select_office_id EQ office_id){
+				// yes, they do
+				request.zsession.selectedOfficeId=form.select_office_id;
+				break;
+			}
+		} 
+	}
 	application.zcore.functions.zRedirect(form.redirectURL); 
 	</cfscript>	
 </cffunction>
@@ -1874,7 +1878,7 @@ application.zcore.user.selectOfficeField(ts);
 	selectStruct.name = ss.name;
 	selectStruct.arrData = arrOffice;
 	selectStruct.queryParseLabelVars=true;
-	selectStruct.queryLabelField = "##office_name##, ##office_address##";
+	selectStruct.queryLabelField = "##office_name##, ##office_address##, ##office_city##";
 	selectStruct.queryValueField = "office_id";
 	application.zcore.functions.zInputSelectBox(selectStruct); 
 	</cfscript>
