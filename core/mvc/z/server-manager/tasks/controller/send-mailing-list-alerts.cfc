@@ -1,5 +1,9 @@
 <cfcomponent>
 <cfoutput>
+<!--- 
+To debug call this url on a client domain where you know there was a new blog article after the overrideYesterdayDate you specify in the URL.
+/z/server-manager/tasks/send-mailing-list-alerts/send?overrideYesterdayDate=2017-11-27&forceDebug=true
+--->
 <cffunction name="send" localmode="modern" access="remote" returntype="any">
 	<cfscript>
 	db=request.zos.queryObject;
@@ -13,7 +17,11 @@
 	}
 	form.site_id=request.zos.globals.id;
 
-	yesterdayDate=dateformat(dateadd("d", -1, now()), "yyyy-mm-dd")&" 00:00:00";
+	if(structkeyexists(form, 'overrideYesterdayDate')){
+		yesterdayDate=dateformat(form.overrideYesterdayDate, "yyyy-mm-dd")&" 00:00:00";
+	}else{
+		yesterdayDate=dateformat(dateadd("d", -1, now()), "yyyy-mm-dd")&" 00:00:00";
+	}
 	midnightDate=dateformat(now(), "yyyy-mm-dd")&" 00:00:00";
 
 	
@@ -53,7 +61,9 @@
 	}
 	qU=db.execute("qU");
 	emailStruct={};
+	contactCount=0;
 	for(row in qU){
+		contactCount++;
 		emailStruct[row.contact_email]={
 			contact_id:row.contact_id,
 			user_id:0,
@@ -70,7 +80,9 @@
 		db.sql&=" LIMIT #db.param(1)# ";
 	}
 	qU=db.execute("qU");
+	userCount=0;
 	for(row in qU){
+		userCount++;
 		emailStruct[row.user_username]={
 			contact_id:0,
 			user_id:row.user_id,
@@ -150,8 +162,7 @@
 				shortSummary&='...';
 			}
 			arrayAppend(arrPlainOut, shortSummary);
-		}
-
+		} 
 	}
 	for(email in emailStruct){
 		row=emailStruct[email];
@@ -192,6 +203,12 @@
 		}else{
 			ts.preview=false;
 		}  
+		/*if(structkeyexists(ts, 'contact_id') and ts.contact_id EQ 10){
+			echo('sending to contact_id 10 only - which is skyflare@gmail.com');
+		}else{
+			continue;
+		}*/
+		//writedump(ts);		continue;
 		rCom=application.zcore.email.sendEmailTemplate(ts); 
 		if(rCom.isOK() EQ false){
 			// user has opt out probably...
@@ -214,7 +231,10 @@
 			abort;
 		}
 	}
-	writeoutput('Successfully completed');
+	writeoutput('#qBlog.recordcount# new blog articles | Sent email to #contactCount# contacts, and #userCount# users completed');
+	if(form.debug){
+		echo('<br>Debug enabled, no real emails were sent to contacts or users, just the developer');
+	}
 	abort;
 	</cfscript>
 </cffunction>
@@ -232,7 +252,11 @@
 	}else{
 		form.debug=true;
 	}
-	yesterdayDate=dateformat(dateadd("d", -1, now()), "yyyy-mm-dd")&" 00:00:00";
+	if(structkeyexists(form, 'overrideYesterdayDate')){
+		yesterdayDate=dateformat(form.overrideYesterdayDate, "yyyy-mm-dd")&" 00:00:00";
+	}else{
+		yesterdayDate=dateformat(dateadd("d", -1, now()), "yyyy-mm-dd")&" 00:00:00";
+	}
 	midnightDate=dateformat(now(), "yyyy-mm-dd")&" 00:00:00";
 
 	db.sql="select * from (#db.table("site", request.zos.zcoreDatasource)# site, 
@@ -265,13 +289,16 @@
 	if(request.zos.istestserver){
 		db.sql&=" LIMIT #db.param(0)#, #db.param(1)# ";
 	}
-	qM=db.execute("qM");  
+	qM=db.execute("qM");   
 	if(qM.recordcount EQ 0){
 		echo("No articles to send an alert for today<br />");
 	}
-	for(row in qM){
+	for(row in qM){ 
         // send email with zDownloadLink(); to run the alert on the correct domain
         link=row.site_domain&'/z/server-manager/tasks/send-mailing-list-alerts/send?ztv=1';
+		if(structkeyexists(form, 'overrideYesterdayDate')){
+			link&="&overrideYesterdayDate=#form.overrideYesterdayDate#";
+		}
         if(structkeyexists(form, 'forceDebug')){
         	link&="&forceDebug=1";
         }
@@ -287,7 +314,10 @@
 	            writeoutput(r1.cfhttp.FileContent&'<br /><br />');
 				application.zcore.functions.zabort();
 			}
-	    }
+	    }else{
+			echo('<h2>#row.site_domain# result:</h2><p><a href="#link#" target="_blank">Run manually</a></p>');
+			echo(r1.cfhttp.filecontent&"<hr>");
+		} 
 	}
 	writeoutput('Complete');
 	abort;
