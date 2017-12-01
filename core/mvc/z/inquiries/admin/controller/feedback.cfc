@@ -355,7 +355,7 @@
 
 
 <!--- 
-http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewContact?contact_id=15
+/z/inquiries/admin/feedback/viewContact?contact_id=15
  --->
 <cffunction name="viewContact" localmode="modern" access="remote" roles="member">
 	<cfscript>

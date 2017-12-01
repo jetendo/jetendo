@@ -80,9 +80,9 @@
 	webposition upload - all clients in one file - that's good.
 		fields: Run Date,Engine,Keyword,URL,URL Type,Position,Delta
 			need to associate domains to client_id - and set type (competitor vs client)
-			widget.zsite.info.127.0.0.2.nip.io/webposition-downloader/moz
+			/webposition-downloader/moz
 			 and 
-			 widget.zsite.info.127.0.0.2.nip.io/webposition-downloader/index
+			/webposition-downloader/index
 	 --->
 
 </cffunction>

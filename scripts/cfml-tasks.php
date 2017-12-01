@@ -6,6 +6,7 @@ if(file_exists($secureScript)){
 	require($secureScript);
 }
 
+// IMPORTANT: All logName values MUST be unique, or it will prevent the duplicates from running
 function getTasks(){
 	if(zIsTestServer()){
 		$adminDomain=get_cfg_var("jetendo_test_admin_domain");

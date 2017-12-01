@@ -1,8 +1,8 @@
 <cfcomponent>
 <!--- 
-http://www.farbeyondcode.com.127.0.0.2.nip.io/z/admin/files-import/reset
-http://www.farbeyondcode.com.127.0.0.2.nip.io/z/admin/files-import/index
-http://www.farbeyondcode.com.127.0.0.2.nip.io/z/admin/files-import/cacheImageSizes
+/z/admin/files-import/reset
+/z/admin/files-import/index
+/z/admin/files-import/cacheImageSizes
  --->
 <cffunction name="reset" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
