@@ -1458,23 +1458,23 @@ this.app_id=10;
 		</tr>
 
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Show Parent Site Authors?</td>
+			<th style="vertical-align:top; width:140px;">Show Parent Site Authors?</th>
 			<td >#application.zcore.functions.zInput_Boolean("blog_config_show_parent_site_authors")#</td>
 		</tr>
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Disable Blog Author?</td>
+			<th style="vertical-align:top; width:140px;">Disable Blog Author?</th>
 			<td >#application.zcore.functions.zInput_Boolean("blog_config_disable_author")#</td>
 		</tr>
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Hide Article Date?</td>
+			<th style="vertical-align:top; width:140px;">Hide Article Date?</th>
 			<td >#application.zcore.functions.zInput_Boolean("blog_config_hide_date")# (Also hides the author in some places)</td>
 		</tr> 
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Show Categories on Articles?</td>
+			<th style="vertical-align:top; width:140px;">Show Categories on Articles?</th>
 			<td >#application.zcore.functions.zInput_Boolean("blog_config_show_categories_on_articles")#</td>
 		</tr>
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Layout Mode:</td>
+			<th style="vertical-align:top; width:140px;">Layout Mode:</th>
 			<td >
 				<cfscript>
 				var ts = StructNew();
@@ -1486,7 +1486,7 @@ this.app_id=10;
 			</td>
 		</tr> 
 		<tr> 
-			<td style="vertical-align:top; width:140px;">Enable Image Box Layout?</td>
+			<th style="vertical-align:top; width:140px;">Enable Image Box Layout?</th>
 			<td >#application.zcore.functions.zInput_Boolean("blog_config_enable_image_box_layout")#</td>
 		</tr>
 

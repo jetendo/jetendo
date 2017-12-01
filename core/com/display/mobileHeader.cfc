@@ -7,7 +7,7 @@ ts={
 	alwaysShow:false, // true will enable 3 line menu button on desktop
 	menuOnLeft:false, // true will put menu icon on left
 	menuTopHTML:'', 
-	menuBottomHTML:'', 
+	menuBottomHTML:'',  
 	logoHTML:'<div class="z-float"><a href="/"><img src="/images/logo.png" alt="#htmleditformat('')#" class="z-fluid"></a></div><a class="z-show-at-479 zPhoneLink z-mobile-header-mobile-phone-link">123-123-1234</a>',
 	tabletSideHTML:'<div class="z-hide-at-479 z-mt-10 z-pr-10"><a class="zPhoneLink z-mobile-header-tablet-phone-link">123-123-1234</a></div>', // if not an empty string, the logo will be centered.
 	arrLink:[{
@@ -33,6 +33,17 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="displayMobileMenuButton" access="public" localmode="modern">
+	<cfscript>
+	</cfscript>
+	<div class="z-mobile-menu-icon" style="z-index:10000; position:relative;">
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
+</cffunction>
+
 <cffunction name="displayMobileMenu" access="public" localmode="modern"> 
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript> 
@@ -42,6 +53,9 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 	ss.tabletSideHTML=ss.tabletSideHTML?:"";
 	ss.menuTopHTML=ss.menuTopHTML?:"";
 	ss.menuBottomHTML=ss.menuBottomHTML?:"";
+	if(not structkeyexists(ss, 'arrCustomButtonContainerIds')){
+		ss.arrCustomButtonContainerIds=[];
+	}
 	if(not structkeyexists(ss, 'logoHTML')){
 		throw("ss.logoHTML is required");
 	}
@@ -50,11 +64,11 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 	}
 	if(not structkeyexists(ss, 'arrLink') or arraylen(ss.arrLink) EQ 0){
 		throw("ss.arrLink is required with one or more links with this structure: { label:'Label', link:'##' } ");
-	}
+	} 
 	</cfscript>   
 	
-	<div class="z-mobile-header <cfif ss.menuOnLeft>z-mobile-header-left</cfif> <cfif ss.fixedPosition>z-mobile-allow-fixed</cfif> <cfif not ss.alwaysShow>z-show-at-992</cfif> z-float">
-		<div class="z-mobile-header-spacer">
+	<div class="z-mobile-header <cfif ss.menuOnLeft>z-mobile-header-left</cfif> <cfif ss.fixedPosition>z-mobile-allow-fixed</cfif> z-float">
+		<div class="z-mobile-header-spacer <cfif not ss.alwaysShow>z-show-at-992</cfif>">
 			<cfif ss.menuOnLeft>
 				<div class="z-mobile-menu-icon">
 					<span></span>

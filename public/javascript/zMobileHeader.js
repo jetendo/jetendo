@@ -2,11 +2,12 @@
 (function($, window, document, undefined){
 	"use strict";
 
+
 function setupMobileHeader(){ 
 	var win = $( window ); 
 	var mobileHeader = $( '.z-mobile-header');  
 	var mobileHeaderMobileMenu        = $( '.z-mobile-menu', mobileHeader );
-	var mobileHeaderMobileMenuIcon    = $( '.z-mobile-menu-icon', mobileHeader );
+	var mobileHeaderMobileMenuIcon    = $( '.z-mobile-menu-icon' );
 	var mobileHeaderMobileMenuOverlay = $( '.z-mobile-header-overlay', mobileHeader );
 	var mobileHeaderMobileMenuClosedLinks        = $( '.z-mobile-menu li.closed > a', mobileHeader );
 
