@@ -859,7 +859,21 @@
 			}
 		}else if(request.zos.cgi.server_port EQ 443){
 			if(replace(replace(request.zos.globals.securedomain,"http://",""),"https://","") NEQ request.zos.cgi.http_host){
-				application.zcore.functions.z404("Secure domain doesn't match http_host.");	
+				if(request.zos.globals.domainaliases NEQ ""){
+					request.zos.arrDomainAliases=listtoarray(request.zos.globals.domainaliases,",");
+					request.zos.domainAliasMatchFound=false;
+					for(request.zos.__t99=1;request.zos.__t99 LTE arraylen(request.zos.arrDomainAliases);request.zos.__t99++){
+						if(request.zos.cgi.http_host EQ request.zos.arrDomainAliases[request.zos.__t99]){
+							request.zos.domainAliasMatchFound=true;
+							break;	
+						}
+					}
+					if(request.zos.domainAliasMatchFound EQ false){
+						application.zcore.functions.z404("Secure domain doesn't match http_host and domain alias match not found");
+					}
+				}else{
+					application.zcore.functions.z404("Secure domain doesn't match http_host.");	
+				}
 			}
 			request.zos.currentHostName='https://'&lcase(request.zos.cgi.http_host); 
 		    request.zRootDomain=replace(replace(lcase(replace(replace(request.zos.globals.domain, "http://",""), "https://", "")),"www.",""),"."&request.zos.testDomain,"");

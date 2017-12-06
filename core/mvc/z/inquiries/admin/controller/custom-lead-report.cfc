@@ -2581,7 +2581,7 @@ leadchart
 	rowCount=0;
 	request.leadData.contentSection.newsletterLog=request.leadData.pageCount; 
 	</cfscript>	
-	<h2 id="newsletterStats">Newsletters</h2>
+	<h2 id="newsletterStats" style="margin-top:0px;">Newsletters</h2>
 
 	<cfscript>
 	if(qMonth.recordcount NEQ 0){
@@ -2721,7 +2721,7 @@ leadchart
 	showFooter();
 	request.leadData.contentSection.blogLog=request.leadData.pageCount; 
 	savecontent variable="blogHeader"{
-		echo('<h2>Blog Articles</h2>');
+		echo('<h2 style="margin-top:0px;">Blog Articles</h2>');
 	}
 	echo(blogHeader);
 	for(row in qArticle){
