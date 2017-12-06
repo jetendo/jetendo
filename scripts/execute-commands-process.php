@@ -1177,7 +1177,11 @@ function publishNginxSiteConfig($a){
 		$row["site_nginx_config"]="location ~ \.(cfm|cfc)$ { proxy_cache ".$domainDir."; proxy_pass http://\$railoUpstream; }"."\n".$row["site_nginx_config"];
 		
 	}
-	$arrSite=explode(",", $row["site_domainaliases"]);
+	if($row["site_domainaliases_publish_nginx_config"] == "1"){
+		$arrSite=explode(",", $row["site_domainaliases"]);
+	}else{
+		$arrSite=array();
+	}
 	if($hasSSL){
 		$arrSSLSite=array();
 		$host=str_replace("www.", "", $sslRow["ssl_common_name"]);

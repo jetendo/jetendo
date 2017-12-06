@@ -474,6 +474,9 @@
 	if(structkeyexists(form, 'site_disable_upgrade_message') EQ false){
 		form.site_disable_upgrade_message=0;
 	}
+	if(structkeyexists(form, 'site_domainaliases_publish_nginx_config') EQ false){
+		form.site_domainaliases_publish_nginx_config=1;
+	}
 	if(structkeyexists(form, 'site_enable_instant_load') EQ false){
 		form.site_enable_instant_load=0;
 	}
@@ -1288,6 +1291,11 @@
 			<td style="vertical-align:top; width:140px;">Domain Aliases:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_domainaliases", "table-error","")#><input name="site_domainaliases" type="text" size="70" maxlength="255" value="#form.site_domainaliases#"> (Enter a comma separated list of all allowed domain aliases. Example: test.client1.com,newsite.client2.com)</td>
 		</tr> 
+		
+		<tr>
+			<td style="vertical-align:top; width:140px;">Domain Aliases<br>Publish Nginx Config:</td>
+			<td >#application.zcore.functions.zInput_Boolean("site_domainaliases_publish_nginx_config")# (Unchecking this box will remove the domain alias from the nginx server block config.  When unchecked, you will need to manually create the server block configuration in nginx/conf/sites/sites.conf and reload nginx for the domain alias to function.)</td>
+		</tr> 
 		<tr >
 			<td style="vertical-align:top; width:140px;">Public User Manager Domain:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_public_user_manager_domain", "table-error","")#><input name="site_public_user_manager_domain" type="text" size="70" maxlength="255" value="#form.site_public_user_manager_domain#"><br>Please include http:// and www. or another subdomain in this field.</td>
@@ -1600,6 +1608,7 @@
 			form.site_lead_reminder_email1_delay_minutes=720;
 		}
 		</cfscript>
+
 		<tr>
 			<td style="vertical-align:top; width:140px;">Disable Upgrade Message:</td>
 			<td >#application.zcore.functions.zInput_Boolean("site_disable_upgrade_message")# (Choose Yes to hide the old browser incompatibility message for this site)</td>
