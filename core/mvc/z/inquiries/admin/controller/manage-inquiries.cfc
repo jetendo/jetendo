@@ -45,7 +45,7 @@
 		// required 
 		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert","userEdit":"userUpdate"},
 		customEditMethods:{"userEdit":"userUpdate"},
-		customReadOnlyMethods:{"userIndex"},
+		customReadOnlyMethods:{"userIndex":true},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
