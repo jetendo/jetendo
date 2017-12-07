@@ -17,7 +17,14 @@
 		rs.success=false;
 		rs.errorMessage='API call failed: <a href="#safeLink#" target="_blank">#safeLink#</a>';
 	}else{
-		rs.dataStruct=deserializeJson(r1.cfhttp.filecontent);
+		try{
+			rs.dataStruct=deserializeJson(r1.cfhttp.filecontent);
+		}catch(Any e){
+			writedump('Failed to deserializeJson on getSiteById response for sid=#row.site_x_deploy_server_remote_site_id#');
+			writedump(r1);
+			writedump(e);
+			abort;
+		}
 		if(not rs.dataStruct.success){
 			rs.success=false;
 			rs.errorMessage='API call returned error message: #rs.dataStruct.errorMessage# | API Call URL: <a href="#safeLink#" target="_blank">#safeLink#</a>';
@@ -702,7 +709,7 @@
 		if(qSite.recordcount EQ 0){
 			throw("Invalid site_id");
 		}
-		application.zcore.functions.zredirect(qSite.site_domain&"/z/server-manager/admin/deploy/deploySite?sid=#form.sid#"); 
+		application.zcore.functions.zredirect(qSite.site_domain&"/z/server-manager/admin/deploy/index?sid=#form.sid#"); 
 	}
 	</cfscript>
 		<h2>Deploy Site</h2> 
