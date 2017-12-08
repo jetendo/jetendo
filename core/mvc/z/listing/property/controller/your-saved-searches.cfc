@@ -65,36 +65,39 @@
        // form.search_sort="newfirst";
         
         if(structkeyexists(form, 'newonly') and form.newonly EQ 1){
-		if(structkeyexists(request.zsession, 'saved_search_last_sent_date')){
-			form.search_list_date=dateformat(request.zsession.saved_search_last_sent_date, 'yyyy-mm-dd')&' '&timeformat(request.zsession.saved_search_last_sent_date, 'HH:mm:ss');
-			form.search_max_list_date=request.zos.mysqlnow;
-		}else if(isdate(local.qSearch.saved_search_last_sent_date)){
-			form.search_list_date=dateformat(local.qSearch.saved_search_last_sent_date, 'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_last_sent_date, 'HH:mm:ss');
-			form.search_max_list_date=request.zos.mysqlnow;
-		}else if(isdate(local.qSearch.saved_search_sent_date)){
-			form.search_list_date=dateformat(local.qSearch.saved_search_sent_date, 'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_sent_date, 'HH:mm:ss');
-			form.search_max_list_date=request.zos.mysqlnow;
-		}else{
-			form.search_list_date=dateformat(dateadd("d", -7, now()), 'yyyy-mm-dd')&' '&timeformat(dateadd("d", -7, now()), 'HH:mm:ss');
-			form.search_max_list_date=request.zos.mysqlnow;
-		}
+			if(structkeyexists(form, 'since') and isdate(form.since)){
+				form.search_list_date=dateformat(form.since, 'yyyy-mm-dd')&' '&timeformat(form.since, 'HH:mm:ss');
+				form.search_max_list_date=request.zos.mysqlnow;
+			}else if(structkeyexists(request.zsession, 'saved_search_last_sent_date')){
+				form.search_list_date=dateformat(request.zsession.saved_search_last_sent_date, 'yyyy-mm-dd')&' '&timeformat(request.zsession.saved_search_last_sent_date, 'HH:mm:ss');
+				form.search_max_list_date=request.zos.mysqlnow;
+			}else if(isdate(local.qSearch.saved_search_last_sent_date)){
+				form.search_list_date=dateformat(local.qSearch.saved_search_last_sent_date, 'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_last_sent_date, 'HH:mm:ss');
+				form.search_max_list_date=request.zos.mysqlnow;
+			}else if(isdate(local.qSearch.saved_search_sent_date)){
+				form.search_list_date=dateformat(local.qSearch.saved_search_sent_date, 'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_sent_date, 'HH:mm:ss');
+				form.search_max_list_date=request.zos.mysqlnow;
+			}else{
+				form.search_list_date=dateformat(dateadd("d", -7, now()), 'yyyy-mm-dd')&' '&timeformat(dateadd("d", -7, now()), 'HH:mm:ss');
+				form.search_max_list_date=request.zos.mysqlnow;
+			}
         } 
-	if(not structkeyexists(request.zsession, 'saved_search_last_sent_date')){
-		request.zsession.saved_search_last_sent_date=local.qSearch.saved_search_sent_date;
-	}
-	db.sql="update #db.table("mls_saved_search", request.zos.zcoreDatasource)# 
-	set  saved_search_last_sent_date=#db.param(dateformat(local.qSearch.saved_search_sent_date,'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_sent_date,'HH:mm:ss'))#,
-	mls_saved_search_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	WHERE mls_saved_search_id = #db.param(local.qSearch.mls_saved_search_id)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	mls_saved_search_deleted=#db.param(0)# ";
-	db.execute("qUpdate");
-	
-        form.searchid=application.zcore.status.getNewId();
-        application.zcore.status.setStatus(form.searchid, false, form,false);
-	searchFormURL=request.zos.listing.functions.getSearchFormLink();
-	writeoutput('<script type="text/javascript">window.location.href='''&searchFormURL&'?searchId='&form.searchId&''';</script>');
-	
+		if(not structkeyexists(request.zsession, 'saved_search_last_sent_date')){
+			request.zsession.saved_search_last_sent_date=local.qSearch.saved_search_sent_date;
+		}
+		db.sql="update #db.table("mls_saved_search", request.zos.zcoreDatasource)# 
+		set  saved_search_last_sent_date=#db.param(dateformat(local.qSearch.saved_search_sent_date,'yyyy-mm-dd')&' '&timeformat(local.qSearch.saved_search_sent_date,'HH:mm:ss'))#,
+		mls_saved_search_updated_datetime=#db.param(request.zos.mysqlnow)# 
+		WHERE mls_saved_search_id = #db.param(local.qSearch.mls_saved_search_id)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		mls_saved_search_deleted=#db.param(0)# ";
+		db.execute("qUpdate");
+		
+	        form.searchid=application.zcore.status.getNewId();
+	        application.zcore.status.setStatus(form.searchid, false, form,false);
+		searchFormURL=request.zos.listing.functions.getSearchFormLink();
+		writeoutput('<script type="text/javascript">window.location.href='''&searchFormURL&'?searchId='&form.searchId&''';</script>');
+		
         </cfscript>
     </cffunction>
     

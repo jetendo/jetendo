@@ -148,7 +148,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 			}
 		}
 		ext=lcase(application.zcore.functions.zGetFileExt(arguments.qImage.image_file));
-		filePath="zupload/library/"&image_library_id&"/"&application.zcore.functions.zURLEncode(arguments.qImage.image_caption,'-')&"-"&arguments.qImage.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
+		filePath="zupload/library/"&image_library_id&"/"&application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(arguments.qImage.image_caption, 70),'-')&"-"&arguments.qImage.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 		if(fileexists(request.zos.globals.privatehomedir&filePath)){
 			return "/"&filePath&"?ztv=#dateformat(arguments.qImage.image_updated_datetime, "yyyymmdd")&timeformat(arguments.qImage.image_updated_datetime, "HHmmss")#";
 		}else{
@@ -199,7 +199,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 		return false;	
 	}else{
 		ext=lcase(application.zcore.functions.zGetFileExt(qImage.image_file));
-		filePath="zupload/library/"&arguments.image_library_id&"/"&application.zcore.functions.zURLEncode(qImage.image_caption,'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
+		filePath="zupload/library/"&arguments.image_library_id&"/"&application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(qImage.image_caption, 70),'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 	}
 
 
@@ -358,7 +358,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	
 	application.zcore.functions.zCreateDirectory(request.zos.globals.privatehomedir&destination);
 	ext=lcase(application.zcore.functions.zGetFileExt(qImage.image_file));
-	newFileName=application.zcore.functions.zURLEncode(qImage.image_caption,'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
+	newFileName=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(qImage.image_caption, 70),'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 	
 	if(arrSize[1] GT request.zos.globals.maximagewidth){
 		// very large file requested, use original max resolution file
@@ -634,11 +634,11 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 		newFileName="";
 		if(compare(qCheck.image_caption, s9.image_caption) NEQ 0){
 			ext=lcase(application.zcore.functions.zGetFileExt(qCheck.image_file));
-			newFileName=application.zcore.functions.zURLEncode(s9.image_caption,'-')&"-"&s9.image_id&"."&ext;
+			newFileName=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(s9.image_caption, 70),'-')&"-"&s9.image_id&"."&ext;
 			application.zcore.functions.zRenameFile(destination&qCheck.image_file, destination&newFileName);
 			s9.image_file=newFileName;
 			if(qCheck.image_intermediate_file NEQ ""){
-				newFileName=application.zcore.functions.zURLEncode(s9.image_caption,'-')&"-"&s9.image_id&"-int."&ext;
+				newFileName=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(s9.image_caption, 70),'-')&"-"&s9.image_id&"-int."&ext;
 				application.zcore.functions.zRenameFile(destination&qCheck.image_intermediate_file, destination&newFileName);
 				s9.image_intermediate_file=newFileName;
 			}
@@ -735,7 +735,7 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 		// only rename now if caption was set
 		if(s9.image_caption NEQ "" and oldFilePath NEQ ""){
 			ext=lcase(application.zcore.functions.zGetFileExt(oldFilePath));
-			s9.image_file=application.zcore.functions.zURLEncode(s9.image_caption,'-')&"-"&s9.image_id&"."&ext;
+			s9.image_file=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(s9.image_caption, 70),'-')&"-"&s9.image_id&"."&ext;
 			application.zcore.functions.zRenameFile(oldFilePath,destination&s9.image_file); 
 			db.sql="UPDATE #db.table("image", request.zos.zcoreDatasource)#  
 			SET image_file = #db.param(s9.image_file)#,

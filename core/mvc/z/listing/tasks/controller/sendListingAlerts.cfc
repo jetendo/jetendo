@@ -120,7 +120,7 @@
 					user_id: t9.user_id, 
 					user_id_siteIDType: t9.user_id_siteIDType, 
 					criteria: 'Criteria: '&ArrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(t9),', '),
-					link: "#request.zos.currentHostName#/z/listing/property/your-saved-searches/view?newonly=1&mls_saved_search_id=#t9.mls_saved_search_id#&saved_search_email=#t9.saved_search_email#&saved_search_key=#t9.saved_search_key#"
+					link: "#request.zos.currentHostName#/z/listing/property/your-saved-searches/view?newonly=1&since=#urlencodedformat(oldDate)#&mls_saved_search_id=#t9.mls_saved_search_id#&saved_search_email=#t9.saved_search_email#&saved_search_key=#t9.saved_search_key#"
 				});
 			}
 			local.rowIndex++;
