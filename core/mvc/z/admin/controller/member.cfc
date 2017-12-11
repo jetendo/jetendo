@@ -75,10 +75,10 @@ site_id = #db.param(request.zos.globals.id)# ";
 	variables.queueSortStruct.sortFieldName = "member_sort";
 	variables.queueSortStruct.primaryKeyName = "user_id";
 	variables.queueSortStruct.where="user.site_id = '#request.zos.globals.id#'  and 
-	member_public_profile='1' and user_deleted='0' and 
-	user.user_group_id <> #variables.userUserGroupId# and 
-	user_server_administrator = 0 "; 
-
+	member_public_profile='1' and user_deleted='0' and  
+	user_deleted = 0 and  
+	user_server_administrator = 0 and 
+	user_group_id IN (#variables.memberAccessGroupIdList#) "; 
 	variables.queueSortStruct.ajaxTableId='sortRowTable';
 	variables.queueSortStruct.ajaxURL='/z/admin/member/#form.returnMethod#';
 	
