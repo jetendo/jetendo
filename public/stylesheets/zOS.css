@@ -764,7 +764,8 @@ hr{ background:none; border:none; border-bottom:1px solid #999; width:100%; marg
 #tinymce .zImageLeft{margin-right:10px !important; margin-bottom:10px !important; float:left !important; }
 #tinymce .zImageDefault{ margin-bottom:10px !important; }
 #tinymce .zImageRight{margin-left:10px !important; margin-bottom:10px !important; float:right !important; }
-#tinymce h1, #tinymce h2, #tinymce h3, #tinymce p, #tinymce ul, #tinymce ol{ padding-top:0px; padding-bottom:10px;}
+#tinymce h1, #tinymce h2, #tinymce h3, #tinymce p, #tinymce ul, #tinymce ol{ margin:0px;
+ padding-top:0px; padding-bottom:10px;}
 
 
 .zEditorHTML iframe{ max-width:100% !important;}
