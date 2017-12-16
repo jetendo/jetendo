@@ -533,7 +533,7 @@ idxTemp2["rets30_YearofAddition"]="Yearof Addition";
 idxTemp2["rets30_ZoningInformation"]="Zoning Information";
 
   
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
+		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Features", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		return arraytolist(arrR,'');
 		
 		</cfscript>
@@ -546,7 +546,7 @@ idxTemp2["rets30_ZoningInformation"]="Zoning Information";
 		var arrR=arraynew(1);
 		var idxTemp2=structnew();
 		// exterior features 
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
+		//arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		return arraytolist(arrR,'');
 		
 		
@@ -563,13 +563,13 @@ idxTemp2["rets30_yearbuilt"]="Year Built";
 if(application.zcore.functions.zso(arguments.idx, 'rets30_virtualtoururl2') NEQ ""){
 	arrayAppend(arrR, '<a href="#arguments.idx.rets30_virtualtoururl2#" target="_blank">View Virtual Tour Link 2</a>');
 }*/
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
+		//arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		
 		
 
 		idxTemp2=structnew(); 
 		
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Financial &amp; Legal Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
+		//arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Financial &amp; Legal Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		
 		return arraytolist(arrR,'');
 		</cfscript>
