@@ -130,8 +130,14 @@ application.zcore.functions.zInsertLead();
 <cffunction name="zInsertLead" localmode="modern" access="public">
 	<cfscript>
 
+	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
+	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
+	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
+	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
+	form.site_id = request.zOS.globals.id; 
 	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
-	application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
+	// TODO: need to reenable when contacts are done
+	//application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
 	inputstruct.datasource=request.zos.zcoreDatasource;
@@ -175,8 +181,14 @@ application.zcore.functions.zImportLead(ts); --->
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss;
+	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
+	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
+	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
+	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
+	form.site_id = request.zOS.globals.id; 
 	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
-	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
+	// TODO: need to reenable when contacts are done
+	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -196,7 +208,13 @@ application.zcore.functions.zUpdateLead();
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss; 
-	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
+	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
+	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
+	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
+	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
+	form.site_id = request.zOS.globals.id; 
+	// TODO: need to reenable when contacts are done
+	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -429,7 +447,8 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	rs.office_id=application.zcore.functions.zso(rs, 'office_id', true);
 	form.inquiries_id=inquiries_id;
 	if(not structkeyexists(request.zos, 'debugleadrouting')){
-  
+  		/*
+  		// TODO: need to reenable when contacts are done
 		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 		ts=contactCom.getDefaultMessageConfig(); 
 		ts.contact_id=application.zcore.functions.zso(form, 'contact_id', true);
@@ -493,14 +512,15 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 		//writedump(ts);    abort; 
 	  
 		rs=contactCom.processMessage(ts);   
-		/*
+
+		*/
 		mail spoolenable="no" to="#rs.assignEmail#" cc="#rs.cc#" bcc="#rs.bcc#" from="#request.fromemail#" replyto="#rs.leademail#" subject="#arguments.ss.subject#" type="html"{
 			for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
 				mailparam file="#arguments.ss.arrAttachments[n]#" disposition="attachment";
 			}
 			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 		    iemailCom.getEmailTemplate("", true);
-		}*/
+		}
 	}else{
 		echo("Would send email to #rs.assignEmail#<br />");
 	}
