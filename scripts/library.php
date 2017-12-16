@@ -186,82 +186,44 @@ function zRemoveEmptyValuesFromArray($arr){
 		}
 	}
 	return $arrNew;
-}
-function getRets12ByListingId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
-function getRets16ByListingId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
+} 
 function getRets18ByListingId(){
 	global $mlsDataDatasource;
 	return array("select rets18_media.rets18_mediasource as id, listing_id as listingid from listing_track, rets18_media WHERE rets18_mediatype='pic' and rets18_media.rets18_tableuid = listing_track_sysid and listing_id IN ('", $mlsDataDatasource);
-}
-function getRets20ByListingId(){
+} 
+function getRetsNormalByListingId(){
 	global $mlsDataDatasource;
 	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
-function getRets22ByListingId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
-
-function getRets24ByListingId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
-function getRets25ByListingId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_id IN ('", $mlsDataDatasource);
-}
-
-function getRets12BySysId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
-}
-function getRets16BySysId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
-}
+} 
+ 
 function getRets18BySysId(){
 	global $mlsDataDatasource;
 	return array("select rets18_media.rets18_mediasource as id, listing_id as listingid from listing_track, rets18_media WHERE rets18_mediatype='pic' and rets18_media.rets18_tableuid = listing_track_sysid and listing_track_sysid IN ('", $mlsDataDatasource);
-}
-function getRets20BySysId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
-}
-function getRets22BySysId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
-}
-
-function getRets24BySysId(){
-	global $mlsDataDatasource;
-	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
-}
-function getRets25BySysId(){
+} 
+function getRetsNormalBySysId(){
 	global $mlsDataDatasource;
 	return array("select SQL_NO_CACHE listing_track_sysid as imageid, listing_id as listingid from listing_track where listing_track_sysid IN ('", $mlsDataDatasource);
 }
 $arrQueryFunction=array();
-$arrQueryFunction["12"]="getRets12BySysId";
-$arrQueryFunction["16"]="getRets16BySysId";
+$arrQueryFunction["12"]="getRetsNormalBySysId";
+$arrQueryFunction["16"]="getRetsNormalBySysId";
 //$arrQueryFunction["18"]="getRets18SysId";
-$arrQueryFunction["20"]="getRets20BySysId";
-$arrQueryFunction["22"]="getRets22BySysId";
-$arrQueryFunction["24"]="getRets24BySysId";
-$arrQueryFunction["25"]="getRets25BySysId";
+$arrQueryFunction["20"]="getRetsNormalBySysId";
+$arrQueryFunction["22"]="getRetsNormalBySysId";
+$arrQueryFunction["24"]="getRetsNormalBySysId";
+$arrQueryFunction["25"]="getRetsNormalBySysId";
+$arrQueryFunction["29"]="getRetsNormalBySysId";
+$arrQueryFunction["30"]="getRetsNormalBySysId";
 $arrListingQueryFunction=array();
-$arrListingQueryFunction["12"]="getRets12ByListingId";
-$arrListingQueryFunction["16"]="getRets16ByListingId";
+$arrListingQueryFunction["12"]="getRetsNormalByListingId";
+$arrListingQueryFunction["16"]="getRetsNormalByListingId";
 //$arrListingQueryFunction["18"]="getRets18SysId";
-$arrListingQueryFunction["20"]="getRets20ByListingId";
-$arrListingQueryFunction["22"]="getRets22ByListingId";
-$arrListingQueryFunction["24"]="getRets24ByListingId";
-$arrListingQueryFunction["25"]="getRets25ByListingId";
+$arrListingQueryFunction["20"]="getRetsNormalByListingId";
+$arrListingQueryFunction["22"]="getRetsNormalByListingId";
+$arrListingQueryFunction["24"]="getRetsNormalByListingId";
+$arrListingQueryFunction["25"]="getRetsNormalByListingId";
+$arrListingQueryFunction["29"]="getRetsNormalByListingId";
+$arrListingQueryFunction["30"]="getRetsNormalByListingId";
 
 $retsConnections=array();
 
@@ -321,6 +283,8 @@ function getRetsImageType($mls_id){
 		return "LargePhoto";
 	}else if($mls_id == "28"){
 		return "HQPhoto";
+	}else if($mls_id == "30"){
+		return "HighRes";
 	}else{
 		return false;
 	}

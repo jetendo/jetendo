@@ -318,7 +318,7 @@
 		var arrT=0;
 		var qD=0;
 
-		db.sql="SELECT listing_data_json FROM #db.table("listing_data", request.zos.zcoreDatasource)# WHERE listing_id LIKE #db.param('3-%')# ";
+		db.sql="SELECT listing_data_json FROM #db.table("listing_data", request.zos.zcoreDatasource)# WHERE listing_id LIKE #db.param('3-%')# and listing_data_deleted=#db.param(0)# ";
 		qD=db.execute("qD");
 		ts={
 			county:{},

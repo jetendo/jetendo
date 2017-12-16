@@ -13,6 +13,7 @@ ts={
 	arrLink:[{
 		label:"Link",
 		link:"##",
+		// closed: true, // set to true if you want to allow menu to expand/collapse for this link
 		arrLink:[{
 			label:"Sub-link",
 			link:"##"

@@ -287,6 +287,10 @@ variables.typeStruct["text"]="text";
 		}
 		metaStruct[mk].table=structnew();
 		for(f=1;f LTE arraylen(curTables);f++){
+			if(not structkeyexists(curTables[f], "METADATA-TABLE")){
+				echo('metadata-table missing for #this.mls_id# metadata.xml | skipping: f=#f#');
+				continue;
+			}
 			curTable=curTables[f]["METADATA-TABLE"];
 			metaStruct[mk].table[curTable.xmlattributes.class]=structnew();
 			metaStruct[mk].table[curTable.xmlattributes.class].tableFields=structnew();
