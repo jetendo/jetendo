@@ -1105,7 +1105,7 @@ zArrDeferredFunctions.push(function(){
 				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 					<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 				</cfif>
-				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#&modalpopforced=1" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;"  class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 				<a href="/z/inquiries/admin/manage-inquiries/addPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
 	 
 			</cfif> 
@@ -1146,7 +1146,7 @@ zArrDeferredFunctions.push(function(){
 							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 								<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 							</cfif>
-							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
+							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#&modalpopforced=1" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
 						</div>
 						<!--- <cfif qinquiry.inquiries_reservation EQ 1>
 							<a href="/z/rental/admin/reservations/cancel?inquiries_id=#qinquiry.inquiries_id#">Cancel Reservation</a>
@@ -2363,6 +2363,7 @@ zArrDeferredFunctions.push(function(){
 					title:"Assign Lead",
 					icon:"mail-forward",
 					link:"/z/inquiries/admin/assign/index?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#",
+					enableEditAjax:true,
 					label:"Assign"
 				}); 
 			}
@@ -2381,6 +2382,7 @@ zArrDeferredFunctions.push(function(){
 				title:"Assign Lead",
 				icon:"mail-forward",
 				link:"/z/inquiries/admin/assign/userIndex?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#",
+				enableEditAjax:true,
 				label:"Assign"
 			});  
 		}

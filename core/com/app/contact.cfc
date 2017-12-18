@@ -241,6 +241,7 @@ ts={
 	inquiries_id:"", // required to exist
 	validHash:true, 
 	privateMessage:false,
+	dontEmailFromContact:false, 
 	enableCopyToSelf:false,  // set to true to allow the sender to receive a copy of his own message.
 	messageStruct:{}, // queue_pop struct
 	jsonStruct:{} // decoded json queue_pop_message_json
@@ -376,7 +377,7 @@ contactCom.processMessage(ts);
 		site_id = #db.param(ss.messageStruct.site_id)# and  
 		inquiries_deleted=#db.param(0)# ";
 		db.execute("qUpdateInquiry");  
-	}else if(notifyStruct.mainContact.contact_id NEQ notifyStruct.fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0 and fromContact.isAssignedUser){ 
+	}else if(notifyStruct.mainContact.contact_id NEQ notifyStruct.fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0 and structkeyexists(notifyStruct.fromContact, 'isAssignedUser') and fromContact.isAssignedUser){ 
 		if(qInquiry.inquiries_status_id EQ 2){
 			newStatusId=3;		
 		}else if(qInquiry.inquiries_status_id EQ 1){
@@ -549,7 +550,10 @@ contactCom.processMessage(ts);
 				addressTypeId:"1",
 				addressType:"to" // to, cc, bcc (bcc is visible only to internal users)
 			};
-			emailStruct[fromContact.contact_email]=ts;
+
+			if(ss.dontEmailFromContact EQ false){
+				emailStruct[fromContact.contact_email]=ts;
+			}
 		}
 		if(ss.jsonStruct.from.name NEQ ""){
 			if(debug){
@@ -808,7 +812,7 @@ contactCom.processMessage(ts);
 			}
 			if(row.contact_id EQ ""){ 
 				// tested successfully
-				contact=getContactByEmail(trim(email), trim(row.user_first_name&" "&row.user_last_name), ss.messageStruct.site_id);
+				contact=getContactByEmail(trim(row.user_username), trim(row.user_first_name&" "&row.user_last_name), ss.messageStruct.site_id);
 				if(structcount(contact) NEQ 0){ 
 					ts={
 						site_id:ss.messageStruct.site_id,

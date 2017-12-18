@@ -541,6 +541,7 @@
 	ts.messageStruct.site_id=request.zos.globals.id;
 	ts.filterContacts.managers=true; 
 	ts.privateMessage=true;
+	ts.dontEmailFromContact=true;
 	ts.enableCopyToSelf=true;
 	ts.jsonStruct.to=[{
 		name:form.assign_name,
