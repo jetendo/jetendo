@@ -349,6 +349,9 @@ contactCom.processMessage(ts);
 	arrEmail=[];
 	ss.inquiries_feedback_download_key=tsFeedback.struct.inquiries_feedback_download_key;  
 	ss.jsonStruct.htmlProcessed=processedHTML; 
+	if(request.zos.isdeveloper){
+		//writedump(notifyStruct.emailSendStruct);
+	}
 	for(type in notifyStruct.emailSendStruct){
 		typeStruct=notifyStruct.emailSendStruct[type];
 		for(i=1;i<=arraylen(typeStruct);i++){     
@@ -400,23 +403,27 @@ contactCom.processMessage(ts);
 		db.execute("qUpdateInquiry"); 
 	}
 
+	if(request.zos.isdeveloper){
+		//writedump(arrEmail);		abort;
+	}
 	arrError=[];
 	for(emailStruct in arrEmail){
 		if(request.zos.istestserver){
 			emailStruct.html=replace(emailStruct.html, '</body>', '<p>Test server debug message: This email would have been sent to #emailStruct.to#</p></body>');
 			emailStruct.to=request.zos.developerEmailTo;
 			emailStruct.cc="";
-			emailStruct.bcc=""; 
-		}  
+			emailStruct.bcc="";  
+		}
 		if(application.zcore.functions.zvar("enablePlusEmailRouting", ss.messageStruct.site_id, 0) EQ 0){
 			emailStruct.from=request.fromEmail;
 			emailStruct.replyTo=notifyStruct.mainContact.contact_email;
 		}
+		/*
 		// TODO: remove when we're done testing:
 		emailStruct.to=request.zos.developerEmailTo;
 		emailStruct.cc="";
 		emailStruct.bcc="";
-  	
+  		*/
   		if(structkeyexists(ss, 'emailFileAttachments')){
   			emailStruct.attachments=ss.emailFileAttachments;
   		}
@@ -539,6 +546,7 @@ contactCom.processMessage(ts);
 				user_id_siteidtype:fromContact.user_id_siteidtype,
 				isUser:fromContact.isUser,
 				isManagerUser:fromContact.isManagerUser,
+				addressTypeId:"1",
 				addressType:"to" // to, cc, bcc (bcc is visible only to internal users)
 			};
 			emailStruct[fromContact.contact_email]=ts;
@@ -612,6 +620,7 @@ contactCom.processMessage(ts);
 				user_id_siteidtype:mainContact.user_id_siteidtype,
 				isUser:mainContact.isUser,
 				isManagerUser:mainContact.isManagerUser,
+				addressTypeId:"2",
 				addressType:"to" // to, cc, bcc (bcc is visible only to internal users)
 			};
 			emailStruct[mainContact.contact_email]=ts;
@@ -660,6 +669,7 @@ contactCom.processMessage(ts);
 				user_group_id:row.user_group_id,
 				isUser:false,
 				isManagerUser:false,
+				addressTypeId:"3",
 				addressType:row.inquiries_x_contact_type // to, cc, bcc (bcc is visible only to internal users)
 			};
 			if(row.userSiteId NEQ ""){
@@ -709,6 +719,7 @@ contactCom.processMessage(ts);
 						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
 						isManagerUser:contact.isManagerUser,
+						addressTypeId:"4",
 						addressType:"cc"
 					};
 					assignedEmailStruct[contact.contact_email]=true;
@@ -739,6 +750,7 @@ contactCom.processMessage(ts);
 					user_id_siteidtype:contact.user_id_siteidtype,
 					isUser:contact.isUser,
 					isManagerUser:contact.isManagerUser,
+					addressTypeId:"5",
 					addressType:"to"
 				};
 				assignedEmailStruct[contact.contact_email]=true;
@@ -784,6 +796,7 @@ contactCom.processMessage(ts);
 							user_id_siteidtype:contact.user_id_siteidtype,
 							isUser:contact.isUser,
 							isManagerUser:contact.isManagerUser,
+							addressTypeId:"6",
 							addressType:"to"
 						};
 						emailStruct[contact.contact_email]=ts;
@@ -810,6 +823,7 @@ contactCom.processMessage(ts);
 						user_id_siteidtype:contact.user_id_siteidtype,
 						isUser:contact.isUser,
 						isManagerUser:contact.isManagerUser,
+						addressTypeId:"7",
 						addressType:"to"
 					};
 					emailStruct[contact.contact_email]=ts; 
@@ -832,6 +846,7 @@ contactCom.processMessage(ts);
 					user_id_siteidtype:application.zcore.functions.zGetSiteIdType(row.userSiteId, ss.messageStruct.site_id),
 					isUser:true,
 					isManagerUser:false,
+					addressTypeId:"8",
 					addressType:"to"
 				};
 
@@ -847,7 +862,9 @@ contactCom.processMessage(ts);
 			}
 		}
 	}
-
+	if(request.zos.isDeveloper){
+		//writedump(emailStruct);	abort;
+	}
 	// anyone missing still who was addressed in the email? force creation of a new "contact" record, and add that email here. 
 	// tested successfully
 	arrType=["to", "cc"];
