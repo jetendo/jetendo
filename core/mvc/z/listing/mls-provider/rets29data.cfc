@@ -11,98 +11,98 @@
 
 	// put them here
 idxExclude["rets29_ArchitecturalStyle"]="Architectural Style";
-idxTemp2["rets29_CloseDate"]="Close Date";
-idxTemp2["rets29_ClosePrice"]="Close Price";
-idxTemp2["rets29_CoListAgentDirectWorkPhone"]="Co List Agent Direct Work Phone";
-idxTemp2["rets29_CoListAgentEmail"]="Co List Agent Email";
-idxTemp2["rets29_CoListAgentFullName"]="Co List Agent Full Name";
-idxTemp2["rets29_CoListAgentMLSBoard"]="Co List Agent Mls Board";
-idxTemp2["rets29_CoListAgentMLSID"]="Co List Agent Mlsid";
-idxTemp2["rets29_CoListAgent_MUI"]="Co List Agent Mui";
-idxTemp2["rets29_CoListAgentPrimaryBoard"]="Co List Agent Primary Board";
-idxTemp2["rets29_CoListOfficeMLSID"]="Co List Office Mlsid";
-idxTemp2["rets29_CoListOffice_MUI"]="Co List Office Mui";
-idxTemp2["rets29_CoListOfficeName"]="Co List Office Name";
-idxTemp2["rets29_CoListOfficePhone"]="Co List Office Phone";
-idxTemp2["rets29_YearBuilt"]="Year Built";
-idxTemp2["rets29_BuyerAgencyCompensation"]="Buyer Agency Compensation";
-idxTemp2["rets29_BuyerAgencyCompensationType"]="Buyer Agency Compensation Type";
-idxTemp2["rets29_BuyerAgentSaleYN"]="Buyer Agent Sale Yn";
-idxTemp2["rets29_CoSellingAgentMLSBoard"]="Co Selling Agent Mls Board";
-idxTemp2["rets29_CoSellingAgentMLSID"]="Co Selling Agent Mlsid";
-idxTemp2["rets29_CoSellingAgent_MUI"]="Co Selling Agent Mui";
-idxTemp2["rets29_CoSellingAgentPrimaryBoard"]="Co Selling Agent Primary Board";
-idxTemp2["rets29_CoSellingOfficeMLSID"]="Co Selling Office Mlsid";
-idxTemp2["rets29_CoSellingOffice_MUI"]="Co Selling Office Mui";
-idxTemp2["rets29_ConditionalDate"]="Conditional Date";
+idxExclude["rets29_CloseDate"]="Close Date";
+idxExclude["rets29_ClosePrice"]="Close Price";
+idxExclude["rets29_CoListAgentDirectWorkPhone"]="Co List Agent Direct Work Phone";
+idxExclude["rets29_CoListAgentEmail"]="Co List Agent Email";
+idxExclude["rets29_CoListAgentFullName"]="Co List Agent Full Name";
+idxExclude["rets29_CoListAgentMLSBoard"]="Co List Agent Mls Board";
+idxExclude["rets29_CoListAgentMLSID"]="Co List Agent Mlsid";
+idxExclude["rets29_CoListAgent_MUI"]="Co List Agent Mui";
+idxExclude["rets29_CoListAgentPrimaryBoard"]="Co List Agent Primary Board";
+idxExclude["rets29_CoListOfficeMLSID"]="Co List Office Mlsid";
+idxExclude["rets29_CoListOffice_MUI"]="Co List Office Mui";
+idxExclude["rets29_CoListOfficeName"]="Co List Office Name";
+idxExclude["rets29_CoListOfficePhone"]="Co List Office Phone";
+idxExclude["rets29_YearBuilt"]="Year Built";
+idxExclude["rets29_BuyerAgencyCompensation"]="Buyer Agency Compensation";
+idxExclude["rets29_BuyerAgencyCompensationType"]="Buyer Agency Compensation Type";
+idxExclude["rets29_BuyerAgentSaleYN"]="Buyer Agent Sale Yn";
+idxExclude["rets29_CoSellingAgentMLSBoard"]="Co Selling Agent Mls Board";
+idxExclude["rets29_CoSellingAgentMLSID"]="Co Selling Agent Mlsid";
+idxExclude["rets29_CoSellingAgent_MUI"]="Co Selling Agent Mui";
+idxExclude["rets29_CoSellingAgentPrimaryBoard"]="Co Selling Agent Primary Board";
+idxExclude["rets29_CoSellingOfficeMLSID"]="Co Selling Office Mlsid";
+idxExclude["rets29_CoSellingOffice_MUI"]="Co Selling Office Mui";
+idxExclude["rets29_ConditionalDate"]="Conditional Date";
 
-idxTemp2["rets29_ContactName"]="Contact Name";
-idxTemp2["rets29_ContactPhone"]="Contact Phone";
-idxTemp2["rets29_SellerContribution"]="Seller Contribution";
-idxTemp2["rets29_SellingAgentDirectWorkPhone"]="Selling Agent Direct Work Phone";
-idxTemp2["rets29_SellingAgentEmail"]="Selling Agent Email";
-idxTemp2["rets29_SellingAgentFullName"]="Selling Agent Full Name";
-idxTemp2["rets29_SellingAgentMLSBoard"]="Selling Agent Mls Board";
-idxTemp2["rets29_SellingAgentMLSID"]="Selling Agent Mlsid";
-idxTemp2["rets29_SellingAgent_MUI"]="Selling Agent Mui";
-idxTemp2["rets29_SellingAgentPrimaryBoard"]="Selling Agent Primary Board";
-idxTemp2["rets29_SellingOfficeMLSID"]="Selling Office Mlsid";
-idxTemp2["rets29_SellingOffice_MUI"]="Selling Office Mui";
-idxTemp2["rets29_SellingOfficeName"]="Selling Office Name";
-idxTemp2["rets29_SellingOfficePhone"]="Selling Office Phone";
-idxTemp2["rets29_ListAgentDirectWorkPhone"]="List Agent Direct Work Phone";
-idxTemp2["rets29_ListAgentEmail"]="List Agent Email";
-idxTemp2["rets29_ListAgentFullName"]="List Agent Full Name";
-idxTemp2["rets29_ListAgentMLSID"]="List Agent Mlsid";
-idxTemp2["rets29_ListAgent_MUI"]="List Agent Mui";
-idxTemp2["rets29_ListingAgentMLSBoard"]="Listing Agent Mls Board";
-idxTemp2["rets29_ListingAgentPrimaryBoard"]="Listing Agent Primary Board";
-idxTemp2["rets29_ListingContractDate"]="Listing Contract Date";
-idxTemp2["rets29_ListingServiceYN"]="Listing Service Yn";
+idxExclude["rets29_ContactName"]="Contact Name";
+idxExclude["rets29_ContactPhone"]="Contact Phone";
+idxExclude["rets29_SellerContribution"]="Seller Contribution";
+idxExclude["rets29_SellingAgentDirectWorkPhone"]="Selling Agent Direct Work Phone";
+idxExclude["rets29_SellingAgentEmail"]="Selling Agent Email";
+idxExclude["rets29_SellingAgentFullName"]="Selling Agent Full Name";
+idxExclude["rets29_SellingAgentMLSBoard"]="Selling Agent Mls Board";
+idxExclude["rets29_SellingAgentMLSID"]="Selling Agent Mlsid";
+idxExclude["rets29_SellingAgent_MUI"]="Selling Agent Mui";
+idxExclude["rets29_SellingAgentPrimaryBoard"]="Selling Agent Primary Board";
+idxExclude["rets29_SellingOfficeMLSID"]="Selling Office Mlsid";
+idxExclude["rets29_SellingOffice_MUI"]="Selling Office Mui";
+idxExclude["rets29_SellingOfficeName"]="Selling Office Name";
+idxExclude["rets29_SellingOfficePhone"]="Selling Office Phone";
+idxExclude["rets29_ListAgentDirectWorkPhone"]="List Agent Direct Work Phone";
+idxExclude["rets29_ListAgentEmail"]="List Agent Email";
+idxExclude["rets29_ListAgentFullName"]="List Agent Full Name";
+idxExclude["rets29_ListAgentMLSID"]="List Agent Mlsid";
+idxExclude["rets29_ListAgent_MUI"]="List Agent Mui";
+idxExclude["rets29_ListingAgentMLSBoard"]="Listing Agent Mls Board";
+idxExclude["rets29_ListingAgentPrimaryBoard"]="Listing Agent Primary Board";
+idxExclude["rets29_ListingContractDate"]="Listing Contract Date";
+idxExclude["rets29_ListingServiceYN"]="Listing Service Yn";
 
-idxTemp2["rets29_ListOfficeMLSID"]="List Office Mlsid";
-idxTemp2["rets29_ListOffice_MUI"]="List Office Mui";
-idxTemp2["rets29_ListOfficeName"]="List Office Name";
-idxTemp2["rets29_ExpirationDate"]="Expiration Date";
+idxExclude["rets29_ListOfficeMLSID"]="List Office Mlsid";
+idxExclude["rets29_ListOffice_MUI"]="List Office Mui";
+idxExclude["rets29_ListOfficeName"]="List Office Name";
+idxExclude["rets29_ExpirationDate"]="Expiration Date";
 
-idxTemp2["rets29_LastChangeTimestamp"]="Last Change Timestamp";
-idxTemp2["rets29_LastChangeType"]="Last Change Type";
-idxTemp2["rets29_GeocodeSource"]="Geocode Source";
-
-
-idxTemp2["rets29_MatrixModifiedDT"]="Matrix Modified Dt";
-idxTemp2["rets29_Matrix_Unique_ID"]="Matrix Unique Id";
+idxExclude["rets29_LastChangeTimestamp"]="Last Change Timestamp";
+idxExclude["rets29_LastChangeType"]="Last Change Type";
+idxExclude["rets29_GeocodeSource"]="Geocode Source";
 
 
-idxTemp2["rets29_MLSNumber"]="Mls Number";
-idxTemp2["rets29_StatusChangeTimestamp"]="Status Change Timestamp";
-idxTemp2["rets29_StatusContractualSearchDate"]="Status Contractual Search Date";
-idxTemp2["rets29_OwnerName"]="Owner Name";
-
-idxTemp2["rets29_OffMarketDate"]="Off Market Date";
+idxExclude["rets29_MatrixModifiedDT"]="Matrix Modified Dt";
+idxExclude["rets29_Matrix_Unique_ID"]="Matrix Unique Id";
 
 
-idxTemp2["rets29_OriginalEntryTimestamp"]="Original Entry Timestamp";
+idxExclude["rets29_MLSNumber"]="Mls Number";
+idxExclude["rets29_StatusChangeTimestamp"]="Status Change Timestamp";
+idxExclude["rets29_StatusContractualSearchDate"]="Status Contractual Search Date";
+idxExclude["rets29_OwnerName"]="Owner Name";
+
+idxExclude["rets29_OffMarketDate"]="Off Market Date";
+
+
+idxExclude["rets29_OriginalEntryTimestamp"]="Original Entry Timestamp";
 
 
 
 
-idxTemp2["rets29_PermitAddressInternetYN"]="Permit Address Internet Yn";
+idxExclude["rets29_PermitAddressInternetYN"]="Permit Address Internet Yn";
 
 
-idxTemp2["rets29_PhotoModificationTimestamp"]="Photo Modification Timestamp";
-idxTemp2["rets29_PlatReferenceSectionPages"]="Plat Reference Section Pages";
-idxTemp2["rets29_PostalCodePlus4"]="Postal Code Plus 4";
-idxTemp2["rets29_PriceChangeTimestamp"]="Price Change Timestamp";
-
-
+idxExclude["rets29_PhotoModificationTimestamp"]="Photo Modification Timestamp";
+idxExclude["rets29_PlatReferenceSectionPages"]="Plat Reference Section Pages";
+idxExclude["rets29_PostalCodePlus4"]="Postal Code Plus 4";
+idxExclude["rets29_PriceChangeTimestamp"]="Price Change Timestamp";
 
 
 
 
 
 
-idxTemp2["rets29_TempOffMarketDate"]="Temp Off Market Date";
+
+
+idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 
 
 	tf=application.zcore.listingStruct.mlsStruct["29"].sharedStruct.metaStruct["property"].tableFields;

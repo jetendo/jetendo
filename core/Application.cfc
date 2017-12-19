@@ -136,7 +136,11 @@ local.tempCGI=duplicate(CGI);
 requestData=getHTTPRequestData();
 
 if(structkeyexists(requestData.headers,'x-forwarded-for')){
-	local.tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
+	if(requestData.headers["x-forwarded-for"] CONTAINS ","){
+		local.tempCGI.remote_addr=listGetAt(requestData.headers["x-forwarded-for"], 1, ",");
+	}else{
+		local.tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
+	}
 }else if(structkeyexists(requestData.headers,'remote_addr')){
 	local.tempCGI.remote_addr=requestData.headers.remote_addr;
 }
