@@ -1,4 +1,4 @@
-+<cfcomponent>
+<cfcomponent>
 <cfoutput>
 <cffunction name="select" localmode="modern" access="remote" roles="member">
 	<cfscript>
@@ -479,8 +479,8 @@
 	if(form.user_id EQ 0){
 		db.sql&=" inquiries_assign_email = #db.param(form.assign_email)#, 
 		inquiries_assign_name=#db.param(form.assign_name)#, 
-		user_id = #db.param("")#, 
-		inquiries_status_id = #db.param(newStatusId)#, ";
+		inquiries_status_id = #db.param(newStatusId)#,
+		user_id = #db.param("")#, ";
 	}else{
 		db.sql&=" inquiries_assign_email = #db.param("")#, 
 		user_id = #db.param(form.user_id)#, 
@@ -490,8 +490,9 @@
 		db.sql&=" office_id=#db.param(form.office_id)#, ";   
 	}
 	if(qInquiry.inquiries_status_id EQ 1){
-		db.sql&=" inquiries_status_id = #db.param(2)#";
+		db.sql&=" inquiries_status_id = #db.param(2)#,";
 	}
+	db.sql&=" inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# ";
 	db.sql&=" WHERE inquiries_id = #db.param(form.inquiries_id)# and 
 	 site_id = #db.param(request.zos.globals.id)# and 
 	 inquiries_deleted=#db.param(0)# ";
