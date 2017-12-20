@@ -35,7 +35,21 @@ idxExclude["rets29_CoSellingAgentPrimaryBoard"]="Co Selling Agent Primary Board"
 idxExclude["rets29_CoSellingOfficeMLSID"]="Co Selling Office Mlsid";
 idxExclude["rets29_CoSellingOffice_MUI"]="Co Selling Office Mui";
 idxExclude["rets29_ConditionalDate"]="Conditional Date";
-
+idxExclude["rets29_WarehouseSqFt"]="Warehouse Sq Ft";
+idxExclude["rets29_CeilingHeight"]="Ceiling Height";
+idxExclude["rets29_CommercialCooling"]="Commercial Cooling";
+idxExclude["rets29_CommercialHeating"]="Commercial Heating";
+idxExclude["rets29_LotSizeUnits"]="Lot Size Units";
+idxExclude["rets29_NumberOfDriveInDoorsTotal"]="Number Of Drive In Doors Total";
+idxExclude["rets29_NumberOfUnitsBuildings"]="Number Of Units Buildings";
+idxExclude["rets29_NumberOfUnitsTotal"]="Number Of Units Total";
+idxExclude["rets29_ParkingTotal"]="Parking Total";
+idxExclude["rets29_DepositPet"]="Deposit Pet";
+idxExclude["rets29_DepositSecurity"]="Deposit Security";
+idxExclude["rets29_SmokingAllowedYN"]="Smoking Allowed Yn";
+idxExclude["rets29_Latitude"]="Latitude";
+idxExclude["rets29_Longitude"]="Longitude";
+idxExclude["rets29_NumberOfDocksTotal"]="Number Of Docks Total";
 idxExclude["rets29_ContactName"]="Contact Name";
 idxExclude["rets29_ContactPhone"]="Contact Phone";
 idxExclude["rets29_SellerContribution"]="Seller Contribution";
@@ -59,37 +73,28 @@ idxExclude["rets29_ListingAgentMLSBoard"]="Listing Agent Mls Board";
 idxExclude["rets29_ListingAgentPrimaryBoard"]="Listing Agent Primary Board";
 idxExclude["rets29_ListingContractDate"]="Listing Contract Date";
 idxExclude["rets29_ListingServiceYN"]="Listing Service Yn";
-
 idxExclude["rets29_ListOfficeMLSID"]="List Office Mlsid";
 idxExclude["rets29_ListOffice_MUI"]="List Office Mui";
 idxExclude["rets29_ListOfficeName"]="List Office Name";
 idxExclude["rets29_ExpirationDate"]="Expiration Date";
-
 idxExclude["rets29_LastChangeTimestamp"]="Last Change Timestamp";
 idxExclude["rets29_LastChangeType"]="Last Change Type";
 idxExclude["rets29_GeocodeSource"]="Geocode Source";
-
-
 idxExclude["rets29_MatrixModifiedDT"]="Matrix Modified Dt";
 idxExclude["rets29_Matrix_Unique_ID"]="Matrix Unique Id";
-
-
 idxExclude["rets29_MLSNumber"]="Mls Number";
 idxExclude["rets29_StatusChangeTimestamp"]="Status Change Timestamp";
 idxExclude["rets29_StatusContractualSearchDate"]="Status Contractual Search Date";
 idxExclude["rets29_OwnerName"]="Owner Name";
-
 idxExclude["rets29_OffMarketDate"]="Off Market Date";
-
-
+idxExclude["rets29_ListPrice"]="List Price";
+idxExclude["rets29_ShowingInstructions"]="Showing Instructions";
+idxExclude["rets29_ShowingPhoneNumber"]="Showing Phone Number";
+idxExclude["rets29_AuctionBidInformation"]="Auction Bid Information";
+idxExclude["rets29_AuctionBidType"]="Auction Bid Type";
+idxExclude["rets29_SuitableUse"]="Suitable Use";
 idxExclude["rets29_OriginalEntryTimestamp"]="Original Entry Timestamp";
-
-
-
-
 idxExclude["rets29_PermitAddressInternetYN"]="Permit Address Internet Yn";
-
-
 idxExclude["rets29_PhotoModificationTimestamp"]="Photo Modification Timestamp";
 idxExclude["rets29_PlatReferenceSectionPages"]="Plat Reference Section Pages";
 idxExclude["rets29_PostalCodePlus4"]="Postal Code Plus 4";
@@ -154,11 +159,7 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_SqFtTotal"]="Sq Ft Total";
 		idxTemp2["rets29_SqFtUnheatedBasement"]="Sq Ft Unheated Basement";
 		idxTemp2["rets29_SqFtUpper"]="Sq Ft Upper";
-		idxTemp2["rets29_WarehouseSqFt"]="Warehouse Sq Ft";
 		idxTemp2["rets29_Water"]="Water";
-		idxTemp2["rets29_CeilingHeight"]="Ceiling Height";
-		xTemp2["rets29_CommercialCooling"]="Commercial Cooling";
-		idxTemp2["rets29_CommercialHeating"]="Commercial Heating";
 		idxTemp2["rets29_FireplaceDescription"]="Fireplace Description";
 		idxTemp2["rets29_FireplaceYN"]="Fireplace Yn";
 		idxTemp2["rets29_Flooring"]="Flooring";
@@ -193,14 +194,9 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_ExteriorConstruction"]="Exterior Construction";
 		idxTemp2["rets29_ExteriorFeatures"]="Exterior Features";
 		idxTemp2["rets29_LotFeatures"]="Lot Features";
-		idxTemp2["rets29_LotSizeArea"]="Lot Size Area";
-		idxTemp2["rets29_LotSizeUnits"]="Lot Size Units";
-		idxTemp2["rets29_NumberOfDriveInDoorsTotal"]="Number Of Drive In Doors Total";
-		idxTemp2["rets29_NumberOfUnitsBuildings"]="Number Of Units Buildings";
-		idxTemp2["rets29_NumberOfUnitsTotal"]="Number Of Units Total";
+		idxTemp2["rets29_LotSizeArea"]="Lot Size Area In Acres";
 		idxTemp2["rets29_ParcelNumber"]="Parcel Number";
 		idxTemp2["rets29_Parking"]="Parking";
-		idxTemp2["rets29_ParkingTotal"]="Parking Total";
 		idxTemp2["rets29_Porch"]="Porch";
 
 		idxTemp2["rets29_PropertySubType"]="Property Sub Type";
@@ -235,8 +231,6 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_CompleName"]="Complex Name";
 		idxTemp2["rets29_Country"]="Country";
 		idxTemp2["rets29_CountyOrParish"]="County Or Parish";
-		idxTemp2["rets29_DepositPet"]="Deposit Pet";
-		idxTemp2["rets29_DepositSecurity"]="Deposit Security";
 		idxTemp2["rets29_Directions"]="Directions";
 		idxTemp2["rets29_ElementarySchool"]="Elementary School";
 		idxTemp2["rets29_Elevation"]="Elevation";
@@ -249,7 +243,6 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_OwnershipType"]="Ownership Type";
 		idxTemp2["rets29_PetsAllowed"]="Pets Allowed";
 		idxTemp2["rets29_Restrictions"]="Restrictions";
-		idxTemp2["rets29_SmokingAllowedYN"]="Smoking Allowed Yn";
 		idxTemp2["rets29_StateOrProvince"]="State Or Province";
 		idxTemp2["rets29_Street"]="Street";
 		idxTemp2["rets29_StreetDirPrefix"]="Street Dir Prefix";
@@ -268,12 +261,9 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_HighSchool"]="High School";
 		idxTemp2["rets29_Improvements"]="Improvements";
 		idxTemp2["rets29_LastStatus"]="Last Status";
-		idxTemp2["rets29_Latitude"]="Latitude";
-		idxTemp2["rets29_Longitude"]="Longitude";
 		idxTemp2["rets29_MiddleOrJuniorSchool"]="Middle Or Junior School";
 		idxTemp2["rets29_Miscellaneous"]="Miscellaneous";
 		idxTemp2["rets29_NewConstructionYN"]="New Construction Yn";
-		idxTemp2["rets29_NumberOfDocksTotal"]="Number Of Docks Total";
 		idxTemp2["rets29_OpenHouseCount"]="Open House Count";
 		idxTemp2["rets29_OpenHouseUpcoming"]="Open House Upcoming";
 		idxTemp2["rets29_OriginalListPrice"]="Original List Price";
@@ -283,10 +273,6 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_Sewer"]="Sewer";
 		idxTemp2["rets29_Status"]="Status";
 		idxTemp2["rets29_CurrentPrice"]="Current Price";
-		idxTemp2["rets29_ListPrice"]="List Price";
-		idxTemp2["rets29_ShowingInstructions"]="Showing Instructions";
-		idxTemp2["rets29_ShowingPhoneNumber"]="Showing Phone Number";
-
 
 		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		     
@@ -297,12 +283,9 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_ZoningSpecification"]="Zoning Specification";
 		idxTemp2["rets29_AssociationFee"]="Association Fee";
 		idxTemp2["rets29_AssociationFeeFrequency"]="Association Fee Frequency";
-		idxTemp2["rets29_AuctionBidInformation"]="Auction Bid Information";
-		idxTemp2["rets29_AuctionBidType"]="Auction Bid Type";
 		idxTemp2["rets29_AuctionYN"]="Auction Yn";
 		idxTemp2["rets29_SyndicationRemarks"]="Syndication Remarks";
 		idxTemp2["rets29_TaxAmountNCM"]="Tax Amount Ncm";
-		idxTemp2["rets29_SuitableUse"]="Suitable Use";
 		idxTemp2["rets29_SoldTerms"]="Sold Terms";
 
 		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Financial &amp; Legal Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));

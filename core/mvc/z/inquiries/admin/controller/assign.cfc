@@ -489,11 +489,9 @@
 	if(application.zcore.user.checkGroupAccess("administrator") and form.method EQ "assign" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
 		db.sql&=" office_id=#db.param(form.office_id)#, ";   
 	}
-	if(qFeedback.count NEQ 0){
-		db.sql&=" inquiries_status_id = #db.param(3)#";
-	}else{
+	if(qInquiry.inquiries_status_id EQ 1){
 		db.sql&=" inquiries_status_id = #db.param(2)#";
-	} 
+	}
 	db.sql&=" WHERE inquiries_id = #db.param(form.inquiries_id)# and 
 	 site_id = #db.param(request.zos.globals.id)# and 
 	 inquiries_deleted=#db.param(0)# ";
