@@ -55,6 +55,8 @@ function processContents($contents){
 		return getDiskUsage($a);
 	}else if($contents =="httpDownload"){
 		return httpDownload($a);
+	}else if($contents =="httpXMLPost"){
+		return httpXMLPost($a);
 	}else if($contents =="httpJsonPost"){
 		return httpJsonPost($a);
 	}else if($contents =="httpDownloadToFile"){
@@ -2160,6 +2162,70 @@ function httpJsonPost($a){
 		return "0";
 	}else{
 		return $result;
+	}
+}
+function httpXMLPost($a){
+	if(count($a) != 1){
+		$ss=new stdClass();
+		$ss->errorMessage="Incorrect number of arguments - should be 1 argument as serialized json string";
+		$ss->success=false;
+		return json_encode($ss, JSON_PRETTY_PRINT); 
+	}
+	$ss=json_decode($a[0]);
+	$ss->success=false; 
+	if(!isset($ss->link)){
+		$ss->errorMessage="json.link is required";
+		$ss->success=false;
+		return json_encode($ss, JSON_PRETTY_PRINT); 
+	}
+	if(!isset($ss->timeout)){
+		$ss->errorMessage="json.timeout is required";
+		$ss->success=false;
+		return json_encode($ss, JSON_PRETTY_PRINT); 
+	}
+	if(!isset($ss->requestXML)){
+		$ss->errorMessage="json.requestXML is required";
+		$ss->success=false;
+		return json_encode($ss, JSON_PRETTY_PRINT); 
+	}
+	try{
+		set_time_limit($ss->timeout);
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $ss->link);
+		/**/
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $ss->requestXML);                                                                  
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);      
+
+		$ss->headers=(Array)$ss->headers;
+		$ss->headers["Content-Type"]="text/xml";
+		$ss->headers["Content-Length"]=strlen($ss->requestXML); 
+		$headers=array(); 
+		foreach($ss->headers as $key => $val){
+			array_push($headers, $key.": ".urlencode($val));
+		}  
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);  
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
+		$result=curl_exec($ch);
+		curl_close($ch);
+		if($result===FALSE){ 
+			$ss->errorMessage="curl request failed: ".curl_error($ch);
+			$ss->success=false;
+			return json_encode($ss, JSON_PRETTY_PRINT);  
+		}else{
+			$ss->success=true;
+			$ss->responseData=$result;
+			return json_encode($ss, JSON_PRETTY_PRINT);
+		}
+	}catch(Exception $e){
+		$ss->errorMessage='Caught exception: '.  $e->getMessage(). "\n";
+		$ss->success=false;
+		return json_encode($ss, JSON_PRETTY_PRINT);  
+
 	}
 }
 function httpDownload($a){

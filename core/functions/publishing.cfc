@@ -240,6 +240,7 @@ result=zHTTPtoFile(source, destinationFile, timeout, throwOnError, useSecureComm
 	</cfscript>
 </cffunction>
 
+
 <!--- 
 
 jsonString=application.zcore.functions.zHttpJsonPost("link", serializeJson(js), 20);
@@ -262,6 +263,37 @@ abort;
 		return false;
 	}else{
 		return result;
+	}
+	</cfscript>
+</cffunction>
+
+
+<!--- 
+ts={
+	link:"",
+	headers:{
+		"soapAction":"something"
+	},
+	requestXML:'xmlAsString',
+	timeout:20 // please set to at least 10 or more seconds
+};
+rs=application.zcore.functions.zHttpXMLPost(ts);
+if(not rs.success){
+	throw(rs.errorMessage);
+	abort;
+} 
+writedump(rs);
+abort;
+ --->
+<cffunction name="zHttpXMLPost" access="public" localmode="modern"> 
+	<cfargument name="ss" type="struct" required="true" />
+	<cfscript> 
+	rs = StructNew(); 
+	result=application.zcore.functions.zSecureCommand("httpXMLPost"&chr(9)&serializeJson(arguments.ss), arguments.ss.timeout+2);
+	if(result NEQ "" and isJson(result)){
+		return deserializeJson(result);
+	}else{
+		return {success:false, "zSecureCommand -> httpXMLPost failed"};
 	}
 	</cfscript>
 </cffunction>

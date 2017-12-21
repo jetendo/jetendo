@@ -1560,7 +1560,7 @@ zArrDeferredFunctions.push(function(){
 	<cfscript>
 	db=request.zos.queryObject; 
 	rs={success:true}; 
-	result=application.zcore.functions.zUpdateLead();  
+	result=application.zcore.functions.zUpdateLead(form);  
 	if(result EQ false){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
 		application.zcore.status.displayReturnJson(request.zsid);

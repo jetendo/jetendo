@@ -208,11 +208,11 @@ application.zcore.functions.zUpdateLead();
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss; 
-	form.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone1'));
-	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
-	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
-	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
-	form.site_id = request.zOS.globals.id; 
+	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
+	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
+	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
+	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
+	ss.site_id = request.zOS.globals.id; 
 	// TODO: need to reenable when contacts are done
 	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
