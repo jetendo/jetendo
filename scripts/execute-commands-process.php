@@ -2199,7 +2199,7 @@ function httpXMLPost($a){
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);      
 
 		$ss->headers=(Array)$ss->headers;
-		$ss->headers["Content-Type"]="text/xml";
+		$ss->headers["Content-Type"]="text/xml; charset=utf-8";
 		$ss->headers["Content-Length"]=strlen($ss->requestXML); 
 		$headers=array(); 
 		foreach($ss->headers as $key => $val){
