@@ -610,7 +610,7 @@
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote, true);
 	} 
-	if(request.zos.isTestServer){
+	if(false and request.zos.isTestServer){
 		ts={  
 			contact_id:request.zsession.user.contact_id,  
 			debug:false,
@@ -694,6 +694,37 @@
 			inquiries_deleted=#db.param(0)# ";
 			db.execute("qUpdateInquiry");  
 		}
+
+		// insert to inquiries_feedback
+		tsFeedback={
+			table:"inquiries_feedback",
+			datasource:request.zos.zcoreDatasource,
+			struct:{
+				inquiries_feedback_subject:form.inquiries_feedback_subject,
+				inquiries_feedback_comments:form.inquiries_feedback_comments, // leave empty because this is an email message.
+				inquiries_feedback_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_id:form.inquiries_id,
+				//user_id:user_id,
+				//contact_id:0,
+				inquiries_id:form.inquiries_id,
+				site_id:request.zos.globals.id,
+				//user_id_siteIDType:user_id_siteIDType, 
+				inquiries_feedback_created_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_feedback_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_feedback_deleted:0,
+				inquiries_feedback_message_json:"", 
+				inquiries_feedback_draft:0,
+				inquiries_feedback_download_key:"",
+				inquiries_feedback_type:0 // 0 is private note, 1 is email
+			}
+		} 
+
+		// build email html  
+		inquiries_feedback_id=application.zcore.functions.zInsert(tsFeedback); 
+		if(not inquiries_feedback_id){ 
+			return {success:false, errorMessage:"Failed to save note"};
+		} 
+		/*
 		// send email to the assigned user.
 		toEmail=qCheck.user_email;
 		if(request.zos.isTestServer){
@@ -706,6 +737,7 @@
 			html:emailHTML
 		};
 		application.zcore.email.send(ts);
+		*/
 	}
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){

@@ -264,6 +264,10 @@ contactCom.processMessage(ts);
 	<cfscript>	
 	db=request.zos.queryObject;
 	ss=arguments.ss;
+	ts={
+		dontEmailFromContact:false
+	};
+	structappend(ss, ts, false);
 	//echo('processMessage');
 	//writedump(ss);
  	debug=false;
