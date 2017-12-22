@@ -926,7 +926,7 @@ displayAdminEditMenu(ts);
 		rs=variables[variables.methods.beforeReturnInsertUpdate]();
 		request.zArrErrorMessages=[];
 	}else{
-		rs={success:true, id:form[variables.primaryKeyField], rowHTML:rowHTML, newRecord:newRecord};
+		rs={success:true, reload:true, id:form[variables.primaryKeyField], rowHTML:rowHTML, newRecord:newRecord};
 	}
 
 	application.zcore.functions.zReturnJson(rs);
