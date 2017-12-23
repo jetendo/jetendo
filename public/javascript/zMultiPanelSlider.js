@@ -7,7 +7,7 @@
 (function($, window, document, undefined){
 	"use strict";
 	var slideNameOffset=0;
-	function zThreePanelSlider(options){
+	function zMultiPanelSlider(options){
 		var self=this; 
 		options.arrSlide=zso(options, 'arrSlide', false, []);
 		options.selector=zso(options, 'selector', false, ''); 
@@ -41,21 +41,17 @@
  		updateSlideWidth();
 
 		if(slider.length==0){
-			console.log("zThreePanelSlider: options.selector not found: "+options.selector);
+			console.log("zMultiPanelSlider: options.selector not found: "+options.selector);
 			return;
 		}
-		if(slider.length==0){
-			console.log("zThreePanelSlider: options.arrSlide has no slides");
+		if(options.arrSlide.length==0){
+			console.log("zMultiPanelSlider: options.arrSlide has no slides");
 			return;
 		}
 		if(options.nextPreviousCenterClass==""){
-			options.nextPreviousCenterClass=options.selector+" .threePanelSlide";
-		}
-
-		slider.append('<div class="threePanelSliderBackground"><div class="threePanelSlider"></div></div>'); 
-		if(currentSlideWidthPercent < 33.33){
-		//	alert('options.slideWidthPercent must be at least 33.33.');
-		}
+			options.nextPreviousCenterClass=options.selector+" .multiPanelSlide";
+		} 
+		slider.append('<div class="multiPanelSliderBackground"><div class="multiPanelSlider"></div></div>');  
 
 		function init(){
 			reloadSlides(false, 0); 
@@ -101,12 +97,12 @@
 
 				if(panelCount != lastPanelCount){
 					lastPanelCount=panelCount;
-					$(options.selector+' .threePanelSlide').remove();
-					reloadSlides(false);
+					$(options.selector+' .multiPanelSlide').remove();
+					reloadSlides(false, 0);
 				}else{
 					// update left, width and height for all slides
 					for(var i=0;i<panelCount;i++){
-						var id=options.selector+' .threePanelSlide'+slideNameOffset+"_"+(i+1);
+						var id=options.selector+' .multiPanelSlide'+slideNameOffset+"_"+(i+1);
 						var currentLeft=firstPercent+((i)*currentSlideWidthPercent);  
 						$(id).css({
 							"width": currentSlideWidthPercent+"%",
@@ -223,13 +219,13 @@
 				$( 'span', pager ).removeClass( 'active' );
 				$( 'span[data-slide-index="' + currentSlideIndex + '"]', pager ).addClass( 'active' );
 			}
-			$(options.selector+" .threePanelSlide").removeClass("active");
+			$(options.selector+" .multiPanelSlide").removeClass("active");
 			$(options.selector+" ."+arrPanelOrder[middlePanelOffset]).addClass("active");
 		}
 
 		function resetInterval( doAnimation ) {
+			clearInterval( sliderInterval );
 			if ( options.auto ) {
-				clearInterval( sliderInterval );
 
 				sliderInterval = setInterval( function() {
 					var doAnimation = typeof doAnimation !== 'undefined' ? doAnimation : true;
@@ -314,17 +310,17 @@
 			} ); 
 		}
 		function resizeSlider(){
-			//d.slideWidth=$(options.selector+" .threePanelSlide > div").width();
+			//d.slideWidth=$(options.selector+" .multiPanelSlide > div").width();
 
  			updateSlideWidth();
 			var sliderWidth=slider.width();
 			//console.log(d);
 			var maxHeight=0;
-			$(options.selector+" .threePanelSlide").each(function(){
+			$(options.selector+" .multiPanelSlide").each(function(){
 				maxHeight=Math.max(maxHeight, zGetAbsPosition(this).height);
 			});
 			//console.log("maxHeight:"+maxHeight);
-			$(options.selector+" .threePanelSlider").height(maxHeight);
+			$(options.selector+" .multiPanelSlider").height(maxHeight);
 
 
 			if(!firstLoad && options.nextPrevious){ 
@@ -367,19 +363,19 @@
 				var loadSlideIndex=getSlideIndex(slideIndex, i-middlePanelOffset ); 
 				//console.log("reloadSlides loadSlideIndex: "+loadSlideIndex+":"+typeof slideIndex);
 				var slide=options.arrSlide[loadSlideIndex];
-				arrHTML.push('<div class="threePanelSlide threePanelSlide'+slideNameOffset+' threePanelSlide'+slideNameOffset+"_"+(i+1)+' ');
+				arrHTML.push('<div class="multiPanelSlide multiPanelSlide'+slideNameOffset+' multiPanelSlide'+slideNameOffset+"_"+(i+1)+' ');
 				if(i == middlePanelOffset){
 					arrHTML.push(' active');
 				}
 				left=Math.round(((100-currentSlideWidthPercent)/2)*100)/100;
 				arrHTML.push('" style="position:absolute; z-index:'+(slideNameOffset+1)+'; width:'+currentSlideWidthPercent+'%; left:'+left+'%;">'+slide.html+'</div>');
-				arrPanelOrderNew.push("threePanelSlide"+slideNameOffset+"_"+(i+1));
+				arrPanelOrderNew.push("multiPanelSlide"+slideNameOffset+"_"+(i+1));
 			}
 			//console.log(arrHTML);
-			$(options.selector+" .threePanelSlider").append(arrHTML.join(""));
+			$(options.selector+" .multiPanelSlider").append(arrHTML.join(""));
 			var loadCount=0;
-			var totalImages=$(options.selector+' .threePanelSlide'+slideNameOffset+" img").length;
-			var $slideImages=$(options.selector+' .threePanelSlide'+slideNameOffset+" img");
+			var totalImages=$(options.selector+' .multiPanelSlide'+slideNameOffset+" img").length;
+			var $slideImages=$(options.selector+' .multiPanelSlide'+slideNameOffset+" img");
 			setInterval(function(){ 
 				$slideImages.each(function(){
 					if(this.complete && typeof this.slideImageLoaded == "undefined"){
@@ -427,13 +423,13 @@
 			} 
 			arrPanelOrder=arrPanelOrderNew;
 
-			$(options.selector+" .threePanelSlide a").on("mousedown touchstart", function(e){
+			$(options.selector+" .multiPanelSlide a").on("mousedown touchstart", function(e){
 				if((event.type == "mousedown") && event.which!=1){
 					return;
 				}
 				this.clickTouchStart=true; 
 			});
-			$(options.selector+" .threePanelSlide a").on("mouseup touchend", function(e){ 
+			$(options.selector+" .multiPanelSlide a").on("mouseup touchend", function(e){ 
 				if((event.type == "mouseup") && event.which!=1){
 					return;
 				} 
@@ -447,14 +443,17 @@
 
 		self.next=function(){
 			self.animateToSlide(getSlideIndex(currentSlideIndex, 1), 1);
+			options.auto=false;
 			resetInterval(true);
 		}
 		self.previous=function(){
 			self.animateToSlide(getSlideIndex(currentSlideIndex, -1), -1);
+			options.auto=false;
 			resetInterval(true);
 		}
 		var arrAnimateQueue=[];
 		self.queueAnimateToSlide=function(slideIndex){
+			options.auto=false;
 			arrAnimateQueue.push(slideIndex);
 			//console.log(slideIndex);
 		}
@@ -572,5 +571,5 @@
 		init();
 
 	}
-	window.zThreePanelSlider=zThreePanelSlider;
+	window.zMultiPanelSlider=zMultiPanelSlider;
 })(jQuery, window, document, "undefined"); 
