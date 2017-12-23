@@ -2,12 +2,7 @@
 .threePanelSliderContainer{position:relative; display:none; width:100%; float:left;}
 .threePanelSliderContainer .threePanelSliderBackground{position:relative; overflow:hidden; z-index:1; width:100% !important; float:left;  background-color:#f3f4f6;}
 .threePanelSliderContainer .threePanelSlider{position:relative; z-index:1; width:100%; min-height:10px; float:left;}
-.threePanelSliderContainer .threePanelSlide{ width:66.67%; position:absolute; left:-10000px; top:0px; }
-.threePanelSliderContainer .threePanelSlide1{ left:-116.66%;}
-.threePanelSliderContainer .threePanelSlide2{ left:-50%;}
-.threePanelSliderContainer .threePanelSlide3{ left:16.66%;}
-.threePanelSliderContainer .threePanelSlide4{ left:83.32%;}
-.threePanelSliderContainer .threePanelSlide5{ left:-149.98%;}
+.threePanelSliderContainer .threePanelSlide{ /*width:66.67%;*/ position:absolute; left:-10000px; top:0px; } 
 
 
 .threePanelSliderContainer .slider-previous-button {
