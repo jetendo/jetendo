@@ -1,13 +1,13 @@
-// the other dimensions should be options - almost done
-// setup default options
 // test more than one on same page with different settings
 
+// allow clicking on other slides to make them active
 /*
 // usage
 */
 
 (function($, window, document, undefined){
 	"use strict";
+	var slideNameOffset=0;
 	function zThreePanelSlider(options){
 		var self=this; 
 		options.arrSlide=zso(options, 'arrSlide', false, []);
@@ -22,6 +22,7 @@
 		options.previousButton=zso(options, 'previousButton', false, '&#10092;');
 		options.nextPreviousCenterClass=zso(options, 'nextPreviousCenterClass', false, '');
 		options.slideWidthPercent=zso(options, 'slideWidthPercent', true, 66.66);
+		options.slideMinimumWidth=zso(options, 'slideWidthPercent', true, 200);
    
 		var animating=false; 
 		var currentSlideIndex=0;
@@ -42,8 +43,7 @@
 			options.nextPreviousCenterClass=options.selector+" .threePanelSlide";
 		}
 
-		slider.append('<div class="threePanelSliderBackground"><div class="threePanelSlider"></div></div>');
-		var slideNameOffset=0;
+		slider.append('<div class="threePanelSliderBackground"><div class="threePanelSlider"></div></div>'); 
 		var sliderInterval=false;
 		var pager=false;
 		var firstLoad=true;		
@@ -58,7 +58,7 @@
 			panelCount++;
 		}
 		var middlePanelOffset=Math.floor(panelCount/2);
-		console.log("panelCount:"+panelCount+" middlePanelOffset:"+middlePanelOffset);
+		//console.log("panelCount:"+panelCount+" middlePanelOffset:"+middlePanelOffset);
 
 		var left=(100-options.slideWidthPercent)/2;
 		var firstPercent=Math.round((left-(options.slideWidthPercent*middlePanelOffset))*100)/100;
@@ -310,6 +310,7 @@
 			var arrHTML=[];
 			var arrPanelOrderNew=[];
 			slideNameOffset++;
+			console.log('reloadSlides: '+options.selector+' panelCount:'+panelCount);
 			for(var i=0;i<panelCount;i++){
 				var loadSlideIndex=getSlideIndex(slideIndex, i-middlePanelOffset ); 
 				//console.log("reloadSlides loadSlideIndex: "+loadSlideIndex+":"+typeof slideIndex);
@@ -322,12 +323,30 @@
 				arrHTML.push('" style="position:absolute; z-index:'+(slideNameOffset+1)+'; width:'+options.slideWidthPercent+'%; left:'+left+'%;">'+slide.html+'</div>');
 				arrPanelOrderNew.push("threePanelSlide"+slideNameOffset+"_"+(i+1));
 			}
+			//console.log(arrHTML);
 			$(options.selector+" .threePanelSlider").append(arrHTML.join(""));
 			var loadCount=0;
-			var totalImages=$('.threePanelSlide'+slideNameOffset+" img").length;
-			$('.threePanelSlide'+slideNameOffset+" img").load(function(e){ 
+			var totalImages=$(options.selector+' .threePanelSlide'+slideNameOffset+" img").length;
+			var $slideImages=$(options.selector+' .threePanelSlide'+slideNameOffset+" img");
+			setInterval(function(){ 
+				$slideImages.each(function(){
+					if(this.complete && typeof this.slideImageLoaded == "undefined"){
+						loadCount++;
+						this.slideImageLoaded=true; 
+						if(loadCount==totalImages){ 
+							$(options.selector).show();
+							if(firstLoad){
+								firstLoadInit();
+							}
+							resizeSlider();
+						}
+					}
+				});
+			}, 100);
+			$slideImages.load(function(e){ 
 				loadCount++;
 				if(loadCount==totalImages){
+					//console.log(options.selector+' loadCount:'+loadCount+'== totalImages:'+totalImages);
 					$(options.selector).show();
 					if(firstLoad){
 						firstLoadInit();
@@ -336,8 +355,7 @@
 				} 
 			}); 
 			
-			//var firstPercent=-116.66; 
-			console.log('firstPercent:'+firstPercent);
+			//var firstPercent=-116.66;  
 			for(var i=0;i<=arrPanelOrderNew.length-1;i++){
 				var m=arrPanelOrderNew[i];
 				var left=firstPercent+((i)*options.slideWidthPercent);  
@@ -385,20 +403,15 @@
 		}
 		var arrAnimateQueue=[];
 		self.queueAnimateToSlide=function(slideIndex){
-			if(animating){
-				if(arrAnimateQueue[arrAnimateQueue.length-1] != slideIndex){
-					arrAnimateQueue.push(slideIndex);
-				}
-			}else{
-				var offset=slideIndex-currentSlideIndex; 
-				self.animateToSlide(getSlideIndex(currentSlideIndex, offset), offset);
-			}
+			arrAnimateQueue.push(slideIndex);
+			console.log(slideIndex);
 		}
 		function executeAnimationQueue(){ 
-			if(arrAnimateQueue.length){
-				var slideIndex=arrAnimateQueue.shift();
+			if(!animating && arrAnimateQueue.length){
+				var slideIndex=arrAnimateQueue.pop();
 				var offset=slideIndex-currentSlideIndex; 
 				self.animateToSlide(getSlideIndex(currentSlideIndex, offset), offset);
+				arrAnimateQueue=[];
 			}
 		};
 		self.animateToSlide=function(slideIndex, offset){
