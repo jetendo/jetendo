@@ -566,7 +566,7 @@ contactCom.processMessage(ts);
 			if(fromContact.contact_first_name EQ "" and fromContact.contact_last_name EQ ""){
 				firstName="";
 				lastName=""; 
-				if(ss.jsonStruct.from.name CONTAINS " "){
+				if(trim(ss.jsonStruct.from.name) CONTAINS " "){
 					firstName=listGetAt(ss.jsonStruct.from.name, 1, " ");
 					lastName=trim(listDeleteAt(ss.jsonStruct.from.name, 1, " "));
 				}else{
@@ -1359,7 +1359,7 @@ scheduleLeadEmail(ts);
 	if(qContact.recordcount EQ 0){ 
 		firstName="";
 		lastName="";
-		if(arguments.name CONTAINS " "){
+		if(trim(arguments.name) CONTAINS " "){
 			firstName=listGetAt(arguments.name, 1, " ");
 			lastName=trim(listDeleteAt(arguments.name, 1, " "));
 		}else{
