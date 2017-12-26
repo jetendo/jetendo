@@ -329,8 +329,6 @@
 
 <cffunction name="add" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	form.contact_assigned_user_id  				= request.zsession.user.id;
-    form.contact_assigned_user_id_siteidtype	= application.zcore.user.getSiteIdTypeFromLoggedOnUser();  
 	edit();
 	</cfscript>
 </cffunction>
@@ -484,7 +482,7 @@
 	} else{
 		urlPage = form.method;
 	}
-	var link = "#variables.prefixURL#" & urlPage & "?modalpopforced=0&contact_type_id=#form.contact_type_id&"|"&form.contact_type_id_siteIDType#&zsid=" & request.zsid;
+	var link = "#variables.prefixURL#" & urlPage & "?modalpopforced=0&contact_id=#form.contact_id#&zsid=" & request.zsid;
 	if(structkeyexists(form, "user_id")){
 		link &= "&user_id=" & form.user_id;
 	}
@@ -498,6 +496,8 @@
 
 <cffunction name="beforeInsert" localmode="modern" access="private" returntype="struct">
 	<cfscript> 
+		form.contact_assigned_user_id  				= request.zsession.user.id;
+	    form.contact_assigned_user_id_siteidtype	= application.zcore.user.getSiteIdTypeFromLoggedOnUser();  
 		rs = validateInsertUpdate();
 		if(not rs.success){
 			application.zcore.status.displayReturnJson(request.zsid);
@@ -592,13 +592,6 @@
 	};
 	// basic fields
 	fs=[];
-	savecontent variable="field"{
-		ts={
-			name:"office_id"
-		};
-		application.zcore.user.selectOfficeField(ts);
-	}
-	arrayAppend(fs, {label:'Office', field:field});
 
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_email" value="#htmleditformat(form.contact_email)#" />');
@@ -666,9 +659,6 @@
 	}
 	arrayAppend(fs, {label:'Postal Code', field:field});
   
-
-
-
 	// add more fields here
 	savecontent variable="field"{
 		echo('<input type="text" name="contact_company" value="#htmlEditFormat( form.contact_company )#" />');
@@ -874,8 +864,11 @@
 	}
 	arrayAppend(fs, {label:'Interested In Lead Comments', field:field});
 
-
-
+	var assignCom = createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.assign");
+	savecontent variable="field"{   
+		assignCom.getAssignContact();
+	}
+	arrayAppend(fs, {label:'Assign To', field:field});
 
 	rs.tabs.basic.fields=fs;
 	// advanced fields
@@ -993,10 +986,6 @@
 	if(application.zcore.functions.zso(form, 'contact_name') NEQ ""){
 		db.sql&=" and concat(contact_first_name, #db.param(" ")#, contact_last_name) LIKE #db.param('%#form.contact_name#%')# ";
 	}
-	if(application.zcore.functions.zso(form, 'contact_type_id') NEQ "" and form.contact_type_id CONTAINS "|"){
-		db.sql&=" and contact.contact_type_id = #db.param(listgetat(form.contact_type_id, 1, "|"))#  
-		AND contact_type_id_siteIDType = #db.param(listgetat(form.contact_type_id, 2, "|"))# ";
-	}
 	sortColumnSQL=getSortColumnSQL();
 	db.sql&=" GROUP BY contact.contact_id ";
 	if(sortColumnSQL NEQ ''){
@@ -1008,21 +997,16 @@
 
 	rs.qData=db.execute("qData");  
 
-	db.sql="SELECT count( ";
-	if(request.zsession.leademailgrouping EQ '1'){
-		db.sql&=" DISTINCT ";
-	}
-	db.sql&=" contact.contact_id) count 
+	db.sql="SELECT count(*) COUNT 
 	from #db.table("contact", request.zos.zcoreDatasource)#
-	WHERE 
-	contact.site_id = #db.param(request.zos.globals.id)# ";
+	WHERE contact.site_id = #db.param(request.zos.globals.id)# ";
 
 	db.sql&=" and contact_deleted = #db.param(0)# and contact_parent_id = #db.param(0)# "; 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #variables.inquiriesCom.getUserLeadFilterSQL(db)#";
 	}else if(not application.zcore.user.checkGroupAccess("administrator")){
-		db.sql&=" AND contact_assigned_user_id = #db.param(request.zsession.user.id)# 
-		and contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
+		db.sql&=" AND contact.contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
+		contact.contact_assigned_user_id_siteidtype = #db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
 	if(form.search_office_id NEQ "0"){
 		db.sql&=" and contact.office_id = #db.param(form.search_office_id)# ";
@@ -1040,7 +1024,6 @@
 	if(application.zcore.functions.zso(form, 'contact_name') NEQ ""){
 		db.sql&=" and concat(contact_first_name, #db.param(" ")#, contact_last_name) LIKE #db.param('%#form.contact_name#%')#";
 	}
-	db.sql&=" GROUP BY contact.contact_id ";
 	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 
 

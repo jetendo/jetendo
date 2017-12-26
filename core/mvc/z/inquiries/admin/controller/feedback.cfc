@@ -4,9 +4,9 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	hCom=0;
-	form.returnJSON=application.zcore.functions.zso(form, 'returnJSON', true, 0);
-	form.inquiries_id=application.zcore.functions.zso(form, 'inquiries_id', true, 0);
-	form.contact_id=application.zcore.functions.zso(form, 'contact_id', true, 0);
+	form.returnJSON		= application.zcore.functions.zso(form, 'returnJSON', true, 0);
+	form.inquiries_id	= application.zcore.functions.zso(form, 'inquiries_id', true, 0);
+	form.contact_id 	= application.zcore.functions.zso(form, 'contact_id', true, 0);
 	variables.inquiriesCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
 
 	form.zPageId=application.zcore.functions.zso(form, 'zPageId');
@@ -14,19 +14,22 @@
 		db.sql="SELECT * 
 		from #db.table("inquiries", request.zos.zcoreDatasource)#
 		WHERE ";
-		if(form.inquiries_id NEQ 0){
-			db.sql&=" inquiries_id = #db.param(form.inquiries_id)# and ";
-		}
-		if(form.contact_id NEQ 0){
-			db.sql&=" contact_id = #db.param(form.contact_id)# and ";
-		}
-		db.sql&=" inquiries_deleted = #db.param(0)# and 
+		db.sql&=" inquiries_id = #db.param(form.inquiries_id)# ";
+		db.sql&=" AND inquiries_deleted = #db.param(0)# and
 		inquiries.site_id = #db.param(request.zos.globals.id)#";
 		if(form.method EQ "userView" or form.method EQ "userViewContact"){
-		    db.sql&=variables.inquiriesCom.getUserLeadFilterSQL(db);
+			if(form.contact_id NEQ 0 ){
+		    } else{
+		    	db.sql&=variables.inquiriesCom.getUserLeadFilterSQL(db);
+		    }
 		}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
-			db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
-			user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+			if(form.contact_id NEQ 0 ){
+				db.sql&=" and contact.contact_type_id = #db.param(listgetat(form.contact_type_id, 1, "|"))#  
+				AND contact_type_id_siteIDType = #db.param(listgetat(form.contact_type_id, 2, "|"))# ";
+			} else{
+				db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
+				user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+			}
 		}
 		db.sql&=" LIMIT #db.param(0)#, #db.param(1)#";
 		variables.qInquiry=db.execute("qInquiry");
@@ -34,9 +37,26 @@
 			if(form.returnJSON EQ 1){
 				application.zcore.functions.zReturnJson({ success:false, errorMessage:"You don't have access to manage this lead or contact."});
 			}else{
-				application.zcore.functions.zRedirect('/z/inquiries/admin/manage-inquiries/index');
+				if(form.contact_id NEQ 0 ){
+					db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE ";
+					db.sql&=" contact_id = #db.param(form.contact_id)#";
+					db.sql&=" AND contact_deleted = #db.param(0)#  
+					AND contact.site_id = #db.param(request.zos.globals.id)#";
+					if(form.method EQ "userView" or form.method EQ "userViewContact"){
+						//WHO ARE WE? DEALER / MANAGER / SALES		
+				    	db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db);
+					}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
+						//WE ARE AGENT
+						db.sql&=" and contact.contact_assigned_user_id = #db.param(request.zsession.user.id)#  
+						AND user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
+					}
+					qContact=db.execute("qContact");
+					if(qContact.recordcount EQ 0){
+						application.zcore.functions.zRedirect('/z/inquiries/admin/manage-contact/index');
+					}
+				}
 			} 
-		}
+		}	
 	}
 	if(form.method EQ "userView" or form.method EQ "userViewContact"){
 		variables.inquiriesCom.userInit();
