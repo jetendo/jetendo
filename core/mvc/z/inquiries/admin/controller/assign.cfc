@@ -78,8 +78,8 @@
 				Assign to a user on this web site:
 			</h3>
 		</div>
-		<cfscript>
-		if(request.zsession.user.office_id NEQ ""){
+		<cfscript> 
+		if(request.zsession.user.office_id NEQ "0"){
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			if(arguments.form_type EQ "user"){
@@ -271,7 +271,7 @@
 			</h3>
 		</div>
 		<cfscript>
-		if(request.zsession.user.office_id NEQ "" ){
+		if(request.zsession.user.office_id NEQ "0" ){
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			if(form.method NEQ "userEdit"){
