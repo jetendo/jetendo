@@ -136,8 +136,9 @@
 
 <cffunction name="init" localmode="modern" access="public" returntype="any">
         <cfscript>
-	var qCheck=0;
-	var db=request.zos.queryObject; 
+		var qCheck=0;
+		request.zos.currentURLISAListingPage=true;
+		var db=request.zos.queryObject; 
         form.action = application.zcore.functions.zso(form, 'action',false,'list'); 
         application.zcore.functions.zStatusHandler(request.zsid);
         </cfscript>

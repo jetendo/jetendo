@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 	<cfscript> 
+	request.zos.currentURLISAListingPage=true;
 	var db=request.zos.queryObject;
 	returnStruct={count:0};
 	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");

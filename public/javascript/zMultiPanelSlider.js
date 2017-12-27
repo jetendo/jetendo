@@ -124,7 +124,7 @@
 			if(options.arrSlide.length > 1){
 				if ( options.pager ) {
 					attachPager();
-					setActivePager();
+					//self.setActivePager();
 				}
 	  
 				resetInterval( false );
@@ -214,7 +214,7 @@
 				return false;
 			} ); 
 		}
-		function setActivePager(){
+		self.setActivePager=function(){
 			if ( options.pager ) {
 				$( 'span', pager ).removeClass( 'active' );
 				$( 'span[data-slide-index="' + currentSlideIndex + '"]', pager ).addClass( 'active' );
@@ -331,7 +331,7 @@
 				//console.log("centerClassHeight:"+centerClassHeight+" length:"+$(options.nextPreviousCenterClass).length);
 				nextButton.css("top", Math.round((centerClassHeight/2))+"px");
 				previousButton.css("top", Math.round((centerClassHeight/2))+"px");
-			}
+			} 
 		}
 		function getSlideIndex(currentSlideIndex, offset){
 			var slideIndex=currentSlideIndex+offset;
@@ -565,7 +565,7 @@
 				reloadSlides(true, direction); 
 			}
 			currentSlideIndex=slideIndex;
-			setActivePager();
+			self.setActivePager();
 			resetInterval(true);
 		}
 		init();

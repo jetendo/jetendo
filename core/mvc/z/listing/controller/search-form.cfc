@@ -500,6 +500,7 @@ SELECT zipcode.*,
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	init(); 
+	request.zos.currentURLISAListingPage=true;
 
 	var propertyDataCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyData"); 
 	var propDisplayCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.propertyDisplay");

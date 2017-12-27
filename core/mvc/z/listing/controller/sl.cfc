@@ -70,6 +70,7 @@
 
 <cffunction name="view" localmode="modern" access="remote" returntype="any">
 	<cfscript>
+request.zos.currentURLISAListingPage=true;
 	application.zcore.template.setTag("title", "Your Saved Listings");
 	application.zcore.template.setTag("pagetitle", "Your Saved Listings"); 
 	form.returnURL=request.zos.originalURL; 
@@ -179,6 +180,7 @@
 
 <cffunction name="inquiry" localmode="modern" access="remote">
 	<cfscript>
+request.zos.currentURLISAListingPage=true;
 	init();
 	form.modalpopforced=1;
 	application.zcore.functions.zSetModalWindow();
@@ -251,6 +253,7 @@
 <cffunction name="index" localmode="modern" access="remote">
  
 	<cfscript>
+request.zos.currentURLISAListingPage=true;
 	init(); 
     request.znotemplate=1;
 	if(cookie.SAVEDLISTINGCOUNT EQ 0){

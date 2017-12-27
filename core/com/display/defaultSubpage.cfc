@@ -9,7 +9,7 @@ The site option group structure must be exactly this to use this code:
 	Section
 		Name // text field, required
 		URL // url field
-		Application // select, optional - Give it list labels/values of Blog|Event|Job including only what the site needs
+		Application // select, optional - Give it list labels/values of Blog|Event|Job|Listing including only what the site needs
 		Section Heading // text field, required
 		Image (3840x800 for 4k or 1920x400 for 1080p) // image, optional
 		Mobile Image (960 x 400) // image, optional
@@ -63,7 +63,8 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	validTypes={
 		"blog":true,
 		"job":true,
-		"event":true
+		"event":true,
+		"listing":true
 	};
 
 	// the string parsing could be cached in a future version, so we could just do a structkeyexists instead
@@ -80,7 +81,7 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 		ts.linkCache[currentGroup.url]=i3;
 		if(currentGroup.application NEQ ""){
 			if(not structkeyexists(validTypes, currentGroup.application)){
-				throw(currentGroup.application&" is not a valid application name. Only Blog, Event and Job are currently supported for the ""Application"" field.");
+				throw(currentGroup.application&" is not a valid application name. Only Blog, Event, Job or Listing are currently supported for the ""Application"" field.");
 			}
 			ts.applicationCache[i3]=currentGroup.application;
 		} 

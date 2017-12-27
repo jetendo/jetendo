@@ -3,6 +3,7 @@
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 <cfscript>
 var temp=structnew();
+request.zos.currentURLISAListingPage=true;
 request.zos.tempObj.listingDetailPage=true;
 
 if(isDefined('request.zsession.zlistingdetailhitcount2') EQ false){

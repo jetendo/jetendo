@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="private" returntype="any">
 	<cfscript>
+	request.zos.currentURLISAListingPage=true;
 	if(isDefined('request.zHideInquiryForm') EQ false){
 		request.zHideInquiryForm=true;
 		form.modalpopforced=application.zcore.functions.zso(form, 'modalpopforced',false,0);

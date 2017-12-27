@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 <cfscript> 
+request.zos.currentURLISAListingPage=true;
 var temp=structnew();  
 application.zcore.template.setTag("title","Property Detail");
 //request.zos.page.setDefaultAction('list');

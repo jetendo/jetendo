@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 	<cfscript>
+request.zos.currentURLISAListingPage=true;
 	var theMeta=0;
 	var primaryCityId=0;
 	var perpage=0;

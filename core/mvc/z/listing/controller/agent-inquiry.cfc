@@ -4,6 +4,7 @@
 
 <cffunction name="index" access="remote" localmode="modern">
 	<cfscript> 
+	request.zos.currentURLISAListingPage=true;
 	db=request.zos.queryObject;
     application.zcore.template.setTag("pagetitle","Contact Us");
     application.zcore.template.setTag("title","Contact Us");

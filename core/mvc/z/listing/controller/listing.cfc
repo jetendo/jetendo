@@ -3053,6 +3053,15 @@ application.zcore.app.getAppCFC('listing').getCitiesByName(arrCity, 'FL');
 </cffunction>
 
 
+<cffunction name="isCurrentPageInListing" localmode="modern" returntype="boolean" access="remote">
+	<cfscript>
+	if(structkeyexists(request.zos, 'currentURLISAListingPage')){
+		return true;
+	}else{
+		return false;
+	}
+	</cfscript>
+</cffunction>
 
 
 </cfoutput>

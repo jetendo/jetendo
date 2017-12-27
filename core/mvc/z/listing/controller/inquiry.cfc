@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="private" returntype="any">
 	<cfscript>
+	request.zos.currentURLISAListingPage=true;
 	var db=request.zos.queryObject;
 	var ts=0;
 	var propDisplayCom=0;

@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 	<cfscript>
+request.zos.currentURLISAListingPage=true;
 	var ss=0;
 	var db=request.zos.queryObject;
 	Request.zPageDebugDisabled=true;
