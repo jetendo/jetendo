@@ -427,18 +427,19 @@
 	site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_deleted=#db.param(0)#"; 
 	qInquiry=db.execute("qInquiry");  
-
+	
 	db.sql="SELECT count(inquiries_feedback_id) count 
 	from #db.table("inquiries_feedback", request.zos.zcoreDatasource)# inquiries_feedback 
 	WHERE inquiries_id = #db.param(form.inquiries_id)#  and 
-	inquiries_feedback_deleted = #db.param(0)# and
+	inquiries_feedback_deleted = #db.param(0)# and 
+	inquiries_feedback_type=#db.param(1)# and 
 	site_id = #db.param(request.zos.globals.id)#";
 	qFeedback=db.execute("qFeedback");
 	if(qFeedback.recordcount NEQ 0 and qFeedback.count NEQ 0){
 		newStatusId=3;
 	}else{
 		newStatusId=2;
-	}  
+	}
 
  
 	if(application.zcore.functions.zso(form, 'assign_email') NEQ ''){
@@ -479,7 +480,6 @@
 	if(form.user_id EQ 0){
 		db.sql&=" inquiries_assign_email = #db.param(form.assign_email)#, 
 		inquiries_assign_name=#db.param(form.assign_name)#, 
-		inquiries_status_id = #db.param(newStatusId)#,
 		user_id = #db.param("")#, ";
 	}else{
 		db.sql&=" inquiries_assign_email = #db.param("")#, 
@@ -488,10 +488,8 @@
 	}
 	if(application.zcore.user.checkGroupAccess("administrator") and form.method EQ "assign" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
 		db.sql&=" office_id=#db.param(form.office_id)#, ";   
-	}
-	if(qInquiry.inquiries_status_id EQ 1){
-		db.sql&=" inquiries_status_id = #db.param(2)#,";
-	}
+	} 
+	db.sql&=" inquiries_status_id = #db.param(newStatusId)#,";
 	db.sql&=" inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# ";
 	db.sql&=" WHERE inquiries_id = #db.param(form.inquiries_id)# and 
 	 site_id = #db.param(request.zos.globals.id)# and 
