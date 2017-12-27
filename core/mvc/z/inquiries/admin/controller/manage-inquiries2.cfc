@@ -140,6 +140,7 @@
 	</cfscript>
 </cffunction>
 
+
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript> 
 	if(structkeyexists(variables, 'inquiriesInitCalled')){
@@ -191,7 +192,8 @@
 	if(variables.hasLeadsAccess){
 		request.zos.hasManageLeadAccess=true;
 	}
-	userGroupCom=createobject("component", "zcorerootmapping.com.user.user_group_admin"); 
+	userGroupCom=createobject("component", "zcorerootmapping.com.user.user_group_admin");
+
 	for(i in request.manageLeadUserGroupStruct){
 		request.zos.manageLeadGroupNameStruct[i]=true;
 		request.zos.manageLeadGroupIdStruct[userGroupCom.getGroupId(i, request.zos.globals.id)]=true;
@@ -302,15 +304,15 @@
 		if(not application.zcore.user.checkGroupAccess("administrator")){
 			echo(' and ( ');
 
-			if(request.zsession.user.office_id NEQ ""){
-				echo(' (contact.contact_assign_user_id=#db.param(0)# and contact.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+			if(request.zsession.user.office_id NEQ ""){ 
+				echo(' (contact.contact_assigned_user_id=#db.param(0)# and contact.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
 			}
 			if(request.userIdList NEQ ""){
-				echo(' (contact.contact_assign_user_id IN (#db.trustedSQL(request.userIdList)#) and contact.contact_assign_user_id_siteIdType=#db.param(1)#) or ');
+				echo(' (contact.contact_assigned_user_id IN (#db.trustedSQL(request.userIdList)#) and contact.contact_assigned_user_id_siteIdType=#db.param(1)#) or ');
 			}
 			// current user 
-			echo(' (contact.contact_assign_user_id = #db.param(request.zsession.user.id)# and 
-			contact.contact_assign_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
+			echo(' (contact.contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
+			contact.contact_assigned_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
 			) ');
 		}
 	}
@@ -684,7 +686,7 @@
 	}
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-	    iemailCom.getEmailTemplate(customNote, true);
+	    iemailCom.getEmailTemplate(customNote, true); 
 	}  
 	ts={  
 		contact_id:request.zsession.user.contact_id,  
@@ -753,12 +755,10 @@
 	if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
 		ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
 	}  
-	//writedump(ts);abort;
-	//writedump(ts);	abort; 
  
 	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 	rs=contactCom.processMessage(ts);  
- 
+  
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){
 			link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
@@ -1400,7 +1400,6 @@ zArrDeferredFunctions.push(function(){
 	myForm.inquiries_email.email = true;
 	myForm.inquiries_first_name.required = true;
 	myForm.inquiries_first_name.friendlyName = "First Name";
-	 
 	//CHECK OTHER TYPES BESIDES INSERT
 	if(form.method EQ "insert" or structKeyExists(variables.reverseCustomAddMethods,form.method)){
 		myForm.inquiries_datetime.createDateTime = true;
@@ -1421,7 +1420,6 @@ zArrDeferredFunctions.push(function(){
 	if(form.inquiries_status_id EQ 0){
 		form.inquiries_status_id=1;
 	} 
-
 	if(form.method EQ "userInsert" or structkeyexists(variables.reverseCustomAddMethods, form.method)){
 		// user version of assign check 
 		arrUser=listToArray(form.user_id, "|");
@@ -1743,7 +1741,6 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="getEditForm" localmode="modern" access="private">
 	<cfscript>
 	var db=request.zos.queryObject; 
-	
 	loadListLookupData();
 	
 	rs={
@@ -1979,6 +1976,9 @@ zArrDeferredFunctions.push(function(){
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
 	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id');
 	form.uid=application.zcore.functions.zso(form, 'uid');
+	form.inquiries_interested_in_model=application.zcore.functions.zso(form, 'inquiries_interested_in_model');
+	form.inquiries_interested_in_category=application.zcore.functions.zso(form, 'inquiries_interested_in_category');
+ 
 	arrU=listToArray(form.uid, '|');
 	form.selected_user_id=0;
 	if(arrayLen(arrU) EQ 2){
@@ -2003,6 +2003,9 @@ zArrDeferredFunctions.push(function(){
 	inquiries.inquiries_datetime <> #db.param('')# and 
 	inquiries_parent_id = #db.param(0)# and 
 	inquiries_deleted = #db.param(0)# ";
+	//THIS FUNC IS INCOMPLETE getUserLeadFilterSQL
+	//Address book will display users in this user's office at salesperson level
+	//salesperson either created it or it was assigned
 	if(form.method EQ "userIndex"){
 		db.sql&=getUserLeadFilterSQL(db);
 	}else if(not application.zcore.user.checkGroupAccess("administrator")){
@@ -2062,6 +2065,13 @@ zArrDeferredFunctions.push(function(){
 	}else{
 		db.sql&=" and inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# ";
 	}
+	if(form.inquiries_interested_in_model NEQ ""){ 
+		db.sql&=" and inquiries.inquiries_interested_in_model like #db.param("%"&form.inquiries_interested_in_model&"%")# ";
+	}
+	if(form.inquiries_interested_in_category NEQ ""){ 
+		db.sql&=" and inquiries.inquiries_interested_in_category like #db.param("%"&form.inquiries_interested_in_category&"%")# ";
+	}
+
 	db.sql&=" and inquiries_parent_id = #db.param(0)# ";
 
 	if(form.method EQ "userIndex"){
@@ -2162,6 +2172,12 @@ zArrDeferredFunctions.push(function(){
 			db.sql&=" and inquiries_phone_time<>#db.param('')#";
 		} 
 	} 
+	if(form.inquiries_interested_in_model NEQ ""){ 
+		db.sql&=" and inquiries.inquiries_interested_in_model like #db.param("%"&form.inquiries_interested_in_model&"%")# ";
+	}
+	if(form.inquiries_interested_in_category NEQ ""){ 
+		db.sql&=" and inquiries.inquiries_interested_in_category like #db.param("%"&form.inquiries_interested_in_category&"%")# ";
+	}
 	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 
 
@@ -2204,7 +2220,7 @@ zArrDeferredFunctions.push(function(){
 		application.zcore.functions.zInputSelectBox(selectStruct);
 	}
 	arrayAppend(rs.searchFields, {
-		groupStyle:'width:280px; max-width:100%; ',
+		groupStyle:'width:320px; max-width:100%; ',
 		fields:[{
 			label:"Name",
 			formField:'<input type="search" name="inquiries_name" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
@@ -2215,25 +2231,25 @@ zArrDeferredFunctions.push(function(){
 			label:"Email",
 			formField:'<input type="text" name="search_email" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_email')#" /> ',
 			field:"search_email",
-			labelStyle:'width:60px;',
+			labelStyle:'width:90px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Phone",
 			formField:'<input type="text" name="search_phone" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_phone')#" />',
 			field:"search_phone",
-			labelStyle:'width:60px;',
+			labelStyle:'width:90px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Type",
 			formField:typeField,
 			field:"inquiries_type_id",
-			labelStyle:'width:60px;',
+			labelStyle:'width:90px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Status",
 			formField:statusField,
 			field:"inquiries_status_id",
-			labelStyle:'width:60px;',
+			labelStyle:'width:90px;',
 			fieldStyle:'width:200px;'
 		}]
 	});
@@ -2251,7 +2267,20 @@ zArrDeferredFunctions.push(function(){
 			field:"",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
-		}]
+		},{
+			label:"Model",
+			formField:'<input type="text" name="inquiries_interested_in_model" value="#form.inquiries_interested_in_model#">',
+			field:"",
+			labelStyle:'width:60px;',
+			fieldStyle:'width:200px;'
+		},{
+			label:"Category",
+			formField:'<input type="text" name="inquiries_interested_in_category" value="#form.inquiries_interested_in_category#">',
+			field:"",
+			labelStyle:'width:60px;',
+			fieldStyle:'width:200px;'
+		}		
+		]
 	});
 
 	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
