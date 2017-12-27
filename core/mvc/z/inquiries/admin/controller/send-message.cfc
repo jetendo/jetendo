@@ -86,19 +86,12 @@
 	}
 	debug=false;
 
-	form.inquiries_from=form.inquiries_from;
-	/*
-	form.inquiries_feedback_to=form.inquiries_to;
-	form.inquiries_feedback_cc=form.inquiries_cc; 
-	form.inquiries_feedback_bcc=form.inquiries_bcc;
-	form.inquiries_feedback_subject=form.inquiries_subject;
-	form.inquiries_feedback_comments=form.inquiries_message;
-	*/
-	db=request.zos.queryObject;
-	myForm={};
-	qCheck=0;
-	result=0;
-	inputStruct=0;
+	form.inquiries_from = form.inquiries_from;
+	db 			= request.zos.queryObject;
+	myForm		= {};
+	qCheck		= 0;
+	result		= 0;
+	inputStruct = 0;
 	q=0;   
 	myForm.inquiries_subject.required = true; 
 	myForm.inquiries_message.required = true; 
@@ -129,11 +122,14 @@
 	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
-	}
+	} 
+	backupForm=duplicate(form);
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote, false);
-	}
+	} 
+	// need this for compose message since there is no inquiries record yet
+	structappend(form, backupForm, true);
 	ts={  
 		contact_id:request.zsession.user.contact_id,  
 		debug:false,
@@ -244,7 +240,6 @@
 			site_id:request.zos.globals.id,
 			inquiries_priority:5
 		}; 
-		
 		if(structkeyexists(request.zsession, 'selectedOfficeId')){
 			ts3.office_id = request.zsession.selectedOfficeId;
 		}
@@ -266,22 +261,7 @@
 		abort;
 	}
 
-	/*if(request.zos.isTestServer){
-		// modify to/cc/bcc to prevent accident emails to real people from test server
-		ts.jsonStruct.from.name="From Developer";
-		ts.jsonStruct.from.email=request.zos.developerEmailFrom;
-		ts.jsonStruct.to=[{
-			"name":"To Developer",
-			"email":request.zos.developerEmailTo,
-			"plusId":"",
-			"originalEmail":request.zos.developerEmailTo
-		}];
-		ts.jsonStruct.cc=[];
-		ts.jsonStruct.bcc=[];
-	}*/
-	// slightly inaccurate since it doesn't include all fields and attachment sizes
 	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
-	//ts.debug=true;
 	ts.filterContacts={};
 	rs=variables.contactCom.processMessage(ts);
 	if(not rs.success){
@@ -423,37 +403,45 @@
 		form.inquiries_subject=defaultSubject;
 	}
 
-
-	db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
+	// get the contacts associated with an inquiry, but if this is a new message, it won't need to do that
+	db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, 
+		inquiries_x_contact.inquiries_x_contact_type, 
+		contact.contact_id, contact.contact_email, 
+		concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
 		FROM (#db.table( 'contact', request.zos.zcoreDatasource )#, 
 		#db.table("inquiries", request.zos.zcoreDatasource)#) 
 		LEFT JOIN #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# ON 
-			inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
+			(inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
 			AND contact.contact_id = inquiries_x_contact.contact_id
-			AND contact.site_id = inquiries_x_contact.site_id
+			AND contact.site_id = inquiries_x_contact.site_id)
 		WHERE
-		inquiries.site_id = contact.site_id and 
-		inquiries.contact_id = contact.contact_id and 
-		inquiries.inquiries_id = #db.param(form.inquiries_id)# and 
-		inquiries_deleted=#db.param(0)# ';
+		inquiries.site_id = contact.site_id 
+		AND inquiries.contact_id = contact.contact_id
+		AND inquiries_deleted=#db.param(0)# 
+		AND inquiries_x_contact.inquiries_x_contact_type IS NOT NULL 
+		AND contact.contact_email <> #db.param("")# ';
+		//IF COMING FROM CONTACT INQUIRIES_ID ALWAYS 0
+		if(form.inquiries_id GT 0){
+			db.sql &= " AND inquiries.inquiries_id = #db.param(form.inquiries_id)# "; 
+		}
 		if(form.method EQ "userIndex"){
 			db.sql&=variables.manageInquiryCom.getUserLeadFilterSQL(db); 
 		}else{
 			if(not application.zcore.user.checkGroupAccess("administrator")){
 				// has to be limited to leads assigned to this user only or other users who have member or higher access.
-				db.sql&=" and (inquiries.user_id = #db.param(request.zsession.user.id)# and inquiries.user_id_siteidtype=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# ";
+				db.sql&=" and (inquiries.user_id = #db.param(request.zsession.user.id)# and inquiries.user_id_siteidtype=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))#) ";
 			}
 		}
 		db.sql&=' and contact.site_id = #db.param( request.zos.globals.id )#
 		AND contact.contact_deleted = #db.param( 0 )# 
 		GROUP BY contact.contact_id 
 		ORDER BY contact.contact_first_name ASC, contact.contact_last_name ASC, contact.contact_email ASC';
-	qContact = db.execute( 'qContact' ); 
-
+	qContact = db.execute( 'qContact' );  
+	//writeDump(qContact); 
 	arrContactQuery=[qContact];
 
 	arrContact=[];
-	arrTo=[];
+	arrTo={};
 	arrLabelTo=[];
 	if(application.zcore.user.checkGroupAccess("member")){
 		// do a second query to get the member and higher contacts (easier)
@@ -461,13 +449,17 @@
 		qUser=application.zcore.user.getUsersWithGroupAccess("member", false, true);
 
 		arrContactId=[];
-		for(row in qUser){
+		/*for(row in qUser){
 			// TODO: fix inefficient loop of queries - unavoidable for now - need to add attribute to getUsersWithGroupAccess that will return contact record in left join
 			contact=variables.contactCom.getContactByEmail(row.user_email, row.user_first_name&" "&row.user_last_name, request.zos.globals.id);
 			arrayAppend(arrContactId, contact.contact_id); 
-		}
+		}*/
 		if(arrayLen(arrContactId) NEQ 0){
-			db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
+			db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, 
+			inquiries_x_contact.contact_id,		
+			inquiries_x_contact.inquiries_x_contact_type, 
+			contact.contact_id, contact.contact_email, 
+			concat(contact.contact_first_name, #db.param(" ")#, contact.contact_last_name) fullName
 			FROM #db.table( 'contact', request.zos.zcoreDatasource )# 
 			LEFT JOIN #db.table( 'inquiries_x_contact', request.zos.zcoreDatasource )# ON 
 				inquiries_x_contact.inquiries_x_contact_deleted = #db.param( 0 )#
@@ -483,7 +475,7 @@
 			qContactMember = db.execute( 'qContactMember' ); 
 			arrayAppend(arrContactQuery, qContactMember);
 		}
- 	} 
+ 	}
  	arrCCSelected=[];
  	arrBCCSelected=[];
  	for(q in arrContactQuery){
@@ -495,9 +487,11 @@
 				ts.label=row.contact_email;
 			}
 			ts.value=replace(row.fullName, "`", "'", "all")&"`"&row.contact_email;
-			if(row.inquiries_x_contact_type EQ "to"){
-				arrayAppend(arrTo, ts.value);
-				arrayAppend(arrLabelTo, ts.label);
+			if(row.inquiries_x_contact_type EQ "to" AND row.contact_id EQ form.contact_id){
+				if(NOT structKeyExists(arrTo, ts.value)){
+					arrTo[ts.value] = ts.value;
+					arrayAppend(arrLabelTo, ts.label);
+				}
 			}
 			if(row.inquiries_x_contact_id NEQ ""){
 				if(row.inquiries_x_contact_type EQ "cc"){
@@ -509,6 +503,15 @@
 			arrayAppend(arrContact, ts);
 		}
 	} 
+	// salesperson can probably share contact with another salesperson by accident.  we don't want that 
+	// need to allow salesperson to create new contact if they type one that exists already they don't have access to.
+	// isolate which contact should appear:
+	// test with salesperson
+	// test with agent
+	// test with administrator
+	// test dealer manager - make sure he can see the contacts of the salespeople
+	//writedump(arrTo);
+
 	if(form.method EQ "index"){
 		action="send";
 	}else{
@@ -557,14 +560,13 @@
 	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
 		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
-		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
+		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(StructKeyArray(arrTo), ','))#">
 		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
 			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
 					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
 			<cfif application.zcore.user.checkGroupAccess("administrator")> 
 				<a href="/z/inquiries/admin/lead-template/index" class="z-manager-search-button" target="_blank">Templates</a> 
-			</cfif>
-			</div> 
+			</cfif> 
 		</div> 
 		<div class="z-float z-p-10 z-bg-white z-index-3" style="position:fixed;">
 			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
@@ -604,7 +606,7 @@
 			<tr>
 				<th>To:</th>
 				<td>#variables.contact.contact_first_name# #variables.contact.contact_last_name# (#variables.contact.contact_email#) 
-					<cfif arrayLen(arrLabelTo) NEQ 0>
+					<cfif arrayLen(arrLabelTo) GT 1>
 						and <span title="#arrayToList(arrLabelTo, chr(10))#">#arrayLen(arrLabelTo)# other<cfif arrayLen(arrLabelTo) GT 1>s</cfif></span>
 					</cfif>
 				</td>

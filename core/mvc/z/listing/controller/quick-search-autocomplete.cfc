@@ -105,56 +105,56 @@
 		 	return;
 		}
 		$('##div-searched-list').html("");
-		if(ctrl.value.length > 3 && _dataType != ""){
-			var obj={
-				id:"getterDATA",
-				method:"post",
-				postObj:{ sData: ctrl.value, sSearchBy:_dataType },
-				callback:function(r){
-					try{
-						var r = JSON.parse(r);
-						var sHTML = "";
-						if(r){
-							for(var obj in r){
-								switch(_dataType){
-									case "postalcode":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].zip + "</p>";
-										break;
-									case "county":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].county + "</p>";
-										break;
-									case "city":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].city + "</p>";
-										break;
-									case "address":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].address + "</p>";
-										break;
-									case "listingmls":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].mls + "</p>";
-										break;
-									case "neighborhood":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].subdivision + "</p>";
-										break;
-									case "school":
-										sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].school + "</p>";
-										break;
-								}
+		//if(ctrl.value.length > 3 && _dataType != ""){
+		var obj={
+			id:"getterDATA",
+			method:"post",
+			postObj:{ sData: ctrl.value, sSearchBy:_dataType },
+			callback:function(r){
+				try{
+					var r = JSON.parse(r);
+					var sHTML = "";
+					if(r){
+						for(var obj in r){
+							switch(_dataType){
+								case "postalcode":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].zip + "</p>";
+									break;
+								case "county":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].county + "</p>";
+									break;
+								case "city":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].city + "</p>";
+									break;
+								case "address":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].address + "</p>";
+									break;
+								case "listingmls":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].mls + "</p>";
+									break;
+								case "neighborhood":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].subdivision + "</p>";
+									break;
+								case "school":
+									sHTML += "<p style=\"cursor:pointer;border:1px solid ##000000;\" onclick=\"$('##query').val($(this).text());$('##div-searched-list').hide();\">" + r[obj].school + "</p>";
+									break;
 							}
-							$('##div-searched-list').html(sHTML);
-							$('##div-searched-list').show();
 						}
+						$('##div-searched-list').html(sHTML);
+						$('##div-searched-list').show();
 					}
-					catch(e){
-						alert(e);
-					}
-				},
-				errorCallback:function(xmtp){ 
-					alert(xmtp);
-				},
-				url:"/z/listing/quick-search-autocomplete/getQueryData"
-			}; 
-			zAjax(obj);
-		}
+				}
+				catch(e){
+					alert(e);
+				}
+			},
+			errorCallback:function(xmtp){ 
+				alert(xmtp);
+			},
+			url:"/z/listing/quick-search-autocomplete/getQueryData"
+		}; 
+		zAjax(obj);
+		//}
 	}
 	
 </script>
@@ -376,12 +376,12 @@
 		qType 	= db.execute("qType");
 		arrRec 	= [];
     	for(rec in qType){
-			//if(Find(LCase(arguments.sData), LCase(qType.idlist),1) GT 0){		
+			if(Find(LCase(arguments.sData), LCase(qType.idlist),1) GT 0){		
 				rs={
-					mls : qType.idlist
+					mls : 'MLS ## ' & qType.idlist
 				};
 				arrayAppend(arrRec,rs);
-			//}
+			}
 		}	
 		application.zcore.functions.zReturnJson(arrRec);
 	</cfscript>
@@ -408,12 +408,12 @@
 		qType 	= db.execute("qType");
 		arrRec 	= [];
     	for(rec in qType){
-			//if(Find(LCase(arguments.sData), LCase(qType.idlist),1) GT 0){		
+			if(Find(LCase(arguments.sData), LCase(qType.idlist),1) GT 0){		
 				rs={
 					subdivision : qType.idlist
 				};
 				arrayAppend(arrRec,rs);
-			//}
+			}
 		}	
 		application.zcore.functions.zReturnJson(arrRec);
 	</cfscript>
@@ -442,7 +442,7 @@
     	for(rec in qType){
 			//if(Find(LCase(arguments.sData), LCase(qType.idlist),1) GT 0){		
 				rs={
-					subdivision : qType.idlist
+					school : qType.idlist
 				};
 				arrayAppend(arrRec,rs);
 			//}

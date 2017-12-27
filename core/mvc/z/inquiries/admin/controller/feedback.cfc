@@ -23,13 +23,13 @@
 		    	db.sql&=variables.inquiriesCom.getUserLeadFilterSQL(db);
 		    }
 		}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
-			if(form.contact_id NEQ 0 ){
+			/*if(form.contact_id NEQ 0 ){
 				db.sql&=" and contact.contact_type_id = #db.param(listgetat(form.contact_type_id, 1, "|"))#  
 				AND contact_type_id_siteIDType = #db.param(listgetat(form.contact_type_id, 2, "|"))# ";
-			} else{
+			} else{*/
 				db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 				user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
-			}
+			//}
 		}
 		db.sql&=" LIMIT #db.param(0)#, #db.param(1)#";
 		variables.qInquiry=db.execute("qInquiry");
@@ -48,7 +48,7 @@
 					}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
 						//WE ARE AGENT
 						db.sql&=" and contact.contact_assigned_user_id = #db.param(request.zsession.user.id)#  
-						AND user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
+						AND contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 					}
 					qContact=db.execute("qContact");
 					if(qContact.recordcount EQ 0){

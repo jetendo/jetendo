@@ -79,27 +79,27 @@
 			</h3>
 		</div>
 		<cfscript>
-		if(arguments.form_type EQ "user"){
-			// only allow assigning to people who belong to the same offices that this user does. 
-			if(request.zsession.user.office_id NEQ ""){
-				qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
-			}else{
+		if(request.zsession.user.office_id NEQ ""){
+			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
+		}else{
+			if(arguments.form_type EQ "user"){
+				// only allow assigning to people who belong to the same offices that this user does. 
 				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
 				WHERE site_id=#db.param(request.zos.globals.id)# and 
 				user_deleted = #db.param(0)# and
 				user_id =#db.param(-1)#";
 				qAgents=db.execute("qAgents"); 
+			}else{
+				// TODO: find only the users this user should have access to 
+				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+				WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+				user_deleted = #db.param(0)# and
+				user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
+				 and (user_server_administrator=#db.param(0)#)
+				ORDER BY member_first_name ASC, member_last_name ASC";
+				qAgents=db.execute("qAgents");
 			} 
-		}else{
-			// TODO: find only the users this user should have access to 
-			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-			user_deleted = #db.param(0)# and
-			user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
-			 and (user_server_administrator=#db.param(0)#)
-			ORDER BY member_first_name ASC, member_last_name ASC";
-			qAgents=db.execute("qAgents");
-		} 
+		}
 		</cfscript> 
 		<script type="text/javascript">
 		/* <![CDATA[ */
@@ -211,7 +211,7 @@
 
 <cffunction name="getAssignContact" localmode="modern" access="remote">
 	<cfscript>
-	form.user_id=application.zcore.functions.zso(form, 'user_id', true);
+		form.contact_assigned_user_id = application.zcore.functions.zso(form, 'contact_assigned_user_id', true);
 		var db=request.zos.queryObject;
 		var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin"); 
 	</cfscript>
@@ -271,60 +271,74 @@
 			</h3>
 		</div>
 		<cfscript>
-		if(request.zsession.user.office_id NEQ ""){
+		if(request.zsession.user.office_id NEQ "" ){
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
-			db.sql="SELECT *, user.site_id userSiteId 
-			FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE site_id=#db.param(request.zos.globals.id)# and 
-			user_deleted = #db.param(0)#";
-			qAgents=db.execute("qAgents"); 
+			if(form.method NEQ "userEdit"){
+				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+				WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# 
+				AND site_id=#db.param(request.zos.globals.id)#
+				AND user_deleted = #db.param(0)#";
+				qAgents=db.execute("qAgents");
+			}else{
+
+				db.sql="SELECT A.*, A.site_id userSiteId 
+				FROM  #db.table("user", request.zos.zcoreDatasource)# A,
+					#db.table("user", request.zos.zcoreDatasource)# B
+				WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL("A"))# 
+				AND	A.user_deleted = #db.param(0)# 
+				AND A.site_id=#db.param(request.zos.globals.id)#
+				AND B.site_id=#db.param(request.zos.globals.id)#
+				AND A.user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
+			 	AND (A.user_server_administrator=#db.param(0)#)
+			 	AND B.user_id = #db.param(request.zsession.user.id)#
+			 	AND A.office_id = B.office_id
+				ORDER BY member_first_name ASC, member_last_name ASC";
+				qAgents=db.execute("qAgents"); 
+			} 
 		} 
 		</cfscript> 
 		<script type="text/javascript">
-		/* <![CDATA[ */
-		function showAgentPhoto(id){
-			var d1=document.getElementById("agentPhotoDiv");
-			if(id!="" && arrAgentPhoto[id]!=""){
-				$(d1).show();
-				d1.innerHTML='<img src="'+arrAgentPhoto[id]+'" width="100">';
-			}else{
-				$(d1).hide();
-				d1.innerHTML="";    
-			}
-		}
-		function assignLeadSelectOffice(){ 
-			var officeElement = document.getElementById("office_id");
-			var userElement=document.getElementById("user_id"); 
-			if(typeof officeElement.options != "undefined" && officeElement.options.length ==0){
-				for(var i=0;i<userElement.options.length;i++){
-					userElement.options[i].style.display="block"; 
-				}
-				return;
-			}
-			var officeId=officeElement.options[officeElement.selectedIndex].value;
-			for(var i=0;i<userElement.options.length;i++){
-				var optionOfficeId=userElement.options[i].getAttribute("data-office-id");
-				if(userElement.options[i].value == ""){
-					userElement.options[i].style.display="block"; 
-				}else if(officeId == "" || optionOfficeId.indexOf(','+officeId+',') != -1){
-					userElement.options[i].style.display="block"; 
+			function showAgentPhoto(id){
+				var d1=document.getElementById("agentPhotoDiv");
+				if(id!="" && arrAgentPhoto[id]!=""){
+					$(d1).show();
+					d1.innerHTML='<img src="'+arrAgentPhoto[id]+'" width="100">';
 				}else{
-					userElement.options[i].style.display="none"; 
+					$(d1).hide();
+					d1.innerHTML="";    
 				}
-			} 
-			userElement.selectedIndex=0;
-		}
-		var arrAgentPhoto=new Array();
-		<cfif qAgents.recordcount>
-			<cfloop query="qAgents">
-			arrAgentPhoto["#qAgents.user_id#|#qAgents.site_id#"]=<cfif qAgents.member_photo NEQ "">"#jsstringformat('#application.zcore.functions.zvar('domain',qAgents.userSiteId)##request.zos.memberImagePath##qAgents.member_photo#')#"<cfelse>""</cfif>;
-			</cfloop>
-		</cfif>
-		/* ]]> */
+			}
+			function assignLeadSelectOffice(){ 
+				var officeElement = document.getElementById("office_id");
+				var userElement=document.getElementById("contact_assigned_user_id"); 
+				if(typeof officeElement.options != "undefined" && officeElement.options.length ==0){
+					for(var i=0;i<userElement.options.length;i++){
+						userElement.options[i].style.display="block"; 
+					}
+					return;
+				}
+				var officeId=officeElement.options[officeElement.selectedIndex].value;
+				for(var i=0;i<userElement.options.length;i++){
+					var optionOfficeId=userElement.options[i].getAttribute("data-office-id");
+					if(userElement.options[i].value == ""){
+						userElement.options[i].style.display="block"; 
+					}else if(officeId == "" || optionOfficeId.indexOf(','+officeId+',') != -1){
+						userElement.options[i].style.display="block"; 
+					}else{
+						userElement.options[i].style.display="none"; 
+					}
+				} 
+				userElement.selectedIndex = 0;
+			}
+			var arrAgentPhoto=new Array();
+			<cfif qAgents.recordcount>
+				<cfloop query="qAgents">
+				arrAgentPhoto["#qAgents.user_id#|#qAgents.site_id#"]=<cfif qAgents.member_photo NEQ "">"#jsstringformat('#application.zcore.functions.zvar('domain',qAgents.userSiteId)##request.zos.memberImagePath##qAgents.member_photo#')#"<cfelse>""</cfif>;
+				</cfloop>
+			</cfif>
 		</script>  
 		<cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>
-			<!--- do nothing --->
 		<cfelse>
 			<div style="width:100%; float:left;">
 				<div style="float:left; width:100%;">Type to filter users:</div>
@@ -341,12 +355,12 @@
 
 			<cfscript>  
 			// when user selects office, the user drop down should change to show only users in that office.
-			echo('<select name="user_id" id="user_id" size="1" onchange="showAgentPhoto(this.options[this.selectedIndex].value);">');
+			echo('<select name="contact_assigned_user_id" id="contact_assigned_user_id" size="1" onchange="showAgentPhoto(this.options[this.selectedIndex].value);">');
 			echo('<option value="" data-office-id="">-- Select --</option>');
 			for(row in qAgents){
 				userGroupName=userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
 				echo('<option value="'&row.user_id&"|"&row.site_id&'" data-office-id=",'&row.office_id&',"');
-				if(form.user_id EQ row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)){
+				if(form.contact_assigned_user_id EQ row.user_id AND form.contact_assigned_user_id_siteidtype EQ application.zcore.functions.zGetSiteIdType(row.site_id)){
 					echo(' selected="selected" ');
 				}
 				arrName=[];
