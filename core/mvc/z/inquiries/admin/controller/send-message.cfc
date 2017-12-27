@@ -441,7 +441,8 @@
 	arrContactQuery=[qContact];
 
 	arrContact=[];
-	arrTo={};
+	arrTo=[];
+	uniqueStruct={};
 	arrLabelTo=[];
 	if(application.zcore.user.checkGroupAccess("member")){
 		// do a second query to get the member and higher contacts (easier)
@@ -487,14 +488,15 @@
 				ts.label=row.contact_email;
 			}
 			ts.value=replace(row.fullName, "`", "'", "all")&"`"&row.contact_email;
-			if(row.inquiries_x_contact_type EQ "to" AND row.contact_id EQ form.contact_id){
-				if(NOT structKeyExists(arrTo, ts.value)){
-					arrTo[ts.value] = ts.value;
-					arrayAppend(arrLabelTo, ts.label);
-				}
-			}
 			if(row.inquiries_x_contact_id NEQ ""){
-				if(row.inquiries_x_contact_type EQ "cc"){
+				if(structKeyExists(uniqueStruct, ts.value)){
+					continue;
+				}
+				uniqueStruct[ts.value] = true;
+				if(row.inquiries_x_contact_type EQ "to" AND row.contact_id EQ form.contact_id){
+					arrayAppend(arrTo, ts.value);
+					arrayAppend(arrLabelTo, ts.label); 
+				}else if(row.inquiries_x_contact_type EQ "cc"){
 					arrayAppend(arrCCSelected, ts.value);
 				}else if(row.inquiries_x_contact_type EQ "bcc"){
 					arrayAppend(arrBCCSelected, ts.value);
@@ -560,7 +562,7 @@
 	<form class="zFormCheckDirty" name="sendEmailForm" id="sendEmailForm" action="/z/inquiries/admin/send-message/#action#" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="contact_id" value="#htmleditformat(form.contact_id)#">
 		<input type="hidden" name="inquiries_id" value="#htmleditformat(form.inquiries_id)#">
-		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(StructKeyArray(arrTo), ','))#">
+		<input type="hidden" name="inquiries_to" value="#htmleditformat(arrayToList(arrTo, ','))#">
 		<div class="z-float z-p-10 z-bg-white z-index-3" style="visibility:hidden;">
 			<button type="submit" name="submitForm" class="z-manager-search-button" style="font-size:150%;">Send</button>
 					<button type="button" name="cancel" onclick="window.parent.zCloseModal();" class="z-manager-search-button">Cancel</button>
