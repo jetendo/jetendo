@@ -208,6 +208,8 @@ function verifySite($row){
 	}
 	if($debug) echo (microtime_float()-$time_start)." seconds for dns\n"; $time_start=microtime_float();
 	if($debug) echo (microtime_float()-$time_start)." seconds for permissions\n"; $time_start=microtime_float();
+	/*
+	// TODO: this code wasn't good enough since it didn't verify the content or http response code so i disabled it.
 	if($verifyHomePage){
 		if($found){
 			$rs=file_get_contents($row["site_domain"]."/");
@@ -222,7 +224,7 @@ function verifySite($row){
 			}
 			if($debug) echo (microtime_float()-$time_start)." seconds for home page download\n"; $time_start=microtime_float();
 		}
-	}
+	}*/
 	if($siteHasError){
 		echo "invalid\n";
 		for($i=0;$i<count($arrError);$i++){
