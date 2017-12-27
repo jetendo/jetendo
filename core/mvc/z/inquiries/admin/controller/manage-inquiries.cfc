@@ -2,35 +2,23 @@
 <cfoutput>   
 <cffunction name="getQuickLinks" localmode="modern" access="public">
 	<cfscript>
-	links=[];  
-	if(not application.zcore.user.checkGroupAccess("member")){
-		// security needed
-		if(request.zos.hasManageLeadAccess){
-			links=[
-				{ link:"/z/inquiries/admin/manage-contact/userAdd", label:"Add Contact" }, 
-				{ link:"/z/inquiries/admin/manage-inquiries/userIndex?zManagerAddOnLoad=1", label:"Add Lead"}, 
-				{ link:"/z/inquiries/admin/manage-contact/userIndex", label:"Contacts" },  
-				{ link:"/z/inquiries/admin/manage-inquiries/userIndex##exportLeadDiv", label:"Lead Export" },  
-				{ link:"/z/inquiries/admin/manage-inquiries/userIndex", label:"Leads" }
-			]; 
-		}
-	}else{ 
-		if(variables.hasLeadsAccess){
-			links=[
-				{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
-				{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead"}, 
-				{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
-				{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
-				{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
-				{ link:"/z/inquiries/admin/routing/index", label:"Lead Routing" }, 
-				{ link:"/z/inquiries/admin/lead-source-report/index", label:"Lead Source Report" }, 
-				{ link:"/z/inquiries/admin/lead-template/index", label:"Lead Template Emails" }, 
-				{ link:"/z/inquiries/admin/types/index", label:"Lead Types" }, 
-				{ link:"/z/inquiries/admin/manage-inquiries/index", label:"Leads" }, 
-				{ link:"/z/admin/mailing-list-export/index", label:"Mailing List Export" }, 
-				{ link:"/z/inquiries/admin/search-engine-keyword-report/index", label:"Search Engine Keyword Lead Report" }
-			];  
-		}
+	links=[]; 
+	variables.hasLeadsAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Leads");
+	if(variables.hasLeadsAccess){
+		links=[
+			{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
+			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead"}, 
+			{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
+			{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
+			{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
+			{ link:"/z/inquiries/admin/routing/index", label:"Lead Routing" }, 
+			{ link:"/z/inquiries/admin/lead-source-report/index", label:"Lead Source Report" }, 
+			{ link:"/z/inquiries/admin/lead-template/index", label:"Lead Template Emails" }, 
+			{ link:"/z/inquiries/admin/types/index", label:"Lead Types" }, 
+			{ link:"/z/inquiries/admin/manage-inquiries/index", label:"Leads" }, 
+			{ link:"/z/admin/mailing-list-export/index", label:"Mailing List Export" }, 
+			{ link:"/z/inquiries/admin/search-engine-keyword-report/index", label:"Search Engine Keyword Lead Report" }
+		]; 
 	}
 	return links;
 	</cfscript>
@@ -44,8 +32,6 @@
 	ts={
 		// required 
 		customAddMethods:{"addBulk":"insertBulk", "userAddBulk":"userInsertBulk","userAdd":"userInsert","userEdit":"userUpdate"},
-		customEditMethods:{"userEdit":"userUpdate"},
-		customReadOnlyMethods:{"userIndex":true},
 		label:"Lead",
 		pluralLabel:"Leads",
 		tableName:"inquiries",
@@ -72,7 +58,7 @@
 		disableAddEdit:false, // true disables add/edit/insert/update of leads
 		requiredParams:[],
 		
-		editFormOverrideParams:["inquiries_type_id", "user_id", "user_id_siteidtype", "office_id", "inquiries_assign_email", "inquiries_assign_name"],
+		editFormOverrideParams:["inquiries_type_id", "user_id"],
 		customInsertUpdate:true, // true disables the normal zInsert/zUpdate calls, so you can implement them in afterInsert and afterUpdate instead
 		sortField:"",
 		hasSiteId:true,
@@ -135,19 +121,14 @@
 	if(form.method EQ "userInsertBulk" or form.method EQ "insertBulk" or form.editSource EQ "contact"){
 		variables.methods.beforeReturnInsertUpdate = 'beforeReturnInsertUpdate';
 	}
-	application.zcore.template.setTag("title","Leads"); 
+	application.zcore.template.setTag("title","Leads");
+	
 	return ts;
 	</cfscript>
 </cffunction>
 
-
-<cffunction name="init" localmode="modern" access="public">
+<cffunction name="init" localmode="modern" access="private">
 	<cfscript> 
-	if(structkeyexists(variables, 'inquiriesInitCalled')){
-		return;
-	}
-	loadManageLeadGroupData();
-	variables.inquiriesInitCalled=true;
 	ts=getInitConfig();
 
 	//FOR REG USER DO NOT WANT TO REDIRECT
@@ -167,6 +148,7 @@
 	}
 	super.init(ts); 
 
+	loadManageLeadGroupData();
 
 	if(request.cgi_script_name CONTAINS "/z/inquiries/admin/manage-inquiries/"){
 		hCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
@@ -187,13 +169,7 @@
 	}
 	request.zos.manageLeadGroupNameStruct={};
 	request.zos.manageLeadGroupIdStruct={};
-	request.zos.hasManageLeadAccess=false;
-	variables.hasLeadsAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Leads");
-	if(variables.hasLeadsAccess){
-		request.zos.hasManageLeadAccess=true;
-	}
-	userGroupCom=createobject("component", "zcorerootmapping.com.user.user_group_admin");
-
+	userGroupCom=createobject("component", "zcorerootmapping.com.user.user_group_admin"); 
 	for(i in request.manageLeadUserGroupStruct){
 		request.zos.manageLeadGroupNameStruct[i]=true;
 		request.zos.manageLeadGroupIdStruct[userGroupCom.getGroupId(i, request.zos.globals.id)]=true;
@@ -213,14 +189,9 @@
 					}
 				}
 			}
-			request.zos.hasManageLeadAccess=true;
 			found=true;
 		}
 	} 
-	if(not request.zos.hasManageLeadAccess){
-		application.zcore.status.setStatus(request.zsid, "Access denied to manage leads", form, true);
-		application.zcore.functions.zRedirect("/z/user/home/index?zsid=#request.zsid#");
-	}
 	request.zos.manageLeadGroupIdList=structkeylist(request.zos.manageLeadGroupIdStruct);
 	request.zos.manageLeadGroupNameList=structkeylist(request.zos.manageLeadGroupNameStruct);
 	if(structcount(groupStruct) NEQ 0){
@@ -250,14 +221,8 @@
 
 <cffunction name="userInit" localmode="modern" access="public">
 	<cfscript>
-	if(structkeyexists(variables, 'inquiriesInitCalled')){
-		return;
-	}
-	loadManageLeadGroupData();
-	variables.inquiriesInitCalled=true;
 	ts=getInitConfig(); 
 	ts.disableAddButton=true;
-	ts.quickLinks=getQuickLinks();
  
 	arrayAppend(ts.titleLinks, { 
 			label:"Add",
@@ -288,35 +253,9 @@
 	application.zcore.skin.includeCSS("/z/font-awesome/css/font-awesome.min.css");
 	application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
 
+	
+	loadManageLeadGroupData();
 
-	</cfscript>
-</cffunction>
-
-<cffunction name="getContactLeadFilterSQL" localmode="modern" access="public">
-	<cfargument name="db" type="component" required="yes">
-	<cfscript>
-	db=arguments.db;
-	if(not structkeyexists(request, 'userIdList')){
-		loadManageLeadGroupData();
-	}
-
-	savecontent variable="out"{
-		if(not application.zcore.user.checkGroupAccess("administrator")){
-			echo(' and ( ');
-
-			if(request.zsession.user.office_id NEQ ""){ 
-				echo(' (contact.contact_assigned_user_id=#db.param(0)# and contact.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
-			}
-			if(request.userIdList NEQ ""){
-				echo(' (contact.contact_assigned_user_id IN (#db.trustedSQL(request.userIdList)#) and contact.contact_assigned_user_id_siteIdType=#db.param(1)#) or ');
-			}
-			// current user 
-			echo(' (contact.contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
-			contact.contact_assigned_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
-			) ');
-		}
-	}
-	return out;
 	</cfscript>
 </cffunction>
 
@@ -324,25 +263,20 @@
 	<cfargument name="db" type="component" required="yes">
 	<cfscript>
 	db=arguments.db;
-	if(not structkeyexists(request, 'userIdList')){
-		loadManageLeadGroupData();
-	}
 
 	savecontent variable="out"{
-		if(not application.zcore.user.checkGroupAccess("administrator")){
-			echo(' and ( ');
+		echo(' and ( ');
 
-			if(request.zsession.user.office_id NEQ ""){
-				echo(' (inquiries.user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
-			}
-			if(request.userIdList NEQ ""){
-				echo(' (inquiries.user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries.user_id_siteIdType=#db.param(1)#) or ');
-			}
-			// current user 
-			echo(' (inquiries.user_id = #db.param(request.zsession.user.id)# and 
-			inquiries.user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
-			) ');
+		if(request.zsession.user.office_id NEQ ""){
+			echo(' (inquiries.user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
 		}
+		if(request.userIdList NEQ ""){
+			echo(' (inquiries.user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries.user_id_siteIdType=#db.param(1)#) or ');
+		}
+		// current user 
+		echo(' (inquiries.user_id = #db.param(request.zsession.user.id)# and 
+		inquiries.user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
+		) ');
 	}
 	return out;
 	</cfscript>
@@ -409,7 +343,6 @@
 	</cfscript>
 	
 </cffunction>
-
 <cffunction name="userView" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
@@ -418,17 +351,6 @@
 	</cfscript>
 	
 </cffunction> 
-
-<cffunction name="userViewContact" localmode="modern" access="remote" roles="user">
-	<cfscript>
-	// need to secure the contact_id by checking if user has access to 1 or more inquiries for this contact.
-	// already wrote this somewhere else (send-message or manage-inquiries?)
- 	
-	userInit();
-	feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
-	feedbackCom.viewContact();
-	</cfscript>
-</cffunction>
 
 <cffunction name="userHasAccessToLead" localmode="modern" access="public" roles="user">
 	<cfargument name="inquiries_id" type="string" required="yes">
@@ -510,7 +432,7 @@
 		userInit();
 	}else{
 		init();
-		if(not application.zcore.user.checkGroupAccess("administrator")){
+		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 			application.zcore.status.setStatus(request.zsid,"Access denied.");
 			application.zcore.functions.zRedirect("/member/?zsid=#request.zsid#");	
 		}
@@ -679,86 +601,144 @@
 		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
 		<h3>#form.inquiries_feedback_subject#</h3>
 		#form.inquiries_feedback_comments#');
-	} 
-	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
+	}
+	if(request.zos.isTestServer){
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
 	}
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-	    iemailCom.getEmailTemplate(customNote, true); 
-	}  
-	ts={  
-		contact_id:request.zsession.user.contact_id,  
-		debug:false,
-		inquiries_id:form.inquiries_id,
-		validHash:true, 
-		jsonStruct:{
-		   "headers":{
-		      "raw":"",
-		      "parsed":{ 
-		      }
-		   },
-		   "from":{
-		      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-		      "email":request.zsession.user.email
-		   },
-		   "to":[
-		      {
-		         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
-		         "email":request.zsession.user.email,
-		         "plusId":"",
-		         "originalEmail":request.zsession.user.email
-		      }
-		   ],
-		   "cc":[],
-		   "bcc":[],
-		   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
-		   "html":emailHTML,
-		   "htmlWeb":form.inquiries_feedback_comments,
-		   "htmlProcessed":"",
-		   "files":[/*
-		      {
-		         "size":2715,
-		         "filePath":"elkdgjicjkbkdbjf2.jpg",
-		         "fileName":"elkdgjicjkbkdbjf.jpg"
-		      }*/
-		   ],
-		   "plusId":"", // nothing for internal mail
-		   "size":0, // measure below
-		   "date":request.zos.mysqlnow,
-		   "version":1,
-		   "humanReplyStruct":{
-		      "isHumanReply":true,
-		      "humanTriggers":[],
-		      "roboScore":0,
-		      "roboTriggers":[],
-		      "score":1,
-		      "humanScore":1
-		   } 
-		},
-		messageStruct:{
-			site_id:request.zos.globals.id
-		},
-		filterContacts:{ managers:true },
-		inquiries_status_id:backupStatusId,
-		privateMessage:true,
-		enableCopyToSelf:true
-	};  
+	    iemailCom.getEmailTemplate(customNote, true);
+	} 
+	if(false and request.zos.isTestServer){
+		ts={  
+			contact_id:request.zsession.user.contact_id,  
+			debug:false,
+			inquiries_id:form.inquiries_id,
+			validHash:true, 
+			jsonStruct:{
+			   "headers":{
+			      "raw":"",
+			      "parsed":{ 
+			      }
+			   },
+			   "from":{
+			      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			      "email":request.zsession.user.email
+			   },
+			   "to":[
+			      {
+			         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			         "email":request.zsession.user.email,
+			         "plusId":"",
+			         "originalEmail":request.zsession.user.email
+			      }
+			   ],
+			   "cc":[],
+			   "bcc":[],
+			   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
+			   "html":emailHTML,
+			   "htmlWeb":form.inquiries_feedback_comments,
+			   "htmlProcessed":"",
+			   "files":[/*
+			      {
+			         "size":2715,
+			         "filePath":"elkdgjicjkbkdbjf2.jpg",
+			         "fileName":"elkdgjicjkbkdbjf.jpg"
+			      }*/
+			   ],
+			   "plusId":"", // nothing for internal mail
+			   "size":0, // measure below
+			   "date":request.zos.mysqlnow,
+			   "version":1,
+			   "humanReplyStruct":{
+			      "isHumanReply":true,
+			      "humanTriggers":[],
+			      "roboScore":0,
+			      "roboTriggers":[],
+			      "score":1,
+			      "humanScore":1
+			   } 
+			},
+			messageStruct:{
+				site_id:request.zos.globals.id
+			},
+			filterContacts:{ managers:true },
+			inquiries_status_id:backupStatusId,
+			privateMessage:true,
+			enableCopyToSelf:true
+		};  
 
-	// slightly inaccurate since it doesn't include all fields and attachment sizes
-	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
-	//ts.debug=true;
-	if(qCheck.office_id NEQ "0"){
-		ts.filterContacts.offices=[qCheck.office_id];
+		// slightly inaccurate since it doesn't include all fields and attachment sizes
+		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+		//ts.debug=true;
+		if(qCheck.office_id NEQ "0"){
+			ts.filterContacts.offices=[qCheck.office_id];
+		}
+		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+		}  
+		//writedump(ts);abort;
+		//writedump(ts);	abort; 
+	 
+		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+		rs=contactCom.processMessage(ts);  
+	}else{
+
+		if(backupStatusId NEQ 0){ 
+			db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+			SET inquiries_status_id=#db.param(backupStatusId)#, 
+			inquiries_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
+			WHERE inquiries_id=#db.param(form.inquiries_id)# and 
+			site_id = #db.param(request.zos.globals.id)# and  
+			inquiries_deleted=#db.param(0)# ";
+			db.execute("qUpdateInquiry");  
+		}
+
+		// insert to inquiries_feedback
+		tsFeedback={
+			table:"inquiries_feedback",
+			datasource:request.zos.zcoreDatasource,
+			struct:{
+				inquiries_feedback_subject:form.inquiries_feedback_subject,
+				inquiries_feedback_comments:form.inquiries_feedback_comments, // leave empty because this is an email message.
+				inquiries_feedback_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_id:form.inquiries_id,
+				//user_id:user_id,
+				//contact_id:0,
+				inquiries_id:form.inquiries_id,
+				site_id:request.zos.globals.id,
+				//user_id_siteIDType:user_id_siteIDType, 
+				inquiries_feedback_created_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_feedback_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
+				inquiries_feedback_deleted:0,
+				inquiries_feedback_message_json:"", 
+				inquiries_feedback_draft:0,
+				inquiries_feedback_download_key:"",
+				inquiries_feedback_type:0 // 0 is private note, 1 is email
+			}
+		} 
+
+		// build email html  
+		inquiries_feedback_id=application.zcore.functions.zInsert(tsFeedback); 
+		if(not inquiries_feedback_id){ 
+			return {success:false, errorMessage:"Failed to save note"};
+		} 
+		/*
+		// send email to the assigned user.
+		toEmail=qCheck.user_email;
+		if(request.zos.isTestServer){
+			toEmail=request.zos.developerEmailTo;
+		}
+		ts={
+			to:toEmail,
+			from:request.fromEmail,
+			subject:"#form.inquiries_feedback_subject#",
+			html:emailHTML
+		};
+		application.zcore.email.send(ts);
+		*/
 	}
-	if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
-		ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
-	}  
- 
-	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
-	rs=contactCom.processMessage(ts);  
-  
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){
 			link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
@@ -781,7 +761,6 @@
 <cffunction name="userAddPrivateNote" localmode="modern" access="remote" roles="user">
 	<cfscript>
 	userInit();
-	addPrivateNote();
 	</cfscript>
 </cffunction> 
 
@@ -1057,7 +1036,7 @@
 	<cfscript>  
 	var db=request.zos.queryObject; 
 	currentMethod=form.method;
-	if(currentMethod EQ "userView" or currentMethod EQ "userViewContact"){
+	if(currentMethod EQ "userView"){
 		userInit();
 	}else{
 		init();
@@ -1079,9 +1058,9 @@
 	(( inquiries_id = #db.param(form.inquiries_id)# and 
 	inquiries_parent_id = #db.param(0)# ) or 
 	(inquiries_parent_id = #db.param(form.inquiries_id)# )) ";
-	if(currentMethod EQ "userView" or currentMethod EQ "userViewContact"){
+	if(currentMethod EQ "userView"){
 		db.sql&=getUserLeadFilterSQL(db);
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -1090,12 +1069,6 @@
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "This inquiry doesn't exist.", false,true);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid="&request.zsid);
 	} 
-	if(currentMethod EQ "userView"){
-		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/userViewContact?fromSource=lead&contactTab=4&zPageId=#form.zPageId#&contact_id=#qInquiry.contact_id#&inquiries_id=#form.inquiries_id#");
-	}else if(currentMethod EQ "view"){
-		application.zcore.functions.zRedirect("/z/inquiries/admin/feedback/viewContact?fromSource=lead&contactTab=4&zPageId=#form.zPageId#&contact_id=#qInquiry.contact_id#&inquiries_id=#form.inquiries_id#");
-	}
-
 	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 	if(qInquiry.inquiries_email NEQ ""){
 		contact = contactCom.getContactByEmail(qInquiry.inquiries_email, qInquiry.inquiries_first_name&" "&qInquiry.inquiries_last_name, request.zos.globals.id);
@@ -1111,7 +1084,6 @@ zArrDeferredFunctions.push(function(){
 			var top=0;
 			var left=0;
 			var $mobileHeader=$(".z-mobile-header");
-			$("##leadDetailMenuBar").show();
 			if(zWindowSize.width < 479){
 				$(".zLeadEditButton").hide();
 				$(".zLeadAssignButton").hide();
@@ -1137,21 +1109,22 @@ zArrDeferredFunctions.push(function(){
 	}
 	zArrScrollFunctions.push({functionName:placeLeadMenu});
 	zArrResizeFunctions.push({functionName:placeLeadMenu});
+	$("##leadDetailMenuBar").show();
 	placeLeadMenu();
 });
 </script>
 	<cfif currentMethod EQ "userViewContact" or currentMethod EQ "viewContact">
-		<div id="leadDetailMenuBarPlaceholder" class="z-float " style="height:37px; padding:5px; position:relative;">
+		<div id="leadDetailMenuBarPlaceholder" class="z-float " style="height:37px; position:relative;">
 		</div>
-		<div id="leadDetailMenuBar" style="position:absolute; top:0px; left:0px; z-index:100; display:none; width:100px; background-color:##FFF; padding:px; ">
+		<div id="leadDetailMenuBar" style="position:absolute; top:0px; left:0px; z-index:1000; display:none; width:100px; background-color:##FFF; padding:5px; ">
 			<h3 style="display:inline-block;">Lead ###form.inquiries_id#</h3> &nbsp;&nbsp;
 
 			<cfif currentMethod EQ "userView" or currentMethod EQ "userViewContact"> 
-				<cfif application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1 and qInquiry.inquiries_email NEQ "">
+				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 					<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 				</cfif>
 				<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
-					<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+					<a href="/z/inquiries/admin/assign/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 				</cfif> 
 				<a href="/z/inquiries/admin/manage-inquiries/userAddPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1&editSource=contact"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
 			<cfelseif currentMethod EQ "view" or currentMethod EQ "viewContact">
@@ -1161,10 +1134,10 @@ zArrDeferredFunctions.push(function(){
 				<cfelse>
 					<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#form.inquiries_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button">Edit</a>
 				</cfif>  
-				<cfif application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1 and qInquiry.inquiries_email NEQ "">
+				<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 					<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-search-button" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 				</cfif>
-				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
+				<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#&modalpopforced=1" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;"  class="z-manager-search-button" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a> 
 				<a href="/z/inquiries/admin/manage-inquiries/addPrivateNote?inquiries_id=#form.inquiries_id#&amp;modalpopforced=1"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-search-button" title="Click here to add a private note"><i class="fa fa-comment" aria-hidden="true"></i> Add Note</a> 
 	 
 			</cfif> 
@@ -1185,7 +1158,7 @@ zArrDeferredFunctions.push(function(){
 				<div class="z-float-left z-pt-10">
 					<cfif currentMethod EQ "userView">
 						<div class="z-manager-button-container">
-							<cfif application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1 and qInquiry.inquiries_email NEQ "">
+							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 								<a href="/z/inquiries/admin/send-message/userIndex?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 							</cfif>
 							<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) EQ 1>
@@ -1196,14 +1169,20 @@ zArrDeferredFunctions.push(function(){
 				
 						<cfif qinquiry.inquiries_readonly EQ 1>
 							<!--- | Read-only | Edit is disabled --->
-						<cfelse> 
+						<cfelse>
+							<!--- <div class="z-manager-button-container">
+								<a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
+							</div> --->
 						</cfif> 
 						<div class="z-manager-button-container">
-							<cfif application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1 and qInquiry.inquiries_email NEQ "">
+							<cfif request.zos.isTestServer and qInquiry.inquiries_email NEQ "">
 								<a href="/z/inquiries/admin/send-message/index?inquiries_id=#qinquiry.inquiries_id#&amp;contact_id=#contact.contact_id#" class="z-manager-assign" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Reply" style=" text-decoration:none;"><i class="fa fa-mail-reply" aria-hidden="true" style="padding-right:5px;"></i><span>Reply</span></a> 
 							</cfif>
-							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
-						</div> 
+							<a href="/z/inquiries/admin/assign/index?inquiries_id=#qinquiry.inquiries_id#&amp;zPageId=#form.zPageId#&modalpopforced=1" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-manager-assign" title="Assign Lead" style=" text-decoration:none;"><i class="fa fa-mail-forward" aria-hidden="true" style="padding-right:5px;"></i><span>Assign</span></a>
+						</div>
+						<!--- <cfif qinquiry.inquiries_reservation EQ 1>
+							<a href="/z/rental/admin/reservations/cancel?inquiries_id=#qinquiry.inquiries_id#">Cancel Reservation</a>
+						</cfif> --->
 			 
 					</cfif>
 				</div>
@@ -1214,9 +1193,6 @@ zArrDeferredFunctions.push(function(){
 	        </cfscript>
 		</cfloop>
 	</cfif>
-	<cfscript>
-	return qInquiry;
-	</cfscript>
 </cffunction>
 
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
@@ -1353,7 +1329,7 @@ zArrDeferredFunctions.push(function(){
 			<input type="radio" name="whichfields" id="whichfields1" value="1" <cfif application.zcore.functions.zso(form, 'whichfields',false,1) EQ 1>checked="checked"</cfif> style="vertical-align:middle; margin:0px; background:none; border:none;" />
 			All Fields
 			<cfif request.zos.istestserver>
-				| WARNING: basic field export is not working yet. This is hidden on live server.<br>
+	
 				<input type="radio" name="whichfields" value="0" <cfif application.zcore.functions.zso(form, 'whichfields',false,1) EQ 0>checked="checked"</cfif> style="vertical-align:middle; background:none; margin:0px;margin-left:10px; border:none;" /> Basic Fields 
 			</cfif></p>
 			<p>Filter:
@@ -1400,6 +1376,7 @@ zArrDeferredFunctions.push(function(){
 	myForm.inquiries_email.email = true;
 	myForm.inquiries_first_name.required = true;
 	myForm.inquiries_first_name.friendlyName = "First Name";
+	 
 	//CHECK OTHER TYPES BESIDES INSERT
 	if(form.method EQ "insert" or structKeyExists(variables.reverseCustomAddMethods,form.method)){
 		myForm.inquiries_datetime.createDateTime = true;
@@ -1420,12 +1397,13 @@ zArrDeferredFunctions.push(function(){
 	if(form.inquiries_status_id EQ 0){
 		form.inquiries_status_id=1;
 	} 
+
 	if(form.method EQ "userInsert" or structkeyexists(variables.reverseCustomAddMethods, form.method)){
 		// user version of assign check 
 		arrUser=listToArray(form.user_id, "|");
 		if(arraylen(arrUser) EQ 2){
 			form.user_id=arrUser[1];
-			form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(arrUser[2]);
+			form.user_id_siteIDType=arrUser[2];
 			// TODO: maybe it could be secured with assign's qAgent stuff | is this a user i have access to
 			// NOT TODAY
 		}else{
@@ -1462,8 +1440,6 @@ zArrDeferredFunctions.push(function(){
 	inquiries_id=#db.param(form.inquiries_id)# and 
 	site_id=#db.param(request.zos.globals.id)# ";
 	qData=db.execute("qData");
-
-	variables.qBeforeUpdateInquiry=qData;
 	if(qData.recordcount NEQ 0){
 		// used by beforeReturnInsertUpdate when method is update
 		form.contact_id=qData.contact_id;
@@ -1475,19 +1451,19 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>   
 	urlPage = "";
-	/*if(form.method EQ "update"){
+	if(form.method EQ "update"){
 		if(form.contact_id EQ 0){
 			link="/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid=#request.zsid#";
 		}
 		link="/z/inquiries/admin/feedback/viewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
-		return {success:true, id:form.inquiries_id, reload:true};
+		return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
 	}else if(form.method EQ "userUpdate"){
 		if(form.contact_id EQ 0){
 			link="/z/inquiries/admin/manage-inquiries/userIndex?zPageId=#form.zPageId#&zsid=#request.zsid#";
 		}
 		link="/z/inquiries/admin/feedback/userViewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
-		return {success:true, id:form.inquiries_id, reload:true};
-	}*/
+		return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
+	}
 	if(structKeyExists(variables.reverseCustomAddMethods, form.method)){
 		urlPage = variables.reverseCustomAddMethods[form.method];
 	} else{
@@ -1495,86 +1471,27 @@ zArrDeferredFunctions.push(function(){
 	}
 	var link = "#variables.prefixURL#" & urlPage & "?modalpopforced=0&inquiries_type_id=#form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType#&zsid=" & request.zsid;
 	if(structkeyexists(form, "user_id")){
-		link &= "&user_id=" & form.user_id&"&user_id_siteidtype="&form.user_id_siteidtype;
+		link &= "&user_id=" & form.user_id;
 	}
-	if(structkeyexists(form, "office_id")){
+	if(structkeyexists(form, "office_id") AND application.zcore.user.checkGroupAccess("administrator")){
 		link &= "&office_id=" & form.office_id;
 	}
-	if(structkeyexists(form, 'inquiries_assign_email')){
-		link&="&inquiries_assign_name=#urlencodedformat(form.inquiries_assign_name)#&inquiries_assign_email=#urlencodedformat(form.inquiries_assign_email)#";
-	}
-	return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};  
+
+	return {success:true, id:form.inquiries_id, redirect:1,redirectLink: link};
 	</cfscript>
 </cffunction>
 
 
-<cffunction name="sendLeadUpdatedEmail" localmode="modern" access="private">
+<cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
- 
-	assignmentChanged=false;
-
-	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)#
-	WHERE inquiries_deleted = #db.param(0)# and  
-	inquiries_id=#db.param(form.inquiries_id)# and 
-	site_id=#db.param(request.zos.globals.id)# ";
-	qData=db.execute("qData");
-	if(not structkeyexists(variables, 'qBeforeUpdateInquiry') or variables.qBeforeUpdateInquiry.recordcount EQ 0){
-		if(qData.inquiries_assign_email NEQ ""){
-			assignmentChanged=true;
-		}else if(qData.user_id NEQ 0){
-			assignmentChanged=true;
-		}
-	}else{
-		// TODO: must detect if assignment changed somehow so we don't send 2 emails.
-		if(qData.inquiries_assign_email NEQ "" and qData.inquiries_assign_email NEQ variables.qBeforeUpdateInquiry.inquiries_assign_email){
-			assignmentChanged=true;
-		}else if(qData.user_id NEQ 0 and qData.user_id&"|"&qData.user_id_siteIDType NEQ variables.qBeforeUpdateInquiry.user_id&"|"&variables.qBeforeUpdateInquiry.user_id_siteIDType){
-			assignmentChanged=true;
-		}
-	}
-	if(assignmentChanged){
-		name="";
-		if(qData.inquiries_assign_email NEQ ""){
-			if(qData.inquiries_assign_name NEQ ""){
-				name=qData.inquiries_assign_name;
-			}else{
-				name=qData.inquiries_assign_email;
-			}
-		}else if(qData.user_id NEQ 0){
-			userStruct=application.zcore.user.getUserById(qData.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(qData.user_id_siteIDType));
-			if(structcount(userStruct)){
-				if(userStruct.user_first_name&userStruct.user_last_name EQ ""){
-					name=userStruct.user_username;
-				}else{
-					name=userStruct.user_first_name&' '&userStruct.user_last_name;
-				} 
-			}
-		}
-		if(name NEQ ""){
-			subject="Lead ###form.inquiries_id# assigned to #name# on #request.zos.globals.shortDomain#";
-		}else{
-			subject="Lead ###form.inquiries_id# added by #request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) on #request.zos.globals.shortDomain#";
-		}
-	}else if(form.method EQ "update" or form.method EQ "userUpdate"){
-		subject="Lead ###form.inquiries_id# updated by #request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) on #request.zos.globals.shortDomain#";
-	}else{
-		subject="Lead ###form.inquiries_id# added by #request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) on #request.zos.globals.shortDomain#";
-	}
-	savecontent variable="htmlWeb"{ 
-		echo('<p>&nbsp;</p>');
-		echo(form.inquiries_admin_comments);
-	}
 	savecontent variable="customNote"{
-		echo('<p>#subject#</p>');
-		if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
-			echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
-			if(form.inquiries_admin_comments NEQ ""){
-				echo(form.inquiries_admin_comments);
-			} 
-		}
+		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
+		<h3>#form.inquiries_feedback_subject#</h3>
+		#form.inquiries_feedback_comments#');
 	}
-	if(application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, 0) EQ 1){
+	if(request.zos.isTestServer){
 		// this should be happening on live server when the new lead interface is all done
 		request.noleadsystemlinks=true;
 	}
@@ -1582,43 +1499,92 @@ zArrDeferredFunctions.push(function(){
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	    iemailCom.getEmailTemplate(customNote, true);
 	} 
-	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
-	ts=contactCom.getDefaultMessageConfig();
-	ts.contact_id=request.zsession.user.contact_id;
-	//ts.debug=false;
-	ts.inquiries_id=form.inquiries_id;
-	ts.jsonStruct.subject=subject;
-	ts.jsonStruct.html=emailHTML;
-	ts.jsonStruct.htmlWeb=htmlWeb;
-	ts.messageStruct.site_id=request.zos.globals.id;
-	ts.filterContacts.managers=true; 
-	ts.privateMessage=true;
-	ts.enableCopyToSelf=true;
-	ts.jsonStruct.to=[{
-		name:form.assign_name,
-		email:form.assign_email
-	}];  
-	if(assignmentChanged){
-		ts.inquiries_status_id=3;
-	}
+	if(request.zos.isTestServer){
+		ts={  
+			contact_id:request.zsession.user.contact_id,  
+			debug:false,
+			inquiries_id:form.inquiries_id,
+			validHash:true, 
+			jsonStruct:{
+			   "headers":{
+			      "raw":"",
+			      "parsed":{ 
+			      }
+			   },
+			   "from":{
+			      "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			      "email":request.zsession.user.email
+			   },
+			   "to":[
+			      {
+			         "name":request.zsession.user.first_name&" "&request.zsession.user.last_name,
+			         "email":request.zsession.user.email,
+			         "plusId":"",
+			         "originalEmail":request.zsession.user.email
+			      }
+			   ],
+			   "cc":[],
+			   "bcc":[],
+			   "subject":"#form.inquiries_feedback_subject#", //[Lead ###form.inquiries_id# Updated] 
+			   "html":emailHTML,
+			   "htmlWeb":form.inquiries_feedback_comments,
+			   "htmlProcessed":"",
+			   "files":[/*
+			      {
+			         "size":2715,
+			         "filePath":"elkdgjicjkbkdbjf2.jpg",
+			         "fileName":"elkdgjicjkbkdbjf.jpg"
+			      }*/
+			   ],
+			   "plusId":"", // nothing for internal mail
+			   "size":0, // measure below
+			   "date":request.zos.mysqlnow,
+			   "version":1,
+			   "humanReplyStruct":{
+			      "isHumanReply":true,
+			      "humanTriggers":[],
+			      "roboScore":0,
+			      "roboTriggers":[],
+			      "score":1,
+			      "humanScore":1
+			   } 
+			},
+			messageStruct:{
+				site_id:request.zos.globals.id
+			},
+			filterContacts:{ managers:true },
+			privateMessage:true,
+			enableCopyToSelf:true
+		};  
 
-	// slightly inaccurate since it doesn't include all fields and attachment sizes
-	ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
-	//ts.debug=true;
-	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)#  
-	WHERE inquiries_id = #db.param(form.inquiries_id)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	inquiries_deleted=#db.param(0)#"; 
-	qInquiry=db.execute("qInquiry"); 
-	if(qInquiry.office_id NEQ "0"){
-		ts.filterContacts.offices=[qInquiry.office_id];
+		// slightly inaccurate since it doesn't include all fields and attachment sizes
+		ts.jsonStruct.size=len(ts.jsonStruct.subject&ts.jsonStruct.html);  
+		//ts.debug=true;
+		if(qCheck.office_id NEQ "0"){
+			ts.filterContacts.offices=[qCheck.office_id];
+		}
+		if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
+			ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
+		}  
+		//writedump(ts);abort;
+		//writedump(ts);	abort; 
+	 
+		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+		rs=contactCom.processMessage(ts);  
+	}else{ 
+		// send email to the assigned user.
+		toEmail=qCheck.user_email;
+		if(request.zos.isTestServer){
+			toEmail=request.zos.developerEmailTo;
+		}
+		ts={
+			to:toEmail,
+			from:request.fromEmail,
+			subject:"#form.inquiries_feedback_subject#",
+			html:emailHTML
+		};
+		application.zcore.email.send(ts);
 	}
-	if(structkeyexists(request.zos, 'manageLeadGroupIdList')){
-		ts.filterContacts.userGroupIds=listToArray(request.zos.manageLeadGroupIdList, ",");
-	}   
-	//writedump(ts);	abort; 
- 
-	rs=contactCom.processMessage(ts);   
 	</cfscript>
 </cffunction>
 
@@ -1626,7 +1592,6 @@ zArrDeferredFunctions.push(function(){
 	<cfscript>
 	db=request.zos.queryObject; 
 	rs={success:true}; 
-	structappend(form, variables.qBeforeUpdateInquiry, false);
 	result=application.zcore.functions.zUpdateLead(form);  
 	if(result EQ false){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
@@ -1634,8 +1599,8 @@ zArrDeferredFunctions.push(function(){
 	}else{
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead Updated.");
 	}
-	sendLeadUpdatedEmail("Lead ###form.inquiries_id# was updated");
-	structdelete(variables, 'qBeforeUpdateInquiry');
+	//sendLeadUpdatedEmail("Lead ###form.inquiries_id# was updated");
+
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1663,10 +1628,9 @@ zArrDeferredFunctions.push(function(){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be added.", false,true);
 		application.zcore.status.displayReturnJson(request.zsid);
 	}else{
-		request.zsid=application.zcore.status.getNewId();
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead Added.");
 	}
-	sendLeadUpdatedEmail("Lead ###form.inquiries_id# was added");
+	//sendLeadUpdatedEmail("Lead ###form.inquiries_id# was added");
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1697,7 +1661,7 @@ zArrDeferredFunctions.push(function(){
 	WHERE site_id =#db.param(request.zos.globals.id)# and 
 	inquiries_deleted = #db.param(0)# and 
 	inquiries_id=#db.param(form.inquiries_id)#";
-	if(not application.zcore.user.checkGroupAccess("administrator")){
+	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" and user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 	}
 	rs.qData=db.execute("qData");
@@ -1728,7 +1692,7 @@ zArrDeferredFunctions.push(function(){
 	if(form.method EQ "userInsert" or form.method EQ "userUpdate"){ 
 		db.sql&=getUserLeadFilterSQL(db); 
 	}else{
-		if(not application.zcore.user.checkGroupAccess("administrator")){
+		if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 			db.sql&=" and inquiries.user_id = #db.param(request.zsession.user.id)# and user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 		}
 	}
@@ -1741,6 +1705,7 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="getEditForm" localmode="modern" access="private">
 	<cfscript>
 	var db=request.zos.queryObject; 
+	
 	loadListLookupData();
 	
 	rs={
@@ -1890,14 +1855,10 @@ zArrDeferredFunctions.push(function(){
 			application.zcore.functions.zInputSelectBox(selectStruct);
 		}
 	}*/
-	var assignCom = createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.assign");
-	savecontent variable="field"{   
-		if(form.method EQ "userEdit"){
-			assignCom.getAssignLead("user");
-		}else{
-			assignCom.getAssignLead("member");
+	var ass = new Assign();
+		savecontent variable="field"{  
+			echo(ass.getAssignLead(""));
 		}
-	}
 	arrayAppend(fs, {label:'Assign To', field:field});
 	//arrayAppend(fs, {label:'Assign To', field:field});
 
@@ -1976,9 +1937,6 @@ zArrDeferredFunctions.push(function(){
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
 	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id');
 	form.uid=application.zcore.functions.zso(form, 'uid');
-	form.inquiries_interested_in_model=application.zcore.functions.zso(form, 'inquiries_interested_in_model');
-	form.inquiries_interested_in_category=application.zcore.functions.zso(form, 'inquiries_interested_in_category');
- 
 	arrU=listToArray(form.uid, '|');
 	form.selected_user_id=0;
 	if(arrayLen(arrU) EQ 2){
@@ -2003,12 +1961,9 @@ zArrDeferredFunctions.push(function(){
 	inquiries.inquiries_datetime <> #db.param('')# and 
 	inquiries_parent_id = #db.param(0)# and 
 	inquiries_deleted = #db.param(0)# ";
-	//THIS FUNC IS INCOMPLETE getUserLeadFilterSQL
-	//Address book will display users in this user's office at salesperson level
-	//salesperson either created it or it was assigned
 	if(form.method EQ "userIndex"){
 		db.sql&=getUserLeadFilterSQL(db);
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" AND user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -2065,18 +2020,11 @@ zArrDeferredFunctions.push(function(){
 	}else{
 		db.sql&=" and inquiries.inquiries_status_id = #db.param(form.inquiries_status_id)# ";
 	}
-	if(form.inquiries_interested_in_model NEQ ""){ 
-		db.sql&=" and inquiries.inquiries_interested_in_model like #db.param("%"&form.inquiries_interested_in_model&"%")# ";
-	}
-	if(form.inquiries_interested_in_category NEQ ""){ 
-		db.sql&=" and inquiries.inquiries_interested_in_category like #db.param("%"&form.inquiries_interested_in_category&"%")# ";
-	}
-
 	db.sql&=" and inquiries_parent_id = #db.param(0)# ";
 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #getUserLeadFilterSQL(db)#";
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -2130,7 +2078,7 @@ zArrDeferredFunctions.push(function(){
 	and inquiries_parent_id = #db.param(0)#"; 
 	if(form.method EQ "userIndex"){
 		db.sql&=" #getUserLeadFilterSQL(db)#";
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
 	}
@@ -2172,12 +2120,6 @@ zArrDeferredFunctions.push(function(){
 			db.sql&=" and inquiries_phone_time<>#db.param('')#";
 		} 
 	} 
-	if(form.inquiries_interested_in_model NEQ ""){ 
-		db.sql&=" and inquiries.inquiries_interested_in_model like #db.param("%"&form.inquiries_interested_in_model&"%")# ";
-	}
-	if(form.inquiries_interested_in_category NEQ ""){ 
-		db.sql&=" and inquiries.inquiries_interested_in_category like #db.param("%"&form.inquiries_interested_in_category&"%")# ";
-	}
 	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 
 
@@ -2220,7 +2162,7 @@ zArrDeferredFunctions.push(function(){
 		application.zcore.functions.zInputSelectBox(selectStruct);
 	}
 	arrayAppend(rs.searchFields, {
-		groupStyle:'width:320px; max-width:100%; ',
+		groupStyle:'width:280px; max-width:100%; ',
 		fields:[{
 			label:"Name",
 			formField:'<input type="search" name="inquiries_name" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
@@ -2231,25 +2173,25 @@ zArrDeferredFunctions.push(function(){
 			label:"Email",
 			formField:'<input type="text" name="search_email" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_email')#" /> ',
 			field:"search_email",
-			labelStyle:'width:90px;',
+			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Phone",
 			formField:'<input type="text" name="search_phone" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_phone')#" />',
 			field:"search_phone",
-			labelStyle:'width:90px;',
+			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Type",
 			formField:typeField,
 			field:"inquiries_type_id",
-			labelStyle:'width:90px;',
+			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Status",
 			formField:statusField,
 			field:"inquiries_status_id",
-			labelStyle:'width:90px;',
+			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		}]
 	});
@@ -2267,20 +2209,7 @@ zArrDeferredFunctions.push(function(){
 			field:"",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
-		},{
-			label:"Model",
-			formField:'<input type="text" name="inquiries_interested_in_model" value="#form.inquiries_interested_in_model#">',
-			field:"",
-			labelStyle:'width:60px;',
-			fieldStyle:'width:200px;'
-		},{
-			label:"Category",
-			formField:'<input type="text" name="inquiries_interested_in_category" value="#form.inquiries_interested_in_category#">',
-			field:"",
-			labelStyle:'width:60px;',
-			fieldStyle:'width:200px;'
-		}		
-		]
+		}]
 	});
 
 	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
@@ -2444,7 +2373,7 @@ zArrDeferredFunctions.push(function(){
 		arrayAppend(adminButtons, {
 			title:"View",
 			icon:"eye",
-			link:'/z/inquiries/admin/feedback/viewContact?fromSource=lead&contactTab=4&zPageId=#form.zPageId#&contact_id=#row.contact_id#&inquiries_id=#row.inquiries_id#',
+			link:'/z/inquiries/admin/feedback/view?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#',
 			label:""
 		}); 
 
@@ -2476,7 +2405,7 @@ zArrDeferredFunctions.push(function(){
 		arrayAppend(adminButtons, {
 			title:"View",
 			icon:"eye",
-			link:'/z/inquiries/admin/manage-inquiries/userViewContact?fromSource=lead&contactTab=4&zPageId=#form.zPageId#&contact_id=#row.contact_id#&inquiries_id=#row.inquiries_id#',
+			link:'/z/inquiries/admin/manage-inquiries/userView?inquiries_id=#row.inquiries_id#&amp;zPageId=#form.zPageId#',
 			label:""
 		}); 
 		if(application.zcore.functions.zso(request.zos.globals, 'enableUserAssign', true, 0) NEQ ""){

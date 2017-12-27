@@ -4,14 +4,60 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	hCom=0;
-	form.returnJSON=application.zcore.functions.zso(form, 'returnJSON', true, 0);
-
+	form.returnJSON		= application.zcore.functions.zso(form, 'returnJSON', true, 0);
+	form.inquiries_id	= application.zcore.functions.zso(form, 'inquiries_id', true, 0);
+	form.contact_id 	= application.zcore.functions.zso(form, 'contact_id', true, 0);
 	variables.inquiriesCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
 
 	form.zPageId=application.zcore.functions.zso(form, 'zPageId');
+	if(form.method EQ "userView" or form.method EQ "userViewContact" or form.method EQ "viewContact"){
+		hasAccessToContact=false;
+		if(form.contact_id NEQ 0 ){
+			db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE ";
+			db.sql&=" contact_id = #db.param(form.contact_id)#";
+			db.sql&=" AND contact_deleted = #db.param(0)#  
+			AND contact.site_id = #db.param(request.zos.globals.id)#";
+			if(form.method EQ "userView" or form.method EQ "userViewContact"){
+				//WHO ARE WE? DEALER / MANAGER / SALES		
+		    	db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db);
+			}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
+				//WE ARE AGENT
+				db.sql&=" and contact.contact_assigned_user_id = #db.param(request.zsession.user.id)#  
+				AND contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
+			}
+			qContact=db.execute("qContact");
+			if(qContact.recordcount){
+				hasAccessToContact=true;
+			}else{
+				application.zcore.functions.zRedirect('/z/inquiries/admin/manage-contact/index');
+			}
+		}
+		db.sql="SELECT * 
+		from #db.table("inquiries", request.zos.zcoreDatasource)#
+		WHERE ";
+		db.sql&=" inquiries_id = #db.param(form.inquiries_id)# ";
+		db.sql&=" AND inquiries_deleted = #db.param(0)# and
+		inquiries.site_id = #db.param(request.zos.globals.id)#";
+		if(form.method EQ "userView" or form.method EQ "userViewContact"){ 
+		    db.sql&=variables.inquiriesCom.getUserLeadFilterSQL(db); 
+		}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){ 
+			db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
+				user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
+		}
+		db.sql&=" LIMIT #db.param(0)#, #db.param(1)#";
+		variables.qInquiry=db.execute("qInquiry");
+		if(variables.qInquiry.recordcount EQ 0){
+			if(form.returnJSON EQ 1){
+				application.zcore.functions.zReturnJson({ success:false, errorMessage:"You don't have access to manage this lead or contact."});
+			}else if(form.inquiries_id NEQ 0 and not hasAccessToContact){
+				application.zcore.functions.zRedirect('/z/inquiries/admin/manage-inquiries/index');
+			} 
+		}	
+	}
 	if(form.method EQ "userView" or form.method EQ "userViewContact"){
-
+		variables.inquiriesCom.userInit();
 	}else{
+		variables.inquiriesCom.init();
 	    application.zcore.adminSecurityFilter.requireFeatureAccess("Leads");
 
 	    if(form.method EQ "viewContact"){
@@ -31,6 +77,190 @@
 			hCom.displayHeader();
 		}
 	}
+	</cfscript>
+</cffunction>
+
+<cffunction name="fixPhoneFormats" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	setting requesttimeout="10000";
+	c=0;
+	db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE contact_phone1_formatted = #db.param('')# AND contact_phone1 <> #db.param('')# and contact_deleted=#db.param(0)# and site_id <> #db.param(-1)#";
+	q=db.execute("q");
+	for(row in q){
+		c++;
+		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+		contact_phone1_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone1))#,
+		contact_phone2_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone2))#,
+		contact_phone3_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.contact_phone3))#
+		WHERE contact_deleted=#db.param(0)# and 
+		site_id = #db.param(row.site_id)# and 
+		contact_id=#db.param(row.contact_id)# ";
+		db.execute("qUpdate");
+
+	}
+	
+	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE inquiries_phone1_formatted = #db.param('')# AND inquiries_phone1 <> #db.param('')# and 
+	inquiries_deleted=#db.param(0)# and site_id <> #db.param(-1)#
+	";
+	c2=0;
+	q=db.execute("q");
+	for(row in q){
+		c2++;
+		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET 
+		inquiries_phone1_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone1))#,
+		inquiries_phone2_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone2))#,
+		inquiries_phone3_formatted=#db.param(application.zcore.functions.zFormatInquiryPhone(row.inquiries_phone3))#
+		WHERE inquiries_deleted=#db.param(0)# and 
+		site_id = #db.param(row.site_id)# and 
+		inquiries_id=#db.param(row.inquiries_id)# ";
+		db.execute("qUpdate");
+	}
+	echo(c&":"&c2);
+	abort;
+	</cfscript>
+</cffunction>
+<cffunction name="fixContactIdStatus" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	echo(application.zcore.functions.zso(application, 'fixContactIdStatus'));
+	</cfscript>
+</cffunction>
+
+<!--- 
+/z/inquiries/admin/feedback/fixContactIdStatus
+/z/inquiries/admin/feedback/fixContactId
+ --->
+<cffunction name="fixContactId" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	setting requesttimeout="10000";
+	/*
+	db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# WHERE 
+	site_id <> #db.param(-1)# and contact_deleted=#db.param(0)#";
+	qContact=db.execute("qContact");
+	contactEmailStruct={};
+	contactPhoneStruct={};
+	for(row in qContact){
+
+	}*/
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	db.sql="SELECT * FROM #db.table("site", request.zos.zcoreDatasource)# WHERE 
+	site_id <>#db.param(-1)# and site_deleted=#db.param(0)# and site_active=#db.param(1)# ";
+	qSite=db.execute("qSite");
+	for(site in qSite){
+		offset=0;
+		fixCount=0;
+		rowCount=0; 
+		while(true){
+
+			// process in reverse order to have newest contact info take precedence
+			db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# FORCE INDEX(`inquiries_datetime`) WHERE 
+			site_id = #db.param(site.site_id)# and inquiries_deleted=#db.param(0)# 
+			ORDER BY inquiries_datetime DESC
+			LIMIT #db.param(offset)#, #db.param(1000)#";
+			qInquiry=db.execute("qInquiry");
+			if(qInquiry.recordcount EQ 0){
+				break;
+			}
+			for(row in qInquiry){
+				application.fixContactIdStatus="Inquiry rows processed: #rowCount# | contact_id updates: #fixCount#";
+				rowCount++;
+				// can't create contacts for these
+				if(row.inquiries_email EQ "" and row.inquiries_phone1 EQ ""){
+					continue;
+				}
+				if(row.contact_id NEQ 0){
+					// skip the ones already done
+					continue;
+				}
+				ts={ 
+					dataStruct:row,
+					site_id:row.site_id
+				};
+				rs=contactCom.storeContactForInquiry(ts);
+				if(rs.success){
+					fixCount++;
+					db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+					set contact_id=#db.param(rs.contact_id)# 
+					WHERE 
+					inquiries_id=#db.param(row.inquiries_id)#  and 
+					site_id= #db.param(row.site_id)# and 
+					inquiries_deleted=#db.param(0)# ";
+					db.execute("qUpdate"); 
+				}
+
+			}
+			offset+=1000;
+		} 
+	}
+	echo(application.fixContactIdStatus);
+	structdelete(application, 'fixContactIdStatus');
+	abort;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="fixUserContact" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	setting requesttimeout="10000"; 
+	contactCom=createobject("component", "zcorerootmapping.com.app.contact"); 
+
+	db.sql="select * from ( #db.table("user", request.zos.zcoreDatasource)#, 
+	#db.table("site", request.zos.zcoreDatasource)# )
+	WHERE site.site_id = user.site_id and 
+	user.site_id <> #db.param(0)# and 
+	user_deleted=#db.param(0)# and 
+	user_active=#db.param(1)# and 
+	site_active=#db.param(1)# and 
+	site_deleted=#db.param(0)# ";
+	qUser=db.execute("qUser"); 
+	rowCount=0;
+	contactCount=0;
+	for(row in qUser){
+		rs=contactCom.getContactByEmail(row.user_username, row.user_first_name&" "&row.user_last_name, row.site_id);
+		rowCount++; 
+	}
+
+	echo('done | rowCount:#rowCount#');
+	abort;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="fixFeedback" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject;
+	setting requesttimeout="10000";
+
+	db.sql="SELECT * FROM #db.table("site", request.zos.zcoreDatasource)# WHERE 
+	site_id <>#db.param(-1)# and site_deleted=#db.param(0)# and site_active=#db.param(1)# ";
+	qSite=db.execute("qSite");
+	for(site in qSite){
+
+		db.sql="update (
+		#db.table("inquiries_feedback", request.zos.zcoreDatasource)#, 
+		#db.table("user", request.zos.zcoreDatasource)#, 
+		#db.table("contact", request.zos.zcoreDatasource)#
+		) set inquiries_feedback.contact_id=contact.contact_id WHERE 
+		inquiries_feedback.inquiries_feedback_deleted=#db.param(0)# and 
+		user.user_deleted=#db.param(0)# and 
+		user.user_id = inquiries_feedback.user_id and 
+		user.site_id = if(inquiries_feedback.user_id_siteIDType = #db.param(1)#, #db.param(site.site_id)#, 
+			if(inquiries_feedback.user_id_siteIDType = #db.param(2)#, #db.param(site.site_parent_id)#, 
+			if(inquiries_feedback.user_id_siteIDType = #db.param(3)#, #db.param(1)#, 
+			if(inquiries_feedback.user_id_siteIDType = #db.param(4)#, #db.param(0)#, #db.param(site.site_id)# ))))  and 
+		user_active=#db.param(1)# and 
+		contact.site_id=inquiries_feedback.site_id and 
+		contact.site_id=#db.param(site.site_id)# and 
+		contact_email = user_username and  
+		contact.contact_deleted=#db.param(0)# 
+		";
+		db.execute("qUpdate");
+	} 
+
+	echo('done');
+	abort;
 	</cfscript>
 </cffunction>
 
@@ -139,77 +369,136 @@
 </cffunction>
 
 
-<cffunction name="userViewContact" localmode="modern" access="remote" roles="user">
-	<cfscript>
-	// need to secure the contact_id by checking if user has access to 1 or more inquiries for this contact.
-	// already wrote this somewhere else (send-message or manage-inquiries?)
-
-	throw("not implemented yet");
-	viewContact();
-	</cfscript>
-</cffunction>
 
 <!--- 
-http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewContact?contact_id=15
+/z/inquiries/admin/feedback/viewContact?contact_id=15
  --->
 <cffunction name="viewContact" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	db=request.zos.queryObject; 
 	currentMethod=form.method;
-	variables.init();
 	// need to validate based on contact_id instead of inquiries_id,  init is disabled for now.
-	//variables.init();
+	init();  
+	if(currentMethod EQ "userViewContact"){
+		currentLink="/z/inquiries/admin/manage-inquiries/userViewContact";
+	}else{
+		currentLink="/z/inquiries/admin/feedback/viewContact";
+	}
 
 	application.zcore.skin.includeCSS("/z/font-awesome/css/font-awesome.min.css");
+	form.zPageId=application.zcore.functions.zso(form, 'zPageId', true);
+	form.fromSource=application.zcore.functions.zso(form, 'fromSource', false, 'contact');
 	form.inquiries_id=application.zcore.functions.zso(form, 'inquiries_id', true, 0);
 	form.contact_id=application.zcore.functions.zso(form, 'contact_id', true, 0);
 	form.contactTab=application.zcore.functions.zso(form, 'contactTab', true, 1); 
 	contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 	contact = contactCom.getContactById(form.contact_id, request.zos.globals.id);
 	if(structcount(contact) EQ 0){
-		application.zcore.status.setStatus(request.zsid, "Contact doesn't exist.", form, true);
-		if(request.zos.isTestServer){
-			throw("contact missing - remove this when done");
-		}
-		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-contact/index?zsid=#request.zsid#");
-	} 
-	contactName="";
-	if(contact.contact_first_name EQ ""){
-		if(contact.contact_email EQ ""){
-			if(contact.contact_phone1 EQ ""){
-				contactName="Contact ##"&contact.contact_id;
+		if(form.contact_id NEQ 0){
+
+			// TODO: probably remove this code eventually since it is trying to fix invalid inquiry records, which shouldn't be possible
+			if(variables.qInquiry.recordcount){
+				for(row in variables.qInquiry){
+					if(row.inquiries_email NEQ "" or row.inquiries_phone1 NEQ ""){
+						ts={ 
+							dataStruct:row,
+							site_id:request.zos.globals.id
+						};
+						rs=contactCom.storeContactForInquiry(ts);
+						if(rs.success){
+							db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET 
+							contact_id=#db.param(rs.contact_id)#, 
+							inquiries_updated_datetime=#db.param(request.zos.mysqlnow)# 
+							WHERE contact_id=#db.param(form.contact_id)# and 
+							inquiries_deleted=#db.param(0)# and 
+							site_id = #db.param(request.zos.globals.id)#";
+							db.execute("qExecute");
+							db.sql="UPDATE #db.table("inquiries_x_contact", request.zos.zcoreDatasource)# SET 
+							contact_id=#db.param(rs.contact_id)#, 
+							inquiries_x_contact_updated_datetime=#db.param(request.zos.mysqlnow)# 
+							WHERE contact_id=#db.param(form.contact_id)# and 
+							inquiries_x_contact_deleted=#db.param(0)# and 
+							site_id = #db.param(request.zos.globals.id)#";
+							db.execute("qExecute");
+							application.zcore.functions.zRedirect(currentLink&"?zPageId=#form.zPageId#&contactTab=#form.contactTab#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&contact_id=#form.contact_id#");
+						}else{
+							application.zcore.status.setStatus(request.zsid, "Contact doesn't exist.", form, true); 
+							application.zcore.functions.zRedirect("/z/inquiries/admin/manage-contact/index?zsid=#request.zsid#");
+						}
+					}
+				}
 			}else{
-				contactName=contact.contact_phone1;
+				application.zcore.status.setStatus(request.zsid, "Contact doesn't exist.", form, true); 
+				application.zcore.functions.zRedirect("/z/inquiries/admin/manage-contact/index?zsid=#request.zsid#");
+			}
+		}
+		contactName="";
+		
+	}else{
+		contactName="";
+		if(contact.contact_first_name EQ ""){
+			if(contact.contact_email EQ ""){
+				if(contact.contact_phone1 EQ ""){
+					contactName="Contact ##"&contact.contact_id;
+				}else{
+					contactName=contact.contact_phone1;
+				}
+			}else{
+				contactName=contact.contact_email;
 			}
 		}else{
-			contactName=contact.contact_email;
+			contactName=contact.contact_first_name&" "&contact.contact_last_name;
 		}
+		/*echo('<div class="z-float z-mb-10">
+			<h3><a href="/z/inquiries/admin/manage-contact/index">Contacts</a> /  #contactName#</h3>
+		</div>');*/
+	} 
+
+	variables.inquiriesCom.displayQuickMenu();
+	/*echo('<div class="z-float z-mb-10">
+		<h2>Leads</h2>
+	</div>');  */
+	if(currentMethod EQ "userViewContact"){
+		contactLink="/z/inquiries/admin/manage-contact/userIndex";
+		leadLink="/z/inquiries/admin/manage-inquiries/userIndex?zPageId=#form.zPageId#";
 	}else{
-		contactName=contact.contact_first_name&" "&contact.contact_last_name;
+		contactLink="/z/inquiries/admin/manage-contact/index";
+		leadLink="/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#";
 	}
-	</cfscript>   
-	<div class="z-float z-mb-10">
-		<h3><a href="/z/inquiries/admin/manage-contact/index">Contacts</a> /  #contactName#</h3>
-	</div>
+	</cfscript>
+	
 	<div class="z-float z-manager-lead-tab-buttons">
 		<ul>
-			<li><a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=1&amp;contact_id=#form.contact_id#" class=" <cfif form.contactTab EQ 1>active</cfif>"><i class="fa fa-address-card" aria-hidden="true"></i> Contact</a></li>
-			<li><a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=2&amp;contact_id=#form.contact_id#" class="<cfif form.contactTab EQ 2>active</cfif>"><i class="fa fa-list" aria-hidden="true"></i> Leads</a></li>
+			<li><a href="#contactLink#"><i class="fa fa-list" aria-hidden="true"></i> Contacts</a></li>
+			<li><a href="#leadLink#"><i class="fa fa-list" aria-hidden="true"></i> Leads</a></li>
 			<cfif form.inquiries_id NEQ 0>
-				<li><div class="z-manager-lead-unclickable-button <cfif form.contactTab EQ 4>active</cfif>"><i class="fa fa-envelope-open" aria-hidden="true"></i> <div style="float:left;">Lead ###form.inquiries_id#</div> 
-						<a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=2&amp;contact_id=#form.contact_id#" class="z-manager-lead-close-button"><i class="fa fa-times" aria-hidden="true" style="margin-right:0px;"></i></a>
+				<li><div class="z-manager-lead-unclickable-button <cfif form.contactTab EQ 4>active</cfif>">
+					<a href="#currentLink#?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#" style="text-decoration:none; color:##000; float:left;">
+						<i class="fa fa-envelope-open" aria-hidden="true"></i> <div style=" float:left;">Lead ###form.inquiries_id#</div></a>
+					<cfscript>
+					if(form.fromSource EQ "lead"){
+						link=leadLink;
+					}else{
+						link="#currentLink#?contactTab=2&amp;contact_id=#form.contact_id#&inquiries_id=&fromSource=#form.fromSource#&zPageId=#form.zPageId#";
+					}
+					</cfscript>
+						<a href="#link#" class="z-manager-lead-close-button"><i class="fa fa-times" aria-hidden="true" style="margin-right:0px;"></i></a>
 					</div></li>
 			</cfif>
-
-			<cfif request.zos.isTestServer and contact.contact_email NEQ "">
-				<cfif currentMethod EQ "userViewContact"> 
-					<li><a href="/z/inquiries/admin/send-message/userIndex?contact_id=#contact.contact_id#"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Compose" style=" text-decoration:none;"><i class="fa fa-pencil-square" aria-hidden="true" style="padding-right:5px;"></i><span>Compose</span></a></li>
-				<cfelse>
-					<li><a href="/z/inquiries/admin/send-message/index?contact_id=#contact.contact_id#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Compose" style=" text-decoration:none;"><i class="fa fa-pencil-square" aria-hidden="true" style="padding-right:5px;"></i><span>Compose</span></a></li>
-				</cfif>
+			<cfif form.contact_id NEQ 0>
+				<li><a href="#currentLink#?contactTab=1&amp;contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#" class=" <cfif form.contactTab EQ 1>active</cfif>"><i class="fa fa-address-card" aria-hidden="true"></i> Contact</a></li>
+				<li><a href="#currentLink#?contactTab=2&amp;contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#" class="<cfif form.contactTab EQ 2>active</cfif>"><i class="fa fa-list" aria-hidden="true"></i> Contact Leads</a></li> 
 			</cfif>
-			<cfif request.zos.isTestServer and form.method EQ "#currentMethod#">
-				<li><a href="/z/inquiries/admin/feedback/#currentMethod#?contactTab=3&amp;contact_id=#form.contact_id#" class="<cfif form.contactTab EQ 3>active</cfif>"><i class="fa fa-globe" aria-hidden="true"></i> Site Usage</a></li>
+
+			<cfif form.contact_id NEQ 0>
+				<cfif application.zcore.functions.zvar("enablePlusEmailRouting", request.zos.globals.id, "0") EQ 1 and contact.contact_email NEQ "">
+					<cfif currentMethod EQ "userViewContact"> 
+						<li><a href="/z/inquiries/admin/send-message/userIndex?contact_id=#contact.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#"  onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Compose" style=" text-decoration:none;"><i class="fa fa-pencil-square" aria-hidden="true" style="padding-right:5px;"></i><span>Compose</span></a></li>
+					<cfelse>
+						<li><a href="/z/inquiries/admin/send-message/index?contact_id=#contact.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" title="Compose" style=" text-decoration:none;"><i class="fa fa-pencil-square" aria-hidden="true" style="padding-right:5px;"></i><span>Compose</span></a></li>
+					</cfif>
+				</cfif> 
+				<li><a href="#currentLink#?contactTab=3&amp;contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#&fromSource=#form.fromSource#&zPageId=#form.zPageId#" class="<cfif form.contactTab EQ 3>active</cfif>"><i class="fa fa-globe" aria-hidden="true"></i> Site Usage</a></li> 
 			</cfif>
 		</ul>
 	</div>
@@ -243,8 +532,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			<div class="z-float">
 				<!--- allow editing a contact from here, and refresh the page here instead of manage-contact --->
 				<h3 style="display:inline-block;">Contact</h3> &nbsp;&nbsp;
-				<a href="/z/inquiries/admin/manage-contact/edit?contact_id=#form.contact_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-button z-contact-edit-button">Edit</a>
-				TODO: Assign button?
+				<a href="/z/inquiries/admin/manage-contact/edit?contact_id=#form.contact_id#&modalpopforced=1&editSource=contact" onclick="zShowModalStandard(this.href, 4000, 4000, true, true); return false;" class="z-button z-contact-edit-button">Edit</a> 
 			</div>
 			<cfscript> 
 			displayContact(contact);
@@ -254,7 +542,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 
 		<div class="z-float z-contact-tab2 z-manager-lead-tab"> 
 			<div class="z-float">
-				<h3>Leads</h3>
+				<h3>Leads From #contactName#</h3>
 			</div>
 			<div class="z-float z-contact-container">
 				<cfscript>
@@ -267,7 +555,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 				}; 
 				if(currentMethod EQ "userViewContact"){
 					ts.mode="user";
-				}
+				} 
 				displayContactLeads(ts);
 				</cfscript>
 			</div>
@@ -275,14 +563,27 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	<cfelseif form.contactTab EQ 3>		
 		<div class="z-float z-contact-tab3 z-manager-lead-tab"> 
 			<div class="z-float">
-				<h3>Site Usage</h3>
+				<h3>Site Usage For #contactName#</h3>
 			</div>
 			<div class="z-float z-contact-container"> 
 				<!--- user data like saved searches / site searches / first page / partial form data /  --->
 				<cfscript>
-				if(application.zcore.app.siteHasApp("listing")){
-					echo('<h2>Saved Listing Searches</h2>');
-					// TODO: pull from existing lead detail?
+				if(application.zcore.app.siteHasApp("listing")){ 
+
+					db.sql="SELECT * FROM #db.table("mls_saved_search", request.zos.zcoreDatasource)# mls_saved_search 
+					WHERE saved_search_email<>#db.param('')# and 
+					mls_saved_search_deleted = #db.param(0)# and 
+					saved_search_email =#db.param(t.inquiries_email)# and 
+					site_id =#db.param(request.zOS.globals.id)#";
+					qSearch=db.execute("qSearch");
+					if(qSearch.recordcount NEQ 0){
+						echo('<h2>Saved Listing Searches</h2>');
+						echo('<div class="z-float z-mb-10">');
+						for(row in qSearch){
+							searchStr=StructNew();
+							echo('Saved Search #i#: #ArrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(row),', ')#<br /><br />');
+						}
+					}
 				}
 				</cfscript> 
 			</div>
@@ -290,9 +591,9 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	<cfelseif form.contactTab EQ 4>		
 		<div class="z-float z-contact-tab3 z-manager-lead-tab"> 
 			<div class="z-float">
-				<div class="z-3of4 z-p-0">
+				<div class="z-3of4 z-fluid-at-992 z-p-0">
 					<cfscript> 
-					variables.inquiriesCom.view(); 
+					qInquiry=variables.inquiriesCom.view(); 
 			        </cfscript> 
 
 					<cfscript>
@@ -300,8 +601,61 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 					displayLeadFeedback(ts);
 					</cfscript>
 			    </div>
-			    <div class="z-1of4 z-p-0">
+			    <div class="z-1of4 z-fluid-at-992 z-p-0">
 					<cfscript> 
+					arrManager=[];
+					arrAssigned=[];
+					ccArray = [];
+					emailUniqueStruct={};
+					isForceOfficeSubscribed=false;
+					isForceSubscribed=false;
+					if(qInquiry.office_id NEQ 0){
+						// get the office_manager_email_list for this lead, and prevent deleting these
+						ts={
+							ids:[qInquiry.office_id],
+							site_id:request.zos.globals.id
+						}
+						arrOffice=application.zcore.user.getOffices(ts); 
+						if(arrayLen(arrOffice)){ 
+							arrTemp=listToArray(arrOffice[1].office_manager_email_list, ",");
+							for(email in arrTemp){
+								contact=contactCom.getContactByEmail(email, "", request.zos.globals.id);
+								arrayAppend(arrManager, contact);
+								emailUniqueStruct[trim(email)]=contact;
+								if(contact.contact_id EQ request.zsession.user.contact_id){
+									isForceOfficeSubscribed=true;
+								}
+							}
+						}
+					} 
+					if(qInquiry.user_id NEQ 0){
+						// add user
+						userStruct=application.zcore.user.getUserById(qInquiry.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(qInquiry.user_id_siteidtype));
+						if(structcount(userStruct) NEQ 0){
+							contact=contactCom.getContactByEmail(userStruct.user_email, userStruct.user_first_name&" "&userStruct.user_last_name, request.zos.globals.id);
+							arrayAppend(arrAssigned, contact);
+							emailUniqueStruct[userStruct.user_username]=contact; 
+							if(contact.contact_id EQ request.zsession.user.contact_id){
+								isForceSubscribed=true;
+
+							}
+						}
+					}
+					if(qInquiry.inquiries_assign_email NEQ 0){
+						arrEmail=listToArray(qInquiry.inquiries_assign_email, ",");
+						for(email in arrEmail){
+							if(arrayLen(arrEmail) EQ 1){
+								contact=contactCom.getContactByEmail(email, qInquiry.inquiries_assign_name, request.zos.globals.id);
+							}else{
+								contact=contactCom.getContactByEmail(email, "", request.zos.globals.id);
+							}
+							emailUniqueStruct[trim(email)]=contact;
+							arrayAppend(arrAssigned, contact); 
+							if(contact.contact_id EQ request.zsession.user.contact_id){
+								isForceSubscribed=true;
+							}
+						}
+					} 
 					// display list of contacts attached to this lead. 
 			 
 					db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_type, contact.contact_id, contact.contact_email, contact.contact_first_name, contact.contact_last_name
@@ -315,14 +669,12 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 							AND contact.contact_deleted = #db.param( 0 )#
 						ORDER BY contact.contact_email ASC';
 					qContact = db.execute( 'qContact' );
-
 					toArray = [];
-					ccArray = [];
 					bccArray=[];
 
 					isSubscribed=false;
 					if ( qContact.recordcount GT 0 ) {
-						for ( row in qContact ) {
+						for ( row in qContact ) { 
 							if(row.contact_id EQ request.zsession.user.contact_id){
 								isSubscribed=true;
 								continue;
@@ -338,39 +690,71 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 					} 
 					echo('<h3>Notification List</h3>');
 					echo('<p>These people will receive email alerts when this lead is updated.</p>');
+					
 					echo('<div class="z-float">');
-						echo('<div class="leadSubscribeLinkContainer">');
-							if(form.method EQ "viewContact"){
-								unsubscribeLink="/z/inquiries/admin/manage-inquiries/unsubscribeToLead?inquiries_id=#form.inquiries_id#";
-								subscribeLink="/z/inquiries/admin/manage-inquiries/subscribeToLead?inquiries_id=#form.inquiries_id#";
-							}else{
-								unsubscribeLink="/z/inquiries/admin/manage-inquiries/userUnsubscribeToLead?inquiries_id=#form.inquiries_id#"; 
-								subscribeLink="/z/inquiries/admin/manage-inquiries/userSubscribeToLead?inquiries_id=#form.inquiries_id#";
-							}
-							if(isSubscribed){
-								echo('<p>Me <a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadUnsubscribeLink z-manager-search-button">Unsubscribe</a></p>');
-							}else{	
-								echo('<p>You are not subscribed to this message yet.</p>'); 
-								echo('<p><a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadSubscribeLink z-manager-search-button">Subscribe</a></p>');
-							}
-						echo('</div>');
+						if(isForceSubscribed){
+							echo('<h3>Yourself</h3>');
+							echo('<p>You''re assigned to this lead.</p>');
+						}else if(isForceOfficeSubscribed){
+							echo('<h3>Yourself</h3>');
+							echo('<p>You''re an office manager for this lead.</p>');
+						}else{
+							echo('<h3>Yourself</h3>');
+							echo('<div class="leadSubscribeLinkContainer">');
+								if(form.method EQ "viewContact"){
+									unsubscribeLink="/z/inquiries/admin/manage-inquiries/unsubscribeToLead?inquiries_id=#form.inquiries_id#";
+									subscribeLink="/z/inquiries/admin/manage-inquiries/subscribeToLead?inquiries_id=#form.inquiries_id#";
+								}else{
+									unsubscribeLink="/z/inquiries/admin/manage-inquiries/userUnsubscribeToLead?inquiries_id=#form.inquiries_id#"; 
+									subscribeLink="/z/inquiries/admin/manage-inquiries/userSubscribeToLead?inquiries_id=#form.inquiries_id#";
+								}
+								if(isSubscribed){
+									echo('<p>You''re subscribed to this lead.</p><p><a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadUnsubscribeLink z-manager-search-button">Unsubscribe</a></p>');
+								}else{	
+									echo('<p>You are not subscribed to this message yet.</p>'); 
+									echo('<p><a href="##" data-subscribe-link="#subscribeLink#" data-unsubscribe-link="#unsubscribeLink#" class="leadSubscribeLink z-manager-search-button">Subscribe</a></p>');
+								}
+							echo('</div>');
+						}
 						echo('<table class="table-list" style="width:100%;">');
+						if(arrayLen(arrAssigned)){
+							echo('</table><h3 style="margin-top:10px;margin-bottom:0px;">Assigned:</h3>');
+							echo('<table class="table-list" style="width:100%;">');
+							for(row in arrAssigned){
+								displayContactNotifyButton(row, false, "Assigned to this lead");
+							} 
+						}
 						if(arraylen(toArray)){
-							echo('<tr><th colspan="2">To:</th></tr>');
+							echo('</table><h3 style="margin-top:10px;margin-bottom:0px;">To:</h3>');
+							echo('<table class="table-list" style="width:100%;">');  
 							for(row in toArray){
-								displayContactNotifyButton(row);
+								if(not structkeyexists(emailUniqueStruct, row.contact_email)){
+									emailUniqueStruct[row.contact_email]=true;
+									displayContactNotifyButton(row, true, "Subscribed to this lead");
+								}
 							}
 						}
-						if(arraylen(ccArray)){
-							echo('<tr><th colspan="2">Cc:</th></tr>');
+						if(arraylen(ccArray) or arrayLen(arrManager)){
+							echo('</table><h3 style="margin-top:10px;margin-bottom:0px;">Cc:</h3>'); 
+							echo('<table class="table-list" style="width:100%;">'); 
+							for(row in arrManager){
+								displayContactNotifyButton(row, false, "Office Manager");
+							}
 							for(row in ccArray){
-								displayContactNotifyButton(row);
+								if(not structkeyexists(emailUniqueStruct, row.contact_email)){
+									emailUniqueStruct[row.contact_email]=true;
+									displayContactNotifyButton(row, true);
+								}
 							}
 						}
 						if(arraylen(bccArray)){
-							echo('<tr><th colspan="2">Bcc:</th></tr>');
+							echo('</table><h3>Bcc:</h3>');
+							echo('<table class="table-list" style="width:100%;">'); 
 							for(row in bccArray){
-								displayContactNotifyButton(row);
+								if(not structkeyexists(emailUniqueStruct, row.contact_email)){
+									emailUniqueStruct[row.contact_email]=true;
+									displayContactNotifyButton(row, true, "Subscribed to this lead");
+								}
 							}
 						}
 						echo('</table>');
@@ -390,7 +774,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 				var unsubscribeLink=$(self).attr("data-unsubscribe-link");
 				var subscribeLink=$(self).attr("data-subscribe-link");
 				if(r.subscribed){
-					arrHTML.push('<p>Me <a href="##" data-unsubscribe-link="'+unsubscribeLink+'" data-subscribe-link="'+subscribeLink+'" class="leadUnsubscribeLink z-manager-search-button">Unsubscribe</a></p>');
+					arrHTML.push('<p>You\'re subscribed to this lead.</p><p><a href="##" data-unsubscribe-link="'+unsubscribeLink+'" data-subscribe-link="'+subscribeLink+'" class="leadUnsubscribeLink z-manager-search-button">Unsubscribe</a></p>');
 				}else{	
 					arrHTML.push('<p>You are not subscribed to this message yet.</p>');
 					arrHTML.push('<p><a href="##" data-unsubscribe-link="'+unsubscribeLink+'" data-subscribe-link="'+subscribeLink+'" class="leadSubscribeLink z-manager-search-button">Subscribe</a></p>');
@@ -448,22 +832,34 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	</script>
 	</cfif> 
 </cffunction>
-
-
+  
 <cffunction name="displayContactNotifyButton" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
+	<cfargument name="allowDelete" type="boolean" required="yes">
+	<cfargument name="hoverTitle" type="string" required="no" default="">
 	<cfscript>
-	ss=arguments.ss;
+	ss = arguments.ss;
 	if(form.method EQ "viewContact"){
 		currentMethod="unsubscribeToLead";
 	}else{
 		currentMethod="userUnsubscribeToLead";
+	} 
+	name = "";
+	if(ss.contact_first_name NEQ ""){ 
+		if(ss.contact_email NEQ ""){
+			name = ss.contact_first_name&" "&ss.contact_last_name&'<br><span style="font-size:12px; color:##666;">'&ss.contact_email&'</span>';
+		}else{
+			name=ss.contact_email;
+		}
+	}else{
+		name=ss.contact_email;
 	}
-	echo('<tr class="z-float leadUnsubscribeOtherLink#ss.contact_id#" style="margin-bottom:5px;">
-		<th>
-		#ss.contact_email#</th><td style="width:1%; white-space:nowrap;">
+	echo('<tr class="leadUnsubscribeOtherLink#ss.contact_id#">
+		<th title="#arguments.hoverTitle#">
+		#name#</th><td style="width:1%; white-space:nowrap;">
 		');
-	if(application.zcore.user.checkGroupAccess("administrator")){
+	if(arguments.allowDelete and (application.zcore.user.checkGroupAccess("administrator") or request.zsession.user.contact_id EQ ss.contact_id)){
+		// allow deleting yourself if not "Assigned" or any administrator can delete
 		echo('<a href="/z/inquiries/admin/manage-inquiries/#currentMethod#?inquiries_id=#form.inquiries_id#&amp;contact_id=#ss.contact_id#" class="leadUnsubscribeOtherLink z-manager-lead-close-button" data-container-id="leadUnsubscribeOtherLink#ss.contact_id#" title="Click to remove this person from the lead."><i class="fa fa-times" aria-hidden="true"></i></a>');
 	}
 	echo('</td></tr>');
@@ -498,7 +894,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	inquiries.site_id = #db.param(request.zos.globals.id)#";
 	if(form.method EQ "userView"){
 	    db.sql&=variables.inquiriesCom.getUserLeadFilterSQL(db);
-	}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false and structkeyexists(request.zos.userSession.groupAccess, "manager") eq false){
+	}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
 		db.sql&=" AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
 		user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
 	}
@@ -537,7 +933,6 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 	displayLeadFeedback(ts);
 	</cfscript>
 
-	<h2>Other inquiries from this contact</h2>
 	<cfscript>
 	ts={
 		arrExcludeInquiriesId:[form.inquiries_id],
@@ -580,32 +975,35 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 				<td>#contact.contact_company#</td>
 			</tr>
 		</cfif>
-		<tr>
-			<th style="width: 140px;">Name</th>
-			<td>
-			<cfif contact.contact_salutation NEQ ""> 
-				#contact.contact_salutation#
-			</cfif>
-			<cfif contact.contact_first_name NEQ ""> 
-				#contact.contact_first_name#
-			</cfif>
-			<cfif contact.contact_last_name NEQ "">
-				#contact.contact_last_name#
-			</cfif>
-			<cfif contact.contact_suffix NEQ "">
-				#contact.contact_suffix#
-			</cfif>
-			</td>
-		</tr>
+
+		<cfif contact.contact_first_name&contact.contact_last_name NEQ "">
+			<tr>
+				<th style="width: 140px;">Name</th>
+				<td>
+				<cfif contact.contact_salutation NEQ ""> 
+					#contact.contact_salutation#
+				</cfif>
+				<cfif contact.contact_first_name NEQ ""> 
+					#contact.contact_first_name#
+				</cfif>
+				<cfif contact.contact_last_name NEQ "">
+					#contact.contact_last_name#
+				</cfif>
+				<cfif contact.contact_suffix NEQ "">
+					#contact.contact_suffix#
+				</cfif>
+				</td>
+			</tr>
+		</cfif>
 		<cfif contact.contact_email NEQ "">
 			<tr>
-				<th>Email</th>
+				<th style="width: 140px;">Email</th>
 				<td><a href="mailto:#contact.contact_email#">#contact.contact_email#</a></td>
 			</tr>
 		</cfif>
 		<cfif contact.contact_phone1 NEQ "">
 			<tr>
-				<th>Phone1</th>
+				<th style="width: 140px;">Phone1</th>
 				<td>#contact.contact_phone1#</td>
 			</tr>
 		</cfif>
@@ -690,145 +1088,145 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			</cfif>
 			<cfif contact.contact_interested_in_type NEQ "">
 				<tr>
-					<th>Interested in Type</th>
+					<th>Type</th>
 					<td>#contact.contact_interested_in_type#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_year NEQ "">
 				<tr>
-					<th>Interested in Year</th>
+					<th>Year</th>
 					<td>#contact.contact_interested_in_year#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_make NEQ "">
 				<tr>
-					<th>Interested in Make</th>
+					<th>Make</th>
 					<td>#contact.contact_interested_in_make#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_model NEQ "">
 				<tr>
-					<th>Interested in Model</th>
+					<th>Model</th>
 					<td>#contact.contact_interested_in_model#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_category NEQ "">
 				<tr>
-					<th>Interested in Category</th>
+					<th>Category</th>
 					<td>#contact.contact_interested_in_category#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_name NEQ "">
 				<tr>
-					<th>Interested in Name</th>
+					<th>Name</th>
 					<td>#contact.contact_interested_in_name#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_hin_vin NEQ "">
 				<tr>
-					<th>Interested in HIN VIN</th>
+					<th>HIN VIN</th>
 					<td>#contact.contact_interested_in_hin_vin#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_stock NEQ "">
 				<tr>
-					<th>Interested in Stock</th>
+					<th>Stock</th>
 					<td>#contact.contact_interested_in_stock#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_length NEQ "">
 				<tr>
-					<th>Interested in Length</th>
+					<th>Length</th>
 					<td>#contact.contact_interested_in_length#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_currently_owned_type NEQ "">
 				<tr>
-					<th>Interested in Currently Owned Type</th>
+					<th>Currently Owned Type</th>
 					<td>#contact.contact_interested_in_currently_owned_type#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_read NEQ "">
 				<tr>
-					<th>Interested in Read</th>
+					<th>Read</th>
 					<td>#contact.contact_interested_in_read#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_age NEQ "">
 				<tr>
-					<th>Interested in Age</th>
+					<th>Age</th>
 					<td>#contact.contact_interested_in_age#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_bounce_reason NEQ "">
 				<tr>
-					<th>Interested in Bounce Reason</th>
+					<th>Bounce Reason</th>
 					<td>#contact.contact_interested_in_bounce_reason#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_home_phone NEQ "">
 				<tr>
-					<th>Interested in Home Phone</th>
+					<th>Home Phone</th>
 					<td>#contact.contact_interested_in_home_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_work_phone NEQ "">
 				<tr>
-					<th>Interested in Work Phone</th>
+					<th>Work Phone</th>
 					<td>#contact.contact_interested_in_work_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_mobile_phone NEQ "">
 				<tr>
-					<th>Interested in Mobile Phone</th>
+					<th>Mobile Phone</th>
 					<td>#contact.contact_interested_in_mobile_phone#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_fax NEQ "">
 				<tr>
-					<th>Interested in Fax</th>
+					<th>Fax</th>
 					<td>#contact.contact_interested_in_fax#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_buying_horizon NEQ "">
 				<tr>
-					<th>Interested in Buying Horizon</th>
+					<th>Buying Horizon</th>
 					<td>#contact.contact_interested_in_buying_horizon#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_status NEQ "">
 				<tr>
-					<th>Interested in Status</th>
+					<th>Status</th>
 					<td>#contact.contact_interested_in_status#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_interest_level NEQ "">
 				<tr>
-					<th>Interested in Interest Level</th>
+					<th>Interest Level</th>
 					<td>#contact.contact_interested_in_interest_level#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_sales_stage NEQ "">
 				<tr>
-					<th>Interested in Sales Stage</th>
+					<th>Sales Stage</th>
 					<td>#contact.contact_interested_in_sales_stage#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_contact_source NEQ "">
 				<tr>
-					<th>Interested in Contact Source</th>
+					<th>Contact Source</th>
 					<td>#contact.contact_interested_in_contact_source#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_dealership NEQ "">
 				<tr>
-					<th>Interested in Dealership</th>
+					<th>Dealership</th>
 					<td>#contact.contact_interested_in_dealership#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_assigned_to NEQ "">
 				<tr>
-					<th>Interested in Assigned To</th>
+					<th>Assigned To</th>
 					<td>#contact.contact_interested_in_assigned_to#</td>
 				</tr>
 			</cfif>
@@ -840,50 +1238,50 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			</cfif>
 			<cfif contact.contact_interested_in_owners_magazine EQ "1">
 				<tr>
-					<th>Interested in Owners Magazine</th>
+					<th>Owners Magazine</th>
 					<td>Yes</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_purchased EQ "1">
 				<tr>
-					<th>Interested in Purchased</th>
+					<th>Purchased</th>
 					<td>Yes</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_service_date NEQ "">
 				<tr>
-					<th>Interested in Service Date</th>
+					<th>Service Date</th>
 					<td>#contact.contact_interested_in_service_date#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_date_delivered NEQ "">
 				<tr>
-					<th>Interested in Date Delivered</th>
+					<th>Date Delivered</th>
 					<td>#contact.contact_interested_in_date_delivered#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_date_sold NEQ "">
 				<tr>
-					<th>Interested in Date Sold</th>
+					<th>Date Sold</th>
 					<td>#contact.contact_interested_in_date_sold#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_warranty_date NEQ "">
 				<tr>
-					<th>Interested in Warranty Date</th>
+					<th>Warranty Date</th>
 					<td>#contact.contact_interested_in_warranty_date#</td>
 				</tr>
 			</cfif>
 			<cfif contact.contact_interested_in_lead_comments NEQ "">
 				<tr>
-					<th>Interested in Lead Comments</th>
+					<th>Lead Comments</th>
 					<td>#contact.contact_interested_in_lead_comments#</td>
 				</tr> 
 			</cfif>
 		</cfsavecontent>
 		<cfif trim(interests) NEQ "">
 			<tr>
-				<th><h2>Interested In</h2>
+				<th colspan="2"><h3>Interested In</h3>
 				</th>
 			</tr>
 			#interests#
@@ -1016,7 +1414,9 @@ zArrDeferredFunctions.push(function(){
 	
 
 	<cfif qFeedBack.recordcount NEQ 0> 
-		<h3>Messages</h3>
+		<div class="z-float">
+			<h3 style="padding-top:10px;">Messages</h3>
+		</div>
 		<cfscript>  
 		showAllDisplayed=0;
 		readCount=0;
@@ -1043,6 +1443,7 @@ zArrDeferredFunctions.push(function(){
 							<a  class="z-button z-feedback-delete-button" href="##" data-feedback-id="#row.inquiries_feedback_id#" data-action="/z/inquiries/admin/feedback/deleteFeedback?inquiries_feedback_id=#row.inquiries_feedback_id#&amp;inquiries_id=#row.inquiries_id#&confirm=1&returnjson=1">X</a>
 						</div>');
 					}
+				hasMessage=false;
 				if(row.inquiries_feedback_message_json NEQ ''){
 					jsonStruct = deserializeJSON( row.inquiries_feedback_message_json );
 						if ( jsonStruct.from.name EQ '' ) {
@@ -1059,9 +1460,12 @@ zArrDeferredFunctions.push(function(){
 							this.showFeedbackMessageAttachments( row, jsonStruct ); 
 							echo('</div>');
 						}
-						echo('<div class="z-feedback-message">');
-						this.showFeedbackMessageFrame( row, jsonStruct );
-						echo('</div>'); 
+						if(jsonStruct.htmlProcessed NEQ "" and jsonStruct.htmlProcessed NEQ '<p>&nbsp;</p>'){
+							hasMessage=true;
+							echo('<div class="z-feedback-message">');
+							this.showFeedbackMessageFrame( row, jsonStruct );
+							echo('</div>'); 
+						}
 					}
 				}else{ 
 					name=trim(row.user_first_name&" "&row.user_last_name);
@@ -1071,7 +1475,10 @@ zArrDeferredFunctions.push(function(){
 						email=name & ' <' & row.user_username & '>';
 					}  
 					savecontent variable="messageHTML"{
-						echo('<div class="z-feedback-message">#application.zcore.functions.zParagraphFormat(row.inquiries_feedback_comments)#</div>'); 
+						if(row.inquiries_feedback_comments NEQ ""){
+							hasMessage=true;
+							echo('<div class="z-feedback-message">#application.zcore.functions.zParagraphFormat(row.inquiries_feedback_comments)#</div>');
+						} 
 					}
 
 				}
@@ -1084,7 +1491,7 @@ zArrDeferredFunctions.push(function(){
 				}
 			echo('</div>');
 			echo(messageHTML);
-			if(row.isRead EQ 1 and row.inquiries_feedback_id NEQ qFeedback.inquiries_feedback_id[1]){ 
+			if(hasMessage and row.isRead EQ 1 and row.inquiries_feedback_id NEQ qFeedback.inquiries_feedback_id[1]){ 
 				echo('<a href="##" class="z-feedback-show-message-button">Show message</a>'); 
 			}
 			if(row.inquiries_feedback_type EQ 0){
@@ -1217,118 +1624,129 @@ zArrDeferredFunctions.push(function(){
 		qOther=db.execute("qOther");
  
 		</cfscript>
-		<div style="width:100%; float:left; padding:5px;">
-			<cfif qOther.recordcount GTE 2>
-				<table class="table-list z-radius-5" style="border-spacing:0px; width:100%; border:1px solid ##CCCCCC;">
-					<tr>
-						<th>Name</th>
-						<th>Phone</th>
-						<th>Priority</th>
-						<th>Status</th>
-						<th>Received</th>
-						<th>Last Update</th>
-						<th>Type</th>
-						<!--- <th class="z-hide-at-767">Comments</th> --->
-						<th>Assigned To</th>
-						<th>Admin</th>
-					</tr>
-					<cfloop query="qOther">
-						<tr>
-							<td>#qOther.inquiries_first_name# #qOther.inquiries_last_name#</td>
-							<td>#qOther.inquiries_phone1#</td>
-							<td>#qOther.inquiries_priority#</td>
-							<td><cfscript>
-								echo(lookupData.statusName[qOther.inquiries_status_id]);
-								if(qOther.inquiries_spam EQ 1){
-									echo(', <strong>Marked as Spam</strong>');
-								}
-								</cfscript>
-							</td>
-							<td>#DateFormat(qOther.inquiries_datetime, "m/d/yy")&" "&TimeFormat(qOther.inquiries_datetime, "h:mm tt")#</td>
-							<td>#DateFormat(qOther.inquiries_updated_datetime, "m/d/yy")&" "&TimeFormat(qOther.inquiries_updated_datetime, "h:mm tt")#</td>
-							<td><cfscript>
-								if(structkeyexists(lookupData.typeNameLookup, qOther.inquiries_type_id&"|"&qOther.inquiries_type_id_siteIdType)){
-									echo(lookupData.typeNameLookup[qOther.inquiries_type_id&"|"&qOther.inquiries_type_id_siteIdType]);
-								}else{
-									echo(qOther.inquiries_type_other);
-								}
-								if(trim(qOther.inquiries_phone_time) NEQ ''){
-									echo(' / <strong>Forced</strong>');
-								}
-								</cfscript>
-							</td> 
-								<!--- <cfscript>
-								cm2=qOther.inquiries_comments;
-								cm2=trim(rereplace(cm2,"<[^>]*?>"," ","ALL"));
-								if(cm2 NEQ ""){
-									writeoutput(left(cm2,350));
-									if(len(cm2) GT 350){
-										writeoutput("...");
-									}
-								}
-								</cfscript> --->
-							<td>
-								<cfscript>
-								
-								if(qOther.inquiries_assign_email NEQ ''){
-
-									arrEmail=listToArray(qOther.inquiries_assign_email, ",");
-									for(i=1;i<=arraylen(arrEmail);i++){
-										e=arrEmail[i];
-										if(i NEQ 1){
-											echo(', '); 
-										}
-										echo('<a href="mailto:#e#">');
-										if(qOther.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
-											echo(qOther.inquiries_assign_name);
-										}else{
-											echo(e);
-										}
-										echo('</a> ');
-									}
-								}else{
-									if(qOther.user_id NEQ 0){
-										echo('<a href="mailto:#qOther.user_username#">');
-										if(qOther.user_first_name NEQ ""){
-											echo('#qOther.user_first_name# #qOther.user_last_name# ');
-										}
-										if(qOther.member_company NEQ ""){
-											echo('(#qOther.member_company#)');
-										}
-										if(qOther.member_company EQ "" and qOther.user_first_name EQ ""){
-											echo(qOther.user_username);
-										}
-										echo('</a>');
-									}
-									if(application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
-										if(structkeyexists(lookupData.officeLookup, qOther.office_id)){
-											echo('<br>'&lookupData.officeLookup[qOther.office_id].office_name);
-										}
-									}
-								}
-								</cfscript> 
-							</td>
-							<td>
-								<cfscript>
-								if(form.method EQ "userViewContact" or form.method EQ "viewContact"){
-									if(form.method EQ "userView"){
-										echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/feedback/userViewContact?contactTab=4&amp;zPageId=#form.zPageId#&amp;contact_id=#qOther.contact_id#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
-									}else{
-										echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/feedback/viewContact?contactTab=4&amp;zPageId=#form.zPageId#&amp;contact_id=#qOther.contact_id#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
-									}
-								}else{
-									if(form.method EQ "userView"){
-										echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/manage-inquiries/userView?zPageId=#form.zPageId#&amp;zsid=#request.zsid#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
-									}else{
-										echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/feedback/view?zPageId=#form.zPageId#&amp;zsid=#request.zsid#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
-									}
-								}
-								</cfscript>
-							</td>
-						</tr> 
-					</cfloop>
-				</table>
+		<cfif qOther.recordcount EQ 0>
+			<p>No leads found for this contact.</p>
+		<cfelse>
+			<cfif form.method EQ "view" or form.method EQ "userView">
+				<h2>Other inquiries from this contact</h2>
 			</cfif>
+		</cfif>
+		<div style="width:100%; float:left; padding:5px;"> 
+			<table class="table-list z-radius-5" style="border-spacing:0px; width:100%; border:1px solid ##CCCCCC;">
+				<tr>
+					<th>Name</th>
+					<th>Phone</th>
+					<th>Priority</th>
+					<th>Status</th>
+					<th>Received</th>
+					<th>Last Update</th>
+					<th>Type</th>
+					<!--- <th class="z-hide-at-767">Comments</th> --->
+					<th>Assigned To</th>
+					<th>Admin</th>
+				</tr>
+				<cfloop query="qOther">
+					<tr>
+						<td>#qOther.inquiries_first_name# #qOther.inquiries_last_name#</td>
+						<td>#qOther.inquiries_phone1#</td>
+						<td>#qOther.inquiries_priority#</td>
+						<td><cfscript>
+							echo(lookupData.statusName[qOther.inquiries_status_id]);
+							if(qOther.inquiries_spam EQ 1){
+								echo(', <strong>Marked as Spam</strong>');
+							}
+							</cfscript>
+						</td>
+						<td>#DateFormat(qOther.inquiries_datetime, "m/d/yy")&" "&TimeFormat(qOther.inquiries_datetime, "h:mm tt")#</td>
+						<td>#DateFormat(qOther.inquiries_updated_datetime, "m/d/yy")&" "&TimeFormat(qOther.inquiries_updated_datetime, "h:mm tt")#</td>
+						<td><cfscript>
+							if(structkeyexists(lookupData.typeNameLookup, qOther.inquiries_type_id&"|"&qOther.inquiries_type_id_siteIdType)){
+								echo(lookupData.typeNameLookup[qOther.inquiries_type_id&"|"&qOther.inquiries_type_id_siteIdType]);
+							}else{
+								echo(qOther.inquiries_type_other);
+							}
+							if(trim(qOther.inquiries_phone_time) NEQ ''){
+								echo(' / <strong>Forced</strong>');
+							}
+							</cfscript>
+						</td> 
+							<!--- <cfscript>
+							cm2=qOther.inquiries_comments;
+							cm2=trim(rereplace(cm2,"<[^>]*?>"," ","ALL"));
+							if(cm2 NEQ ""){
+								writeoutput(left(cm2,350));
+								if(len(cm2) GT 350){
+									writeoutput("...");
+								}
+							}
+							</cfscript> --->
+						<td>
+							<cfscript>
+							
+							if(qOther.inquiries_assign_email NEQ ''){
+
+								arrEmail=listToArray(qOther.inquiries_assign_email, ",");
+								for(i=1;i<=arraylen(arrEmail);i++){
+									e=arrEmail[i];
+									if(i NEQ 1){
+										echo(', '); 
+									}
+									echo('<a href="mailto:#e#">');
+									if(qOther.inquiries_assign_name neq '' and arraylen(arrEmail) EQ 1){
+										echo(qOther.inquiries_assign_name);
+									}else{
+										echo(e);
+									}
+									echo('</a> ');
+								}
+							}else{
+								if(qOther.user_id NEQ 0){
+									echo('<a href="mailto:#qOther.user_username#">');
+									if(qOther.user_first_name NEQ ""){
+										echo('#qOther.user_first_name# #qOther.user_last_name# ');
+									}
+									if(qOther.member_company NEQ ""){
+										echo('(#qOther.member_company#)');
+									}
+									if(qOther.member_company EQ "" and qOther.user_first_name EQ ""){
+										echo(qOther.user_username);
+									}
+									echo('</a>');
+								}
+								if(application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
+									if(structkeyexists(lookupData.officeLookup, qOther.office_id)){
+										echo('<br>'&lookupData.officeLookup[qOther.office_id].office_name);
+									}
+								}
+							}
+							</cfscript> 
+						</td>
+						<td>
+							<cfscript>
+							if(form.method EQ "userViewContact" or form.method EQ "viewContact"){
+								if(form.method EQ "userViewContact"){
+									currentLink="/z/inquiries/admin/manage-inquiries/userViewContact";
+								}else{
+									currentLink="/z/inquiries/admin/feedback/viewContact";
+								}
+ 
+								if(form.method EQ "userView"){
+									echo('<div class="z-manager-button-container"><a href="#currentLink#?contactTab=4&amp;zPageId=#form.zPageId#&amp;contact_id=#qOther.contact_id#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
+								}else{
+									echo('<div class="z-manager-button-container"><a href="#currentLink#?fromSource=contact&amp;contactTab=4&amp;zPageId=#form.zPageId#&amp;contact_id=#qOther.contact_id#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
+								} 
+							}else{
+								if(form.method EQ "userView"){
+									echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/manage-inquiries/userView?zPageId=#form.zPageId#&amp;zsid=#request.zsid#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
+								}else{
+									echo('<div class="z-manager-button-container"><a href="/z/inquiries/admin/feedback/view?fromSource=contact&amp;zPageId=#form.zPageId#&amp;zsid=#request.zsid#&amp;inquiries_id=#qOther.inquiries_id#" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
+								}
+							}
+							</cfscript>
+						</td>
+					</tr> 
+				</cfloop>
+			</table> 
 		</div>
 	</cfif> 
 </cffunction>
