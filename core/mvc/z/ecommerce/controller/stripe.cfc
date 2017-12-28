@@ -22,7 +22,8 @@
 <!--- CHECKOUT FORM --->
 <cffunction name="checkoutForm" localmode="modern" access="public">
 	<cfargument name="checkoutForm" type="struct" required="yes">
-	<form action="/z/ecommerce/stripe-checkout/process" method="post">
+	<!--- <form action="/z/ecommerce/stripe-checkout/process" method="post"> --->
+	<form action="/stripe-test/process" method="post">
 		<script src="https://checkout.stripe.com/checkout.js"
 			class="stripe-button"
 			data-key="#variables.publicKey#"

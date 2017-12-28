@@ -279,11 +279,21 @@
 		db.execute("qDelete");
 		db.sql="DELETE FROM #db.table("inquiries_lead_template_x_site", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_lead_template_x_site_deleted=#db.param(0)#";
 		db.execute("qDelete");
+
+
 	}
 	if(form.clearLeadData EQ 1 or form.clearLeadConfigAndData EQ 1){
 		db.sql="DELETE FROM #db.table("inquiries_feedback", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_feedback_deleted=#db.param(0)#";
 		db.execute("qDelete");
 		db.sql="DELETE FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_deleted=#db.param(0)#";
+		db.execute("qDelete");
+		db.sql="DELETE FROM #db.table("inquiries_autoresponder", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_autoresponder_deleted=#db.param(0)#";
+		db.execute("qDelete");
+		db.sql="DELETE FROM #db.table("inquiries_autoresponder_drip", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_autoresponder_drip_deleted=#db.param(0)#";
+		db.execute("qDelete");
+		db.sql="DELETE FROM #db.table("inquiries_autoresponder_drip_log", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_autoresponder_drip_log_deleted=#db.param(0)#";
+		db.execute("qDelete");
+		db.sql="DELETE FROM #db.table("inquiries_autoresponder_subscriber", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and inquiries_autoresponder_subscriber_deleted=#db.param(0)#";
 		db.execute("qDelete");
 
 	} 

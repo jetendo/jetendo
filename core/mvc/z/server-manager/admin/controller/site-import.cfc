@@ -84,6 +84,7 @@
 					#db.param('www.')#, #db.param('')#) site_short_domain 
 				FROM #db.table("site", request.zos.zcoreDatasource)# site 
 				WHERE site_id <> #db.param(-1)# and 
+				site_active=#db.param(1)# and
 				site_deleted = #db.param(0)#
 				ORDER BY site_short_domain ASC";
 				qSites=db.execute("qSites");
