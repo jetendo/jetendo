@@ -1233,9 +1233,13 @@ deleteSearchIndex(ts);
 		}
 		arrayAppend(fs, {label:"Active", field:application.zcore.functions.zInput_Boolean(variables.activeField)}); 
 	}
+
 	echo('
 	<div class="z-manager-edit-errors z-float"></div>
 	<form id="zManagerEditForm" class="zFormCheckDirty" action="#formAction#" method="post" enctype="multipart/form-data" onsubmit="return zSubmitManagerEditForm(this); ">');
+	for(field in variables.requiredParams){
+		echo('<input type="hidden" name="#field#" value="#htmleditformat(form[field])#">');
+	}
 	/*
 	ts=StructNew();
 	ts.name="zMLSSearchForm";
