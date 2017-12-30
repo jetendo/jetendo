@@ -431,11 +431,7 @@ this can go in selector to filter the returned data
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	  <soapenv:Header>
 	    <ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/cm/v201708" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
-	      <ns1:clientCustomerId>#request.zos.googleAnalyticsConfig.adwordsTestAccount#</ns1:clientCustomerId>
-	      <ns1:developerToken>#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#</ns1:developerToken>
-	      <ns1:userAgent>Jetendo</ns1:userAgent>
-	      <ns1:validateOnly>false</ns1:validateOnly>
-	      <ns1:partialFailure>false</ns1:partialFailure>
+	      #getAdwordsAuthXML()#
 	    </ns1:RequestHeader>
 	  </soapenv:Header>
 	  <soapenv:Body>
@@ -538,6 +534,483 @@ $headers = array(
 */
 
 	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/cm/v201708/CampaignService', xmlText);
+	return rs;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getAndProcessKeywordStats" localmode="modern" access="public">
+	<cfargument name="arrKeyword" type="array" required="yes">
+	<cfscript>
+	arrKeyword=arguments.arrKeyword;
+	// batch 500 keywords at a time 
+	js={
+		success:true,
+		results:[]
+	};
+	perpage=800;
+	runCount=ceiling(arrayLen(arrKeyword)/500);
+	for(i=1;i<=runCount;i++){
+		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordStats";
+		arrNew=[];
+		count=arrayLen(arrKeyword);
+		for(n=1;n<=min(500, count);n++){
+			arrayAppend(arrNew, arrKeyword[1]);
+			arrayDeleteAt(arrKeyword, 1);
+		}
+		hasMore=true;
+		offset=0;
+		while(hasMore){
+			try{
+				rs=getKeywordStats(offset, arrNew);
+				if(not rs.success){
+					return rs;
+				}
+				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordStats";
+				//writedump(rs);abort;
+				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
+				if(total EQ 0){
+					break;
+				}
+				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;
+				//writedump(entries);
+				for(i=1;i<=arraylen(entries);i++){
+					t=entries[i].data;  
+					t1={}; 
+
+					if(t[1].key.XMLText EQ "KEYWORD_TEXT"){
+						t1.keyword=t[1].value.value.xmlText;
+					}
+					if(t[2].key.XMLText EQ "SEARCH_VOLUME"){
+						t1.searchVolume=t[2].value.value.xmlText;
+					}  
+					arrayAppend(js.results, t1);
+				}
+				offset+=perpage;
+				sleep(1000); 
+				if(total < offset){
+					hasMore=false;
+					break;
+				}
+			}catch(Any e){
+				savecontent variable="out"{
+					echo('<h2>Google Adwords API Error Occurred</h2>');
+					writedump(rs);
+					writedump(e);
+				}
+				if(request.zos.isDeveloper){
+					echo(out);
+					abort;
+				}else{
+					throw(out);
+				}
+			}
+		}
+	}
+	structdelete(application, 'googleAdwordsAPIStatus');
+	return js;
+	</cfscript>
+</cffunction>
+
+<!---  
+/z/inquiries/admin/google-oauth/index
+/z/inquiries/admin/google-oauth/displayKeywordIdeas
+/z/inquiries/admin/google-oauth/displayKeywordStats
+ --->
+<cffunction name="getAndProcessKeywordIdeas" localmode="modern" access="public">
+	<cfargument name="arrKeyword" type="array" required="yes">
+	<cfscript>
+	arrKeyword=arguments.arrKeyword;
+	js={
+		success:true,
+		results:[]
+	};
+	perpage=800;
+	runCount=ceiling(arrayLen(arrKeyword)/100); 
+	for(i=1;i<=runCount;i++){
+		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordIdeas";
+		arrNew=[];
+		count=arrayLen(arrKeyword);
+		for(n=1;n<=min(100, count);n++){
+			arrayAppend(arrNew, arrKeyword[1]);
+			arrayDeleteAt(arrKeyword, 1);
+		}
+		hasMore=true;
+		offset=0;
+		while(hasMore){
+			try{
+				rs=getKeywordIdeas(offset, arrNew); 
+				if(not rs.success){
+					return rs; 
+				} 
+				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordIdeas";
+				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
+				if(total EQ 0){
+					break;
+				}
+				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;  
+				for(i=1;i<=arraylen(entries);i++){
+					t=entries[i].data;  
+					t1={}; 
+					t1.keyword=t[1].value.value.xmlText;
+					t1.keyword=listdeleteat(t1.keyword, listlen(t1.keyword, " "), " ");
+					t1.searchVolume=t[2].value.value.xmlText;
+					arrayAppend(js.results, t1);
+				}
+				offset+=perpage;
+				sleep(1000);
+				if(total < offset){
+					hasMore=false;
+					break;
+				} 
+			}catch(Any e){
+				savecontent variable="out"{
+					echo('<h2>Google Adwords API Error Occurred</h2>');
+					writedump(rs);
+					writedump(e);
+				}
+				if(request.zos.isDeveloper){
+					echo(out);
+					abort;
+				}else{
+					throw(out);
+				}
+			}
+		}
+	}
+	structdelete(application, 'googleAdwordsAPIStatus');
+	return js;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="displayKeywordStats" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	rs=getKeywordStats(0, ["Flights from London to New York", "London Flights"]);
+	//rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><ns2:requestId>0005619168f967e80ac14c051300f74e</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>197</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>4248747</value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>3934797</value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>')};
+	if(not rs.success){ 
+		echo(rs.errorMessage);		abort;
+	}
+	//writedump(rs);abort;
+	entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;
+	//writedump(entries);
+	js={
+		success:true,
+		results:[]
+	};
+	for(i=1;i<=arraylen(entries);i++){
+		t=entries[i].data;  
+		t1={}; 
+
+		if(t[1].key.XMLText EQ "KEYWORD_TEXT"){
+			t1.keyword=t[1].value.value.xmlText;
+		}
+		if(t[2].key.XMLText EQ "SEARCH_VOLUME"){
+			t1.searchVolume=t[2].value.value.xmlText;
+		}  
+		arrayAppend(js.results, t1);
+	}
+	writedump(js);abort;
+	</cfscript>
+</cffunction>
+
+<!---  
+/z/inquiries/admin/google-oauth/index
+/z/inquiries/admin/google-oauth/displayKeywordIdeas
+/z/inquiries/admin/google-oauth/displayKeywordStats
+ --->
+<cffunction name="displayKeywordIdeas" localmode="modern" access="remote" roles="administrator"> 
+	<cfscript> 
+
+	rs=getKeywordIdeas(0, ["Flights"]);
+	// ideas response with searchVolume
+	//rs={success:true, data:xmlparse(application.zcore.functions.zreadfile(request.zos.globals.privatehomedir&"googleAdwordsKeywordIdeasResponse.txt")) }; 
+	if(not rs.success){ 
+		echo(rs.errorMessage);	abort;
+	}
+	//writedump(rs);abort;
+	entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries; 
+	
+	js={
+		success:true,
+		results:[]
+	};
+	for(i=1;i<=arraylen(entries);i++){
+		t=entries[i].data;  
+		t1={}; 
+		t1.keyword=t[1].value.value.xmlText;
+		t1.keyword=listdeleteat(t1.keyword, listlen(t1.keyword, " "), " ");
+		t1.searchVolume=t[2].value.value.xmlText;
+		arrayAppend(js.results, t1);
+	}
+	writedump(js);	abort;
+	</cfscript>
+</cffunction>
+
+<cffunction name="displayKeywordStatsMonthly" localmode="modern" access="remote" roles="administrator"> 
+	<cfscript> 
+	//rs=getKeywordStatsMonthly(0, ["Flights from London to New York", "London Flights"]);
+	//writedump(rs);abort; 
+	// this was a stats response with monthly searches
+	rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><ns2:requestId>000561906c0814580aec568c680d512d</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>226</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>4417788</count></value><value><year>2017</year><month>10</month><count>9836306</count></value><value><year>2017</year><month>9</month><count>8496396</count></value><value><year>2017</year><month>8</month><count>1212821</count></value><value><year>2017</year><month>7</month><count>2911047</count></value><value><year>2017</year><month>6</month><count>5121332</count></value><value><year>2017</year><month>5</month><count>48068</count></value><value><year>2017</year><month>4</month><count>5889451</count></value><value><year>2017</year><month>3</month><count>105440</count></value><value><year>2017</year><month>2</month><count>3994551</count></value><value><year>2017</year><month>1</month><count>8163845</count></value><value><year>2016</year><month>12</month><count>787929</count></value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>8284056</count></value><value><year>2017</year><month>10</month><count>3396650</count></value><value><year>2017</year><month>9</month><count>1813169</count></value><value><year>2017</year><month>8</month><count>7316914</count></value><value><year>2017</year><month>7</month><count>4127112</count></value><value><year>2017</year><month>6</month><count>1422728</count></value><value><year>2017</year><month>5</month><count>6340440</count></value><value><year>2017</year><month>4</month><count>2140069</count></value><value><year>2017</year><month>3</month><count>1430838</count></value><value><year>2017</year><month>2</month><count>7911019</count></value><value><year>2017</year><month>1</month><count>2077186</count></value><value><year>2016</year><month>12</month><count>957383</count></value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>') };
+	// search_volume didn't return anything, so we have to calculate the average ourselves for each term
+	if(not rs.success){
+		echo(rs.errorMessage);
+		abort;
+	}
+	//writedump(rs);abort;
+	//writedump(rs);
+	entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;
+	//writedump(entries);
+	
+	js={
+		success:true,
+		results:[]
+	};
+	for(i=1;i<=arraylen(entries);i++){
+		t=entries[i].data;  
+		t1={}; 
+		if(entries[i].data[1].key.XMLText EQ "KEYWORD_TEXT"){
+			t1.keyword=entries[i].data[1].value.value.xmlText;
+			totalVolume=0;
+			totalMonths=arraylen(t.value.value);
+			for(i3=1;i3<=arraylen(t.value.value);i3++){
+				totalVolume+=t.value.value.count.xmlText;
+			}
+			avgVolume=0;
+			if(totalMonths NEQ 0){
+				avgVolume=round(totalVolume/totalMonths);
+			}
+			t1.totalVolume=totalVolume;
+			t1.searchVolume=avgVolume;
+		}  
+		arrayAppend(js.results, t1);
+	}
+	writedump(js);	abort;
+	</cfscript>
+</cffunction>
+
+
+<!--- 
+adwordsLiveManagerAccount
+ --->
+<cffunction name="getAdwordsAuthXML" localmode="modern" access="public">
+	<cfscript>
+	live=true;
+	form.debug=application.zcore.functions.zso(form, 'debug', true, 0);
+	if(form.debug){
+		live=false;
+	}
+	</cfscript>
+	<cfsavecontent variable="out">
+	<cfif live>
+		<ns1:clientCustomerId>#request.zos.googleAnalyticsConfig.adwordsLiveAccount#</ns1:clientCustomerId>
+		<ns1:developerToken>#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#</ns1:developerToken>
+	<cfelse>
+		<ns1:clientCustomerId>#request.zos.googleAnalyticsConfig.adwordsTestAccount#</ns1:clientCustomerId>
+		<ns1:developerToken>#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#</ns1:developerToken>
+	</cfif>
+		<ns1:userAgent>Jetendo</ns1:userAgent>
+		<ns1:validateOnly>false</ns1:validateOnly>
+		<ns1:partialFailure>false</ns1:partialFailure>
+	</cfsavecontent>
+	<cfscript>
+	return out;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getKeywordIdeas" localmode="modern" access="public">
+	<cfargument name="startIndex" type="numeric" required="yes">
+	<cfargument name="arrKeyword" type="array" required="yes">
+	<cfscript>  
+	arrKeyword=arguments.arrKeyword;
+
+	// the ids for language and location come from data posted here: 
+	// https://developers.google.com/adwords/api/docs/appendix/codes-formats
+	// 1000 is english
+
+	// https://developers.google.com/adwords/api/docs/appendix/geotargeting
+	// 2840 is united states
+
+	// limits documented here: https://developers.google.com/adwords/api/docs/appendix/limits
+
+	// campaign status can be PAUSED or ENABLED or REMOVED
+	// we should not try to change the status for a campaign that is already "REMOVED"
+	xmlText='<?xml version="1.0"?>
+	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Header>
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+			#getAdwordsAuthXML()#
+		</ns1:RequestHeader>
+	</soapenv:Header>
+	<soapenv:Body>
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	         <selector>
+	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
+	            for(keyword in arrKeyword){
+	            	xmlText&='<queries>'&keyword&'</queries>';
+	            } 
+	            xmlText&='
+	            </searchParameters>
+	            <searchParameters xsi:type="LanguageSearchParameter">
+	               <languages>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	               </languages>
+	            </searchParameters>
+	            <searchParameters xsi:type="LocationSearchParameter">
+	               <locations>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	               </locations>
+	            </searchParameters> 
+	            <ideaType>KEYWORD</ideaType>
+	            <requestType>IDEAS</requestType>
+	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
+	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
+	            <requestedAttributeTypes>SEARCH_VOLUME</requestedAttributeTypes>
+	            
+	            
+	            <paging>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	            </paging>
+	         </selector>
+	      </get>
+	  </soapenv:Body>
+	</soapenv:Envelope>'; 
+	            //<requestType>STATS</requestType>
+	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
+
+	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	return rs;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getKeywordStats" localmode="modern" access="public">
+	<cfargument name="startIndex" type="numeric" required="yes">
+	<cfargument name="arrKeyword" type="array" required="yes">
+	<cfscript>  
+	arrKeyword=arguments.arrKeyword;
+
+	// the ids for language and location come from data posted here: 
+	// https://developers.google.com/adwords/api/docs/appendix/codes-formats
+	// 1000 is english
+
+	// https://developers.google.com/adwords/api/docs/appendix/geotargeting
+	// 2840 is united states
+
+	// limits documented here: https://developers.google.com/adwords/api/docs/appendix/limits
+
+	// campaign status can be PAUSED or ENABLED or REMOVED
+	// we should not try to change the status for a campaign that is already "REMOVED"
+	xmlText='<?xml version="1.0"?>
+	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Header>
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+			#getAdwordsAuthXML()#
+		</ns1:RequestHeader>
+	</soapenv:Header>
+	<soapenv:Body>
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	         <selector>
+	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
+	            for(keyword in arrKeyword){
+	            	xmlText&='<queries>'&keyword&'</queries>';
+	            }
+	            xmlText&='
+	            </searchParameters>
+	            <searchParameters xsi:type="LanguageSearchParameter">
+	               <languages>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	               </languages>
+	            </searchParameters>
+	            <searchParameters xsi:type="LocationSearchParameter">
+	               <locations>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	               </locations>
+	            </searchParameters>
+	            <ideaType>KEYWORD</ideaType>
+	            <requestType>STATS</requestType>
+	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
+	            <requestedAttributeTypes>SEARCH_VOLUME</requestedAttributeTypes> 
+	            
+	            <paging>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	            </paging>
+	         </selector>
+	      </get>
+	  </soapenv:Body>
+	</soapenv:Envelope>';  
+
+	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getKeywordStatsMonthly" localmode="modern" access="public">
+	<cfargument name="startIndex" type="numeric" required="yes">
+	<cfargument name="arrKeyword" type="array" required="yes">
+	<cfscript>  
+	arrKeyword=arguments.arrKeyword;
+
+	// the ids for language and location come from data posted here: 
+	// https://developers.google.com/adwords/api/docs/appendix/codes-formats
+	// 1000 is english
+
+	// https://developers.google.com/adwords/api/docs/appendix/geotargeting
+	// 2840 is united states
+
+	// limits documented here: https://developers.google.com/adwords/api/docs/appendix/limits
+
+	// campaign status can be PAUSED or ENABLED or REMOVED
+	// we should not try to change the status for a campaign that is already "REMOVED"
+	xmlText='<?xml version="1.0"?>
+	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Header>
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+			#getAdwordsAuthXML()#
+		</ns1:RequestHeader>
+	</soapenv:Header>
+	<soapenv:Body>
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	         <selector>
+	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
+	            for(keyword in arrKeyword){
+	            	xmlText&='<queries>'&keyword&'</queries>';
+	            }
+	            xmlText&='
+	            </searchParameters>
+	            <searchParameters xsi:type="LanguageSearchParameter">
+	               <languages>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	               </languages>
+	            </searchParameters>
+	            <searchParameters xsi:type="LocationSearchParameter">
+	               <locations>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	               </locations>
+	            </searchParameters>
+	            <ideaType>KEYWORD</ideaType>
+	            <requestType>STATS</requestType>
+	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
+	            <requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes> 
+	            
+	            <paging>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	            </paging>
+	         </selector>
+	      </get>
+	  </soapenv:Body>
+	</soapenv:Envelope>'; 
+	            //<requestType>STATS</requestType>
+	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
+
+	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
 	return rs;
 	</cfscript>
 </cffunction>
