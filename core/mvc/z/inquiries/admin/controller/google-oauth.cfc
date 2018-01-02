@@ -548,7 +548,8 @@ $headers = array(
 		success:true,
 		results:[]
 	};
-	perpage=800;
+	perpage=800; // google has limit of 800 results from this service
+	// google can return up to 700 keyword stats at once, we do 500 here to stay under the limit
 	runCount=ceiling(arrayLen(arrKeyword)/500);
 	for(i=1;i<=runCount;i++){
 		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordStats";
@@ -625,7 +626,8 @@ $headers = array(
 		success:true,
 		results:[]
 	};
-	perpage=800;
+	perpage=800; // google has limit of 800 results from this service
+	// google has limit of 200 seed keywords per ideas request
 	runCount=ceiling(arrayLen(arrKeyword)/100); 
 	for(i=1;i<=runCount;i++){
 		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordIdeas";

@@ -1892,7 +1892,7 @@ application.zcore.user.selectOfficeField(ts);
 
     arrId=listToArray(arguments.officeIdList, ",");
 
-    db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# 
+    db.sql="SELECT *, user.site_id userSiteId FROM #db.table("user", request.zos.zcoreDatasource)# 
     WHERE site_id = #db.param(arguments.site_id)# AND 
     user_deleted=#db.param(0)# and 
     user_active=#db.param(1)#";
@@ -1903,7 +1903,7 @@ application.zcore.user.selectOfficeField(ts);
             if(i NEQ 1){
                 db.sql&=" or ";
             }
-            db.sql&=" CONCAT(#db.param(',')#, office_id, #db.param(',')#) LIKE #db.param('%,#id#,%')# ";
+            db.sql&=" CONCAT(#db.param(',')#, office_id, #db.param(',')#) LIKE #db.param('%,#trim(id)#,%')# ";
         }
         db.sql&=" ) ";
     }
