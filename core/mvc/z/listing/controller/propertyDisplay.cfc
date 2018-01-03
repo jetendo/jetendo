@@ -465,7 +465,7 @@ propertyDisplayCom.init(ts);
 		this.optionStruct.thumbnailLayout=true;
 	} 
 	limit=10;
-	if(isdefined('this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit')){
+	if(isdefined('this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit') and this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit NEQ ""){
 		limit=this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit;
 	}
 	request.zos.requestLogEntry('propertyDisplay.cfc before display() loop');

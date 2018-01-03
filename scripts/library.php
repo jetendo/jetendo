@@ -341,7 +341,7 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 		$connect = $arrRetsConnections[$mls_id]->Connect($arrConfig["loginURL"], $arrConfig["username"], $arrConfig["password"]);
 
 		if (!$connect) {
-			echo "  + Not connected:<br>\n";
+			echo "  + Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."<br>\n";
 			print_r($arrRetsConnections[$mls_id]->Error());
 			return false;
 		}else{
