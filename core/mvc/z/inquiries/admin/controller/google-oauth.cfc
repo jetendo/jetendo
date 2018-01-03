@@ -930,11 +930,6 @@ adwordsLiveManagerAccount
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
 	               </languages>
 	            </searchParameters>
-	            <searchParameters xsi:type="LocationSearchParameter">
-	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
-	               </locations>
-	            </searchParameters>
 	            <ideaType>KEYWORD</ideaType>
 	            <requestType>STATS</requestType>
 	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
@@ -949,6 +944,14 @@ adwordsLiveManagerAccount
 	  </soapenv:Body>
 	</soapenv:Envelope>';  
 
+/*
+
+	            <searchParameters xsi:type="LocationSearchParameter">
+	               <locations>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	               </locations>
+	            </searchParameters>
+	            */
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
 	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
 	return rs;
