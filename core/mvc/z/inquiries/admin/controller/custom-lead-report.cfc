@@ -2137,10 +2137,14 @@ leadchart
 	ORDER BY inquiries_datetime ASC ";
 	request.leadData.qPhone=db.execute("qPhone");
 
-
+  
 	db.sql="SELECT 
-	*
+	*, track_user_referer, track_user_source, track_user_first_page
 	FROM #db.table("inquiries", request.zos.zcoreDatasource)#  
+	LEFT JOIN #db.table("track_user", request.zos.zcoreDatasource)# ON 
+	track_user.site_id = inquiries.site_id and 
+	track_user.inquiries_id = inquiries.inquiries_id and 
+	track_user_deleted=#db.param(0)# 
 	WHERE 
 	inquiries_final_inquiries_id=#db.param(0)# and 
 	inquiries_datetime>=#db.param(request.leadData.startMonthDate)# and 
@@ -2250,7 +2254,7 @@ leadchart
 						<th>Customer ##</th>
 						<th>City</th>
 						<th>Date</th>
-						<th>Office</th>
+						<th>Label / Referrer</th>
 						<!--- <th>Source</th> --->
 					</tr>
 			</cfsavecontent>
@@ -2272,16 +2276,21 @@ leadchart
 					rowCount=0;
 				}
 				js=deserializeJson(row.inquiries_custom_json);
+				referrer="";
 				fs={
 					"name":"",
 					"Phone 1":"",
 					"source":"",
 					"city":"",
 					"tracking_label":"",
-					"called_at":""
+					"called_at":"",
+					"referrer":""
 				};
 				for(field in js.arrCustom){
 					fs[field.label]=field.value;
+				}
+				if(fs.referrer NEQ ""){
+					referrer=application.zcore.functions.zLimitStringLength(fs.referrer, 30);
 				}
 				//echo('</table>');
 				if(fs["Phone 1"] EQ ""){
@@ -2297,7 +2306,7 @@ leadchart
 					<td>#fs["Phone 1"]#</td>
 					<td>#fs.city#</td>
 					<td>#dateformat(row.inquiries_datetime, "m/d/yyyy")#</td>
-					<td>#label#</td>
+					<td>#label# / #referrer#</td>
 					
 				</tr>');//<td>#fs.source#</td>
 
@@ -2340,6 +2349,7 @@ leadchart
 						<th>Email</th>
 						<th>Date</th>
 						<th>Type</th>
+						<th>Source</th>
 					</tr>
 			</cfsavecontent>
 			<cfscript>
@@ -2359,7 +2369,7 @@ leadchart
 					}
 					rowCount=0;
 				} 
-				fs["Phone 1"]="";
+				fs["Phone 1"]=""; 
 				if(row.inquiries_custom_json NEQ ""){
 					js=deserializeJson(row.inquiries_custom_json);
 					
@@ -2373,7 +2383,7 @@ leadchart
 					};
 					for(field in js.arrCustom){
 						fs[field.label]=field.value;
-					} 
+					}  
 					//echo('</table>');
 					if(fs["Phone 1"] EQ ""){
 						fs["Phone 1"]=row.inquiries_phone1;
@@ -2390,12 +2400,30 @@ leadchart
 				writedump(js);
 				break;*/
 				// Phone 1
+
+				/*
+output source:
+track_user_source
+track_user_first_page
+
+			track_user_referer NOT LIKE #db.param('%doubleclick%')# AND 
+			track_user_referer NOT LIKE #db.param('%/aclk%')# AND 
+			(track_user_referer LIKE #db.param('%search.%')# OR 
+			track_user_referer LIKE #db.param('%google%')# OR 
+			track_user_referer LIKE #db.param('%bing%')# OR 
+			track_user_referer LIKE #db.param('%android%')# )";
+				*/
+				source=row.track_user_source;
+				if(source EQ ""){
+					source="N/A";
+				}
 				echo('<tr>
 					<td style="width:1%; white-space:nowrap;">#row.inquiries_first_name# #row.inquiries_last_name#</td>
 					<td>#row.inquiries_phone1#</td>
 					<td>#row.inquiries_email#</td>
 					<td>#dateformat(row.inquiries_datetime, "m/d/yyyy")#</td>
 					<td>#inquiries_type_name#</td>
+					<td>#source#</td>
 				</tr>');
 				rowCount++;
 			}
@@ -2462,6 +2490,7 @@ leadchart
 			WHERE track_user_source<>#db.param('')# AND 
 			site_id = #db.param(request.zos.globals.id)#
 			AND  
+			track_user_deleted=#db.param(0)# and 
 			(DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
 			DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#) 
 			GROUP BY track_user_source 
@@ -2475,6 +2504,7 @@ leadchart
 			AND  
 			(DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
 			DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
+			track_user_deleted=#db.param(0)# and 
 			track_user_referer NOT LIKE #db.param('%doubleclick%')# AND 
 			track_user_referer NOT LIKE #db.param('%/aclk%')# AND 
 			(track_user_referer LIKE #db.param('%search.%')# OR 
