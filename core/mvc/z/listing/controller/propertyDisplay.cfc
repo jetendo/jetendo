@@ -463,9 +463,13 @@ propertyDisplayCom.init(ts);
 		variables.trackBedroomStruct=structnew();
 	}else if(this.optionstruct.search_result_layout EQ 2){
 		this.optionStruct.thumbnailLayout=true;
+	} 
+	limit=10;
+	if(isdefined('this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit')){
+		limit=this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit;
 	}
 	request.zos.requestLogEntry('propertyDisplay.cfc before display() loop');
-	for(i=1;i LTE arrayLen(this.dataStruct.arrData);i++){
+	for(i=1;i LTE min(limit, arrayLen(this.dataStruct.arrData));i++){
 		if(not arrayisdefined(this.dataStruct.arrData, i)){
 			continue;
 		}

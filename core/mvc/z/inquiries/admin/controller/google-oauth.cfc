@@ -859,11 +859,7 @@ adwordsLiveManagerAccount
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
 	               </languages>
 	            </searchParameters>
-	            <searchParameters xsi:type="LocationSearchParameter">
-	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
-	               </locations>
-	            </searchParameters> 
+	           
 	            <ideaType>KEYWORD</ideaType>
 	            <requestType>IDEAS</requestType>
 	            <requestedAttributeTypes>KEYWORD_TEXT</requestedAttributeTypes>
@@ -879,6 +875,13 @@ adwordsLiveManagerAccount
 	      </get>
 	  </soapenv:Body>
 	</soapenv:Envelope>'; 
+	/*
+	 <searchParameters xsi:type="LocationSearchParameter">
+	               <locations>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	               </locations>
+	            </searchParameters> 
+	            */
 	            //<requestType>STATS</requestType>
 	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
 
