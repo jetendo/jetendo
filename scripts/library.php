@@ -367,7 +367,7 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 			continue;
 		}
 		$i++;
-		$fname=$mls_id."-".$pid."-".($arrPhoto['Object-ID']).".jpeg";
+		$fname=$mls_id."-".$pid."-".($arrPhoto['Object-ID']+1).".jpeg";
 		$md5name=md5($fname);
 		$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/";
 		if(!is_dir($fpath)){
