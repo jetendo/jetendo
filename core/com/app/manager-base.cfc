@@ -177,7 +177,9 @@ add option for search indexing for search table.
 			queueSortStruct.where&=" and #variables.deletedField#=0 ";
 		}
 		for(param in variables.requiredParams){
-			queueSortStruct.where&=" and `#param#`='#application.zcore.functions.zEscape(form[param])#' ";
+			if(param NEQ variables.primaryKeyField){
+				queueSortStruct.where&=" and `#param#`='#application.zcore.functions.zEscape(form[param])#' ";
+			}
 		}
 		queueSortStruct.ajaxURL=variables.prefixURL&"index?#variables.requiredParamsQS#";
 		queueSortStruct.ajaxTableId="sortRowTable";
