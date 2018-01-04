@@ -341,7 +341,7 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 		$connect = $arrRetsConnections[$mls_id]->Connect($arrConfig["loginURL"], $arrConfig["username"], $arrConfig["password"]);
 
 		if (!$connect) {
-			echo "  + Not connected:<br>\n";
+			echo "  + Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."<br>\n";
 			print_r($arrRetsConnections[$mls_id]->Error());
 			return false;
 		}else{
@@ -367,7 +367,7 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 			continue;
 		}
 		$i++;
-		$fname=$mls_id."-".$pid."-".($arrPhoto['Object-ID']).".jpeg";
+		$fname=$mls_id."-".$pid."-".($arrPhoto['Object-ID']+1).".jpeg";
 		$md5name=md5($fname);
 		$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/";
 		if(!is_dir($fpath)){

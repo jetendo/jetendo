@@ -61,8 +61,9 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 		$result=$cmysql->query("select listing_id, listing_photocount, listing_liststatus from `listing` listing where 
 		listing_photocount<> '0' and 
 		listing_deleted='0' and 
-		listing_images_verified_datetime < '".$mysqlMidnightDate."' and 
+		listing_images_verified_datetime < '".$mysqlMidnightDate."' and  
 		listing_id like '".$mlsRow["mls_id"]."-%' LIMIT ".$offset.", ".$perloop." ", MYSQLI_STORE_RESULT);
+
 		if($result->num_rows == 0){
 			break;
 		}
@@ -79,8 +80,8 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 				$count1++;
 				$fname=$row["listing_id"]."-".$i.".jpeg";
 				$md5name=md5($fname);
-				$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/";
-				if(!file_exists($fpath.$fname)){
+				$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/"; 
+				if(!file_exists($fpath.$fname)){ 
 					ob_start();
 					$r=zDownloadRetsImages($row["listing_id"], "", $i);
 					$out=ob_get_clean();
@@ -101,7 +102,7 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 						echo "Processed ".$count1." images | mls_id = ".$mls_id." | Downloaded ".$downloadCount." missing images\n";
 					}
 				}
-			}
+			} 
 			$mysqldate = date("Y-m-d H:i:s");
 			$cmysql->query("UPDATE listing SET listing_images_verified_datetime='".$mysqldate."' WHERE listing_id = '".$row["listing_id"]."' and listing_deleted = '0'");
 			usleep(20000);
