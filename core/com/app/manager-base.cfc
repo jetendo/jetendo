@@ -1160,7 +1160,7 @@ deleteSearchIndex(ts);
 			arrayAppend(arrOverride, param);
 		}
 		application.zcore.functions.zQueryToStruct(rs.qData, form, arrayToList(arrOverride, ", "));
-	}else{
+	}else{ 
 		if(rs.qData.recordcount EQ 0){
 			application.zcore.status.setStatus(request.zsid, "#variables.label# doesn't exist.", form, true);
 			application.zcore.functions.zRedirect("#variables.prefixURL#index?#variables.requiredParamsQS#&zsid=#request.zsid#");
@@ -1236,9 +1236,11 @@ deleteSearchIndex(ts);
 
 	echo('
 	<div class="z-manager-edit-errors z-float"></div>
-	<form id="zManagerEditForm" class="zFormCheckDirty" action="#formAction#" method="post" enctype="multipart/form-data" onsubmit="return zSubmitManagerEditForm(this); ">');
+	<form id="zManagerEditForm" class="zFormCheckDirty" action="#formAction#" method="post" enctype="multipart/form-data" onsubmit="return zSubmitManagerEditForm(this); ">'); 
 	for(field in variables.requiredParams){
-		echo('<input type="hidden" name="#field#" value="#htmleditformat(form[field])#">');
+		if(field NEQ variables.primaryKeyField){
+			echo('<input type="hidden" name="#field#" value="#htmleditformat(form[field])#">');
+		}
 	}
 	/*
 	ts=StructNew();
