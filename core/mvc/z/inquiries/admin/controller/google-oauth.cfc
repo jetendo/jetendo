@@ -11,7 +11,7 @@
 	</cfscript>
 </cffunction> 
 
-<cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="index" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
@@ -96,7 +96,8 @@ openssl_sign($data, $signature, $private_key_pem, OPENSSL_ALGO_SHA256);
     };*/
 
 	</cfscript>
-	<p><a href="#firstAuthLink#">Authenticate with Google Analytics</a></p>
+	<h2>Google API Login</h2>
+	<p><a href="#firstAuthLink#">Authenticate with Google</a></p> 
 	<!--- <p><a href="/z/inquiries/admin/google-oauth/passwordLogin">Login with password</a></p> --->
 	<!--- 
 todo: add search console api: POST https://www.googleapis.com/webmasters/v3/sites/http%3A%2F%2Fwww.boomerpower.info%2F/searchAnalytics/query?fields=rows&key=
@@ -121,7 +122,7 @@ Google Analytics:
 </cffunction>
 
 
-<!--- <cffunction name="passwordLogin" localmode="modern" access="remote" roles="serveradministrator">
+<!--- <cffunction name="passwordLogin" localmode="modern" access="remote" roles="administrator">
 	<cfscript> 
 	http url="https://api.oauth2server.com/token" method="post" timeout="10"{
 		httpparam type="formfield" name="grant_type" value="password";
@@ -156,7 +157,7 @@ Google Analytics:
 	
 </cffunction> --->
 
-<cffunction name="return" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="return" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	init();
 	form.code=application.zcore.functions.zso(form, 'code');
@@ -210,7 +211,7 @@ Google Analytics:
 	</cfscript>
 </cffunction>
 
-<cffunction name="reportIndex" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="reportIndex" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	init();
 	if(structkeyexists(form, 'googleSearchConsoleCancel')){
@@ -244,7 +245,9 @@ Google Analytics:
 
 	<p><a href="/z/inquiries/admin/custom-lead-report/index" target="_blank">View Report</a></p>
 	<p><a href="/z/inquiries/admin/google-oauth/revokeToken">Revoke Auth Token</a></p>
-	<p><a href="#scheduledLink#" target="_blank">Scheduled Task (Adwords)</a> 
+	<p><a href="#scheduledLink#" target="_blank">Scheduled Task (Adwords) - Don't run this</a> 
+
+	<h2>Never run more then one of these at a time because Google will start failing and it will be pointless.  They will each take several minutes to finish.</h2>
 	<p><a href="#overviewLink#" target="_blank">Google Analytics Main Overview</a> 
 		<cfscript>
 		s=application.zcore.functions.zso(application, 'googleAnalyticsOverviewStatus');
@@ -278,7 +281,7 @@ Google Analytics:
 	<p><a href="/z/inquiries/admin/google-oauth/index">Authenticate Again</a></p>
 </cffunction>
 
-<cffunction name="revokeToken" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="revokeToken" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	//https://accounts.google.com/o/oauth2/revoke?token=
 	http url="https://accounts.google.com/o/oauth2/revoke?token=#application.googleAnalyticsAccessToken.access_token#" method="get" timeout="10"{ 
@@ -1106,11 +1109,11 @@ adwordsLiveManagerAccount
 </cffunction>
 
 
-<cffunction name="refreshToken" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="refreshToken" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	form.code=application.zcore.functions.zso(form, 'code');
 	if(not structkeyexists(application, 'googleAnalyticsAccessToken')){
-		application.zcore.status.setStatus(request.zsid, "You must authenticate with google analytics first.", form, true);
+		application.zcore.status.setStatus(request.zsid, "You must authenticate with google first.", form, true);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/index?zsid=#request.zsid#");
 	}
 	http url="https://www.googleapis.com/oauth2/v4/token" method="post" timeout="10"{
@@ -1188,7 +1191,7 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="searchConsole" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="searchConsole" localmode="modern" access="remote" roles="administrator">
 	<cfscript> 
 	init();
 	db=request.zos.queryObject;
@@ -1428,7 +1431,7 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
  
-<cffunction name="overview" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="overview" localmode="modern" access="remote" roles="administrator">
 	<cfscript>  
 	init();
 	db=request.zos.queryObject;
@@ -1554,7 +1557,7 @@ adwordsLiveManagerAccount
 </cffunction>
 
 
-<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="administrator">
 	<cfscript>  
 	init();
 	db=request.zos.queryObject;
@@ -1783,7 +1786,7 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="organic" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="organic" localmode="modern" access="remote" roles="administrator">
 	<cfscript> 
 	init();
 	db=request.zos.queryObject;
@@ -1925,7 +1928,7 @@ adwordsLiveManagerAccount
 </cffunction>
 
 
-<cffunction name="keyword" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="keyword" localmode="modern" access="remote" roles="administrator">
 	<cfscript> 
 	init();
 	db=request.zos.queryObject;
@@ -2082,7 +2085,7 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="goal" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="goal" localmode="modern" access="remote" roles="administrator">
 	<cfscript> 
 	init();
 	throw("not implemented - the api call works, but i don't think we need this one");
