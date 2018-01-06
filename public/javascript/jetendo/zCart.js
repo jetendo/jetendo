@@ -236,6 +236,16 @@
 			itemIds[jsonObj.id]=idOffset; 
 			self.updateCount();
 		};
+		self.updatePrice = function(itemId, price){
+			if(!zKeyExists(itemIds, itemId)){
+				return -1;
+			}
+			var id = itemIds[itemId];
+			items[id].price = price;
+			self.renderItems();
+			self.updateCookie();
+			return 1;
+		};
 		self.updateQuantity=function(itemId, quantity){
 			if(!zKeyExists(itemIds, itemId)){
 				return;

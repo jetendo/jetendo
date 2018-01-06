@@ -1955,6 +1955,7 @@ var zLastAjaxVarName=""; */
 					customCallback(r);
 					return;
 				}
+				//alert(r.reload + " " + r.redirect)
 				if(typeof r.reload != "undefined" && r.reload){
 					window.parent.location.reload();
 				}else if(typeof r.redirect != "undefined" && r.redirect){
