@@ -410,6 +410,9 @@
 			imageWidth:form.image_size_width, // will resize image and preserve ratio if not zero
 			imageHeight:form.image_size_height // will resize image and preserve ratio if not zero
 		}
+		if(form.method EQ "insertFile"){
+			ts.enableUnzip=false;
+		}
 		rs=request.zos.siteVirtualFileCom.uploadFiles(ts);
 	}
 	if(rs.success EQ false){

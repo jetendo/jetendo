@@ -778,6 +778,7 @@ displayAdminEditMenu(ts);
 			}
 		}
 	} 
+	newFileStruct={};
 	for(fs in variables.imageFields){
 		application.zcore.functions.zCreateDirectory(fs.uploadPath);
 
@@ -802,6 +803,9 @@ displayAdminEditMenu(ts);
 					form[fs.originalField]=request.zos.lastUploadFileName; 
 				}
 				form[fs.field]=arrList[1];
+				newFileStruct[fs.field]=true;
+
+
 			}
 		}else if(form.method EQ "update" and not deleting){
 			if(structkeyexists(fs, 'originalField')){
@@ -838,7 +842,7 @@ displayAdminEditMenu(ts);
 
 	if(fail){
 		application.zcore.status.displayReturnJson(request.zsid);
-	} 
+	}
 	if(variables.metaField NEQ ""){
 		form[variables.metaField]=variables.metaCom.save(variables.tableName, form); 
 	}
@@ -853,8 +857,24 @@ displayAdminEditMenu(ts);
 		}
 		if(application.zcore.functions.zso(form, fs.field) NEQ ""){
 			form[fs.field]=application.zcore.functions.zUploadFileToDb(fs.field, fs.uploadPath, variables.tableName, variables.primaryKeyField, application.zcore.functions.zso(form, "#fs.field#_delete", true, 0), variables.datasource); 
+			newFileStruct[fs.field]=true;
 		}else if(form.method EQ "update" and not deleting){ 
 			form[fs.field]=rsUpdate.qData[fs.field];
+		}
+	} 
+	if(form.method EQ "update"){
+		for(fs in variables.imageFields){
+			if(structkeyexists(newFileStruct, fs.field)){
+				if(structkeyexists(fs, 'originalField')){
+					application.zcore.functions.zDeleteFile(fs.uploadPath&rsUpdate.qData[fs.originalField]); 
+				}
+				application.zcore.functions.zDeleteFile(fs.uploadPath&rsUpdate.qData[fs.field]);
+			}
+		}
+		for(fs in variables.fileFields){ 
+			if(structkeyexists(newFileStruct, fs.field)){
+				application.zcore.functions.zDeleteFile(fs.uploadPath&rsUpdate.qData[fs.field]);
+			}
 		}
 	}
 	ts=StructNew();
