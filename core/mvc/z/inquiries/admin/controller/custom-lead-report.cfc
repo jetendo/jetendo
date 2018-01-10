@@ -1237,7 +1237,7 @@ $(document).ready(function(){
 
 	<!--- 
 leadchart
-	db.sql="select * from #db.table("facebook_month")# WHERE ";  
+	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE ";  
 	db.sql&=" facebook_month_datetime>=#db.param(dateformat(dateadd("yyyy", -1, request.leadData.endDate), "yyyy-mm-dd"))# and 
 		facebook_month_datetime<#db.param(dateformat(dateadd("d", -1, dateadd("m", 1, request.leadData.endDate)), "yyyy-mm-dd"))# and "; 
 	db.sql&=" site_id =#db.param(request.zos.globals.id)# and 
@@ -2592,7 +2592,7 @@ track_user_first_page
 	qN=db.execute("qN");
 
 	db.sql="select *, DATE_FORMAT(newsletter_month_datetime, #db.param('%Y-%m')#) date  
-	from #db.table("newsletter_month")# WHERE 
+	from #db.table("newsletter_month", request.zos.zcoreDatasource)# WHERE 
 	newsletter_month_datetime>=#db.param(request.leadData.startDate)# and 
 	newsletter_month_datetime<#db.param(request.leadData.endDate)# and 
 	site_id =#db.param(request.zos.globals.id)# and 
@@ -2818,7 +2818,7 @@ track_user_first_page
 	}
 	db=request.zos.queryObject;
 
-	db.sql="select * from #db.table("facebook_page")# WHERE  
+	db.sql="select * from #db.table("facebook_page", request.zos.zcoreDatasource)# WHERE  
 	facebook_page_external_id IN (#db.param(pageIdList)#) and 
 	facebook_page_deleted=#db.param(0)#   ";
 	qPost=db.execute("qPost"); 
@@ -2829,7 +2829,7 @@ track_user_first_page
 	pageInternalIdList=arrayToList(arrIdNew, ",");
 
 
-	db.sql="select * from #db.table("facebook_post")# WHERE 
+	db.sql="select * from #db.table("facebook_post", request.zos.zcoreDatasource)# WHERE 
 	facebook_post_created_datetime>=#db.param(request.leadData.startMonthDate)# and 
 	facebook_post_created_datetime<#db.param(request.leadData.endDate)# and 
 	facebook_page_id IN (#db.param(pageInternalIdList)#) and 
@@ -2838,7 +2838,7 @@ track_user_first_page
 	LIMIT #db.param(0)#, #db.param(5)#";
 	qN=db.execute("qN"); 
 
-	db.sql="select * from #db.table("facebook_month")# WHERE 
+	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE 
 	facebook_month_datetime>=#db.param(request.leadData.startDate)# and 
 	facebook_month_datetime<#db.param(request.leadData.endDate)# and 
 	site_id =#db.param(request.zos.globals.id)# and 
@@ -2847,7 +2847,7 @@ track_user_first_page
 	qMonth=db.execute("qMonth");  
 	
 
-	db.sql="select * from #db.table("facebook_month")# WHERE "; 
+	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE "; 
 	if(form.yearToDateLeadLog EQ 1 or form.yearToDateLeadLog EQ 2){
 		db.sql&=" site_id = #db.param(0)# and ";
 	}else{
@@ -2860,7 +2860,7 @@ track_user_first_page
 	LIMIT #db.param(0)#, #db.param(1)# ";
 	qMonthPreviousYear=db.execute("qMonthPreviousYear");    
 
-	db.sql="select * from #db.table("facebook_month")# WHERE ";  
+	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE ";  
 	db.sql&=" facebook_month_datetime>=#db.param(dateformat(dateadd("yyyy", -1, dateadd("d", -1, request.leadData.endDate)), "yyyy-mm-01"))# and 
 		facebook_month_datetime<=#db.param(request.leadData.startMonthDate)# and "; 
 	db.sql&=" site_id =#db.param(request.zos.globals.id)# and 
