@@ -498,6 +498,7 @@ zGetLatLong(ts);
 	gs99t.search_sort="";
 	gs99t.search_listdate="";
 	gs99t.search_near_address="";
+	gs99t.search_near_coordinates="";
 	gs99t.search_near_radius="";
 	gs99t.search_remarks_negative="";
 	gs99t.search_mls_number_list="";
@@ -950,7 +951,7 @@ zGetLatLong(ts);
 	var arrL=0;
 	var s9=structnew();
 	var g=0;
-	var arrList2=['search_city_id','search_listing_type_id','search_acreage_low','search_acreage_high','search_bedrooms_low','search_bedrooms_high','search_bathrooms_low','search_bathrooms_high','search_sqfoot_low','search_sqfoot_high','search_rate_low','search_zip','search_address','search_rate_high','search_with_photos','search_subdivision','search_frontage','search_view','search_county','search_status','search_style','search_condoname','search_with_pool','search_sort','search_near_address','search_near_radius','search_within_map','search_agent_only','search_office_only','search_subdivision','search_surrounding_cities','search_remarksmatch','search_remarks_negative','search_remarks','search_year_built_low','search_year_built_high','search_listing_sub_type_id','search_result_limit','search_agent_always','search_office_always','search_sort_agent_first','search_sort_office_first','search_result_layout','search_group_by','search_region','search_condition','search_parking','search_tenure','search_liststatus','search_lot_square_feet_low','search_lot_square_feet_high','search_mls_number_list'];
+	var arrList2=['search_city_id','search_listing_type_id','search_acreage_low','search_acreage_high','search_bedrooms_low','search_bedrooms_high','search_bathrooms_low','search_bathrooms_high','search_sqfoot_low','search_sqfoot_high','search_rate_low','search_zip','search_address','search_rate_high','search_with_photos','search_subdivision','search_frontage','search_view','search_county','search_status','search_style','search_condoname','search_with_pool','search_sort','search_near_address','search_near_coordinates','search_near_radius','search_within_map','search_agent_only','search_office_only','search_subdivision','search_surrounding_cities','search_remarksmatch','search_remarks_negative','search_remarks','search_year_built_low','search_year_built_high','search_listing_sub_type_id','search_result_limit','search_agent_always','search_office_always','search_sort_agent_first','search_sort_office_first','search_result_layout','search_group_by','search_region','search_condition','search_parking','search_tenure','search_liststatus','search_lot_square_feet_low','search_lot_square_feet_high','search_mls_number_list'];
 	s9.city="City: ";
 	s9.yearBuilt="Year Built: ";
 	s9.priceRange="Price Range: ";
@@ -1102,6 +1103,9 @@ zGetLatLong(ts);
 	}
 	if(arguments.searchStr.search_near_address NEQ ''){
 		ArrayAppend(SearchCri,'Within #arguments.searchStr.search_near_radius# miles of #arguments.searchStr.search_near_address#');
+	}
+	if(arguments.searchStr.search_near_coordinates NEQ ''){
+		ArrayAppend(SearchCri,'Within #arguments.searchStr.search_near_radius# miles of #arguments.searchStr.search_near_coordinates#');
 	}
 	if(arguments.searchStr.search_remarks_negative NEQ ''){
 		ArrayAppend(SearchCri,'Excluding These Remarks: '&arguments.searchStr.search_remarks_negative);

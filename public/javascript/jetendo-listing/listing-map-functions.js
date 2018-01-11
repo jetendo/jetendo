@@ -677,7 +677,7 @@ function onGMAPLoadV3(){
 		pm.point=new google.maps.LatLng(zAjaxNearAddressMarker[0], zAjaxNearAddressMarker[1]);
 		pm.title="zNearAddressMarker";
 		pm.htmlText='<table width="150"><tr><td>Location:<br>'+ad1+'</td></tr></table>';
-		var marker=zAddPermanentMarker(pm);
+		var marker=zAddPermanentMarkerV3(pm);
 		google.maps.event.trigger(marker,'click');
 		zMapOverlaysV3.push(marker);
 	}
@@ -1136,9 +1136,18 @@ function zAjaxMapRadiusChange(){
 		zAjaxSetNearAddress();
 	}
 }
+	function zAjaxMapCoordinatesRadiusChange(){
+		var d3=document.getElementById("search_near_radius");
+		if(d3.value !== ""){
+			zAjaxSetNearCoordinates();
+		}
+	}
 function zAjaxFailNearAddress(){
 	alert('There was a problem setting the address. Try again');
 }
+	function zAjaxFailNearCoordinates(){
+		alert('There was a problem setting the coordinates. Try again');
+	}
 function zAjaxSetNearAddress(){
 	var d1=document.getElementById("searchNearAddress");
 	var d2=document.getElementById("search_near_radius");
@@ -1153,6 +1162,20 @@ function zAjaxSetNearAddress(){
 	tempObj.ignoreOldRequests=true;
 	zAjax(tempObj);
 }
+	function zAjaxSetNearCoordinates(){
+		var d1=document.getElementById("search_near_coordinates");
+		var d2=document.getElementById("search_near_radius");
+		var d3="/z/listing/search-form/nearCoordinates?search_near_coordinates="+escape(d1.value)+"&search_near_radius="+escape(d2.value);
+		
+		var tempObj={};
+		tempObj.id="zMapNearCoordinates";
+		tempObj.url=d3;
+		tempObj.callback=zAjaxReturnNearCoordinates;
+		tempObj.errorCallback=zAjaxFailNearCoordinates;
+		tempObj.cache=false;
+		tempObj.ignoreOldRequests=true;
+		zAjax(tempObj);
+	}
 function zAjaxCancelNearAddress(){
 	var d1=document.getElementById("searchNearAddress");
 	var d2=document.getElementById("search_near_radius");
@@ -1161,6 +1184,14 @@ function zAjaxCancelNearAddress(){
 	d1.value='';
 	d2.value='0.1';
 }
+	function zAjaxCancelNearCoordinates(){
+		var d1=document.getElementById("search_near_coordinates");
+		var d2=document.getElementById("search_near_radius");
+		var d3=document.getElementById("zNearCoordinatesDiv");
+		d3.style.display="none";
+		d1.value='';
+		d2.value='0.1';
+	}
 function zNearAddressChange(o){
 	var d1=document.getElementById("zNearAddressDiv");
 	var d3=document.getElementById("search_near_address");
@@ -1171,6 +1202,16 @@ function zNearAddressChange(o){
 		d1.style.display="block";
 	}
 }
+	function zNearCoordinatesChange(o){
+		var d1=document.getElementById("zNearCoordinatesDiv");
+		var d3=document.getElementById("search_near_coordinates");
+		if(o.value === ""){
+			d1.style.display="none";
+			d3.value="";
+		}else{
+			d1.style.display="block";
+		}
+	}
 
 var zArrPermanentMarker=new Array();
 function zAjaxReturnNearAddress(r,skipParse){
@@ -1230,7 +1271,7 @@ function zAjaxReturnNearAddress(r,skipParse){
 	if(typeof mapObj === "undefined"){
 		return;
 	}
-	mapObjV3.closeInfoWindow();
+	// mapObjV3.closeInfoWindow();
 	mapObjV3.setCenter(new google.maps.LatLng(mapProps.avgLat, mapProps.avgLong), mapProps.zoom);
 	
 	zSetNearAddress(1);
@@ -1240,6 +1281,76 @@ function zAjaxReturnNearAddress(r,skipParse){
 	arrAd=d2.value.split(",");
 	var ad1=arrAd.shift()+"<br>"+arrAd.join(",");
 	pm.htmlText='<table width="150"><tr><td>Location:<br>'+ad1+'</td></tr></table>';
-	var marker=zAddPermanentMarker(pm);
+	var marker=zAddPermanentMarkerV3(pm);
 	google.maps.event.trigger(marker,"click");
 }
+	function zAjaxReturnNearCoordinates(r,skipParse){
+		// throws an error when debugging is enabled.
+		//r='{"success":true,"errorMsg":"","search_map_coordinates_list":"-81.1391101437,-81.1376618563,29.2753658556,29.2768141444"}';
+		if(zDebugMLSAjax){
+			document.write(r);	
+			return;
+		}
+		var myObj=eval('('+r+')');
+		if(!myObj.success){
+			alert(myObj.errorMessage);
+			return;
+		}
+		//alert("set:"+myObj.success);
+		// set map coordinates
+		var arrLatLong=myObj.search_map_coordinates_list.split(",");
+		var minLat=parseFloat(arrLatLong[2]);
+		var maxLat=parseFloat(arrLatLong[3]);
+		var minLong=parseFloat(arrLatLong[0]);
+		var maxLong=parseFloat(arrLatLong[1]);
+		var avgLat=(minLat+maxLat)/2;
+		var avgLong=(minLong+maxLong)/2;
+		var zoom=0;
+		var propHeight=Math.max(heightPerPixel*50,Math.abs(maxLat-minLat));
+		var propWidth=Math.max(widthPerPixel*50,Math.abs(maxLong-minLong));
+		var twp=widthPerPixel;
+		var thp=heightPerPixel;
+		margin=50;
+		for(zoom=1;zoom<=20;zoom++){
+			if(zoom !== 1){
+				twp*=2;
+				thp*=2;
+			}
+			maxWidth=mapProps.curStageWidth*twp;
+			maxHeight=mapProps.curStageHeight*thp;
+			// all properties must fit within zoom level
+			if(maxWidth>propWidth+(twp*margin) && maxHeight>propHeight+(thp*margin)){
+				break;
+			}
+		}
+		// set zoom and center
+		mapProps.avgLong=avgLong;
+		mapProps.avgLat=avgLat;
+		if(Math.abs(maxLat-minLat)===0){
+			mapProps.zoom=20-zoom;
+		}else{
+			mapProps.zoom=18-zoom;
+		}
+		streetView=false;
+		var d1=document.getElementById("searchNearLocation");
+		var d2=document.getElementById("search_near_coordinates");
+		// d2.value=d1.value;
+		var d3=document.getElementById("zNearCoordinatesDiv");
+		d3.style.display="none";
+
+		if(typeof mapObj === "undefined"){
+			return;
+		}
+		// mapObjV3.closeInfoWindow();
+		mapObjV3.setCenter(new google.maps.LatLng(mapProps.avgLat, mapProps.avgLong), mapProps.zoom);
+		
+		zSetNearAddress(1);
+		var pm=new Object();
+		pm.point=new google.maps.LatLng(mapProps.avgLat, mapProps.avgLong);
+		pm.title="zNearCoordinatesMarker";
+		arrAd=d1.value.split(",");
+		var ad1=arrAd.shift()+"<br>"+arrAd.join(",");
+		pm.htmlText='<table width="150"><tr><td>Location:<br>'+ad1+'</td></tr></table>';
+		var marker=zAddPermanentMarkerV3(pm);
+		google.maps.event.trigger(marker,"click");
+	}
