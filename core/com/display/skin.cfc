@@ -474,7 +474,11 @@
 		templateTagFunction="prependTag";
 		templateTagName="meta";
 	} 
-	s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; // TODO: might want to bring this back later request.zos.staticFileDomain& 
+	if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
+		s='<link rel="stylesheet" type="text/css" href="#request.zos.globals.domain##checkPath#" />'; 
+	}else{
+		s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; 
+	}
 	application.zcore.template[templateTagFunction](templateTagName, s&chr(10), forceFirst);
 	return ""; 
 </cfscript>

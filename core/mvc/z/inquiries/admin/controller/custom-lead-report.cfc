@@ -369,6 +369,7 @@ $(document).ready(function(){
 
 <cffunction name="index" localmode="modern" access="remote" roles="administrator">  
 	<cfscript>  
+	setting requesttimeout="200";
 	init();
 	form.returnJSON=application.zcore.functions.zso(form, "returnJSON", true, 0);
 	form.facebookQuarters=application.zcore.functions.zso(form, 'facebookQuarters', true, 1);
@@ -3211,8 +3212,7 @@ track_user_first_page
 		}
 	}  
 	if(structkeyexists(form, 'print')){ 
-		debug=false;
-		setting requesttimeout="20";
+		debug=false; 
 		pdfFile=request.zos.globals.privateHomeDir&"#form.selectedMonth#-Lead-Report-#request.zos.globals.shortDomain#.pdf";
 		r=application.zcore.functions.zConvertHTMLTOPDF(htmlOut, pdfFile, 1000);
 		if(r EQ false){

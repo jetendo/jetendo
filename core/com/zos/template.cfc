@@ -12,7 +12,7 @@
 		<meta name="referrer" content="origin">
 	</cfif>
 	<script type="text/javascript">/* <![CDATA[ */var zSiteDomain="#request.zos.globals.domain#";/* ]]> */</script>
-	<script src="#application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#" type="text/javascript"></script>
+	<script src="#request.zos.globals.domain##application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#" type="text/javascript"></script>
 	<script type="text/javascript">/* <![CDATA[ */
 	#arguments.dynamicContent#
 	/* ]]> */</script>
@@ -828,7 +828,12 @@ for(local.row in local.qSite){
 			local.scriptIncludeStruct={"1":{},"2":{},"3":{},"4":{},"5":{},"6":{},"7":{},"8":{}, "9":{}, "10":{}, "11":{}, "12":{}, "13":{}, "14":{}, "15":{}, "16":{}, "17":{}, "18":{}, "19":{}, "20":{} };
 			for(local.i=1;local.i LTE arraylen(request.zos.arrScriptInclude);local.i++){
 				if(left(request.zos.arrScriptInclude[local.i], local.jqueryIncludeLength) NEQ "/z/javascript/jquery/jquery-1.10.2.min.js"){
-					local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.arrScriptInclude[local.i]]=true;
+					if(left(request.zos.arrScriptInclude[local.i], 1) EQ '/' and left(request.zos.arrScriptInclude[local.i], 2) NEQ "//"){
+						// required for domains that use http proxy connection
+						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.globals.domain&request.zos.arrScriptInclude[local.i]]=true;
+					}else{
+						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.arrScriptInclude[local.i]]=true;
+					}
 				}
 			}
 			local.scriptCount=structcount(local.scriptIncludeStruct); 
@@ -844,7 +849,7 @@ for(local.row in local.qSite){
 
 			append2='<script type="text/javascript">/* <![CDATA[ */  
 				setTimeout(function(){
-					var tempM=new zLoader();tempM.loadScripts(["#application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
+					var tempM=new zLoader();tempM.loadScripts(["#request.zos.globals.domain##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
 					'&local.scriptOutput&'
 					);
 				},0); /* ]]> */</script>'; 
@@ -1129,12 +1134,12 @@ for(local.row in local.qSite){
 
 <cffunction name="getIconMetaTags" access="private" localmode="modern">
 	<cfsavecontent variable="out">
-	<link rel="shortcut icon" href="/favicon.ico">
-	<link rel="apple-touch-icon" href="/zupload/settings/apple-touch-icon.png">
-	<link rel="apple-touch-icon" sizes="57x57" href="/zupload/settings/apple-touch-icon-57x57-precomposed.png" />
-	<link rel="apple-touch-icon" sizes="72x72" href="/zupload/settings/apple-touch-icon-72x72-precomposed.png" />
-	<link rel="apple-touch-icon" sizes="114x114" href="/zupload/settings/apple-touch-icon-114x114-precomposed.png" />
-	<link rel="apple-touch-icon" sizes="144x144" href="/zupload/settings/apple-touch-icon-144x144-precomposed.png" /> 
+	<link rel="shortcut icon" href="#request.zos.globals.domain#/favicon.ico">
+	<link rel="apple-touch-icon" href="#request.zos.globals.domain#/zupload/settings/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="57x57" href="#request.zos.globals.domain#/zupload/settings/apple-touch-icon-57x57-precomposed.png" />
+	<link rel="apple-touch-icon" sizes="72x72" href="#request.zos.globals.domain#/zupload/settings/apple-touch-icon-72x72-precomposed.png" />
+	<link rel="apple-touch-icon" sizes="114x114" href="#request.zos.globals.domain#/zupload/settings/apple-touch-icon-114x114-precomposed.png" />
+	<link rel="apple-touch-icon" sizes="144x144" href="#request.zos.globals.domain#/zupload/settings/apple-touch-icon-144x144-precomposed.png" /> 
 	</cfsavecontent>
 	<cfscript>
 	return out;
