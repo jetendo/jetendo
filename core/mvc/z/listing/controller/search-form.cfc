@@ -195,14 +195,14 @@ SELECT zipcode.*,
 <cffunction name="nearCoordinates" localmode="modern" access="remote">
 	<cfscript>
 	init();
-	search_near_coordinates=trim(application.zcore.functions.zso(form, 'search_near_coordinates'));
-	if(search_near_coordinates EQ ""){
+	form.search_near_coordinates=trim(application.zcore.functions.zso(form, 'search_near_coordinates'));
+	if(form.search_near_coordinates EQ ""){
 		application.zcore.functions.z404("Invalid request - search_near_coordinates is required");
 	}
 	// application.zcore.functions.z404("this can't depend on zGetLatLong anymore. need to make it use client side geocoding.");
 	// application.zcore.tracking.backOneHit();
 
-	coords = listToArray( search_near_coordinates, ',' );
+	coords = listToArray( form.search_near_coordinates, ',' );
 
 	lat = coords[1];
 	long = coords[2];
@@ -3000,7 +3000,9 @@ sfSortStruct["search_frontage"]=theCriteriaHTML;
 
 <cfsavecontent variable="theCriteriaHTML">
 <!---<cfif structkeyexists(form.searchFormHideCriteria, 'more_options') EQ false and application.zcore.functions.zso(application.sitestruct[request.zos.globals.id],'zListingMapCheck',false,false)>--->
-<cfif (structkeyexists(form, 'zdisablesearchfilter') or structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable, 'search_near_coordinates') EQ false or application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable,'search_near_coordinates') EQ 1)>
+<cfif (structkeyexists(form, 'zdisablesearchfilter') or 
+	structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable, 'search_near_coordinates') EQ false or 
+	application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable,'search_near_coordinates') EQ 1)>
 
 <div class="zmlsformdiv">
 <cfsavecontent variable="featureHTML2"> 
