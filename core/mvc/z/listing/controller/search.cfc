@@ -34,7 +34,8 @@
 	this.searchCriteria.search_mls_number_list="cc";
 	this.searchCriteria.search_sort="dd";
 	this.searchCriteria.search_listdate="ee";
-	this.searchCriteria.search_near_address="ff";
+    this.searchCriteria.search_near_address="ff";
+	this.searchCriteria.search_near_coordinates="ff1";
 	this.searchCriteria.search_near_radius="gg";
 	//this.searchCriteria.search_sortppsqft="";
 	//this.searchCriteria.search_new_first="";
@@ -1378,7 +1379,8 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
 		sfSortStruct["search_liststatus"]="";
 		sfSortStruct["search_style"]="";
 		sfSortStruct["search_frontage"]="";
-		sfSortStruct["search_near_address"]="";
+        sfSortStruct["search_near_address"]="";
+		sfSortStruct["search_near_coordinates"]="";
 		sfSortStruct["search_more_options"]="";
 		sfSortStruct["search_listdate"]="";
 		sfSortStruct["search_sort"]="";
@@ -3545,6 +3547,77 @@ if(searchFormEnabledDropDownMenus){
 </cfsavecontent>
 <cfscript>
 sfSortStruct["search_near_address"]=theCriteriaHTML;
+</cfscript>
+
+<cfsavecontent variable="theCriteriaHTML">
+<cfif isDefined('searchFormHideCriteria.more_options') EQ false and application.zcore.functions.zso(application.sitestruct[request.zos.globals.id],'zListingMapCheck',false,false)>
+<cfif (structkeyexists(form, 'zdisablesearchfilter') or structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.filterStruct, 'searchable.search_city_id') EQ false or application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable, 'search_near_coordinates') EQ 1)>
+<div class="zmlsformdiv">
+<cfsavecontent variable="featureHTML2"> 
+Type street address<br />
+including city &amp; state:<br />
+
+<cfscript>
+ts=StructNew();
+//ts.label="Location:";
+ts.name="search_near_coordinates";
+rs=application.zcore.functions.zInput_Hidden(ts);
+</cfscript>
+<input type="text" name="searchNearCoordinates" id="searchNearCoordinates" size="15" onkeyup="zNearCoordinatesChange(this);" value="<cfif application.zcore.functions.zso(form, 'searchNearCoordinates') NEQ "">#form.searchNearCoordinates#<cfelse>#application.zcore.functions.zso(form, 'search_near_coordinates')#</cfif>" />
+<div class="zsearchformhr"></div>
+<br style="clear:both;" />
+Set Radius Distance: <br style="clear:both;" />
+
+<cfscript>
+ts = StructNew();
+ts.name="search_near_radius";
+ts.hideselect=true;
+ts.listValuesDelimiter="|";
+ts.listValues ="0.1|0.25|0.50|0.75|1|1.25|1.5|2|3|4|5|10|15|20|25|30|40|50";
+ts.listLabels ="0.1|0.25|0.50|0.75|1|1.25|1.5|2|3|4|5|10|15|20|25|30|40|50";
+ts.listLabelsDelimiter="|";
+ts.onchange="zAjaxMapCoordinatesRadiusChange();";
+ts.output=true;
+ts.selectLabel="Radius";
+//ts.inlineStyle="width:#replace(searchFormSelectWidth,"px","")-20#px;";
+    application.zcore.functions.zInputSelectBox(ts);
+</cfscript> (In Miles)<br style="clear:both;" />
+<div id="zNearCoordinatesDiv" style="display:none;">
+<div class="zsearchformhr"></div><br style="clear:both;" />
+Click &quot;Set&quot; to recenter<br />
+ the map or &quot;Cancel&quot;.<br />
+
+<input type="button" name="setNearCoordinates" onclick="zAjaxSetNearCoordinates();" value="Set" /> <input type="button" name="cancelNearCoordinates" onclick="zAjaxCancelNearCoordinates();" value="Cancel" />
+</div>
+</cfsavecontent>
+<cfscript>
+if(searchFormEnabledDropDownMenus){
+    //writeoutput(featureHTML2);    
+}else{
+    if(searchDisableExpandingBox){
+        writeoutput('<div class="zmlsformlabel">Near Location</div><br />'&featureHTML2);
+    }else{
+        ts=StructNew();
+        //ts.zExpOptionValue=rs.zExpOptionValue;
+        ts.label="Near Location:";
+        ts.contents=featureHTML2;
+            ts.height=28 + 145;
+        ts.width="165";
+        ts.zMotionEnabled=true;
+        if(application.zcore.functions.zso(form, 'search_near_coordinates') NEQ ""){
+            ts.zMotionOpen=true;
+        }else{
+            ts.zMotionOpen=application.zcore.app.getAppData("listing").sharedStruct.filterStruct.opened["search_near_coordinates"];
+        }
+        application.zcore.functions.zExpOption(ts);
+    }
+}
+</cfscript></div>
+</cfif>
+</cfif>
+</cfsavecontent>
+<cfscript>
+sfSortStruct["search_near_coordinates"]=theCriteriaHTML;
 </cfscript>
 
 <!--- <cfsavecontent variable="theCriteriaHTML">

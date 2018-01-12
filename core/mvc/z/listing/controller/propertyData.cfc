@@ -126,6 +126,7 @@
 	
 	sc2.search_sort="priceasc"; 
 	sc2.search_near_address="";
+	sc2.search_near_coordinates="";
 	sc2.search_near_radius="";
 	sc2.search_new_first=false;
 	sc2.search_list_date="";
@@ -1593,6 +1594,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	
 	sc2.search_sort="priceasc";
 	sc2.search_near_address="";
+	sc2.search_near_coordinates="";
 	sc2.search_near_radius="";
 	sc2.search_new_first=false;
 	sc2.search_list_date="";
@@ -1678,7 +1680,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	var defaultOpened=structnew();
 	var nodragstruct=0;
 	var uniquesortstruct=structnew();
-	var arrDefaultSort=listtoarray("filter_city_id,filter_rate,filter_listing_type_id,filter_listing_sub_type_id,filter_bedrooms,filter_bathrooms,filter_sqfoot,filter_lot_square_feet,filter_year_built,filter_acreage,filter_county,filter_view,filter_status,filter_style,filter_frontage,filter_region,filter_tenure,filter_parking,filter_condition,filter_near_address,filter_more_options,filter_condoname,filter_subdivision,filter_remarks,filter_remarks_negative,filter_zip,filter_address,filter_within_map");
+	var arrDefaultSort=listtoarray("filter_city_id,filter_rate,filter_listing_type_id,filter_listing_sub_type_id,filter_bedrooms,filter_bathrooms,filter_sqfoot,filter_lot_square_feet,filter_year_built,filter_acreage,filter_county,filter_view,filter_status,filter_style,filter_frontage,filter_region,filter_tenure,filter_parking,filter_condition,filter_near_address,filter_near_coordinates,filter_more_options,filter_condoname,filter_subdivision,filter_remarks,filter_remarks_negative,filter_zip,filter_address,filter_within_map");
 	var db2=request.zos.noVerifyQueryObject;
 	db.sql="select * from #db.table("mls_filter", request.zos.zcoreDatasource)# mls_filter 
 	where mls_filter.site_id = #db.param(request.zos.globals.id)# and 

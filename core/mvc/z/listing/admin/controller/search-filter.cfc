@@ -134,7 +134,7 @@ ts.onChangeCallback="getMLSCount";
 ts.successMessage=false;
 application.zcore.functions.zForm(ts);
 </cfscript>
-		<button type="submit" name="submitPage1" value="submitPage1">Update Search Filter</button><br />
+		<button type="submit" name="submitPage1" value="submitPage1" class="z-button">Update Search Filter</button><br />
 <br />
         <h2>Specify criteria and choose to include or exclude listings that match.</h2>
 
@@ -185,7 +185,7 @@ returnStruct2 = propertyDataCom.getProperties(ts);
 		
 		db.sql="SHOW FIELDS FROM "&request.zos.queryObject.table("mls_filter", request.zos.zcoreDatasource);
 		qM=db.execute("qM"); 
-		arrDefaultSort=listtoarray("filter_city_id,filter_rate,filter_listing_type_id,filter_listing_sub_type_id,filter_bedrooms,filter_bathrooms,filter_sqfoot,filter_year_built,filter_acreage,filter_county,filter_view,filter_status,filter_liststatus,filter_style,filter_frontage,filter_region,filter_tenure,filter_parking,filter_condition,filter_near_address,filter_more_options,filter_condoname,filter_subdivision,filter_remarks,filter_remarks_negative,filter_zip,filter_address,filter_within_map");
+		arrDefaultSort=listtoarray("filter_city_id,filter_rate,filter_listing_type_id,filter_listing_sub_type_id,filter_bedrooms,filter_bathrooms,filter_sqfoot,filter_year_built,filter_acreage,filter_county,filter_view,filter_status,filter_liststatus,filter_style,filter_frontage,filter_region,filter_tenure,filter_parking,filter_condition,filter_near_address,filter_near_coordinates,filter_more_options,filter_condoname,filter_subdivision,filter_remarks,filter_remarks_negative,filter_zip,filter_address,filter_within_map");
 		arrCurrentSort=arraynew(1);
 		/*if(filter_city_id NEQ ""){
 			for(i=1;i LTE arraylen(arrDefaultSort);i++){
@@ -216,6 +216,7 @@ returnStruct2 = propertyDataCom.getProperties(ts);
 		cts["listing type id"]="property type";
 		cts["listing sub type id"]="property sub type";
 		cts["near address"]="near location";
+		cts["near coordinates"]="near coordinates";
 		cts["status"]="sale type";
 		cts["liststatus"]="listing status";
 		arrNoSort=arraynew(1);
@@ -352,7 +353,7 @@ tableDnD.init(table,zDropFilterTable);
     <br />
 
 
-	<button type="submit" name="submitPage" value="submitPage">Update Search Filter</button>
+	<button type="submit" name="submitPage" value="submitPage" class="z-button">Update Search Filter</button>
     #application.zcore.functions.zEndForm()# 
 
 </cffunction>

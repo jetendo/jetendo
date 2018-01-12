@@ -192,6 +192,49 @@ SELECT zipcode.*,
 	</cfscript>
 </cffunction>
 
+<cffunction name="nearCoordinates" localmode="modern" access="remote">
+	<cfscript>
+	init();
+	search_near_coordinates=trim(application.zcore.functions.zso(form, 'search_near_coordinates'));
+	if(search_near_coordinates EQ ""){
+		application.zcore.functions.z404("Invalid request - search_near_coordinates is required");
+	}
+	// application.zcore.functions.z404("this can't depend on zGetLatLong anymore. need to make it use client side geocoding.");
+	// application.zcore.tracking.backOneHit();
+
+	coords = listToArray( search_near_coordinates, ',' );
+
+	lat = coords[1];
+	long = coords[2];
+
+	// calculate radius and make lat/long box
+	if(lat NEQ 0 and long NEQ 0){
+		// 1 degree is 69.047 miles.
+		degreeConstant=69.047;
+		latRatio=form.search_near_radius/degreeConstant;
+		longRatio=latRatio*cos(latRatio);
+		minLat=lat-(latRatio/2);
+		maxLat=lat+(latRatio/2);
+		minLong=long-(longRatio/2);
+		maxLong=long+(longRatio/2);
+		arrMap2=["minLongitude","maxLongitude","minLatitude","maxLatitude"];
+		form.search_map_coordinates_list="#minLong#,#maxLong#,#minLat#,#maxLat#";
+		jsonText=('{"success":true,"errorMsg":"","search_map_coordinates_list":"#form.search_map_coordinates_list#"}');
+	}else{
+		jsonText=('{"success":false,"errorMsg":"Address not found.  Please type a complete, valid address and try again."}');	
+	}
+	if(structkeyexists(form, 'x_ajax_id') EQ false){
+		abort;
+	}
+	savecontent variable="out"{
+		echo(jsonText);
+	}
+	header name="x_ajax_id" value="#form.x_ajax_id#";
+	echo(out);
+	abort;
+	</cfscript>
+</cffunction>
+
 <cffunction name="ajaxMapListing" localmode="modern" access="remote">
 	<cfscript>
 	init();
@@ -548,6 +591,7 @@ sfSortStruct["search_condition"]="";
 sfSortStruct["search_tenure"]="";
 sfSortStruct["search_parking"]="";
 sfSortStruct["search_near_address"]="";
+sfSortStruct["search_near_coordinates"]="";
 sfSortStruct["search_more_options"]="";
 sfSortStruct["search_result_limit"]="";
 sfSortStruct["search_sort"]="";
@@ -2946,9 +2990,89 @@ if(form.searchFormEnabledDropDownMenus){
 sfSortStruct["search_frontage"]=theCriteriaHTML;
 </cfscript>
 
+
+
+<cfif request.zos.isTestServer>
+
+<!--- START TEST SERVER ONLY --->
+
+
+
 <cfsavecontent variable="theCriteriaHTML">
-<cfif structkeyexists(form.searchFormHideCriteria, 'more_options') EQ false and application.zcore.functions.zso(application.sitestruct[request.zos.globals.id],'zListingMapCheck',false,false)>
-<cfif (structkeyexists(form, 'zdisablesearchfilter') or structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable, 'search_near_address') EQ false or application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable,'search_near_address') EQ 1)>
+<!---<cfif structkeyexists(form.searchFormHideCriteria, 'more_options') EQ false and application.zcore.functions.zso(application.sitestruct[request.zos.globals.id],'zListingMapCheck',false,false)>--->
+<cfif (structkeyexists(form, 'zdisablesearchfilter') or structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable, 'search_near_coordinates') EQ false or application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.filterStruct.searchable,'search_near_coordinates') EQ 1)>
+
+<div class="zmlsformdiv">
+<cfsavecontent variable="featureHTML2"> 
+Type street address<br />
+including city &amp; state:<br />
+
+<cfscript>
+ts=StructNew();
+//ts.label="Location:";
+ts.name="search_near_coordinates";
+
+if ( structKeyExists( form, 'search_near_coordinates' ) ) {
+	ts.value = form.search_near_coordinates;
+}
+
+rs=application.zcore.functions.zInput_Hidden(ts);
+
+application.zcore.functions.zRequireGoogleMaps();
+
+</cfscript>
+
+
+<input data-address-coordinates="search_near_coordinates" type="text" name="searchNearLocation" id="searchNearLocation" size="15" value="<cfif application.zcore.functions.zso(form, 'searchNearLocation') NEQ "">#searchNearLocation#<cfelse>#application.zcore.functions.zso(form, 'search_near_location')#</cfif>" class="zGoogleAddressAutoComplete" data-disable-geolocate="1" />
+<div class="zsearchformhr"></div>
+<br style="clear:both;" />
+Set Radius Distance: <br style="clear:both;" />
+
+<cfscript>
+ts = StructNew();
+ts.name="search_near_radius";
+ts.hideselect=true;
+ts.listValuesDelimiter="|";
+ts.listValues ="5|10|25|50|75|100";
+ts.listLabels ="5|10|25|50|75|100";
+ts.listLabelsDelimiter="|";
+ts.onchange="zAjaxMapCoordinatesRadiusChange();";
+ts.output=true;
+ts.selectLabel="Radius";
+//ts.inlineStyle="width:#replace(form.searchFormSelectWidth,"px","")-20#px;";
+	application.zcore.functions.zInputSelectBox(ts);
+</cfscript> (In Miles)<br style="clear:both;" />
+<div id="zNearCoordinatesDiv" style="display:none;">
+<div class="zsearchformhr"></div><br style="clear:both;" />
+Click &quot;Set&quot; to recenter<br />
+ the map or &quot;Cancel&quot;.<br />
+
+<input type="button" name="setNearCoordinates" onclick="zAjaxSetNearCoordinates();" value="Set" /> <input type="button" name="cancelNearAddress" onclick="zAjaxCancelNearCoordinates();" value="Cancel" />
+</div>
+</cfsavecontent>
+<cfscript>
+if(form.searchFormEnabledDropDownMenus){
+	//writeoutput(featureHTML2);	
+}else{
+	if(form.searchDisableExpandingBox){
+		writeoutput(featureHTML2);
+	}else{
+		ts=StructNew();
+		//ts.zExpOptionValue=rs.zExpOptionValue;
+		ts.label="Near Location:";
+		ts.contents=featureHTML2;
+			ts.height=28 + 145;
+		ts.width="165";
+		ts.zMotionEnabled=true;
+		if(application.zcore.functions.zso(form, 'search_near_coordinates') NEQ ""){
+			ts.zMotionOpen=true;
+		}else{
+			ts.zMotionOpen=application.zcore.app.getAppData("listing").sharedStruct.filterStruct.opened["search_near_coordinates"];
+		}
+		application.zcore.functions.zExpOption(ts);
+	}
+}
+</cfscript></div>
 <!--- <div class="zmlsformdiv">
 <cfsavecontent variable="featureHTML2"> 
 Type street address<br />
@@ -3010,12 +3134,22 @@ if(form.searchFormEnabledDropDownMenus){
 	}
 }
 </cfscript></div> --->
-</cfif>
+<!---</cfif>--->
 </cfif>
 </cfsavecontent>
 <cfscript>
-sfSortStruct["search_near_address"]=theCriteriaHTML;
+sfSortStruct["search_near_coordinates"]=theCriteriaHTML;
 </cfscript>
+
+
+<!--- END TEST SERVER ONLY --->
+
+</cfif>
+
+
+
+
+
 
 <cfsavecontent variable="theCriteriaHTML">
 <cfif request.cgi_script_name NEQ "/z/listing/admin/search-filter/index">
