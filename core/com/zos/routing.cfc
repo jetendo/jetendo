@@ -281,7 +281,11 @@
 			//writeoutput('in isCFC'&request.zos.routingDisableComponentInvoke);
 			if(request.zos.routingDisableComponentInvoke EQ false){  
 				request.zArrErrorMessages=["#form.method#() function of #request.zos.currentController# was called in routing.cfc"];
-				rs.routingCurrentComponentObject[form.method](argumentcollection=request.zos.routingArgumentsStruct);
+				if(structcount(request.zos.routingArgumentsStruct) EQ 0){
+					rs.routingCurrentComponentObject[form.method]();
+				}else{
+					rs.routingCurrentComponentObject[form.method](argumentcollection=request.zos.routingArgumentsStruct);
+				}
 				request.zArrErrorMessages=[];
 				request.zos.onrequestcompleted=true;
 				if(request.zos.routingCfcMethodWasMissing){
@@ -295,6 +299,7 @@
 		}
 		</cfscript>
 	</cffunction>
+
     
     <cffunction name="checkCFCSecurity" localmode="modern" output="no" returntype="any">
     	<cfargument name="scriptName" type="string" required="yes">

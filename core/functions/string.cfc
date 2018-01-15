@@ -190,19 +190,28 @@
 	</cfscript>
 </cffunction>
 
-<!--- application.zcore.functions.zGenerateStrongPassword(minLength, maxLength [, onlyAlphanumeric]) --->
+<!--- application.zcore.functions.zGenerateStrongPassword(minLength, maxLength [, onlyAlphanumeric] [, userFriendly]) --->
 <cffunction name="zGenerateStrongPassword" localmode="modern" output="no" returnpath="string">
 	<cfargument name="minLength" type="numeric" required="no" default="32">
 	<cfargument name="maxLength" type="numeric" required="no" default="62">
 	<cfargument name="onlyAlphanumeric" type="boolean" required="no" default="#false#">
-	<cfscript>     
+	<cfargument name="userFriendly" type="boolean" required="no" default="#false#">
+	<cfscript> 
 	if(arguments.onlyAlphanumeric){
-		var d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		if(arguments.userFriendly){
+			d='0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghjkmnopqrstuvwxyz';
+		}else{
+			d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		} 
 	}else{
-		var d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@##$%^&*()[]{}|;:,.<>/?`~ ''"+-';
+		if(arguments.userFriendly){
+			d='123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz=!@##$%^&*()[]{}|;:,.<>?''"+';
+		}else{
+			d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@##$%^&*()[]{}|;:,.<>/?`~''"+-';
+		}
 	}
 	var d1=len(d);
-	var plen=randrange(1, arguments.maxLength-arguments.minLength, "SHA1PRNG")+arguments.minLength;
+	var plen=max(arguments.minLength, randrange(1, arguments.maxLength-arguments.minLength, "SHA1PRNG")+arguments.minLength);
 	var i=0;
 	var p=""; 
 	for(i=1;i LTE plen;i++){

@@ -10,7 +10,7 @@
 		variables.environment = this.determineEnvironment();
 
 		if ( this.inProduction() ) {
-			variables.secretKey = stripeConfig.liveSeretKey;
+			variables.secretKey = stripeConfig.liveSecretKey;
 			variables.publicKey = stripeConfig.livePublicKey;
 		} else {
 			variables.secretKey = stripeConfig.testSecretKey;
