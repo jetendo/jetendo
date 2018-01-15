@@ -202,16 +202,16 @@
 			d='0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghjkmnopqrstuvwxyz';
 		}else{
 			d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-		}
+		} 
 	}else{
 		if(arguments.userFriendly){
 			d='123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz=!@##$%^&*()[]{}|;:,.<>?''"+';
 		}else{
-			d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@##$%^&*()[]{}|;:,.<>/?`~ ''"+-';
+			d='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@##$%^&*()[]{}|;:,.<>/?`~''"+-';
 		}
 	}
 	var d1=len(d);
-	var plen=randrange(1, arguments.maxLength-arguments.minLength, "SHA1PRNG")+arguments.minLength;
+	var plen=max(arguments.minLength, randrange(1, arguments.maxLength-arguments.minLength, "SHA1PRNG")+arguments.minLength);
 	var i=0;
 	var p=""; 
 	for(i=1;i LTE plen;i++){
