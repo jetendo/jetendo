@@ -10,9 +10,9 @@
 	<meta name="format-detection" content="telephone=no">
 	<cfif request.zos.cgi.server_port EQ "443">
 		<meta name="referrer" content="origin">
-	</cfif>
+	</cfif> 
 	<script type="text/javascript">/* <![CDATA[ */var zSiteDomain="#request.zos.globals.domain#";/* ]]> */</script>
-	<script src="#request.zos.globals.domain##application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#" type="text/javascript"></script>
+	<script src="#request.zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#" type="text/javascript"></script>
 	<script type="text/javascript">/* <![CDATA[ */
 	#arguments.dynamicContent#
 	/* ]]> */</script>
@@ -830,7 +830,7 @@ for(local.row in local.qSite){
 				if(left(request.zos.arrScriptInclude[local.i], local.jqueryIncludeLength) NEQ "/z/javascript/jquery/jquery-1.10.2.min.js"){
 					if(left(request.zos.arrScriptInclude[local.i], 1) EQ '/' and left(request.zos.arrScriptInclude[local.i], 2) NEQ "//"){
 						// required for domains that use http proxy connection
-						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.globals.domain&request.zos.arrScriptInclude[local.i]]=true;
+						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.currentHostName&request.zos.arrScriptInclude[local.i]]=true;
 					}else{
 						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.arrScriptInclude[local.i]]=true;
 					}
@@ -849,7 +849,7 @@ for(local.row in local.qSite){
 
 			append2='<script type="text/javascript">/* <![CDATA[ */  
 				setTimeout(function(){
-					var tempM=new zLoader();tempM.loadScripts(["#request.zos.globals.domain##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
+					var tempM=new zLoader();tempM.loadScripts(["#request.zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
 					'&local.scriptOutput&'
 					);
 				},0); /* ]]> */</script>'; 

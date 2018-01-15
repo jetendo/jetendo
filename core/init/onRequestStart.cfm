@@ -659,8 +659,6 @@
 	}
 	
 	Request.zOS.debuggerEnabled = true;
-	request.zos.templateData=structnew();
-	application.zcore.template.init2();
 	request.zos.autoresponderImagePath="/zupload/autoresponder/";
 	request.zos.memberImagePath="/zupload/member/";
 	
@@ -907,6 +905,8 @@
 			}
 		}
 	}
+	request.zos.templateData=structnew();
+	application.zcore.template.init2(); 
 	if(structkeyexists(form,request.zos.urlRoutingParameter) and form[request.zos.urlRoutingParameter] NEQ ""){
 		 request.cgi_script_name=application.zcore.routing.processInternalURLRewrite(form[request.zos.urlRoutingParameter]);
 		if(structkeyexists(form,'zdebugurl') and form.zdebugurl){

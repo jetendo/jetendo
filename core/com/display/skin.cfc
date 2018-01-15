@@ -475,7 +475,7 @@
 		templateTagName="meta";
 	} 
 	if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
-		s='<link rel="stylesheet" type="text/css" href="#request.zos.globals.domain##checkPath#" />'; 
+		s='<link rel="stylesheet" type="text/css" href="#request.zos.currentHostName##checkPath#" />'; 
 	}else{
 		s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; 
 	}
