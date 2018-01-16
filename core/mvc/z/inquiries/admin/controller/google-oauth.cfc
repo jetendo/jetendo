@@ -5,7 +5,8 @@
 	<cfscript>
 	setting requesttimeout="10000";
 	// you must preregister the returnLink at the oauth2 vendor's web site.
-	// /z/inquiries/admin/google-oauth/return
+	// that is done under Google APIs, credentials, add/edit, then change: Authorized redirect URIs
+	// https://console.developers.google.com/apis/credentials
 
 	variables.returnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return"; 
 	</cfscript>
