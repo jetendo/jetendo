@@ -20,13 +20,13 @@
 	setting requesttimeout="5000";
 	request.ignoreSlowScript=true;
 
-	twoWeeksInFuture=dateadd("d", 14, now());
+	futureDate=dateadd("d", 35, now());
 	// for quickly debugging forced renewal
 	if(structkeyexists(form, 'forceRenewAll')){
-		twoWeeksInFuture=dateadd("d", 91, now());
+		futureDate=dateadd("d", 91, now());
 		throw("disabled for now, but this works if you uncomment this throw");
 	}
-	twoWeeksInFuture=dateformat(twoWeeksInFuture, "yyyy-mm-dd")&" "&timeformat(twoWeeksInFuture, "HH:mm:ss");
+	futureDate=dateformat(futureDate, "yyyy-mm-dd")&" "&timeformat(futureDate, "HH:mm:ss");
 	reloadNginx=false;
 	db.sql="select * from 
 	#db.table("site", request.zos.zcoreDatasource)#, 
@@ -37,7 +37,7 @@
 	site_deleted=#db.param('0')# and 
 	ssl_letsencrypt=#db.param(1)# AND 
 	ssl_expiration_datetime >=#db.param(request.zos.mysqlnow)# and
-	ssl_expiration_datetime <=#db.param(twoWeeksInFuture)# and
+	ssl_expiration_datetime <=#db.param(futureDate)# and
 	ssl_deleted=#db.param('0')# 
 	ORDER BY ssl_expiration_datetime ASC ";
 	qSSL=db.execute("qSSL");
