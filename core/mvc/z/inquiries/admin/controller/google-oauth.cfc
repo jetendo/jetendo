@@ -546,39 +546,48 @@ $headers = array(
 <cffunction name="getAndProcessKeywordStats" localmode="modern" access="public">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>
-	arrKeyword=arguments.arrKeyword;
+	arrKeyword=duplicate(arguments.arrKeyword);
 	// batch 500 keywords at a time 
 	js={
 		success:true,
 		results:[]
 	};
-	perpage=800; // google has limit of 800 results from this service
+	perpage=700; // google has limit of 800 results from this service
 	// google can return up to 700 keyword stats at once, we do 500 here to stay under the limit
-	runCount=ceiling(arrayLen(arrKeyword)/500);
-	for(i=1;i<=runCount;i++){
-		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordStats";
+	echo(arrayTOList(arrKeyword, "<br>"));
+	echo("<br>====GOOGLE RESPONSE BELOW:<br>");
+	runCount=ceiling(arrayLen(arrKeyword)/perpage);
+	echo('runCount:'&runCount&'<br>');
+	for(i2=1;i2<=runCount;i2++){
+		application.googleAdwordsAPIStatus="API Call ###i2# request processing: getAndProcessKeywordStats";
 		arrNew=[];
 		count=arrayLen(arrKeyword);
-		for(n=1;n<=min(500, count);n++){
+		for(n=1;n<=min(perpage, count);n++){
 			arrayAppend(arrNew, arrKeyword[1]);
 			arrayDeleteAt(arrKeyword, 1);
+		}
+		if(i2 NEQ 1){
+			sleep(75000); 
 		}
 		hasMore=true;
 		offset=0;
 		while(hasMore){
-			try{
+			try{  
 				rs=getKeywordStats(offset, arrNew);
 				if(not rs.success){
-					return rs;
+					js.success=false;
+					js.errorResponse=rs;
+					return js;
+					//return rs;
 				}
-				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordStats";
+				application.googleAdwordsAPIStatus="API Call ###i2# response processing with offset: #offset#: getAndProcessKeywordStats";
 				//writedump(rs);abort;
 				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
 				if(total EQ 0){
+					//echo('total was 0<br>');
 					break;
 				}
-				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;
-				//writedump(entries);
+				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries; 
 				for(i=1;i<=arraylen(entries);i++){
 					t=entries[i].data;  
 					t1={}; 
@@ -589,19 +598,25 @@ $headers = array(
 					if(t[2].key.XMLText EQ "SEARCH_VOLUME"){
 						t1.searchVolume=t[2].value.value.xmlText;
 					}  
+					echo(t1.keyword&":"&t1.searchVolume&"<br>");
 					arrayAppend(js.results, t1);
 				}
-				offset+=perpage;
-				sleep(1000); 
+				offset+=500; 
 				if(total < offset){
 					hasMore=false;
 					break;
+				}else{
+					sleep(75000); 
 				}
 			}catch(Any e){
 				savecontent variable="out"{
 					echo('<h2>Google Adwords API Error Occurred</h2>');
-					writedump(rs);
-					writedump(e);
+					if(not structkeyexists(local, 'rs')){
+						writedump(e);
+					}else{
+						writedump(rs);
+						writedump(e);
+					}
 				}
 				if(request.zos.isDeveloper){
 					echo(out);
@@ -612,6 +627,7 @@ $headers = array(
 			}
 		}
 	}
+	//echo('stopped');	abort;
 	structdelete(application, 'googleAdwordsAPIStatus');
 	return js;
 	</cfscript>
@@ -630,16 +646,19 @@ $headers = array(
 		success:true,
 		results:[]
 	};
-	perpage=800; // google has limit of 800 results from this service
+	perpage=500; // google has limit of 800 results from this service
 	// google has limit of 200 seed keywords per ideas request
 	runCount=ceiling(arrayLen(arrKeyword)/100); 
-	for(i=1;i<=runCount;i++){
-		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordIdeas";
+	for(i2=1;i2<=runCount;i2++){
+		application.googleAdwordsAPIStatus="API Call ###i2# request processing: getAndProcessKeywordIdeas";
 		arrNew=[];
 		count=arrayLen(arrKeyword);
 		for(n=1;n<=min(100, count);n++){
 			arrayAppend(arrNew, arrKeyword[1]);
 			arrayDeleteAt(arrKeyword, 1);
+		}
+		if(i2 NEQ 1){
+			sleep(3000);
 		}
 		hasMore=true;
 		offset=0;
@@ -649,7 +668,7 @@ $headers = array(
 				if(not rs.success){
 					return rs; 
 				} 
-				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordIdeas";
+				application.googleAdwordsAPIStatus="API Call ###i2# response processing with offset: #offset#: getAndProcessKeywordIdeas";
 				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
 				if(total EQ 0){
 					break;
@@ -663,12 +682,13 @@ $headers = array(
 					t1.searchVolume=t[2].value.value.xmlText;
 					arrayAppend(js.results, t1);
 				}
-				offset+=perpage;
-				sleep(1000);
+				offset+=500;
 				if(total < offset){
 					hasMore=false;
 					break;
-				} 
+				}else{
+					sleep(3000);
+				}
 			}catch(Any e){
 				savecontent variable="out"{
 					echo('<h2>Google Adwords API Error Occurred</h2>');
@@ -873,7 +893,7 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
@@ -913,7 +933,8 @@ adwordsLiveManagerAccount
 
 	// campaign status can be PAUSED or ENABLED or REMOVED
 	// we should not try to change the status for a campaign that is already "REMOVED"
-	xmlText='<?xml version="1.0"?>
+	arrXML=[];
+	arrayAppend(arrXML, '<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
 		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
@@ -923,12 +944,11 @@ adwordsLiveManagerAccount
 	<soapenv:Body>
 	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
 	         <selector>
-	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
+	            <searchParameters xsi:type="RelatedToQuerySearchParameter">');
 	            for(keyword in arrKeyword){
-	            	xmlText&='<queries>'&keyword&'</queries>';
+	            	arrayAppend(arrXML, '<queries>'&keyword&'</queries>');
 	            }
-	            xmlText&='
-	            </searchParameters>
+	            arrayAppend(arrXML, '</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -941,12 +961,12 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
 	  </soapenv:Body>
-	</soapenv:Envelope>';  
+	</soapenv:Envelope>');  
 
 /*
 
@@ -957,7 +977,8 @@ adwordsLiveManagerAccount
 	            </searchParameters>
 	            */
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	xmlText=arrayToList(arrXML, '');
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);  
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1012,7 +1033,7 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
