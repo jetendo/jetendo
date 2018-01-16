@@ -383,9 +383,10 @@ var zLastAjaxVarName=""; */
 		var opt;
 		var hasValue=false;
 		
-		if(options.length >=2){
-			if(options[0].value != "" || options[1].value != ""){
+		for (var i=0, iLen=options.length; i<iLen; i++) {
+			if(options[i].value != ""){
 				hasValue=true;
+				break;
 			}
 		}
 		for (var i=0, iLen=options.length; i<iLen; i++) {
