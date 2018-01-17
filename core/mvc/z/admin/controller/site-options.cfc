@@ -2556,6 +2556,10 @@
 
 		newDataStruct.site_x_option_group_set_id=setIdBackup2; 
 		newDataStruct.site_option_group_id=groupIdBackup2;
+
+		if(qCheck.site_option_group_disable_detailed_lead_email EQ 1){
+			form.inquiries_disable_detailed_lead_email=1;
+		}
 		
 		if(qCheck.site_option_group_email_cfc_path NEQ "" and qCheck.site_option_group_email_cfc_method NEQ ""){
 			if(left(qCheck.site_option_group_email_cfc_path, 5) EQ "root."){

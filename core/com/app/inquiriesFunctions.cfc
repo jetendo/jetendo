@@ -186,9 +186,12 @@
 	ts.tablestyle=tablestyle;
 	application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts);
 	</cfscript>
- 
 
 	<span #tablestyle#>
+
+	<cfif arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1>
+		<p>The details of this lead have been removed from this email for added security.  Please view the lead in the manager to see all the details</p>
+	<cfelse>
 	<table #tablestyle# class="table-list">
   
 		<cfif trim(t.inquiries_first_name) NEQ '' or trim(t.inquiries_last_name) NEQ ''>
@@ -755,6 +758,8 @@
 			</cfscript> 
 		</cfif>
 		</table>
+
+	</cfif>
 
 		<h3 style="margin-top:10px;">Tracking Details</h3>
 		

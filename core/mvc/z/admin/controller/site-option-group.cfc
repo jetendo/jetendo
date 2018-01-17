@@ -2362,6 +2362,10 @@ displayGroupCom.ajaxInsert();
 					<td>#application.zcore.functions.zInput_Boolean("site_option_group_lead_routing_enabled")# | If Yes, an email will be generated when a new record is inserted.</td>
 				</tr>
 				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Detailed Lead Email?","member.site-option-group.edit site_option_group_disable_detailed_lead_email")#</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_group_disable_detailed_lead_email")# | If Yes, a simple lead email will be sent excluding any personal information from the contact.</td>
+				</tr>
+				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Path","member.site-option-group.edit site_option_group_email_cfc_path")#</th>
 					<td><input type="text" name="site_option_group_email_cfc_path" id="site_option_group_email_cfc_path" value="#htmleditformat(form.site_option_group_email_cfc_path)#" /><br /> (Should begin with zcorerootmapping, root or another root relative path.)</td>
 				</tr>
