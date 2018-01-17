@@ -554,20 +554,22 @@ $headers = array(
 	};
 	perpage=700; // google has limit of 800 results from this service
 	// google can return up to 700 keyword stats at once, we do 500 here to stay under the limit
-	echo(arrayTOList(arrKeyword, "<br>"));
-	echo("<br>====GOOGLE RESPONSE BELOW:<br>");
+	keywordCount=arrayLen(arrKeyword);
 	runCount=ceiling(arrayLen(arrKeyword)/perpage);
 	echo('runCount:'&runCount&'<br>');
 	for(i2=1;i2<=runCount;i2++){
 		application.googleAdwordsAPIStatus="API Call ###i2# request processing: getAndProcessKeywordStats";
 		arrNew=[];
 		count=arrayLen(arrKeyword);
+		echo("<br>====CHECKING THESE KEYWORDS:<br>");
 		for(n=1;n<=min(perpage, count);n++){
+			echo(arrKeyword[1]&"<br>");
 			arrayAppend(arrNew, arrKeyword[1]);
 			arrayDeleteAt(arrKeyword, 1);
-		}
+		} 
+		echo("<br>====GOOGLE RESPONSE BELOW:<br>");
 		if(i2 NEQ 1){
-			sleep(75000); 
+			sleep(225000); 
 		}
 		hasMore=true;
 		offset=0;
@@ -577,6 +579,7 @@ $headers = array(
 				if(not rs.success){
 					js.success=false;
 					js.errorResponse=rs;
+					js.successCount=min(keywordCount, (runCount-1)*perpage);
 					return js;
 					//return rs;
 				}
@@ -606,7 +609,7 @@ $headers = array(
 					hasMore=false;
 					break;
 				}else{
-					sleep(75000); 
+					sleep(225000); 
 				}
 			}catch(Any e){
 				savecontent variable="out"{
@@ -629,6 +632,8 @@ $headers = array(
 	}
 	//echo('stopped');	abort;
 	structdelete(application, 'googleAdwordsAPIStatus');
+
+	js.successCount=keywordCount;
 	return js;
 	</cfscript>
 </cffunction>
@@ -658,7 +663,7 @@ $headers = array(
 			arrayDeleteAt(arrKeyword, 1);
 		}
 		if(i2 NEQ 1){
-			sleep(3000);
+			sleep(225000);
 		}
 		hasMore=true;
 		offset=0;
@@ -687,7 +692,7 @@ $headers = array(
 					hasMore=false;
 					break;
 				}else{
-					sleep(3000);
+					sleep(225000);
 				}
 			}catch(Any e){
 				savecontent variable="out"{
