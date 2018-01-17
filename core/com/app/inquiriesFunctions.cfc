@@ -190,7 +190,7 @@
 	<span #tablestyle#>
 
 	<cfif arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1>
-		<p>The details of this lead have been removed from this email for added security.  Please view the lead in the manager to see all the details</p>
+		<p>The details of this lead have been removed from this email for added security.  Please view the lead in the manager to see all the details.</p>
 	<cfelse>
 	<table #tablestyle# class="table-list">
   
