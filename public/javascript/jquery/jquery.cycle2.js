@@ -1543,5 +1543,5 @@ $.extend($.fn.cycle.API, {
         });
     }
 });    
-
+$.fn.cycle.log = $.noop;
 })(jQuery);

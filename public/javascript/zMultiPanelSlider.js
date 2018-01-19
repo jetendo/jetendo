@@ -314,8 +314,7 @@
 			} ); 
 		}
 		function resizeSlider(){
-			//d.slideWidth=$(options.selector+" .multiPanelSlide > div").width();
-			console.log('resizeSlider');
+			//d.slideWidth=$(options.selector+" .multiPanelSlide > div").width(); 
  			updateSlideWidth();
 			var sliderWidth=slider.width();
 			//console.log(d);
