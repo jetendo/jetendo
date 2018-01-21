@@ -122,7 +122,28 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 			if(ts["Subdivision Name"] NEQ ""){
 				local.listing_subdivision=ts["Subdivision Name"];
 			}
+		} 
+		if(local.listing_subdivision EQ ""){
+			if(findnocase(","&ts["Development Name"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
+				ts["Development Name"]="";
+			}else if(ts["Development Name"] NEQ ""){
+				ts["Development Name"]=application.zcore.functions.zFirstLetterCaps(ts["Development Name"]);
+			}
+			if(ts["Development Name"] NEQ ""){
+				local.listing_subdivision=ts["Development Name"];
+			}
+		} 
+		if(local.listing_subdivision EQ ""){
+			if(findnocase(","&ts["Complex Name"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
+				ts["Complex Name"]="";
+			}else if(ts["Complex Name"] NEQ ""){
+				ts["Complex Name"]=application.zcore.functions.zFirstLetterCaps(ts["Complex Name"]);
+			}
+			if(ts["Complex Name"] NEQ ""){
+				local.listing_subdivision=ts["Complex Name"];
+			}
 		}
+
 		if(local.listing_subdivision EQ ""){
 			if(findnocase(","&ts["Subdivision Complex Bldg"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
 				ts["Subdivision Complex Bldg"]="";
@@ -416,6 +437,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_subdivision=local.listing_subdivision;
 		rs.listing_year_built=ts["year built"];
 		rs.listing_office=ts["List Office MLSID"];
+		rs.listing_office_name=ts["List Office Name"];
 		rs.listing_agent=ts["List Agent MLSID"];
 		rs.listing_latitude=curLat;
 		rs.listing_longitude=curLong;
