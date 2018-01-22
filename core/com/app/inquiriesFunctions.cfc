@@ -185,11 +185,22 @@
 	ts=structnew();
 	ts.tablestyle=tablestyle;
 	application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts);
+
+	showDetails=true;
+	if(arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1){
+		if(request.zos.originalURL EQ "/z/inquiries/admin/feedback/view"){
+			showDetails=true;
+		}else if(request.zos.originalURL EQ "/z/inquiries/admin/manage-inquiries/userView"){
+			showDetails=true;
+		}else{
+			showDetails=false;
+		}
+	}
 	</cfscript>
 
 	<span #tablestyle#>
 
-	<cfif arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1>
+	<cfif showDetails EQ false>
 		<p>The details of this lead have been removed from this email for added security.  Please view the lead in the manager to see all the details.</p>
 	<cfelse>
 	<table #tablestyle# class="table-list">
