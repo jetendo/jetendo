@@ -731,6 +731,30 @@ Page count: <input type="text" name="mls_option_inquiry_pop_count" size="3" valu
 <tr><th>Search CFC Method:</th>
 <td><input type="text" name="mls_option_search_cfc_method" value="#htmleditformat(form.mls_option_search_cfc_method)#" /> (i.e. index) 
 </td></tr>
+<tr>
+<th>Search Header CFC Path</th>
+<td><input type="text" name="mls_option_search_header_cfc_path" id="mls_option_search_header_cfc_path" value="#htmleditformat(form.mls_option_search_header_cfc_path)#" /><br />(Should begin with zcorerootmapping, root or another root relative path.)</td>
+</tr>
+<tr>
+<th>Search Header CFC Method</th>
+<td><input type="text" name="mls_option_search_header_cfc_method" id="mls_option_search_header_cfc_method" value="#htmleditformat(form.mls_option_search_header_cfc_method)#" /><br />(A function name in the CFC with access="public")</td>
+</tr>
+<tr>
+<th>Search Listing Result CFC Path</th>
+<td><input type="text" name="mls_option_listing_result_cfc_path" id="mls_option_listing_result_cfc_path" value="#htmleditformat(form.mls_option_listing_result_cfc_path)#" /><br />(Should begin with zcorerootmapping, root or another root relative path.)</td>
+</tr>
+<tr>
+<th>Search Listing Result CFC Method</th>
+<td><input type="text" name="mls_option_listing_result_cfc_method" id="mls_option_listing_result_cfc_method" value="#htmleditformat(form.mls_option_listing_result_cfc_method)#" /><br />(A function name in the CFC with access="public")</td>
+</tr>
+<tr>
+<th>Search Footer CFC Path</th>
+<td><input type="text" name="mls_option_search_footer_cfc_path" id="mls_option_search_footer_cfc_path" value="#htmleditformat(form.mls_option_search_footer_cfc_path)#" /><br />(Should begin with zcorerootmapping, root or another root relative path.)</td>
+</tr>
+<tr>
+<th>Search Footer CFC Method</th>
+<td><input type="text" name="mls_option_search_footer_cfc_method" id="mls_option_search_footer_cfc_method" value="#htmleditformat(form.mls_option_search_footer_cfc_method)#" /><br />(A function name in the CFC with access="public")</td>
+</tr>
 <tr><th>Force links to use<br /> custom search template:</th>
 <td>
 <input type="radio" name="mls_option_search_template_forced" value="1" <cfif form.mls_option_search_template_forced EQ 1>checked="checked"</cfif>> Yes 
