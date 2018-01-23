@@ -569,7 +569,7 @@ $headers = array(
 		} 
 		echo("<br>====GOOGLE RESPONSE BELOW:<br>");
 		if(i2 NEQ 1){
-			sleep(225000); 
+			sleep(275000); 
 		}
 		hasMore=true;
 		offset=0;
@@ -609,7 +609,7 @@ $headers = array(
 					hasMore=false;
 					break;
 				}else{
-					sleep(225000); 
+					sleep(275000); 
 				}
 			}catch(Any e){
 				savecontent variable="out"{
@@ -663,7 +663,7 @@ $headers = array(
 			arrayDeleteAt(arrKeyword, 1);
 		}
 		if(i2 NEQ 1){
-			sleep(225000);
+			sleep(275000);
 		}
 		hasMore=true;
 		offset=0;
@@ -692,7 +692,7 @@ $headers = array(
 					hasMore=false;
 					break;
 				}else{
-					sleep(225000);
+					sleep(275000);
 				}
 			}catch(Any e){
 				savecontent variable="out"{
