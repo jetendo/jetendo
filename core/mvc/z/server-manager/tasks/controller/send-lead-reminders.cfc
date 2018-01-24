@@ -2,7 +2,7 @@
 <cfoutput>
 <!--- must call on specific site: /z/server-manager/tasks/send-lead-reminders/send --->
 <cffunction name="send" localmode="modern" access="remote">
-	<cfscript>
+	<cfscript> 
 	setting requesttimeout="10000";
 	/*if(not request.zos.isTestServer){
 		throw("disabled on production for now");
@@ -161,9 +161,9 @@
 				ts.cc=user.user_alternate_email;
 			}
 		} 
-		if(officeCC){ 
-			if(structkeyexists(officeLookup, uid)){
-				office=officeLookup[uid];
+		if(officeCC and qI.office_id NEQ 0){  
+			if(structkeyexists(officeLookup, qI.office_id)){
+				office=officeLookup[qI.office_id];
 				if(debug){
 					echo('found office<br>');
 				}
