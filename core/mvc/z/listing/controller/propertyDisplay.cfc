@@ -470,19 +470,19 @@ propertyDisplayCom.init(ts);
 	}
 	request.zos.requestLogEntry('propertyDisplay.cfc before display() loop');
 
-	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_path',false,0) NEQ '' ) {
-		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method',false,0) NEQ '' ) {
+	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_path') NEQ '' ) {
+		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method') NEQ '' ) {
 			tempHeaderComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_search_header_cfc_path'], 'root.', request.zRootCFCPath );
 			tempHeaderCom = createobject( 'component', tempHeaderComPath );
 
-			arrayAppend( arrOutput, tempHeaderCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method',false,0) ]() );
+			arrayAppend( arrOutput, tempHeaderCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method') ]() );
 		}
 	}
 
 	var useCustomListingLayout = false;
 
-	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_listing_result_cfc_path',false,0) NEQ '' ) {
-		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_listing_result_cfc_method',false,0) NEQ '' ) {
+	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_listing_result_cfc_path') NEQ '' ) {
+		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_listing_result_cfc_method') NEQ '' ) {
 			useCustomListingLayout = true;
 			tempListingComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_listing_result_cfc_path'], 'root.', request.zRootCFCPath );
 			tempListingCom = createobject( 'component', tempListingComPath );
@@ -598,12 +598,12 @@ propertyDisplayCom.init(ts);
 		request.zos.requestLogEntry('propertyDisplay.cfc end of display loop for listing_id = #row.listing_id#');
 	}  
 
-	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_path',false,0) NEQ '' ) {
-		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method',false,0) NEQ '' ) {
+	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_path') NEQ '' ) {
+		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') NEQ '' ) {
 			tempFooterComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_search_footer_cfc_path'], 'root.', request.zRootCFCPath );
 			tempFooterCom = createobject( 'component', tempFooterComPath );
 
-			arrayAppend( arrOutput, tempFooterCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method',false,0) ]() );
+			arrayAppend( arrOutput, tempFooterCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') ]() );
 		}
 	}
 
