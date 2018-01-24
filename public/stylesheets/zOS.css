@@ -1070,8 +1070,7 @@ a.z-manager-assign:hover span{ color:#369;}
 	.zImageDefault{float:none !important;}
 	.zImageRight{ margin-left:0px; height:auto !important; width:auto !important; max-width:100%; float:none !important; }
 
-	.zImageLeft { display: block; margin: 10px auto; }
-	.zImageRight { display: block; margin: 10px auto; }
+	.zEditorHTML img.zImageLeft, .zEditorHTML img.zImageRight { display: block; margin: 10px auto; }
 
 	.zinquiry-form-table input, .zinquiry-form-table select, .zinquiry-form-table textarea{max-width:150px;}
 }
