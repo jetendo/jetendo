@@ -883,6 +883,14 @@ adwordsLiveManagerAccount
 	            } 
 	            xmlText&='
 	            </searchParameters>
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -904,6 +912,26 @@ adwordsLiveManagerAccount
 	      </get>
 	  </soapenv:Body>
 	</soapenv:Envelope>'; 
+
+	/*
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting>
+						<ns1:targetGoogleSearch>true</ns1:targetGoogleSearch>
+						<ns1:targetSearchNetwork>true</ns1:targetSearchNetwork>
+						<ns1:targetContentNetwork>true</ns1:targetContentNetwork>
+						<ns1:targetPartnerSearchNetwork>true</ns1:targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters> 
+	targetGoogleSearch
+	targetSearchNetwork
+	targetContentNetwork
+	targetPartnerSearchNetwork
+	RelatedToQuerySearchParameter
+networkSetting:  
+	SEARCH_VOLUME
+	Bigger numbers: GLOBAL_MONTHLY_SEARCHES
+	Bigger numbers: AVERAGE_TARGETED_MONTHLY_SEARCHES
+	*/
 	/*
 	 <searchParameters xsi:type="LocationSearchParameter">
 	               <locations>
@@ -939,6 +967,49 @@ adwordsLiveManagerAccount
 	// campaign status can be PAUSED or ENABLED or REMOVED
 	// we should not try to change the status for a campaign that is already "REMOVED"
 	arrXML=[];
+	// work version that includes search partners
+	/*
+arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710">
+<SOAP-ENV:Header>
+<ns1:RequestHeader>
+			#getAdwordsAuthXML()#
+</ns1:RequestHeader>
+</SOAP-ENV:Header>
+<SOAP-ENV:Body>
+	<ns1:get>
+		<ns1:selector>
+			<ns1:searchParameters xsi:type="ns1:RelatedToQuerySearchParameter">
+				<ns1:queries>cheap flights</ns1:queries>
+				<ns1:queries>affordable flights</ns1:queries>
+			</ns1:searchParameters>
+			<ns1:searchParameters xsi:type="ns1:LanguageSearchParameter">
+			<ns1:languages>
+				<ns2:id>1000</ns2:id>
+			</ns1:languages>
+			</ns1:searchParameters>
+			<ns1:searchParameters xsi:type="ns1:NetworkSearchParameter">
+				<ns1:networkSetting>
+					<ns2:targetGoogleSearch>true</ns2:targetGoogleSearch>
+					<ns2:targetSearchNetwork>false</ns2:targetSearchNetwork>
+					<ns2:targetContentNetwork>false</ns2:targetContentNetwork>
+					<ns2:targetPartnerSearchNetwork>false</ns2:targetPartnerSearchNetwork>
+				</ns1:networkSetting>
+			</ns1:searchParameters>
+			<ns1:ideaType>KEYWORD</ns1:ideaType>
+			<ns1:requestType>STATS</ns1:requestType>
+			<ns1:requestedAttributeTypes>KEYWORD_TEXT</ns1:requestedAttributeTypes>
+			<ns1:requestedAttributeTypes>SEARCH_VOLUME</ns1:requestedAttributeTypes> 
+			<ns1:requestedAttributeTypes>GLOBAL_MONTHLY_SEARCHES</ns1:requestedAttributeTypes> 
+
+			<ns1:paging>
+			   <ns2:startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</ns2:startIndex>
+			   <ns2:numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</ns2:numberResults>
+			</ns1:paging>
+		</ns1:selector>
+	</ns1:get>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>');
+*/ 
 	arrayAppend(arrXML, '<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
@@ -953,7 +1024,15 @@ adwordsLiveManagerAccount
 	            for(keyword in arrKeyword){
 	            	arrayAppend(arrXML, '<queries>'&keyword&'</queries>');
 	            }
-	            arrayAppend(arrXML, '</searchParameters>
+	            arrayAppend(arrXML, '</searchParameters> 
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -971,19 +1050,10 @@ adwordsLiveManagerAccount
 	         </selector>
 	      </get>
 	  </soapenv:Body>
-	</soapenv:Envelope>');  
-
-/*
-
-	            <searchParameters xsi:type="LocationSearchParameter">
-	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
-	               </locations>
-	            </searchParameters>
-	            */
+	</soapenv:Envelope>');   
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
 	xmlText=arrayToList(arrXML, '');
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);  
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);   
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1021,6 +1091,14 @@ adwordsLiveManagerAccount
 	            }
 	            xmlText&='
 	            </searchParameters>
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -1048,7 +1126,7 @@ adwordsLiveManagerAccount
 	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
 
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);  
 	return rs;
 	</cfscript>
 </cffunction>
