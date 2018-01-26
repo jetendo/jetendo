@@ -2112,6 +2112,10 @@ displayGroupCom.ajaxInsert();
 					</td>
 				</tr>
 				<tr>
+					<th>Newsletter Auto Opt In?</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_group_newsletter_opt_in_form")#</td>
+				</tr>
+				<tr>
 					<th>Require Captcha<br />For Public Data Entry:</th>
 					<td>
 					#application.zcore.functions.zInput_Boolean("site_option_group_enable_public_captcha")#

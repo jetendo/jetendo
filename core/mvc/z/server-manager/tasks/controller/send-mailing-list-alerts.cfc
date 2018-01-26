@@ -55,7 +55,7 @@ To debug call this url on a client domain where you know there was a new blog ar
 	WHERE site_id= #db.param(request.zos.globals.id)# and 
 	contact_deleted = #db.param(0)# and 
 	contact_parent_id=#db.param(0)# and 
-	contact_opt_in = #db.param(1)# ";
+	contact_opt_out = #db.param(0)# ";
 	if(form.debug){
 		db.sql&=" LIMIT #db.param(1)# ";
 	}

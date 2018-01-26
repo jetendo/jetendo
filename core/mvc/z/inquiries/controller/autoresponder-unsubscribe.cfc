@@ -39,7 +39,7 @@
 
 		if(form.otherEmails EQ 1){
 			db.sql = 'UPDATE #db.table( 'contact', request.zos.zcoreDatasource )#
-			SET contact_opt_in = #db.param( 0 )#,
+			SET contact_opt_out = #db.param( 1 )#,
 			contact_updated_datetime = #db.param( request.zOS.mysqlnow )#
 			WHERE site_id = #db.param( request.zOS.globals.id )#
 			AND contact_email = #db.param( form.email )#

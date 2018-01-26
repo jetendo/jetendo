@@ -2553,7 +2553,10 @@
 	groupIdBackup2=qCheck.site_option_group_id;
 	arrEmailStruct=[];
 	if((methodBackup EQ "publicInsertGroup" or methodBackup EQ "publicAjaxInsertGroup") and qCheck.site_option_group_lead_routing_enabled EQ 1 and not structkeyexists(form, 'disableGroupEmail')){
-
+		
+		if(qCheck.site_option_group_newsletter_opt_in_form EQ 1){
+			form.inquiries_email_opt_in=1;
+		}
 		newDataStruct.site_x_option_group_set_id=setIdBackup2; 
 		newDataStruct.site_option_group_id=groupIdBackup2;
 

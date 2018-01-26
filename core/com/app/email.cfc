@@ -1279,7 +1279,7 @@ if(rCom.isOK() EQ false){
 		<cfsavecontent variable="db.sql">
 		SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)#  
 		WHERE contact_id = #db.param(arguments.ss.contact_id)# and 
-		contact_opt_in = #db.param(1)# and 
+		contact_opt_out = #db.param(0)# and 
 		contact_deleted = #db.param(0)# and 
 		(site_id = #db.param(arguments.ss.site_id)# 
 		<cfif arguments.ss.contact_key NEQ ""> or contact_key = #db.param(arguments.ss.contact_key)# </cfif>

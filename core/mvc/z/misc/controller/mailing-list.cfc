@@ -42,23 +42,23 @@
 		form.set9=application.zcore.functions.zGetHumanFieldIndex();
 		</cfscript>
 	<form class="zFormCheckDirty" action="/z/misc/mailing-list/process" onsubmit="zSet9('zset9_#form.set9#');" method="get">
-		<input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
+		<input type="hidden" name="zset9" id="zset9_#form.set9#" value="" /> 
 		<cfif form.modalpopforced EQ 1>
-		<input type="hidden" name="modalpopforced" value="1" />
-		<input type="hidden" name="js3811" id="js3811" value="" />
-		<input type="hidden" name="js3812" id="js3812" value="#application.zcore.functions.zGetFormHashValue()#" />
+			<input type="hidden" name="modalpopforced" value="1" />
+			<input type="hidden" name="js3811" id="js3811" value="" />
+			<input type="hidden" name="js3812" id="js3812" value="#application.zcore.functions.zGetFormHashValue()#" />
 		</cfif>
 		#application.zcore.functions.zFakeFormFields()#
 	  <p>Your Email Address: 
 		<input type="text" name="user_username" size="40" value="#htmleditformat(application.zcore.functions.zso(form, 'email'))#" />
 		</p>
 		<p>
-		<input type="submit" name="submit1" value="Subscribe" />
+			<input type="submit" name="submit1" value="Subscribe" />
 		</p>
         <div class="zPrivacyPolicyMessage">
    			By submitting this form, you agree to receive mailing list emails from us. #application.zcore.functions.zvarso("Form Privacy Message")#
 		</div>
-	<p><a href="/z/user/privacy/index" class="zPrivacyPolicyLink" target="_blank">Privacy Policy</a></p>
+		<p><a href="/z/user/privacy/index" class="zPrivacyPolicyLink" target="_blank">Privacy Policy</a></p>
 	</form>
 	
 	
@@ -123,6 +123,7 @@
 		application.zcore.functions.zredirect('/');
 	} */
 	form.user_pref_list=1;
+	form.inquiries_email_opt_in=1;
 	form.user_username=application.zcore.functions.zso(form, 'user_username');
 	if(form.user_username EQ "" or application.zcore.functions.zEmailValidate(form.user_username) EQ false){
 		if(form.returnJson EQ 1){
@@ -200,7 +201,26 @@
 	#application.zcore.functions.zVarSO("Lead Conversion Tracking Code")#
 </cffunction>
 
-
+<!--- 
+this is for custom mailing-list forms
+<cfscript>
+mailingListCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.mailing-list");
+mailingListCom.outputStartForm();
+</cfscript>
+<p>Your Email Address: 
+<input type="text" name="user_username" size="40" value="#htmleditformat(application.zcore.functions.zso(form, 'email'))#" />
+</p>
+<p>
+	<input type="submit" name="submit1" value="Subscribe" />
+</p>
+<div class="zPrivacyPolicyMessage">
+		By submitting this form, you agree to receive mailing list emails from us. #application.zcore.functions.zvarso("Form Privacy Message")#
+</div>
+<p><a href="/z/user/privacy/index" class="zPrivacyPolicyLink" target="_blank">Privacy Policy</a></p>
+<cfscript>
+mailingListCom.outputEndForm();
+</cfscript>
+ --->
 <cffunction name="outputStartForm" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>

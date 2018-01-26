@@ -165,7 +165,7 @@ Google Analytics:
 	link="https://www.googleapis.com/oauth2/v4/token";
 	http url="#link#" method="post" timeout="10"{
 		httpparam type="formfield" name="grant_type" value="authorization_code";
-		httpparam type="formfield" name="code" value="#form.code#";
+		httpparam type="formfield" name="code" value="#form.code#"; 
 		httpparam type="formfield" name="redirect_uri" value="#tempReturnLink#";
 		httpparam type="formfield" name="client_id" value="#request.zos.googleAnalyticsConfig.clientId#";
 		httpparam type="formfield" name="client_secret" value="#request.zos.googleAnalyticsConfig.clientSecret#"; 
@@ -186,8 +186,7 @@ Google Analytics:
 		return;
 	}
 	// 401 is expired token
-	// 403 is no access to "view"
-
+	// 403 is no access to "view" 
 	js=deserializeJson(cfhttp.filecontent);
 	if(structkeyexists(js, 'error')){
 		writedump(js.error);
@@ -1363,7 +1362,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	// 401 is expired token
 	// 403 is no access to "view"
 
-	js=deserializeJson(cfhttp.filecontent);
+	js=deserializeJson(cfhttp.filecontent); 
 	if(structkeyexists(js, 'error')){
 		if(form.cron EQ 1){
 			return {success:false, errorMessage:"Failed to refresh token for account type: #form.accountType# - google returned error in json"};
@@ -1373,9 +1372,9 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 		}
 	}	
 	if(structkeyexists(js, 'access_token')){ 
+		application.googleAnalyticsAccessToken[form.accountType].access_token=js.access_token;
 		application.googleAnalyticsAccessToken[form.accountType].loginDatetime=now();
-		application.googleAnalyticsAccessToken[form.accountType].expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken[form.accountType].loginDatetime);
-
+		application.googleAnalyticsAccessToken[form.accountType].expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken[form.accountType].loginDatetime); 
 		// TODO: don't need to redirect when this is done
 		if(form.cron EQ 1){
 			return {success:true};

@@ -186,7 +186,7 @@
 			contact.contact_deleted=#db.param(0)# and 
 			contact.contact_email = inquiries_autoresponder_subscriber.inquiries_autoresponder_subscriber_email AND 
 			contact.site_id = inquiries_autoresponder_subscriber.site_id AND 
-			contact.contact_opt_in = #db.param( 1 )# 
+			contact.contact_opt_out = #db.param(0)# 
 			LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
 			user_username=inquiries_autoresponder_subscriber.inquiries_autoresponder_subscriber_email and 
 			user_deleted = #db.param(0)# and 
