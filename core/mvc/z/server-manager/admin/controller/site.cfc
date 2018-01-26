@@ -2013,14 +2013,14 @@
 			<td style="vertical-align:top; width:140px;">Interspire Email<br>Owner Id List:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_interspire_email_owner_id_list", "table-error","")#>
 				<input name="site_interspire_email_owner_id_list" type="text" size="70" value="#htmleditformat(form.site_interspire_email_owner_id_list)#"><br>
-				This is the id of the user account in interspire email marketer. Comma separated if there are multiple ids.
+				This is the id of the user account in interspire email marketer. <!--- Comma separated if there are multiple ids. --->
 			</td>
 		</tr> 
 		<tr >
 			<td style="vertical-align:top; width:140px;">Campaign Monitor<br>User Id List:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_campaign_monitor_user_id_list", "table-error","")#>
 				<input name="site_campaign_monitor_user_id_list" type="text" size="70" value="#htmleditformat(form.site_campaign_monitor_user_id_list)#"><br>
-				This is the id of the user account in campaign monitor. Comma separated if there are multiple ids.
+				This is the id of the user account in campaign monitor. <!--- Comma separated if there are multiple ids. --->
 			</td>
 		</tr> 
 		<tr >
