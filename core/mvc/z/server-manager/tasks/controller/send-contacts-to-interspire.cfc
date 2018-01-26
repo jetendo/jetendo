@@ -10,7 +10,7 @@
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# 
 	WHERE site_id<>#db.param(-1)# and 
 	site_active=#db.param(1)# and 
-	site_live=#db.param(1)# and 
+	site_live=#db.param(1)# and  
 	site_interspire_email_owner_id_list<> #db.param('')# and 
 	site_deleted = #db.param(0)#";
 	qSite=db.execute("qSite");
@@ -21,6 +21,7 @@
 		db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# 
 		WHERE site_id=#db.param(siteRow.site_id)# and 
 		contact_parent_id=#db.param(0)# and 
+		contact_email<>#db.param('')# and 
 		contact_deleted = #db.param(0)# ";
 		qContact=db.execute("qContact");
 
@@ -76,12 +77,19 @@
 	//wriedump(js);	abort;
 	if(structkeyexists(request.zos, 'interspireImportContactURL') and request.zos.interspireImportContactURL NEQ ""){
 		link=request.zos.interspireImportContactURL; 
-		jsonString=application.zcore.functions.zHttpJsonPost(link, serializeJson(js), 20);
-		if(jsonString EQ false or not isJson(jsonString)){
-			throw(jsonString);
+
+		HTTP METHOD="POST" URL="#link#" result="cfhttpresult" timeout="9000" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{ 
+			httpparam type="formfield" name="listData" value="#serializeJson(js)#";
+		}
+		if(not structkeyexists(cfhttpresult,'statuscode') or left(cfhttpresult.statusCode,3) NEQ '200'){
+			savecontent variable="out"{
+				echo('<h2>Send contacts to interspire failed</h2>');
+				writedump(cfhttpresult);
+			}
+			throw(out);
 		}
 		echo("<h2>Response</h2>");
-		echo(jsonString);
+		echo(cfhttpresult.filecontent);
 	}
 
 	echo("<h2>Task Completed</h2>");
