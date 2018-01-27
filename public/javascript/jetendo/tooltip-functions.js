@@ -9,6 +9,16 @@ var zHelpTooltip=new Object();
 	zHelpTooltip.curTimeoutId=false;
 	zHelpTooltip.helpDiv=false;
 	zHelpTooltip.helpInnerDiv=false;
+	zHelpTooltip.getParentScroll = function (ctrl) {
+		if (ctrl == null) {
+			return null;
+		}
+		if (ctrl.scrollHeight > ctrl.clientHeight) {
+			return ctrl;
+		} else {
+			return zHelpTooltip.getParentScroll(ctrl.parentNode);
+		}
+	};
 	zHelpTooltip.showTooltip=function(){
 		clearTimeout(zHelpTooltip.curTimeoutId);
 		zHelpTooltip.curTimeoutId=false;
@@ -20,8 +30,10 @@ var zHelpTooltip=new Object();
 		zHelpTooltip.helpDiv.style.display="block";
 		zHelpTooltip.helpInnerDiv.innerHTML=zHelpTooltip.arrTrack[this.id].title;
 		var p2=zGetAbsPosition(zHelpTooltip.helpDiv);
-		zHelpTooltip.helpDiv.style.left=Math.min(ws.width-p2.width-10, p.x+p.width+5)+"px";
-		zHelpTooltip.helpDiv.style.top=Math.max(10,(p.y)-p2.height)+"px";
+		zHelpTooltip.helpDiv.style.left = Math.min(ws.width-p2.width-10, p.x+p.width+5)+"px";
+		var dParent = zHelpTooltip.getParentScroll(d);
+		var window_offset = (p.y) - ( p2.height + $(dParent).scrollTop());
+		zHelpTooltip.helpDiv.style.top  = window_offset + "px";//Math.max(10,(p.y)-p2.height)+"px";
 		//alert(Math.min(ws.width-p.width, p.x+p.width+5)+" | "+(p.y-p.height-5));
 		return false;
 	};
