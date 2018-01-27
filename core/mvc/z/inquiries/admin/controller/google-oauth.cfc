@@ -8,21 +8,49 @@
 	// that is done under Google APIs, credentials, add/edit, then change: Authorized redirect URIs
 	// https://console.developers.google.com/apis/credentials
 
-	variables.returnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return"; 
+	form.accountType=application.zcore.functions.zso(form, 'accountType');
+
+	variables.returnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return?accountType=#form.accountType#"; 
+
+    request.googleAnalyticsAuthenticated=false;
+    if(structkeyexists(application, 'googleAnalyticsAccessToken') and structkeyexists(application.googleAnalyticsAccessToken, 'analytics')){
+		d=parsedatetime(dateformat(application.googleAnalyticsAccessToken["analytics"].expiresDatetime, "yyyy-mm-dd")&" "&timeformat(application.googleAnalyticsAccessToken["analytics"].expiresDatetime, "HH:mm:ss"));
+		secondsRemaining=datediff("s", d, now());  
+		if(secondsRemaining <-30){
+    		request.googleAnalyticsAuthenticated=true;
+		}
+    } 
+    request.googleAdwordsAuthenticated=false;
+    if(structkeyexists(application, 'googleAnalyticsAccessToken') and structkeyexists(application.googleAnalyticsAccessToken, 'adwords')){
+		d=parsedatetime(dateformat(application.googleAnalyticsAccessToken["adwords"].expiresDatetime, "yyyy-mm-dd")&" "&timeformat(application.googleAnalyticsAccessToken["adwords"].expiresDatetime, "HH:mm:ss"));
+		secondsRemaining=datediff("s", d, now());  
+		if(secondsRemaining <-30){
+    		request.googleAdwordsAuthenticated=true;
+    	}
+    } 
 	</cfscript>
 </cffunction> 
 
-<cffunction name="index" localmode="modern" access="remote" roles="administrator">
+<cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
 	application.zcore.functions.zStatusHandler(request.zsid);
-	scope="https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords";
 
 	//link='https://accounts.google.com/o/oauth2/auth'; 
 	link="https://accounts.google.com/o/oauth2/v2/auth"; 
 
-	firstAuthLink="#link#?response_type=code&client_id=#request.zos.googleAnalyticsConfig.clientId#&redirect_uri=#urlencodedformat(variables.returnLink)#&scope=#urlencodedformat(scope)#&prompt=consent&access_type=offline";
+	analyticsReturnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return?accountType=analytics";
+	adwordsReturnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return?accountType=adwords";
+
+	scope="https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly";
+	analyticsAuthLink="#link#?response_type=code&client_id=#request.zos.googleAnalyticsConfig.clientId#&redirect_uri=#urlencodedformat(analyticsReturnLink)#&scope=#urlencodedformat(scope)#&prompt=consent&access_type=offline";
+
+
+	scope="https://www.googleapis.com/auth/adwords";
+	adwordsAuthLink="#link#?response_type=code&client_id=#request.zos.googleAnalyticsConfig.clientId#&redirect_uri=#urlencodedformat(adwordsReturnLink)#&scope=#urlencodedformat(scope)#&prompt=consent&access_type=offline";
+
+	//firstAuthLink="#link#?response_type=code&client_id=#request.zos.googleAnalyticsConfig.clientId#&redirect_uri=#urlencodedformat(variables.returnLink)#&scope=#urlencodedformat(scope)#&prompt=consent&access_type=offline";
 /*
 some progress on jot signing.  i can't use coldfusion, it must be php or openssl command line
 	// issuer=#urlencodedformat(sc.client_email)#&signingAlgorithm=RS256&signingKey=#urlencodedformat(ss.private_key)#
@@ -96,9 +124,12 @@ openssl_sign($data, $signature, $private_key_pem, OPENSSL_ALGO_SHA256);
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/jetendo-google-analytics%40jetendo-153519.iam.gserviceaccount.com"
     };*/
 
-	</cfscript>
+	</cfscript> 
 	<h2>Google API Login</h2>
-	<p><a href="#firstAuthLink#">Authenticate with Google</a></p> 
+	<h3><a href="#adwordsAuthLink#" class="z-button">Authenticate with Google Adwords</a> | Status: <cfif request.googleAdwordsAuthenticated>Last authenticated at #dateformat(application.googleAnalyticsAccessToken.adwords.loginDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.adwords.loginDatetime, "h:mm:ss")#<cfelse>Logged out</cfif></h3> 
+	<h3><a href="#analyticsAuthLink#" class="z-button">Authenticate with Google Analytics</a> | Status: <cfif request.googleAnalyticsAuthenticated>Last authenticated at #dateformat(application.googleAnalyticsAccessToken.analytics.loginDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.analytics.loginDatetime, "h:mm:ss")#<cfelse>Logged out</cfif></h3>
+	<p>If one of the above is authenticated, you can click "View API Links"</p>
+	<h3><a href="/z/inquiries/admin/google-oauth/reportIndex">View API Links</a></h3> 
 	<!--- <p><a href="/z/inquiries/admin/google-oauth/passwordLogin">Login with password</a></p> --->
 	<!--- 
 todo: add search console api: POST https://www.googleapis.com/webmasters/v3/sites/http%3A%2F%2Fwww.boomerpower.info%2F/searchAnalytics/query?fields=rows&key=
@@ -121,59 +152,25 @@ Google Analytics:
 				You can see each lead type here.  Note, the web site database is more accurate since google analytics can be blocked.
 	 --->
 </cffunction>
+ 
 
-
-<!--- <cffunction name="passwordLogin" localmode="modern" access="remote" roles="administrator">
-	<cfscript> 
-	http url="https://api.oauth2server.com/token" method="post" timeout="10"{
-		httpparam type="formfield" name="grant_type" value="password";
-		httpparam type="formfield" name="username" value="#request.zos.googleAnalyticsConfig.username#";
-		httpparam type="formfield" name="password" value="#request.zos.googleAnalyticsConfig.password#";
-		httpparam type="formfield" name="client_id" value="#request.zos.googleAnalyticsConfig.serverLogin.client_id#";
-	} 
-
-	writedump(cfhttp);
-
-	if(not isJson(cfhttp.filecontent)){
-		writedump(cfhttp.filecontent);
-		return;
-	}
-
-	js=deserializeJson(cfhttp.filecontent);
-	if(structkeyexists(js, 'error')){
-		echo("Error:"&js.error);
-		return;
-	}	
-	if(structkeyexists(js, 'access_token')){
-		js.access_token;
-		application.googleAnalyticsAccessToken=js.access_token;
-		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/reportIndex");
-	}else{
-		echo('Unknown response:');
-		writedump(js);
-		abort;
-	}
-	
-    </cfscript>
-	
-</cffunction> --->
-
-<cffunction name="return" localmode="modern" access="remote" roles="administrator">
+<cffunction name="return" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	init();
 	form.code=application.zcore.functions.zso(form, 'code');
+
+	tempReturnLink=request.zos.globals.domain&"/z/inquiries/admin/google-oauth/return?accountType=#form.accountType#";
 	//writedump(form);
 	//link='https://accounts.google.com/o/oauth2/token';
 	link="https://www.googleapis.com/oauth2/v4/token";
 	http url="#link#" method="post" timeout="10"{
 		httpparam type="formfield" name="grant_type" value="authorization_code";
-		httpparam type="formfield" name="code" value="#form.code#";
-		httpparam type="formfield" name="redirect_uri" value="#variables.returnLink#";
+		httpparam type="formfield" name="code" value="#form.code#"; 
+		httpparam type="formfield" name="redirect_uri" value="#tempReturnLink#";
 		httpparam type="formfield" name="client_id" value="#request.zos.googleAnalyticsConfig.clientId#";
 		httpparam type="formfield" name="client_secret" value="#request.zos.googleAnalyticsConfig.clientSecret#"; 
 	}
 
-	//writedump(cfhttp); 
 	/*
 	response json is:
 	{
@@ -189,19 +186,20 @@ Google Analytics:
 		return;
 	}
 	// 401 is expired token
-	// 403 is no access to "view"
-
+	// 403 is no access to "view" 
 	js=deserializeJson(cfhttp.filecontent);
 	if(structkeyexists(js, 'error')){
 		writedump(js.error);
 		return;
 	}	
 	if(structkeyexists(js, 'access_token')){
-
-		application.googleAnalyticsAccessToken=js;
-		application.googleAnalyticsAccessToken.loginDatetime=now();
-		application.googleAnalyticsAccessToken.expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken.loginDatetime);
-		application.zcore.functions.zWriteFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken.txt", serializeJson(application.googleAnalyticsAccessToken));
+		if(not structkeyexists(application, 'googleAnalyticsAccessToken')){
+			application.googleAnalyticsAccessToken={};
+		}
+		js.loginDatetime=now();
+		js.expiresDatetime=dateadd("s", js.expires_in, js.loginDatetime);
+		application.googleAnalyticsAccessToken[form.accountType]=js; 
+		application.zcore.functions.zWriteFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt", serializeJson(application.googleAnalyticsAccessToken[form.accountType]));
 		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/reportIndex");
 	}else{
 		echo('Unknown response:');
@@ -212,9 +210,10 @@ Google Analytics:
 	</cfscript>
 </cffunction>
 
-<cffunction name="reportIndex" localmode="modern" access="remote" roles="administrator">
+<cffunction name="reportIndex" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	init();
+	application.zcore.functions.zStatusHandler(request.zsid);
 	if(structkeyexists(form, 'googleSearchConsoleCancel')){
 		application.googleSearchConsoleCancel=1; 
 	}
@@ -227,67 +226,89 @@ Google Analytics:
 	if(structkeyexists(form, 'googleAnalyticsKeywordCancel')){
 		application.googleAnalyticsKeywordCancel=1; 
 	}
-	if(not structkeyexists(application, 'googleAnalyticsAccessToken')){
-		application.zcore.status.setStatus(request.zsid, "Invalid access token", form, true);
+	if(not request.googleAnalyticsAuthenticated and not request.googleAdwordsAuthenticated){
+		application.zcore.status.setStatus(request.zsid, "You must authenticate first", form, true);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/index?zsid=#request.zsid#");
 	}
+	/*
 	echo("Access Token:<br>");
 	writedump(application.googleAnalyticsAccessToken);
-
-	scheduledLink="/z/inquiries/admin/google-oauth/scheduledTask";
-	overviewLink="/z/inquiries/admin/google-oauth/overview";
-	organicLink="/z/inquiries/admin/google-oauth/organic";
-	keywordLink="/z/inquiries/admin/google-oauth/keyword";
-	goalLink="/z/inquiries/admin/google-oauth/goal";
+	*/
+	scheduledLink="/z/inquiries/admin/google-oauth/scheduledTask?accountType=analytics";
+	overviewLink="/z/inquiries/admin/google-oauth/overview?accountType=analytics";
+	organicLink="/z/inquiries/admin/google-oauth/organic?accountType=analytics";
+	keywordLink="/z/inquiries/admin/google-oauth/keyword?accountType=analytics";
+	goalLink="/z/inquiries/admin/google-oauth/goal?accountType=analytics";
 	refreshLink="/z/inquiries/admin/google-oauth/refreshToken";
-	searchConsoleLink="/z/inquiries/admin/google-oauth/searchConsole";
+	searchConsoleLink="/z/inquiries/admin/google-oauth/searchConsole?accountType=adwords";
 	</cfscript>
-	<p>You can add sid=SITEID&amp;reimport=1 to pull the data again for a specific site.</p>
+	<h3>Never run more then one api call at a time because Google will start failing and it will be pointless.  They will each take several minutes to finish.</h3>
+	<h2>Adwords API Calls</h2>
+	<cfif request.googleAdwordsAuthenticated>
+		<p><a href="/z/inquiries/admin/google-oauth/revokeToken?accountType=adwords">Revoke Auth Token</a></p>
+		<p><a href="#refreshLink#?accountType=adwords">Refresh Token (#dateformat(application.googleAnalyticsAccessToken.adwords.expiresDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.adwords.expiresDatetime, "h:mm tt")#)</a></p>
+		<cfif request.zos.isdeveloper>
+			<p><a href="#scheduledLink#" target="_blank">Scheduled Task (Adwords) - Don't run this</a> 
+		</cfif>
+	<cfelse>
+		<p>Adwords not authenticated, <a href="/z/inquiries/admin/google-oauth/index">click here to authenticate</a></p>
+	</cfif>
 
-	<p><a href="/z/inquiries/admin/custom-lead-report/index" target="_blank">View Report</a></p>
-	<p><a href="/z/inquiries/admin/google-oauth/revokeToken">Revoke Auth Token</a></p>
-	<p><a href="#scheduledLink#" target="_blank">Scheduled Task (Adwords) - Don't run this</a> 
+	<h2>Analytics API Calls</h2>
+	<cfif request.googleAnalyticsAuthenticated>
+		<p><a href="/z/inquiries/admin/google-oauth/revokeToken?accountType=analytics">Revoke Auth Token</a></p>
 
-	<h2>Never run more then one of these at a time because Google will start failing and it will be pointless.  They will each take several minutes to finish.</h2>
-	<p><a href="#overviewLink#" target="_blank">Google Analytics Main Overview</a> 
-		<cfscript>
-		s=application.zcore.functions.zso(application, 'googleAnalyticsOverviewStatus');
-		</cfscript>
-		<cfif s NEQ "">
-			(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsOverviewStatus=1">Cancel</a>)
-		</cfif></p>
-	<p><a href="#organicLink#" target="_blank">Google Analytics Organic Search</a> 
-		<cfscript>
-		s=application.zcore.functions.zso(application, 'googleAnalyticsOrganicStatus');
-		</cfscript>
-		<cfif s NEQ "">
-			(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsOrganicCancel=1">Cancel</a>)
-		</cfif></p>
-	<p><a href="#keywordLink#" target="_blank">Google Analytics Keywords</a> 
-		<cfscript>
-		s=application.zcore.functions.zso(application, 'googleAnalyticsKeywordStatus');
-		</cfscript>
-		<cfif s NEQ "">
-			(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsKeywordCancel=1">Cancel</a>)
-		</cfif></p>
-	<p><a href="#searchConsoleLink#" target="_blank">Google Webmaster Search Console Keywords</a> 
-		<cfscript>
-		s=application.zcore.functions.zso(application, 'googleSearchConsoleStatus');
-		</cfscript>
-		<cfif s NEQ "">
-			(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleSearchConsoleCancel=1">Cancel</a>)
-		</cfif> </p> 
-	<!--- <p><a href="#goalLink#" target="_blank">Google Analytics Goals</a></p>  --->
-	<p><a href="#refreshLink#">Refresh Token (#dateformat(application.googleAnalyticsAccessToken.expiresDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.expiresDatetime, "h:mm tt")#)</a></p>
-	<p><a href="/z/inquiries/admin/google-oauth/index">Authenticate Again</a></p>
+		<p>You can add sid=SITEID&amp;reimport=1 to pull the data again for a specific site.</p>
+
+		<!--- <p><a href="/z/inquiries/admin/custom-lead-report/index" target="_blank">View Report</a></p> --->
+
+		<p><a href="#overviewLink#" target="_blank">Google Analytics Main Overview</a> 
+			<cfscript>
+			s=application.zcore.functions.zso(application, 'googleAnalyticsOverviewStatus');
+			</cfscript>
+			<cfif s NEQ "">
+				(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsOverviewStatus=1">Cancel</a>)
+			</cfif></p>
+		<p><a href="#organicLink#" target="_blank">Google Analytics Organic Search</a> 
+			<cfscript>
+			s=application.zcore.functions.zso(application, 'googleAnalyticsOrganicStatus');
+			</cfscript>
+			<cfif s NEQ "">
+				(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsOrganicCancel=1">Cancel</a>)
+			</cfif></p>
+		<p><a href="#keywordLink#" target="_blank">Google Analytics Keywords</a> 
+			<cfscript>
+			s=application.zcore.functions.zso(application, 'googleAnalyticsKeywordStatus');
+			</cfscript>
+			<cfif s NEQ "">
+				(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleAnalyticsKeywordCancel=1">Cancel</a>)
+			</cfif></p>
+		<p><a href="#searchConsoleLink#" target="_blank">Google Webmaster Search Console Keywords</a> 
+			<cfscript>
+			s=application.zcore.functions.zso(application, 'googleSearchConsoleStatus');
+			</cfscript>
+			<cfif s NEQ "">
+				(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleSearchConsoleCancel=1">Cancel</a>)
+			</cfif> </p> 
+		<!--- <p><a href="#goalLink#" target="_blank">Google Analytics Goals</a></p>  --->
+		<p><a href="#refreshLink#?accountType=analytics">Refresh Token (#dateformat(application.googleAnalyticsAccessToken.analytics.expiresDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.analytics.expiresDatetime, "h:mm tt")#)</a></p>
+	<cfelse>
+		<p>Analytics not authenticated, <a href="/z/inquiries/admin/google-oauth/index">click here to authenticate</a></p>
+	</cfif>
+	<hr>
+	<h2><a href="/z/inquiries/admin/google-oauth/index">Authenticate Again</a></h2>
+	<cfif request.zos.isDeveloper>
+		<h2><a href="/z/inquiries/admin/google-oauth/refreshAllTokens">Refresh All Tokens</a></h2>
+	</cfif>
 </cffunction>
 
-<cffunction name="revokeToken" localmode="modern" access="remote" roles="administrator">
+<cffunction name="revokeToken" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	//https://accounts.google.com/o/oauth2/revoke?token=
-	http url="https://accounts.google.com/o/oauth2/revoke?token=#application.googleAnalyticsAccessToken.access_token#" method="get" timeout="10"{ 
+	http url="https://accounts.google.com/o/oauth2/revoke?token=#application.googleAnalyticsAccessToken[form.accountType].access_token#" method="get" timeout="10"{ 
 	}
 
+	structdelete(application.googleAnalyticsAccessToken, form.accountType);
 	//writedump(cfhttp);
 
 	application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/index");
@@ -295,17 +316,90 @@ Google Analytics:
 	</cfscript>
 </cffunction>
 
-<cffunction name="scheduledTask" localmode="modern" access="remote">
+<!--- this cron job should run every 25 minutes, so we can guarantee it runs twice before the expiration of the token.  This will reduce temporary failures from breaking authentication.  --->
+<cffunction name="refreshAllTokens" localmode="modern" access="remote">
 	<cfscript>
+	init();
+	form.cron=1;
 	if(not request.zos.isdeveloper and not request.zos.istestserver and not request.zos.isserver){
 		application.zcore.functions.z404("Only for servers / developers to run");
 	}
-	result=checkAccessToken();
+
+	arrError=[];
+	form.accountType="analytics";
+	if(not request.googleAnalyticsAuthenticated){
+		// attempt to load token from disk
+		path=request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt";
+		if(fileexists(path)){
+			tokenContents=application.zcore.functions.zReadFile(path);
+			if(tokenContents NEQ false){
+				application.googleAnalyticsAccessToken[form.accountType]=deserializeJson(tokenContents);
+			}
+		}
+	}
+	if(request.googleAnalyticsAuthenticated){
+		rs=refreshToken();
+		if(not rs.success){
+			structdelete(application.googleAnalyticsAccessToken, form.accountType);
+			application.zcore.functions.zDeleteFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt")
+			arrayAppend(arrError, rs.errorMessage);
+		}
+    	echo('Google analytics authenticated: #rs.success#<br>');
+    }else{
+    	echo('Google analytics authenticated: #request.googleAdwordsAuthenticated#<br>');
+	}
+	form.accountType="adwords";
+	if(not request.googleAnalyticsAuthenticated){
+		// attempt to load token from disk
+		path=request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt";
+		if(fileexists(path)){
+			tokenContents=application.zcore.functions.zReadFile(path);
+			if(tokenContents NEQ false){
+				application.googleAnalyticsAccessToken[form.accountType]=deserializeJson(tokenContents);
+			}
+		}
+	}
+    if(request.googleAdwordsAuthenticated){
+		rs=refreshToken();
+		if(not rs.success){
+			structdelete(application.googleAnalyticsAccessToken, form.accountType);
+			application.zcore.functions.zDeleteFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt")
+			arrayAppend(arrError, rs.errorMessage);
+		}
+    	echo('Google adwords authenticated: #rs.success#<br>');
+    }else{
+    	echo('Google adwords authenticated: #request.googleAdwordsAuthenticated#<br>');
+    }
+    if(arrayLen(arrError) NEQ 0){
+	    savecontent variable="out"{
+	    	echo('<h2>Google Authentication Failed</h2>
+	    		<p>You must login and authenticate again <a href="#request.zos.globals.serverDomain#/z/inquiries/admin/google-oauth/index">here</a>.</p>');
+	    	echo('<p>'&arrayToList(arrError, "<br>")&'</p>');
+
+	    }
+	    throw(out);
+	}else{
+		echo('All tokens refreshed successfully');
+		abort;
+	}
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="scheduledTask" localmode="modern" access="remote">
+	<cfscript>
+	init();
+	// refresh if its active
+	form.accountType="adwords";
+	if(not request.zos.isdeveloper and not request.zos.istestserver and not request.zos.isserver){
+		application.zcore.functions.z404("Only for servers / developers to run");
+	}
+	/*result=checkAccessToken();
 	writedump(result);
 	if(not result){
 		link="#request.zos.globals.serverDomain#/z/inquiries/admin/google-oauth/index";
 		throw('Google Access Token has expired.  Please manually authenticate again here: <a href="#link#">#link#</a>');
-	}
+	}*/
 	// getCampaignReport works for reports
 	rs=getCampaignReport();
 	// getCampaigns is set to pause campaign - not working yet?
@@ -324,6 +418,7 @@ Google Analytics:
 
 <cffunction name="getCampaignReport" localmode="modern" access="public">
 	<cfscript>
+	form.accountType="adwords";
 	campaignId="920259499"; // test campaign
 	// Label (field) documentation: https://developers.google.com/adwords/api/docs/appendix/reports/campaign-performance-report
 
@@ -393,7 +488,7 @@ this can go in selector to filter the returned data
 
 		apiLink="https://adwords.google.com/api/adwords/reportdownload/v201708";
 		http url="#apiLink#" method="post" charset="utf-8" timeout="1000" throwonerror="no"{ 
-			httpparam type="Header" name="Authorization" value="Bearer #application.googleAnalyticsAccessToken.access_token#";
+			httpparam type="Header" name="Authorization" value="Bearer #application.googleAnalyticsAccessToken[form.accountType].access_token#";
 			httpparam type="Header" name="developerToken" value="#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#";
 			httpparam type="Header" name="clientCustomerId" value="#request.zos.googleAnalyticsConfig.adwordsTestAccount#";
 			//httpparam type="Header" name="useRawEnumValues" value="true";
@@ -427,6 +522,7 @@ this can go in selector to filter the returned data
 
 <cffunction name="getCampaigns" localmode="modern" access="public">
 	<cfscript> 
+	form.accountType="adwords";
 	campaignId="920259499"; // test campaign
 
 	// campaign status can be PAUSED or ENABLED or REMOVED
@@ -546,39 +642,52 @@ $headers = array(
 <cffunction name="getAndProcessKeywordStats" localmode="modern" access="public">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>
-	arrKeyword=arguments.arrKeyword;
+	form.accountType="adwords";
+	arrKeyword=duplicate(arguments.arrKeyword);
 	// batch 500 keywords at a time 
 	js={
 		success:true,
 		results:[]
 	};
-	perpage=800; // google has limit of 800 results from this service
+	perpage=700; // google has limit of 800 results from this service
 	// google can return up to 700 keyword stats at once, we do 500 here to stay under the limit
-	runCount=ceiling(arrayLen(arrKeyword)/500);
-	for(i=1;i<=runCount;i++){
-		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordStats";
+	keywordCount=arrayLen(arrKeyword);
+	runCount=ceiling(arrayLen(arrKeyword)/perpage);
+	echo('runCount:'&runCount&'<br>');
+	for(i2=1;i2<=runCount;i2++){
+		application.googleAdwordsAPIStatus="API Call ###i2# request processing: getAndProcessKeywordStats";
 		arrNew=[];
 		count=arrayLen(arrKeyword);
-		for(n=1;n<=min(500, count);n++){
+		echo("<br>====CHECKING THESE KEYWORDS:<br>");
+		for(n=1;n<=min(perpage, count);n++){
+			echo(arrKeyword[1]&"<br>");
 			arrayAppend(arrNew, arrKeyword[1]);
 			arrayDeleteAt(arrKeyword, 1);
-		}
+		} 
+		echo("<br>====GOOGLE RESPONSE BELOW:<br>");
+		/*if(i2 NEQ 1){
+			sleep(275000); 
+		}*/
 		hasMore=true;
 		offset=0;
 		while(hasMore){
-			try{
+			try{  
 				rs=getKeywordStats(offset, arrNew);
 				if(not rs.success){
-					return rs;
+					js.success=false;
+					js.errorResponse=rs;
+					js.successCount=min(keywordCount, (runCount-1)*perpage);
+					return js;
+					//return rs;
 				}
-				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordStats";
+				application.googleAdwordsAPIStatus="API Call ###i2# response processing with offset: #offset#: getAndProcessKeywordStats";
 				//writedump(rs);abort;
 				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
 				if(total EQ 0){
+					//echo('total was 0<br>');
 					break;
 				}
-				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries;
-				//writedump(entries);
+				entries=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.entries; 
 				for(i=1;i<=arraylen(entries);i++){
 					t=entries[i].data;  
 					t1={}; 
@@ -589,19 +698,25 @@ $headers = array(
 					if(t[2].key.XMLText EQ "SEARCH_VOLUME"){
 						t1.searchVolume=t[2].value.value.xmlText;
 					}  
+					echo(t1.keyword&":"&t1.searchVolume&"<br>");
 					arrayAppend(js.results, t1);
 				}
-				offset+=perpage;
-				sleep(1000); 
+				offset+=perpage; 
 				if(total < offset){
 					hasMore=false;
 					break;
+				}else{
+				//	sleep(275000); 
 				}
 			}catch(Any e){
 				savecontent variable="out"{
 					echo('<h2>Google Adwords API Error Occurred</h2>');
-					writedump(rs);
-					writedump(e);
+					if(not structkeyexists(local, 'rs')){
+						writedump(e);
+					}else{
+						writedump(rs);
+						writedump(e);
+					}
 				}
 				if(request.zos.isDeveloper){
 					echo(out);
@@ -612,7 +727,10 @@ $headers = array(
 			}
 		}
 	}
+	//echo('stopped');	abort;
 	structdelete(application, 'googleAdwordsAPIStatus');
+
+	js.successCount=keywordCount;
 	return js;
 	</cfscript>
 </cffunction>
@@ -625,21 +743,25 @@ $headers = array(
 <cffunction name="getAndProcessKeywordIdeas" localmode="modern" access="public">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>
+	form.accountType="adwords";
 	arrKeyword=arguments.arrKeyword;
 	js={
 		success:true,
 		results:[]
 	};
-	perpage=800; // google has limit of 800 results from this service
+	perpage=500; // google has limit of 800 results from this service
 	// google has limit of 200 seed keywords per ideas request
 	runCount=ceiling(arrayLen(arrKeyword)/100); 
-	for(i=1;i<=runCount;i++){
-		application.googleAdwordsAPIStatus="API Call ###i# request processing: getAndProcessKeywordIdeas";
+	for(i2=1;i2<=runCount;i2++){
+		application.googleAdwordsAPIStatus="API Call ###i2# request processing: getAndProcessKeywordIdeas";
 		arrNew=[];
 		count=arrayLen(arrKeyword);
 		for(n=1;n<=min(100, count);n++){
 			arrayAppend(arrNew, arrKeyword[1]);
 			arrayDeleteAt(arrKeyword, 1);
+		}
+		if(i2 NEQ 1){
+			sleep(275000);
 		}
 		hasMore=true;
 		offset=0;
@@ -649,7 +771,7 @@ $headers = array(
 				if(not rs.success){
 					return rs; 
 				} 
-				application.googleAdwordsAPIStatus="API Call ###i# response processing with offset: #offset#: getAndProcessKeywordIdeas";
+				application.googleAdwordsAPIStatus="API Call ###i2# response processing with offset: #offset#: getAndProcessKeywordIdeas";
 				total=rs.data["soap:Envelope"]["soap:Body"].getResponse.rval.totalNumEntries.xmltext;
 				if(total EQ 0){
 					break;
@@ -664,11 +786,12 @@ $headers = array(
 					arrayAppend(js.results, t1);
 				}
 				offset+=perpage;
-				sleep(1000);
 				if(total < offset){
 					hasMore=false;
 					break;
-				} 
+				}else{
+					sleep(275000);
+				}
 			}catch(Any e){
 				savecontent variable="out"{
 					echo('<h2>Google Adwords API Error Occurred</h2>');
@@ -690,8 +813,9 @@ $headers = array(
 </cffunction>
 
 
-<cffunction name="displayKeywordStats" localmode="modern" access="remote" roles="administrator">
+<cffunction name="displayKeywordStats" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	form.accountType="adwords";
 	rs=getKeywordStats(0, ["Flights from London to New York", "London Flights"]);
 	//rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><ns2:requestId>0005619168f967e80ac14c051300f74e</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>197</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>4248747</value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>3934797</value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>')};
 	if(not rs.success){ 
@@ -725,8 +849,9 @@ $headers = array(
 /z/inquiries/admin/google-oauth/displayKeywordIdeas
 /z/inquiries/admin/google-oauth/displayKeywordStats
  --->
-<cffunction name="displayKeywordIdeas" localmode="modern" access="remote" roles="administrator"> 
+<cffunction name="displayKeywordIdeas" localmode="modern" access="remote" roles="serveradministrator"> 
 	<cfscript> 
+	form.accountType="adwords";
 
 	rs=getKeywordIdeas(0, ["Flights"]);
 	// ideas response with searchVolume
@@ -753,8 +878,9 @@ $headers = array(
 	</cfscript>
 </cffunction>
 
-<cffunction name="displayKeywordStatsMonthly" localmode="modern" access="remote" roles="administrator"> 
+<cffunction name="displayKeywordStatsMonthly" localmode="modern" access="remote" roles="serveradministrator"> 
 	<cfscript> 
+	form.accountType="adwords";
 	//rs=getKeywordStatsMonthly(0, ["Flights from London to New York", "London Flights"]);
 	//writedump(rs);abort; 
 	// this was a stats response with monthly searches
@@ -802,6 +928,7 @@ adwordsLiveManagerAccount
  --->
 <cffunction name="getAdwordsAuthXML" localmode="modern" access="public">
 	<cfscript>
+	form.accountType="adwords";
 	live=true;
 	form.debug=application.zcore.functions.zso(form, 'debug', true, 0);
 	if(form.debug){
@@ -829,6 +956,7 @@ adwordsLiveManagerAccount
 	<cfargument name="startIndex" type="numeric" required="yes">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>  
+	form.accountType="adwords";
 	arrKeyword=arguments.arrKeyword;
 
 	// the ids for language and location come from data posted here: 
@@ -858,6 +986,14 @@ adwordsLiveManagerAccount
 	            } 
 	            xmlText&='
 	            </searchParameters>
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -873,12 +1009,32 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
 	  </soapenv:Body>
 	</soapenv:Envelope>'; 
+
+	/*
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting>
+						<ns1:targetGoogleSearch>true</ns1:targetGoogleSearch>
+						<ns1:targetSearchNetwork>true</ns1:targetSearchNetwork>
+						<ns1:targetContentNetwork>true</ns1:targetContentNetwork>
+						<ns1:targetPartnerSearchNetwork>true</ns1:targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters> 
+	targetGoogleSearch
+	targetSearchNetwork
+	targetContentNetwork
+	targetPartnerSearchNetwork
+	RelatedToQuerySearchParameter
+networkSetting:  
+	SEARCH_VOLUME
+	Bigger numbers: GLOBAL_MONTHLY_SEARCHES
+	Bigger numbers: AVERAGE_TARGETED_MONTHLY_SEARCHES
+	*/
 	/*
 	 <searchParameters xsi:type="LocationSearchParameter">
 	               <locations>
@@ -900,6 +1056,7 @@ adwordsLiveManagerAccount
 	<cfargument name="startIndex" type="numeric" required="yes">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>  
+	form.accountType="adwords";
 	arrKeyword=arguments.arrKeyword;
 
 	// the ids for language and location come from data posted here: 
@@ -913,7 +1070,51 @@ adwordsLiveManagerAccount
 
 	// campaign status can be PAUSED or ENABLED or REMOVED
 	// we should not try to change the status for a campaign that is already "REMOVED"
-	xmlText='<?xml version="1.0"?>
+	arrXML=[];
+	// work version that includes search partners
+	/*
+arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710">
+<SOAP-ENV:Header>
+<ns1:RequestHeader>
+			#getAdwordsAuthXML()#
+</ns1:RequestHeader>
+</SOAP-ENV:Header>
+<SOAP-ENV:Body>
+	<ns1:get>
+		<ns1:selector>
+			<ns1:searchParameters xsi:type="ns1:RelatedToQuerySearchParameter">
+				<ns1:queries>cheap flights</ns1:queries>
+				<ns1:queries>affordable flights</ns1:queries>
+			</ns1:searchParameters>
+			<ns1:searchParameters xsi:type="ns1:LanguageSearchParameter">
+			<ns1:languages>
+				<ns2:id>1000</ns2:id>
+			</ns1:languages>
+			</ns1:searchParameters>
+			<ns1:searchParameters xsi:type="ns1:NetworkSearchParameter">
+				<ns1:networkSetting>
+					<ns2:targetGoogleSearch>true</ns2:targetGoogleSearch>
+					<ns2:targetSearchNetwork>false</ns2:targetSearchNetwork>
+					<ns2:targetContentNetwork>false</ns2:targetContentNetwork>
+					<ns2:targetPartnerSearchNetwork>false</ns2:targetPartnerSearchNetwork>
+				</ns1:networkSetting>
+			</ns1:searchParameters>
+			<ns1:ideaType>KEYWORD</ns1:ideaType>
+			<ns1:requestType>STATS</ns1:requestType>
+			<ns1:requestedAttributeTypes>KEYWORD_TEXT</ns1:requestedAttributeTypes>
+			<ns1:requestedAttributeTypes>SEARCH_VOLUME</ns1:requestedAttributeTypes> 
+			<ns1:requestedAttributeTypes>GLOBAL_MONTHLY_SEARCHES</ns1:requestedAttributeTypes> 
+
+			<ns1:paging>
+			   <ns2:startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</ns2:startIndex>
+			   <ns2:numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</ns2:numberResults>
+			</ns1:paging>
+		</ns1:selector>
+	</ns1:get>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>');
+*/ 
+	arrayAppend(arrXML, '<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
 		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
@@ -923,12 +1124,19 @@ adwordsLiveManagerAccount
 	<soapenv:Body>
 	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
 	         <selector>
-	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
+	            <searchParameters xsi:type="RelatedToQuerySearchParameter">');
 	            for(keyword in arrKeyword){
-	            	xmlText&='<queries>'&keyword&'</queries>';
+	            	arrayAppend(arrXML, '<queries>'&keyword&'</queries>');
 	            }
-	            xmlText&='
-	            </searchParameters>
+	            arrayAppend(arrXML, '</searchParameters> 
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -941,23 +1149,15 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
 	  </soapenv:Body>
-	</soapenv:Envelope>';  
-
-/*
-
-	            <searchParameters xsi:type="LocationSearchParameter">
-	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
-	               </locations>
-	            </searchParameters>
-	            */
+	</soapenv:Envelope>');   
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	xmlText=arrayToList(arrXML, '');
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);   
 	return rs;
 	</cfscript>
 </cffunction>
@@ -966,6 +1166,7 @@ adwordsLiveManagerAccount
 	<cfargument name="startIndex" type="numeric" required="yes">
 	<cfargument name="arrKeyword" type="array" required="yes">
 	<cfscript>  
+	form.accountType="adwords";
 	arrKeyword=arguments.arrKeyword;
 
 	// the ids for language and location come from data posted here: 
@@ -995,6 +1196,14 @@ adwordsLiveManagerAccount
 	            }
 	            xmlText&='
 	            </searchParameters>
+				<searchParameters xsi:type="NetworkSearchParameter">
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					</networkSetting>
+				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
 	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
@@ -1012,7 +1221,7 @@ adwordsLiveManagerAccount
 	            
 	            <paging>
 	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">800</numberResults>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
@@ -1022,7 +1231,7 @@ adwordsLiveManagerAccount
 	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
 
 	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);  
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1040,7 +1249,7 @@ adwordsLiveManagerAccount
 	// report api doesn't have an operation limit per day, but there is a limit of 1000 reports per day.
 	http url="#arguments.apiLink#" method="post" charset="utf-8" timeout="1000" throwonerror="no"{
 		httpparam type="Header" name="Content-Type" value="application/soap+xml";
-		httpparam type="Header" name="Authorization" value="Bearer #application.googleAnalyticsAccessToken.access_token#";
+		httpparam type="Header" name="Authorization" value="Bearer #application.googleAnalyticsAccessToken[form.accountType].access_token#";
 		httpparam type="xml" value="#arguments.xml#";
 	}
 	rs={success:true}; 
@@ -1060,25 +1269,27 @@ adwordsLiveManagerAccount
 	return rs;
 	</cfscript>
 </cffunction>
-	
+	<!--- 
 <!--- /z/inquiries/admin/google-oauth/checkAccessToken --->
 <cffunction name="checkAccessToken" localmode="modern" access="public">
 	<cfscript>
-	if(not structkeyexists(application, 'googleAnalyticsAccessToken')){
-		tokenContents=application.zcore.functions.zReadFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken.txt");
+	// need to support accountType here somehow
+	path=request.zos.globals.serverPrivateHomeDir&"googleAccessToken#form.accountType#.txt";
+	if(not structkeyexists(application, 'googleAnalyticsAccessToken') or not structkeyexists(application.googleAnalyticsAccessToken, form.accountType) and fileexists(path)){
+		tokenContents=application.zcore.functions.zReadFile(path);
 		if(tokenContents NEQ false){
-			application.googleAnalyticsAccessToken=deserializeJson(tokenContents);
+			application.googleAnalyticsAccessToken[form.accountType]=deserializeJson(tokenContents);
 		}
 	}
 
-	if(structkeyexists(application, 'googleAnalyticsAccessToken')){
-		d=parsedatetime(dateformat(application.googleAnalyticsAccessToken.expiresDatetime, "yyyy-mm-dd")&" "&timeformat(application.googleAnalyticsAccessToken.expiresDatetime, "HH:mm:ss"));
+	if(structkeyexists(application, 'googleAnalyticsAccessToken') and structkeyexists(application.googleAnalyticsAccessToken, form.accountType)){
+		d=parsedatetime(dateformat(application.googleAnalyticsAccessToken[form.accountType].expiresDatetime, "yyyy-mm-dd")&" "&timeformat(application.googleAnalyticsAccessToken[form.accountType].expiresDatetime, "HH:mm:ss"));
 		secondsRemaining=datediff("s", d, now()); 
 		if(secondsRemaining >=-30){
 			// execute token refresh 
 			http url="https://www.googleapis.com/oauth2/v4/token" method="post" timeout="10"{
 				httpparam type="formfield" name="grant_type" value="refresh_token";
-				httpparam type="formfield" name="refresh_token" value="#application.googleAnalyticsAccessToken.refresh_token#"; 
+				httpparam type="formfield" name="refresh_token" value="#application.googleAnalyticsAccessToken[form.accountType].refresh_token#"; 
 				httpparam type="formfield" name="client_id" value="#request.zos.googleAnalyticsConfig.clientId#";
 				httpparam type="formfield" name="client_secret" value="#request.zos.googleAnalyticsConfig.clientSecret#"; 
 			}
@@ -1093,10 +1304,10 @@ adwordsLiveManagerAccount
 				return false;
 			}	
 			if(structkeyexists(js, 'access_token')){ 
-				application.googleAnalyticsAccessToken.access_token=js.access_token;
-				application.googleAnalyticsAccessToken.loginDatetime=now();
-				application.googleAnalyticsAccessToken.expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken.loginDatetime);
-				application.zcore.functions.zWriteFile(request.zos.globals.serverPrivateHomeDir&"googleAccessToken.txt", serializeJson(application.googleAnalyticsAccessToken));
+				application.googleAnalyticsAccessToken[form.accountType].access_token=js.access_token;
+				application.googleAnalyticsAccessToken[form.accountType].loginDatetime=now();
+				application.googleAnalyticsAccessToken[form.accountType].expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken[form.accountType].loginDatetime);
+				application.zcore.functions.zWriteFile(path, serializeJson(application.googleAnalyticsAccessToken[form.accountType]));
 				return true;
 			}else{
 				return false;
@@ -1108,23 +1319,29 @@ adwordsLiveManagerAccount
 	return false;
 	</cfscript>
 </cffunction>
+ --->
 
-
-<cffunction name="refreshToken" localmode="modern" access="remote" roles="administrator">
+<cffunction name="refreshToken" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	form.cron=application.zcore.functions.zso(form, 'cron', true, 0);
 	form.code=application.zcore.functions.zso(form, 'code');
-	if(not structkeyexists(application, 'googleAnalyticsAccessToken')){
-		application.zcore.status.setStatus(request.zsid, "You must authenticate with google first.", form, true);
-		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/index?zsid=#request.zsid#");
+	if(not structkeyexists(application, 'googleAnalyticsAccessToken') or not structkeyexists(application.googleAnalyticsAccessToken, form.accountType)){
+		if(form.cron EQ 1){
+			return {success:false, errorMessage:"Failed to refresh token for account type: #form.accountType# - cached token was missing"};
+		}else{
+			application.zcore.status.setStatus(request.zsid, "You must authenticate with google first.", form, true);
+			application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/index?zsid=#request.zsid#");
+		}
 	}
 	http url="https://www.googleapis.com/oauth2/v4/token" method="post" timeout="10"{
 		httpparam type="formfield" name="grant_type" value="refresh_token";
-		httpparam type="formfield" name="refresh_token" value="#application.googleAnalyticsAccessToken.refresh_token#"; 
+		httpparam type="formfield" name="refresh_token" value="#application.googleAnalyticsAccessToken[form.accountType].refresh_token#"; 
 		httpparam type="formfield" name="client_id" value="#request.zos.googleAnalyticsConfig.clientId#";
 		httpparam type="formfield" name="client_secret" value="#request.zos.googleAnalyticsConfig.clientSecret#"; 
 	}
 
-	writedump(cfhttp); 
+	
+	//writedump(cfhttp); 
 	/*
 	response json is:
 	{
@@ -1135,27 +1352,44 @@ adwordsLiveManagerAccount
 	*/ 
 
 	if(not isJson(cfhttp.filecontent)){
-		writedump(cfhttp.filecontent);
-		return;
+		if(form.cron EQ 1){
+			return {success:false, errorMessage:"Failed to refresh token for account type: #form.accountType# - response was not valid json"};
+		}else{
+			writedump(cfhttp.filecontent);
+			return;
+		}
 	}
 	// 401 is expired token
 	// 403 is no access to "view"
 
-	js=deserializeJson(cfhttp.filecontent);
+	js=deserializeJson(cfhttp.filecontent); 
 	if(structkeyexists(js, 'error')){
-		writedump(js.error);
-		return;
+		if(form.cron EQ 1){
+			return {success:false, errorMessage:"Failed to refresh token for account type: #form.accountType# - google returned error in json"};
+		}else{
+			writedump(js.error);
+			return;
+		}
 	}	
 	if(structkeyexists(js, 'access_token')){ 
-		application.googleAnalyticsAccessToken.loginDatetime=now();
-		application.googleAnalyticsAccessToken.expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken.loginDatetime);
-
+		application.googleAnalyticsAccessToken[form.accountType].access_token=js.access_token;
+		application.googleAnalyticsAccessToken[form.accountType].loginDatetime=now();
+		application.googleAnalyticsAccessToken[form.accountType].expiresDatetime=dateadd("s", js.expires_in, application.googleAnalyticsAccessToken[form.accountType].loginDatetime); 
 		// TODO: don't need to redirect when this is done
-		application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/reportIndex");
+		if(form.cron EQ 1){
+			return {success:true};
+		}else{
+			application.zcore.status.setStatus(request.zsid, "#form.accountType# token was refreshed successfully.");
+			application.zcore.functions.zRedirect("/z/inquiries/admin/google-oauth/reportIndex?zsid=#request.zsid#");
+		}
 	}else{
-		echo('Unknown response:');
-		writedump(js);
-		abort;
+		if(form.cron EQ 1){
+			return {success:false, errorMessage:"Failed to refresh token for account type: #form.accountType#"};
+		}else{
+			echo('Unknown response:');
+			writedump(js);
+			abort;
+		}
 	}
 	</cfscript>
 </cffunction>
@@ -1170,7 +1404,7 @@ adwordsLiveManagerAccount
 	50,000 requests per day.
 	*/
 
- 	link='https://analyticsreporting.googleapis.com/v4/reports:batchGet?access_token=#application.googleAnalyticsAccessToken.access_token#&alt=json';
+ 	link='https://analyticsreporting.googleapis.com/v4/reports:batchGet?access_token=#application.googleAnalyticsAccessToken[form.accountType].access_token#&alt=json';
  	//echo(link);
  	jsonString=serializeJson(arguments.jsonStruct); 
 	jsonString=application.zcore.functions.zHttpJsonPost(link, jsonString, 20);
@@ -1192,8 +1426,9 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="searchConsole" localmode="modern" access="remote" roles="administrator">
+<cffunction name="searchConsole" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
+	form.accountType="analytics";
 	init();
 	db=request.zos.queryObject;
 	/*
@@ -1230,7 +1465,7 @@ adwordsLiveManagerAccount
 				abort;
 			}
 			application.googleSearchConsoleStatus="Processing #row.site_short_domain# at #startMonthDate# to #endDate#";
-			link="https://www.googleapis.com/webmasters/v3/sites/#urlencodedformat(row.site_google_search_console_domain)#/searchAnalytics/query?access_token=#application.googleAnalyticsAccessToken.access_token#&alt=json&fields=rows";
+			link="https://www.googleapis.com/webmasters/v3/sites/#urlencodedformat(row.site_google_search_console_domain)#/searchAnalytics/query?access_token=#application.googleAnalyticsAccessToken[form.accountType].access_token#&alt=json&fields=rows";
 			jsonStruct={
 				"startDate": startMonthDate,
 				"endDate": endDate,
@@ -1348,6 +1583,7 @@ adwordsLiveManagerAccount
 <cffunction name="processGASummary" localmode="modern" access="public">
 	<cfargument name="ds2" type="struct" required="yes">
 	<cfscript>
+	form.accountType="analytics";
 	db=request.zos.queryObject;
 	ds2=arguments.ds2;  
 	js=doAPICall(ds2.js);  
@@ -1432,8 +1668,9 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
  
-<cffunction name="overview" localmode="modern" access="remote" roles="administrator">
+<cffunction name="overview" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>  
+	form.accountType="analytics";
 	init();
 	db=request.zos.queryObject;
 	/*
@@ -1558,8 +1795,9 @@ adwordsLiveManagerAccount
 </cffunction>
 
 
-<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="administrator">
+<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>  
+	form.accountType="analytics";
 	init();
 	db=request.zos.queryObject;
 	/*
@@ -1715,6 +1953,7 @@ adwordsLiveManagerAccount
 	<cfargument name="ds2" type="struct" required="yes">
 	<cfargument name="maxGoals" type="number" required="yes">
 	<cfscript>
+	form.accountType="analytics";
 	db=request.zos.queryObject;
 	ds2=arguments.ds2;  
 	js=doAPICall(ds2.js);  
@@ -1787,8 +2026,9 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="organic" localmode="modern" access="remote" roles="administrator">
+<cffunction name="organic" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
+	form.accountType="analytics";
 	init();
 	db=request.zos.queryObject;
 	/* 
@@ -1929,8 +2169,9 @@ adwordsLiveManagerAccount
 </cffunction>
 
 
-<cffunction name="keyword" localmode="modern" access="remote" roles="administrator">
+<cffunction name="keyword" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
+	form.accountType="analytics";
 	init();
 	db=request.zos.queryObject;
 	// TODO: need unique manually created exclude list for each client to filter out their own brand 
@@ -2086,8 +2327,9 @@ adwordsLiveManagerAccount
 	</cfscript>
 </cffunction>
 
-<cffunction name="goal" localmode="modern" access="remote" roles="administrator">
+<cffunction name="goal" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
+	form.accountType="analytics";
 	init();
 	throw("not implemented - the api call works, but i don't think we need this one");
 	/*

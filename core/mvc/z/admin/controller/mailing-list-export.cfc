@@ -12,12 +12,12 @@
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Mailing List Export");	
 	if(structkeyexists(form,'alldata') EQ false){
 		filterSQL1=" and user_pref_email='1'";
-		filterSQL2=" and contact_opt_in='1'";
+		filterSQL2=" and contact_opt_out='0'";
 	} 
 	header name="Content-Type" value="text/plain" charset="utf-8";
 	header name="Content-Disposition" value="attachment; filename=#dateformat(now(), 'yyyy-mm-dd')#-mailing-list-export.csv" charset="utf-8";
 
-	echo('"Email","Company","First Name","Last Name","Phone","Opt In","Opt In Confirmed","Created Datetime"'&chr(10));
+	echo('"Email","Company","First Name","Last Name","Phone","Opt Out","Opt In","Opt In Confirmed","Created Datetime"'&chr(10));
 	db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# 
 	WHERE site_id=#db.param(request.zos.globals.id)# and 
 	contact_parent_id=#db.param(0)# and 
@@ -27,7 +27,7 @@
 	uniqueStruct={};
 	loop query="qM"{
 		uniqueStruct[qM.contact_email]=true;
-		echo('"'&qM.contact_email&'","","'&qM.contact_first_name&'","'&qM.contact_last_name&'","'&qM.contact_phone1&'","'&qM.contact_opt_in&'","'&qM.contact_confirm&'","'&dateformat(qM.contact_datetime, 'm/d/yyyy')&" "&timeformat(qM.contact_datetime, 'h:mm tt')&'"'&chr(10));
+		echo('"'&qM.contact_email&'","","'&qM.contact_first_name&'","'&qM.contact_last_name&'","'&qM.contact_phone1&'","'&qM.contact_opt_out&'","'&qM.contact_opt_in&'","'&qM.contact_confirm&'","'&dateformat(qM.contact_datetime, 'm/d/yyyy')&" "&timeformat(qM.contact_datetime, 'h:mm tt')&'"'&chr(10));
 	}
 	db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# user 
 	WHERE user_active=#db.param('1')# and 
@@ -57,7 +57,7 @@
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Mailing List Export");	
 	if(structkeyexists(form,'alldata') EQ false){
 		filterSQL1=" and user_pref_email='1'";
-		filterSQL2=" and contact_opt_in='1'";
+		filterSQL2=" and contact_opt_out='0'";
 	}
 	</cfscript>
 	<h2>Mailing List Export</h2>

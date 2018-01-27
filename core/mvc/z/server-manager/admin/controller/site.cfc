@@ -680,6 +680,12 @@
 		form.site_securedomain = left(form.site_securedomain, len(form.site_securedomain)-1);
 	}
 	form.site_live=application.zcore.functions.zso(form, 'site_live',true);
+	if(application.zcore.functions.zso(form, 'site_live_datetime') NEQ ""){
+		form.site_live_datetime=dateformat(form.site_live_datetime, "yyyy-mm-dd")&" "&timeformat(form.site_live_datetime, "HH:mm:ss");
+	}
+	if(form.site_live EQ 1 and (form.method EQ "insert" or qCheck.site_live EQ 0)){
+		form.site_live_datetime=request.zos.mysqlnow;
+	}
 	if(trim(form.site_homelinktext) EQ ""){					
 		application.zcore.status.setStatus(Request.zsid, "Home link text is required",form,true);
 		application.zcore.status.setFieldError(Request.zsid, "site_homelinktext");
@@ -1341,6 +1347,12 @@
 			<td><input name="site_live" type="checkbox" value="1" <cfif form.site_live EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Is this site live? WARNING: Do not check unless it is ready because XML Sitemap will start pinging when it is live.</td>
 		</tr>
 		<tr>
+			<td style="vertical-align:top; width:140px;">Launch Date</td>
+			<td><input name="site_live_datetime" type="datetime-local" value="#dateformat(form.site_live_datetime, 'yyyy-mm-dd')&'T'&timeformat(form.site_live_datetime, 'HH:mm')#"><br>
+				Launch date will also auto-update when you first check "Is This site live?".</td>
+		</tr>
+
+		<tr>
 			<td style="vertical-align:top; width:140px;">&nbsp;</td>
 			<td><input name="site_require_login" type="checkbox" value="1" <cfif form.site_require_login EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Require login?<br /><br />
 			Bypass IP List: <input type="text" name="site_require_login_bypass_ip_list" value="#htmleditformat(form.site_require_login_bypass_ip_list)#" /> (Useful for mobile testing.  This setting is inherited by child sites.)</td>
@@ -2001,14 +2013,14 @@
 			<td style="vertical-align:top; width:140px;">Interspire Email<br>Owner Id List:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_interspire_email_owner_id_list", "table-error","")#>
 				<input name="site_interspire_email_owner_id_list" type="text" size="70" value="#htmleditformat(form.site_interspire_email_owner_id_list)#"><br>
-				This is the id of the user account in interspire email marketer. Comma separated if there are multiple ids.
+				This is the id of the user account in interspire email marketer. <!--- Comma separated if there are multiple ids. --->
 			</td>
 		</tr> 
 		<tr >
 			<td style="vertical-align:top; width:140px;">Campaign Monitor<br>User Id List:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_campaign_monitor_user_id_list", "table-error","")#>
 				<input name="site_campaign_monitor_user_id_list" type="text" size="70" value="#htmleditformat(form.site_campaign_monitor_user_id_list)#"><br>
-				This is the id of the user account in campaign monitor. Comma separated if there are multiple ids.
+				This is the id of the user account in campaign monitor. <!--- Comma separated if there are multiple ids. --->
 			</td>
 		</tr> 
 		<tr >

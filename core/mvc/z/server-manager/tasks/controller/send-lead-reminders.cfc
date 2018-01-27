@@ -2,7 +2,7 @@
 <cfoutput>
 <!--- must call on specific site: /z/server-manager/tasks/send-lead-reminders/send --->
 <cffunction name="send" localmode="modern" access="remote">
-	<cfscript>
+	<cfscript> 
 	setting requesttimeout="10000";
 	/*if(not request.zos.isTestServer){
 		throw("disabled on production for now");
@@ -86,20 +86,15 @@
 	officeCC=false;
 	if(application.zcore.functions.zso(request.zos.globals, 'enableLeadReminderOfficeManagerCC', true, 0) EQ 1){
 		officeCC=true;
-
-		// get all the users belonging to an office as a lookup table.
-		db.sql="select * from #db.table("user", request.zos.zcoreDatasource)#, 
-		#db.table("office", request.zos.zcoreDatasource)# WHERE 
-		user.user_active=#db.param(1)# and 
-		user.site_id = #db.param(request.zos.globals.id)# and 
-		user_deleted=#db.param(0)# and 
-		user.office_id=office.office_id and 
-		office.site_id = user.site_id and 
-		office.office_deleted=#db.param(0)# ";
+ 
+		db.sql="select * from  
+		#db.table("office", request.zos.zcoreDatasource)# WHERE  
+		site_id = #db.param(request.zos.globals.id)# and 
+		office_deleted=#db.param(0)# ";
 		qOffice=db.execute("qOffice");
 		officeLookup={};
 		for(row in qOffice){
-			officeLookup[row.user_id&"|1"]=row;
+			officeLookup[row.office_id]=row;
 		} 
 	}
 	if(debug){
@@ -161,9 +156,9 @@
 				ts.cc=user.user_alternate_email;
 			}
 		} 
-		if(officeCC){ 
-			if(structkeyexists(officeLookup, uid)){
-				office=officeLookup[uid];
+		if(officeCC and qI.office_id NEQ 0){  
+			if(structkeyexists(officeLookup, qI.office_id)){
+				office=officeLookup[qI.office_id];
 				if(debug){
 					echo('found office<br>');
 				}

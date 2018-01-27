@@ -3243,6 +3243,7 @@ track_user_first_page
 		if(form.returnJSON EQ 1){
 			return {success:true, filePath:pdfFile, html:htmlOut };
 		}else{
+			// if this ever stops working for file download in chrome, we can redirect to a different function and turn off deletefile
 		    header name="Content-Disposition" value="inline; filename=#getfilefrompath(pdfFile)#" charset="utf-8";
 		    content type="application/pdf" deletefile="yes" file="#pdfFile#";
 		}

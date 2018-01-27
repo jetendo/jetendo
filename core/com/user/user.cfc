@@ -48,10 +48,7 @@ this.customStruct = StructNew();
 	var db=request.zos.queryObject;
 	var ts=structnew();
 	var contact_id=false;
-	if(application.zcore.functions.zso(arguments.ss, 'user_pref_list', false,'0') EQ '0'){
-		// don't add them if they didn't check opt in box.
-		return 0;	
-	}
+	optIn=application.zcore.functions.zso(arguments.ss, 'user_pref_list', false,'0'); 
 	db.sql="select user_id, user_pref_email from #db.table("user", request.zos.zcoreDatasource)# 
 	WHERE user_username=#db.param(arguments.ss.user_username)# and 
 	user_deleted = #db.param(0)# and 
@@ -59,7 +56,7 @@ this.customStruct = StructNew();
 	qU=db.execute("qU"); 
 	if(qU.recordcount NEQ 0){
 		// already a user
-		if(qU.user_pref_email EQ 0){
+		if(optIn EQ 1 and qU.user_pref_email EQ 0){
 			// reset autoresponder confirm
 			db.sql="update #db.table("user", request.zos.zcoreDatasource)# 
 			set user_confirm=#db.param(0)#, 
@@ -81,11 +78,11 @@ this.customStruct = StructNew();
 	site_id=#db.param(request.zos.globals.id)#";
 	qU=db.execute("qU"); 
 	if(qU.recordcount NEQ 0){
-		if(qU.contact_opt_in EQ 0){
+		if(optIn EQ 1 and qU.contact_opt_in EQ 0){
 			db.sql="update #db.table("contact", request.zos.zcoreDatasource)#  
 			set contact_confirm=#db.param(0)#, 
 			contact_confirm_count=#db.param(0)#, 
-			contact_opt_in=#db.param(1)#,
+			contact_opt_in=#db.param(1)#, 
 			contact_updated_datetime=#db.param(request.zos.mysqlnow)#  
 			WHERE contact_id=#db.param(qU.contact_id)# and 
 			contact_deleted = #db.param(0)# and 
@@ -106,14 +103,18 @@ this.customStruct = StructNew();
 		ts.struct.contact_sent_datetime=request.zos.mysqlnow;
 		ts.struct.contact_updated_datetime=request.zos.mysqlnow;
 		ts.struct.contact_key=hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha-256'); 
-		ts.struct.contact_opt_in=1;
+		if(optIn EQ 1){
+			ts.struct.contact_opt_in=1;
+		}else{
+			ts.struct.contact_opt_in=0;
+		}
 		ts.struct.contact_confirm=0;
 		ts.struct.contact_des_key=GenerateSecretKey("des");
 		ts.struct.site_id=request.zos.globals.id;
 		ts.struct.contact_confirm_count=0;
 		contact_id=application.zcore.functions.zInsert(ts);
 	}
-	if(contact_id NEQ false){
+	if(optIn EQ 1 and contact_id NEQ false){
 		// send autoresponder
 		application.zcore.functions.zSendMailUserAutoresponder(contact_id);
 	}

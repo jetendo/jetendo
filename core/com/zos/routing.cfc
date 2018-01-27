@@ -569,6 +569,7 @@
 					db.execute("q"); 
 					db.sql="update #db.table("contact", request.zos.zcoreDatasource)#  
 					set contact_opt_in=#db.param(1)#, 
+					contact_opt_out=#db.param(0)#, 
 					contact_confirm=#db.param(1)#,
 					contact_updated_datetime=#db.param(request.zos.mysqlnow)#  
 					WHERE contact_id=#db.param(form.contact_id)# and 
@@ -587,6 +588,7 @@
 						if(row.contact_email NEQ ""){
 							 db.sql="update #db.table("contact", request.zos.zcoreDatasource)#  
 							 set contact_opt_in=#db.param(1)#, 
+							 contact_opt_out=#db.param(0)#, 
 							 contact_confirm=#db.param(1)#,  
 							 contact_confirm_datetime=#db.param(request.zos.mysqlnow)#, 
 							 contact_confirm_ip=#db.param(request.zos.cgi.remote_addr)#,
@@ -613,7 +615,7 @@
 					site_id=#db.param(request.zos.globals.id)#";
 					db.execute("q"); 
 					 db.sql="update #db.table("contact", request.zos.zcoreDatasource)#  
-					 set contact_opt_in=#db.param(0)#, 
+					 set contact_opt_out=#db.param(1)#, 
 					 contact_confirm=#db.param(1)#,  
 					 contact_confirm_datetime=#db.param(request.zos.mysqlnow)#, 
 					 contact_confirm_ip=#db.param(request.zos.cgi.remote_addr)#,
@@ -634,7 +636,7 @@
 					for(row in qContact){
 						if(row.contact_email NEQ ""){
 							 db.sql="update #db.table("contact", request.zos.zcoreDatasource)#  
-							 set contact_opt_in=#db.param(0)#, 
+							 set contact_opt_out=#db.param(1)#, 
 							 contact_confirm=#db.param(1)#,  
 							 contact_confirm_datetime=#db.param(request.zos.mysqlnow)#, 
 							 contact_confirm_ip=#db.param(request.zos.cgi.remote_addr)#,

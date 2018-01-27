@@ -684,12 +684,13 @@ If the link does not work, please copy and paste the entire link in your browser
 	form.user_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
 	form.contact_key=hash(form.user_salt, "sha-256");
 	db.sql="INSERT INTO #db.table("contact", request.zos.zcoreDatasource)# (contact_confirm , contact_opt_in, contact_email,contact_key, 
-	site_id , contact_sent_datetime , contact_datetime , contact_confirm_datetime , contact_confirm_count, contact_updated_datetime)
+	site_id , contact_sent_datetime , contact_datetime , contact_confirm_datetime , contact_confirm_count, contact_updated_datetime, contact_opt_out)
 	VALUES( #db.param(0)#, #db.param(0)#, #db.param(form.e)#, #db.param(form.contact_key)#, 
 	#db.param(request.zos.globals.id)#, #db.param(request.zos.mysqlnow)#, #db.param(request.zos.mysqlnow)#, 
-	#db.param(request.zos.mysqlnow)#, #db.param(3)#, #db.param(request.zos.mysqlnow)# )
+	#db.param(request.zos.mysqlnow)#, #db.param(3)#, #db.param(request.zos.mysqlnow)#, #db.param(1)# )
 	
 	ON DUPLICATE KEY UPDATE contact_opt_in=#db.param('0')#, 
+	contact_opt_out=#db.param(1)#, 
 	contact_confirm_count=#db.param(3)#,  
 	contact_confirm_datetime = #db.param(request.zos.mysqlnow)# ";
 	db.execute("qInsert");

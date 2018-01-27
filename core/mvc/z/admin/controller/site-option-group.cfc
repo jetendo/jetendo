@@ -2112,6 +2112,10 @@ displayGroupCom.ajaxInsert();
 					</td>
 				</tr>
 				<tr>
+					<th>Newsletter Auto Opt In?</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_group_newsletter_opt_in_form")#</td>
+				</tr>
+				<tr>
 					<th>Require Captcha<br />For Public Data Entry:</th>
 					<td>
 					#application.zcore.functions.zInput_Boolean("site_option_group_enable_public_captcha")#
@@ -2360,6 +2364,10 @@ displayGroupCom.ajaxInsert();
 				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Lead Routing?","member.site-option-group.edit site_option_group_lead_routing_enabled")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("site_option_group_lead_routing_enabled")# | If Yes, an email will be generated when a new record is inserted.</td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Detailed Lead Email?","member.site-option-group.edit site_option_group_disable_detailed_lead_email")#</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_group_disable_detailed_lead_email")# | If Yes, a simple lead email will be sent excluding any personal information from the contact.</td>
 				</tr>
 				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Path","member.site-option-group.edit site_option_group_email_cfc_path")#</th>
