@@ -981,7 +981,7 @@ searchEvents(ts);
  	ss.calendarids=application.zcore.functions.zso(ss, 'calendarids');
  	ss.showinactive=application.zcore.functions.zso(ss, 'showinactive');
 	if(not application.zcore.user.checkGroupAccess("member")){
-		ts.showInactive=false;
+		ss.showInactive=false;
 	}
 
 	ss.keyword=replace(replace(ss.keyword, '+', '%', 'all'), ' ', '%', 'all');
