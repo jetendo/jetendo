@@ -47,6 +47,135 @@ these tables are done:
 </cffunction>
 
 
+<cffunction name="installPageTab" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+
+	db=request.zos.queryObject;
+	setting requesttimeout="10000";
+	init();   
+	pageId="133352126736097"; // farbeyondcode page id - https://www.facebook.com/Far-Beyond-Code-LLC-133352126736097/
+	 
+	// have to get page access_token before we can do changes to the page.
+	ts={
+		method:'GET',
+		link:'/#pageId#?fields=access_token',
+		throwOnError:false
+	};
+	application.facebookImportStatus="Page tabs | API call #ts.link#";
+	form.disableFacebookCache=true;
+		echo('<p>'&ts.link&'</p>');
+	if(request.debug){
+		rs2={success:true};//request.debugRS.pageTabs;
+	}else{ 
+		rs2=request.facebook.sendRequest(ts);
+	} 
+	structdelete(form, 'disableFacebookCache'); 
+	if(rs2.success EQ false){
+		echo('<hr><h2>Download failed:'&ts.link&'</h2>');
+		writedump(rs2);
+		break; 
+	}
+
+	pageAccessToken=rs2.response.access_token;   
+	
+	/*
+	// create page tab 
+	ts={
+		method:'POST',
+		link:'/#pageId#/tabs',
+		throwOnError:false,
+		requestParams:{
+			//tab:"app_customTab1",
+			app_id:request.zos.facebookConfig.appId, // 		integer		The App ID for custom apps added tabs.
+			// custom_image_url: "", // 		URL		URL for an image for this tab app
+			access_token:pageAccessToken, 
+			custom_name:"Jetendo Tab", // 		string		Custom name for this tab
+			//is_non_connection_landing_tab:false, // 	boolean	A flag to identify whether the tab is a custom landing tab for viewers who are not already connected to this Page
+			position:1, // integer 	Where this tab is located in the list of tabs
+			// only specify when updating a tab
+			// tab:"app_"&request.zos.facebookConfig.appId //	string	The Tab key. For default apps which appear on tabs this is a value such as timeline. For custom apps this is app_{app_id}.
+		}
+	};
+	// "Invalid appsecret_proof provided in the API argumen
+	application.facebookImportStatus="Page create tab | API call #ts.link#";
+	form.disableFacebookCache=true;
+		echo('<p>'&ts.link&'</p>');
+	if(request.debug){
+		rs2={success:true};//request.debugRS.pageTabs;
+	}else{ 
+		rs2=request.facebook.sendCustomTokenRequest(ts);
+	} 
+	//writedump(rs2);	abort;
+	*/
+		/* 
+	response:
+	{success: true}
+	// errors: 
+		100	Invalid parameter
+		200	Permissions error
+		210	User not visible
+		*/
+ 
+	// list page tabs
+	ts={
+		method:'GET',
+		link:'/#pageId#/tabs',
+		throwOnError:false
+	};
+	// "Invalid appsecret_proof provided in the API argumen
+	application.facebookImportStatus="Page tabs | API call #ts.link#";
+	form.disableFacebookCache=true;
+		echo('<p>'&ts.link&'</p>');
+	if(request.debug){
+		rs2={success:true};//request.debugRS.pageTabs;
+	}else{ 
+		rs2=request.facebook.sendTokenlessRequest(ts);
+	} 
+	structdelete(form, 'disableFacebookCache'); 
+	if(rs2.success EQ false){
+		echo('<hr><h2>Download failed:'&ts.link&'</h2>');
+		writedump(rs2);
+		break; 
+	}
+	writedump(rs2);
+	form.disableFacebookCache=true;
+	ts={
+		method:'DELETE',
+		link:'/#pageId#/tabs/app_#request.zos.facebookConfig.appId#',
+		requestParams:{},
+		throwOnError:false
+	};  
+	// "Invalid appsecret_proof provided in the API argumen
+	application.facebookImportStatus="Page delete tab | API call #ts.link#";
+	form.disableFacebookCache=true;
+		echo('<p>'&ts.link&'</p>');
+		writedump(ts);
+	if(request.debug){
+		rs2={success:true};//request.debugRS.pageTabs;
+	}else{  
+		rs2=request.facebook.sendDeleteRequest(ts);
+	} 
+	writedump(rs2);
+	abort;
+	/*
+	delete:
+	DELETE http request
+	/{page_id}/tabs
+	tab // Tab key for the custom app to remove.   custom tab app syntax: app_{app_id}
+
+	response:
+	{success: true}
+	// errors: 
+		100	Invalid parameter
+		200	Permissions error
+	*/ 
+	//echo(serializeJson(rs2));abort;
+	//writedump(rs2);abort;
+ 
+	abort;
+	</cfscript>
+</cffunction>
+
 <cffunction name="listFacebookAccounts" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	db=request.zos.queryObject;

@@ -446,7 +446,36 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 			abort;
 		}
 	}
+	// add the manager email list to the lead assignment email
 	rs.office_id=application.zcore.functions.zso(rs, 'office_id', true);
+	if(request.zos.globals.enableUserOfficeAssign EQ 1){
+		if(rs.office_id NEQ 0){ 
+			ts={
+				ids:rs.office_id, 
+				site_id:request.zos.globals.id
+			}
+			arrOffice=getOffices(ts);
+			if(arrayLen(arrOffice)){
+
+				arrEmailTemp=listToArray(arrOffice[1].office_manager_email_list, ",");
+				arrNewCC=listToArray(rs.cc, ",");
+				uniqueEmailStruct={};
+				for(email in arrNewCC){
+					uniqueEmailStruct[email]=true;
+				}
+				for(email in arrEmailTemp){
+					uniqueEmailStruct[email]=true;
+				}
+				ts.cc=structkeylist(uniqueEmailStruct);
+				if(structkeyexists(request.zos, 'debugleadrouting')){
+					echo("Added office manager email list to cc: #ts.cc#<br>");
+				}
+				if(request.zos.isTestServer){
+					ts.cc="";
+				}
+			}
+		}
+	}
 	form.inquiries_id=inquiries_id;
 	if(not structkeyexists(request.zos, 'debugleadrouting')){
   		/*

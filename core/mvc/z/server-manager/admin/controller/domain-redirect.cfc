@@ -27,9 +27,9 @@
 	<cfif structkeyexists(form,'confirm')>
 		<cfscript> 
 		db.sql="UPDATE #db.table("domain_redirect", request.zos.zcoreDatasource)# 
-		set domain_redirect_deleted = #db.param(1)#,
+		set domain_redirect_deleted = #db.param(form.domain_redirect_id)#,
 		domain_redirect_updated_datetime=#db.param(request.zos.mysqlnow)#
-		WHERE domain_redirect_id= #db.param(application.zcore.functions.zso(form, 'domain_redirect_id'))# and 
+		WHERE domain_redirect_id= #db.param(form.domain_redirect_id)# and 
 		site_id = #db.param(form.sid)# and 
 		domain_redirect_deleted=#db.param(0)# ";
 		q=db.execute("q"); 

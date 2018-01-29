@@ -340,29 +340,33 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	<cfscript>
 	application.zcore.template.appendTag("meta",theMeta);
 	</cfscript>
-	<h2>Upload Videos</h2> 
-	<p>Note: If your video upload takes more then 5 hours to upload, it may fail to upload. Please contact the webmaster if this happens.</p>
-	
-	<form id="uploadForm1" action="" enctype="multipart/form-data" method="post">
-		<table class="table-list">
-			<tr><td>Width:</td>
-			<td><input name="video_width" id="video_width" value="#request.zos.globals.maximagewidth#" /></td>
-		</tr><tr>
-			<td>Height:</td>
-			<td><input name="video_height" id="video_height" value="#round(request.zos.globals.maximagewidth*0.5625)#" /></td>
-		</tr><tr>
-			<td>Video:</td>
-			<td><input name="video_file" id="fileUpload1" accept=".3g2, .3gp, .asf, .asx, .avi, .flv, .mov, .mp4, .mpg, .swf, .vob, .wmv, .divx, .f4v, .m2p, .m4v, .mkv, .mpeg, .ogv, .webm, .xvid" type="file" /></td>
-		</tr><tr>
-			<td>&nbsp;</td>
-			<td><input type="button" id="uploadButton1" value="Upload" class="z-manager-search-button" /> 
-			<input type="button" name="cancel1" id="cancelButton" class="z-manager-search-button" value="Cancel" onclick="window.location.href=window.location.href; " /></td>
-		</tr><tr>
-			<td>&nbsp;</td>
-			<td><progress id="progressBar1" style="display:none;" value="0" max="100"></progress></td></tr>
-		</table>
-	</form> 
-
+	<cfif request.zos.isdeveloper>
+		<p>Note: upload videos is only enabled for developers now.</p>
+		<h2>Upload Videos</h2> 
+		<p>Note: If your video upload takes more then 5 hours to upload, it may fail to upload. Please contact the webmaster if this happens.</p>
+		
+		<form id="uploadForm1" action="" enctype="multipart/form-data" method="post">
+			<table class="table-list">
+				<tr><td>Width:</td>
+				<td><input name="video_width" id="video_width" value="#request.zos.globals.maximagewidth#" /></td>
+			</tr><tr>
+				<td>Height:</td>
+				<td><input name="video_height" id="video_height" value="#round(request.zos.globals.maximagewidth*0.5625)#" /></td>
+			</tr><tr>
+				<td>Video:</td>
+				<td><input name="video_file" id="fileUpload1" accept=".3g2, .3gp, .asf, .asx, .avi, .flv, .mov, .mp4, .mpg, .swf, .vob, .wmv, .divx, .f4v, .m2p, .m4v, .mkv, .mpeg, .ogv, .webm, .xvid" type="file" /></td>
+			</tr><tr>
+				<td>&nbsp;</td>
+				<td><input type="button" id="uploadButton1" value="Upload" class="z-manager-search-button" /> 
+				<input type="button" name="cancel1" id="cancelButton" class="z-manager-search-button" value="Cancel" onclick="window.location.href=window.location.href; " /></td>
+			</tr><tr>
+				<td>&nbsp;</td>
+				<td><progress id="progressBar1" style="display:none;" value="0" max="100"></progress></td></tr>
+			</table>
+		</form>  
+	</cfif>
+	<h2>Video Library</h2>
+	<p>Please use <a href="http://youtube.com" target="_blank">youtube.com</a> or <a href="http://vimeo.com" target="_blank">vimeo.com</a> to host videos in the future. If you have special requirements and need to host the video on this web site, send the web developer an email.</p>
 <!--- 
 
 	<form id="form1" action="#request.cgi_script_name#?method=videoform" enctype="multipart/form-data" method="post">

@@ -87,6 +87,24 @@
 </cffunction>
 
 	
+<!--- /z/inquiries/admin/import-facebook-stats/facebookInstallPageTab --->
+<cffunction name="facebookInstallPageTab" access="remote" localmode="modern">
+
+	<cfscript>
+	setting requesttimeout="100000";
+	init();
+
+	// need to have admin privileges on page 
+	// need 2000 or more fans to be able to do create tabs.
+
+	
+
+	// /v2.11/#pageId#/tabs
+	facebookTestCom=createobject("component", "facebook-test");
+	facebookTestCom.installPageTab();
+
+	</cfscript>
+</cffunction>
 
 <cffunction name="downloadFacebook" access="remote" localmode="modern">
 
