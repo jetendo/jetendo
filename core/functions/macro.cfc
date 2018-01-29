@@ -361,6 +361,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 	var badTagList="script|embed|base|input|textarea|button|object|iframe|form";
 	arguments.text=rereplacenocase(arguments.text,"<(#badTagList#).*?</\1>", " ", 'ALL');
 	arguments.text=rereplacenocase(arguments.text,"(</|<)[^>]*>", " ", 'ALL');
+	arguments.text=replacenocase(arguments.text,"&nbsp;", " ", 'ALL');
 	return arguments.text;
 	</cfscript>
 </cffunction>
