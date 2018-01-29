@@ -253,6 +253,9 @@ if(rs.success){
 		'access_token':    this.getAccessToken(), 
 		'include_headers': false
 	};
+	if(structkeyexists(ss, 'requestParams')){
+		structappend(requestParams, ss.requestParams);
+	}
 	ts={
 		requestURL:ss.link,
 		params:requestParams,
@@ -264,6 +267,73 @@ if(rs.success){
 
 	</cfscript>
 </cffunction>
+
+<cffunction name="sendTokenlessRequest" localmode="modern" access="public" hint="Each request counts as 1 api call, even when batched">
+	<cfargument name="ss" type="struct" required="yes">  
+	<cfscript> 
+	ss=arguments.ss;
+	requestParams = {
+		'access_token':    request.zos.facebookConfig.appId&"|"&request.zos.facebookConfig.appSecret, 
+		'include_headers': false
+	};
+	if(structkeyexists(ss, 'requestParams')){
+		structappend(requestParams, ss.requestParams);
+	}
+	ts={
+		requestURL:ss.link,
+		params:requestParams,
+		method:ss.method,
+		timeout:200,
+		throwOnError: application.zcore.functions.zso(ss, 'throwOnError', false, true)  
+	}
+	return internalSendRequest(ts);
+
+	</cfscript>
+</cffunction>
+
+<cffunction name="sendCustomTokenRequest" localmode="modern" access="public" hint="Each request counts as 1 api call, even when batched">
+	<cfargument name="ss" type="struct" required="yes">   
+	<cfscript> 
+	ss=arguments.ss; 
+ 	appsecret_proof=lcase(HMAC( ss.requestParams.access_token, request.zos.facebookConfig.appSecret, "HmacSHA256"));
+	requestParams = { 
+		'include_headers': false,
+		appsecret_proof:appsecret_proof
+	};
+	if(structkeyexists(ss, 'requestParams')){
+		structappend(requestParams, ss.requestParams);
+	}
+	ts={
+		requestURL:ss.link,
+		params:requestParams,
+		method:ss.method,
+		timeout:200,
+		throwOnError: application.zcore.functions.zso(ss, 'throwOnError', false, true)  
+	}
+	return internalSendRequest(ts);
+
+	</cfscript>
+</cffunction> 
+
+<cffunction name="sendDeleteRequest" localmode="modern" access="public" hint="Each request counts as 1 api call, even when batched">
+	<cfargument name="ss" type="struct" required="yes">    
+	<cfscript> 
+	ss=arguments.ss;  
+	requestParams={};
+	if(structkeyexists(ss, 'requestParams')){
+		structappend(requestParams, ss.requestParams);
+	}
+	ts={
+		requestURL:application.zcore.functions.zURLAppend(ss.link, "access_token=#request.zos.facebookConfig.appId&"|"&request.zos.facebookConfig.appSecret#"),
+		params:requestParams,
+		method:ss.method,
+		timeout:200,
+		throwOnError: application.zcore.functions.zso(ss, 'throwOnError', false, true)  
+	} 
+	return internalSendRequest(ts);
+
+	</cfscript>
+</cffunction> 
 
 <!--- API REQUEST & HELPERS ---> 
 <!--- 
