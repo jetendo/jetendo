@@ -467,6 +467,12 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 					uniqueEmailStruct[email]=true;
 				}
 				ts.cc=structkeylist(uniqueEmailStruct);
+				if(structkeyexists(request.zos, 'debugleadrouting')){
+					echo("Added office manager email list to cc: #ts.cc#<br>");
+				}
+				if(request.zos.isTestServer){
+					ts.cc="";
+				}
 			}
 		}
 	}
