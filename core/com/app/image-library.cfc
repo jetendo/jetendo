@@ -422,7 +422,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 		arrList = application.zcore.functions.zResizeImage(request.zos.globals.privatehomedir&destination&qImage.image_file,request.zos.globals.privatehomedir&destination,arguments.size,arguments.crop,true,newFileName); 
 		if(isarray(arrList) EQ false){
 			throw("Error: zcorerootmapping.com.app.image-library.cfc - getImageLink() failed because zResizeImage() failed.");
-		}else if(ArrayLen(arrList) EQ 1){
+		}else if(ArrayLen(arrList) EQ 1){ 
 			newFileName=arrList[1];
 			ts=structnew();
 			ts.datasource=request.zos.zcoreDatasource;
@@ -430,12 +430,14 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 			ts.struct=structnew();
 			ts.struct.site_id=request.zos.globals.id;
 			ts.struct.image_cache_file=newFileName;
-			ts.struct.image_cache_width=request.arrLastImageWidth[1];
-			ts.struct.image_cache_height=request.arrLastImageHeight[1];
+			// we had to use the arguments.size here instead of actual size, because images smaller then arguments.size would result in missing db entries
+			ts.struct.image_cache_width=arrSize[1];//request.arrLastImageWidth[1];
+			ts.struct.image_cache_height=arrSize[2];//request.arrLastImageHeight[1];
 			ts.struct.image_cache_crop=arguments.crop;
 			ts.struct.image_library_id=arguments.image_library_id;
+			ts.struct.image_cache_deleted=0;
 			ts.struct.image_id=arguments.image_id;
-			application.zcore.functions.zInsert(ts);
+			application.zcore.functions.zInsert(ts);  
 			if(zdebug){
 				writeoutput('image resized: /#destination&newFileName#<br /><img src="/#destination&newFileName#" />');
 				application.zcore.functions.zabort();
@@ -2295,13 +2297,23 @@ application.zcore.imageLibraryCom.getViewOriginalImagesURL(image_library_id, ima
 	WHERE image_id = #db.param(arguments.image_id)# and 
 	image_deleted = #db.param(0)# and 
 	site_id = #db.param(request.zos.globals.id)#";
-	var qImages=db.execute("qImages");
+	qImages=db.execute("qImages");
 	if(qImages.recordcount EQ 0){
 		return;
 	}
 	if(not variables.hasAccessToImageLibraryId(qImages.image_library_id)){
 		application.zcore.functions.z404("No access to image_library_id");	
 	}
+
+	db.sql="SELECT * FROM #db.table("image_cache", request.zos.zcoreDatasource)# 
+	WHERE image_id = #db.param(arguments.image_id)# and 
+	image_cache_deleted = #db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)#";
+	qCachedImages=db.execute("qCachedImages");
+	for(row in qCachedImages){
+		application.zcore.functions.zDeleteFile(request.zos.globals.privatehomedir&"zupload/library/#qImages.image_library_id#/#row.image_cache_file#");
+	}
+
 	application.zcore.functions.zDeleteFile(request.zos.globals.privatehomedir&"zupload/library/#qImages.image_library_id#/#qImages.image_file#");
 	application.zcore.functions.zDeleteFile(request.zos.globals.privatehomedir&"zupload/library/#qImages.image_library_id#/#qImages.image_intermediate_file#");
 	this.clearImageIdCache(arguments.image_id);
