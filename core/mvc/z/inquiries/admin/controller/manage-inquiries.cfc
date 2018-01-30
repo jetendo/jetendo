@@ -1291,7 +1291,7 @@ zArrDeferredFunctions.push(function(){
 
 
 	<cfif application.zcore.user.checkGroupAccess("member") or form.method EQ "userIndex">
-		<cfif form.method EQ "userIndex">
+		<cfif not request.zos.istestserver and form.method EQ "userIndex">
 			<div id="exportLeadDiv" class="z-pt-20 z-float">
 				<h2>Export Leads</h2>
 				<p>Lead export is temporarily unavailable.</p>
@@ -2219,35 +2219,36 @@ zArrDeferredFunctions.push(function(){
 		}]
 	});
 
-	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
-	if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
-		savecontent variable="officeField"{
-			selectStruct = StructNew();
-			selectStruct.name = "search_office_id"; 
-			selectStruct.arrData = arrOffice;
-			selectStruct.size=3; 
-			selectStruct.queryLabelField = "office_name";
-			selectStruct.inlineStyle="width:100%; max-width:100%;";
-			selectStruct.queryValueField = 'office_id';
+	if(form.method EQ "index"){
+		arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+		if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
+			savecontent variable="officeField"{
+				selectStruct = StructNew();
+				selectStruct.name = "search_office_id"; 
+				selectStruct.arrData = arrOffice;
+				selectStruct.size=3; 
+				selectStruct.queryLabelField = "office_name";
+				selectStruct.inlineStyle="width:100%; max-width:100%;";
+				selectStruct.queryValueField = 'office_id';
 
-			if(arrayLen(arrOffice) GT 3){
-				echo('Office:<br>
-					Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
-				application.zcore.functions.zInputSelectBox(selectStruct);
-		   		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
-	   		}else{
-	   			selectStruct.size=1;
-				echo('<div style="width:60px; float:left;">Office:</div><div style="width:200px;float:left;">');
-				application.zcore.functions.zInputSelectBox(selectStruct);
-				echo('</div>');
-	   		}
-	   	}
-		arrayAppend(rs.searchFields, { 
-			groupStyle:'width:280px; max-width:100%; ',
-			fields:[ { label:"", formField:officeField, field:'search_office_id'} ] 
-		});
+				if(arrayLen(arrOffice) GT 3){
+					echo('Office:<br>
+						Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+					application.zcore.functions.zInputSelectBox(selectStruct);
+			   		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
+		   		}else{
+		   			selectStruct.size=1;
+					echo('<div style="width:60px; float:left;">Office:</div><div style="width:200px;float:left;">');
+					application.zcore.functions.zInputSelectBox(selectStruct);
+					echo('</div>');
+		   		}
+		   	}
+			arrayAppend(rs.searchFields, { 
+				groupStyle:'width:280px; max-width:100%; ',
+				fields:[ { label:"", formField:officeField, field:'search_office_id'} ] 
+			});
+		}
 	}
-
 	if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
 		userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 		user_group_id = userGroupCom.getGroupId('agent',request.zos.globals.id);
