@@ -1463,6 +1463,7 @@ function getImageMagickConvertApplyMask($a){
 }
 
 function getImageMagickConvertResize($a){
+	// the quality is 93% in imagemagick, which is 60 to 70% photoshop.  If the user uploads a lower quality image, the code will use that quality instead of 93.
 	set_time_limit(100); 
 	if(count($a) != 8){
 		echo "Incorrect number of arguments to getImageMagickConvertResize.\n";

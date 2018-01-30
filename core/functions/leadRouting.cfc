@@ -451,11 +451,11 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	if(request.zos.globals.enableUserOfficeAssign EQ 1){
 		if(rs.office_id NEQ 0){ 
 			ts={
-				ids:rs.office_id, 
+				ids:[rs.office_id], 
 				site_id:request.zos.globals.id
 			}
 			arrOffice=getOffices(ts);
-			if(arrayLen(arrOffice)){
+			if(arrayLen(arrOffice) NEQ 0){
 
 				arrEmailTemp=listToArray(arrOffice[1].office_manager_email_list, ",");
 				arrNewCC=listToArray(rs.cc, ",");

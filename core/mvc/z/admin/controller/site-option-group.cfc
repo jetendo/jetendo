@@ -1980,6 +1980,19 @@ displayGroupCom.ajaxInsert();
 						</cfscript></td>
 				</tr>
 				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Form Bottom Description:","member.site-option-group.edit site_option_group_bottom_form_description")#</th>
+					<td>
+						<cfscript>
+						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+						htmlEditor.instanceName	= "site_option_group_bottom_form_description";
+						htmlEditor.value			= application.zcore.functions.zso(form, 'site_option_group_bottom_form_description');
+						htmlEditor.width			= "#request.zos.globals.maximagewidth#px";
+						htmlEditor.height		= 250;
+						htmlEditor.create();
+						</cfscript></td>
+				</tr>
+
+				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("List View Description:","member.site-option-group.edit site_option_group_list_description")#</th>
 					<td>
 						<cfscript>
