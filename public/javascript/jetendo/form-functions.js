@@ -761,6 +761,12 @@ var zLastAjaxVarName=""; */
 		if(typeof obj.formId != "undefined"){
 			var form = document.getElementById(obj.formId);
 			var formData = new FormData(form);
+			var postObjTemp=zGetFormDataByFormId(obj.formId);
+			for(var i in postObjTemp){
+				if(formData.get(i)==null){
+					formData.set(i, "");
+				}
+			}
 			req.open(zAjaxData[obj.id].method, action, true); 
 			req.send(formData);
 		}else{
