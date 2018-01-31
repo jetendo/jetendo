@@ -4941,6 +4941,11 @@ Define this function in another CFC to override the default email format
 			</tr>
 		</table>
 	</form>
+	<cfscript> 
+	if(qCheck.site_option_group_bottom_form_description NEQ ""){
+		echo(qCheck.site_option_group_bottom_form_description);
+	}
+	</cfscript>
 	<div style="width:100%; <cfif form.site_option_group_id EQ "">min-height:1000px; </cfif> float:left; clear:both;"></div>
 	<cfif structkeyexists(form, 'jumptoanchor')>
 		<script type="text/javascript">

@@ -13,7 +13,11 @@
 	}else if(application.zcore.user.checkGroupAccess("member") EQ false){
 		application.zcore.functions.z404("Only manager members can export leads.");	
 	}
+
 	form.search_office_id=application.zcore.functions.zso(form, 'search_office_id', true, "0");
+	if(form.method EQ "userExport" and structkeyexists(request.zsession, 'selectedOfficeId')){
+		form.search_office_id=request.zsession.selectedOfficeId;
+	}
 	form.format=application.zcore.functions.zso(form,'format',false,'csv');
 	form.whichfields=application.zcore.functions.zso(form, 'whichfields',false,1);
 	
