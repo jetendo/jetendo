@@ -1291,12 +1291,7 @@ zArrDeferredFunctions.push(function(){
 
 
 	<cfif application.zcore.user.checkGroupAccess("member") or form.method EQ "userIndex">
-		<cfif not request.zos.istestserver and form.method EQ "userIndex">
-			<div id="exportLeadDiv" class="z-pt-20 z-float">
-				<h2>Export Leads</h2>
-				<p>Lead export is temporarily unavailable.</p>
-			</div>
-		<cfelse>
+		 
 	
 		<script type="text/javascript">
 		/* <![CDATA[ */
@@ -1348,8 +1343,7 @@ zArrDeferredFunctions.push(function(){
 			<p><button type="button" name="submit11" onclick="loadExport();" class="z-manager-search-button">Export</button></p>
 			<!--- <cfif form.searchType NEQ "">
 			</cfif> --->
-		</div>
-		</cfif>
+		</div> 
 	</cfif> 
 </cffunction> 
 
