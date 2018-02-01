@@ -289,8 +289,8 @@ objCookies=GetResponseCookies(cfhttp);
 		}
  
 		row.site_semrush_last_import_datetime=dateformat(row.site_semrush_last_import_datetime, "yyyy-mm-")&"01";
-		// go back a day to make sure we didn't miss something
-		row.site_semrush_last_import_datetime=dateadd("d", -1, row.site_semrush_last_import_datetime);
+		// don't want to grab too many months at once anymore, so i commented this out.
+		//row.site_semrush_last_import_datetime=dateadd("d", -1, row.site_semrush_last_import_datetime);
 		echo(row.site_domain&" : "&dateformat(row.site_semrush_last_import_datetime, "m/d/yyyy")&"<br>");
 		p=application.zcore.functions.zGetDomainWritableInstallPath(row.site_sitename); 
 		if(p EQ ""){

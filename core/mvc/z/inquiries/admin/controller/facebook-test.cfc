@@ -827,6 +827,8 @@ these tables are done:
 */
 	//writedump(structkeyarray(postStruct2));
 	//writedump(structkeyarray(postStruct));
+
+	abort;
 	</cfscript>
 
 </cffunction>

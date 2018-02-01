@@ -1577,6 +1577,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 
 	application.googleSearchConsoleStatus="";
 	echo('done'); 
+	abort;
 	</cfscript>
 </cffunction>
 

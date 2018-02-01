@@ -44,6 +44,7 @@
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	var db=request.zos.queryObject;
+	setting requesttimeout="500";
 	var qSite=0;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	variables.init();
