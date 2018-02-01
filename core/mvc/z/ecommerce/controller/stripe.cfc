@@ -346,7 +346,7 @@
 		if ( result.status_code NEQ 200 ) {
 			savecontent variable="out" {
 				writeDump( arguments );
-				writeDump( cfhttp );
+				writeDump( result );
 			}
 			throw( 'Stripe error: ' & this.translateStatusCode( result.status_code ) & '<br /><br />Response:' & htmlEditFormat( result.filecontent ) & '<br /><br />' & out );
 		}

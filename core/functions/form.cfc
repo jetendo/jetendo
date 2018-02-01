@@ -3503,8 +3503,8 @@ echo('
     tFN32.parentNode.removeChild(tFN32);
     </script>
     <noscript>
-    	<h1>Warning: JavaScript is disabled on your browser.</h1>
-    	<h2>Please enable JavaScript and reload this page or call us instead.</h2>
+    	<div class="z-float" style="font-size:24px;">Warning: JavaScript is disabled on your browser.</div>
+    	<div class="z-float" style="font-size:18px;">Please enable JavaScript and reload this page or call us instead.</div>
     </noscript>
 </cffunction>
     

@@ -606,7 +606,10 @@ var zArrGeolocationWatchCallback=[];
 				if(type == 'cities'){
 					type='(cities)';
 				}
-				if(type != '(cities)' && type != '(regions)' && type != 'geocode'){
+				if(type == 'postal_code'){
+					type='(postal_code)';
+				}
+				if(type != '(cities)' && type != '(postal_code)' && type != '(regions)' && type != 'geocode'){
 					throw("Invalid autocomplete type.  Please specify geocode, (cities), (regions) in data-autocomplete-type"); 
 				}
 				options.types=[type];
@@ -668,7 +671,9 @@ var zArrGeolocationWatchCallback=[];
 									var place=results[0]; 
 									clearAddressFields();  
 									if(zIsTestServer() || zIsDeveloper()) console.log('Geocoded address:'+currentValue); 
-									self2.value=place.formatted_address;
+									if(type != '(postal_code)'){
+										self2.value=place.formatted_address;
+									}
 
 									fillInAddressFields(place, autocomplete.__fieldElement.name); 
 								} else {
