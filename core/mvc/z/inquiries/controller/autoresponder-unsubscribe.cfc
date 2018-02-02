@@ -4,11 +4,11 @@
 	<cfscript>
 		if ( NOT structKeyExists( form, 'email' ) ) {
 			echo( 'Email address required.' );
-			return;
+			abort;
 		}
 		if ( NOT structKeyExists( form, 'autoresponder_id' ) ) {
 			echo( 'Autoresponder ID required.' );
-			return;
+			abort;
 		} 
 		application.zcore.skin.disableGlobalHTMLHeadCode();
 		application.zcore.template.setTemplate( 'root.templates.empty', true, true );

@@ -329,8 +329,38 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	if(not structkeyexists(arguments.ss, 'disableDebugAbort')){
 		arguments.ss.disableDebugAbort=false;
 	} 
+	rs.cc=""; 
+	// add the manager email list to the lead assignment email
+	rs.office_id=application.zcore.functions.zso(arguments.ss, 'office_id', true);
+	if(request.zos.globals.enableUserOfficeAssign EQ 1){
+		if(rs.office_id NEQ 0){ 
+			ts={
+				ids:[rs.office_id], 
+				site_id:request.zos.globals.id
+			}
+			arrOffice=application.zcore.user.getOffices(ts);
+			if(arrayLen(arrOffice) NEQ 0){
+
+				arrEmailTemp=listToArray(arrOffice[1].office_manager_email_list, ",");
+				arrNewCC=listToArray(rs.cc, ",");
+				uniqueEmailStruct={};
+				for(email in arrNewCC){
+					uniqueEmailStruct[email]=true;
+				}
+				for(email in arrEmailTemp){
+					uniqueEmailStruct[email]=true;
+				}
+				rs.cc=structkeylist(uniqueEmailStruct);
+				if(structkeyexists(request.zos, 'debugleadrouting')){
+					echo("Added office manager email list to cc: #rs.cc#<br>");
+				}
+				if(request.zos.isTestServer){
+					rs.cc="";
+				}
+			}
+		}
+	}
 	if(structkeyexists(arguments.ss, 'forceAssign') and arguments.ss.forceAssign){
-		rs.cc=""; 
 		if(structkeyexists(arguments.ss, 'assignEmail')){
 			rs.assignEmail=arguments.ss.assignEmail;
 			rs.user_id=0;
@@ -359,7 +389,7 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 					echo(m);
 				}
 			}else{
-				if(qAssignUser.office_id CONTAINS ","){
+				if(rs.office_id EQ 0 and qAssignUser.office_id CONTAINS ","){
 					rs.office_id=listGetAt(qAssignUser.office_id, 1, ",");
 				}
 				if(qAssignUser.user_alternate_email NEQ ""){
@@ -446,36 +476,6 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 			abort;
 		}
 	}
-	// add the manager email list to the lead assignment email
-	rs.office_id=application.zcore.functions.zso(rs, 'office_id', true);
-	if(request.zos.globals.enableUserOfficeAssign EQ 1){
-		if(rs.office_id NEQ 0){ 
-			ts={
-				ids:[rs.office_id], 
-				site_id:request.zos.globals.id
-			}
-			arrOffice=getOffices(ts);
-			if(arrayLen(arrOffice) NEQ 0){
-
-				arrEmailTemp=listToArray(arrOffice[1].office_manager_email_list, ",");
-				arrNewCC=listToArray(rs.cc, ",");
-				uniqueEmailStruct={};
-				for(email in arrNewCC){
-					uniqueEmailStruct[email]=true;
-				}
-				for(email in arrEmailTemp){
-					uniqueEmailStruct[email]=true;
-				}
-				ts.cc=structkeylist(uniqueEmailStruct);
-				if(structkeyexists(request.zos, 'debugleadrouting')){
-					echo("Added office manager email list to cc: #ts.cc#<br>");
-				}
-				if(request.zos.isTestServer){
-					ts.cc="";
-				}
-			}
-		}
-	}
 	form.inquiries_id=inquiries_id;
 	if(not structkeyexists(request.zos, 'debugleadrouting')){
   		/*
@@ -553,7 +553,11 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 		    iemailCom.getEmailTemplate("", true);
 		}
 	}else{
-		echo("Would send email to #rs.assignEmail#<br />");
+		echo("Would send email as follows:
+		from: #request.fromemail#<br>
+		to: #rs.assignEmail#<br>
+		cc: #rs.cc#<br>
+		bcc: #rs.bcc#<br />");
 	}
 	rs2.arrDebug=arrDebug;
 	rs2.success=true;
