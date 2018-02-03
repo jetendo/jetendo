@@ -4,7 +4,7 @@
 	<cfscript>
 	if(form.method EQ "userViewContact"){
 		variables.inquiriesCom.userInit();
-	}else{
+	}else if(structkeyexists(variables.inquiriesCom, 'init')){
 		variables.inquiriesCom.init();
 	}
 	return variables.inquiriesCom.getQuickLinks();

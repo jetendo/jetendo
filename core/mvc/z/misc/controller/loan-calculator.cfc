@@ -53,7 +53,7 @@
 		<td>&nbsp;</td><td><div id="loanCostDiv"></div></td>
 		</tr> 
 		<tr><td>&nbsp;</td>
-		<td>&nbsp;</td><td><input type="button" name="loanSubmit" onclick="zCalculateLoanPayment();" value="Calculate" /></td>
+		<td>&nbsp;</td><td><input type="button" name="loanSubmit" class="zLoanCalculatorButton" onclick="zCalculateLoanPayment();" value="Calculate" /></td>
 		</tr>
 	</table>
 
@@ -99,7 +99,7 @@ loanCalcCom.customExample();
 		<td>&nbsp;</td><td><div id="loanCostDiv"></div></td>
 		</tr> 
 		<tr><td>&nbsp;</td>
-		<td>&nbsp;</td><td><input type="button" name="loanSubmit" onclick="zCalculateLoanPayment();" value="Calculate" /></td>
+		<td>&nbsp;</td><td><input type="button" name="loanSubmit" class="zLoanCalculatorButton" onclick="zCalculateLoanPayment();" value="Calculate" /></td>
 		</tr>
 	</table>
 
