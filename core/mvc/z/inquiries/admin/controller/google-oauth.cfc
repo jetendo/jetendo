@@ -4,6 +4,9 @@
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript>
 	setting requesttimeout="10000";
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
 	// you must preregister the returnLink at the oauth2 vendor's web site.
 	// that is done under Google APIs, credentials, add/edit, then change: Authorized redirect URIs
 	// https://console.developers.google.com/apis/credentials
@@ -28,10 +31,11 @@
     		request.googleAdwordsAuthenticated=true;
     	}
     } 
+    
 	</cfscript>
-</cffunction> 
+</cffunction>  
 
-<cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
@@ -154,7 +158,7 @@ Google Analytics:
 </cffunction>
  
 
-<cffunction name="return" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="return" localmode="modern" access="remote">
 	<cfscript>
 	init();
 	form.code=application.zcore.functions.zso(form, 'code');
@@ -210,7 +214,7 @@ Google Analytics:
 	</cfscript>
 </cffunction>
 
-<cffunction name="reportIndex" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="reportIndex" localmode="modern" access="remote">
 	<cfscript>
 	init();
 	application.zcore.functions.zStatusHandler(request.zsid);
@@ -1426,7 +1430,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	</cfscript>
 </cffunction>
 
-<cffunction name="searchConsole" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="searchConsole" localmode="modern" access="remote">
 	<cfscript> 
 	form.accountType="analytics";
 	init();
@@ -1565,7 +1569,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			echo('Processed search console for #row.site_short_domain# | #startMonthDate# to #endDate#<br>'); 
 			startMonthDate=dateFormat(dateadd("m", 1, startMonthDate), "yyyy-mm-dd");
 			endDate=dateformat(dateadd("m", 1, endDate), "yyyy-mm-dd");
-			sleep(1000); // sleep to avoid hitting google's api limit
+			sleep(2000); // sleep to avoid hitting google's api limit
 		}
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_google_search_console_last_import_datetime=#db.param(request.zos.mysqlnow)#,
@@ -1669,7 +1673,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	</cfscript>
 </cffunction>
  
-<cffunction name="overview" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="overview" localmode="modern" access="remote">
 	<cfscript>  
 	form.accountType="analytics";
 	init();
@@ -1775,7 +1779,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			echo('processed google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
 			tempStartDate=dateformat(dateadd("yyyy", -1, tempStartDate), "yyyy-mm-dd"); 
 			tempEndDate=dateformat(dateadd("yyyy", -1, tempEndDate), "yyyy-mm-dd"); 
-			sleep(1000); // sleep to avoid hitting google's api limit
+			sleep(2000); // sleep to avoid hitting google's api limit
 			if(dateformat(tempStartDate, "yyyymmdd") < 20050101){
 				echo('stopped google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
 				break;
@@ -1796,7 +1800,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 </cffunction>
 
 
-<cffunction name="channelGoalReport" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="channelGoalReport" localmode="modern" access="remote">
 	<cfscript>  
 	form.accountType="analytics";
 	init();
@@ -1925,11 +1929,11 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 					}
 					break;
 				}
-				sleep(1000); // sleep to avoid hitting google's api limit
+				sleep(2000); // sleep to avoid hitting google's api limit
 			}
 			tempStartDate=dateformat(dateadd("yyyy", -1, tempStartDate), "yyyy-mm-dd"); 
 			tempEndDate=dateformat(dateadd("yyyy", -1, tempEndDate), "yyyy-mm-dd"); 
-			sleep(1000); // sleep to avoid hitting google's api limit
+			sleep(2000); // sleep to avoid hitting google's api limit
 			if(dateformat(tempStartDate, "yyyymmdd") < 20050101){
 				echo('stopped google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
 				break;
@@ -2027,7 +2031,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	</cfscript>
 </cffunction>
 
-<cffunction name="organic" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="organic" localmode="modern" access="remote">
 	<cfscript> 
 	form.accountType="analytics";
 	init();
@@ -2154,7 +2158,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 				echo('stopped google analytics overview for #row.site_short_domain# at #tempStartDate# to #tempEndDate#<br>');
 				break;
 			} 
-			sleep(1000); // sleep to avoid hitting google's api limit
+			sleep(2000); // sleep to avoid hitting google's api limit
 		} 
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_google_analytics_organic_last_import_datetime=#db.param(request.zos.mysqlnow)#,
@@ -2170,7 +2174,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 </cffunction>
 
 
-<cffunction name="keyword" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="keyword" localmode="modern" access="remote">
 	<cfscript> 
 	form.accountType="analytics";
 	init();
@@ -2309,7 +2313,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			if(nextSite){
 				break;
 			} 
-			sleep(1000); // sleep to avoid hitting google's api limit
+			sleep(2000); // sleep to avoid hitting google's api limit
 			echo('Processed google analytics organic keywords for #row.site_short_domain# | #tempStartDate# to #tempEndDate#<br>'); 
 			tempStartDate=dateformat(dateadd("m", -1, tempStartDate), "yyyy-mm-dd"); 
 			tempEndDate=dateformat(dateadd("d", -1, dateadd("m", 1, tempStartDate) ), "yyyy-mm-dd");
@@ -2328,7 +2332,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	</cfscript>
 </cffunction>
 
-<cffunction name="goal" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="goal" localmode="modern" access="remote">
 	<cfscript> 
 	form.accountType="analytics";
 	init();

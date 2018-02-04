@@ -236,6 +236,7 @@ objCookies=GetResponseCookies(cfhttp);
 <cffunction name="semrush" access="remote" localmode="modern">
 	<cfscript>
 	init();
+	setting requesttimeout="5000";
 	db=request.zos.queryobject;
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# 
 	WHERE site_active=#db.param(1)# and 
@@ -584,6 +585,7 @@ objCookies=GetResponseCookies(cfhttp);
 
 	<cfscript>
 	init();
+	setting requesttimeout="5000";
 	db=request.zos.queryobject;
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# 
 	WHERE site_active=#db.param(1)# and 

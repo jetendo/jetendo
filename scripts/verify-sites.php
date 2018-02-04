@@ -71,6 +71,10 @@ function getAvailableUpgradePackages(){
 	}
 	return $arrPackage;
 }
+function is_dir_empty($dir) {
+  if (!is_readable($dir)) return NULL; 
+  return (count(scandir($dir)) == 2);
+}
 function verifySite($row){
 	global $cmysql2, $forcePermissions, $userStruct, $preview, $verifyHomePage, $userUnusedStruct, $isTestServer, $pathStruct, $checkDNS, $dnsServer, $dnsServer2, $wwwUser, $sitesPath, $ftpEnabled;
 	$siteHomedir=zGetDomainInstallPath($row["site_short_domain"]);
@@ -83,45 +87,56 @@ function verifySite($row){
 		$time_start = microtime_float();
 		echo "Verifying: ".$siteHomedir.": ";
 		unset($pathStruct[$siteHomedir]);
-		if(substr($siteHomedir, 0, strlen($sitesPath)) != $sitesPath){
-			$siteHasError=true;
-			array_push($arrError, $siteHomedir." is not inside the installPath: ".$sitesPath." and it must be.");	
-		}else if(!is_dir($siteHomedir)){
-			$siteHasError=true;
-			array_push($arrError, "Self-healing notice: ".$siteHomedir." didn't exist, and was created now. ");	
-			if(!$preview){
-				mkdir($siteHomedir);
+		if(zIsTestServer()){
+			$found=true; // always found on test server
+			if(is_dir($siteHomedir)){
+				if(is_dir_empty($siteHomedir)){
+					echo("\nremoving empty site dir: ".$siteHomedir."\n");
+					rmdir($siteHomedir);
+				}
 			}
-		}
-		$result=zCheckDirectoryPermissions($siteHomedir, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "440", "550", true, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable."zcache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable."_cache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable."zupload/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable."zuploadsecure/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$result=zCheckDirectoryPermissions($siteHomedirWritable, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", true, $preview, $arrError, $isTestServer);
-		if(!$result){
-			$siteHasError=true;
-		}
-		$found=true;
+		}else{ 
+			if(substr($siteHomedir, 0, strlen($sitesPath)) != $sitesPath){
+				$siteHasError=true;
+				array_push($arrError, $siteHomedir." is not inside the installPath: ".$sitesPath." and it must be.");	
+			}else if(!is_dir($siteHomedir)){
+				$siteHasError=true;
+				array_push($arrError, "Self-healing notice: ".$siteHomedir." didn't exist, and was created now. ");	
+				if(!$preview){
+					mkdir($siteHomedir);
+				}
+			}else{
+				$found=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedir, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "440", "550", true, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable."zcache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable."_cache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable."zupload/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable."zuploadsecure/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+			$result=zCheckDirectoryPermissions($siteHomedirWritable, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", true, $preview, $arrError, $isTestServer);
+			if(!$result){
+				$siteHasError=true;
+			}
+		} 
 	}else{
 		if(is_dir($siteHomedir)){
 			array_push($arrError, "Attention required: ".$siteHomedir." exists, but site is inactive. You should remove these files from the server.");	
@@ -363,6 +378,7 @@ if(!$result){
 
 $sitesPath=get_cfg_var("jetendo_sites_path");
 
+/*
 echo "Running apt-get update to check for new packages: ";
 $arrPackage=getAvailableUpgradePackages();
 if($arrPackage['available']){
@@ -372,7 +388,7 @@ if($arrPackage['available']){
 }else{
 	echo "No new packages are available. Response: ".$arrPackage['results']."\n";
 }
-
+*/
 $forcePermissions=false; 
 $userUnusedStruct=array();
 $pathStruct=array();

@@ -6,6 +6,9 @@
 	variables.userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36";
 
  	form.fpid=application.zcore.functions.zso(form, 'fpid', true, 0); 
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
 	</cfscript>
 	
 </cffunction>

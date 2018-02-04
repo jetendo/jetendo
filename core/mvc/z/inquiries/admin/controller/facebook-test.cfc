@@ -19,6 +19,9 @@ these tables are done:
  --->
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
 	form.postsEnabled=application.zcore.functions.zso(form, 'postsEnabled', true, 0);
  	form.fpid=application.zcore.functions.zso(form, 'fpid', true, 0); 
 
@@ -39,7 +42,7 @@ these tables are done:
 	</cfscript>
 </cffunction> --->
 
-<cffunction name="cancelFacebookImport" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="cancelFacebookImport" localmode="modern" access="remote">
 	<cfscript>
 	application.cancelFacebookImport=true;
 	</cfscript>
@@ -176,7 +179,7 @@ these tables are done:
 	</cfscript>
 </cffunction>
 
-<cffunction name="listFacebookAccounts" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="listFacebookAccounts" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
 	setting requesttimeout="10000";
@@ -232,7 +235,7 @@ these tables are done:
 	</cfscript>
 </cffunction>
 
-<cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
 	setting requesttimeout="10000";
@@ -838,7 +841,7 @@ getPostDetails
 
  --->
 
-<cffunction name="getPostDetails" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="getPostDetails" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
@@ -1058,7 +1061,7 @@ seems like i should make facebook_page_month update separate from import to make
 
  --->
 
-<cffunction name="calculatePageTotals" localmode="modern" access="remote" roles="serveradministrator">
+<cffunction name="calculatePageTotals" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
