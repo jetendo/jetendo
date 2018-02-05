@@ -758,13 +758,13 @@ var zLastAjaxVarName=""; */
 		}
 		action+="&x_ajax_id="+escape(obj.id);
 
-		if(typeof obj.formId != "undefined"){
+		if(typeof window.FormData != "undefined" && typeof obj.formId != "undefined"){
 			var form = document.getElementById(obj.formId);
 			var formData = new FormData(form);
 			var postObjTemp=zGetFormDataByFormId(obj.formId);
 			for(var i in postObjTemp){
-				if(formData.get(i)==null){
-					formData.set(i, "");
+				if(postObjTemp[i] == ""){
+					formData.append(i, ""); 
 				}
 			}
 			req.open(zAjaxData[obj.id].method, action, true); 
@@ -780,6 +780,13 @@ var zLastAjaxVarName=""; */
 				req.open(zAjaxData[obj.id].method,action,true);
 				req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
+				if(typeof obj.formId != "undefined"){
+					var postObj=zGetFormDataByFormId(obj.formId);
+					var postData="";
+					for(var i in postObj){
+						postData+=i+"="+encodeURIComponent(postObj[i])+"&";
+					}
+				}
 				req.send(postData);  
 			}
 		}
