@@ -342,7 +342,7 @@ objCookies=GetResponseCookies(cfhttp);
 		 		//link="https://api.semrush.com/reports/tracking/?key=#request.zos.semrushAPIKey#&campaign_id=#id#&display_hash=&action=report&type=tracking_position_rankings_overview_organic&use_volume=national&date_begin=#dateformat(tempStartDate, "yyyymmdd")#&date_end=#dateformat(tempEndDate, "yyyymmdd")#&display_limit=1000000&display_filter=&display_tags=&display_sort=0_pos_asc&linktype_filter=2&url=*.#site#%2F*&export_columns=Ph%2CTg%2CDt%2CNq%2CCp&export=csv"; 
  				fileName="#row.site_id#-semrush-#id#-keyword-report-#dateformat(tempEndDate, "yyyy-mm-dd")#.csv";
 				/* */
-				http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#fileName#" redirect="yes" method="get" timeout="30"{
+				http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#fileName#" redirect="yes" method="get" timeout="200"{
 					for(strCookie in objCookies){ 
 						httpparam type="COOKIE" name="#strCookie#" value="#objCookies[ strCookie ]#";
 					}
@@ -599,7 +599,7 @@ objCookies=GetResponseCookies(cfhttp);
 
 	// 	https://moz.com/products/api/keys 
 
-	http url="https://moz.com/login" useragent="#variables.userAgent#" redirect="yes"   method="post" timeout="20"{
+	http url="https://moz.com/login" useragent="#variables.userAgent#" redirect="yes"   method="post" timeout="60"{
 		httpparam type="header" name="referer" value="https://moz.com/login?redirect=/home";
 		httpparam type="formfield" name="data[User][redirect]" value="/home";
 		httpparam type="formfield" name="data[User][login_email]" value="#request.zos.seomozUsername#";
@@ -631,7 +631,7 @@ objCookies=GetResponseCookies(cfhttp);
 	 		link="https://analytics.moz.com/delorean-api/rankings/prod.#id#/grouped-by/engine-variant/You/week.csv?date_range=#startDate#..#dateformat(now(), "yyyy-mm-dd")#";
 	 		filePath=path&row.site_id&"-moz-keyword-report.csv";
 	 		application.zcore.functions.zDeleteFile(filePath);
-			http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#row.site_id#-moz-keyword-report.csv" timeout="30"{  
+			http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#row.site_id#-moz-keyword-report.csv" timeout="200"{  
 				for(strCookie in objCookies){
 					httpparam type="COOKIE" name="#strCookie#" value="#objCookies[ strCookie ].Value#";
 				}
