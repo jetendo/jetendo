@@ -127,28 +127,32 @@
 
 <cffunction name="createCharge" localmode="modern" access="public">
 	<cfargument name="customerId" type="string" required="yes">
-	<cfargument name="cardId" type="string" required="yes">
+	<cfargument name="source" type="string" required="yes" hint="source is the token returned from stripe's payment form.">
 	<cfargument name="amount" type="numeric" required="yes">
 	<cfargument name="charge" type="struct" required="yes">
 	<cfscript>
-		customerId = arguments.customerId;
-		cardId     = arguments.cardId;
-		amount     = arguments.amount;
-		charge     = arguments.charge;
+	customerId = arguments.customerId;
+	source     = arguments.source;
+	amount     = arguments.amount;
+	charge     = arguments.charge;
 
-		// The charge amount must be a positive integer and include the cents.
-		// To charge $10.00 you would put in '1000' as the amount.
-		// @see https://stripe.com/docs/api/curl#create_charge-amount
-		amount = replace( amount, '.', '', 'all' );
-		amount = replace( amount, ',', '', 'all' );
-		amount = replace( amount, '$', '', 'all' );
+	// The charge amount must be a positive integer and include the cents.
+	// To charge $10.00 you would put in '1000' as the amount.
+	// @see https://stripe.com/docs/api/curl#create_charge-amount
+	amount = replace( amount, '.', '', 'all' );
+	amount = replace( amount, ',', '', 'all' );
+	amount = replace( amount, '$', '', 'all' );
 
-		charge.amount   = amount;
-		charge.currency = 'USD';
+	charge.amount   = amount;
+	charge.currency = 'USD';
+	if(customerId NEQ "" and customerId NEQ "0"){
 		charge.customer = customerId;
-		charge.source   = cardId;
+	}
+	if(source NEQ "" and source NEQ "0"){
+		charge.source   = source;
+	}
 
-		return this.sendRequest( '/charges', charge );
+	return this.sendRequest( '/charges', charge );
 	</cfscript>
 </cffunction>
 
@@ -355,6 +359,48 @@
 
 		return response;
 	</cfscript>
+</cffunction>
+
+<!--- move this to stripe.cfc --->
+<cffunction name="displayPaymentButton" localmode="modern" access="remote"> 
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>  
+	ss=arguments.ss;
+	</cfscript>
+	<div id="zStripeAmountDiv" class="z-float">
+		<form action="" id="zStripeAmountForm" method="post">
+			<input type="hidden" name="zStripeItemName" id="zStripeItemName" value="#htmleditformat(ss.itemName)#">
+			<input type="hidden" name="zStripeItemDescription" id="zStripeItemDescription" value="#htmleditformat(ss.itemDescription)#">
+			<p>$ <input type="text" name="zStripeAmount" id="zStripeAmount" value="#htmleditformat(ss.amount)#"></p>
+			<p><input type="submit" name="zStripeSubmit" id="zStripeSubmit" value="#htmleditformat(ss.submitText)#"></p>
+		</form>
+	</div>
+	<div id="zStripePayDiv" class="z-float" style="display:none;">
+	</div>
+	<script>
+	zArrDeferredFunctions.push(function(){
+		$("##zStripeAmountForm").on("submit", function(e){
+			e.preventDefault();
+			var amount=$("##zStripeAmount").val();
+			var amount=parseFloat(amount);
+			if(isNaN(amount)){
+				alert("Invalid amount specified, please enter a rounded dollar amount.");
+				return false;
+			}
+			if(amount<=0){
+				alert("You must enter a positive dollar amount.");
+				return false;
+			}
+			var itemName=htmlEntities.encode($("##zStripeItemName").val());
+			var itemDescription=htmlEntities.encode($("##zStripeItemDescription").val());
+			var amount=Math.round(amount*100);
+			$("##zStripeAmountDiv").hide();
+			$("##zStripePayDiv").show().html('<form id="zStripePaymentForm" action="#ss.confirmationURL#" method="post"><script src="https://checkout.stripe.com/checkout.js" class="stripe-button" data-key="#variables.publicKey#" data-amount="'+amount+'" data-name="'+itemName+'" data-description="'+itemDescription+'" data-locale="auto"><\/script><input type="hidden" name="amount" value="'+amount+'"><\/form>');
+			// need a callback because the pay with card button doesn't load instantly.
+			//$(".stripe-button-el").trigger("click");
+		});
+	});
+	</script>
 </cffunction>
 
 <cffunction name="getResponse" localmode="modern" access="private">
