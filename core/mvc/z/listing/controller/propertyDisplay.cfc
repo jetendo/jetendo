@@ -474,8 +474,10 @@ propertyDisplayCom.init(ts);
 		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method') NEQ '' ) {
 			tempHeaderComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_search_header_cfc_path'], 'root.', request.zRootCFCPath );
 			tempHeaderCom = createobject( 'component', tempHeaderComPath );
-
-			arrayAppend( arrOutput, tempHeaderCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method') ]() );
+			savecontent variable="out"{
+				tempHeaderCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_header_cfc_method') ]();
+			}
+			arrayAppend( arrOutput, '<div class="z-float">'&out&'</div>' );
 		}
 	}
 
@@ -508,75 +510,80 @@ propertyDisplayCom.init(ts);
 			request.zos.requestLogEntry('propertyDisplay.cfc after baseGetDetails() for listing_id = #row.listing_id#');
 		}
 
-		if ( useCustomListingLayout ) {
-			savecontent variable="tempText"{
-				tempListingCom[ application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_listing_result_cfc_method'] ]( idx );
-			}
-		} else {
-			savecontent variable="tempText"{
-				if(this.optionStruct.storeCopy){
-					throw("storeCopy listing_saved is disabled");
-				}else if(this.optionStruct.oneLineLayout){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: one-line<br />";
-					}
-					this.oneLineTemplate(idx); 
-				}else if( this.optionStruct.thumbnailLayout){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: thumbnail<br />";
-					}
+		request.lastphotoid=idx.listing_id;
+		if(structkeyexists(idx, 'sysidfield2')){
+			idx.photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1, idx.sysidfield, idx.sysidfield2);
+		}else if(structkeyexists(idx, 'sysidfield')){
+			idx.photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1, idx.sysidfield);
+		}else{
+			idx.photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1);
+		} 
+ 
+		savecontent variable="tempText"{
+			if(useCustomListingLayout){ 
+				tempListingCom[ application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_listing_result_cfc_method'] ]( idx ); 
+			}else if(this.optionStruct.storeCopy){
+				throw("storeCopy listing_saved is disabled");
+			}else if(this.optionStruct.oneLineLayout){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: one-line<br />";
+				}
+				this.oneLineTemplate(idx); 
+			}else if( this.optionStruct.thumbnailLayout){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: thumbnail<br />";
+				}
 
-					this.thumbnailTemplate(idx);
-				}else if( this.optionStruct.descriptionLink){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: description-link<br />";
-					}
-					this.descriptionLinkTemplate(idx);
-				}else if( this.optionStruct.classifiedflyerads){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: classifiedflyerads<br />";
-					}
-					this.classifiedFlyerAdsTemplate(idx);
-					/*
-				    // TODO this is probably wrong or not in use.
-				}else if( this.optionStruct.rss){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: rss<br />";
-					}
-					this.rssTemplate(idx);
-				    ts=StructNew();
-				    ts.name='listing'&(StructCount(Request.rssListingStruct)+1);
-				    ts.date=DateFormat(far_vrdb_list_date,'yyyymmdd')&'000001';
-				    ts.text=tempText;
-				    request.rssListingStruct[ts.name]=ts;
-				    */
-				}else if( this.optionStruct.emailFormat){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: email<br />";
-					}
-					this.emailTemplate(idx);
-				}else if( this.optionStruct.plainText){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: emailPlain<br />";
-					}
-					this.emailPlainTemplate(idx);
-				}else if( isdefined('this.optionStruct.listNew') and this.optionStruct.listNew){
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: list (new)<br />";
-					}
-					this.listTemplate(idx);
-				}else{
-					if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
-						curTemplate="template: list<br />";
-					}
-					this.listTemplate(idx);
+				this.thumbnailTemplate(idx);
+			}else if( this.optionStruct.descriptionLink){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: description-link<br />";
 				}
-				if(len(curTemplate) and curTemplateOutput EQ false){
-					curTemplateOutput=true;
-					echo(curTemplate);
+				this.descriptionLinkTemplate(idx);
+			}else if( this.optionStruct.classifiedflyerads){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: classifiedflyerads<br />";
 				}
+				this.classifiedFlyerAdsTemplate(idx);
+				/*
+			    // TODO this is probably wrong or not in use.
+			}else if( this.optionStruct.rss){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: rss<br />";
+				}
+				this.rssTemplate(idx);
+			    ts=StructNew();
+			    ts.name='listing'&(StructCount(Request.rssListingStruct)+1);
+			    ts.date=DateFormat(far_vrdb_list_date,'yyyymmdd')&'000001';
+			    ts.text=tempText;
+			    request.rssListingStruct[ts.name]=ts;
+			    */
+			}else if( this.optionStruct.emailFormat){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: email<br />";
+				}
+				this.emailTemplate(idx);
+			}else if( this.optionStruct.plainText){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: emailPlain<br />";
+				}
+				this.emailPlainTemplate(idx);
+			}else if( isdefined('this.optionStruct.listNew') and this.optionStruct.listNew){
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: list (new)<br />";
+				}
+				this.listTemplate(idx);
+			}else{
+				if(structkeyexists(form, 'debugsearchresults') and form.debugsearchresults){
+					curTemplate="template: list<br />";
+				}
+				this.listTemplate(idx);
 			}
-		}
+			if(len(curTemplate) and curTemplateOutput EQ false){
+				curTemplateOutput=true;
+				echo(curTemplate);
+			}
+		} 
 		if(this.optionStruct.output){
 		    arrayAppend(arrOutput,tempText);// tempText2&
 		}else{
@@ -597,15 +604,6 @@ propertyDisplayCom.init(ts);
 		}
 		request.zos.requestLogEntry('propertyDisplay.cfc end of display loop for listing_id = #row.listing_id#');
 	}  
-
-	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_path') NEQ '' ) {
-		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') NEQ '' ) {
-			tempFooterComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_search_footer_cfc_path'], 'root.', request.zRootCFCPath );
-			tempFooterCom = createobject( 'component', tempFooterComPath );
-
-			arrayAppend( arrOutput, tempFooterCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') ]() );
-		}
-	}
 
 	request.zos.requestLogEntry('propertyDisplay.cfc after display() loop');
 	if(this.optionStruct.thumbnailLayout){
@@ -661,6 +659,18 @@ propertyDisplayCom.init(ts);
 		}
 	}
 	ArrayAppend(arrOutput,this.checkNav(true));
+
+	if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_path') NEQ '' ) {
+		if ( application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') NEQ '' ) {
+			tempFooterComPath = replace( application.zcore.app.getAppData("listing").sharedStruct.optionStruct['mls_option_search_footer_cfc_path'], 'root.', request.zRootCFCPath );
+			tempFooterCom = createobject( 'component', tempFooterComPath );
+
+			savecontent variable="out"{
+				tempFooterCom[ application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_search_footer_cfc_method') ]();
+			}
+			arrayAppend( arrOutput, '<div class="z-float">'&out&'</div>');
+		}
+	}
 	if(this.optionStruct.plainText EQ false and this.optionStruct.classifiedFlyerAds EQ false and this.optionStruct.rss EQ false){
 		ArrayAppend(arrOutput,'<br style="clear:both;" />');
 	}
@@ -785,14 +795,6 @@ propertyDisplayCom.init(ts);
 	var propertyLink=0;
 	var iwidth=0;
 		
-	request.lastphotoid=arguments.idx.listing_id;
-	if(structkeyexists(arguments.idx, 'sysidfield2')){
-		arguments.idx.photo1=application.zcore.listingCom.getPhoto(arguments.idx.listing_id,1, arguments.idx.sysidfield, arguments.idx.sysidfield2);
-	}else if(structkeyexists(arguments.idx, 'sysidfield')){
-		arguments.idx.photo1=application.zcore.listingCom.getPhoto(arguments.idx.listing_id,1, arguments.idx.sysidfield);
-	}else{
-		arguments.idx.photo1=application.zcore.listingCom.getPhoto(arguments.idx.listing_id,1);
-	} 
 	//writedump(arguments.idx.photo1&":"&arguments.idx.listing_id&":"&arguments.idx.sysidfield);
 	var iwidth=int(request.zos.globals.maximagewidth/3)-30;
 	var iheight=int(iwidth*0.68);
