@@ -633,8 +633,6 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	</cfscript>
 </cffunction>
 
-
-
 <cffunction name="getAdminLinks" localmode="modern" output="no" access="public" returntype="struct" hint="links for member area">
 	<cfargument name="linkStruct" type="struct" required="yes">
 	<cfscript>
