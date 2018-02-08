@@ -27,7 +27,7 @@ var zHelpTooltip=new Object();
 		var p=zGetAbsPosition(d);
 		//alert(this.id+" tooltip "+p.x+":"+p.y+":"+p.width+":"+p.height);
 		var ws=getWindowSize();	
-		zHelpTooltip.helpDiv.style.display="block";
+		zHelpTooltip.helpDiv.style.display="inline-block";
 		zHelpTooltip.helpInnerDiv.innerHTML=zHelpTooltip.arrTrack[this.id].title;
 		var p2=zGetAbsPosition(zHelpTooltip.helpDiv);
 		zHelpTooltip.helpDiv.style.left = Math.min(ws.width-p2.width-10, p.x+p.width+5)+"px";
@@ -57,6 +57,7 @@ var zHelpTooltip=new Object();
 			zHelpTooltip.curTimeoutId=setTimeout(function(){ document.getElementById(zHelpTooltip.curId).onmouseover(); }, 1000);	
 		}
 	};
+	
 	zHelpTooltip.setupHelpTooltip=function(){
 		zHelpTooltip.helpDiv=document.getElementById("zHelpToolTipDiv");
 		zHelpTooltip.helpInnerDiv=document.getElementById("zHelpToolTipInnerDiv");
@@ -65,7 +66,7 @@ var zHelpTooltip=new Object();
 			if(a[i].title == ""){
 				continue;
 			}
-			a[i].style.display="block"; 
+			a[i].style.display="inline-block"; 
 			zHelpTooltip.arrTrack[a[i].id]={hovering:false,title:a[i].title};
 			a[i].title="";
 			a[i].onmouseover=zHelpTooltip.hover;
@@ -82,3 +83,4 @@ var zHelpTooltip=new Object();
 	});
 
 })(jQuery, window, document, "undefined"); 
+

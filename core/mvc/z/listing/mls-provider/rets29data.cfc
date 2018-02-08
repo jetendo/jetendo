@@ -10,6 +10,8 @@
 	idxExclude={};
 
 	// put them here
+idxExclude["rets29_VirtualTourURLUnbranded"]="Virtual Tour Url Unbranded";
+idxExclude["rets29_VOWAVMYN"]="Vowavmyn";
 idxExclude["rets29_ArchitecturalStyle"]="Architectural Style";
 idxExclude["rets29_CloseDate"]="Close Date";
 idxExclude["rets29_ClosePrice"]="Close Price";
@@ -204,6 +206,10 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_PropertyType"]="Property Type";
 		idxTemp2["rets29_Roof"]="Roof";
 
+		if(structkeyexists(arguments.idx, "rets29_ParcelNumber")){
+			arguments.idx["rets29_ParcelNumber"]=replace(arguments.idx["rets29_ParcelNumber"], "Â", "-", "all");
+		}
+
 		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));
 		    
 		return arraytolist(arrR,'');
@@ -224,8 +230,6 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_CompanyRemarks"]="Company Remarks";
 		idxTemp2["rets29_Construction"]="Construction";
 		idxTemp2["rets29_ConstructionType"]="Construction Type";
-		idxTemp2["rets29_VirtualTourURLUnbranded"]="Virtual Tour Url Unbranded";
-		idxTemp2["rets29_VOWAVMYN"]="Vowavmyn";
 		idxTemp2["rets29_CCRSubjectToYN"]="Ccr Subject To Yn";
 		idxTemp2["rets29_City"]="City";
 		idxTemp2["rets29_CompleName"]="Complex Name";

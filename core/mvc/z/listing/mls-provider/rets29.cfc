@@ -360,8 +360,13 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_sub_type_id=","&local.listing_sub_type_id&",";
 		rs.listing_style=","&local.listing_style&",";
 		rs.listing_view=","&local.listing_view&",";
-		rs.listing_lot_square_feet=ts["Sq Ft Total"];
-		rs.listing_square_feet=ts["Sq Ft Main"];
+		rs.listing_lot_square_feet="";
+		if(structkeyexists(ts, "Acres Wooded") and isnumeric(ts["Acres Wooded"])){
+			rs.listing_lot_square_feet=round(ts["Acres Wooded"]/0.000022956841138659);
+		}else if(structkeyexists(ts, "Lot Size Area In Acres") and isnumeric(ts["Lot Size Area In Acres"])){
+			rs.listing_lot_square_feet=round(ts["Lot Size Area In Acres"]/0.000022956841138659);
+		}
+		rs.listing_square_feet=ts["Sq Ft Total"];
 		rs.listing_subdivision=local.listing_subdivision;
 		rs.listing_year_built=ts["year built"];
 		rs.listing_office=ts["List Office MLSID"];

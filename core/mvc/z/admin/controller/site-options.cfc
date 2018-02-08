@@ -4750,8 +4750,9 @@ Define this function in another CFC to override the default email format
 					writeoutput('">');
 					if(rs.label and row.site_option_hide_label EQ 0){
 						if(row.site_option_label_on_top EQ 1){
-							echo('<th style="vertical-align:top; ">&nbsp;</th>
-							<td>');
+							//<th style="vertical-align:top; ">&nbsp;</th>
+							echo('
+							<td colspan="2">');
 							echo('<div style="padding-bottom:0px;float:left; width:100%;">'&application.zcore.functions.zOutputToolTip(row.site_option_display_name, row.site_option_tooltip)&'<a id="soid_#row.site_option_id#" style="display:block; float:left;"></a> ');
 
 							if(row.site_option_required and row.site_option_hide_label EQ 0){

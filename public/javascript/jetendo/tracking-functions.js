@@ -64,7 +64,10 @@
 		}
 	}
 	function zTrackPageView(link){
-		if(typeof window['GoogleAnalyticsObject'] != "undefined"){
+		if(typeof window['gtag'] != "undefined"){
+			var b=window['gtag'];
+			b('config', {'page_path': link}); 
+		}else if(typeof window['GoogleAnalyticsObject'] != "undefined"){
 			var b=window[window['GoogleAnalyticsObject']];
 			b('send', {
 				'hitType' : 'pageview',
@@ -105,80 +108,114 @@
 				}, 100);
 			}
 			return; 
-		}
-			if(typeof window['GoogleAnalyticsObject'] != "undefined"){
-				var b=window[window['GoogleAnalyticsObject']];
-				if(gotoToURLAfterEvent != ""){
-					if(eventLabel != ""){
-						console.log('track event 1:'+eventValue);
-						b('send', 'event', eventCategory, eventAction, eventLabel, eventValue, {
-							'hitCallback': function(){
-								clearTimeout(registerTimeout);
-								if(!newWindow && gotoToURLAfterEvent != ""){
-									window.location.href = gotoToURLAfterEvent;
-								}
-							}
-						});
-					}else{
-						console.log('track event 2:'+eventAction);
-						b('send', 'event', eventCategory, eventAction, {
-							'hitCallback': function(){ 
-								clearTimeout(registerTimeout);
-								if(!newWindow && gotoToURLAfterEvent != ""){
-									window.location.href = gotoToURLAfterEvent;
-								}
-							}
-						});
-					}
-				}else{
-					if(eventLabel != ""){
-						console.log('track event 3:'+eventValue);
-						b('send', 'event', eventCategory, eventAction, eventLabel, eventValue);
-					}else{
-						console.log('track event 4:'+eventAction);
-						b('send', 'event', eventCategory, eventAction);
-					}
-				}
-			}else if(typeof pageTracker != "undefined" && typeof pageTracker._trackPageview != "undefined"){
+		} 
+		if(typeof window['gtag'] != "undefined"){
+			var b=window['gtag'];
+			if(gotoToURLAfterEvent != ""){
 				if(eventLabel != ""){
-					pageTracker._trackEvent(eventCategory, eventAction, eventLabel, eventValue);
+					console.log('track event 1:'+eventValue);
+					b('event', eventAction, {
+					  'event_category': eventCategory,
+					  'event_label': eventLabel,
+					  value:eventValue,
+					  'event_callback': function(){
+							clearTimeout(registerTimeout);
+							if(!newWindow && gotoToURLAfterEvent != ""){
+								window.location.href = gotoToURLAfterEvent;
+							}
+					  }
+					}); 
 				}else{
-					pageTracker._trackEvent(eventCategory, eventAction);
-				} 
-			}else if(typeof _gaq != "undefined" && typeof _gaq.push != "undefined"){
-				if(gotoToURLAfterEvent != ""){
-					_gaq.push(['_set','hitCallback',function(){
-						clearTimeout(registerTimeout);
-						if(!newWindow){
-							window.location.href = gotoToURLAfterEvent;
-						}
-					}]);
-				}
-				if(eventLabel != ""){
-					_gaq.push(['_trackEvent', eventCategory, eventAction, eventLabel, eventValue]);
-				}else{
-					_gaq.push(['_trackEvent', eventCategory, eventAction]);
+					console.log('track event 2:'+eventAction);
+					b('event', eventAction, {
+					  'event_category': eventCategory, 
+					  value:eventValue,
+					  'event_callback': function(){
+							clearTimeout(registerTimeout);
+							if(!newWindow && gotoToURLAfterEvent != ""){
+								window.location.href = gotoToURLAfterEvent;
+							}
+					  }
+					});  
 				}
 			}else{
-				if(zIsLoggedIn()){
-					if(!newWindow && gotoToURLAfterEvent != ""){
+				if(eventLabel != ""){
+					console.log('track event 3:'+eventValue);
+					b('event', eventAction, {
+					  'event_category': eventCategory,
+					  'event_label': eventLabel,
+					  value:eventValue
+					}); 
+				}else{
+					console.log('track event 4:'+eventAction);
+					b('event', eventAction, {
+					  'event_category': eventCategory,
+					  value:eventValue
+					}); 
+				}
+			}
+		}else if(typeof window['GoogleAnalyticsObject'] != "undefined"){
+			var b=window[window['GoogleAnalyticsObject']];
+			if(gotoToURLAfterEvent != ""){
+				if(eventLabel != ""){
+					console.log('track event 1:'+eventValue);
+					b('send', 'event', eventCategory, eventAction, eventLabel, eventValue, {
+						'hitCallback': function(){
+							clearTimeout(registerTimeout);
+							if(!newWindow && gotoToURLAfterEvent != ""){
+								window.location.href = gotoToURLAfterEvent;
+							}
+						}
+					});
+				}else{
+					console.log('track event 2:'+eventAction);
+					b('send', 'event', eventCategory, eventAction, {
+						'hitCallback': function(){ 
+							clearTimeout(registerTimeout);
+							if(!newWindow && gotoToURLAfterEvent != ""){
+								window.location.href = gotoToURLAfterEvent;
+							}
+						}
+					});
+				}
+			}else{
+				if(eventLabel != ""){
+					console.log('track event 3:'+eventValue);
+					b('send', 'event', eventCategory, eventAction, eventLabel, eventValue);
+				}else{
+					console.log('track event 4:'+eventAction);
+					b('send', 'event', eventCategory, eventAction);
+				}
+			}
+		}else if(typeof pageTracker != "undefined" && typeof pageTracker._trackPageview != "undefined"){
+			if(eventLabel != ""){
+				pageTracker._trackEvent(eventCategory, eventAction, eventLabel, eventValue);
+			}else{
+				pageTracker._trackEvent(eventCategory, eventAction);
+			} 
+		}else if(typeof _gaq != "undefined" && typeof _gaq.push != "undefined"){
+			if(gotoToURLAfterEvent != ""){
+				_gaq.push(['_set','hitCallback',function(){
+					clearTimeout(registerTimeout);
+					if(!newWindow){
 						window.location.href = gotoToURLAfterEvent;
 					}
-				}else{
-					throw("Google analytics tracking code is not installed, or is using different syntax. Event tracking will not work until this is correct.");
-				}
-				//alert("Google analytics tracking code is not installed, or is using different syntax. Event tracking will not work until this is correct.");
+				}]);
 			}
-		/*try{
-		}catch(e){
+			if(eventLabel != ""){
+				_gaq.push(['_trackEvent', eventCategory, eventAction, eventLabel, eventValue]);
+			}else{
+				_gaq.push(['_trackEvent', eventCategory, eventAction]);
+			}
+		}else{
 			if(zIsLoggedIn()){
-				if(!newWindow){
+				if(!newWindow && gotoToURLAfterEvent != ""){
 					window.location.href = gotoToURLAfterEvent;
 				}
 			}else{
-				//throw("Google analytics tracking code is not installed, or is using different syntax. Event tracking will not work until this is correct.");
+				throw("Google analytics tracking code is not installed, or is using different syntax. Event tracking will not work until this is correct.");
 			}
-		}*/
+		}
 	}
 
 	// track all outbound links in google analytics events
