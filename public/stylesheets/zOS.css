@@ -466,10 +466,13 @@ _margin-right: 16px ;
 _margin-left: -83px ;
 }
 .zHelpToolTipContainer{}
-.zHelpToolTipLabel{float:left; padding-right:5px; padding-bottom:10px;}
+
+
+.zHelpToolTipLabel{ display:inline-block;padding-right:5px; padding-bottom:10px;}
 .zHelpToolTip,.zHelpToolTip:link, .zHelpToolTip:visited{
 	cursor:pointer;
-	width:13px; height:13px; display:none; float:left;
+	width:13px; height:13px; display:none;  
+
 	background-image:url(/z/a/images/help_off.png);
 	_background-image:none;
 _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/z/a/images/help_off.png', sizingMethod='scale');
