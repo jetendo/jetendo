@@ -170,7 +170,7 @@ this.app_id=18;
 			if ( structKeyExists( arguments.linkStruct['Jobs'].children, 'Add Job' ) EQ false ) {
 				ts = structNew();
 
-				ts.featureName = 'Add Jobs';
+				ts.featureName = 'Jobs';
 				ts.link        = '/z/job/admin/manage-jobs/add';
 
 				arguments.linkStruct['Jobs'].children['Add Job'] = ts;
@@ -179,7 +179,7 @@ this.app_id=18;
 			if ( structKeyExists( arguments.linkStruct['Jobs'].children, 'Add Job Category' ) EQ false ) {
 				ts = structNew();
 
-				ts.featureName = 'Add Job Category';
+				ts.featureName = 'Jobs';
 				ts.link        = '/z/job/admin/manage-job-category/add';
 
 				arguments.linkStruct['Jobs'].children['Add Job Category'] = ts;
@@ -197,7 +197,7 @@ this.app_id=18;
 			if ( structKeyExists( arguments.linkStruct['Jobs'].children, 'Job Categories' ) EQ false ) {
 				ts = structNew();
 
-				ts.featureName = 'Job Categories';
+				ts.featureName = 'Jobs';
 				ts.link        = '/z/job/admin/manage-job-category/index';
 
 				arguments.linkStruct['Jobs'].children['Job Categories'] = ts;
@@ -216,7 +216,7 @@ this.app_id=18;
 			if ( structKeyExists( arguments.linkStruct['Jobs'].children, 'View Jobs Home Page' ) EQ false ) {
 				ts = structNew();
 
-				ts.featureName = 'View Jobs Home Page';
+				ts.featureName = 'Jobs';
 				ts.link        = this.getJobsHomePageLink();
 
 				arguments.linkStruct['Jobs'].children['View Jobs Home Page'] = ts;

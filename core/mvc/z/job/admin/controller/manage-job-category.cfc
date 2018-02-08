@@ -5,7 +5,7 @@
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject; 
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Job Categories", true);	
+	application.zcore.adminSecurityFilter.requireFeatureAccess("Jobs", true);	
 	db.sql="SELECT * FROM #db.table("job_category", request.zos.zcoreDatasource)# job_category
 	WHERE job_category_id= #db.param(application.zcore.functions.zso(form,'job_category_id'))# and 
 	job_category_deleted = #db.param(0)# and
@@ -66,7 +66,7 @@
 	var ts={};
 	db=request.zos.queryObject;
 	var result=0;
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Job Categories", true);	
+	application.zcore.adminSecurityFilter.requireFeatureAccess("Jobs", true);	
 	form.site_id = request.zos.globals.id;
 	ts.job_category_name.required = true;
 	result = application.zcore.functions.zValidateStruct(form, ts, Request.zsid,true);
@@ -153,7 +153,7 @@
 	var currentMethod=form.method;
 	var htmlEditor=0;
 	application.zcore.functions.zSetPageHelpId("11.4");
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Job Categories");	
+	application.zcore.adminSecurityFilter.requireFeatureAccess("Jobs");	
 	if(application.zcore.functions.zso(form,'job_category_id') EQ ''){
 		form.job_category_id = -1;
 	}
@@ -264,7 +264,7 @@
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	db=request.zos.queryObject;
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Job Categories");	
+	application.zcore.adminSecurityFilter.requireFeatureAccess("Jobs");	
 	application.zcore.functions.zSetPageHelpId("11.3");
 	searchOn=false;
 	db.sql="select job_category.*, COUNT(job.job_id) COUNT 
