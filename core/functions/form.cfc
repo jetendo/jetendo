@@ -123,6 +123,7 @@
 <cffunction name="zSetupMultipleSelect" localmode="modern" output="no" returntype="string">
     <cfargument name="id" type="string" required="yes">
     <cfargument name="value" type="string" required="yes">
+    <cfargument name="required" type="boolean" required="no" default="#false#">
     <cfscript>
 	if(not structkeyexists(request.zos, 'zSetupMultipleSelectInit')){
 		request.zos.zSetupMultipleSelectIndex=0;
@@ -133,8 +134,13 @@
 		application.zcore.skin.includeJS("/z/javascript/jquery/jquery-ui-multiselect-widget/src/jquery.multiselect.filter.js", '', 2);
 	}
 	request.zos.zSetupMultipleSelectIndex++;
-	application.zcore.skin.addDeferredScript('
-		$("##'&arguments.id&'").after("<div id=\"zSelectMultipleSelected_'&arguments.id&'\" class=\"zSelectMultipleSelected\"></div>");
+	savecontent variable="out"{
+		echo('
+		$("##'&arguments.id&'").after(');
+		if(arguments.required){
+			echo('" * "+');
+		}
+		echo('"<div id=\"zSelectMultipleSelected_'&arguments.id&'\" class=\"zSelectMultipleSelected\"></div>");
 		$("##'&arguments.id&'").multiselect({
 			click: function(event, ui){
 				if(ui.value==''''){
@@ -163,7 +169,9 @@
 			}
 		});
 		$("##'&arguments.id&'").trigger("change");
-	');
+		');
+	}
+	application.zcore.skin.addDeferredScript(out);
 	</cfscript>
 </cffunction>
 	

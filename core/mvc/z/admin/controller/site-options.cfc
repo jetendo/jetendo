@@ -4788,8 +4788,13 @@ Define this function in another CFC to override the default email format
 					}else{
 						echo(rs.value);
 					}
-				}
-				if(row.site_option_required and row.site_option_hide_label EQ 1){
+				} 
+				requiredEnabled=true;
+				if(application.zcore.functions.zso(optionStruct[row.site_option_id], 'selectmenu_multipleselection', true, 0) EQ 1 or application.zcore.functions.zso(optionStruct[row.site_option_id], 'checkbox_values') NEQ ""){
+					requiredEnabled=false;
+				} 
+
+				if(requiredEnabled and row.site_option_required and row.site_option_hide_label EQ 1){
 					writeoutput(' <span style="font-size:80%;">*</span> ');
 				} 
 

@@ -65,7 +65,7 @@
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfscript> 
 	characterWidth=0;
-	return variables.createSelectMenu(arguments.row["#variables.type#_option_id"], arguments.row["#variables.type#_option_group_id"], arguments.optionStruct, true, arguments.onChangeJavascript, characterWidth);
+	return variables.createSelectMenu(arguments.row["#variables.type#_option_id"], arguments.row["#variables.type#_option_group_id"], arguments.optionStruct, true, arguments.onChangeJavascript, characterWidth, false);
 	</cfscript>
 </cffunction>
 
@@ -167,7 +167,13 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	characterWidth=arguments.row["#variables.type#_option_character_width"];
-	return { label: true, hidden: false, value:variables.createSelectMenu(arguments.row["#variables.type#_option_id"], arguments.row["#variables.type#_option_group_id"], arguments.optionStruct, false, '', characterWidth)};
+
+	if(arguments.row["#variables.type#_option_required"] EQ 1){
+		required=true; 
+	}else{
+		required=false;
+	}
+	return { label: true, hidden: false, value:variables.createSelectMenu(arguments.row["#variables.type#_option_id"], arguments.row["#variables.type#_option_group_id"], arguments.optionStruct, false, '', characterWidth, required)};
 	</cfscript>
 </cffunction>
 
@@ -244,14 +250,21 @@
 		');
 	}  
 	if(enabled){
-		arrayAppend(arrV, '
+
+		arrayAppend(arrV, ' 
+
+		if(arguments.row["#variables.type#_option_required"] EQ 1){
+			required=true; 
+		}else{
+			required=false;
+		}
 		selectStruct.multiple=false;
 		');
 		if(application.zcore.functions.zso(optionStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
 			arrayAppend(arrV, '
 		selectStruct.multiple=true;
 		selectStruct.hideSelect=true;
-		application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, "#fieldName#"));
+		application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, "#fieldName#"), required);
 			');
 		}
 		arrayAppend(arrV, '
@@ -577,6 +590,7 @@
 	<cfargument name="enableSearchView" type="boolean" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfargument name="characterWidth" type="string" required="yes">
+	<cfargument name="required" type="boolean" required="yes">
 	<cfscript>
 	var selectStruct = StructNew();
 	var ts=0;
@@ -627,6 +641,7 @@
 
 	selectStruct.onchange&=arguments.onChangeJavascript;
 	if(local.enabled){
+
 		selectStruct.multiple=false;
 		if(arguments.enableSearchView){
 			selectStruct.multiple=false;
@@ -635,7 +650,7 @@
 			if(application.zcore.functions.zso(ts, 'selectmenu_multipleselection', true, 0) EQ 1){
 				selectStruct.multiple=true;
 				selectStruct.hideSelect=true;
-				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'));
+				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), arguments.required);
 			}
 		}
 		selectStruct.output=false;
