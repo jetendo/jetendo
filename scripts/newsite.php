@@ -92,9 +92,10 @@ site_deleted='0'  ";
 site_deleted='0' ";
 }
 
+/*
 $result=`cat /proc/sys/net/ipv4/tcp_syncookies`;
 if(trim($result) != "1"){
-	`echo 1 > /proc/sys/net/ipv4/tcp_syncookies`;
+	//`echo 1 > /proc/sys/net/ipv4/tcp_syncookies`;
 	$to      = get_cfg_var('jetendo_developer_email_to');
 	$subject = 'PHP newsite.php syncookies reenabled on '.$host;
 		
@@ -105,7 +106,7 @@ if(trim($result) != "1"){
 
 	mail($to, $subject, $message, $headers);
 }
-
+*/
 $sharePath=get_cfg_var("jetendo_share_path");
 
 for($i4=0;$i4 < 62;$i4++){
