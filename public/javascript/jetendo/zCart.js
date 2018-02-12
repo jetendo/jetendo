@@ -145,7 +145,7 @@
 			return items;
 		};
 		self.readCookie=function(){
-			var value=zGetCookie("zcart-"+options.name);
+			var value=zGetCookie(new String("zcart-"+options.name).toUpperCase());
 			if(value === ""){
 				return;
 			}
@@ -165,7 +165,7 @@
 			for(var i in items){
 				arrId.push(items[i].id+"|"+items[i].quantity);
 			}
-			zSetCookie({key:"zcart-"+options.name,value:arrId.join(","),path:'/',futureSeconds:31536000,enableSubdomains:false}); 
+			zSetCookie({key:new String("zcart-"+options.name).toUpperCase(),value:arrId.join(","),path:'/',futureSeconds:31536000,enableSubdomains:false}); 
 		};
 		self.updateCount=function(){
 			if(options.debug) console.log("count is:"+count);
@@ -365,3 +365,5 @@
 	}; 
 	window.zCart=zCart;
 })(jQuery, window, document, "undefined"); 
+
+
