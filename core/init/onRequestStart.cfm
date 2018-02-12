@@ -338,7 +338,7 @@
 		site_id=getSiteId();
 	} 
 	// TODO need to avoid running this if the core is not fully loaded yet.
-	if(request.zos.isTestServer and not structkeyexists(application,'onInternalApplicationStartRunning')){
+	if(request.zos.isTestServer and not structkeyexists(application,'onInternalApplicationStartRunning')){ 
 		if(site_id NEQ 0){
 			if(not structkeyexists(application.zcoreSitesLoaded, site_id)){ 
 				setSiteRequestGlobals(site_id); 
