@@ -49,7 +49,7 @@
 		<tr><td>Payment</td>
 		<td>&nbsp;</td><td><div id="loanMonthlyPaymentDiv"></div></td>
 		</tr> 
-		<tr><td>Cost of Loan</td>
+		<tr class="zloan-calculator-cost-of-loan"><td>Cost of Loan</td>
 		<td>&nbsp;</td><td><div id="loanCostDiv"></div></td>
 		</tr> 
 		<tr><td>&nbsp;</td>
@@ -95,7 +95,7 @@ loanCalcCom.customExample();
 		<tr><td>Payment</td>
 		<td>&nbsp;</td><td><div id="loanMonthlyPaymentDiv"></div></td>
 		</tr> 
-		<tr><td>Cost of Loan</td>
+		<tr class="zloan-calculator-cost-of-loan"><td>Cost of Loan</td>
 		<td>&nbsp;</td><td><div id="loanCostDiv"></div></td>
 		</tr> 
 		<tr><td>&nbsp;</td>
@@ -121,8 +121,8 @@ loanCalcCom.customExample();
 		if(isNaN(interest)){
 			alert("Loan amount must be a decimal number.");
 		}
-		if(isNaN(term)){
-			alert("Term must be a number without any letters or punctuation.");
+		if(isNaN(term) || term <= 0){
+			//alert("Term must be a number without any letters or punctuation.");
 		}
 		if(isNaN(down)){
 			alert("Down Payment must be a number without any letters or punctuation.");
@@ -134,8 +134,13 @@ loanCalcCom.customExample();
 		var mn = tauToTheN * i / (tauToTheN - 1.0 );
 		var monthlyPayment=amount * mn;
 		var totalInterest = amount * mn * term - amount;
-		paymentDiv.innerHTML="$"+(Math.round(monthlyPayment*100)/100)+" per month";
-		loanCostDiv.innerHTML="$"+(Math.round(totalInterest*100)/100)+" total interest";
+		if(isNaN(monthlyPayment) || isNaN(term) || term <= 0){
+			paymentDiv.innerHTML="";
+			loanCostDiv.innerHTML="";
+		}else{
+			paymentDiv.innerHTML="$"+(Math.round(monthlyPayment*100)/100)+" per month";
+			loanCostDiv.innerHTML="$"+(Math.round(totalInterest*100)/100)+" total interest";
+		}
 	}
 	zArrDeferredFunctions.push(function(){
 		$(".loanInputClass").bind("change", function(){
