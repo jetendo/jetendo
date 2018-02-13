@@ -71,10 +71,11 @@
 </cffunction>
 
 <cffunction name="getAllCustomers" localmode="modern" access="public">
+	<cfargument name="email" type="string" required="no" default="">
 	<cfargument name="limit" type="numeric" required="no" default="10">
 	<cfargument name="customers" type="struct" required="no" default="#{}#">
 	<cfscript>
-		return this.sendRequest( '/customers?limit=' & arguments.limit, arguments.customers, 'GET' );
+		return this.sendRequest( '/customers?email=' & arguments.email & '&limit=' & arguments.limit, arguments.customers, 'GET' );
 	</cfscript>
 </cffunction>
 
@@ -348,11 +349,13 @@
 		}
 
 		if ( result.status_code NEQ 200 ) {
-			savecontent variable="out" {
+			/*savecontent variable="out" {
 				writeDump( arguments );
 				writeDump( result );
 			}
-			throw( 'Stripe error: ' & this.translateStatusCode( result.status_code ) & '<br /><br />Response:' & htmlEditFormat( result.filecontent ) & '<br /><br />' & out );
+ 			& '<br /><br />' & out
+			*/
+			throw( 'Stripe error: ' & this.translateStatusCode( result.status_code ) & '<br /><br />Response:' & htmlEditFormat( result.filecontent ));
 		}
 
 		response = this.getResponse( result );
