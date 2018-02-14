@@ -413,6 +413,7 @@ these tables are done:
 	for(post in qPagePosts){
 		postStruct[post.facebook_post_external_id]={facebook_post_id:post.facebook_post_id};
 	} 
+	arrError=[];
 	for(n2=1;n2<=arraylen(arrAccount);n2++){
 		page=arrAccount[n2];
 		if(form.fpid NEQ "0"){
@@ -469,6 +470,7 @@ these tables are done:
 			if(rs2.success EQ false){
 				echo('<hr><h2>Download failed:'&ts.link&'</h2>');
 				writedump(rs2);
+				arrayAppend(arrError, 'Download failed:'&ts.link);
 				break; 
 			}
 			//writedump(rs2);
@@ -527,6 +529,7 @@ these tables are done:
 			if(rs2.success EQ false){
 				echo('<hr><h2>Download failed:'&ts.link&'</h2>');
 				writedump(rs2);
+				arrayAppend(arrError, 'Download failed:'&ts.link);
 				break; 
 			}
 			if(structkeyexists(application, 'cancelFacebookImport')){
@@ -791,6 +794,9 @@ these tables are done:
 
 
 	calculatePageTotals();
+	if(arrayLen(arrError) and not request.zos.isDeveloper){
+		throw('<h2>Facebook import failed for some api calls</h2>'&arrayToList(arrError, "<br>"));
+	}
  	/*
  	nothing below
  	writedump(arrPage);
