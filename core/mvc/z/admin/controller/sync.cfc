@@ -711,8 +711,16 @@ This allows avoiding remaps more easily.  Less code when importing.
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	variables.userGroupCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.user.user_group_admin");
 	header name="Content-Type" value="text/plain" charset="utf-8";
+	if(request.zos.isTestServer){
+		fileName="test-";
+	}else{
+		fileName="live-";
+	}
+	fileName&="sync-json-";
+	fileName&=application.zcore.functions.zUrlEncode(request.zos.globals.shortDomain)&".txt";
+
 	if(structkeyexists(form, 'download')){
-		header name="Content-Disposition" value="attachment; filename=json.txt" charset="utf-8";
+		header name="Content-Disposition" value="attachment; filename=#fileName#" charset="utf-8";
 	}
 	
 	
