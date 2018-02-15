@@ -1456,7 +1456,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 		db.sql&=" and site_id = #db.param(form.sid)# ";
 	}
 	qSite=db.execute("qSite");     
-
+	sleep(3000);
  	for(row in qSite){
 		startMonthDate=dateformat(dateadd("d", -60, now()), "yyyy-mm-")&"01";
 		endDate=dateformat(dateadd("d", -1, dateadd("m", 1, startMonthDate)), "yyyy-mm-dd");
@@ -1569,7 +1569,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			echo('Processed search console for #row.site_short_domain# | #startMonthDate# to #endDate#<br>'); 
 			startMonthDate=dateFormat(dateadd("m", 1, startMonthDate), "yyyy-mm-dd");
 			endDate=dateformat(dateadd("m", 1, endDate), "yyyy-mm-dd");
-			sleep(4000); // sleep to avoid hitting google's api limit
+			sleep(3000); // sleep to avoid hitting google's api limit
 		}
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_google_search_console_last_import_datetime=#db.param(request.zos.mysqlnow)#,
