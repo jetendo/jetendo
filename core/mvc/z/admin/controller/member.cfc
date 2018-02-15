@@ -1284,7 +1284,7 @@ site_id = #db.param(request.zos.globals.id)# ";
 			</div>
 			<cfif application.zcore.user.checkGroupAccess("administrator")>
 				<div class="z-float-left z-pr-10 z-pb-10">
-				#application.zcore.functions.zOutputHelpToolTip("Office","member.member.edit office_id")#:  
+				Office:  
 				<cfscript>
 					db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
 					WHERE site_id = #db.param(request.zos.globals.id)# and 
@@ -1295,6 +1295,7 @@ site_id = #db.param(request.zos.globals.id)# ";
 					selectStruct.name = "office_id";
 					selectStruct.query = qOffice;
 					selectStruct.hideSelect=false;
+					selectStruct.inlineStyle="max-width:200px;";
 					selectStruct.queryParseLabelVars=true;
 					selectStruct.queryLabelField = "##office_name##, ##office_address##";
 					selectStruct.queryValueField = "office_id";

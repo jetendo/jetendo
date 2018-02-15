@@ -36,6 +36,7 @@ verifySitePaths
 saveFaviconSet#chr(9)#sourceFilePath#chr(9)#destinationPath
 convertFileCharsetISO88591toUTF8#chr(9)#sourceFilePath
 gitClone#chr(9)#cloneLink#chr(9)#homedir
+installSublimeProjectFile#chr(9)#listOfShortDomainPaths
 */
 
 function processContents($contents){
@@ -123,6 +124,8 @@ function processContents($contents){
 		return sslInstallLetsEncryptCertificate($a);
 	}else if($contents =="gitClone"){
 		return gitClone($a);
+	}else if($contents =="installSublimeProjectFiles"){
+		return installSublimeProjectFiles($a);
 	}
 	return "";
 }
@@ -1317,6 +1320,33 @@ function gzipFilePath($a){
 		}
 	}
 	return "0";
+}
+function installSublimeProjectFiles($a){
+	if(count($a) != 1){
+		return "0";
+	}
+
+	$path=str_replace(".", "", $a[0]);
+	if($path != $a[0]){
+		return "0"; // security issue in paths, prevent any further action.
+	}
+	$arrSite=explode(",", $path);
+	$p=get_cfg_var("jetendo_root_path");
+	for($i=0;$i<count($arrSite);$i++){
+		$site=trim($arrSite[$i]);
+		if($site == ""){
+			continue;
+		}
+		$source=$p."sites-writable/".$site."/".$site.".sublime-project";
+		$destination=$p."sites/".$site."/".$site.".sublime-project";
+		if(file_exists($source)){
+			if(file_exists($destination)){
+				unlink($destination);
+			}
+			rename($source, $destination);
+		}
+	}
+	return "1";
 }
 function getImageMagickConvertApplyMask($a){
 	set_time_limit(100);

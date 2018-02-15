@@ -536,6 +536,17 @@
 				link:"/z/inquiries/admin/manage-inquiries/index?search_office_id=#row.office_id#"
 			});
 		}
+		arrayAppend(editLinks, {
+			label:"Public Users",
+			link:"/z/admin/member/showPublicUsers?office_id=#row.office_id#"
+		});
+		if(application.zcore.user.checkGroupAccess("administrator")){
+			arrayAppend(editLinks, {
+				label:"Site Manager Users",
+				link:"/z/admin/member/index?office_id=#row.office_id#"
+			});
+		}
+ 
 		ts={
 			buttons:[/*{
 				icon:"",

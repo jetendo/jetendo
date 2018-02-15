@@ -82,7 +82,9 @@ TODO: figure out why site backup doesn't get compressed.
 		"facebook_post":true,
 		"facebook_page_month":true,
 		"facebook_page":true,
+		"ssl":true,
 		"facebook_month":true,
+		"domain_redirect":true,
 		"site_x_deploy_server":true
 	};
 	return ts;

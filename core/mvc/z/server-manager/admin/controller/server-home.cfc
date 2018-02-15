@@ -317,6 +317,7 @@
 			<p><a href="/z/server-manager/admin/server-home/prepareForDistribution" target="_blank">Prepare For Distribution</a></p>
 			<p><a href="/z/misc/geocode/index">Testing Geocoding Features</a></p>
 			<cfif request.zos.istestserver>
+				<p><a href="/z/server-manager/admin/generate-sublime-project/index" target="_blank">Generate Sublime Text Project Files</a></p>
 				<p><a href="/z/server-manager/admin/db-upgrade/installDatabaseVersion">Install Test Database</a></p>
 			</cfif>
 			<h3>Scheduled Tasks</h3>
