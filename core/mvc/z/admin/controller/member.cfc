@@ -1148,6 +1148,9 @@ site_id = #db.param(request.zos.globals.id)# ";
 	user.site_id = user_group.site_id and 
 	user.user_group_id = user_group.user_group_id and  
 	user_server_administrator = #db.param('0')#";
+	if(structkeyexists(form, 'office_id') and trim(form.office_id) NEQ ''){
+		db.sql&=" and FIND_IN_SET(#db.param(form.office_id)#, user.office_id) >= #db.param(1)#";
+	}
 	if(structkeyexists(form, 'ugid') and trim(form.ugid) NEQ '0'){
 		db.sql&=" and user.user_group_id = #db.param(form.ugid)# ";
 		searchOn=true;
@@ -1178,6 +1181,9 @@ site_id = #db.param(request.zos.globals.id)# ";
 	user.user_group_id = user_group.user_group_id and 
 	user.site_id = #db.param(request.zos.globals.id)# and 
 	user_server_administrator = #db.param('0')#";
+	if(structkeyexists(form, 'office_id') and trim(form.office_id) NEQ ''){
+		db.sql&=" and FIND_IN_SET(#db.param(form.office_id)#, user.office_id) >= #db.param(1)#";
+	}
 	if(structkeyexists(form, 'ugid') and trim(form.ugid) NEQ '0'){
 		db.sql&=" and user.user_group_id = #db.param(form.ugid)# ";
 	}else{
@@ -1276,6 +1282,28 @@ site_id = #db.param(request.zos.globals.id)# ";
 				application.zcore.functions.zInputSelectBox(selectStruct);
 				</cfscript>
 			</div>
+			<cfif application.zcore.user.checkGroupAccess("administrator")>
+				<div class="z-float-left z-pr-10 z-pb-10">
+				#application.zcore.functions.zOutputHelpToolTip("Office","member.member.edit office_id")#:  
+				<cfscript>
+					db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
+					WHERE site_id = #db.param(request.zos.globals.id)# and 
+					office_deleted = #db.param(0)# 
+					ORDER BY office_name";
+					qOffice=db.execute("qOffice");
+					selectStruct = StructNew();
+					selectStruct.name = "office_id";
+					selectStruct.query = qOffice;
+					selectStruct.hideSelect=false;
+					selectStruct.queryParseLabelVars=true;
+					selectStruct.queryLabelField = "##office_name##, ##office_address##";
+					selectStruct.queryValueField = "office_id";
+					selectStruct.multiple=false;
+					application.zcore.functions.zInputSelectBox(selectStruct);
+				</cfscript>
+			</div>
+			</cfif>
+
 			<div class="z-float-left z-pr-10 z-pb-10">
 					<input type="submit" name="submitForm" value="Search" class="z-manager-search-button" />
 				<cfif searchOn>
@@ -1310,6 +1338,7 @@ site_id = #db.param(request.zos.globals.id)# ";
 		<thead>
 		<tr>
 			<th>ID</th>
+			<th>Office(s)</th>
 			<th>Company</th>
 			<th>Name</th>
 			<th>Email</th>
@@ -1324,11 +1353,41 @@ site_id = #db.param(request.zos.globals.id)# ";
 		<tbody>
 			<cfloop query="qMember"> 
 				<cfscript>
-				row={};
-				structappend(row, qMember); 
+					row={};
+					structappend(row, qMember); 
 				</cfscript>
 			<tr #variables.queueSortCom.getRowHTML(qMember.user_id)# <cfif qMember.currentRow MOD 2 EQ 0>class="row2"<cfelse>class="row1"</cfif>>
 				<td>#qMember.user_id#</td>
+				<cfif qMember.office_id NEQ "">
+					<cfscript>
+						var sInTag 	= " AND office_id IN (#qMember.office_id#)"
+						var sOffice	= "";
+						db.sql="SELECT office_name 
+						FROM #db.table("office", request.zos.zcoreDatasource)# office 
+						WHERE site_id = #db.param(request.zos.globals.id)# 
+						AND office_deleted = #db.param(0)# 
+						#db.trustedSQL(sInTag)#
+						ORDER BY office_name";
+						qOfficeData = db.execute("qOfficeData");
+						for(office in qOfficeData){
+							sOffice &= office.office_name & ",";
+						}
+						if(LEN(sOffice) GT 1){
+							sOffice = Mid(sOffice,1,LEN(sOffice)-1);
+						}
+						if(LEN(sOffice) GT 50){
+							//FIND LAST COMMA
+							pos = Find(",", sOffice,40);
+							if(pos NEQ 0)
+								sOffice = Mid(sOffice,1,pos-1) & "...";
+							else
+								sOffice &= "...";
+						}
+					</cfscript>
+					<td>#sOffice#</td>	
+				<cfelse>
+					<td>No Office</td>
+				</cfif>
 				<td>#qMember.member_company#&nbsp;</td>
 				<td><cfif qMember.member_first_name EQ ''>
 						#qMember.user_first_name# #qMember.user_last_name#
