@@ -11,7 +11,10 @@ $sitesPath=get_cfg_var("jetendo_sites_path");
 $debug=false;
 $timeout=60; // seconds
 $host=`hostname`;
-
+$isSharedTestServer=false;
+if($host=="jetendodev.farbeyondcode.com"){
+	$isSharedTestServer=true;
+}
 
 if((int)date("i") % 4 == 0){
 	$avgLoad=explode(" ", `cat /proc/loadavg`);
@@ -110,7 +113,7 @@ if(trim($result) != "1"){
 $sharePath=get_cfg_var("jetendo_share_path");
 
 for($i4=0;$i4 < 62;$i4++){
-	if(!$isTestServer){
+	if($isSharedTestServer || !$isTestServer){
 		$wwwUser=get_cfg_var("jetendo_www_user");
 		if(file_exists($sharePath."__zdeploy-core-complete.txt")){ 
 			@unlink($sharePath."__zdeploy-core-complete.txt");
@@ -123,6 +126,7 @@ for($i4=0;$i4 < 62;$i4++){
 	}
 	
 	if($isTestServer && file_exists($sharePath."__zdeploy-core-executed.txt")){ 
+		$deploy_server_group=file_get_contents($sharePath."__zdeploy-core-executed.txt");
 		unlink($sharePath."__zdeploy-core-executed.txt");
 		@unlink($sharePath."__zdeploy-core-failed.txt");
 
@@ -135,7 +139,9 @@ for($i4=0;$i4 < 62;$i4++){
 			fclose($handle); 
 		}else{
 			$sql2="select * from deploy_server where deploy_server_deploy_enabled='1' and 
-			deploy_server_deleted = 0 "; 
+			deploy_server_deleted = 0 and 
+			deploy_server_group='".$cmysql->real_escape_string($deploy_server_group)."' "; 
+
 			$r=$cmysql->query($sql2, MYSQLI_STORE_RESULT); 
 			$handle=fopen($sharePath."__zdeploy-core-complete-temp.txt", "w");
 			fwrite($handle, "1");
@@ -152,8 +158,9 @@ for($i4=0;$i4 < 62;$i4++){
 				$privateKeyPath=$row2["deploy_server_private_key_path"];
 				$remoteUsername=$row2["deploy_server_ssh_username"];
 				$remoteHost=$row2["deploy_server_ssh_host"];
+				$remotePort=$row2["deploy_server_ssh_port"];
 
-				$sshCommand=zGetSSHConnectCommand($remoteHost, $privateKeyPath);
+				$sshCommand=zGetSSHConnectCommand($remoteHost, $privateKeyPath, $remotePort);
 				if($sshCommand===FALSE){
 					$handle=fopen($sharePath."__zdeploy-core-failed.txt", "w");
 					fwrite($handle, "zGetSSHConnectCommand failed.  The remote host and private key may not be defined yet.");
@@ -229,6 +236,7 @@ for($i4=0;$i4 < 62;$i4++){
 		// only run on test
 		if($isTestServer){
 			if(file_exists($siteWritableInstallPath."__zdeploy-executed.txt")){ 
+				$deploy_server_group=file_get_contents($siteWritableInstallPath."__zdeploy-executed.txt");
 				unlink($siteWritableInstallPath."__zdeploy-executed.txt"); 
 				@unlink($siteWritableInstallPath."__zdeploy-complete.txt.temp"); 
 				@unlink($siteWritableInstallPath."__zdeploy-complete.txt"); 
@@ -253,7 +261,8 @@ for($i4=0;$i4 < 62;$i4++){
 					deploy_server_deploy_enabled='1'  and 
 					site_x_deploy_server.site_id = '".$siteId."' and 
 					deploy_server_deleted = 0 and 
-					site_x_deploy_server_deleted = 0 "; 
+					site_x_deploy_server_deleted = 0  and 
+					deploy_server_group='".$cmysql->real_escape_string($deploy_server_group)."' ";
 					$mysqlResult1=$cmysql->query($sql2, MYSQLI_STORE_RESULT); 
 					while($row2=$mysqlResult1->fetch_assoc()){ 
 						$privateKeyPath=$row2["deploy_server_private_key_path"];
@@ -261,8 +270,9 @@ for($i4=0;$i4 < 62;$i4++){
 						$remoteHost=$row2["deploy_server_ssh_host"];
 						$remotePath=$row2["site_x_deploy_server_remote_path"];
 						$remoteSourceOnly=$row2["site_x_deploy_server_source_only"];
+						$remotePort=$row2["deploy_server_ssh_port"];
 						
-						$sshCommand=zGetSSHConnectCommand($remoteHost, $privateKeyPath);
+						$sshCommand=zGetSSHConnectCommand($remoteHost, $privateKeyPath, $remotePort);
 						if($sshCommand===FALSE){
 							$handle=fopen($siteWritableInstallPath."__zdeploy-error.txt", "w");
 							fwrite($handle, "zGetSSHConnectCommand failed.  The remote host and private key may not be defined yet.");
@@ -358,20 +368,20 @@ for($i4=0;$i4 < 62;$i4++){
 				}
 			}
 		}else{
-			// only run on remote
-			if(file_exists($siteInstallPath."__zdeploy-complete.txt")){
-				// fix file chown and chmod permissions
-				$preview=false;
-				$arrError=array();
-				$result=zCheckDirectoryPermissions($siteInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "440", "550", true, $preview, $arrError, $isTestServer);
-				$result=zCheckDirectoryPermissions($siteWritableInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-				$result=zCheckDirectoryPermissions($siteWritableInstallPath."zcache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-				$result=zCheckDirectoryPermissions($siteWritableInstallPath."_cache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-				$result=zCheckDirectoryPermissions($siteWritableInstallPath."zupload/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
-				$result=zCheckDirectoryPermissions($siteWritableInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", true, $preview, $arrError, $isTestServer);
-				
-				@unlink($siteInstallPath."__zdeploy-complete.txt"); 
-			}
+		}
+		// only run on remote
+		if(($isSharedTestServer || !$isTestServer) && file_exists($siteInstallPath."__zdeploy-complete.txt")){
+			// fix file chown and chmod permissions
+			$preview=false;
+			$arrError=array();
+			$result=zCheckDirectoryPermissions($siteInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "440", "550", true, $preview, $arrError, $isTestServer);
+			$result=zCheckDirectoryPermissions($siteWritableInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			$result=zCheckDirectoryPermissions($siteWritableInstallPath."zcache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			$result=zCheckDirectoryPermissions($siteWritableInstallPath."_cache/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			$result=zCheckDirectoryPermissions($siteWritableInstallPath."zupload/", get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", false, $preview, $arrError, $isTestServer);
+			$result=zCheckDirectoryPermissions($siteWritableInstallPath, get_cfg_var("jetendo_www_user"), get_cfg_var("jetendo_www_user"), "660", "770", true, $preview, $arrError, $isTestServer);
+			
+			@unlink($siteInstallPath."__zdeploy-complete.txt"); 
 		}
 	} 
 	

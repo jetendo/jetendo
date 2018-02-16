@@ -811,8 +811,8 @@ function checkMySQLPrivileges(){
 	return true;
 }
 
-function zGetSSHConnectCommand($remoteHost, $privateKeyPath){
-	$cmd='/usr/bin/ssh -O check -S "/root/.ssh/ctl/%L-%r@%h:%p" '.$remoteHost." 2>&1";
+function zGetSSHConnectCommand($remoteHost, $privateKeyPath, $remotePort){
+	$cmd='/usr/bin/ssh -O check -S "/root/.ssh/ctl/%L-%r@%h:%p" -p '.escapeshellarg($remotePort).' '.$remoteHost." 2>&1";
 	echo "\n\n\n\n".$cmd."\n";
 	$result=`$cmd`;
 	echo "Result: ".$result."\n";
@@ -820,14 +820,14 @@ function zGetSSHConnectCommand($remoteHost, $privateKeyPath){
 	if($p === FALSE){
 		if(file_exists($privateKeyPath)){
 			echo "Switching to private key path for ssh connection\n";
-			$sshCommand='ssh -i '.$privateKeyPath;
+			$sshCommand='ssh -p '.escapeshellarg($remotePort).' -i '.escapeshellarg($privateKeyPath);
 		}else{
 			echo "No private key or ssh connection exists\n";
 			return false;
 		}
 	}else{
 		echo "Reusing master ssh connection\n";
-		$sshCommand='ssh -o "ControlPath=/root/.ssh/ctl/%L-%r@%h:%p"';
+		$sshCommand='ssh -p '.escapeshellarg($remotePort).' -o "ControlPath=/root/.ssh/ctl/%L-%r@%h:%p"';
 	}
 	return $sshCommand;
 }

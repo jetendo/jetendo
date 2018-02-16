@@ -101,7 +101,7 @@
 		if(not fileexists(tempFile)){
 			tempFile=request.zos.sharedPath&"database/jetendo-schema-"&currentVersion&".json";
 			if(not fileexists(tempFile)){
-				throw("The current database version's schema json file is missing: "&request.zos.sharedPath&"database/jetendo-schema-"&currentVersion&".json");
+				throw("checkVersion: The current database version's schema json file is missing: "&request.zos.sharedPath&"database/jetendo-schema-"&currentVersion&".json");
 			}
 		}
 	}

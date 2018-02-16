@@ -957,7 +957,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 		// select all children
 		db.sql="select * from ##db.table("#ss.childTableName#", #ss.datasource#)## 
 		WHERE 
-		#ss.tableName#_id = ##db.param(row.#ss.childPrimaryKeyId)### ";
+		#ss.tableName#_id = ##db.param(row.#ss.childPrimaryKeyId#)## ";
 		');
 		if(ss.childEnableSiteId){
 			echo('

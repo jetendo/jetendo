@@ -38,6 +38,7 @@
 	<cfscript>
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
+	form.deploy_server_group=application.zcore.functions.zso(form, 'deploy_server_group');
 	if(form.method EQ "deploySite"){
 		setting requesttimeout="150";
 	}
@@ -59,7 +60,8 @@
 	WHERE deploy_server.deploy_server_id = site_x_deploy_server.deploy_server_id and 
 	site_x_deploy_server.site_id = #db.param(form.sid)# and 
 	site_x_deploy_server_deleted = #db.param(0)# and 
-	deploy_server_deleted = #db.param(0)# "; 
+	deploy_server_group=#db.param(form.deploy_server_group)# and 
+	deploy_server_deleted = #db.param(0)#";
 	var qDeploy=db.execute("qDeploy");
 	if(qDeploy.recordcount EQ 0){
 		throw("No deploy servers has been configured for this site yet.");
@@ -67,31 +69,38 @@
 
 	for(var row in qDeploy){
 		// required to ensure the rsync command sends file to correct remote path.
-		rs=variables.getSiteJson(row);
-		if(not rs.success){
-			throw(rs.errorMessage);
+		if(row.deploy_server_host EQ ""){
+			// don't need to verify
+			if(row.site_x_deploy_server_remote_site_id EQ 0 or row.site_x_deploy_server_remote_path EQ ""){
+				throw("No deploy servers has been configured for this site yet.");
+			}
+		}else{
+			rs=variables.getSiteJson(row);
+			if(not rs.success){
+				throw(rs.errorMessage);
+			}
+			/*
+			disabled for now since it isn't working.  this would need to run after everything instead of before in the future.
+			link=rs.dataStruct.domain&"/z/server-manager/api/server/executeCacheReset?zusername=#urlencodedformat(row.deploy_server_email)#&zpassword=#urlencodedformat(row.deploy_server_password)#&reset=site&zforce=1";  
+			r1=application.zcore.functions.zdownloadlink(link, 120); 
+			if(r1.success EQ false or r1.cfhttp.statuscode NEQ "200 OK"){ 
+				application.zcore.status.setStatus(request.zsid, "Site files deployed, but the site cache failed to reset on the remote server.  You should manually verify the web site is still working.", form, true);
+			} */
+			db.sql="update #db.table("site_x_deploy_server", request.zos.zcoreDatasource)# 
+			set site_x_deploy_server_remote_path = #db.param(rs.dataStruct.installPath)#,
+			site_x_deploy_server_updated_datetime=#db.param(request.zos.mysqlnow)#  
+			where site_id = #db.param(row.site_id)# and 
+			site_x_deploy_server_id = #db.param(row.site_x_deploy_server_id)# and 
+			site_x_deploy_server_deleted=#db.param(0)# ";
+			db.execute("qUpdate");
 		}
-		/*
-		disabled for now since it isn't working.
-		link=rs.dataStruct.domain&"/z/server-manager/api/server/executeCacheReset?zusername=#urlencodedformat(row.deploy_server_email)#&zpassword=#urlencodedformat(row.deploy_server_password)#&reset=site&zforce=1";  
-		r1=application.zcore.functions.zdownloadlink(link, 120); 
-		if(r1.success EQ false or r1.cfhttp.statuscode NEQ "200 OK"){ 
-			application.zcore.status.setStatus(request.zsid, "Site files deployed, but the site cache failed to reset on the remote server.  You should manually verify the web site is still working.", form, true);
-		} */
-		db.sql="update #db.table("site_x_deploy_server", request.zos.zcoreDatasource)# 
-		set site_x_deploy_server_remote_path = #db.param(rs.dataStruct.installPath)#,
-		site_x_deploy_server_updated_datetime=#db.param(request.zos.mysqlnow)#  
-		where site_id = #db.param(row.site_id)# and 
-		site_x_deploy_server_id = #db.param(row.site_x_deploy_server_id)# and 
-		site_x_deploy_server_deleted=#db.param(0)# ";
-		db.execute("qUpdate");
 	}
 	application.zcore.functions.zdeletefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-error.txt');
 	application.zcore.functions.zdeletefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-complete.txt');
 	if(structkeyexists(form, 'preview')){
 		application.zcore.functions.zwritefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-preview.txt', '1');
 	}
-	application.zcore.functions.zwritefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-executed.txt', '1');
+	application.zcore.functions.zwritefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-executed.txt', form.deploy_server_group);
 	
 	var start=gettickcount();
 	while(true){
@@ -226,6 +235,9 @@
 		if(not structkeyexists(form, 'deploy_server_id'&index)){
 			break;
 		}
+		if(form["site_x_deploy_server_remote_path#index#"] EQ ""){
+			form["site_x_deploy_server_remote_path#index#"]=application.zcore.functions.zvar("homedir", form.sid);
+		}
 		/*if(application.zcore.functions.zso(form, "site_x_deploy_server_remote_site_id#index#", true, 0) EQ 0){
 			continue;
 		}*/
@@ -311,6 +323,9 @@
 	apiError=false;
 	arrDeployServer=[];
 	for(var row in qDeployServer){
+		if(row.deploy_server_host EQ ""){
+			continue;
+		}
 		if(row.deploy_server_secure EQ 1){
 			link="https://"&row.deploy_server_host;
 		}else{
@@ -364,6 +379,7 @@
 	}
 	if(not apiError){
 		echo('<tr>
+		<th>SSH Host</th>
 		<th>Remote Host</th>
 		<th>Local Site</th>
 		<th>Remote Site</th>
@@ -379,7 +395,9 @@
 				}
 			}
 			curDomain=replace(replace(row.site_short_domain, '.'&request.zos.testDomain, ''), "www.", "");
-			echo('<tr><td>'&deployServer.row.deploy_server_host&'</td>
+			echo('<tr>
+			<td>'&deployServer.row.deploy_server_ssh_host&'</td>
+			<td>'&deployServer.row.deploy_server_host&'</td>
 			<td>'&curDomain&'</td><td>');
 			if(row.site_x_deploy_server_remote_site_id NEQ ""){
 				form["site_x_deploy_server_remote_site_id#index#"]=row.site_x_deploy_server_remote_site_id;
@@ -453,6 +471,7 @@
 	<form class="zFormCheckDirty" action="/z/server-manager/admin/deploy/saveSite" method="post">
 	<input type="hidden" name="sid" value="#htmleditformat(form.sid)#" />
 	<table class="table-list"><tr>
+	<th>SSH Host</th>
 	<th>Remote Host</th>
 	<th>Local Site</th>
 	<th>Remote Site</th>
@@ -461,78 +480,92 @@
 	index=0;
 	for(var row in qDeploy){
 		index++;
-		if(row.deploy_server_secure EQ 1){
-			link="https://"&row.deploy_server_host;
-		}else{
-			link="http://"&row.deploy_server_host;
-		}
-		link=link&"/z/server-manager/api/server/getConfig?zusername=#urlencodedformat(row.deploy_server_email)#&zpassword=#urlencodedformat(row.deploy_server_password)#"; 
-		r1=application.zcore.functions.zDownloadLink(link, 30);
-		writeoutput('<tr class="table-white"><td>#row.deploy_server_host#</td>
+		writeoutput('<tr class="table-white">
+		<td>'&row.deploy_server_ssh_host&'</td>
+		<td>#row.deploy_server_host#</td>
 		<td>#replace(replace(application.zcore.functions.zvar("shortDomain", form.sid), "."&request.zos.testDomain, ""), "www.", "")#</td>'); 
-		if(not r1.success){ 
-			writeoutput('<td colspan="2">Failed to download configuration.  <a href="/z/server-manager/admin/deploy-server/edit?deploy_server_id=#row.deploy_server_id#">Verify server configuration</a></td>');
-		}else{ 
-			// loop 
-			try{
-				dataStruct=deserializeJson(r1.cfhttp.filecontent); 
-			}catch(Any excpt){
-				savecontent variable="output"{
-					writeoutput('Failed to execute deserializeJSON after calling <a href="#link#" target="_blank">#link#</a>.');
-					writedump(r1);
-					writedump(excpt);
-				}
-				throw(output);
-			}
-			arrLabel=[];
-			arrValue=[];
-			if(not structkeyexists(dataStruct, 'success')){
-				writeoutput('<td colspan="2">API call returned invalid format.</td>');
-			}else if(not dataStruct.success){
-				writeoutput('<td colspan="2">API call returned error message: #dataStruct.errorMessage#</td>');
+
+		if(row.deploy_server_host EQ ""){
+
+			echo(' 
+			<td><input type="text" name="site_x_deploy_server_remote_site_id#index#" value="#row.site_x_deploy_server_remote_site_id#" style="min-width:100%; max-width:100%; width:100%;">
+			<input type="hidden" name="site_x_deploy_server_remote_path#index#" value="">
+				</td>');
+
+		}else{
+			if(row.deploy_server_secure EQ 1){
+				link="https://"&row.deploy_server_host;
 			}else{
-				curDomain=replace(replace(application.zcore.functions.zvar('shortdomain', form.sid), '.'&request.zos.testDomain, ''), "www.", "");
-				if(row.site_x_deploy_server_remote_site_id NEQ ""){
-					form["site_x_deploy_server_remote_site_id#index#"]=row.site_x_deploy_server_remote_site_id;
-				}else{
-					form["site_x_deploy_server_remote_site_id#index#"]='';
-				}
-				for(i=1;i LTE arraylen(dataStruct.arrSite);i++){
-					curSite=dataStruct.arrSite[i];
-					if(form["site_x_deploy_server_remote_site_id#index#"] EQ '' and curDomain EQ curSite.shortDomain){
-						form["site_x_deploy_server_remote_site_id#index#"]=curSite.id;
+				link="http://"&row.deploy_server_host;
+			}
+			link=link&"/z/server-manager/api/server/getConfig?zusername=#urlencodedformat(row.deploy_server_email)#&zpassword=#urlencodedformat(row.deploy_server_password)#"; 
+			r1=application.zcore.functions.zDownloadLink(link, 30);
+			if(not r1.success){ 
+				writeoutput('<td colspan="2">Failed to download configuration.  <a href="/z/server-manager/admin/deploy-server/edit?deploy_server_id=#row.deploy_server_id#">Verify server configuration</a></td>');
+			}else{ 
+				// loop 
+				try{
+					dataStruct=deserializeJson(r1.cfhttp.filecontent); 
+				}catch(Any excpt){
+					savecontent variable="output"{
+						writeoutput('Failed to execute deserializeJSON after calling <a href="#link#" target="_blank">#link#</a>.');
+						writedump(r1);
+						writedump(excpt);
 					}
-					arrayAppend(arrLabel, curSite.shortDomain);
-					arrayAppend(arrValue, curSite.id);
+					throw(output);
 				}
-				writeoutput('<td>');
-				writeoutput('<input type="hidden" name="deploy_server_id#index#" value="#htmleditformat(row.deploy_server_id)#" />');
-				writeoutput('<input type="hidden" name="site_x_deploy_server_remote_path#index#" value="#htmleditformat(row.site_x_deploy_server_remote_path)#" />');
-				
-				ts = StructNew();
-				ts.name = "site_x_deploy_server_remote_site_id#index#";
-				ts.listLabels = arrayToList(arrLabel, chr(9));
-				ts.listValues = arrayToList(arrValue, chr(9));
-				ts.listLabelsDelimiter = chr(9); // tab delimiter
-				ts.listValuesDelimiter = chr(9);
-				ts.selectedValues=row.site_x_deploy_server_remote_site_id;
-				application.zcore.functions.zInputSelectBox(ts);
-				writeoutput('</td><td>');
-				writeoutput('<input type="radio" name="site_x_deploy_server_source_only#index#" ');
-				if(row.site_x_deploy_server_source_only EQ 1){
-					echo('checked="checked"');
+				arrLabel=[];
+				arrValue=[];
+				if(not structkeyexists(dataStruct, 'success')){
+					writeoutput('<td colspan="2">API call returned invalid format.</td>');
+				}else if(not dataStruct.success){
+					writeoutput('<td colspan="2">API call returned error message: #dataStruct.errorMessage#</td>');
+				}else{
+					curDomain=replace(replace(application.zcore.functions.zvar('shortdomain', form.sid), '.'&request.zos.testDomain, ''), "www.", "");
+					if(row.site_x_deploy_server_remote_site_id NEQ ""){
+						form["site_x_deploy_server_remote_site_id#index#"]=row.site_x_deploy_server_remote_site_id;
+					}else{
+						form["site_x_deploy_server_remote_site_id#index#"]='';
+					}
+					for(i=1;i LTE arraylen(dataStruct.arrSite);i++){
+						curSite=dataStruct.arrSite[i];
+						if(form["site_x_deploy_server_remote_site_id#index#"] EQ '' and curDomain EQ curSite.shortDomain){
+							form["site_x_deploy_server_remote_site_id#index#"]=curSite.id;
+						}
+						arrayAppend(arrLabel, curSite.shortDomain);
+						arrayAppend(arrValue, curSite.id);
+					}
+					writeoutput('<td>');
+					writeoutput('<input type="hidden" name="site_x_deploy_server_remote_path#index#" value="#htmleditformat(row.site_x_deploy_server_remote_path)#" />');
+					
+					ts = StructNew();
+					ts.name = "site_x_deploy_server_remote_site_id#index#";
+					ts.listLabels = arrayToList(arrLabel, chr(9));
+					ts.listValues = arrayToList(arrValue, chr(9));
+					ts.listLabelsDelimiter = chr(9); // tab delimiter
+					ts.listValuesDelimiter = chr(9);
+					ts.selectedValues=row.site_x_deploy_server_remote_site_id;
+					application.zcore.functions.zInputSelectBox(ts);
+					writeoutput('</td>');
+
 				}
-				echo('value="1" /> Source Only 
-				<input type="radio" name="site_x_deploy_server_source_only#index#" ');
-				if(row.site_x_deploy_server_source_only EQ 0 or row.site_x_deploy_server_source_only EQ ''){
-					echo('checked="checked"');
-				}
-				echo(' value="0" /> Source &amp; Files ');
 			}
 		}
+		echo('<td>');
+		echo('<input type="hidden" name="deploy_server_id#index#" value="#htmleditformat(row.deploy_server_id)#" />');
+		writeoutput('<input type="radio" name="site_x_deploy_server_source_only#index#" ');
+		if(row.site_x_deploy_server_source_only EQ 1){
+			echo('checked="checked"');
+		}
+		echo('value="1" /> Source Only 
+		<input type="radio" name="site_x_deploy_server_source_only#index#" ');
+		if(row.site_x_deploy_server_source_only EQ 0 or row.site_x_deploy_server_source_only EQ ''){
+			echo('checked="checked"');
+		}
+		echo(' value="0" /> Source &amp; Files '); 
 		echo('</tr>');
 	}
-	writeoutput('<tr><td colspan="4"><input type="submit" name="submit1" value="Save" /> 
+	writeoutput('<tr><td colspan="5"><input type="submit" name="submit1" value="Save" /> 
 	<input type="button" name="cancel" onclick="window.location.href=''/z/server-manager/admin/deploy/index?sid=#form.sid#'';" value="Cancel" />
 	</td></tr>');
 	writeoutput('</table>
@@ -549,28 +582,30 @@
 	db=request.zos.queryObject;
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
+	form.deploy_server_group=application.zcore.functions.zso(form, 'deploy_server_group');
 	startTime=gettickcount();
 	db.sql="select * from #db.table("deploy_server", request.zos.zcoredatasource)# 
 	where deploy_server_deploy_enabled=#db.param(1)# and 
+	deploy_server_group=#db.param(form.deploy_server_group)# and 
 	deploy_server_deleted = #db.param(0)#";
 	qDeploy=db.execute("qDeploy");
 	if(qDeploy.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "No deployment servers are enabled. Create and enable a deploy server first.", form, true);
-		application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/index?deploy_server_group=#form.deploy_server_group#&zsid=#request.zsid#");
 	}
 	setting requesttimeout="500";
 	application.zcore.functions.zdeletefile(request.zos.sharedPath&'__zdeploy-core-complete.txt');
 	if(structkeyexists(form, 'preview')){
 		application.zcore.functions.zwritefile(request.zos.sharedPath&'__zdeploy-core-preview.txt', '1');
 	}
-	application.zcore.functions.zwritefile(request.zos.sharedPath&'__zdeploy-core-executed.txt', '1');
+	application.zcore.functions.zwritefile(request.zos.sharedPath&'__zdeploy-core-executed.txt', form.deploy_server_group);
 	
 	var start=gettickcount();
 	failed=false;
 	while(true){
 		if((gettickcount()-start)/1000 GT 200){
 			application.zcore.status.setStatus(request.zsid, "Deployment took longer then 200 seconds, and may still be running at #timeformat(now(), "h:mm:ss tt")#. Please verify that the site is working correct on the remote server(s) and clear any cached data that may need to be cleared.", form, true);
-			application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?deploy_server_group=#form.deploy_server_group#&zsid=#request.zsid#");
 		}
 		if(fileexists(request.zos.sharedPath&'__zdeploy-core-complete.txt')){
 			application.zcore.functions.zdeletefile(request.zos.sharedPath&'__zdeploy-core-complete.txt');
@@ -578,7 +613,7 @@
 		}else if(fileexists(request.zos.sharedPath&'__zdeploy-core-failed.txt')){
 			e=application.zcore.functions.zReadFile(request.zos.sharedPath&'__zdeploy-core-failed.txt');
 			application.zcore.status.setStatus(request.zsid, "Deployment failed: "&e, form, true);
-			application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?deploy_server_group=#form.deploy_server_group#&zsid=#request.zsid#");
 
 			application.zcore.functions.zdeletefile(request.zos.sharedPath&'__zdeploy-core-failed.txt');
 			failed=true;
@@ -586,9 +621,13 @@
 		}
 		sleep(100);
 	}
+	cacheReset=false;
 	if(not failed and not structkeyexists(form, 'preview')){
 		// later this needs to be non blocking so multiple servers update at once
 		for(row in qDeploy){
+			if(row.deploy_server_host EQ ""){
+				continue;
+			}
 			if(row.deploy_server_secure EQ 1){
 				adminDomain="https://"&row.deploy_server_host;
 			}else{
@@ -620,13 +659,17 @@
 				}
 				throw("#request.zos.installPath#core/ synced, but failed to clear cache: #form.clearcache# for <a href=""#link#"">#link#</a>   at #timeformat(now(), "h:mm:ss tt")#.  You should manually verify the web sites on the target server are still working. Output: #output#");
 			} 
+			cacheReset=true;
 		}
 		application.zcore.status.setStatus(request.zsid, "#request.zos.installPath#core/ synced in #((gettickcount()-startTime)/1000)# seconds.  Completed at #timeformat(now(), "h:mm:ss tt")#. Please verify that the remote server(s) are working correctly.");
 	
 	}else{
 		application.zcore.status.setStatus(request.zsid, "#request.zos.installPath#core/ preview changes completed.");
 	}
-	application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?zsid=#request.zsid#");
+	if(not cacheReset){
+		application.zcore.status.setStatus(request.zsid, "Remote cache was not reset. You must do this manually.");
+	}
+	application.zcore.functions.zRedirect("/z/server-manager/admin/deploy/deployCore?deploy_server_group=#form.deploy_server_group#&zsid=#request.zsid#");
 	</cfscript>
 	
 </cffunction>
@@ -637,6 +680,7 @@
 	var local=structnew();
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
+	form.deploy_server_group =application.zcore.functions.zso(form, 'deploy_server_group');
 	application.zcore.functions.zSetPageHelpId("8.4.5"); 
 	if(request.zos.isTestServer EQ false){
 		writeoutput('Deploy can''t be run on a production server since it is designed to deploy from the test server to the production server. 
@@ -644,11 +688,34 @@
 		application.zcore.functions.zabort();
 	}
 	application.zcore.functions.zStatusHandler(request.zsid);
+
+	db=request.zos.queryObject;
+	db.sql="SELECT * 
+	FROM #db.table("deploy_server", request.zos.zcoreDatasource)# deploy_server WHERE 
+	deploy_server_deleted = #db.param(0)#
+	group by deploy_server_group 
+	order by deploy_server_group asc ";
+	qDeploy=db.execute("qDeploy");
 	</cfscript>
 	<p><a href="/z/server-manager/admin/deploy/index">Deploy</a> /</p>
 	<h2>Deploy Core Application</h2>
 	<p>Select the kind of cache to clear after deployment, and click "Submit".</p>
 	<p>When changing the core, it is recommended to verify conventions before deploying.  This helps retain integration and compatibility.</p>
+
+	<h3>
+		<cfscript>
+		offset=1;
+		for(row in qDeploy){
+			echo('<input type="radio" name="deploy_server_group" class="deployServerGroup" id="deploy_server_group#offset#" value="#htmleditformat(row.deploy_server_group)#" ');
+			if((form.deploy_server_group EQ "" and offset EQ 1) or form.deploy_server_group EQ row.deploy_server_group){
+				echo('checked="checked"');
+			}
+			echo('> <label for="deploy_server_group#offset#">#row.deploy_server_group#</label> ');
+			offset++;
+		}
+		</cfscript>
+	</h3>
+	<hr>
 	<p>Clear Cache:
 		<input type="radio" class="clearCacheCoreDeploy" name="clearcache" value="" checked="checked" />
 		Code
@@ -665,9 +732,9 @@
 
 		<div id="pleaseWait" style="display:none;">Please wait up to 200 seconds...</div>
 		<div id="deployLinkDiv" style="width:100%; float:left">
-			<h2><a href="##" onclick="document.getElementById('deployLinkDiv').style.display='none';document.getElementById('pleaseWait').style.display='block'; window.location.href='/z/server-manager/admin/deploy/processDeployCore?clearcache='+$('.clearCacheCoreDeploy:checked').val(); return false;" class="z-manager-search-button">Deploy Core</a>
+			<h2><a href="##" class="deployCoreButton z-manager-search-button">Deploy Core</a>
 			&nbsp;&nbsp;&nbsp;
-			<a href="##" onclick="document.getElementById('deployLinkDiv').style.display='none';document.getElementById('pleaseWait').style.display='block'; window.location.href='/z/server-manager/admin/deploy/processDeployCore?preview=1&amp;clearcache='+$('.clearCacheCoreDeploy:checked').val(); return false;" class="z-manager-search-button">Preview Changes</a>
+			<a href="##" class="previewDeployCoreButton z-manager-search-button">Preview Changes</a>
 			&nbsp;&nbsp;&nbsp;
 			<a href="/z/server-manager/tasks/verify-conventions/index" target="_blank" class="z-manager-search-button">Verify Conventions</a>
 			</h2>
@@ -681,6 +748,35 @@
 			<textarea name="changes" cols="100" row="20" style="width:95% !important; height:200px;">'&application.zcore.functions.zreadfile(filePath)&'</textarea>');
 		}
 		</cfscript>
+		<script type="text/javascript">
+		zArrDeferredFunctions.push(function(){
+			$(".deployCoreButton").on("click", function(e){
+				e.preventDefault();
+				document.getElementById('deployLinkDiv').style.display='none';
+				document.getElementById('pleaseWait').style.display='block'; 
+				group="";
+				$(".deployServerGroup").each(function(){
+					if(this.checked){
+						group=this.value;
+					}
+				});
+				window.location.href='/z/server-manager/admin/deploy/processDeployCore?clearcache='+$('.clearCacheCoreDeploy:checked').val()+'&deploy_server_group='+escape(group); 
+			});
+			$(".previewDeployCoreButton").on("click", function(e){
+				e.preventDefault();
+				document.getElementById('deployLinkDiv').style.display='none';
+				document.getElementById('pleaseWait').style.display='block'; 
+				group="";
+				$(".deployServerGroup").each(function(){
+					if(this.checked){
+						group=this.value;
+					}
+				});
+				window.location.href='/z/server-manager/admin/deploy/processDeployCore?preview=1&clearcache='+$('.clearCacheCoreDeploy:checked').val()+'&deploy_server_group='+escape(group); 
+
+			});
+		});
+		</script>
 </cffunction>
 
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
@@ -691,6 +787,7 @@
 	}else{
 		application.zcore.functions.zSetPageHelpId("8.1.1.3");
 	}
+	form.deploy_server_group =application.zcore.functions.zso(form, 'deploy_server_group');
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	if(not request.zos.isTestServer){
@@ -712,10 +809,10 @@
 		application.zcore.functions.zredirect(qSite.site_domain&"/z/server-manager/admin/deploy/index?sid=#form.sid#"); 
 	}
 	</cfscript>
-		<h2>Deploy Site</h2> 
+		<h2>Deploy Site</h2>  
 		<div style="font-size:120%; line-height:1.3;  width:100%; float:left;">
 	<cfif application.zcore.functions.zso(form, 'sid') NEQ ""> 
-			<p id="deployStatusId" style="display:none;">Please wait while the deploy process executes. (This could take a while if the changed files were large.)</p>
+			<p id="deployStatusId" class="deployStatusId" style="display:none;">Please wait while the deploy process executes. (This could take a while if the changed files were large.)</p>
 		<cfscript>
 		db.sql="select * from 
 		#db.table("deploy_server", request.zos.zcoreDatasource)# deploy_server, 
@@ -723,9 +820,12 @@
 		WHERE deploy_server.deploy_server_id = site_x_deploy_server.deploy_server_id and 
 		site_x_deploy_server.site_id = #db.param(form.sid)#  and 
 		deploy_server_deleted = #db.param(0)# and 
-		site_x_deploy_server_deleted = #db.param(0)#";
+		site_x_deploy_server_deleted = #db.param(0)# 
+		GROUP BY deploy_server_group, site_x_deploy_server_id 
+		ORDER BY deploy_server_group ASC";
 		var qDeploy=db.execute("qDeploy");
 		</cfscript>
+   
 		<!--- <cfif request.zos.isTestServer>
 			<h3>Current Server: Test Server</h3>
 		<cfelse>
@@ -735,11 +835,15 @@
 		if(qDeploy.recordcount EQ 0){
 			echo('<p>No servers have been configured for this site.</p>');
 		}
-		echo('<table class="table-list z-mb-10">'); 
+		echo('<div class="z-float">');
 		for(row in qDeploy){
+			echo('<table class="table-list z-mr-10 z-mb-10" style="float:left;">'); 
 			if(row.site_id NEQ ""){
-				rs=variables.getSiteJson(row);
 				echo("
+				<tr>
+				<th>Group</th> 
+				<td>#row.deploy_server_group#</td>
+				</tr>
 				<tr>
 				<th>Local Site</th> 
 				<td>#application.zcore.functions.zvar("shortDomain", form.sid)#</td>
@@ -747,15 +851,26 @@
 				<tr>
 				<th>Remote Site</th>
 				<td>");
-				if(rs.success){
-					echo('#rs.dataStruct.shortDomain#</td></tr><tr><th>&nbsp;</th><td><span id="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#" onclick="document.getElementById(''deployButtonsId'').style.display=''none'';document.getElementById(''deployStatusId'').style.display=''block'';" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?sid=#form.sid#&amp;preview=1" onclick="document.getElementById(''deployButtonsId'').style.display=''none'';document.getElementById(''deployStatusId'').style.display=''block'';" class="z-manager-search-button">Preview Changes</a></span>');
+				allowDeploy=true;
+				if(row.deploy_server_host EQ ""){
+					echo(application.zcore.functions.zvar("shortDomain", form.sid));
 				}else{
-					echo(rs.errorMessage);
+					rs=variables.getSiteJson(row);
+					if(rs.success){
+						echo(rs.dataStruct.shortDomain);
+					}else{
+						allowDeploy=false;
+						echo(rs.errorMessage);
+					}
 				}
 				echo('</td></tr>');
+				if(allowDeploy){
+					echo('<tr><th>&nbsp;</th><td><span id="deployButtonsId" class="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#&amp;preview=1" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Preview Changes</a></span></td></tr>');
+				}
 			}
+			echo ('</table> ');
 		}
-		echo ('</table> ');
+		echo('</div>');
 
 		filePath=application.zcore.functions.zGetDomainWritableInstallPath(application.zcore.functions.zvar('shortDomain', form.sid))&"__zdeploy-changes.txt";
 		if(fileexists(filePath)){
