@@ -79,6 +79,14 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="getAllCustomersList" localmode="modern" access="public">
+	<cfargument name="limit" type="numeric" required="no" default="10">
+	<cfargument name="customers" type="struct" required="no" default="#{}#">
+	<cfscript>
+		return this.sendRequest( '/customers?limit=' & arguments.limit, arguments.customers, 'GET' );
+	</cfscript>
+</cffunction>
+
 <!--- CARDS --->
 <!--- https://stripe.com/docs/api/curl#cards --->
 
