@@ -1407,6 +1407,8 @@ virtualFileCom.serveVirtualFile();
 			type = 'image/gif';
 		}else if(ext EQ 'pdf'){
 			type='application/pdf';
+		}else if(ext EQ 'mp3'){
+			type='audio/mpeg';
 		}else if(ext EQ 'js'){
 			type='text/js';
 		}else if(ext EQ 'css'){
