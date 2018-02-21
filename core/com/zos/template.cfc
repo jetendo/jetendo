@@ -1029,6 +1029,9 @@ for(local.row in local.qSite){
 	if(trim(arguments.name) EQ ''){
 		this.fail("Error: COMPONENT: zcorerootmapping.com.zos.template.cfc: setTag ARGUMENT `name` cannot be an empty string",true);
 	}else{
+		if(not structkeyexists(request.zos.templateData, 'tagContent')){
+			application.zcore.functions.zRedirect("/");
+		}
 		request.zos.templateData.uniqueTagStruct[arguments.name]=true;
 		if(arguments.append){
 			if(structkeyexists(request.zos.templateData.tagContent,arguments.name)){

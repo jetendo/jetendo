@@ -1111,7 +1111,7 @@ $(document).ready(function(){
 			<td>Incoming Organic Search Traffic</td><td>{OrganicSearchPageNumber}</td></tr>
 		<tr style="{newsletterLogStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="newsletterLog" <cfif request.leadData.disableContentSection.newsletterLog>checked="checked"</cfif>></td>
-			<td>Newsletters</td><td>{newsletterLogPageNumber}</td></tr> 
+			<td>Email Marketing</td><td>{newsletterLogPageNumber}</td></tr> 
 		<tr style="{blogLogStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="blogLog" <cfif request.leadData.disableContentSection.blogLog>checked="checked"</cfif>></td>
 			<td>Blog Articles</td><td>{blogLogPageNumber}</td></tr> 
@@ -2612,7 +2612,7 @@ track_user_first_page
 	rowCount=0;
 	request.leadData.contentSection.newsletterLog=request.leadData.pageCount; 
 	</cfscript>	
-	<h2 id="newsletterStats" style="margin-top:0px;">Newsletters</h2>
+	<h2 id="newsletterStats" style="margin-top:0px;">Email Marketing</h2>
 
 	<cfscript>
 	if(qMonth.recordcount NEQ 0){
