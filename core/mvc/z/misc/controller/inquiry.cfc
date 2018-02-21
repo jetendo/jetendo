@@ -569,7 +569,7 @@
     <tr class="znewslettercheckbox">
 		<th>&nbsp;</th>
 		<td><input type="checkbox" name="inquiries_email_opt_in" id="inquiries_email_opt_in" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_email_opt_in',false,0) EQ "1">checked="checked"</cfif> style="background:none; border:none;" /> <label for="inquiries_email_opt_in"><cfif application.zcore.functions.zvarso("Newsletter Signup Text") EQ "">
-				Please check the box to join our newsletter.
+				Please check the box to join our mailing list.
 			<cfelse>
 				#application.zcore.functions.zvarso("Newsletter Signup Text")#
 			</cfif></label></td>
