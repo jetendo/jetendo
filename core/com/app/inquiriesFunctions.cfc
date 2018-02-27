@@ -92,7 +92,7 @@
 				if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
 					assignDomain=request.zos.globals.publicUserManagerDomain;
 				}
-				if(not application.zcore.user.groupIdHasAccessToGroup(form.user_group_id, "member")){ 
+				if(not application.zcore.user.groupIdHasAccessToGroup(request.zsession.user.group_id, "member")){ 
 					loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/userView";
 				}
 			} 
