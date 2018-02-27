@@ -2214,7 +2214,15 @@ zArrDeferredFunctions.push(function(){
 	});
 
 	if(form.method EQ "index"){
-		arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+		if(application.zcore.user.checkGroupAccess("administrator")){
+			ts={ 
+				sortBy:"name", 
+				site_id:request.zos.globals.id
+			}
+			arrOffice=application.zcore.user.getOffices(ts); 
+		}else{
+			arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
+		}
 		if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
 			savecontent variable="officeField"{
 				selectStruct = StructNew();
