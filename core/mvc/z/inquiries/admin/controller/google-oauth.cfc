@@ -2058,8 +2058,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 		db.sql&=" and site_id = #db.param(form.sid)# ";
 	} 
 	qSite=db.execute("qSite");  
-	startDate=dateformat(dateadd("m", -1, dateformat(now(), "yyyy-mm")&"-01"), "yyyy-mm-dd"); 
-	endDate=dateformat(dateadd("d", -1, dateformat(now(), "yyyy-mm")&"-01"), "yyyy-mm-dd");
+	startDate=dateformat(dateformat(now(), "yyyy-mm")&"-01", "yyyy-mm-dd"); 
+	endDate=dateformat(dateadd("d", -1, dateformat( dateadd("m", 1, startDate), "yyyy-mm")&"-01"), "yyyy-mm-dd");
  
  	count=0;
  	monthSinceGALaunch=datediff("m", "2005-01-01", now());  
@@ -2070,7 +2070,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
  		// uncomment to force import of all time again
  		//row.site_google_analytics_organic_last_import_datetime="";
 		if(row.site_google_analytics_organic_last_import_datetime NEQ "" and not structkeyexists(form, 'reimport')){
-			monthSinceGALaunch=1; // only download last 2 months of data
+			monthSinceGALaunch=2; // only download last 2 months of data
 		} 
  		// one month at a time in reverse until nothing is returned?
  		for(g=1;g<=monthSinceGALaunch;g++){   
@@ -2207,8 +2207,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	}
 	qSite=db.execute("qSite");    
 	// site_google_search_console_last_import_datetime
-	startDate=dateformat(now(), "yyyy-mm-")&"01"; 
-	endDate=dateformat(dateadd("d", -1, dateadd("m", 1, startDate) ), "yyyy-mm-dd");
+	startDate=dateformat(dateformat(now(), "yyyy-mm")&"-01", "yyyy-mm-dd"); 
+	endDate=dateformat(dateadd("d", -1, dateformat( dateadd("m", 1, startDate), "yyyy-mm")&"-01"), "yyyy-mm-dd"); 
  	count=0;
  	monthSinceGALaunch=datediff("m", "2005-01-01", now());
  	for(row in qSite){
@@ -2217,7 +2217,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 		// uncomment to force downloading everything again
 		// row.site_google_analytics_keyword_last_import_datetime="";
 		if(row.site_google_analytics_keyword_last_import_datetime NEQ "" and not structkeyexists(form, 'reimport')){
-			monthSinceGALaunch=1; // only download last 2 months of data
+			monthSinceGALaunch=2; // only download last 2 months of data
 		}
  		// one month at a time in reverse until nothing is returned?
  		for(g=1;g<=monthSinceGALaunch;g++){  
