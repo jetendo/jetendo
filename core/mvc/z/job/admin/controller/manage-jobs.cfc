@@ -21,28 +21,13 @@
 		application.zcore.status.setStatus(Request.zsid, 'Job no longer exists', false,true);
 		application.zcore.functions.zRedirect('/z/job/admin/manage-jobs/index?zsid=#request.zsid#');
 	}
+	jobCom=application.zcore.app.getAppCFC("job");
 	</cfscript>
 	<cfif structkeyexists(form,'confirm')>
 		<cfscript> 
-		application.zcore.imageLibraryCom.deleteImageLibraryId(qCheck.job_image_library_id);
-
-		db.sql="DELETE FROM #db.table("job_x_category", request.zos.zcoreDatasource)#  
-		WHERE job_id= #db.param(application.zcore.functions.zso(form, 'job_id'))# and 
-		job_x_category_deleted = #db.param(0)# and 
-		site_id = #db.param(request.zos.globals.id)# ";
-		q=db.execute("q");
-
-		application.zcore.functions.zDeleteUniqueRewriteRule(qCheck.job_unique_url);
-
-		db.sql="DELETE FROM #db.table("job", request.zos.zcoreDatasource)#  
-		WHERE job_id= #db.param(application.zcore.functions.zso(form, 'job_id'))# and 
-		job_deleted = #db.param(0)# and 
-		site_id = #db.param(request.zos.globals.id)# ";
-		q=db.execute("q");
-
-
-		jobCom=application.zcore.app.getAppCFC("job");
-		jobCom.searchIndexDeleteJob(form.job_id);
+		for(row in qCheck){
+			jobCom.deleteJobByStruct(row);
+		}
 
 		if(structkeyexists(request.zsession, 'job_return'&form.job_id)){
 			a=request.zsession['job_return'&form.job_id];
