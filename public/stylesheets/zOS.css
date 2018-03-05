@@ -237,8 +237,8 @@ border-left:none !important;
 
 .zblog-image-box-image-container img{max-height:100%;float:none;}
 .zblog-image-box-single{width:100% !important; max-width:400px;}
-.zblog-articlepagenav-left{width:23%; margin-right:2%; float:left;}
-.zblog-articlepagenav-right{width:23%; float:left;} 
+.zblog-articlepagenav-left{width:48%; margin-right:2%; float:left;}
+.zblog-articlepagenav-right{width:48%; float:left;} 
 .rss-summary-modern .rss-summary-thumbnail img{float:left; max-width:100%; min-width:100%; margin:0px;}
 .rss-summary-modern .rss-summary-thumbnail a{display:block; float:left; width:100%;}
 

@@ -1282,6 +1282,8 @@ application.zcore.imageLibraryCom.getImageSQL(ts);
 	<cfscript>
 	if(arguments.layout_type EQ ""){
 		return "";	
+	}else if(arguments.layout_type EQ "10"){
+		return "large-images-at-top";	
 	}else if(arguments.layout_type EQ "1" or arguments.layout_type EQ "3"){
 		return "galleryview-1.1";
 	}else if(arguments.layout_type EQ "2" or arguments.layout_type EQ "4"){
@@ -1341,8 +1343,8 @@ application.zcore.imageLibraryCom.getLayoutTypeForm(ts); --->
 	ts.selectedValues =  arguments.ss.value;
 	ts.selectedDelimiter = ","; // change if comma conflicts...
 	// options for list data
-	ts.listLabels = "Large Photos (1 Column),Gallery Slideshow At Bottom,Gallery Slideshow At Top,Thumbnails and Lightbox At Bottom,Thumbnails and Lightbox At Top,ContentFlow At Bottom,ContentFlow At Top,Thumbnail On Top Left - Other Large Photos At Bottom,Thumbnail On Top Right - Other Large Photos At Bottom,Custom";
-	ts.listValues = "0,1,3,2,4,5,6,7,9,8";
+	ts.listLabels = "Large Photos At Bottom,Large Photos At Top,Gallery Slideshow At Bottom,Gallery Slideshow At Top,Thumbnails and Lightbox At Bottom,Thumbnails and Lightbox At Top,ContentFlow At Bottom,ContentFlow At Top,Thumbnail On Top Left - Other Large Photos At Bottom,Thumbnail On Top Right - Other Large Photos At Bottom,Custom";
+	ts.listValues = "0,10,1,3,2,4,5,6,7,9,8";
 	ts.listLabelsDelimiter = ","; // tab delimiter
 	ts.listValuesDelimiter = ",";
 	
@@ -1440,368 +1442,378 @@ application.zcore.imageLibraryCom.displayImages(ts);
 			return arrOutput;	
 		}
 	}
-	if((arguments.ss.layoutType EQ "thumbnail-left-and-other-photos" or arguments.ss.layoutType EQ "thumbnail-right-and-other-photos") and not arguments.ss.top){
+	if(arguments.ss.layoutType EQ "large-images-at-top"){
+		if(arguments.ss.top){
+			arguments.ss.layoutType="";
+		}else{
+			if(arguments.ss.output){
+				return;
+			}else{
+				return [];
+			}
+		}
+	}else if((arguments.ss.layoutType EQ "thumbnail-left-and-other-photos" or arguments.ss.layoutType EQ "thumbnail-right-and-other-photos") and not arguments.ss.top){
 		arguments.ss.layoutType="";
 	}
 	</cfscript>
 	<cfif arguments.ss.output>
-	<cfif arguments.ss.layoutType EQ "thumbnail-left-and-other-photos" or arguments.ss.layoutType EQ "thumbnail-right-and-other-photos">
-		<cfscript>
-		application.zcore.app.getAppCFC("content").setRequestThumbnailSize(0,0,0);
-		
-		if(structkeyexists(request.zos, 'thumbnailSizeStruct')){ 
-			thumbnailWidth=request.zos.thumbnailSizeStruct.width;
-			thumbnailHeight=request.zos.thumbnailSizeStruct.height;
-			thumbnailCrop=request.zos.thumbnailSizeStruct.crop;
-		}else{
+		<cfif arguments.ss.layoutType EQ "thumbnail-left-and-other-photos" or arguments.ss.layoutType EQ "thumbnail-right-and-other-photos">
+			<cfscript>
+			application.zcore.app.getAppCFC("content").setRequestThumbnailSize(0,0,0);
+			
+			if(structkeyexists(request.zos, 'thumbnailSizeStruct')){ 
+				thumbnailWidth=request.zos.thumbnailSizeStruct.width;
+				thumbnailHeight=request.zos.thumbnailSizeStruct.height;
+				thumbnailCrop=request.zos.thumbnailSizeStruct.crop;
+			}else{
+				if(arguments.ss.forceSize){
+					thumbnailWidth=round(arrT[1]/2);
+					echo('1');
+					thumbnailHeight=round((arrT[2]/2)*.6);
+				}else{
+					thumbnailWidth=round(960/2);
+					thumbnailHeight=round((960/2)*.6);
+				}
+			}
+			thumbnailWidth*=2;
+			thumbnailHeight*=2; 
+			</cfscript>
+			<cfloop query="qImages" startrow="1" endrow="1">
+				<cfif arguments.ss.layoutType EQ "thumbnail-right-and-other-photos">
+					<div class="zImageLibraryImageRight" style="width:#thumbnailWidth/1.5#px;">
+				<cfelse>
+					<div class="zImageLibraryImageLeft" style="width:#thumbnailWidth/1.5#px;">
+				</cfif>
+					<cfscript>
+					caption=qImages.image_caption;
+					if(caption EQ ""){
+						caption=arguments.ss.defaultAltText;
+					}
+					</cfscript>
+					<img class="content z-fluid" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
+				</div>
+			</cfloop>
+		<cfelseif arguments.ss.layoutType EQ "contentflow">
+			<cfscript>
+			application.zcore.functions.zRequireContentFlowSlideshow();
+			
 			if(arguments.ss.forceSize){
 				thumbnailWidth=round(arrT[1]/2);
-				echo('1');
 				thumbnailHeight=round((arrT[2]/2)*.6);
 			}else{
-				thumbnailWidth=round(960/2);
-				thumbnailHeight=round((960/2)*.6);
+				thumbnailWidth=round(request.zos.globals.maximagewidth/2);
+				thumbnailHeight=round((request.zos.globals.maximagewidth/2)*.6);
 			}
-		}
-		thumbnailWidth*=2;
-		thumbnailHeight*=2; 
-		</cfscript>
-		<cfloop query="qImages" startrow="1" endrow="1">
-			<cfif arguments.ss.layoutType EQ "thumbnail-right-and-other-photos">
-				<div class="zImageLibraryImageRight" style="width:#thumbnailWidth/1.5#px;">
-			<cfelse>
-				<div class="zImageLibraryImageLeft" style="width:#thumbnailWidth/1.5#px;">
+			newSize=thumbnailWidth&"x"&thumbnailHeight;
+			application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
+			</cfscript> 
+
+			<div id="contentFlow#qImages.image_library_id#" class="ContentFlow">
+				<div class="loadIndicator">
+					<div class="indicator"></div>
+				</div>
+				<div class="flow">
+					<cfloop query="qImages">
+						<cfscript>
+						caption=qImages.image_caption;
+						if(caption EQ ""){
+							caption=arguments.ss.defaultAltText;
+						}
+						</cfscript>
+						<div class="item">
+							<img class="content" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
+							<div class="caption">#htmleditformat(qImages.image_caption)#</div>
+						</div>
+					</cfloop>
+				</div>
+				<div class="globalCaption"></div>
+			</div>
+		    <script type="text/javascript"> 
+			var myContentFlow#qImages.image_library_id# = new ContentFlow('contentFlow#qImages.image_library_id#', {
+				circularFlow: true,
+				loadingTimeout: 60000
+			});
+			zArrDeferredFunctions.push(function() {
+				setTimeout(function(){
+					if($("##contentFlow#qImages.image_library_id#").length != 0){
+						function go_to_next_and_wait() {
+							setTimeout(function() {
+								myContentFlow#qImages.image_library_id#.moveTo('right');
+								go_to_next_and_wait();
+							}, #arguments.ss.slideshowTimeout#); // 5000ms = 5 seconds
+						}
+						go_to_next_and_wait();
+						myContentFlow#qImages.image_library_id#.moveTo('right');
+					}
+				}, #arguments.ss.slideshowTimeout#); 
+			});
+		    </script>
+
+		<cfelseif arguments.ss.layoutType EQ "thumbnails-and-lightbox">
+			<cfsavecontent variable="topMeta">
+	    
+			<cfif structkeyexists(request,'zGalleryThumbnailLightboxIndex') EQ false>
+				<cfset request.zGalleryThumbnailLightboxIndex=1>
+				<cfscript>
+				application.zcore.skin.includeJS("/z/javascript/Magnific-Popup/jquery.magnific-popup.min.js");
+				application.zcore.skin.includeCSS("/z/javascript/Magnific-Popup/magnific-popup.css");
+				</cfscript>
+				<style type="text/css">
+				/* <![CDATA[ */ 
+				.mfp-gallery{z-index:20001;}
+				.mfp-bg{z-index:20000;}
+				
+				##zThumbnailLightgallery ul *{box-sizing:border-box;}
+				##zThumbnailLightgallery ul {  width:100%; text-align:center; display:block; list-style: none; margin:0px !important; padding:0px !important; }
+				##zThumbnailLightgallery ul li {  min-width:150px; width:32.8%; background-image:none !important; list-style:none !important; display: inline-block; margin:0px; padding:0px;}
+				
+				##zThumbnailLightgallery ul a {
+				display:block; float:left;
+				margin-right:10px;
+				margin-bottom:10px;
+				}
+				##zThumbnailLightgallery ul img {
+				padding:4px;
+				background-color:##FFF;
+				max-width:100%;
+				border: 1px solid ##DFDFDF; 
+				}
+				##zThumbnailLightgallery ul a:hover img {
+				background-color:##000;
+				border: 1px solid ##DFDFDF;  
+				color: ##fff;
+				}
+				##zThumbnailLightgallery ul a:hover { color: ##fff; }
+
+				.mfp-with-zoom .mfp-container,
+				.mfp-with-zoom.mfp-bg {
+				  opacity: 0;
+				  -webkit-backface-visibility: hidden;
+				  /* ideally, transition speed should match zoom duration */
+				  -webkit-transition: all 0.3s ease-out; 
+				  -moz-transition: all 0.3s ease-out; 
+				  -o-transition: all 0.3s ease-out; 
+				  transition: all 0.3s ease-out;
+				}
+
+				.mfp-with-zoom.mfp-ready .mfp-container {
+				    opacity: 1;
+				}
+				.mfp-with-zoom.mfp-ready.mfp-bg {
+				    opacity: 0.8;
+				}
+
+				.mfp-with-zoom.mfp-removing .mfp-container, 
+				.mfp-with-zoom.mfp-removing.mfp-bg {
+				  opacity: 0;
+				}
+				@media only screen and (max-width: 767px) { 
+					##zThumbnailLightgallery ul li { min-width:250px; width:33.3%; }
+				}
+				 /* ]]> */
+				</style>
+				</cfif>
+				<script type="text/javascript">
+				/* <![CDATA[ */ zArrDeferredFunctions.push(function(){
+
+					/*$('##zThumbnailLightgallery').magnificPopup({
+						type: 'image',
+						closeOnContentClick: true,
+						image: {
+							verticalFit: false
+						}
+					});*/
+					$('##zThumbnailLightgallery').magnificPopup({
+						delegate: 'a',
+						type: 'image',
+						tLoading: 'Loading image ##%curr%...',
+						mainClass: 'mfp-no-margins mfp-with-zoom mfp-fade zThumbnailLightboxPopupDiv',
+						closeBtnInside: false,
+						fixedContentPos: true,
+						/*retina:{
+							ratio:2,
+							replaceSrc: function(item, ratio) {
+								return item.el.attr("data-2x-image");
+						      //return item.src.replace(/\.\w+$/, function(m) { return '@2x' + m; });
+						    } // function that changes image source
+						    
+						},*/
+						gallery: {
+							enabled: true,
+							navigateByImgClick: true,
+							preload: [0,1] // Will preload 0 - before current, and 1 after the current image
+						},
+						image: {
+							//verticalFit:false,
+							tError: '<a href="%url%">The image ##%curr%</a> could not be loaded.',
+							titleSrc: function(item) {
+								return item.el.attr('title');
+							}
+						},
+						zoom: {
+							enabled: true, // By default it's false, so don't forget to enable it
+
+							duration: 300, // duration of the effect, in milliseconds
+							easing: 'ease-in-out', // CSS transition easing function 
+
+							// The "opener" function should return the element from which popup will be zoomed in
+							// and to which popup will be scaled down
+							// By defailt it looks for an image tag:
+							opener: function(openerElement) {
+								// openerElement is the element on which popup was initialized, in this case its <a> tag
+								// you don't need to add "opener" option if this code matches your needs, it's defailt one.
+								return openerElement.is('img') ? openerElement : openerElement.find('img');
+							}
+						}
+					});
+				}); /* ]]> */
+				</script>
+				</cfsavecontent>
+				<cfscript>
+				application.zcore.functions.zRequireJQuery();
+				application.zcore.template.appendTag("meta",topMeta);
+				arrT=listtoarray(arguments.ss.size,"x");
+				if(structkeyexists(arguments.ss, 'thumbSize')){
+					arrT=listtoarray(arguments.ss.thumbSize,"x");
+					thumbnailWidth=arrT[1];
+					thumbnailHeight=arrT[2]; 
+				}else{ 
+					thumbnailWidth=round((arrT[1]-(3*15))/3);
+					thumbnailHeight=round(thumbnailWidth*.6);
+				}
+				application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, thumbnailWidth&"x"&thumbnailHeight, 1);
+				/*newSize="500x300";//arrT[1]&"x"&round(arrT[1]*.6);
+				newHeight=round(arrT[1]*.6);
+				application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);*/
+				newSize="1900x1080";//arrT[1]&"x"&round(arrT[1]*.6); 
+				application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
+				</cfscript>
+		
+				<div id="zThumbnailLightgallery">
+				    <ul>
+					<cfloop query="qImages">
+
+						<cfscript>
+						caption=qImages.image_caption;
+						if(caption EQ ""){
+							caption=arguments.ss.defaultAltText;
+						}
+						</cfscript>
+						<li><a class="zNoContentTransition"
+					 href="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"
+					 
+					  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" /></a></li>
+					</cfloop>
+					  <!---  data-2x-image="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize2, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  --->
+				    </ul>
+				</div>
+
+		<cfelseif arguments.ss.layoutType EQ "galleryview-1.1">
+			<cfsavecontent variable="topMeta">
+			<cfif structkeyexists(request,'zGalleryViewSlideShowIndex') EQ false>
+			<cfset request.zGalleryViewSlideShowIndex=1>
+			<cfif structkeyexists(form, 'zajaxdownloadcontent') EQ false>
+			#application.zcore.skin.includeCSS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.css")#
+			#application.zcore.skin.includeJS("/z/javascript/jquery/jquery.easing.1.3.js")#
+			#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.js")#
+			#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.timers-1.2.js")#
 			</cfif>
+		<cfelse>
+			<cfscript>request.zGalleryViewSlideShowIndex++;</cfscript>
+		</cfif>
+		</cfsavecontent>
+		<cfscript>
+		
+		application.zcore.template.appendTag("meta",topMeta); 
+		application.zcore.functions.zRequireJQuery();
+		application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, '160x80', 1);
+		arrT=listtoarray(arguments.ss.size,"x");
+		newSize=arrT[1]&"x"&round(arrT[1]*.6);
+		newHeight=round(arrT[1]*.6);
+		application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
+		hasCaptions=false;
+		</cfscript> 
+		<div class="zGalleryViewSlideshowContainer">
+			<ul id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#" class="zGalleryViewSlideshow">
+			<cfloop query="qImages">
 				<cfscript>
 				caption=qImages.image_caption;
 				if(caption EQ ""){
 					caption=arguments.ss.defaultAltText;
 				}
 				</cfscript>
-				<img class="content z-fluid" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
-			</div>
-		</cfloop>
-	<cfelseif arguments.ss.layoutType EQ "contentflow">
-		<cfscript>
-		application.zcore.functions.zRequireContentFlowSlideshow();
-		
-		if(arguments.ss.forceSize){
-			thumbnailWidth=round(arrT[1]/2);
-			thumbnailHeight=round((arrT[2]/2)*.6);
-		}else{
-			thumbnailWidth=round(request.zos.globals.maximagewidth/2);
-			thumbnailHeight=round((request.zos.globals.maximagewidth/2)*.6);
-		}
-		newSize=thumbnailWidth&"x"&thumbnailHeight;
-		application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
-		</cfscript> 
-
-		<div id="contentFlow#qImages.image_library_id#" class="ContentFlow">
-			<div class="loadIndicator">
-				<div class="indicator"></div>
-			</div>
-			<div class="flow">
-				<cfloop query="qImages">
-					<cfscript>
-					caption=qImages.image_caption;
-					if(caption EQ ""){
-						caption=arguments.ss.defaultAltText;
-					}
-					</cfscript>
-					<div class="item">
-						<img class="content" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
-						<div class="caption">#htmleditformat(qImages.image_caption)#</div>
-					</div>
-				</cfloop>
-			</div>
-			<div class="globalCaption"></div>
+				<li><img  data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
+			</cfloop>
+			</ul> 
 		</div>
-	    <script type="text/javascript"> 
-		var myContentFlow#qImages.image_library_id# = new ContentFlow('contentFlow#qImages.image_library_id#', {
-			circularFlow: true,
-			loadingTimeout: 60000
-		});
-		zArrDeferredFunctions.push(function() {
-			setTimeout(function(){
-				if($("##contentFlow#qImages.image_library_id#").length != 0){
-					function go_to_next_and_wait() {
-						setTimeout(function() {
-							myContentFlow#qImages.image_library_id#.moveTo('right');
-							go_to_next_and_wait();
-						}, #arguments.ss.slideshowTimeout#); // 5000ms = 5 seconds
-					}
-					go_to_next_and_wait();
-					myContentFlow#qImages.image_library_id#.moveTo('right');
-				}
-			}, #arguments.ss.slideshowTimeout#); 
-		});
-	    </script>
-
-	<cfelseif arguments.ss.layoutType EQ "thumbnails-and-lightbox">
-		<cfsavecontent variable="topMeta">
-    
-		<cfif structkeyexists(request,'zGalleryThumbnailLightboxIndex') EQ false>
-			<cfset request.zGalleryThumbnailLightboxIndex=1>
+		<cfsavecontent variable="theJS">
+			{ 
+			pause_on_hover: true,
+			transition_speed: 1000, 		//INT - duration of panel/frame transition (in milliseconds)
+			transition_interval: #arguments.ss.slideshowTimeout#, 		//INT - delay between panel/frame transitions (in milliseconds)
+			easing: 'swing', 				//STRING - easing method to use for animations (jQuery provides 'swing' or 'linear', more available with jQuery UI or Easing plugin)
+		
+		<cfif arguments.ss.forceSize>
+			panel_width: #arrT[1]#,
+			panel_height: #arrT[2]#,
+		<cfelse>
+			panel_width: #request.zos.globals.maximagewidth#, 				//INT - width of gallery panel (in pixels)
+			panel_height: #round(request.zos.globals.maximagewidth*.6)+45#, 				//INT - height of gallery panel (in pixels)
+		</cfif> 
+		panel_animation: 'crossfade', 		//STRING - animation method for panel transitions (crossfade,fade,slide,none)
+		panel_scale: 'fit', 			//STRING - cropping option for panel images (crop = scale image and fit to aspect ratio determined by panel_width and panel_height, fit = scale image and preserve original aspect ratio)
+		overlay_position: 'bottom', 	//STRING - position of panel overlay (bottom, top)
+		pan_images: true,				//BOOLEAN - flag to allow user to grab/drag oversized images within gallery
+		pan_style: 'track',				//STRING - panning method (drag = user clicks and drags image to pan, track = image automatically pans based on mouse position
+		pan_smoothness: 15,				//INT - determines smoothness of tracking pan animation (higher number = smoother)
+		start_frame: 1, 				//INT - index of panel/frame to show first when gallery loads
+		show_filmstrip: true, 			//BOOLEAN - flag to show or hide filmstrip portion of gallery
+		show_filmstrip_nav: true, 		//BOOLEAN - flag indicating whether to display navigation buttons
+		enable_slideshow: true,			//BOOLEAN - flag indicating whether to display slideshow play/pause button
+		autoplay: <cfif structkeyexists(arguments.ss, 'autoplay')>#arguments.ss.autoplay#<cfelse>true</cfif>,				//BOOLEAN - flag to start slideshow on gallery load
+		<cfif hasCaptions and ((structkeyexists(arguments.ss, 'showCaptions') and arguments.ss.showCaptions) or structkeyexists(request.zos, 'forceImageGalleryCaptions'))>
+	     enable_overlays: true,
+	    </cfif>
+		show_captions: <cfif hasCaptions and ((structkeyexists(arguments.ss, 'showCaptions') and arguments.ss.showCaptions) or structkeyexists(request.zos, 'forceImageGalleryCaptions'))>true<cfelse>false</cfif>, 			//BOOLEAN - flag to show or hide frame captions	
+		filmstrip_size: 3, 				//INT - number of frames to show in filmstrip-only gallery
+		filmstrip_style: 'scroll', 		//STRING - type of filmstrip to use (scroll = display one line of frames, scroll filmstrip if necessary, showall = display multiple rows of frames if necessary)
+		filmstrip_position: 'bottom', 	//STRING - position of filmstrip within gallery (bottom, top, left, right)
+		<cfif arguments.ss.forceSize>
 			<cfscript>
-			application.zcore.skin.includeJS("/z/javascript/Magnific-Popup/jquery.magnific-popup.min.js");
-			application.zcore.skin.includeCSS("/z/javascript/Magnific-Popup/magnific-popup.css");
+			if(not structkeyexists(arguments.ss, 'thumbSize')){
+				arguments.ss.thumbSize="110x60";
+			}
+			local.arrT2=listToArray(arguments.ss.thumbSize, 'x');
 			</cfscript>
-			<style type="text/css">
-			/* <![CDATA[ */ 
-			.mfp-gallery{z-index:20001;}
-			.mfp-bg{z-index:20000;}
-			
-			##zThumbnailLightgallery ul *{box-sizing:border-box;}
-			##zThumbnailLightgallery ul {  width:100%; text-align:center; display:block; list-style: none; margin:0px !important; padding:0px !important; }
-			##zThumbnailLightgallery ul li {  min-width:150px; width:32.8%; background-image:none !important; list-style:none !important; display: inline-block; margin:0px; padding:0px;}
-			
-			##zThumbnailLightgallery ul a {
-			display:block; float:left;
-			margin-right:10px;
-			margin-bottom:10px;
-			}
-			##zThumbnailLightgallery ul img {
-			padding:4px;
-			background-color:##FFF;
-			max-width:100%;
-			border: 1px solid ##DFDFDF; 
-			}
-			##zThumbnailLightgallery ul a:hover img {
-			background-color:##000;
-			border: 1px solid ##DFDFDF;  
-			color: ##fff;
-			}
-			##zThumbnailLightgallery ul a:hover { color: ##fff; }
-
-			.mfp-with-zoom .mfp-container,
-			.mfp-with-zoom.mfp-bg {
-			  opacity: 0;
-			  -webkit-backface-visibility: hidden;
-			  /* ideally, transition speed should match zoom duration */
-			  -webkit-transition: all 0.3s ease-out; 
-			  -moz-transition: all 0.3s ease-out; 
-			  -o-transition: all 0.3s ease-out; 
-			  transition: all 0.3s ease-out;
-			}
-
-			.mfp-with-zoom.mfp-ready .mfp-container {
-			    opacity: 1;
-			}
-			.mfp-with-zoom.mfp-ready.mfp-bg {
-			    opacity: 0.8;
-			}
-
-			.mfp-with-zoom.mfp-removing .mfp-container, 
-			.mfp-with-zoom.mfp-removing.mfp-bg {
-			  opacity: 0;
-			}
-			@media only screen and (max-width: 767px) { 
-				##zThumbnailLightgallery ul li { min-width:250px; width:33.3%; }
-			}
-			 /* ]]> */
-			</style>
-			</cfif>
-			<script type="text/javascript">
-			/* <![CDATA[ */ zArrDeferredFunctions.push(function(){
-
-				/*$('##zThumbnailLightgallery').magnificPopup({
-					type: 'image',
-					closeOnContentClick: true,
-					image: {
-						verticalFit: false
-					}
-				});*/
-				$('##zThumbnailLightgallery').magnificPopup({
-					delegate: 'a',
-					type: 'image',
-					tLoading: 'Loading image ##%curr%...',
-					mainClass: 'mfp-no-margins mfp-with-zoom mfp-fade zThumbnailLightboxPopupDiv',
-					closeBtnInside: false,
-					fixedContentPos: true,
-					/*retina:{
-						ratio:2,
-						replaceSrc: function(item, ratio) {
-							return item.el.attr("data-2x-image");
-					      //return item.src.replace(/\.\w+$/, function(m) { return '@2x' + m; });
-					    } // function that changes image source
-					    
-					},*/
-					gallery: {
-						enabled: true,
-						navigateByImgClick: true,
-						preload: [0,1] // Will preload 0 - before current, and 1 after the current image
-					},
-					image: {
-						//verticalFit:false,
-						tError: '<a href="%url%">The image ##%curr%</a> could not be loaded.',
-						titleSrc: function(item) {
-							return item.el.attr('title');
-						}
-					},
-					zoom: {
-						enabled: true, // By default it's false, so don't forget to enable it
-
-						duration: 300, // duration of the effect, in milliseconds
-						easing: 'ease-in-out', // CSS transition easing function 
-
-						// The "opener" function should return the element from which popup will be zoomed in
-						// and to which popup will be scaled down
-						// By defailt it looks for an image tag:
-						opener: function(openerElement) {
-							// openerElement is the element on which popup was initialized, in this case its <a> tag
-							// you don't need to add "opener" option if this code matches your needs, it's defailt one.
-							return openerElement.is('img') ? openerElement : openerElement.find('img');
-						}
-					}
-				});
-			}); /* ]]> */
-			</script>
-			</cfsavecontent>
-			<cfscript>
-			application.zcore.functions.zRequireJQuery();
-			application.zcore.template.appendTag("meta",topMeta);
-			arrT=listtoarray(arguments.ss.size,"x");
-			if(structkeyexists(arguments.ss, 'thumbSize')){
-				arrT=listtoarray(arguments.ss.thumbSize,"x");
-				thumbnailWidth=arrT[1];
-				thumbnailHeight=arrT[2]; 
-			}else{ 
-				thumbnailWidth=round((arrT[1]-(3*15))/3);
-				thumbnailHeight=round(thumbnailWidth*.6);
-			}
-			application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, thumbnailWidth&"x"&thumbnailHeight, 1);
-			/*newSize="500x300";//arrT[1]&"x"&round(arrT[1]*.6);
-			newHeight=round(arrT[1]*.6);
-			application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);*/
-			newSize="1900x1080";//arrT[1]&"x"&round(arrT[1]*.6); 
-			application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
-			</cfscript>
-	
-			<div id="zThumbnailLightgallery">
-			    <ul>
-				<cfloop query="qImages">
-
-					<cfscript>
-					caption=qImages.image_caption;
-					if(caption EQ ""){
-						caption=arguments.ss.defaultAltText;
-					}
-					</cfscript>
-					<li><a class="zNoContentTransition"
-				 href="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"
-				 
-				  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" /></a></li>
-				</cfloop>
-				  <!---  data-2x-image="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize2, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  --->
-			    </ul>
-			</div>
-
-	<cfelseif arguments.ss.layoutType EQ "galleryview-1.1">
-		<cfsavecontent variable="topMeta">
-		<cfif structkeyexists(request,'zGalleryViewSlideShowIndex') EQ false>
-		<cfset request.zGalleryViewSlideShowIndex=1>
-		<cfif structkeyexists(form, 'zajaxdownloadcontent') EQ false>
-		#application.zcore.skin.includeCSS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.css")#
-		#application.zcore.skin.includeJS("/z/javascript/jquery/jquery.easing.1.3.js")#
-		#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.js")#
-		#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.timers-1.2.js")#
+			frame_width: #local.arrT2[1]#, 
+			frame_height: #local.arrT2[2]#, 
+		<cfelse>
+		frame_width: 110, 				//INT - width of filmstrip frames (in pixels)
+		frame_height: 60, 				//INT - width of filmstrip frames (in pixels)
 		</cfif>
+		frame_opacity: 0.5, 			//FLOAT - transparency of non-active frames (1.0 = opaque, 0.0 = transparent)
+		frame_scale: 'crop', 			//STRING - cropping option for filmstrip images (same as above)
+		frame_gap: 5, 					//INT - spacing between frames within filmstrip (in pixels)
+		show_infobar: false,				//BOOLEAN - flag to show or hide infobar
+		infobar_opacity: 0.7				//FLOAT - transparency for info bar
+		}
+		</cfsavecontent>
+		<input type="hidden" name="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#_data" id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#_data" value="#htmleditformat(theJS)#" />
 	<cfelse>
-		<cfscript>request.zGalleryViewSlideShowIndex++;</cfscript>
-	</cfif>
-	</cfsavecontent>
-	<cfscript>
-	
-	application.zcore.template.appendTag("meta",topMeta); 
-	application.zcore.functions.zRequireJQuery();
-	application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, '160x80', 1);
-	arrT=listtoarray(arguments.ss.size,"x");
-	newSize=arrT[1]&"x"&round(arrT[1]*.6);
-	newHeight=round(arrT[1]*.6);
-	application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
-	hasCaptions=false;
-	</cfscript> 
-	<div class="zGalleryViewSlideshowContainer">
-		<ul id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#" class="zGalleryViewSlideshow">
+	    <cfscript>
+		application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, arguments.ss.size, arguments.ss.crop);
+		</cfscript>
 		<cfloop query="qImages">
+
 			<cfscript>
 			caption=qImages.image_caption;
 			if(caption EQ ""){
 				caption=arguments.ss.defaultAltText;
 			}
 			</cfscript>
-			<li><img  data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
+			<img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" style="border:none;" />
+			<cfif qImages.image_caption NEQ ""><br /><div style="padding-top:5px;">#qImages.image_caption#</div></cfif><!--- <hr class="zdisplayimageshr" /> ---><br />
 		</cfloop>
-		</ul> 
-	</div>
-	<cfsavecontent variable="theJS">
-		{ 
-		pause_on_hover: true,
-		transition_speed: 1000, 		//INT - duration of panel/frame transition (in milliseconds)
-		transition_interval: #arguments.ss.slideshowTimeout#, 		//INT - delay between panel/frame transitions (in milliseconds)
-		easing: 'swing', 				//STRING - easing method to use for animations (jQuery provides 'swing' or 'linear', more available with jQuery UI or Easing plugin)
-	
-	<cfif arguments.ss.forceSize>
-		panel_width: #arrT[1]#,
-		panel_height: #arrT[2]#,
-	<cfelse>
-		panel_width: #request.zos.globals.maximagewidth#, 				//INT - width of gallery panel (in pixels)
-		panel_height: #round(request.zos.globals.maximagewidth*.6)+45#, 				//INT - height of gallery panel (in pixels)
-	</cfif> 
-	panel_animation: 'crossfade', 		//STRING - animation method for panel transitions (crossfade,fade,slide,none)
-	panel_scale: 'fit', 			//STRING - cropping option for panel images (crop = scale image and fit to aspect ratio determined by panel_width and panel_height, fit = scale image and preserve original aspect ratio)
-	overlay_position: 'bottom', 	//STRING - position of panel overlay (bottom, top)
-	pan_images: true,				//BOOLEAN - flag to allow user to grab/drag oversized images within gallery
-	pan_style: 'track',				//STRING - panning method (drag = user clicks and drags image to pan, track = image automatically pans based on mouse position
-	pan_smoothness: 15,				//INT - determines smoothness of tracking pan animation (higher number = smoother)
-	start_frame: 1, 				//INT - index of panel/frame to show first when gallery loads
-	show_filmstrip: true, 			//BOOLEAN - flag to show or hide filmstrip portion of gallery
-	show_filmstrip_nav: true, 		//BOOLEAN - flag indicating whether to display navigation buttons
-	enable_slideshow: true,			//BOOLEAN - flag indicating whether to display slideshow play/pause button
-	autoplay: <cfif structkeyexists(arguments.ss, 'autoplay')>#arguments.ss.autoplay#<cfelse>true</cfif>,				//BOOLEAN - flag to start slideshow on gallery load
-	<cfif hasCaptions and ((structkeyexists(arguments.ss, 'showCaptions') and arguments.ss.showCaptions) or structkeyexists(request.zos, 'forceImageGalleryCaptions'))>
-     enable_overlays: true,
-    </cfif>
-	show_captions: <cfif hasCaptions and ((structkeyexists(arguments.ss, 'showCaptions') and arguments.ss.showCaptions) or structkeyexists(request.zos, 'forceImageGalleryCaptions'))>true<cfelse>false</cfif>, 			//BOOLEAN - flag to show or hide frame captions	
-	filmstrip_size: 3, 				//INT - number of frames to show in filmstrip-only gallery
-	filmstrip_style: 'scroll', 		//STRING - type of filmstrip to use (scroll = display one line of frames, scroll filmstrip if necessary, showall = display multiple rows of frames if necessary)
-	filmstrip_position: 'bottom', 	//STRING - position of filmstrip within gallery (bottom, top, left, right)
-	<cfif arguments.ss.forceSize>
-		<cfscript>
-		if(not structkeyexists(arguments.ss, 'thumbSize')){
-			arguments.ss.thumbSize="110x60";
-		}
-		local.arrT2=listToArray(arguments.ss.thumbSize, 'x');
-		</cfscript>
-		frame_width: #local.arrT2[1]#, 
-		frame_height: #local.arrT2[2]#, 
-	<cfelse>
-	frame_width: 110, 				//INT - width of filmstrip frames (in pixels)
-	frame_height: 60, 				//INT - width of filmstrip frames (in pixels)
-	</cfif>
-	frame_opacity: 0.5, 			//FLOAT - transparency of non-active frames (1.0 = opaque, 0.0 = transparent)
-	frame_scale: 'crop', 			//STRING - cropping option for filmstrip images (same as above)
-	frame_gap: 5, 					//INT - spacing between frames within filmstrip (in pixels)
-	show_infobar: false,				//BOOLEAN - flag to show or hide infobar
-	infobar_opacity: 0.7				//FLOAT - transparency for info bar
-	}
-	</cfsavecontent>
-	<input type="hidden" name="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#_data" id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#_data" value="#htmleditformat(theJS)#" />
-<cfelse>
-    <cfscript>
-	application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, arguments.ss.size, arguments.ss.crop);
-	</cfscript>
-	<cfloop query="qImages">
-
-		<cfscript>
-		caption=qImages.image_caption;
-		if(caption EQ ""){
-			caption=arguments.ss.defaultAltText;
-		}
-		</cfscript>
-		<img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" style="border:none;" />
-		<cfif qImages.image_caption NEQ ""><br /><div style="padding-top:5px;">#qImages.image_caption#</div></cfif><hr class="zdisplayimageshr" /><br />
-	</cfloop>
     </cfif>
 <cfelse>
 	<cfloop query="qImages">
