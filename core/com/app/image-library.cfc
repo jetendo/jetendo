@@ -431,12 +431,13 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 			ts.struct.site_id=request.zos.globals.id;
 			ts.struct.image_cache_file=newFileName;
 			// we had to use the arguments.size here instead of actual size, because images smaller then arguments.size would result in missing db entries
-			ts.struct.image_cache_width=arrSize[1];//request.arrLastImageWidth[1];
-			ts.struct.image_cache_height=arrSize[2];//request.arrLastImageHeight[1];
-			ts.struct.image_cache_crop=arguments.crop;
-			ts.struct.image_library_id=arguments.image_library_id;
-			ts.struct.image_cache_deleted=0;
-			ts.struct.image_id=arguments.image_id;
+			ts.struct.image_cache_width		= arrSize[1];//request.arrLastImageWidth[1];
+			ts.struct.image_cache_height	= arrSize[2];//request.arrLastImageHeight[1];
+
+			ts.struct.image_cache_crop		= arguments.crop;
+			ts.struct.image_library_id		= arguments.image_library_id;
+			ts.struct.image_cache_deleted	= 0;
+			ts.struct.image_id				= arguments.image_id;
 			application.zcore.functions.zInsert(ts);  
 			if(zdebug){
 				writeoutput('image resized: /#destination&newFileName#<br /><img src="/#destination&newFileName#" />');
@@ -605,6 +606,7 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 	ts.table="image";
 	s9.image_datetime=request.zos.mysqlnow;
 	s9.image_updated_datetime=request.zos.mysqlnow;
+
 	if(structkeyexists(form, 'image_caption')){
 		s9.image_caption=form.image_caption;
 	}else if(structkeyexists(form,'image_caption')){
@@ -698,6 +700,13 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 				}
 				oldFilePath=destination&filePath; 
 				s9.image_file=filePath;
+				local.imageSize=application.zcore.functions.zGetImageSize(oldFilePath);        
+				if(local.imageSize.success){
+					s9.image_latitude 		= local.imageSize.image_latitude;
+	    			s9.image_longitude 		= local.imageSize.image_longitude;
+	    			s9.image_altitude		= local.imageSize.image_altitude;
+	    			s9.image_taken_datetime	= local.imageSize.image_taken_datetime;
+				}
 				/*
 				writedump(form.image_file);
 				writedump(destination&filePath);
@@ -711,6 +720,7 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 					application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - saveImageId() failed because zResizeImage() failed.");
 				}else if(ArrayLen(arrList) EQ 1){
 					s9.image_intermediate_file=arrList[1];
+
 				}
 				
 			}else{
@@ -723,7 +733,8 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 			application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - saveImageId() failed to insert to database.");
 		}
 		local.imageSizeStruct=application.zcore.functions.zGetImageSize(destination&s9.image_file);    
-		if(not local.imageSizeStruct.success){
+
+    	if(not local.imageSizeStruct.success){
 			throw(local.imageSizeStruct.errorMessage);
 		}
 		s9.image_width=local.imageSizeStruct.width;
@@ -1490,7 +1501,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 						caption=arguments.ss.defaultAltText;
 					}
 					</cfscript>
-					<img class="content z-fluid" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
+					<img class="content z-fluid" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" />
 				</div>
 			</cfloop>
 		<cfelseif arguments.ss.layoutType EQ "contentflow">
@@ -1521,7 +1532,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 						}
 						</cfscript>
 						<div class="item">
-							<img class="content" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" />
+							<img class="content" alt="#htmleditformat(caption)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" />
 							<div class="caption">#htmleditformat(qImages.image_caption)#</div>
 						</div>
 					</cfloop>
@@ -1702,7 +1713,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 						<li><a class="zNoContentTransition"
 					 href="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"
 					 
-					  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" /></a></li>
+					  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#"  data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" /></a></li>
 					</cfloop>
 					  <!---  data-2x-image="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize2, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  --->
 				    </ul>
@@ -1711,16 +1722,16 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		<cfelseif arguments.ss.layoutType EQ "galleryview-1.1">
 			<cfsavecontent variable="topMeta">
 			<cfif structkeyexists(request,'zGalleryViewSlideShowIndex') EQ false>
-			<cfset request.zGalleryViewSlideShowIndex=1>
-			<cfif structkeyexists(form, 'zajaxdownloadcontent') EQ false>
-			#application.zcore.skin.includeCSS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.css")#
-			#application.zcore.skin.includeJS("/z/javascript/jquery/jquery.easing.1.3.js")#
-			#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.js")#
-			#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.timers-1.2.js")#
+				<cfset request.zGalleryViewSlideShowIndex=1>
+				<cfif structkeyexists(form, 'zajaxdownloadcontent') EQ false>
+					#application.zcore.skin.includeCSS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.css")#
+					#application.zcore.skin.includeJS("/z/javascript/jquery/jquery.easing.1.3.js")#
+					#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.galleryview-3.0-dev.js")#
+					#application.zcore.skin.includeJS("/z/javascript/jquery/galleryview-1.1/jquery.timers-1.2.js")#
+				</cfif>
+			<cfelse>
+				<cfscript>request.zGalleryViewSlideShowIndex++;</cfscript>
 			</cfif>
-		<cfelse>
-			<cfscript>request.zGalleryViewSlideShowIndex++;</cfscript>
-		</cfif>
 		</cfsavecontent>
 		<cfscript>
 		
@@ -1742,14 +1753,31 @@ application.zcore.imageLibraryCom.displayImages(ts);
 					caption=arguments.ss.defaultAltText;
 				}
 				</cfscript>
-				<li><img  data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
+				<li><img data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
 			</cfloop>
 			</ul> 
 		</div>
+		<script>
+			var arrImages = {};
+			zArrDeferredFunctions.push( function() {
+				console.log($('window'));
+				/*for(var x in $('window')){
+					if(x.indexOf("gal") != -1){
+						alert(x);
+					}
+				}
+				*/
+				alert(window.galleryView);
+			});
+			<cfloop query="qImages">
+				arrImages["#qImages.image_id#"] = {lat:"#qImages.image_latitude#", lon:"#qImages.image_longitude#", altitude:"#qImages.image_altitude#", taken:"#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#"}; 
+			</cfloop>
+		</script>  
+
 		<cfsavecontent variable="theJS">
 			{ 
 			pause_on_hover: true,
-			transition_speed: 1000, 		//INT - duration of panel/frame transition (in milliseconds)
+			transition_speed: 3000, 		//INT - duration of panel/frame transition (in milliseconds)
 			transition_interval: #arguments.ss.slideshowTimeout#, 		//INT - delay between panel/frame transitions (in milliseconds)
 			easing: 'swing', 				//STRING - easing method to use for animations (jQuery provides 'swing' or 'linear', more available with jQuery UI or Easing plugin)
 		
@@ -1811,7 +1839,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				caption=arguments.ss.defaultAltText;
 			}
 			</cfscript>
-			<img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" style="border:none;" />
+			<img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#" style="border:none;"  data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" />
 			<cfif qImages.image_caption NEQ ""><br /><div style="padding-top:5px;">#qImages.image_caption#</div></cfif><!--- <hr class="zdisplayimageshr" /> ---><br />
 		</cfloop>
     </cfif>
