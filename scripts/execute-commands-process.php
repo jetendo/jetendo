@@ -1592,7 +1592,7 @@ function getImageMagickConvertResize($a){
 	if($ext == '.jpg' || $ext == '.jpeg'){
 		$cmd2="/usr/bin/identify -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=`$cmd2`; 
-		$arrR=explode(",", trim($r));
+		$arrR=explode("|", trim($r));
 		$currentWidth=$arrR[0];
 		$currentHeight=$arrR[1];
 		$qualityMustChange=false;
