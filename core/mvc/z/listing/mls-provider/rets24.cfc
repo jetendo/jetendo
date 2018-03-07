@@ -136,9 +136,10 @@ variables.tableLookup["I"]="I";
 	
 	local.listing_parking=this.listingLookupNewId("parking",ts['Parking Features']);
 
-	local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type",ts['rets24_list_9']);
+	local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type",application.zcore.functions.zso(ts, 'rets24_list_9'));
 	
 	local.listing_type_id=this.listingLookupNewId("listing_type",ts['rets24_list_8']);
+	
 
 	ad=ts['street ##'];
 	if(ad NEQ 0){
