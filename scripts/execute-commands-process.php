@@ -1853,11 +1853,11 @@ function getImageMagickIdentify($a){
 			for($i=0; $i < $idx; $i++){
 				$r .= $a[$i] . ($i < $idx-1 ? ",":"");
 			}
-			if($idx < 8){
+			/*if($idx < 8){
 				for($i=$idx; $i < 9; $i++){
 					$r .= $a[$i] . ($i < 8 ? ",":"");
 				}
-			}				
+			}*/				
 			echo $cmd."\n".$r."\n";
 			return $r;
 		}
