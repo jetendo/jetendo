@@ -1767,7 +1767,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 					}
 				}
 				*/
-				alert(window.galleryView);
+				//alert(window.galleryView);
 			});
 			<cfloop query="qImages">
 				arrImages["#qImages.image_id#"] = {lat:"#qImages.image_latitude#", lon:"#qImages.image_longitude#", altitude:"#qImages.image_altitude#", taken:"#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#"}; 
