@@ -1816,27 +1816,29 @@ function getImageMagickIdentify($a){
 			$r		= `$cmd`;
 			//$a	= explode("|", trim($r));
 			$a 		= preg_split("/[|]/",trim($r));
-			/*
-			// TODO: finish implementing auto-rotate
-			if($a[4]=="6"){ 
-				$widthBackup=$a[1];
-				$a[1]=$a[0];
-				$a[0]=$widthBackup;
-				$r=implode(",", $a);
+			if($a[4] == ""){ 
+				$a[4] = "1";
 			}
-			*/
 			if($a[5] != ""){
 				$a[5] = zGetGps(explode(",", $a[5]));
-			}	
+			} else{
+				$a[5] = "0";
+			}
 			if($a[6] != ""){
 				$a[6] = zGetGps(explode(",", $a[6]));
-			}	
+			} else{
+				$a[6] = "0";
+			}
 			if($a[7] != ""){
 				$a[7] = zGetElevation($a[7]);
-			}	
+			} else{
+				$a[7] = "0";
+			}
 			if($a[8] != ""){
 				$a[8] =  zParseExifTime($a[8]);
-			}	
+			} else{
+				$a[8] = date('Y-m-d H:i:s');
+			}
 			if(strtolower(trim($a[2]))=="cmyk"){
 				$cmd2="/usr/bin/convert ".escapeshellarg($path)." -profile ".$p2."icc-profiles/USWebCoatedSWOP.icc -profile ".$p2."icc-profiles/sRGB_IEC61966-2-1_black_scaled.icc ".escapeshellarg($path)." 2>&1";
 				$r2=`$cmd2`;
