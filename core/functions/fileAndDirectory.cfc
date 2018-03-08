@@ -752,7 +752,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	secureCommand="getImageMagickIdentify"&chr(9)&arguments.source;
 	output=trim(application.zcore.functions.zSecureCommand(secureCommand, 10));
 	if(output CONTAINS "," and listlen(output,",", true) GTE 9){
-		arrOut=listtoarray(output, ",");
+		arrOut=listtoarray(output, ",", true);
 		ext=application.zcore.functions.zGetFileExt(arguments.source);
 		if(ext NEQ "gif" and ext NEQ "png" and lcase(arrOut[3]) NEQ "srgb"){
 			form.invalidImagePath=arguments.source;

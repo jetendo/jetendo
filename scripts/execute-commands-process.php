@@ -1848,7 +1848,7 @@ function getImageMagickIdentify($a){
 				$r2=`$cmd2`;
 				$a[2]="srgb";
 			}
-			$r = explode(",", $a);
+			$r = implode(",", $a);
 			echo $cmd."\n".$r."\n";
 			return $r;
 		}
