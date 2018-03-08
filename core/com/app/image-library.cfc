@@ -1781,7 +1781,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		<cfsavecontent variable="theJS">
 			{ 
 			pause_on_hover: true,
-			transition_speed: 3000, 		//INT - duration of panel/frame transition (in milliseconds)
+			transition_speed: 1000, 		//INT - duration of panel/frame transition (in milliseconds)
 			transition_interval: #arguments.ss.slideshowTimeout#, 		//INT - delay between panel/frame transitions (in milliseconds)
 			easing: 'swing', 				//STRING - easing method to use for animations (jQuery provides 'swing' or 'linear', more available with jQuery UI or Easing plugin)
 		
