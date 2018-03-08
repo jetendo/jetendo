@@ -1590,13 +1590,13 @@ function getImageMagickConvertResize($a){
 	$compressQuality=93;
 
 	if($ext == '.jpg' || $ext == '.jpeg'){
-		$cmd2="/usr/bin/identify -format '%w,%h,%Q,%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$cmd2="/usr/bin/identify -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=`$cmd2`; 
-		$arrR=explode(",", trim($r));
+		$arrR=explode("|", trim($r));
 		$currentWidth=$arrR[0];
 		$currentHeight=$arrR[1];
 		$qualityMustChange=false;
-		if(count($arrR) == 4 and is_numeric($arrR[2])){
+		if(count($arrR) >= 4 && is_numeric($arrR[2])){
 			$newQuality=intval($arrR[2]);
 			if($compressQuality<$newQuality){
 				$qualityMustChange=true;
@@ -1641,7 +1641,7 @@ function getImageMagickConvertResize($a){
 		$compress=' -strip -interlace Plane -sampling-factor 4:2:0 -quality '.$compressQuality.'% ';
 	}
 	// TODO - auto-orient or manual rotations to fix -auto-orient
-	$cmd.=' '.escapeshellarg($sourceFilePath).' '.$compress.' '.$pngColorFix.escapeshellarg($destinationFilePath); 
+	$cmd.=' -auto-orient '.escapeshellarg($sourceFilePath).' '.$compress.' '.$pngColorFix.escapeshellarg($destinationFilePath); 
 
 	$tempDestination=$destinationFilePath.".".microtime(true);
 	$renamed=false;
@@ -1812,32 +1812,43 @@ function getImageMagickIdentify($a){
 			$found=true;
 		}
 		if($found){
-			$cmd="/usr/bin/identify -format '%w,%h,%[colorspace],%Q,%[exif:orientation]' ".escapeshellarg($path)." 2>&1";
-			$r=`$cmd`;
-
-			$a=explode(",", trim($r));
-			/*
-			// TODO: finish implementing auto-rotate
-			if($a[4]=="6"){ 
-				$widthBackup=$a[1];
-				$a[1]=$a[0];
-				$a[0]=$widthBackup;
-				$r=implode(",", $a);
+			$cmd	= "/usr/bin/identify -format '%w|%h|%[colorspace]|%Q|%[exif:orientation]|%[exif:GPSLatitude],%[exif:GPSLatitudeRef]|%[exif:GPSLongitude],%[exif:GPSLongitudeRef]|%[exif:GPSAltitude]|%[exif:DateTime]' ".escapeshellarg($path)." 2>&1";
+			$r		= `$cmd`;
+			//$a	= explode("|", trim($r));
+			$a 		= preg_split("/[|]/",trim($r));
+			if($a[4] == ""){ 
+				$a[4] = "1";
 			}
-			*/
+			if($a[5] != ""){
+				$a[5] = zGetGps(explode(",", $a[5]));
+			} else{
+				$a[5] = "0";
+			}
+			if($a[6] != ""){
+				$a[6] = zGetGps(explode(",", $a[6]));
+			} else{
+				$a[6] = "0";
+			}
+			if($a[7] != ""){
+				$a[7] = zGetElevation($a[7]);
+			} else{
+				$a[7] = "0";
+			}
+			if($a[8] != ""){
+				$a[8] =  zParseExifTime($a[8]);
+			} else{
+				$a[8] = date('Y-m-d H:i:s');
+			}
 			if(strtolower(trim($a[2]))=="cmyk"){
 				$cmd2="/usr/bin/convert ".escapeshellarg($path)." -profile ".$p2."icc-profiles/USWebCoatedSWOP.icc -profile ".$p2."icc-profiles/sRGB_IEC61966-2-1_black_scaled.icc ".escapeshellarg($path)." 2>&1";
 				$r2=`$cmd2`;
 				$a[2]="srgb";
-				$r=implode(",", $a);
 			}else if(strtolower(trim($a[2]))=="gray"){
 				$cmd2="/usr/bin/convert ".escapeshellarg($path)." -depth 8 -type TrueColor -profile ".$p2."icc-profiles/sRGB_IEC61966-2-1_black_scaled.icc ".escapeshellarg($path)." 2>&1";
 				$r2=`$cmd2`;
 				$a[2]="srgb";
-				$r=implode(",", $a);
 			}
-
-
+			$r = implode(",", $a);
 			echo $cmd."\n".$r."\n";
 			return $r;
 		}

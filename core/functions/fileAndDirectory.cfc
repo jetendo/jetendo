@@ -751,14 +751,14 @@ notes: optionally delete an existing image that has a field in the specified dat
 	var output = 0;
 	secureCommand="getImageMagickIdentify"&chr(9)&arguments.source;
 	output=trim(application.zcore.functions.zSecureCommand(secureCommand, 10));
-	if(output CONTAINS "," and listlen(output,",") GTE 4){
-		arrOut=listtoarray(output, ",");
+	if(output CONTAINS "," and listlen(output,",", true) GTE 9){
+		arrOut=listtoarray(output, ",", true);
 		ext=application.zcore.functions.zGetFileExt(arguments.source);
 		if(ext NEQ "gif" and ext NEQ "png" and lcase(arrOut[3]) NEQ "srgb"){
 			form.invalidImagePath=arguments.source;
 			return{ success: false, errorMessage:"The image must be converted to the sRGB color profile.  It is currently: "&arrOut[3] };
 		}
-		return { success:true, width:arrOut[1], height:arrOut[2], quality:arrOut[4] };
+		return { success:true, width:arrOut[1], height:arrOut[2], quality:arrOut[4], image_latitude:arrOut[6],image_longitude:arrOut[7],image_altitude:arrOut[8],image_taken_datetime:arrOut[9]};
 	}else{
 		return{ success: false, errorMessage:"Unable to read image dimensions. Output:""#output#"".  The image may be corrupted or an unsupported format.  Please try again with a RGB jpg, png or gif." };
 		//application.zcore.template.fail("resizeImage: failed to get source image dimensions with zSecureCommand: "&secureCommand&" | Output: "&output,true);
@@ -863,6 +863,10 @@ notes: optionally delete an existing image that has a field in the specified dat
     }
     request.arrLastImageWidth=arraynew(1);
     request.arrLastImageHeight=arraynew(1);
+    request.arrLastImageLatitude=arraynew(1);
+    request.arrLastImageLongitude=arraynew(1);
+    request.arrLastImageAltitude=arraynew(1);
+    request.arrLastImageTakenDate=arraynew(1);
     for(n=1;n LTE arraylen(arrSizes);n++){
         currentWidth=backupWidth;
         currentHeight=backupHeight;
@@ -990,6 +994,23 @@ notes: optionally delete an existing image that has a field in the specified dat
 		if(request.zos.isDeveloper and structkeyexists(form, 'zdebug')){ 
 			writeoutput(resizeCMD&"<br />");
 		}
+		//GET INFO BEFORE CONVERTING - SOMEHOW WE DESTROY INFO
+		local.imageSize=application.zcore.functions.zGetImageSize(cs.sourceFilePath);        
+		if(not local.imageSize.success){
+			if(fileExists(cs.sourceFilePath)){
+				fileInfo=ImageInfo(cs.sourceFilePath);
+				local.imageSize={};
+				local.imageSize.success=true;
+				local.imageSize.width=fileInfo.width;
+				local.imageSize.height=fileInfo.height;
+				local.imageSize.image_latitude=""; 
+				local.imageSize.image_longitude=""; 
+				local.imageSize.image_altitude=""; 
+				local.imageSize.image_taken_datetime="";  
+			}else{
+				throw(local.imageSize.errorMessage);
+			}
+		}
 		secureCommand="getImageMagickConvertResize"&chr(9)&cs.resizeWidth&chr(9)&cs.resizeHeight&chr(9)&cs.cropWidth&chr(9)&cs.cropHeight&chr(9)&cs.cropXOffset&chr(9)&cs.cropYOffset&chr(9)&cs.sourceFilePath&chr(9)&cs.destinationFilePath;
 		output=application.zcore.functions.zSecureCommand(secureCommand, 20); 
 		if(output NEQ "1"){
@@ -998,20 +1019,18 @@ notes: optionally delete an existing image that has a field in the specified dat
 			}
 			return false;
 		}
-		local.imageSize=application.zcore.functions.zGetImageSize(filePath);        
-		if(not local.imageSize.success){
-			if(fileExists(filePath)){
-				fileInfo=ImageInfo(filePath);
-				local.imageSize={};
-				local.imageSize.success=true;
-				local.imageSize.width=fileInfo.width;
-				local.imageSize.height=fileInfo.height;
-			}else{
-				throw(local.imageSize.errorMessage);
-			}
+		local.imageSize2=application.zcore.functions.zGetImageSize(cs.sourceFilePath);        
+		if(local.imageSize2.success){
+			local.imageSize.width=local.imageSize2.width;
+			local.imageSize.height=local.imageSize2.height;
 		}
 		arrayAppend(request.arrLastImageWidth,local.imageSize.width);
 		arrayAppend(request.arrLastImageHeight,local.imageSize.height); 
+		arrayAppend(request.arrLastImageLatitude,local.imageSize.image_latitude); 
+    	arrayAppend(request.arrLastImageLongitude,local.imageSize.image_longitude); 
+    	arrayAppend(request.arrLastImageAltitude,local.imageSize.image_altitude); 
+    	arrayAppend(request.arrLastImageTakenDate,local.imageSize.image_taken_datetime); 
+
         if(fileexists(filePath) EQ false){
 			throw("File not exists - Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output);
 			//return false;
