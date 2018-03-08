@@ -207,14 +207,15 @@ body{ min-height: auto !important;}
 }
 .contentPropertySummaryDiv div{width:100%;}
 
-.zblog-story{font-size:125%; line-height:1.6;}
-.zblog-story h1{font-size:180%; line-height:1.6;}
-.zblog-story h2{font-size:160%; line-height:1.6;}
-.zblog-story h3{font-size:140%; line-height:1.6;}
-.zblog-after-story{font-size:125%; line-height:1.6;}
-.zblog-after-story h1{font-size:180%; line-height:1.6;}
-.zblog-after-story h2{font-size:160%; line-height:1.6;}
-.zblog-after-story h3{font-size:140%; line-height:1.6;}
+
+.zblog-story{font-size:115%; line-height:1.6;}
+.zblog-story h1{font-size:170%; line-height:1.6;}
+.zblog-story h2{font-size:150%; line-height:1.6;}
+.zblog-story h3{font-size:130%; line-height:1.6;}
+.zblog-after-story{font-size:115%; line-height:1.6;}
+.zblog-after-story h1{font-size:170%; line-height:1.6;}
+.zblog-after-story h2{font-size:150%; line-height:1.6;}
+.zblog-after-story h3{font-size:130%; line-height:1.6;}
 
 .rss-summary-thumbnail{float:left; padding-right:20px; padding-bottom:20px; padding-left:0px;}
 .rss-summary-ds-2{overflow:hidden;
