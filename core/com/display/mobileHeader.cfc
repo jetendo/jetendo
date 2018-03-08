@@ -135,7 +135,26 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 								if(structkeyexists(sublink, 'onclick') and sublink.onclick NEQ ""){
 									echo(' onclick="'&sublink.onclick&'"');
 								}
-								echo('>#sublink.label#</a></li>');
+								echo('>#sublink.label#</a>');
+								/*
+								// third tier not possible with current javascript
+								if(structkeyexists(sublink, 'arrLink') and arrayLen(sublink.arrLink)){
+									echo('<ul>');
+									for(n2=1;n2<=arraylen(sublink.arrLink);n2++){
+										sublink2=sublink.arrLink[n2];
+										echo('<li><a href="#sublink2.link#"');
+										if(structkeyexists(sublink, 'target') and sublink2.target NEQ ""){
+											echo(' target="'&sublink2.target&'"');
+										}
+										if(structkeyexists(sublink, 'onclick') and sublink2.onclick NEQ ""){
+											echo(' onclick="'&sublink2.onclick&'"');
+										}
+										echo('>#sublink2.label#</a></li>');
+									}
+									echo('</ul>');
+								}
+								*/
+								echo('</li>');
 							}
 							echo('</ul>');
 						}
