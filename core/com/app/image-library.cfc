@@ -1361,6 +1361,7 @@ ts.layoutType=""; // thumbnail-left-and-other-photos,thumbnail-right-and-other-p
 ts.image_id = 0; // only use this if you want a specific image.
 ts.size="#request.zos.globals.maximagewidth#x2000";
 ts.pregenerate=false; // true will force all images to be resized before returning
+ts.disableMouseWheel=false; // set to true to disable mousewheel for contentflow gallery.
 ts.crop=0;
 ts.offset=0;
 ts.limit=0; // zero will return all images
@@ -1531,7 +1532,10 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		    <script type="text/javascript"> 
 			var myContentFlow#qImages.image_library_id# = new ContentFlow('contentFlow#qImages.image_library_id#', {
 				circularFlow: true,
-				loadingTimeout: 60000
+				loadingTimeout: 60000 
+				<cfif application.zcore.functions.zso(arguments.ss, 'disableMouseWheel', false, false)>
+					, scrollWheelSpeed :0
+				</cfif>
 			});
 			zArrDeferredFunctions.push(function() {
 				setTimeout(function(){
