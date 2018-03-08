@@ -1843,23 +1843,12 @@ function getImageMagickIdentify($a){
 				$cmd2="/usr/bin/convert ".escapeshellarg($path)." -profile ".$p2."icc-profiles/USWebCoatedSWOP.icc -profile ".$p2."icc-profiles/sRGB_IEC61966-2-1_black_scaled.icc ".escapeshellarg($path)." 2>&1";
 				$r2=`$cmd2`;
 				$a[2]="srgb";
-				//$r=implode(",", $a);
 			}else if(strtolower(trim($a[2]))=="gray"){
 				$cmd2="/usr/bin/convert ".escapeshellarg($path)." -depth 8 -type TrueColor -profile ".$p2."icc-profiles/sRGB_IEC61966-2-1_black_scaled.icc ".escapeshellarg($path)." 2>&1";
 				$r2=`$cmd2`;
 				$a[2]="srgb";
-				//$r=implode(",", $a);
 			}
-			$r ="";
-			$idx = count($a);
-			for($i=0; $i < $idx; $i++){
-				$r .= $a[$i] . ($i < $idx-1 ? ",":"");
-			}
-			/*if($idx < 8){
-				for($i=$idx; $i < 9; $i++){
-					$r .= $a[$i] . ($i < 8 ? ",":"");
-				}
-			}*/				
+			$r = explode(",", $a);
 			echo $cmd."\n".$r."\n";
 			return $r;
 		}
