@@ -449,6 +449,30 @@ these tables are done:
 			endDate=dateformat(dateadd("d", -1, dateadd("m", 1, startDate)), "yyyy-mm-dd");
 		} 
 		monthCount=0;
+
+		// get page auth token and reuse it below
+
+		ts={
+			method:'GET',
+			link:'/#page.id#?fields=access_token',
+			throwOnError:false
+		};
+		application.facebookImportStatus="Page tabs | API call #ts.link#";
+		form.disableFacebookCache=true;
+			echo('<p>'&ts.link&'</p>');
+		if(request.debug){
+			rs2={success:true};//request.debugRS.pageTabs;
+		}else{ 
+			rs2=request.facebook.sendRequest(ts);
+		} 
+		structdelete(form, 'disableFacebookCache'); 
+		if(rs2.success EQ false){
+			echo('<hr><h2>Download failed:'&ts.link&'</h2>');
+			writedump(rs2);
+			break; 
+		} 
+		pageAccessToken=rs2.response.access_token;   
+
 	 	while(true){ 
 	 		startDateRemote=datediff("s", createDateTime(1970, 1, 1, 0, 0, 0), startDate);
 			endDateRemote=datediff("s", createDateTime(1970, 1, 1, 0, 0, 0), endDate); 
@@ -457,16 +481,24 @@ these tables are done:
 			// grab page fans and age groups separately on the last day of the month only
 			ts={
 				method:'GET',
-				link:'/#page.id#/insights?metric=page_fans,page_fans_gender_age,page_views_total&period=lifetime&since=' & endDateRemote & '&until=' & endDateRemote,
-				throwOnError:false
-			};
+				link:'/#page.id#/insights',//?metric=page_fans,page_fans_gender_age,page_views_total&period=lifetime&since=' & endDateRemote & '&until=' & endDateRemote,
+				throwOnError:false,
+				requestParams:{
+					//tab:"app_customTab1",
+					metric:"page_fans,page_fans_gender_age,page_views_total",
+					period:"lifetime",
+					since:endDateRemote,
+					until:endDateRemote,
+					access_token:pageAccessToken
+				}
+			}; 
 			application.facebookImportStatus="Page: #page.name# | API call #ts.link# at #startDate# to #endDate#";
 				echo('<p>'&ts.link&'</p>');
 			if(request.debug){
 				rs2=request.debugRS.pageInsights;
 			}else{ 
-				rs2=request.facebook.sendRequest(ts);
-			} 
+				rs2=request.facebook.sendCustomTokenRequest(ts);
+			}  
 			if(rs2.success EQ false){
 				echo('<hr><h2>Download failed:'&ts.link&'</h2>');
 				writedump(rs2);
@@ -517,14 +549,21 @@ these tables are done:
 			application.facebookImportStatus="Page: #page.name# | API call #ts.link#";
 			ts={
 				method:'GET',
-				link:'/#page.id#/insights?metric=page_fan_adds_by_paid_non_paid_unique,page_fan_removes,page_impressions_unique,page_impressions,page_views_total&period=day&since=' & startDateRemote & '&until=' & endDateRemote,
-				throwOnError:false
+				link:'/#page.id#/insights',
+				throwOnError:false,
+				requestParams:{
+					metric:"page_fan_adds_by_paid_non_paid_unique,page_fan_removes,page_impressions_unique,page_impressions,page_views_total",
+					period:"day",
+					since:startDateRemote,
+					until:endDateRemote,
+					access_token:pageAccessToken
+				}
 			};
 				echo('<p>'&ts.link&'</p>');
 			if(request.debug){
 				rs2=request.debugRS.pageInsightsDaily;
 			}else{ 
-				rs2=request.facebook.sendRequest(ts);
+				rs2=request.facebook.sendCustomTokenRequest(ts); 
 			}  
 			if(rs2.success EQ false){
 				echo('<hr><h2>Download failed:'&ts.link&'</h2>');
@@ -649,8 +688,12 @@ these tables are done:
 				// everything but reactions is possible:
 				ts={
 					method:'GET',
-					link:'/#page.id#/posts?fields='&urlencodedformat("id,type,object_id,created_time,updated_time,permalink_url,message,comments.limit(0).summary(total_count),shares"),
-					throwOnError:true
+					link:'/#page.id#/posts', 
+					throwOnError:true,
+					requestParams:{
+						fields:"id,type,object_id,created_time,updated_time,permalink_url,message,comments.limit(0).summary(total_count),shares",
+						access_token:pageAccessToken
+					}
 				};
 				application.facebookImportStatus="Page: #page.name# | #gettickcount()# | API call #ts.link#";
 				//application.facebookStatsPageStatus="Processing insights for page posts: #page.name# (id: #page.id#)";
@@ -666,7 +709,7 @@ these tables are done:
 					if(request.debug){
 						rs2=request.debugRS.pagePosts;
 					}else{
-						rs2=request.facebook.sendRequest(ts);
+						rs2=request.facebook.sendCustomTokenRequest(ts); 
 					}
 					/*
 					if(pageOffset NEQ 0){

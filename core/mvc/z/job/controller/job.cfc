@@ -1534,17 +1534,42 @@ searchJobs(ts);
 	<cfscript>
 	d=dateformat(arguments.d, "yyyy-mm-dd")&" "&timeformat(arguments.d, "HH:mm:ss");
 	db=request.zos.queryObject;
-	db.sql="delete from #db.table("job", request.zos.zcoreDatasource)# WHERE 
+ 
+	db.sql="select * from #db.table("job", request.zos.zcoreDatasource)# WHERE 
 	site_id=#db.param(request.zos.globals.id)# and 
 	job_deleted=#db.param(0)# and 
 	job_updated_datetime<#db.param(d)#";
-	db.execute("qDelete");
+	qJob=db.execute("qJob");
+	for(row in qJob){
+		deleteJobByStruct(row);
+	}  
+	</cfscript>
+</cffunction>
 
-	db.sql="delete from #db.table("job_x_category", request.zos.zcoreDatasource)# WHERE 
-	site_id=#db.param(request.zos.globals.id)# and 
-	job_x_category_deleted=#db.param(0)# and 
-	job_x_category_updated_datetime<#db.param(d)#";
-	db.execute("qDelete");
+<cffunction name="deleteJobByStruct" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	var db=request.zos.queryObject; 
+
+	application.zcore.imageLibraryCom.deleteImageLibraryId(ss.job_image_library_id);
+
+	db.sql="DELETE FROM #db.table("job_x_category", request.zos.zcoreDatasource)#  
+	WHERE job_id= #db.param(ss.job_id)# and 
+	job_x_category_deleted = #db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)# ";
+	q=db.execute("q");
+
+	application.zcore.functions.zDeleteUniqueRewriteRule(ss.job_unique_url);
+
+	db.sql="DELETE FROM #db.table("job", request.zos.zcoreDatasource)#  
+	WHERE job_id= #db.param(ss.job_id)# and 
+	job_deleted = #db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)# ";
+	q=db.execute("q");
+
+
+	searchIndexDeleteJob(ss.job_id);
 	</cfscript>
 </cffunction>
 </cfoutput>
