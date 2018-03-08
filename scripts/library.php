@@ -1083,4 +1083,36 @@ function getAbsolutePath($path) {
 		return $result;
 	}
 }
+function zGetGps($exifCoord)
+{
+	$degrees 	= count($exifCoord) > 0 ? zGpsInfo($exifCoord[0]) : 0;
+	$minutes 	= count($exifCoord) > 1 ? zGpsInfo($exifCoord[1]) : 0;
+	$seconds	= count($exifCoord) > 2 ? zGpsInfo($exifCoord[2]) : 0;
+	$ref		= count($exifCoord) > 3 ? $exifCoord[3] : "";
+	$flip = ($ref == 'W' OR $ref == 'West' OR $ref == 'S' OR $ref == 'South') ? -1 : 1;
+    return $flip * ($degrees + $minutes / 60 + $seconds / 3600);
+}
+function zGetElevation($exifElev)
+{
+	$meters	= zGpsInfo($exifElev);
+    return $meters;
+}
+function zParseExifTime($timePart)
+{
+	$parts = explode(':', substr($timePart,0,10));
+	if(count($parts) < 3)
+		return date('Y-m-d H:i:s');
+	return date($parts[0] ."-" .$parts[1] ."-" .$parts[2] .substr($timePart,10));
+}
+function zGpsInfo($coordPart)
+{
+	$parts = explode('/', $coordPart);
+	if(count($parts) <= 0)// jic
+		return 0;
+	if(count($parts) == 1)
+		return $parts[0];
+
+	return floatval($parts[0]) / floatval($parts[1]);
+}
+
 ?>
