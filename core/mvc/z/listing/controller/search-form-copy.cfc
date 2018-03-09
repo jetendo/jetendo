@@ -3766,7 +3766,7 @@ propertyDataCom.setSearchCriteria(form);
 	<div id="zListingHelpDiv" style="display:none; margin-bottom:10px;border:1px solid ##990000; padding:10px; padding-top:10px;">
 		<p style="font-size:14px; font-weight:bold;">Search Directions:</p>
 		<p>Click on one of the search options on the sidebar and use the text fields, sliders and check boxes to enter your search data.  After you are done, click "Show Results" and the results will load on the right. </p>
-		<p><strong>City Search:</strong> Start typing a city into the box and our system will automatically show you a list of matching cities.  Select each city you wish to include in the search by using the arrow keys up and down.  Please the enter key or left click with your mouse to confirm the selection.  To remove a city, click the "X" button to the left of the city name. Only cities matching the ones in our system may be selected.</p>
+		<p><strong>City Search:</strong> Start typing a city into the box and our system will automatically show you a list of matching cities.  Select each city you wish to include in the search by using the arrow keys up and down.  Press the enter key or left click with your mouse to confirm the selection.  To remove a city, click the "X" button to the left of the city name. Only cities matching the ones in our system may be selected.</p>
 		<p>After typing an entry, click "Update Results" to update your search. </p>
 		<p>You can select or type as many options as you want.</p>
 		<p>Your search will automatically show the ## of matching listings as you update each search field.</p>
