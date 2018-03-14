@@ -244,6 +244,8 @@ these tables are done:
  	if(application.zcore.functions.zso(form, 'pullEverything', true, 0) EQ 1){
  		pullEverything=true;
  	}
+ 	// lets always disable cache for now.  
+ 	form.disableFacebookCache=true;
 
 	/*
 	don't need these anymore i think.
@@ -326,7 +328,7 @@ these tables are done:
 		echo('Cancelled');
 		abort;
 	}
-	form.disableFacebookCache=true;
+	//form.disableFacebookCache=true;
 	echo('<p>'&ts.link&'</p>');
 	if(request.debug){
 		rs=request.debugRS.accounts;
@@ -342,7 +344,7 @@ these tables are done:
 	while(true){
 		if(structkeyexists(rs.response.paging, 'next')){
 			ts.link=rs.response.paging.next;
-			form.disableFacebookCache=true;
+			//form.disableFacebookCache=true;
 			echo('<p>'&ts.link&'</p>');
 			if(request.debug){
 				rs=request.debugRS.accounts;
@@ -350,7 +352,7 @@ these tables are done:
 				rs=request.facebook.sendRequest(ts);
 			}
 			requestCount++;
-			structdelete(form, 'disableFacebookCache');
+			//structdelete(form, 'disableFacebookCache');
 			for(n2=1;n2<=arraylen(rs.response.data);n2++){
 				arrayAppend(arrAccount, rs.response.data[n2]);
 			}
@@ -361,7 +363,7 @@ these tables are done:
 			break;
 		}
 	}
-	structdelete(form, 'disableFacebookCache');
+	//structdelete(form, 'disableFacebookCache');
 	//echo(serializeJson(rs)); abort;
  
 	ageLookup={
@@ -458,14 +460,14 @@ these tables are done:
 			throwOnError:false
 		};
 		application.facebookImportStatus="Page tabs | API call #ts.link#";
-		form.disableFacebookCache=true;
+		//form.disableFacebookCache=true;
 			echo('<p>'&ts.link&'</p>');
 		if(request.debug){
 			rs2={success:true};//request.debugRS.pageTabs;
 		}else{ 
 			rs2=request.facebook.sendRequest(ts);
 		} 
-		structdelete(form, 'disableFacebookCache'); 
+		//structdelete(form, 'disableFacebookCache'); 
 		if(rs2.success EQ false){
 			echo('<hr><h2>Download failed:'&ts.link&'</h2>');
 			writedump(rs2);
