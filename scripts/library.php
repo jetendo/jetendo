@@ -315,7 +315,7 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 	if($type === false){
 		echo "getRetsImageType returned false for mls_id = ".$mls_id."\n";
 		return false;
-	} 
+	}  
 	if($photoIndex == 0){
 		$photoIndex="*";
 	}else{
@@ -362,12 +362,19 @@ function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 	$a=explode("-", $listingId);
 	$pid=$a[1];
 	$destinationPath=get_cfg_var("jetendo_share_path")."mls-images/";
+	$photoOffset=0; 
 	foreach ($photos as $arrPhoto) {
+		$photoOffset++;
 		if(!$arrPhoto['Success']){
 			continue;
 		}
 		$i++;
-		$fname=$mls_id."-".$pid."-".($arrPhoto['Object-ID']+1).".jpeg";
+		if($photoIndex == "*"){
+			$fname=$mls_id."-".$pid."-".($photoOffset).".jpeg";
+		}else{
+			// had to do this because NSB returned wrong Object-ID
+			$fname=$mls_id."-".$pid."-".($photoIndex+1).".jpeg";
+		}
 		$md5name=md5($fname);
 		$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/";
 		if(!is_dir($fpath)){

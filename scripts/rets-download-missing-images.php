@@ -41,6 +41,11 @@ ORDER BY mls_update_date desc", MYSQLI_STORE_RESULT);
 // 19 = password is not working yet - need to test when it does
 // 20 = Authorization failed - need to test in the morning hours in case that it is why.
 
+// 28-nsb rets server is broken and doesn't support downloading images with an offset, so we have to stupidly download all of the images again anytime they are missing, and we often need to do this because they don't have a proper field to download images with since date photo is wrong, and date change is not on all tables.
+$forceDownloadAll=array(
+	"28"=>true
+);
+
 $count1=0;
 $downloadCount=0;
 $errorCount=0;
@@ -81,9 +86,14 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 				$fname=$row["listing_id"]."-".$i.".jpeg";
 				$md5name=md5($fname);
 				$fpath=$destinationPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/"; 
-				if(!file_exists($fpath.$fname)){ 
+				if(!file_exists($fpath.$fname)){ // || $row["listing_id"] =='28-1036138' || $row["listing_id"] =='25-O5559132'
 					ob_start();
-					$r=zDownloadRetsImages($row["listing_id"], "", $i);
+					if(isset($forceDownloadAll[$mls_id])){
+						$r=zDownloadRetsImages($row["listing_id"], "", 0);
+						$c=0; 
+					}else{
+						$r=zDownloadRetsImages($row["listing_id"], "", $i);
+					}
 					$out=ob_get_clean();
 					echo $out;
 					if($r===false){
