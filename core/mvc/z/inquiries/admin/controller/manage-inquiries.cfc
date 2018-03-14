@@ -1930,7 +1930,7 @@ zArrDeferredFunctions.push(function(){
 	rs={};
 	loadListLookupData();
 
-	form.search_office_id=application.zcore.functions.zso(form, 'search_office_id', true, "0");
+	form.search_office_id=application.zcore.functions.zso(form, 'search_office_id');
 	if(application.zcore.functions.zso(request.zsession, "selectedofficeid", true, 0) NEQ 0){
 		form.search_office_id=request.zsession.selectedofficeid;
 	} 
@@ -2013,7 +2013,7 @@ zArrDeferredFunctions.push(function(){
 	if(form.search_email NEQ ""){
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
 	}
-	if(form.search_office_id NEQ "0"){
+	if(form.search_office_id NEQ ""){
 		db.sql&=" and inquiries.office_id = #db.param(form.search_office_id)# ";
 	}
 	if(form.inquiries_status_id EQ ""){ 
@@ -2087,7 +2087,7 @@ zArrDeferredFunctions.push(function(){
 		db.sql&=" and inquiries.user_id = #db.param(form.selected_user_id)# and 
 		user_id_siteIDType = #db.param(form.selected_user_id_siteidtype)#";
 	}
-	if(form.search_office_id NEQ "0"){
+	if(form.search_office_id NEQ ""){
 		db.sql&=" and inquiries.office_id = #db.param(form.search_office_id)# ";
 	}
 	if(form.search_phone NEQ ""){
@@ -2223,6 +2223,7 @@ zArrDeferredFunctions.push(function(){
 		}else{
 			arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 		}
+		arrayPrepend(arrOffice, {office_name:"No Office", office_id:"0"});
 		if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
 			savecontent variable="officeField"{
 				selectStruct = StructNew();

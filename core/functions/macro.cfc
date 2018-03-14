@@ -1300,5 +1300,95 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	return qRate.exchange_rate_amount;
 	</cfscript>
 </cffunction> 
+
+
+<!--- 
+thumbnailSize=480; // must be one of these: 150,240,320,480,640
+rs=application.zcore.functions.zGetInstagramFeedByURL("any instagram username home page page url with ?__a=1 added to the end.", thumbnailSize);
+if(rs.success){
+	for(image in rs.arrSocialImage){
+		writedump(image);abort;
+	}
+}else{
+	echo(rs.errorMessage);
+}
+ --->
+<cffunction name="zGetInstagramFeedByURL" localmode="modern" access="public" returntype="struct">
+	<cfargument name="theURL" type="string" required="yes">
+	<cfargument name="thumbnailSize" type="string" required="yes">
+	<cftry>
+		<cfscript>
+		arrSocialImage=[];
+		cachePath=application.zcore.functions.zURLEncode(arguments.theURL, '_');
+		if(not structkeyexists(application, 'instagramFeedCache')){
+			application.instagramFeedCache={};
+		}
+		if(request.zos.zreset NEQ "site" and structkeyexists(application.instagramFeedCache, cachePath) and application.instagramFeedCache[cachePath].date EQ dateformat(now(), "yyyy-mm-dd")){
+			arrSocialImage=application.instagramFeedCache[cachePath].arrSocialImage;
+		}else{
+			rs=application.zcore.functions.zDownloadLink(arguments.theURL);
+			if(rs.success){
+				if(rs.cfhttp.filecontent NEQ "" and isJson(rs.cfhttp.filecontent)){
+					jsonObj=deserializeJSON(rs.cfhttp.filecontent); 
+					arrImage=jsonObj.graphql.user.edge_owner_to_timeline_media.edges; 
+					for(i=1;i LTE min(5, arrayLen(arrImage));i++){
+						image=arrImage[i].node; 
+						thumbnailImage=image.thumbnail_src;
+						for(thumbnail in image.thumbnail_resources){
+							if(thumbnail.config_width EQ arguments.thumbnailSize){
+								thumbnailImage=thumbnail.src;
+							}
+						}   
+						ts={
+							id:image.id,
+							image:image.display_url,
+							link:"https://www.instagram.com/p/"&image.shortcode&"/",
+							likeCount:image.edge_liked_by.count,
+							commentCount:image.edge_media_to_comment.count,
+							date:DateAdd("s", image.taken_at_timestamp, DateConvert("utc2Local", "January 1 1970 00:00")),
+							image:thumbnailImage,
+							owner:image.owner.id,
+							shortCode:image.shortcode,
+							imageWidth:image.dimensions.width,
+							imageHeight:image.dimensions.height,
+							thumbnailWidth:arguments.thumbnailSize,
+							thumbnailHeight:arguments.thumbnailSize,
+							caption:image.edge_media_to_caption.edges[1].node.text,
+							is_video:image.is_video
+						};
+						arrayAppend(arrSocialImage, ts);
+					}
+				}
+				application.instagramFeedCache[cachePath]={
+					arrSocialImage:arrSocialImage,
+					date:dateformat(now(), "yyyy-mm-dd")
+				};
+			}else{
+				return {success:false, errorMessage:"Instagram Download Failed"};
+			}
+		}
+		return {success:true, arrSocialImage:arrSocialImage};
+		</cfscript>
+		<cfcatch type="any">
+			<cfscript> 
+			savecontent variable="out"{
+				echo('<h2>Instagram API Failure</h2>');
+				writedump(cfcatch);
+			}
+			ts={
+				type:"Custom",
+				errorHTML:out,
+				scriptName:'/',
+				url:request.zos.originalURL,
+				exceptionMessage:'Instagram API Failure',
+				// optional
+				lineNumber:'400'
+			}
+			application.zcore.functions.zLogError(ts);
+			return {success:false, errorMessage:"Instagram API Changed"};
+			</cfscript>
+		</cfcatch>
+	</cftry>
+</cffunction>
 </cfoutput>
 </cfcomponent>
