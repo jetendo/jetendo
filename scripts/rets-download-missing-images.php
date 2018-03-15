@@ -1,6 +1,6 @@
 <?php
-// Add this task to crontab manually if you want the server to download missing rets images automatically.  This will run it every hour.
-// 30 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/rets-download-missing-images.php >/dev/null 2>&1
+// Add this task to crontab manually if you want the server to download missing rets images automatically.  This will run it every 5 minutes
+// 5 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/rets-download-missing-images.php >/dev/null 2>&1
 require("library.php");
 
 
