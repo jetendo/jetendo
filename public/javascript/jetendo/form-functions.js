@@ -1898,7 +1898,7 @@ var zLastAjaxVarName=""; */
 			if(unloadCalled){
 				return;
 			}
-			if(e.target && e.target.activeElement && e.target.activeElement.href.indexOf("mailto:") != -1){
+			if(e.target && e.target.activeElement && e.target.activeElement.href && e.target.activeElement.href.indexOf("mailto:") != -1){
 				return;
 			}
 			unloadCalled=true;
