@@ -1431,64 +1431,35 @@
 				}
 			]
 		});
-		db.sql = "SELECT ga_month_channel_source_goal_channel, 
-		SUM(ga_month_channel_source_goal_visits) AS amt,
-		ga_month_channel_source_goal_source,
-		ga_month_channel_source_goal_date	
-	  	FROM #db.table("ga_month_channel_source_goal", request.zos.zcoreDatasource)# 
-		WHERE ga_month_channel_source_goal_deleted = #db.param(0)# 
-		AND site_id = #db.param(request.zos.globals.id)# AND ";
+		db.sql="SELECT 
+		DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) date, 
+		COUNT(DISTINCT inquiries.inquiries_id) count ,inquiries_type_name
+		FROM #db.table("inquiries", request.zos.zcoreDatasource)#,
+		#db.table("inquiries_type", request.zos.zcoreDatasource)#  
+		WHERE inquiries.inquiries_type_id = inquiries_type.inquiries_type_id
+		AND inquiries_deleted = #db.param(0)# 
+		AND inquiries_type_deleted = #db.param(0)# 
+		AND inquiries_final_inquiries_id=#db.param(0)# 
+		AND inquiries_type.site_id = #db.param(request.zos.globals.id)# 
+		AND inquiries.site_id = #db.param(request.zos.globals.id)# ";
 		if(form.inquiries_start_date EQ false){
-			db.sql &= " (ga_month_channel_source_goal_date >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
-			 ga_month_channel_source_goal_date <= #db.param(dateformat(now(), "yyyy-mm-dd")&' 23:59:59')#) ";
+			db.sql &= " AND (inquiries_datetime >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
+			 inquiries_datetime <= #db.param(dateformat(now(), "yyyy-mm-dd")&' 23:59:59')#) ";
 		}else{
-			db.sql &=" (ga_month_channel_source_goal_date >=  #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
-			 ga_month_channel_source_goal_date <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#) ";
+			db.sql &=" AND (inquiries_datetime >=  #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
+			 inquiries_datetime <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#) ";
 		}
-	 	db.sql &= " AND ga_month_channel_source_goal_channel <> #db.param('Referral')# 
-	 	GROUP BY ga_month_channel_source_goal_source,ga_month_channel_source_goal_date;";
-	    var data 		= db.execute("data");
-    	var sDateData 	= StructNew("Ordered");
-	    for(var rs in Data){
-	    	var elDia = DateFormat(rs.ga_month_channel_source_goal_date,"mm/dd/yyyy");
-	    	if(NOT structKeyExists(sDateData, elDia)){
-		   		sDateData[elDia] = {"month" : elDia, "(Other)" : 0, "Direct" : 0, "Email" : 0, "Organic Search" : 0, "Social" : 0, "Organic Search Bing" : 0, "Organic Search Google" : 0, "Organic Search Yahoo" : 0, "Social Facebook" : 0, "Social Twitter": 0,"Social Instagram" : 0};
-	    	}
-	    }
-	    for(var rs in Data){
-	    	var elDia = DateFormat(rs.ga_month_channel_source_goal_date,"mm/dd/yyyy");
-	    	if(NOT structKeyExists(sDateData, elDia)){
-		   		sDateData[elDia] = {"month" : elDia, "(Other)" : 0, "Direct" : 0, "Email" : 0, "Organic Search" : 0, "Social" : 0, "Organic Search Bing" : 0, "Organic Search Google" : 0, "Organic Search Yahoo" : 0, "Social Facebook" : 0, "Social Twitter": 0,"Social Instagram" : 0};
-	    	}
-	    	if(rs.ga_month_channel_source_goal_channel EQ '(Other)'){
-	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
-	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Direct'){
-	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
-	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Email'){
-	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
-	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Organic Search'){
-	    		if(FindNoCase("bing", rs.ga_month_channel_source_goal_source) NEQ 0){
-		    		sDateData[elDia]["Organic Search Bing"] += rs.amt;
-	    		} else if (FindNoCase("google", rs.ga_month_channel_source_goal_source) NEQ 0){
-		    		sDateData[elDia]["Organic Search Google"] += rs.amt;
-	    		} else if (rs.ga_month_channel_source_goal_source EQ 'yahoo'){
-		    		sDateData[elDia]["Organic Search Yahoo"] += rs.amt;
-	    		} else{
-	    			sDateData[elDia]["Organic Search"] += rs.amt;
-	    		}		
-	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Social'){
-	    		if(FindNoCase("facebook", rs.ga_month_channel_source_goal_source) NEQ 0){
-		    		sDateData[elDia]["Social Facebook"] += rs.amt;
-	    		} else if(FindNoCase("t.co", rs.ga_month_channel_source_goal_source) EQ 1 OR FindNoCase("twitter", rs.ga_month_channel_source_goal_source) NEQ 0){
-		    		//t.co has to be beginning or otherwise pinterst.com would be added
-		    		sDateData[elDia]["Social Twitter"] += rs.amt;
-	    		} else if(FindNoCase("instagram",rs.ga_month_channel_source_goal_source) NEQ 0){
-		    		sDateData[elDia]["Social Instagram"] += rs.amt;
-	    		} else{
-		    		sDateData[elDia]["Social"] += rs.amt;
-	    		}		
-	    	}
+	 	db.sql &= " GROUP BY date, inquiries.inquiries_type_id, inquiries_type_name;";
+    	var qData 		= db.execute("qData");
+    	//writedump(qData);abort;
+		if(form.inquiries_start_date EQ false){
+			request.leadData.startMonthDate = dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00';
+			request.leadData.endDate = dateformat(now(), "yyyy-mm-dd")&' 23:59:59';
+		}else{
+			request.leadData.startMonthDate = dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00';
+			request.leadData.endDate = dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59'
 		}
+
 	</cfscript>
 	<style>
 		text{
@@ -1546,15 +1517,18 @@
 	</cfif>
 	<h3 style="color:##000000;padding-left:20px;">Top Channels</h3>
 	<div class="z-float" id="divChannels"></div>
-	<div class="d3All" style="width:100%; height:500px;">
-		<div style="height:500px; padding-left:10px; float:left;">
+	<div class="d3All" style="width:100%; height:800px;">
+		<div style="height:1000px; padding-left:10px; float:left;">
 			<cfscript>
-				var total 	= 0;
-				var pieData = [];
-				for(var x in sDateData){
-					arrayAppend(pieData,sDateData[x]);
+				var barData 	= [];
+				var ssLabels	= StructNew("Ordered")
+				for(var rec in qData){
+					if(NOT structKeyExists(ssLabels, rec.inquiries_type_name)){
+						ssLabels[rec.inquiries_type_name] = rec.inquiries_type_name;
+					}
+					arrayAppend(barData,{"month": "#rec.date#", "#rec.inquiries_type_name#":"#rec.count#"});
 				}
-				#makeStackGraph(serializeJSON(pieData),"pcStack")#;	
+				#makeStackGraph(serializeJSON(barData),"pcStack", structKeyArray(ssLabels))#;	
 			</cfscript>
 		</div>
 	<div>
@@ -1563,15 +1537,20 @@
 <cffunction name="makeStackGraph" localmode="modern" access="remote">
 	<cfargument name="chartData" type="string" required="yes">
 	<cfargument name="chartName" type="string" required="yes">
+	<cfargument name="chartLabels" type="Array" required="yes">
 	<div style="float:left;padding-left:150px;">
-		<svg id="#arguments.chartName#" width="1500" height="400">
+		<svg id="#arguments.chartName#" width="1500" height="900">
 		</svg>
 	</div>
 	<script>
 	function #arguments.chartName#loadStackCharts(){
 		//alert(JSON.stringify(data));
 		//["(Other)", "Direct", "Email","Organic Search", "Social", "Organic Search Bing", "Organic Search Google", "Organic Search Yahoo", "Social Facebook", "Social Twitter","Social Instagram"]
-		var color = d3.scaleOrdinal().range(["##867200", 
+		var color = d3.scaleOrdinal().range(["##319177",
+											 "##93DFB8",
+											 "##FF7A00",
+											 "##AD4379",
+											 "##867200", 
 											 "##652DC1", 
 											 "##C5E17A", 
 											 "##0A6B0D", 
@@ -1581,21 +1560,24 @@
 											 "##6456B7", 
 											 "##FDFF00", 
 											 "##708EB3",
-											 "##000000"]);
+											 "##000000",
+											 "##A6A6A6",
+											 "##9E5E6F",
+											 "##DA2C43",
+											 "##778BA5",
+											 "##5FA778",
+											 "##5F8A8B",
+											 "##914E75"
+											 ]);
 
 		var data	 	= #arguments.chartData#;
 		//alert(JSON.stringify(data));
-		var keys		= [	"Direct", 
-							"Email", 
-							"Organic Search Bing", 
-							"Organic Search Google", 
-							"Organic Search Yahoo", 
-							"Social Facebook", 
-							"Social Twitter",
-							"Social Instagram", 
-							"Social",
-							"Organic Search",
-							"(Other)"];
+		var keys		= [];
+		<cfscript>
+			for(key in arguments.chartLabels){
+				echo('keys.push("#key#");');
+			}
+		</cfscript>
 		var series = d3.stack()
 		    .keys(keys)
 		    .offset(d3.stackOffsetDiverging)
@@ -1627,8 +1609,8 @@
 		  .enter().append("rect")
 		    .attr("width", x.bandwidth)
 		    .attr("x", function(d) { return x(d.data.month); })
-		    .attr("y", function(d) { return y(d[1]); })
-		    .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+		    .attr("y", function(d) { /*if(isNaN(y(d[1]))) return 1; else*/ return y(d[1]); })
+		    .attr("height", function(d) { if(isNaN(y(d[1]))) return 1; else return y(d[0]) - y(d[1]); })
 
 		svg.append("g")
 		    .attr("transform", "translate(0," + y(0) + ")")
