@@ -973,7 +973,7 @@
 				<span>All Users: Sessions<br /><b>#NumberFormat(totalSessions)#</b></span> 
 			</div>
 			<div style="float:left; padding-left:220px;">
-				<span>All Users: Goal Conversion Rate<br /><b>#NumberFormat((totalCompletions/totalSessions)*100,".000")#%</b></span> 
+				<span>All Users: Goal Conversion Rate<br /><b>#NumberFormat((totalCompletions/(totalSessions GT 0 ? totalSessions : 1))*100,".000")#%</b></span> 
 
 			</div>
 			<div style="float:left; padding-left:440px;">
@@ -1371,8 +1371,315 @@
 	});
 	</script>
 </cffunction>
+<cffunction name="googleStackSourceBreakdown" localmode="modern" access="remote" roles="member">
+	<cfscript>
+		init();
+		variables.searchFields=[];
 
+		variables.inquiryFirstDate = dateformat(dateadd("m", -2, now()), "yyyy-mm-dd");
 
+		form.searchOn=application.zcore.functions.zso(form, 'searchOn', true, 0);
+		params=[];
+		if(form.searchOn EQ 1){
+			arrayAppend(params, "searchOn=#form.searchOn#");
+		} 
+	 	for(group in variables.searchFields){
+	 		if(structkeyexists(group, 'fields')){
+			 	for(field in group.fields){
+			 		form[field.field]=application.zcore.functions.zso(form, field.field); 
+					if(form.searchOn EQ 1){
+	 					arrayAppend(params, "#field.field#=#urlencodedformat(form[field.field])#");
+	 				}
+			 	}
+			}
+		}
+	 	currentLink=application.zcore.functions.zURLAppend(request.zos.originalURL, arrayToList(params, "&"));
+
+		if(not structkeyexists(form, 'inquiries_start_date') or not isdate(form.inquiries_start_date)){  
+			form.inquiries_start_date=variables.inquiryFirstDate; 
+		}
+		if(not structkeyexists(form, 'inquiries_end_date') or not isdate(form.inquiries_end_date)){  
+			form.inquiries_end_date=dateFormat(now(), "yyyy-mm-dd"); 
+		}
+		if(form.inquiries_start_date EQ false or form.inquiries_end_date EQ false){
+			form.inquiries_start_date = dateformat(dateadd("d", -30, now()), "yyyy-mm-dd");
+			form.inquiries_end_date = dateFormat(now(), "yyyy-mm-dd");
+		}
+		if(not structkeyexists(form, 'inquiries_2_percent')){
+			form.inquiries_2_percent = "";
+		}
+		var db = request.zos.queryObject; //request.zos.noVerifyQueryObject; 
+		var sChecked = "";
+		if(form.inquiries_2_percent EQ "on"){
+			sChecked = " checked";
+		}
+		arrayAppend(variables.searchFields, {
+			groupStyle:'width:280px; max-width:100%; ',
+			fields:[
+				{
+					label:"Start",
+					formField:'<input type="date" name="inquiries_start_date" value="#dateformat(form.inquiries_start_date, 'yyyy-mm-dd')#">',
+					field:"",
+					labelStyle:'width:160px;',
+					fieldStyle:'width:200px;'
+				},{
+					label:"End",
+					formField:'<input type="date" name="inquiries_end_date" value="#dateformat(form.inquiries_end_date, 'yyyy-mm-dd')#">',
+					field:"",
+					labelStyle:'width:160px;',
+					fieldStyle:'width:200px;'
+				}
+			]
+		});
+		db.sql = "SELECT ga_month_channel_source_goal_channel, 
+		SUM(ga_month_channel_source_goal_visits) AS amt,
+		ga_month_channel_source_goal_source,
+		ga_month_channel_source_goal_date	
+	  	FROM #db.table("ga_month_channel_source_goal", request.zos.zcoreDatasource)# 
+		WHERE ga_month_channel_source_goal_deleted = #db.param(0)# 
+		AND site_id = #db.param(request.zos.globals.id)# AND ";
+		if(form.inquiries_start_date EQ false){
+			db.sql &= " (ga_month_channel_source_goal_date >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
+			 ga_month_channel_source_goal_date <= #db.param(dateformat(now(), "yyyy-mm-dd")&' 23:59:59')#) ";
+		}else{
+			db.sql &=" (ga_month_channel_source_goal_date >=  #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
+			 ga_month_channel_source_goal_date <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#) ";
+		}
+	 	db.sql &= " AND ga_month_channel_source_goal_channel <> #db.param('Referral')# 
+	 	GROUP BY ga_month_channel_source_goal_source,ga_month_channel_source_goal_date;";
+	    var data 		= db.execute("data");
+    	var sDateData 	= StructNew("Ordered");
+	    for(var rs in Data){
+	    	var elDia = DateFormat(rs.ga_month_channel_source_goal_date,"mm/dd/yyyy");
+	    	if(NOT structKeyExists(sDateData, elDia)){
+		   		sDateData[elDia] = {"month" : elDia, "(Other)" : 0, "Direct" : 0, "Email" : 0, "Organic Search" : 0, "Social" : 0, "Organic Search Bing" : 0, "Organic Search Google" : 0, "Organic Search Yahoo" : 0, "Social Facebook" : 0, "Social Twitter": 0,"Social Instagram" : 0};
+	    	}
+	    }
+	    for(var rs in Data){
+	    	var elDia = DateFormat(rs.ga_month_channel_source_goal_date,"mm/dd/yyyy");
+	    	if(NOT structKeyExists(sDateData, elDia)){
+		   		sDateData[elDia] = {"month" : elDia, "(Other)" : 0, "Direct" : 0, "Email" : 0, "Organic Search" : 0, "Social" : 0, "Organic Search Bing" : 0, "Organic Search Google" : 0, "Organic Search Yahoo" : 0, "Social Facebook" : 0, "Social Twitter": 0,"Social Instagram" : 0};
+	    	}
+	    	if(rs.ga_month_channel_source_goal_channel EQ '(Other)'){
+	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
+	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Direct'){
+	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
+	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Email'){
+	    		sDateData[elDia]["#rs.ga_month_channel_source_goal_channel#"] += rs.amt;
+	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Organic Search'){
+	    		if(FindNoCase("bing", rs.ga_month_channel_source_goal_source) NEQ 0){
+		    		sDateData[elDia]["Organic Search Bing"] += rs.amt;
+	    		} else if (FindNoCase("google", rs.ga_month_channel_source_goal_source) NEQ 0){
+		    		sDateData[elDia]["Organic Search Google"] += rs.amt;
+	    		} else if (rs.ga_month_channel_source_goal_source EQ 'yahoo'){
+		    		sDateData[elDia]["Organic Search Yahoo"] += rs.amt;
+	    		} else{
+	    			sDateData[elDia]["Organic Search"] += rs.amt;
+	    		}		
+	    	} else if(rs.ga_month_channel_source_goal_channel EQ 'Social'){
+	    		if(FindNoCase("facebook", rs.ga_month_channel_source_goal_source) NEQ 0){
+		    		sDateData[elDia]["Social Facebook"] += rs.amt;
+	    		} else if(FindNoCase("t.co", rs.ga_month_channel_source_goal_source) EQ 1 OR FindNoCase("twitter", rs.ga_month_channel_source_goal_source) NEQ 0){
+		    		//t.co has to be beginning or otherwise pinterst.com would be added
+		    		sDateData[elDia]["Social Twitter"] += rs.amt;
+	    		} else if(FindNoCase("instagram",rs.ga_month_channel_source_goal_source) NEQ 0){
+		    		sDateData[elDia]["Social Instagram"] += rs.amt;
+	    		} else{
+		    		sDateData[elDia]["Social"] += rs.amt;
+	    		}		
+	    	}
+		}
+	</cfscript>
+	<style>
+		text{
+		  font: 15px sans-serif;
+		}
+		th{
+			background-color: ##000000;
+			color:##FFFFFF;
+			text-align:left;
+			font-weight:bold;
+		}
+	</style>
+	<h2>Statistics</h2>
+	<cfif arraylen(variables.searchFields)>
+		<div class="z-float">
+			<a href="##" class="z-manager-list-tab-button <cfif form.searchOn EQ 0>active</cfif>" data-tab="" data-click-location="#request.zos.originalURL#">All Data</a>
+			<a href="##" class="z-manager-list-tab-button <cfif form.searchOn EQ 1>active</cfif>" data-tab="z-manager-search-fields"><div class="z-float-left">Search</div><div class="z-show-at-992 z-float-left">&nbsp;</div><div class="z-manager-list-tab-refine">Refine</div></a> 
+		</div>
+		<div class="z-manager-tab-container z-float" <cfif form.searchOn EQ 0>style="display:none;"</cfif>>
+			<div class="z-manager-list-tab z-manager-search-fields <cfif form.searchOn EQ 1>active</cfif>">
+				<form action="#currentLink#" method="get">
+					<input type="hidden" name="searchOn" value="1">
+					<cfscript>
+					for(group in variables.searchFields){
+						echo('<div class="z-manager-search-group"');
+						if(structkeyexists(group, 'groupStyle')){
+							echo(' style="#group.groupStyle#"');
+						}
+						echo('>');
+						for(field in group.fields){
+
+							echo('<div class="z-manager-search-field">');
+							if(structkeyexists(field, 'label')){
+								echo('<div class="z-manager-search-field-label"');
+								if(structkeyexists(field, 'labelStyle')){
+									echo(' style="#field.labelStyle#"');
+								}
+								echo('>#field.label#</div>');
+							}
+							echo('<div class="z-manager-search-field-form"');
+							if(structkeyexists(field, 'fieldStyle')){
+								echo(' style="#field.fieldStyle#"');
+							}
+							echo('>#field.formField#</div></div>');
+						}
+						echo('</div>');
+					}
+					</cfscript> 
+					<div class="z-manager-search-submit">
+						<input type="submit" name="submit1" class="z-manager-search-button" value="Submit">
+					</div>
+				</form>
+			</div>
+		</div>
+	</cfif>
+	<h3 style="color:##000000;padding-left:20px;">Top Channels</h3>
+	<div class="z-float" id="divChannels"></div>
+	<div class="d3All" style="width:100%; height:500px;">
+		<div style="height:500px; padding-left:10px; float:left;">
+			<cfscript>
+				var total 	= 0;
+				var pieData = [];
+				for(var x in sDateData){
+					arrayAppend(pieData,sDateData[x]);
+				}
+				#makeStackGraph(serializeJSON(pieData),"pcStack")#;	
+			</cfscript>
+		</div>
+	<div>
+</cffunction>
+
+<cffunction name="makeStackGraph" localmode="modern" access="remote">
+	<cfargument name="chartData" type="string" required="yes">
+	<cfargument name="chartName" type="string" required="yes">
+	<div style="float:left;padding-left:150px;">
+		<svg id="#arguments.chartName#" width="1500" height="400">
+		</svg>
+	</div>
+	<script>
+	function #arguments.chartName#loadStackCharts(){
+		//alert(JSON.stringify(data));
+		//["(Other)", "Direct", "Email","Organic Search", "Social", "Organic Search Bing", "Organic Search Google", "Organic Search Yahoo", "Social Facebook", "Social Twitter","Social Instagram"]
+		var color = d3.scaleOrdinal().range(["##867200", 
+											 "##652DC1", 
+											 "##C5E17A", 
+											 "##0A6B0D", 
+											 "##87FF2A", 
+											 "##FFC800", 
+											 "##F653A6", 
+											 "##6456B7", 
+											 "##FDFF00", 
+											 "##708EB3",
+											 "##000000"]);
+
+		var data	 	= #arguments.chartData#;
+		//alert(JSON.stringify(data));
+		var keys		= [	"Direct", 
+							"Email", 
+							"Organic Search Bing", 
+							"Organic Search Google", 
+							"Organic Search Yahoo", 
+							"Social Facebook", 
+							"Social Twitter",
+							"Social Instagram", 
+							"Social",
+							"Organic Search",
+							"(Other)"];
+		var series = d3.stack()
+		    .keys(keys)
+		    .offset(d3.stackOffsetDiverging)
+		    (data);
+		var svg = d3.select("svg"),
+		    margin = {top: 20, right: 30, bottom: 30, left: 290},
+		    width = +svg.attr("width"),
+		    height = +svg.attr("height");
+
+		var x = d3.scaleBand()
+		    .domain(data.map(function(d) { return d.month; }))
+		    .rangeRound([margin.left, width - margin.right])
+		    .padding(0.1);
+
+		var y = d3.scaleLinear()
+		    .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
+		    .rangeRound([height - margin.bottom, margin.top]);
+
+		var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+		svg.append("g")
+		  .selectAll("g")
+		  .data(series)
+		  .enter().append("g")
+		    //.attr("fill", function(d) { alert(z(d.key));return z(d.key); })
+			.style("fill", function(d,i) { return color(i);})
+		  .selectAll("rect")
+		  .data(function(d) { return d; })
+		  .enter().append("rect")
+		    .attr("width", x.bandwidth)
+		    .attr("x", function(d) { return x(d.data.month); })
+		    .attr("y", function(d) { return y(d[1]); })
+		    .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+
+		svg.append("g")
+		    .attr("transform", "translate(0," + y(0) + ")")
+		    .call(d3.axisBottom(x));
+
+		svg.append("g")
+		    .attr("transform", "translate(" + margin.left + ",0)")
+		    .call(d3.axisLeft(y));
+
+		var legend = svg.append("g")
+	  		.attr("class", "legend")
+			.attr("height", 100)
+	  		.attr("width", 100)
+    		.attr('transform', 'translate(-20,50)');
+   
+	    legend.selectAll('rect')
+	      .data(keys)
+	      .enter()
+	      .append("rect")
+		  .attr("x", 5)
+	      .attr("y", function(d, i){ return (i *  30);})
+		  .attr("width", 45)
+		  .attr("height", 25)
+		  .style("fill", function(d,i) { 
+	        var color_hash = color(i);
+	        return color_hash;
+	    });
+      
+	    legend.selectAll('text')
+	      .data(keys)
+	      .enter()
+	      .append("text")
+		  .attr("x", 55)
+	      .attr("y", function(d, i){ return ((i *  30)+17);})
+		  .text(function(d,i) {
+	        var text = keys[i];
+	        return text;
+		});
+
+	}
+	function stackMin(serie) {
+	  return d3.min(serie, function(d) { return d[0]; });
+	}
+
+	function stackMax(serie) {
+	  return d3.max(serie, function(d) { return d[1]; });
+	}		
+	zArrDeferredFunctions.push(function(){
+		#arguments.chartName#loadStackCharts();
+	});
+	</script>
+</cffunction>
 </cfoutput>
-
 </cfcomponent>
