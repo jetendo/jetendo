@@ -1,119 +1,5 @@
 <cfcomponent>
 <cfoutput>
-<!--- 
-<cffunction name="chart" localmode="modern" access="remote">
-	<cfscript>
-	init();
-	</cfscript>
-<!DOCTYPE html>
-<head>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-</head>
-<body>
-<cfscript>
-chartData=[{date:"04/01/2017", close: 10}, 
-	{date:"05/01/2017", close: 15}, 
-	{date:"06/01/2017", close: 25}];
-</cfscript>
-<svg data-jsondata="#htmleditformat(serializeJson(chartData))#" width="960" height="500"></svg>
-<script>
-/*
-var dataArray = [103, 13, 21, 14, 37, 15, 18, 34, 30];
-
-var svg = d3.select("body").append("svg")
-          .attr("height","100%")
-          .attr("width","100%");
-
-svg.selectAll("rect")
-    .data(dataArray)
-    .enter().append("rect")
-          .attr("class", "bar")
-          .attr("height", function(d, i) {return (d * 10)})
-          .attr("width","40")
-          .attr("x", function(d, i) {return (i * 60) + 25})
-          .attr("y", function(d, i) {return 400 - (d * 10)});
-*/
-
-function loadLineCharts(){
-	$("svg").each(function(){
-
-		var svg = d3.select("svg"),
-		    margin = {top: 20, right: 20, bottom: 30, left: 50},
-		    width = +svg.attr("width") - margin.left - margin.right,
-		    height = +svg.attr("height") - margin.top - margin.bottom,
-		    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		var parseTime = d3.timeParse("%m/%d/%Y");
-
-		var x = d3.scaleTime()
-		    .rangeRound([0, width]);
-
-		var y = d3.scaleLinear()
-		    .rangeRound([height, 0]);
-
-		var area = d3.area()
-		    .x(function(d) { return x(d.date); })
-		    .y1(function(d) { return y(d.close); });
-
-		var data=JSON.parse($(this).attr("data-jsondata"));
-		for(var i=0;i<data.length;i++){
-			data[i].date=parseTime(data[i].date);
-		}
-			/*[{date:parseTime("04/01/2017"), close: 10}, 
-		{date:parseTime("05/01/2017"), close: 15}, 
-		{date:parseTime("06/01/2017"), close: 25}]; 
-		*/
-		 /*
-		d3.tsv("/zupload/data.txt", function(d) {
-		  d.date = parseTime(d.date);
-		  d.close = +d.close;
-		  return d;
-		}, function(error, data2) {
-			console.log(data2);*/
-		x.domain(d3.extent(data, function(d) {  return d.date; }));
-		y.domain([0, d3.max(data, function(d) { return d.close; })]);
-		area.y0(y(0));
-
-		g.append("path")
-		      .datum(data)
-		      .attr("fill", "rgba(0,68,175,1)")
-		      .attr("d", area);
-
-		g.append("g")
-		      .attr("transform", "translate(0," + height + ")")
-		      .call(d3.axisBottom(x));
-		      /*
-		    .append("text") 
-		      .attr("y", 6)
-		      .attr("x", 850)
-		      .attr("dy", "0.71em")
-		      .attr("fill", "##000")
-		      .attr("text-anchor", "end")
-		      .text("Month");*/
-
-		g.append("g")
-		      .call(d3.axisLeft(y))
-		    .append("text")
-		      .attr("fill", "##000")
-		      .attr("transform", "rotate(-90)")
-		      .attr("y", 6)
-		      .attr("dy", "0.71em")
-		      .attr("text-anchor", "end")
-		      .text("Facebook Fans");
-		      g;  
-		/* }); */
-	});
-}
-$(document).ready(function(){
-	loadLineCharts();
-});
-//});
-</script>
-</body></html><cfabort>
-
-</cffunction>
---->
 <cffunction name="init" localmode="modern" access="private"> 
 	<cfscript>
 	if(form.method NEQ "index"){
@@ -423,6 +309,8 @@ $(document).ready(function(){
 		blogLog();
 		facebookLog();
 		leadSummaryByTypeData();
+		//to do 
+		websiteLeadsBarChart();
 		phoneLogOut=phoneCallLog();
 		webFormOut=webformLog();
 		leadSummaryOut=leadSummaryByType();
@@ -918,54 +806,55 @@ $(document).ready(function(){
 		<script> 
 		function loadLineCharts(){
 			$("svg").each(function(){
+				if($(this).attr("data-attr") != "ignore"){
+					var svg = d3.select(this),
+					    margin = {top: 20, right: 20, bottom: 30, left: 50},
+					    width = +svg.attr("width") - margin.left - margin.right,
+					    height = +svg.attr("height") - margin.top - margin.bottom,
+					    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-				var svg = d3.select(this),
-				    margin = {top: 20, right: 20, bottom: 30, left: 50},
-				    width = +svg.attr("width") - margin.left - margin.right,
-				    height = +svg.attr("height") - margin.top - margin.bottom,
-				    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					var parseTime = d3.timeParse("%m/%d/%Y");
 
-				var parseTime = d3.timeParse("%m/%d/%Y");
+					var x = d3.scaleTime()
+					    .rangeRound([0, width]);
 
-				var x = d3.scaleTime()
-				    .rangeRound([0, width]);
+					var y = d3.scaleLinear()
+					    .rangeRound([height, 0]);
 
-				var y = d3.scaleLinear()
-				    .rangeRound([height, 0]);
+					var area = d3.area()
+					    .x(function(d) { return x(d.date); })
+					    .y1(function(d) { return y(d.close); });
 
-				var area = d3.area()
-				    .x(function(d) { return x(d.date); })
-				    .y1(function(d) { return y(d.close); });
+					var verticalLabel=$(this).attr("data-json-vertical-label");
+					var areaColor=$(this).attr("data-chart-area-color");
+					var data=JSON.parse($(this).attr("data-jsondata"));
+					for(var i=0;i<data.length;i++){
+						data[i].date=parseTime(data[i].date);
+					} 
+					x.domain(d3.extent(data, function(d) {  return d.date; }));
+					y.domain([0, d3.max(data, function(d) { return d.close; })]);
+					area.y0(y(0));
 
-				var verticalLabel=$(this).attr("data-json-vertical-label");
-				var areaColor=$(this).attr("data-chart-area-color");
-				var data=JSON.parse($(this).attr("data-jsondata"));
-				for(var i=0;i<data.length;i++){
-					data[i].date=parseTime(data[i].date);
-				} 
-				x.domain(d3.extent(data, function(d) {  return d.date; }));
-				y.domain([0, d3.max(data, function(d) { return d.close; })]);
-				area.y0(y(0));
+					g.append("path")
+					      .datum(data)
+					      .attr("fill", "##"+areaColor) //"rgba(0,68,175,1)")
+					      .attr("d", area);
 
-				g.append("path")
-				      .datum(data)
-				      .attr("fill", "##"+areaColor) //"rgba(0,68,175,1)")
-				      .attr("d", area);
+					g.append("g")
+					      .attr("transform", "translate(0," + height + ")")
+					      .call(d3.axisBottom(x)); 
 
-				g.append("g")
-				      .attr("transform", "translate(0," + height + ")")
-				      .call(d3.axisBottom(x)); 
-
-				g.append("g")
-				      .call(d3.axisLeft(y))
-				    .append("text")
-				      .attr("fill", "##000")
-				      .attr("transform", "rotate(-90)")
-				      .attr("y", 6)
-				      .attr("dy", "0.71em")
-				      .attr("text-anchor", "end")
-				      .text(verticalLabel);
-				      g;   
+					g.append("g")
+					      .call(d3.axisLeft(y))
+					    .append("text")
+					      .attr("fill", "##000")
+					      .attr("transform", "rotate(-90)")
+					      .attr("y", 6)
+					      .attr("dy", "0.71em")
+					      .attr("text-anchor", "end")
+					      .text(verticalLabel);
+					      g;   
+				}
 			});
 		}
 		$(document).ready(function(){
@@ -1160,6 +1049,144 @@ $(document).ready(function(){
 	</cfscript>
 	</form>
 </cffunction>
+<cffunction name="websiteLeadsBarChart" localmode="modern" access="public">
+	<h2 style="margin-top:0px;">Lead Comparison Chart</h2>
+	<div class="z-float" id="divChannels"></div>
+	<div style="height:350px; padding-left:10px; float:left;">
+		<cfscript>
+			//application.zcore.skin.includeJS("#request.zos.globals.domain#/z/javascript/d3/d3.js");
+			//initReportData();
+			//request.leadData.contentSection.Summary=request.leadData.pageCount; 
+			//writeDUmp(request.leadData.monthStruct);abort;
+			var barData 	= [];
+			for(var key in request.leadData.monthStruct){
+				arrayAppend(barData,{"month": "#key#", "Phone Leads" : request.leadData.monthStruct[key].phone, "Web Leads": (request.leadData.monthStruct[key].total - request.leadData.monthStruct[key].phone)});
+			}
+			//writeDump(barData);abort;
+			#makeStackGraph(serializeJSON(barData),"pcStack")#;	
+		</cfscript>
+	</div>
+</cffunction>
+<cffunction name="makeStackGraph" localmode="modern" access="remote">
+	<cfargument name="chartData" type="string" required="yes">
+	<cfargument name="chartName" type="string" required="yes">
+	<div style="float:left;padding-left:150px;">
+		<svg data-attr="ignore" id="#arguments.chartName#" width="500" height="325">
+		</svg>
+	</div>
+	<script>
+		function #arguments.chartName#loadStackCharts(){
+			var color = d3.scaleOrdinal().range(["##319177",
+												 "##867200", 
+												 "##93DFB8",
+												 "##FF7A00",
+												 "##AD4379",
+												 "##652DC1", 
+												 "##C5E17A", 
+												 "##0A6B0D", 
+												 "##87FF2A", 
+												 "##FFC800", 
+												 "##F653A6", 
+												 "##6456B7", 
+												 "##FDFF00", 
+												 "##708EB3",
+												 "##000000",
+												 "##A6A6A6",
+												 "##9E5E6F",
+												 "##DA2C43",
+												 "##778BA5",
+												 "##5FA778",
+												 "##5F8A8B",
+												 "##914E75"
+												 ]);
+
+			var data	 	= #arguments.chartData#;
+			//alert(JSON.stringify(data));
+			var keys		= ["Web Leads", "Phone Leads"];
+			var series = d3.stack()
+			    .keys(keys)
+			    .offset(d3.stackOffsetDiverging)
+			    (data);
+			var svg = d3.select("svg"),
+			    margin = {top: 20, right: 30, bottom: 30, left: 290},
+			    width = +svg.attr("width"),
+			    height = +svg.attr("height");
+
+			var x = d3.scaleBand()
+			    .domain(data.map(function(d) { return d.month; }))
+			    .rangeRound([margin.left, width - margin.right])
+			    .padding(0.1);
+
+			var y = d3.scaleLinear()
+			    .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
+			    .rangeRound([height - margin.bottom, margin.top]);
+
+			var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+			svg.append("g")
+			  .selectAll("g")
+			  .data(series)
+			  .enter().append("g")
+			    //.attr("fill", function(d) { alert(z(d.key));return z(d.key); })
+				.style("fill", function(d,i) { return color(i);})
+			  .selectAll("rect")
+			  .data(function(d) { return d; })
+			  .enter().append("rect")
+			    .attr("width", x.bandwidth)
+			    .attr("x", function(d) { return x(d.data.month); })
+			    .attr("y", function(d) { /*if(isNaN(y(d[1]))) return 1; else*/ return y(d[1]); })
+			    .attr("height", function(d) { if(isNaN(y(d[1]))) return 1; else return y(d[0]) - y(d[1]); })
+
+			svg.append("g")
+			    .attr("transform", "translate(0," + y(0) + ")")
+			    .call(d3.axisBottom(x));
+
+			svg.append("g")
+			    .attr("transform", "translate(" + margin.left + ",0)")
+			    .call(d3.axisLeft(y));
+
+			var legend = svg.append("g")
+		  		.attr("class", "legend")
+				.attr("height", 100)
+		  		.attr("width", 100)
+	    		.attr('transform', 'translate(-20,50)');
+	   
+		    legend.selectAll('rect')
+		      .data(keys)
+		      .enter()
+		      .append("rect")
+			  .attr("x", 5)
+		      .attr("y", function(d, i){ return (i *  30);})
+			  .attr("width", 45)
+			  .attr("height", 25)
+			  .style("fill", function(d,i) { 
+		        var color_hash = color(i);
+		        return color_hash;
+		    });
+	      
+		    legend.selectAll('text')
+		      .data(keys)
+		      .enter()
+		      .append("text")
+			  .attr("x", 55)
+		      .attr("y", function(d, i){ return ((i *  30)+17);})
+			  .text(function(d,i) {
+		        var text = keys[i];
+		        return text;
+			});
+
+		}
+		function stackMin(serie) {
+		  return d3.min(serie, function(d) { return d[0]; });
+		}
+
+		function stackMax(serie) {
+		  return d3.max(serie, function(d) { return d[1]; });
+		}		
+		#arguments.chartName#loadStackCharts();
+	</script>
+</cffunction>
+
 <cffunction name="websiteLeads" localmode="modern" access="public">
 
 	<cfscript>
