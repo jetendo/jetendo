@@ -198,7 +198,27 @@
 		curDate="";
 	}
 	application.zcore.functions.zRequireJqueryUI();
-	application.zcore.skin.addDeferredScript('$( "###arguments.prefixString##arguments.row["#variables.type#_option_id"]#_date" ).datepicker();');
+	/*
+	arguments.optionStruct=duplicate(arguments.optionStruct);
+	arguments.optionStruct.datetime_min_offset=0;
+	arguments.optionStruct.datetime_max_offset=7;
+	*/
+	initValues="{";
+	if(structkeyexists(arguments.optionStruct, 'datetime_max_offset') and arguments.optionStruct.datetime_max_offset NEQ ""){
+		arrMaxDate=listToArray(dateformat(dateadd("d", arguments.optionStruct.datetime_max_offset, now()), 'yyyy,m,d'));
+		maxDate=arrMaxDate[1]&","&(arrMaxDate[2]-1)&","&arrMaxDate[3];
+		initValues&="maxDate:new Date(#maxDate#)";
+	}
+	if(structkeyexists(arguments.optionStruct, 'datetime_min_offset') and arguments.optionStruct.datetime_min_offset NEQ ""){
+		arrMinDate=listToArray(dateformat(dateadd("d", arguments.optionStruct.datetime_min_offset, now()), 'yyyy,m,d'));
+		minDate=arrMinDate[1]&","&(arrMinDate[2]-1)&","&arrMinDate[3];
+		if(right(initValues, 1) NEQ "{"){
+			initValues&=", ";
+		}
+		initValues&=" minDate:new Date(#minDate#) ";
+	}
+	initValues&="}";
+	application.zcore.skin.addDeferredScript('$( "###arguments.prefixString##arguments.row["#variables.type#_option_id"]#_date" ).datepicker(#initValues#);');
 	return { label: true, hidden: false, value:'<input type="text" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
 	</cfscript>
 </cffunction>
@@ -352,7 +372,9 @@
 		return { success:false};
 	}
 	ts={
-		datetime_range_search_type:application.zcore.functions.zso(arguments.dataStruct, 'datetime_range_search_type')	
+		datetime_range_search_type:application.zcore.functions.zso(arguments.dataStruct, 'datetime_range_search_type'),
+		datetime_min_offset:application.zcore.functions.zso(arguments.dataStruct, 'datetime_min_offset'),
+		datetime_max_offset:application.zcore.functions.zso(arguments.dataStruct, 'datetime_max_offset')
 	};
 	arguments.dataStruct["#variables.type#_option_type_json"]=serializeJson(ts);
 	return { success:true, optionStruct: ts};
@@ -362,7 +384,9 @@
 <cffunction name="getOptionFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
-		datetime_range_search_type:"0"
+		datetime_range_search_type:"0",
+		datetime_min_offset:"",
+		datetime_max_offset:""
 	};
 	return ts;
 	</cfscript>
@@ -380,7 +404,12 @@
 	<cfsavecontent variable="output">
 	<input type="radio" name="#variables.type#_option_type_id" value="5" onClick="setType(5);" <cfif value EQ 5>checked="checked"</cfif>/>
 	Date<br />
-	<div id="typeOptions5" style="display:none;padding-left:30px;"> </div>	
+	<div id="typeOptions5" style="display:none;padding-left:30px;"> 
+		<p>Leave these values empty to disable date range restriction on the datepicker.<p>
+		<p>Min Date Offset in Days: <input type="text" name="datetime_min_offset" id="datetime_min_offset" value="#application.zcore.functions.zso(arguments.optionStruct, 'datetime_min_offset')#" style="width:100px; min-width:auto;"></p>
+		<p>Max Date Offset in Days: 
+		<input type="text" name="datetime_max_offset" id="datetime_max_offset" value="#application.zcore.functions.zso(arguments.optionStruct, 'datetime_max_offset')#" style="width:100px; min-width:auto;"></p>
+	</div>	
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction>
