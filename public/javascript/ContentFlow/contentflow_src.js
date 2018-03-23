@@ -731,7 +731,9 @@ ContentFlow.prototype = {
 
         onclickActiveItem: function (item) {
             var url, target;
-console.log('hmm');
+            return; // atempt to disable click
+
+            
             if (url = item.content.getAttribute('href')) {
                 target = item.content.getAttribute('target');
             }
