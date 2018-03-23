@@ -4789,7 +4789,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	</cfloop>
 
 
-	<cfif application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id NEQ 0 and application.zcore.app.getAppData("blog").optionStruct.blog_config_disable_author NEQ 1>
+	<cfif structkeyexists(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id') and structkeyexists(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author') and application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id NEQ 0 and application.zcore.app.getAppData("blog").optionStruct.blog_config_disable_author NEQ 1>
 		<h2>Author RSS Feeds</h2>
 		<cfscript> 
 		db.sql="select *  
