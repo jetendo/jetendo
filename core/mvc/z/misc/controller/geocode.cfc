@@ -809,6 +809,7 @@ rs=geocodeCom.getSearchSQL(ts);
 	startLatitude=application.zcore.functions.zEscape(ss.startPosition.latitude);
 	startLongitude=application.zcore.functions.zEscape(ss.startPosition.longitude);
    	rs={};
+   	rs.success=true;
    	rs.selectSQL=", ( 3959 * acos( cos( radians('#startLatitude#') )
       * cos( radians( #latitudeField# ) ) 
       * cos( radians( #longitudeField# ) - radians('#startLongitude#') ) 

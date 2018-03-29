@@ -310,7 +310,9 @@
 		facebookLog();
 		leadSummaryByTypeData();
 		//to do 
-		websiteLeadsBarChart();
+		if(structkeyexists(form, 'enableSourceChart')){
+			websiteLeadsBarChart();
+		}
 		phoneLogOut=phoneCallLog();
 		webFormOut=webformLog();
 		leadSummaryOut=leadSummaryByType();
@@ -806,7 +808,7 @@
 		<script> 
 		function loadLineCharts(){
 			$("svg").each(function(){
-				if($(this).attr("data-attr") != "ignore"){
+				//if($(this).attr("data-attr") != "ignore"){
 					var svg = d3.select(this),
 					    margin = {top: 20, right: 20, bottom: 30, left: 50},
 					    width = +svg.attr("width") - margin.left - margin.right,
@@ -854,7 +856,7 @@
 					      .attr("text-anchor", "end")
 					      .text(verticalLabel);
 					      g;   
-				}
+				//}
 			});
 		}
 		$(document).ready(function(){

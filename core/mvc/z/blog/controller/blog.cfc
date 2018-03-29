@@ -946,6 +946,19 @@ this.app_id=10;
 			t9.mapStruct.dataId="uid";
 			t9.mapStruct.dataId2="sid"; 
 			arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.blog_config_url_author_id],t9);
+
+			t9=structnew();
+			t9.type=3;
+			t9.scriptName="/z/blog/blog/feedAuthorTemplate";
+			t9.ifStruct=structnew();
+			t9.ifStruct.ext="xml";
+			t9.urlStruct=structnew();
+			t9.urlStruct[request.zos.urlRoutingParameter]="/z/blog/blog/feedAuthorTemplate";
+			t9.mapStruct=structnew();
+			t9.mapStruct.urlTitle="zURLName";
+			t9.mapStruct.dataId="user_id";
+			t9.mapStruct.dataId2="user_id_siteidtype"; 
+			arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.blog_config_url_author_id],t9);
 		}
 
 		t9=structnew();
@@ -3782,10 +3795,37 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	var q_blog_feed='';
 	var blog_feed='';
 	variables.init();
+	form.offset=application.zcore.functions.zso(form, 'offset', true, 0); 
+	form.count=application.zcore.functions.zso(form, 'count', true, 25);
 	form.blog_category_id=application.zcore.functions.zso(form, 'blog_category_id', true, 0);
 	if(form.blog_category_id EQ 0){
 		application.zcore.functions.z404("Missing blog_category_id");
 	}
+	form.returnCount=application.zcore.functions.zso(form, 'returnCount', true, 0); 
+	if(form.returnCount EQ 1){
+		db.sql="select count(distinct blog.blog_id) count
+		from (#db.table("blog_x_category", request.zos.zcoreDatasource)#,   
+		#db.table("blog", request.zos.zcoreDatasource)#) WHERE 
+		blog_x_category.blog_category_id=#db.param(form.blog_category_id)# and 
+		blog.blog_id = blog_x_category.blog_id and
+		blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
+		blog_status <> #db.param(2)#  and 
+		blog_deleted = #db.param(0)# and 
+		blog.site_id = #db.param(request.zos.globals.id)# and 
+		blog.site_id = blog_x_category.site_id and
+		blog_x_category_deleted = #db.param(0)#";
+		q_blog_feed=db.execute("q_blog_feed"); 
+		echo(q_blog_feed.count);
+		abort;
+	}
+	if(form.offset < 0){
+		echo("offset must be between 0 and 1000 inclusive.");
+		abort;
+	}
+	if(form.count < 10 or form.count > 100){
+		echo("count must be between 10 and 100 inclusive.");
+		abort;
+	} 
 	application.zcore.template.clearPrependAppendTagData("content");
 	// set default action
 	application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
@@ -3795,17 +3835,19 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	ts.image_library_id_field="blog.blog_image_library_id";
 	ts.count = 0; // how many images to get
 	rs2=application.zcore.imageLibraryCom.getImageSQL(ts);
-	</cfscript> 
-	<cfsavecontent variable="db.sql">
-	select * 
+	db.sql="select * 
 	#db.trustedsql(rs2.select)# 
-	from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category
+	from #db.table("blog_category", request.zos.zcoreDatasource)# 
+	left join #db.table("blog_x_category", request.zos.zcoreDatasource)#  on 
+	blog_x_category.blog_category_id = blog_category.blog_category_id and
+	blog_x_category_deleted = #db.param(0)# and
+	blog_category.site_id = blog_x_category.site_id
 	left join #db.table("blog", request.zos.zcoreDatasource)# blog on 
-	blog_category.blog_category_id = blog.blog_category_id and
+	blog_x_category.blog_id = blog.blog_id and
 	blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
 	blog_status <> #db.param(2)#  and 
 	blog_deleted = #db.param(0)# and
-	blog.site_id = blog_category.site_id
+	blog.site_id = blog_x_category.site_id
 	#db.trustedsql(rs2.leftJoin)# 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
 	blog.user_id = user.user_id  and 
@@ -3816,7 +3858,8 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	blog_category_deleted = #db.param(0)#
 	group by blog.blog_id
 	order by blog_sticky desc, blog_datetime desc
-	</cfsavecontent><cfscript>q_blog_feed=db.execute("q_blog_feed");
+	LIMIT #db.param(form.offset)#, #db.param(form.count)# ";
+	q_blog_feed=db.execute("q_blog_feed");
 	</cfscript>
 	<cfif q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')>
 		<cfscript>
@@ -3925,6 +3968,187 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 </cffunction>
 
 
+
+<cffunction name="feedAuthorTemplate" localmode="modern" access="remote" output="yes" returntype="any">
+	<cfscript>  
+	var db=request.zos.queryObject; 
+	variables.init();
+	form.offset=application.zcore.functions.zso(form, 'offset', true, 0);
+	form.count=application.zcore.functions.zso(form, 'count', true, 25);
+	if(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id EQ 0 or application.zcore.app.getAppData("blog").optionStruct.blog_config_disable_author EQ 1){
+		application.zcore.functions.z404("Blog author is disabled.");
+	}
+	if(form.offset < 0){
+		echo("offset must be between 0 and 1000 inclusive.");
+		abort;
+	}
+	if(form.count < 10 or form.count > 100){
+		echo("count must be between 10 and 100 inclusive.");
+		abort;
+	}
+	form.user_id=application.zcore.functions.zso(form, 'user_id', true, 0);
+	form.user_id_siteidtype=application.zcore.functions.zso(form, 'user_id_siteidtype', true, 0);
+	if(form.user_id EQ 0){
+		application.zcore.functions.z404("Missing user_id");
+	}
+	form.returnCount=application.zcore.functions.zso(form, 'returnCount', true, 0); 
+	if(form.returnCount EQ 1){
+		db.sql="select count(distinct blog.blog_id) count   
+		from (#db.table("blog", request.zos.zcoreDatasource)#, 
+		#db.table("user", request.zos.zcoreDatasource)#) 
+		WHERE 
+		blog.user_id = user.user_id  and 
+		user_deleted = #db.param(0)# and 
+		blog_deleted = #db.param(0)# and  
+		blog.site_id=#db.param(request.zos.globals.id)# and 
+		blog.user_id = #db.param(form.user_id)# and 
+		blog.user_id_siteidtype=#db.param(form.user_id_siteidtype)# and 
+		user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))# ";
+		q_blog_feed=db.execute("q_blog_feed"); 
+		echo(q_blog_feed.count);
+		abort;
+	}
+	application.zcore.template.clearPrependAppendTagData("content");
+	// set default action
+	application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
+	Request.zPageDebugDisabled=true;
+	// you must have a group by in your query or it may miss rows
+	ts=structnew();
+	ts.image_library_id_field="blog.blog_image_library_id";
+	ts.count = 0; // how many images to get
+	rs2=application.zcore.imageLibraryCom.getImageSQL(ts);
+	db.sql="select * 
+	#db.trustedsql(rs2.select)# 
+	from (#db.table("blog", request.zos.zcoreDatasource)#, 
+	#db.table("user", request.zos.zcoreDatasource)#)
+	LEFT JOIN #db.table("blog_category", request.zos.zcoreDatasource)# on 
+	blog_category.blog_category_id = blog.blog_category_id and
+	blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
+	blog_status <> #db.param(2)#  and 
+	blog_deleted = #db.param(0)# and
+	blog.site_id = blog_category.site_id and  
+	blog_category_deleted = #db.param(0)#
+	#db.trustedsql(rs2.leftJoin)# 
+	WHERE 
+	blog.user_id = user.user_id  and 
+	user_deleted = #db.param(0)# and 
+	blog_deleted = #db.param(0)# and  
+	blog.site_id=#db.param(request.zos.globals.id)# and 
+	blog.user_id = #db.param(form.user_id)# and 
+	blog.user_id_siteidtype=#db.param(form.user_id_siteidtype)# and 
+	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))#
+	group by blog.blog_id
+	order by blog_sticky desc, blog_datetime desc 
+	LIMIT #db.param(form.offset)#, #db.param(form.count)# ";
+	q_blog_feed=db.execute("q_blog_feed"); 
+	if(q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')){
+		application.zcore.functions.z301Redirect('/');
+	}
+	userStruct=application.zcore.user.getUserById(form.user_id, application.zcore.functions.zGetSiteIdFromSiteIdType(form.user_id_siteidtype));
+ 
+	if(structcount(userStruct) EQ 0){
+		application.zcore.functions.z404("User doesn't exist.");
+	} 
+	curLink=getAuthorLink(userStruct, 'xml'); 
+	actualLink=request.zos.originalURL;
+	if(compare(curLink,actualLink) neq 0){
+		application.zcore.functions.z301Redirect(curLink);
+	}
+	title = replace("Blog Articles by "&userStruct.user_first_name&" "&userStruct.user_last_name, "&", "&amp;", "ALL");
+	
+	</cfscript>
+	<cfsavecontent variable="feedLink">#request.zOS.currentHostName#<cfif q_blog_feed.blog_category_unique_name NEQ ''>#q_blog_feed.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,q_blog_feed.blog_category_id,"html",q_blog_feed.blog_category_name)#</cfif></cfsavecontent>
+
+	<cfsavecontent variable="blog_feed">
+	<rss  version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
+	<title>#xmlformat(title)# From #request.zos.globals.shortdomain#</title>
+	<link>#feedLink#</link>
+	<cfset feedDescription=application.zcore.functions.zXmlFormat('This feed is a list of stories from #request.zOS.currentHostName# by this author.')>
+	<description>Get the latest #application.zcore.functions.zXmlFormat(q_blog_feed.blog_category_name)# from #request.zos.globals.shortdomain#</description>
+	<language>en-us</language>
+	<copyright>#year(now())#</copyright>
+	<lastBuildDate>#gethttptimestring()#</lastBuildDate>
+	<cfloop from="1" to="#q_blog_feed.recordcount#" index="count">
+		<cfif q_blog_feed.blog_id[count] NEQ ''>
+			<cfscript>	
+			blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
+			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
+				blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+			}else{
+				blog_author="";
+			}
+			blog_summary = q_blog_feed.blog_summary[count];
+			blog_story = q_blog_feed.blog_story[count];
+			blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
+			user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
+			date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
+			time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
+			if(q_blog_feed.blog_unique_name[count] NEQ ""){
+				tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
+			}else{
+				tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
+			} 
+			thumbnailStruct=variables.getThumbnailSizeStruct();
+			ts2=structnew();
+			ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
+			ts2.output=false;
+			ts2.query=q_blog_feed;
+			ts2.row=count;
+			ts2.size="960x4000";//thumbnailStruct.width&"x"&thumbnailStruct.height;
+			ts2.crop=thumbnailStruct.crop;
+			ts2.count = 1;  
+			arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+			image="";
+			if(arraylen(arrImages) NEQ 0){
+				image=arrImages[1].link;
+			}  
+			</cfscript>
+			<item>
+				<title>#blog_title#</title>
+				<link>#tempLink#</link>
+				<cfif image NEQ ""> 
+					<enclosure url="#request.zos.currentHostName&image#" type="image/*"/>
+				</cfif>
+				<cfscript>
+				if(blog_summary EQ ''){
+					tempText = blog_story;
+				/*	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
+					if(len(tempText) GT 1000){
+						tempText=left(tempText,1000)&'...';
+					}*/
+				}else{
+					tempText = blog_summary;
+				//	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
+				}
+				//tempText = application.zcore.functions.zXMLFormat(tempText);
+				</cfscript><!--- 
+				<description>#tempText#</description> --->
+				<description><![CDATA[ <cfif image NEQ ""><p><img src="#image#" /></p></cfif> #tempText# ]]></description>
+				<pubDate>#date# #time#</pubDate>
+				<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0> 
+					<author><cfif user_username EQ "">#application.zcore.functions.zvarso("zofficeemail")#<cfelse>#user_username#<cfif blog_author NEQ ""> (#blog_author#)</cfif></cfif></author>
+				</cfif>
+				<comments>#tempLink###comments</comments>
+		    <guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
+			</item>
+		</cfif>
+	</cfloop>
+	</channel>
+	</rss>
+	</cfsavecontent>
+	<cfscript>
+	blog_feed=replace(blog_feed, ' href="/', ' href="#request.zos.currentHostName#/', 'all');
+	blog_feed=replace(blog_feed, ' src="/', ' src="#request.zos.currentHostName#/', 'all');
+	</cfscript>
+	<!--- <cfcontent type="text/xml"> --->
+	<cfcontent type="text/xml; utf-8">
+	#blog_feed#
+	<cfscript>
+	application.zcore.functions.zabort();
+	</cfscript>
+</cffunction>
 <!--- 
 
 ?noContentImage=1&offset=0&count=100000
@@ -3944,14 +4168,27 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
  
 	form.offset=application.zcore.functions.zso(form, 'offset', true, 0); 
 	form.count=application.zcore.functions.zso(form, 'count', true, 25); 
+	form.returnCount=application.zcore.functions.zso(form, 'returnCount', true, 0); 
+	if(form.returnCount EQ 1){
+		db.sql="select count(blog.blog_id) count 
+		from #db.table("blog", request.zos.zcoreDatasource)# blog  
+		where blog.site_id=#db.param(request.zos.globals.id)# and 
+		blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
+		blog_deleted = #db.param(0)# and 
+		blog_status <> #db.param(2)#    ";
+		q_blog_feed=db.execute("q_blog_feed"); 
+		echo(q_blog_feed.count);
+		abort;
+	}
 	if(form.offset < 0){
-		application.zcore.functions.z404("Invalid request - offset must be 0 or more.");
+		echo("offset must be between 0 and 1000 inclusive.");
+		abort;
 	}
-	if(form.count < 1){
-		application.zcore.functions.z404("Invalid request - count must be 1 or more.");
+	if(form.count < 10 or form.count > 100){
+		echo("count must be between 10 and 100 inclusive.");
+		abort;
 	}
-	</cfscript><cfsavecontent variable="db.sql">
-	select *
+	db.sql="select *
 	#db.trustedsql(rs2.select)#
 	from #db.table("blog", request.zos.zcoreDatasource)# blog
 	#db.trustedsql(rs2.leftJoin)#
@@ -3965,8 +4202,8 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	blog_status <> #db.param(2)#  
 	group by blog.blog_id 
 	order by blog_sticky desc, blog_datetime desc 
-	LIMIT #db.param(form.offset)#,#db.param(count)#
-	</cfsavecontent><cfscript>q_blog_feed=db.execute("q_blog_feed");
+	LIMIT #db.param(form.offset)#,#db.param(form.count)#";
+	q_blog_feed=db.execute("q_blog_feed");
 	if(structkeyexists(form, 'zURLName') and application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_url EQ '{default}'){
 		curLink="/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name,'-')#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-0.xml";
 		actualLink="/#form.zURLName#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-0.xml";
@@ -4194,6 +4431,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 
 <cffunction name="getAuthorLink" localmode="modern" access="public" output="no" returntype="string">
 	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="type" type="string" required="no" default="html">
 	<cfscript>
 	row=arguments.row;
 	application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id=application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id');
@@ -4202,9 +4440,9 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	}else{
 		if(not structkeyexists(row, 'user_id_siteIDType')){
 			user_id_siteIDType=application.zcore.functions.zGetSiteIdType(row.site_id);
-			return "/#application.zcore.functions.zURLEncode(row.user_first_name&" "&row.user_last_name)#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id#-#row.user_id#_#user_id_siteIDType#.html";
+			return "/#application.zcore.functions.zURLEncode(row.user_first_name&" "&row.user_last_name)#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id#-#row.user_id#_#user_id_siteIDType#.#arguments.type#";
 		}else{
-			return "/#application.zcore.functions.zURLEncode(row.user_first_name&" "&row.user_last_name)#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id#-#row.user_id#_#row.user_id_siteIDType#.html";
+			return "/#application.zcore.functions.zURLEncode(row.user_first_name&" "&row.user_last_name)#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id#-#row.user_id#_#row.user_id_siteIDType#.#arguments.type#";
 		}
 	}
 	</cfscript>
@@ -4487,10 +4725,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	application.zcore.template.setTag("pagetitle",tempTitle);
 	application.zcore.template.setTag("pagenav",tempPageNav);
 	application.zcore.template.setTag("menu",tempMenu);
-	</cfscript>
-	
-	<cfsavecontent variable="db.sql">
-	SELECT * from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
+	db.sql="SELECT * from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
 	LEFT JOIN #db.table("blog", request.zos.zcoreDatasource)# blog ON 
 	blog.blog_category_id = blog_category.blog_category_id and 
 	blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
@@ -4501,8 +4736,8 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	blog.blog_id IS NOT NULL and 
 	blog_category_deleted = #db.param(0)# 
 	GROUP BY blog_category.blog_category_id
-	ORDER BY blog_category_name ASC
-	</cfsavecontent><cfscript>qCat=db.execute("qCat");
+	ORDER BY blog_category_name ASC";
+	qCat=db.execute("qCat");
 	if(application.zcore.app.getAppData("blog").optionStruct.blog_config_category_home_url EQ '{default}'){
 		curLink="/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_category_home_name,'-')#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-1.html";
 		if(not structkeyexists(form, 'zURLName')){
@@ -4532,9 +4767,9 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
     
 	<div style="padding-bottom:10px; width:240px; float:left; "><a class="#application.zcore.functions.zGetLinkClasses()#" href="#xmlLink#" target="_blank" style="text-decoration:none; "><img src="/z/a/blog/images/rss-xml.gif" alt="RSS: #htmleditformat(application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name)#"  style="padding-right:10px; padding-bottom:2px; border:none;  text-align:middle; " />#application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name#</a></div>
 	
-	<div style="padding-bottom:10px; width:100px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://add.my.yahoo.com/rss?url=#URLEncodedFormat(xmlLink)#" target="_blank"><img src="/z/a/blog/images/addtomyyahoo-big.gif" alt="Add to My Yahoo" style=" border:none;" /></a></div>
+	<!--- <div style="padding-bottom:10px; width:100px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://add.my.yahoo.com/rss?url=#URLEncodedFormat(xmlLink)#" target="_blank"><img src="/z/a/blog/images/addtomyyahoo-big.gif" alt="Add to My Yahoo" style=" border:none;" /></a></div>
 	
-	<div style="padding-bottom:10px; width:65px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://my.msn.com/addtomymsn.armx?id=rss&amp;ut=#URLEncodedFormat(xmlLink)#&amp;ru=#URLEncodedFormat(htmlLink)#" target="_blank"><img src="/z/a/blog/images/rss_mymsn.gif" alt="Add to My MSN" style=" border:none;" /></a></div>
+	<div style="padding-bottom:10px; width:65px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://my.msn.com/addtomymsn.armx?id=rss&amp;ut=#URLEncodedFormat(xmlLink)#&amp;ru=#URLEncodedFormat(htmlLink)#" target="_blank"><img src="/z/a/blog/images/rss_mymsn.gif" alt="Add to My MSN" style=" border:none;" /></a></div> --->
 	<br style="clear:both;" />
 	<hr />
 	<cfloop query="qCat">
@@ -4545,13 +4780,45 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		
 		<div style="padding-bottom:10px; width:240px; float:left; "><a class="#application.zcore.functions.zGetLinkClasses()#" href="#xmlLink#" target="_blank" style="text-decoration:none; "><img src="/z/a/blog/images/rss-xml.gif" alt="RSS: #htmleditformat(qCat.blog_category_name)#" style="padding-right:10px; padding-bottom:2px;border:none;  text-align:middle; " />#qCat.blog_category_name#</a></div>
 		
-		<div style="padding-bottom:10px; width:100px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://add.my.yahoo.com/rss?url=#URLEncodedFormat(xmlLink)#" target="_blank"><img src="/z/a/blog/images/addtomyyahoo-big.gif" alt="Add to My Yahoo" style=" border:none;" /></a></div>
+		<!--- <div style="padding-bottom:10px; width:100px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://add.my.yahoo.com/rss?url=#URLEncodedFormat(xmlLink)#" target="_blank"><img src="/z/a/blog/images/addtomyyahoo-big.gif" alt="Add to My Yahoo" style=" border:none;" /></a></div>
 		
-		<div style="padding-bottom:10px; width:65px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://my.msn.com/addtomymsn.armx?id=rss&amp;ut=#URLEncodedFormat(xmlLink)#&amp;ru=#URLEncodedFormat(htmlLink)#" target="_blank"><img src="/z/a/blog/images/rss_mymsn.gif" alt="Add to My MSN" style=" border:none;" /></a></div>
+		<div style="padding-bottom:10px; width:65px; float:left;"><a class="#application.zcore.functions.zGetLinkClasses()#" href="http://my.msn.com/addtomymsn.armx?id=rss&amp;ut=#URLEncodedFormat(xmlLink)#&amp;ru=#URLEncodedFormat(htmlLink)#" target="_blank"><img src="/z/a/blog/images/rss_mymsn.gif" alt="Add to My MSN" style=" border:none;" /></a></div> --->
 		
 		<br style="clear:both;" />
 		<hr />
 	</cfloop>
+
+
+	<cfif structkeyexists(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id') and structkeyexists(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author') and application.zcore.app.getAppData("blog").optionStruct.blog_config_url_author_id NEQ 0 and application.zcore.app.getAppData("blog").optionStruct.blog_config_disable_author NEQ 1>
+		<h2>Author RSS Feeds</h2>
+		<cfscript> 
+		db.sql="select *  
+		from (#db.table("blog", request.zos.zcoreDatasource)#, 
+		#db.table("user", request.zos.zcoreDatasource)#) 
+		WHERE 
+		blog.user_id = user.user_id  and 
+		user_deleted = #db.param(0)# and 
+		blog_deleted = #db.param(0)# and  
+		blog.site_id=#db.param(request.zos.globals.id)# and   
+		user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))#
+		group by user.user_id, user.site_id 
+		order by user_first_name asc, user_last_name asc, user_username ";
+		q_blog_feed=db.execute("q_blog_feed"); 
+
+		for(row in q_blog_feed){ 
+			curLink=getAuthorLink(row, 'xml');
+			echo('<a href="#curLink#" target="_blank" style="text-decoration:none; "><img src="/z/a/blog/images/rss-xml.gif" alt=""  style="padding-right:10px; padding-bottom:2px; border:none;  text-align:middle; " />Articles By ');
+			if(row.user_first_name EQ ""){
+				echo(row.user_username);
+			}else{
+				echo("#row.user_first_name# #row.user_last_name#");
+			}
+			echo('</a><br style="clear:both;" /><hr>');
+		}
+ 
+		</cfscript>
+
+	</cfif>
 </cffunction>
 
 

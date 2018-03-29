@@ -445,6 +445,8 @@
 			qUserTemp=db.execute("qUserTemp");
 			if(qUserTemp.recordcount NEQ 0){
 				previousAssignee=qUserTemp.user_first_name&" "&qUserTemp.user_last_name&" "&qUserTemp.user_username;
+			}else{
+				previousAssignee="N/A";
 			}
 		}else{
 			previousAssignee='#qPrevious.inquiries_assign_name# #qPrevious.inquiries_assign_email# ';

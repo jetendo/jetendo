@@ -364,12 +364,25 @@ if(rs.success){
 	}
 	path=request.zos.globals.privateHomeDir&"facebook-api-cache/";
 	application.zcore.functions.zcreatedirectory(path);
-	filePath=path&hash(tempLink, "sha-256")&"-"&dateformat(now(), "yyyy-mm-dd")&".json";
+	// the hash has to be computed on all the params (excluding the access_token)
+	hashString="";
+	for(param in ss.params){
+		if(param NEQ "access_token"){
+			hashString&=param&"="&ss.params[param];
+		}
+	} 
+	filePath=path&hash(tempLink&"?"&hashString, "sha-256")&"-"&dateformat(now(), "yyyy-mm-dd")&".json";
 
 	if(fileExists(filePath) and not structkeyexists(form, 'disableFacebookCache')){
+		if(request.zos.isDeveloper){
+			echo('Cached download:'&tempLink&"<br>");
+		}
 		r=application.zcore.functions.zReadFile(filePath);
 		result=deserializeJson(r);
 	}else{
+		if(request.zos.isDeveloper){
+			echo('Fresh download:'&tempLink&"<br>");
+		}
 
 		try{
 			http method=ss.method, charset="utf-8", timeout=ss.timeout, url=tempLink, result="result" {
@@ -386,7 +399,8 @@ if(rs.success){
 				}
 			}
 			form.lastSuccessfulRequestHTTP=result;
-			application.zcore.functions.zwritefile(filepath, serializeJson(result));
+			// lets never cache anything for now:
+			//application.zcore.functions.zwritefile(filepath, serializeJson(result));
 			sleep(400); // avoid api limits
 
 		}catch(Any e){
