@@ -53,7 +53,7 @@ else {
 if ( isset( $_GET['radius'] ) ) {
 	$radius = $_GET['radius'] * 1600; // converted miles to square meters
 } else{
-	$radius = 40000;
+	$radius = 1000;
 }
 
 if(isset($_GET["limit"])){
@@ -61,7 +61,8 @@ if(isset($_GET["limit"])){
 }else{
 	$limit = 20;
 }
-
+//include ('library.php');
+//if(zIsTestServer()){  throws 500
 require_once ('oauth.php');
 
 $token_secret = get_cfg_var("jetendo_yelp3_api_key");
@@ -84,6 +85,24 @@ $a=json_decode($data);
 $error=json_last_error();
 if($error != JSON_ERROR_NONE){
 	throw new Exception("Yelp didn't return valid json: ".$error);
+}
+if(strpos($_SERVER['HTTP_HOST'], ".".get_cfg_var("jetendo_test_domain")) !== FALSE){
+	$testserver=true;
+}else{
+	$testserver=false;
+}
+
+if($testserver){ 
+     $domain=get_cfg_var("jetendo_test_admin_domain"); 
+}else{ 
+     $domain=get_cfg_var("jetendo_admin_domain"); 
+} 
+for($i=0;$i<count($a->businesses);$i++){
+	$c=$a->businesses[$i];
+	if(isset($c->rating)){
+		$c->rating = $domain."/z/images/stars/stars".$c->rating.".png";
+	}
+	$a->businesses[$i]=$c;
 }
 $data=json_encode($a);
 echo $data;
