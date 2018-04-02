@@ -764,8 +764,8 @@
 	if(qAutoresponder.inquiries_autoresponder_from NEQ ""){
 		fromEmail=qAutoresponder.inquiries_autoresponder_from;
 	}
-	if(dripData.inquiries_autoresponder_drip_from NEQ ""){
-		fromEmail=dripData.inquiries_autoresponder_drip_from;
+	if(qAutoresponderDrip.inquiries_autoresponder_drip_from NEQ ""){
+		fromEmail=qAutoresponderDrip.inquiries_autoresponder_drip_from;
 	} 
 
 	if ( fromEmail EQ '' ) {
