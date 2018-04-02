@@ -563,27 +563,29 @@ displayGroupCom.add();
 		<input type="submit" name="submit1" value="Submit" />
 	</form>
 	<script type="text/javascript">
-	$("##customForm1").bind("submit", function(){
-		var postObj=zGetFormDataByFormId("customForm1"); 
-		var tempObj={};
-		tempObj.id="ajaxModalFormLoad";
-		tempObj.cache=false;
-		tempObj.method="post";
-		tempObj.postObj=postObj;
-		tempObj.callback=function(r){ 
-			var r=JSON.parse(r);
-			if(r.success){ 
-				// success
-			}else{
-				alert(r.errorMessage);
-				return;
-			}
-			window.location.href="#groupStruct.site_option_group_public_thankyou_url#";
-		};
-		tempObj.ignoreOldRequests=true;
-		tempObj.url="/form/buyerProcess";
-		zAjax(tempObj);
-		return false;
+	zArrDeferredFunctions.push(function(){
+		$("##customForm1").bind("submit", function(){
+			var postObj=zGetFormDataByFormId("customForm1"); 
+			var tempObj={};
+			tempObj.id="ajaxModalFormLoad";
+			tempObj.cache=false;
+			tempObj.method="post";
+			tempObj.postObj=postObj;
+			tempObj.callback=function(r){ 
+				var r=JSON.parse(r);
+				if(r.success){ 
+					// success
+				}else{
+					alert(r.errorMessage);
+					return;
+				}
+				window.location.href="#groupStruct.site_option_group_public_thankyou_url#";
+			};
+			tempObj.ignoreOldRequests=true;
+			tempObj.url="/form/customFormProcess";
+			zAjax(tempObj);
+			return false;
+		});
 	});
 	</script>
 </cffunction>')&'
