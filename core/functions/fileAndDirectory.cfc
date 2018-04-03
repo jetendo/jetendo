@@ -1073,7 +1073,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	<cfargument name="path" type="string" required="yes">
 	<cfscript>
 	if(fileexists(arguments.path) || directoryExists(arguments.path)){
-		return listgetat(application.zcore.functions.zSecureCommand("getDiskUsage"&chr(9)&arguments.path, 10), 1, chr(9));
+		return listgetat(application.zcore.functions.zSecureCommand("getDiskUsage"&chr(9)&arguments.path, 120), 1, chr(9));
 	}else{
 		return 0;
 	}
