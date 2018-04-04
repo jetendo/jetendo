@@ -2114,7 +2114,8 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		<input type="hidden" name="method" value="list" />
 		<div class="z-float z-mb-10">
 			<input type="text" name="searchtext" id="searchtext" placeholder="ID or Keyword" value="#htmleditformat(application.zcore.functions.zso(form, 'searchtext'))#" style="min-width:200px;width:75%; max-width:400px;" size="20" maxchars="10" /> 
-			<select id="searchBlogCategoryId" name="searchBlogCategoryId">
+			<select id="searchBlogCategoryId" name="searchBlogCategoryId" style="width:250px;">
+				<option value="" disabled>Search By Category</option>
 				<option value=""></option>
 				<cfloop query="qCategory">
 					<cfif form.searchBlogCategoryId EQ qCategory.blog_category_id>
