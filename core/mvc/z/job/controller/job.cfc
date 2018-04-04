@@ -1356,7 +1356,7 @@ searchJobs(ts);
 		jobImageLibrary.image_library_id = job.image_library_id;
 		jobImageLibrary.output           = false;
 		jobImageLibrary.size             = '320x240';
-		jobImageLibrary.crop             = 1;
+		jobImageLibrary.crop             = 0;
 		jobImageLibrary.count            = 1;
 
 		jobImages = application.zcore.imageLibraryCom.displayImages( jobImageLibrary );

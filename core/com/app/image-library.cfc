@@ -148,6 +148,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 			}
 		}
 		ext=lcase(application.zcore.functions.zGetFileExt(arguments.qImage.image_file));
+		if(ext EQ "jpeg"){
+			ext="jpg";
+		}
 		filePath="zupload/library/"&image_library_id&"/"&application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(arguments.qImage.image_caption, 70),'-')&"-"&arguments.qImage.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 		if(fileexists(request.zos.globals.privatehomedir&filePath)){
 			return "/"&filePath&"?ztv=#dateformat(arguments.qImage.image_updated_datetime, "yyyymmdd")&timeformat(arguments.qImage.image_updated_datetime, "HHmmss")#";
@@ -199,6 +202,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 		return false;	
 	}else{
 		ext=lcase(application.zcore.functions.zGetFileExt(qImage.image_file));
+		if(ext EQ "jpeg"){
+			ext="jpg";
+		}
 		filePath="zupload/library/"&arguments.image_library_id&"/"&application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(qImage.image_caption, 70),'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 	}
 
@@ -358,6 +364,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	
 	application.zcore.functions.zCreateDirectory(request.zos.globals.privatehomedir&destination);
 	ext=lcase(application.zcore.functions.zGetFileExt(qImage.image_file));
+	if(ext EQ "jpeg"){
+		ext="jpg";
+	}
 	newFileName=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(qImage.image_caption, 70),'-')&"-"&arguments.image_id&"-"&arguments.size&"-"&arguments.crop&"."&ext;
 	
 	if(arrSize[1] GT request.zos.globals.maximagewidth){
@@ -387,6 +396,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	}
 	if((not zdebug or not request.zos.isDeveloper) and fileexists(request.zos.globals.privatehomedir&destination&newFileName)){
 		ext=application.zcore.functions.zGetFileExt(qImage.image_file);
+		if(ext EQ "jpeg"){
+			ext="jpg";
+		}
 		type="image/jpeg";
 		if(ext EQ "png"){
 			type="image/png";
@@ -444,6 +456,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 				application.zcore.functions.zabort();
 			}
 			ext=application.zcore.functions.zGetFileExt(qImage.image_file);
+			if(ext EQ "jpeg"){
+				ext="jpg";
+			}
 			type="image/jpeg";
 			if(ext EQ "png"){
 				type="image/png";
@@ -638,6 +653,9 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 		newFileName="";
 		if(compare(qCheck.image_caption, s9.image_caption) NEQ 0){
 			ext=lcase(application.zcore.functions.zGetFileExt(qCheck.image_file));
+			if(ext EQ "jpeg"){
+				ext="jpg";
+			}
 			newFileName=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(s9.image_caption, 70),'-')&"-"&s9.image_id&"."&ext;
 			application.zcore.functions.zRenameFile(destination&qCheck.image_file, destination&newFileName);
 			s9.image_file=newFileName;
@@ -680,6 +698,9 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 					newFileName=getfilefrompath(form.image_file);
 					filePath=destination&newFileName;
 					ext=application.zcore.functions.zgetfileext(newFileName);
+					if(ext EQ "jpeg"){
+						ext="jpg";
+					}
 					curName=application.zcore.functions.zgetfilename(newFileName);
 					offset=1;
 					if(fileexists(filePath)){
@@ -748,6 +769,9 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 		// only rename now if caption was set
 		if(s9.image_caption NEQ "" and oldFilePath NEQ ""){
 			ext=lcase(application.zcore.functions.zGetFileExt(oldFilePath));
+			if(ext EQ "jpeg"){
+				ext="jpg";
+			}
 			s9.image_file=application.zcore.functions.zURLEncode(application.zcore.functions.zLimitStringLength(s9.image_caption, 70),'-')&"-"&s9.image_id&"."&ext;
 			application.zcore.functions.zRenameFile(oldFilePath,destination&s9.image_file); 
 			db.sql="UPDATE #db.table("image", request.zos.zcoreDatasource)#  
