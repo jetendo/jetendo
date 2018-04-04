@@ -1958,7 +1958,8 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		form.searchText=request.zsession.blogSearchText;
 	}
 	
-	form.searchText=trim(application.zcore.functions.zso(form, 'searchText'));
+	form.searchText				= trim(application.zcore.functions.zso(form, 'searchText'));
+	form.searchBlogCategoryId	= application.zcore.functions.zso(form, 'searchBlogCategoryId');
 	searchTextOriginal=replace(replace(replace(form.searchText, '+', ' ', 'all'), '@', '_', 'all'), '"', '', "all");
 	if(not isnumeric(searchTextOriginal)){
 		form.searchText=application.zcore.functions.zCleanSearchText(form.searchText, true);
@@ -2015,6 +2016,9 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	WHERE blog.site_id=#db.param(request.zos.globals.id)# and 
 	blog_deleted = #db.param(0)# and 
 	site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+	if(form.searchBlogCategoryId NEQ ''){
+		db.sql &= " and blog.blog_category_id = #db.param(form.searchBlogCategoryId)# ";
+	}
 	if(searchTextOriginal NEQ ''){
 		db.sql&=" and 
 		
@@ -2056,6 +2060,9 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	WHERE site_id=#db.param(request.zos.globals.id)# and 
 	site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
 	blog_deleted = #db.param(0)#
+	<cfif form.searchBlogCategoryId NEQ ''>
+		and blog_category_id = #db.param(form.searchBlogCategoryId)#
+	</cfif>
 	<cfif searchTextOriginal NEQ ''>
 		and 
 		
@@ -2080,9 +2087,17 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			) 
 		)
 	</cfif>
-	</cfsavecontent><cfscript>qCount=db.execute("qCount");
+	</cfsavecontent>
+	<cfscript>
+		qCount=db.execute("qCount");
 		searchStruct.count = qCount.count;
 		searchNav = application.zcore.functions.zSearchResultsNav(searchStruct);
+		db.sql = "SELECT blog_category_id, blog_category_name
+		FROM #db.table("blog_category", request.zos.zcoreDatasource)# blog  
+		WHERE site_id = #db.param(request.zos.globals.id)#
+		AND blog_category_deleted = #db.param(0)#";
+		qCategory = db.execute("qCategory");
+
 	echo('<div class="z-manager-list-view">');
 	echo('<div class="z-float z-mb-10">'); 
 	echo('<h2 style="display:inline-block;">');
@@ -2099,6 +2114,17 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		<input type="hidden" name="method" value="list" />
 		<div class="z-float z-mb-10">
 			<input type="text" name="searchtext" id="searchtext" placeholder="ID or Keyword" value="#htmleditformat(application.zcore.functions.zso(form, 'searchtext'))#" style="min-width:200px;width:75%; max-width:400px;" size="20" maxchars="10" /> 
+			<select id="searchBlogCategoryId" name="searchBlogCategoryId">
+				<option value=""></option>
+				<cfloop query="qCategory">
+					<cfif form.searchBlogCategoryId EQ qCategory.blog_category_id>
+						<option selected value="#qCategory.blog_category_id#">#qCategory.blog_category_name#</option>
+					<cfelse>
+						<option value="#qCategory.blog_category_id#">#qCategory.blog_category_name#</option>
+					</cfif>
+				</cfloop>
+			</select>
+
 			<input type="submit" name="searchForm" value="Search" class="z-manager-search-button" /> 
 			<cfif application.zcore.functions.zso(form, 'searchtext') NEQ ''> | 
 				<input type="button" name="searchForm2" value="Clear Search" class="z-manager-search-button" onclick="window.location.href='/z/blog/admin/blog-admin/articleList?searchtext=';" />
