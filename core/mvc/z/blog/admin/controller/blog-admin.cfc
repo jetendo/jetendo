@@ -1936,9 +1936,6 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		<a href="/z/blog/admin/blog-admin/blogDelete?confirm=yes&amp;blog_id=#form.blog_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/blog/admin/blog-admin/articleList?site_x_option_group_set_id=#form.site_x_option_group_set_id#">No</a></h2>
 	</cfif>
 </cffunction>
-
-
-
 <cffunction name="articleList" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var qlist=0;
@@ -1952,11 +1949,11 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	application.zcore.functions.zSetPageHelpId("3.1");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Blog Articles"); 
 	application.zcore.siteOptionCom.requireSectionEnabledSetId([""]);
-	if(structkeyexists(form, 'searchText')){
+	/*if(structkeyexists(form, 'searchText')){
 		request.zsession.blogSearchText=form.searchText;
 	}else if(structkeyexists(form, 'searchText')){
 		form.searchText=request.zsession.blogSearchText;
-	}
+	}*/
 	
 	form.searchText				= trim(application.zcore.functions.zso(form, 'searchText'));
 	form.searchBlogCategoryId	= application.zcore.functions.zso(form, 'searchBlogCategoryId');
@@ -1984,7 +1981,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	// allows custom url formatting 
 	//searchStruct.parseURLVariables = true; 
 	searchStruct.indexName = 'zIndex'; 
-	searchStruct.url = "/z/blog/admin/blog-admin/articleList";  
+	searchStruct.url = "/z/blog/admin/blog-admin/articleList?searchText=#urlencodedformat(form.searchText)#&searchBlogCategoryId=#urlencodedformat(form.searchBlogCategoryId)#";  
 	searchStruct.buttons = 5; 
 	// set from query string or default value 
 	searchStruct.perpage = 30;	
@@ -2048,10 +2045,18 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			) 
 		) ";
 	}
-	db.sql&=" group by blog.blog_id 
-	ORDER BY 
-		blog_datetime desc 
-		LIMIT #db.param(start)#, #db.param(searchStruct.perpage)#";
+	if(form.searchBlogCategoryId NEQ ''){
+		db.sql&=" group by blog.blog_id 
+		ORDER BY 
+			blog_title asc,
+			blog_datetime desc
+			LIMIT #db.param(start)#, #db.param(searchStruct.perpage)#";
+	} else{
+		db.sql&=" group by blog.blog_id 
+		ORDER BY 
+			blog_datetime desc
+			LIMIT #db.param(start)#, #db.param(searchStruct.perpage)#";
+	}
 	qList=db.execute("qList");
 	</cfscript>
 	<cfsavecontent variable="db.sql">
@@ -2168,13 +2173,6 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	</div>
 	
 </cffunction>
-
-
-
-
-
-
-
 
 <cffunction name="tagInsert" localmode="modern" access="remote" roles="member">
 	<cfscript>
