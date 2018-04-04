@@ -2201,13 +2201,13 @@ zArrDeferredFunctions.push(function(){
 		fields:[{
 			label:"Start",
 			formField:'<input type="date" name="inquiries_start_date" value="#dateformat(form.inquiries_start_date, 'yyyy-mm-dd')#">',
-			field:"",
+			field:"inquiries_start_date",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"End",
 			formField:'<input type="date" name="inquiries_end_date" value="#dateformat(form.inquiries_end_date, 'yyyy-mm-dd')#">',
-			field:"",
+			field:"inquiries_end_date",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		}]
