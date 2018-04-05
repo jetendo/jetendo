@@ -1464,6 +1464,7 @@ function getImageMagickConvertApplyMask($a){
 	$pngColorFix='';
 	if($ext == '.png'){
 		$pngColorFix="PNG32:"; 
+		$compress=' -define png:compression-filter=5 -define png:compression-level=7 -define png:compression-strategy=1 ';
 	}else if($ext == '.gif'){
 		// do nothing
 	}else{
@@ -1637,6 +1638,7 @@ function getImageMagickConvertResize($a){
 	}
 	if($ext == '.png'){
 		$pngColorFix="PNG32:"; 
+		$compress=' -define png:compression-filter=5 -define png:compression-level=7 -define png:compression-strategy=1 ';
 	}else if($ext == '.gif'){
 		// do nothing.
 	}else{
