@@ -1608,6 +1608,8 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				
 				##zThumbnailLightgallery ul a {
 				display:block; float:left;
+				text-align:center;
+				width:100%;
 				margin-right:10px;
 				margin-bottom:10px;
 				}
