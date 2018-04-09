@@ -135,7 +135,9 @@ application.zcore.functions.zInsertLead();
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
 	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
 	form.site_id = request.zOS.globals.id; 
-	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
+		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	}
 	// TODO: need to reenable when contacts are done
 	//application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
 	inputStruct = StructNew();
@@ -186,7 +188,11 @@ application.zcore.functions.zImportLead(ts); --->
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
 	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
 	form.site_id = request.zOS.globals.id; 
-	form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+
+
+	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
+		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	}
 	// TODO: need to reenable when contacts are done
 	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
@@ -208,7 +214,7 @@ application.zcore.functions.zUpdateLead();
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss;
-	structDelete(ss, "inquiries_datetime");
+	//structDelete(ss, "inquiries_datetime");
 
 	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
 	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
