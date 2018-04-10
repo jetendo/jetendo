@@ -12,6 +12,9 @@
 	if(form.method EQ "showPublicUsers"){
 		form.returnMethod="showPublicUsers";
 	}
+	if(form.returnMethod EQ ""){
+		form.returnMethod = "index";
+	}
 	if(not application.zcore.user.checkGroupAccess("administrator") and not structkeyexists(request.zos.userSession.groupAccess, "manager")){
 		if(form.method EQ "index"){
 			application.zcore.functions.zRedirect("/z/admin/member/edit?user_id=#request.zsession.user.id#");
@@ -80,7 +83,7 @@ site_id = #db.param(request.zos.globals.id)# ";
 	user_server_administrator = 0 and 
 	user_group_id IN (#variables.memberAccessGroupIdList#) "; 
 	variables.queueSortStruct.ajaxTableId='sortRowTable';
-	variables.queueSortStruct.ajaxURL='/z/admin/member/#form.returnMethod#';
+	variables.queueSortStruct.ajaxURL='/z/admin/member/#form.returnMethod#?showAll=1';
 	
 	variables.queueSortCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.queueSort");
 	variables.queueSortCom.init(variables.queueSortStruct);
@@ -1335,6 +1338,9 @@ site_id = #db.param(request.zos.globals.id)# ";
 	}
 	</cfscript>
 	#searchNav# 
+	<cfif qmember.recordcount GTE 30 and form.showall EQ 0>
+		<p><a href="#request.zos.originalURL#?showAll=1" class="z-manager-search-button">Enable sorting</a></p>
+	</cfif>
 	<table id="sortRowTable" style="width:100%;"  class="table-list">
 		<thead>
 		<tr>
