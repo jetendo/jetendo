@@ -313,7 +313,7 @@ this.inited=false;
 						echo('Aborted due to nearing time limit');
 						stopProcessing=true;
 						//fileClose(request.zos.idxFileHandle);
-						//structdelete(application.zcore, 'importMLSRunning');
+						//structdelete(application.zcore, 'mlsImportIsRunning');
 						break;
 					}
 					if(this.optionstruct.delaybetweenloops NEQ 0){
@@ -385,7 +385,7 @@ this.inited=false;
 
 	if(gettickcount()-request.totalRunTime GT 170000){
 		echo('Aborted due to nearing time limit');
-		structdelete(application.zcore, 'importMLSRunning');
+		structdelete(application.zcore, 'mlsImportIsRunning');
 		abort;
 	}
 	</cfscript>

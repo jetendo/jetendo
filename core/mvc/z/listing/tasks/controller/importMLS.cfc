@@ -35,16 +35,21 @@
 	setting requesttimeout="200";
 	request.ignoreslowscript=true;
 	myloops=46;
-	if(structkeyexists(application.zcore, 'importMLSRunning')){
+ 
+	if(structkeyexists(application.zcore, 'mlsImportIsRunning')){
 		if(not structkeyexists(form, 'zforce')){
-			echo('importMLS is already running | <a href="/z/listing/tasks/importMLS/index?zforce=1">Force execution</a>');
-			application.zcore.functions.zabort();
+			if(datediff("n", application.zcore.mlsImportIsRunning, now()) GT 5){
+				structdelete(application.zcore, 'mlsImportIsRunning');
+			}else{
+				throw('importMLS is already running | <a href="/z/listing/tasks/importMLS/index?zforce=1">Force execution</a>');
+				abort;
+			}
 		}
 	}
 	request.totalRunTime=gettickcount();
 	application.zcore.listingCom.makeListingImportDataReady();
  
-	application.zcore.importMLSRunning=true;
+	application.zcore.mlsImportIsRunning=now();
 	try{
 		while(myloops GT 0){
 			myloops--;
@@ -58,15 +63,15 @@
 			}
 			if(gettickcount()-request.totalRunTime GT 170000){
 				echo('Aborted due to nearing time limit');
-				structdelete(application.zcore, 'importMLSRunning');
+				structdelete(application.zcore, 'mlsImportIsRunning');
 				abort;
 			}
 		}
 	}catch(Any e){
-		structdelete(application.zcore, 'importMLSRunning');
+		structdelete(application.zcore, 'mlsImportIsRunning');
 		rethrow;	
 	}
-	structdelete(application.zcore, 'importMLSRunning');
+	structdelete(application.zcore, 'mlsImportIsRunning');
 	abort;
 	</cfscript>
 </cffunction>

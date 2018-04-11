@@ -652,10 +652,10 @@
 		application.zcore.searchFormCache[request.zos.globals.id]=structnew();
 	}
 
-	if(structkeyexists(application.zcore, 'importMLSRunning')){
-		request.zos.importMLSRunning=true;
+	if(structkeyexists(application.zcore, 'mlsImportIsRunning')){
+		request.zos.mlsImportIsRunning=true;
 	}else{
-		request.zos.importMLSRunning=false;
+		request.zos.mlsImportIsRunning=false;
 	}
 	
 	Request.zOS.debuggerEnabled = true;
