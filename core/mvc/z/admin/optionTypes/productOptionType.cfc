@@ -12,7 +12,7 @@
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfscript>
-	return "You need to set this value manually";
+	return "28.512,-81.299178";
 	</cfscript>
 </cffunction>
 
@@ -40,9 +40,22 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="isCopyable" localmode="modern" access="public" returntype="boolean" output="no">
+<cffunction name="hasCustomDelete" localmode="modern" access="public" returntype="boolean" output="no">
 	<cfscript>
 	return false;
+	</cfscript>
+</cffunction>
+
+<cffunction name="onDelete" localmode="modern" access="public" output="no">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfscript>
+	</cfscript>
+</cffunction>
+
+<cffunction name="isCopyable" localmode="modern" access="public" returntype="boolean" output="no">
+	<cfscript>
+	return true;
 	</cfscript>
 </cffunction>
 
@@ -113,12 +126,63 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="getFormField" localmode="modern" access="public">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="prefixString" type="string" required="yes">
+	<cfargument name="dataStruct" type="struct" required="yes">  
+	<cfscript>
+		var db=request.zos.queryObject;
+		db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
+		site_id = #db.param(request.zos.globals.id)# and 
+		product_deleted = #db.param(0)# and
+		product_active = #db.param(1)# 	
+		ORDER BY product_name ASC";
+		qGroup=db.execute("qGroup");
+		savecontent variable="output"{
+			selectStruct = StructNew();
+			selectStruct.name = "#arguments.prefixString##arguments.row["#variables.type#_option_id"]#";
+			selectStruct.query = qGroup;
+			selectStruct.queryLabelField = "product_name";
+			selectStruct.queryValueField = "product_id";
+			selectStruct.multiple=true;
+			selectStruct.hideSelect=true;
+			application.zcore.functions.zInputSelectBox(selectStruct);
+			application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), true);
+		}
+		return { label: true, hidden: false, value: output};  
+	</cfscript>
+</cffunction>
+
+<cffunction name="getFormFieldCode" localmode="modern" access="public">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="fieldName" type="string" required="yes">
+	<cfscript>
+	return '
+	<cfscript>
+	ts={
+		name:"#arguments.fieldName#",
+		fields:{
+			// you must update these to be form field ids for auto-complete to work
+			product_id:"",
+			product_name:"",
+			product_category_id:"",
+			product_image_library_id:""
+		}
+	};
+	return { label: true, hidden: false, value: application.zcore.functions.zMapLocationPicker(ts)};  
+	</cfscript> 
+	';
+	</cfscript> 
+</cffunction>
+
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfscript>
+	<cfscript> 
 	return {success:true};
 	</cfscript>
 </cffunction>
@@ -132,90 +196,16 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="hasCustomDelete" localmode="modern" access="public" returntype="boolean" output="no">
-	<cfscript>
-	return true;
-	</cfscript>
-</cffunction>
-
-<cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
-	<cfscript>
-	uploadPath=getUploadPath(arguments.optionStruct);
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_value')){
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_group_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_group_value"]);
-		}
-	}else{
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_value"]);
-		}
-	}
-	</cfscript>
-</cffunction> 
-
-<cffunction name="getFormField" localmode="modern" access="public">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
-	<cfargument name="prefixString" type="string" required="yes">
-	<cfargument name="dataStruct" type="struct" required="yes">  
-	<cfsavecontent variable="local.output">
-		<cfscript>
-		var allowDelete=true;
-		if(arguments.row["#variables.type#_option_required"] EQ 1){
-			allowDelete=false;
-		}
-		var ts3=StructNew();
-		ts3.name=arguments.prefixString&arguments.row["#variables.type#_option_id"];
-		ts3.allowDelete=allowDelete;
-		if(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]] NEQ ""){
-			uploadPath=getUploadPath(arguments.optionStruct);
-			if(uploadPath EQ "zuploadsecure"){
-				ts3.downloadPath="/zuploadsecure/site-options/";
-				if(application.zcore.user.checkGroupAccess("administrator")){
-					echo('<p><a href="#request.zos.currentHostName#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/site-options/"&arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])&'" target="_blank">Download File</a></p>');
-				}else{
-					echo('<p>'&arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]]&' | You must be an administrator to download the file.</p>');
-				}
-			}else{
-				ts3.downloadPath="/zupload/site-options/";
-				writeoutput('<p><a href="/'&uploadPath&'/site-options/#arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]]#" 
-				target="_blank" 
-				title="#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])#">Download File</a></p>');
-			}
-		}
-		application.zcore.functions.zInput_file(ts3);
-		</cfscript>
-	</cfsavecontent>
-	<cfscript>
-	return { label: true, hidden: false, value:local.output};  
-	</cfscript> 
-</cffunction>
-
-<cffunction name="getFormFieldCode" localmode="modern" access="public">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
-	<cfargument name="fieldName" type="string" required="yes">
-	<cfscript>
-	return '';
-	</cfscript>
-</cffunction>
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
-	if(arguments.value NEQ ""){
-		uploadPath=getUploadPath(arguments.optionStruct);
-		if(uploadPath EQ "zuploadsecure"){
-			return '<a href="#request.zos.globals.domain#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/site-options/"&arguments.value)&'" target="_blank">Download File</a>';
-		}else{
-			return '<a href="#request.zos.globals.domain#/'&uploadPath&'/site-options/#arguments.value#" target="_blank">Download File</a>';
-		}
+	if(structkeyexists(arguments.dataStruct, arguments.value)){
+		return arguments.dataStruct[arguments.value];
 	}else{
-		return ('N/A');
+		return arguments.value; 
 	}
 	</cfscript>
 </cffunction>
@@ -229,48 +219,13 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="getUploadPath" localmode="modern" access="private">
-	<cfargument name="optionStruct" type="struct" required="yes">
-	<cfscript>
-	uploadPath="zupload";
-	if(application.zcore.functions.zso(arguments.optionStruct, 'file_securepath') EQ 'Yes'){
-		uploadPath='zuploadsecure';
-	}
-	return uploadPath;
-	</cfscript>
-</cffunction>
-
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
-	var nv=0;
-	uploadPath=getUploadPath(arguments.optionStruct);
-	arguments.dataStruct["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-	nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]);
-	var tempDir=getTempDirectory();
-	filename="";
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-		form["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["#variables.type#_option_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/site-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["#variables.type#_option_id"]&'_delete', request.zos.zcoredatasource, '#variables.siteType#_x_option_group_value');	
-	}else{
-		form["#variables.siteType#_x_option_id"]=arguments.row["#variables.siteType#_x_option_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["#variables.type#_option_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/site-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["#variables.type#_option_id"]&'_delete', request.zos.zcoredatasource, '#variables.siteType#_x_option_value');	
-	}
-	if(not structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]&'_delete') and (isNull(fileName) or fileName EQ "")){
-		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-			arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]]=arguments.row["#variables.siteType#_x_option_group_value"];
-			nv=arguments.row["#variables.siteType#_x_option_group_value"];
-		}else{
-			arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]]=arguments.row["#variables.siteType#_x_option_value"];
-			nv=arguments.row["#variables.siteType#_x_option_value"];
-		}
-	}else{
-		arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]]=fileName;
-		nv=fileName;
-	}
+	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]);
 	return { success: true, value: nv, dateValue: "" };
 	</cfscript>
 </cffunction>
@@ -280,21 +235,13 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
-	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]);
-	if(nv EQ ""){
-		if(structkeyexists(arguments.row,'#variables.siteType#_x_option_group_value')){
-			return arguments.row["#variables.siteType#_x_option_group_value"];
-		}else{
-			return arguments.row["#variables.siteType#_x_option_value"];
-		}
-	}
-	return nv;
+	return application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]);
 	</cfscript>
 </cffunction>
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'File';
+	return 'Product Picker';
 	</cfscript>
 </cffunction>
 
@@ -310,16 +257,25 @@
 		application.zcore.status.setStatus(Request.zsid, false,arguments.dataStruct,true);
 		return { success:false};
 	}
-	ts={ 
+	ts={
+		product_id:application.zcore.functions.zso(arguments.dataStruct, 'product_id'),
+		product_name:application.zcore.functions.zso(arguments.dataStruct, 'product_name'),
+		product_category_id:application.zcore.functions.zso(arguments.dataStruct, 'product_category_id'),
+		product_image_library_id:application.zcore.functions.zso(arguments.dataStruct, 'product_image_library_id')
 	};
 	arguments.dataStruct["#variables.type#_option_type_json"]=serializeJson(ts);
 	return { success:true, optionStruct: ts};
 	</cfscript>
 </cffunction>
 		
+
 <cffunction name="getOptionFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
-	ts={ 
+	ts={
+		product_id:"",
+		product_name:"",
+		product_category_id:"",
+		product_image_library_id:""
 	};
 	return ts;
 	</cfscript>
@@ -333,97 +289,42 @@
 	var db=request.zos.queryObject;
 	var output="";
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
+	/*db.sql="select * from #db.table("#variables.type#_option", request.zos.zcoreDatasource)# WHERE 
+	site_id = #db.param(request.zos.globals.id)# and 
+	#variables.type#_option_deleted = #db.param(0)# and
+	#variables.type#_option_group_id = #db.param(arguments.dataStruct["#variables.type#_option_group_id"])# 	
+	ORDER BY #variables.type#_option_name ASC";
+	*/
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="#variables.type#_option_type_id" value="9" onClick="setType(9);" <cfif value EQ 9>checked="checked"</cfif>/>
-	File<br />
-	<div id="typeOptions9" style="display:none;padding-left:30px;">
-
-		<table style="border-spacing:0px;">
-		<tr><td>Secure Path: </td><td>
+	<input type="radio" name="#variables.type#_option_type_id" value="25" onClick="setType(25);" <cfif value EQ 25>checked="checked"</cfif>/>
+	#this.getTypeName()#<br />
+	<div id="typeOptions25" style="display:none;padding-left:30px;"> 
+		<p>Map all the fields to enable auto-populating the map address lookup field.</p>
+		<table class="table-list">
+		<tr><td>
+		Product: </td><td>
 		<cfscript>
-		arguments.optionStruct.file_securepath=application.zcore.functions.zso(arguments.optionStruct, 'file_securepath', false, "No");
-		if(arguments.optionStruct.file_securepath EQ ""){
-			arguments.optionStruct.file_securepath="No";
-		}
-		var ts = StructNew();
-		ts.name = "file_securepath";
-		ts.style="border:none;background:none;";
-		ts.labelList = "Yes,No";
-		ts.valueList = "Yes,No";
-		ts.hideSelect=true;
-		ts.struct=arguments.optionStruct;
-		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
-		</cfscript>
-		</td></tr>
+		arrProdLabel=["Product ID 1","Product ID 2"];
+		ssProd = StructNew(); 
+		ssProd.size=1;
+		ssProd.name = "product_id";
+		ssProd.listLabelsDelimiter = ",";
+		ssProd.listValuesDelimiter = ",";
+		ssProd.listLabels=arrayToList(arrProdLabel, ",");
+		ssProd.listValues=arrayToList(arrProdLabel, ",");
+		application.zcore.functions.zInputSelectBox(ssProd);
+		</cfscript> </td></tr>
 		</table>
-
-	<!--- 
-
-
-which fields must be done by client?
-	amount
-	subscription / purchase
-ts={
-	arrAmount:[
-		// one time payment example
-		{
-			amount:2,
-			label: "One Time Payment"
-		},
-		// subscription payment example
-		{
-			amount:2,
-			label="Subscription Payment",
-			frequency: 1, // ommitting this field or setting it to 0 disables the subscription feature for this payment option, 1 will collect a payment each subscriptionPeriod, 2+ will skip subscriptionPeriods (i.e. 2 is bimonthly, 3 is trimonthly etc)
-			period: 'M', // M = month | Y = year | D = day,
-		},
-		// product purchase example
-		{
-			amount:30,
-			label: "Product Purchase", 
-			taxRate:6,
-			shipping:10
-		}
-	],
-	arrItem:[
-		{
-			name:'Product/Service',
-			amount:2
-		}
-	],
-	selectMessage: "Select Payment Option and Click Buy Now",
-	buttonImage: "Buy now", // Must be "Buy now", "Checkout", "Donate" or "Custom"
-	// buttonImageURL: "", // only used when buttonImage is "Custom"
-	subscriptionPaymentLimit: 0, // 0 is unlimited, Otherwise you can set this between 2 and 52
-	subscriptionRetry: true, // true will retry 2 times before cancelling subscription.
-	subscriptionModifyEnabled: false, // true will allow the customer to change subscription - not recommended in most cases
-	subscriptionTrialEnabled: false, // true will allow a different price or $0 price at the beginning of the subscription
-	// subscriptionTrialPeriod: 'M', // M = month | Y = year | D = day | When subscriptionTrialEnabled is true, this value determine the length of the trial.
-	// subscriptionTrialAmount: 0, // When subscriptionTrialEnabled is true, this value determine the price of the trial.  The price can be 0 or more.
-	sandbox:false, // requires paypal developer sandbox account for "business" field if set to true
-	business: "", // paypal merchant id (recommended) or paypal email address
-	// invoice: 1, // must be unique on each transaction or don't specify one
-	hideLabel: false,
-	ipnURL: request.zos.currentHostName&"/z/misc/paypal/ipn", // It is better if this URL uses SSL
-	returnURL: request.zos.currentHostName&"/z/misc/paypal/thank-you", // Note: The user is not sent to this URL automatically. They have to click a button after paying.
-	returnLabel: "Continue shopping", // after payment, there is a button that will go to the return URL, this field changes the text on that button
-	disableNote: true, // Set to false to allow the customer to enter notes in a comments field that is sent along with their payment.
-	disableShipping: true, // Set to false to enable paypal's shipping features
-	bottomMessage: "No PayPal account is required"
-};
-	 --->
-	</div> 
-
+	</div>
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction> 
 
-
 <cffunction name="getCreateTableColumnSQL" localmode="modern" access="public">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	return "`#arguments.fieldName#` text NOT NULL";
+	return "`#arguments.fieldName#` varchar(80) NOT NULL";
 	</cfscript>
 </cffunction>
 </cfoutput>
