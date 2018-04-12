@@ -347,36 +347,13 @@
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var output="";
-	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
-	/*db.sql="select * from #db.table("#variables.type#_option", request.zos.zcoreDatasource)# WHERE 
-	site_id = #db.param(request.zos.globals.id)# and 
-	#variables.type#_option_deleted = #db.param(0)# and
-	#variables.type#_option_group_id = #db.param(arguments.dataStruct["#variables.type#_option_group_id"])# 	
-	ORDER BY #variables.type#_option_name ASC";
-	*/
+		var db=request.zos.queryObject;
+		var output	= "#this.getTypeName()#";
+		var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="#variables.type#_option_type_id" value="25" onClick="setType(25);" <cfif value EQ 25>checked="checked"</cfif>/>
-	#this.getTypeName()#<br />
-	<div id="typeOptions25" style="display:none;padding-left:30px;"> 
-		<table class="table-list">
-		<tr><td>
-		Product: </td><td>
-		<cfscript>
-		arrProdLabel=["Product ID 1","Product ID 2"];
-		ssProd = StructNew(); 
-		ssProd.size=1;
-		ssProd.name = "product_id";
-		ssProd.listLabelsDelimiter = ",";
-		ssProd.listValuesDelimiter = ",";
-		ssProd.listLabels=arrayToList(arrProdLabel, ",");
-		ssProd.listValues=arrayToList(arrProdLabel, ",");
-		application.zcore.functions.zInputSelectBox(ssProd);
-		</cfscript> </td></tr>
-		</table>
-	</div>
+		<input type="radio" name="#variables.type#_option_type_id" value="25" onClick="setType(25);" <cfif value EQ 25>checked="checked"</cfif>/>
+		#this.getTypeName()#<br />
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction> 
