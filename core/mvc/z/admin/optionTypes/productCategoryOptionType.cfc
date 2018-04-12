@@ -134,12 +134,15 @@
 	<cfscript>
 		var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
 		var db=request.zos.queryObject;
-		db.sql="select * from 
-			#db.table("product_category", request.zos.globals.datasource)# 
-			WHERE site_id = #db.param(request.zos.globals.id)#
-			AND	product_category_deleted = #db.param(0)#
-			AND product_category_active = #db.param(1)# 	
-			ORDER BY product_category_name ASC";
+		db.sql="select p.product_category_id AS ProdId,p.product_category_name AS ProdName, child.product_category_id, child.product_category_name
+		 FROM #db.table("product_category", request.zos.globals.datasource)# p
+         LEFT JOIN #db.table("product_category", request.zos.globals.datasource)# AS child 
+         ON child.product_category_parent_id = p.product_category_id
+	   	WHERE p.product_category_parent_id = #db.param(0)#
+		AND p.site_id = #db.param(request.zos.globals.id)#
+			AND	p.product_category_deleted = #db.param(0)#
+			AND p.product_category_active = #db.param(1)# 		   
+		ORDER BY p.product_category_name, child.product_category_name";
 		try{
 			qProd = db.execute("qProd");
 		}
@@ -147,7 +150,7 @@
 	</cfscript>
 	<cfsavecontent variable="output">
 	<script>
-		function pspMgrProdCategoryChanged(ctrl){
+		function pspMgrProdCategoryChanged_#arguments.row["#variables.type#_option_id"]#(ctrl){
 			var iProduct = parseInt($("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").val());
 			if(iProduct){
 				if($(".zProductIdClass")[0]){
@@ -156,7 +159,7 @@
 						$prod.find('option').not(':selected').remove();
 						for(var idx in arrProdInSpecial){
 							var prod = arrProdInSpecial[idx];
-							if(prod.category == iProduct){
+							if(prod.category == iProduct && prod.id != $prod.val()){
 								$prod.append("<option data-category=\"" + prod.category + "\" value=\""+ prod.id + "\">" + prod.name + "</option>");
 							}
 						}
@@ -165,9 +168,23 @@
 			}
 		}
 	</script>	
-	<select class="zProductCategoryIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdCategoryChanged(this);">
+	<select class="zProductCategoryIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdCategoryChanged_#arguments.row["#variables.type#_option_id"]#(this);">
 		<option value="">No Product Category</option>
+		<cfset prodName = "">
 		<cfloop query="qProd">
+			<cfif prodName NEQ qProd.prodName AND qProd.product_category_id GT 0>
+				<cfset prodName = qProd.prodName>
+				<optgroup label="#prodName#">
+			<cfelseif prodName NEQ qProd.prodName AND qProd.product_category_id LTE 0>
+				<cfset prodName = qProd.prodName>
+				<optgroup label="#prodName#">
+				<cfif Trim(sValue) EQ qProd.prodId>
+					<option selected value="#qProd.prodId#">#qProd.prodName#</option>
+				<cfelse>
+					<option value="#qProd.prodId#">#qProd.prodName#</option>
+				</cfif>
+				<cfcontinue>
+			</cfif>
 			<cfif Trim(sValue) EQ qProd.product_category_id>
 				<option selected value="#qProd.product_category_id#">#qProd.product_category_name#</option>
 			<cfelse>

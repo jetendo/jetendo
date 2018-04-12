@@ -156,9 +156,9 @@
 				</cfif>
 			</cfloop>
 		});
-		function pspMgrProdChanged(ctrl){
+		function pspMgrProdChanged_#arguments.row["#variables.type#_option_id"]#(ctrl){
 			var $lstCtrl = $("##lstProductName");
-			$("##product_name").val($("###arguments.prefixString##arguments.row["#variables.type#_option_id"]# option:selected").text());
+			$("##product_name_#arguments.row["#variables.type#_option_id"]#").val($("###arguments.prefixString##arguments.row["#variables.type#_option_id"]# option:selected").text());
 			var sCategory = $("###arguments.prefixString##arguments.row["#variables.type#_option_id"]# option:selected").attr("data-category");
 			if(sCategory != "" && sCategory !== undefined){
 				if($(".zProductCategoryIdClass")[0])
@@ -169,7 +169,7 @@
 				$("##ddBtnProductName")[0].textContent = "▼";
 			}
 		}
-		function pspMgrHideList(ctrl, lstCtrl) {
+		function pspMgrHideList_#arguments.row["#variables.type#_option_id"]#(ctrl, lstCtrl) {
 			var $theCtrl = $("##" + lstCtrl);
 			if($theCtrl.css('display') == 'none'){
 				$theCtrl.css('display', 'block');
@@ -179,7 +179,7 @@
 				ctrl.textContent = "▼";
 			}
 		}
-		function pspMgrSearchProduct(e, ctrl) {
+		function pspMgrSearchProduct_#arguments.row["#variables.type#_option_id"]#(e, ctrl) {
 			if(e.keyCode == 27)
 				return false;
 			$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").empty();
@@ -198,11 +198,11 @@
 			}
 		}
 	</script>	
-	<input style="width:200px; height:25px;" type="text" id="product_name" value="#sValue#"
-		name="product_name" list="productList" onkeyup="pspMgrSearchProduct(event, this);" />
-	<button type="button" id="ddBtnProductName" onclick="pspMgrHideList(this,'lstProductName');" style="padding:0px; width:22px; height:24px; top:1px; position:relative; left:-3px; cursor:pointer;">▼</button>
+	<input style="width:200px; height:25px;" type="text" id="product_name_#arguments.row["#variables.type#_option_id"]#" value="#sValue#"
+		name="product_name_#arguments.row["#variables.type#_option_id"]#" list="productList" onkeyup="pspMgrSearchProduct_#arguments.row["#variables.type#_option_id"]#(event, this);" />
+	<button type="button" id="ddBtnProductName" onclick="pspMgrHideList_#arguments.row["#variables.type#_option_id"]#(this,'lstProductName');" style="padding:0px; width:22px; height:24px; top:1px; position:relative; left:-3px; cursor:pointer;">▼</button>
 	<datalist id="lstProductName" style="display:none; height:300px; width:250px; padding-left:0px;">
-		<select class="zProductIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdChanged(this);">
+		<select class="zProductIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdChanged_#arguments.row["#variables.type#_option_id"]#(this);">
 			<option value="">No Product</option>
 		</select>
 	</datalist>
