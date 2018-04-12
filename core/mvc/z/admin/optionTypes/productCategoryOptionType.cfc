@@ -133,79 +133,48 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 		var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
-		//application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id')
 		var db=request.zos.queryObject;
-		db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
-		site_id = #db.param(request.zos.globals.id)# and 
-		product_deleted = #db.param(0)# and
-		product_active = #db.param(1)# 	
-		ORDER BY product_name ASC";
+		db.sql="select * from 
+			#db.table("product_category", request.zos.globals.datasource)# 
+			WHERE site_id = #db.param(request.zos.globals.id)#
+			AND	product_category_deleted = #db.param(0)#
+			AND product_category_active = #db.param(1)# 	
+			ORDER BY product_category_name ASC";
 		try{
 			qProd = db.execute("qProd");
 		}
-		catch(Any e){qProd = QueryNew("product_id, product_name");}
+		catch(Any e){qProd = QueryNew("product_category_id, product_category_name");}
 	</cfscript>
 	<cfsavecontent variable="output">
 	<script>
-		var arrProdInSpecial	= [];
-		zArrDeferredFunctions.push(function(){
-			<cfloop query="qProd">
-				arrProdInSpecial.push({id:"#qProd.product_id#", name: "#qProd.product_name#", category:"#qProd.product_category_id#"});
-				<cfif Trim(sValue) EQ qProd.product_id>
-					$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").append("<option selected data-category=\"#qProd.product_category_id#\" value=\"#qProd.product_id#\">#qProd.product_name#</option>");
-				</cfif>
-			</cfloop>
-		});
-		function pspMgrProdChanged(ctrl){
-			var $lstCtrl = $("##lstProductName");
-			$("##product_name").val($("###arguments.prefixString##arguments.row["#variables.type#_option_id"]# option:selected").text());
-			var sCategory = $("###arguments.prefixString##arguments.row["#variables.type#_option_id"]# option:selected").attr("data-category");
-			if(sCategory != "" && sCategory !== undefined){
-				if($(".zProductCategoryIdClass")[0])
-					$(".zProductCategoryIdClass").val(sCategory);
-			}
-			if($lstCtrl.css('display') == 'block'){
-				$lstCtrl.css('display', 'none');
-				$("##ddBtnProductName")[0].textContent = "▼";
-			}
-		}
-		function pspMgrHideList(ctrl, lstCtrl) {
-			var $theCtrl = $("##" + lstCtrl);
-			if($theCtrl.css('display') == 'none'){
-				$theCtrl.css('display', 'block');
-				ctrl.textContent = "▲";
-			} else {
-				$theCtrl.css('display', 'none');
-				ctrl.textContent = "▼";
-			}
-		}
-		function pspMgrSearchProduct(e, ctrl) {
-			if(e.keyCode == 27)
-				return false;
-			$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").empty();
-			$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").append("<option value=\"\"></option>");
-			var searchText = $(ctrl).val().toLowerCase();
-			for(var idx in arrProdInSpecial){
-				var prod = arrProdInSpecial[idx];
-				if(searchText == "" || prod.id.indexOf(searchText) != -1 || prod.name.toLowerCase().indexOf(searchText) != -1){
-					$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").append("<option data-category=\"" + prod.category + "\" value=\""+ prod.id + "\">" + prod.name + "</option>");
+		function pspMgrProdCategoryChanged(ctrl){
+			var iProduct = parseInt($("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").val());
+			if(iProduct){
+				if($(".zProductIdClass")[0]){
+					var $prod = $(".zProductIdClass");
+					if(arrProdInSpecial){
+						$prod.find('option').not(':selected').remove();
+						for(var idx in arrProdInSpecial){
+							var prod = arrProdInSpecial[idx];
+							if(prod.category == iProduct){
+								$prod.append("<option data-category=\"" + prod.category + "\" value=\""+ prod.id + "\">" + prod.name + "</option>");
+							}
+						}
+					}
 				}
-			}
-			var $lstCtrl = $("##lstProductName");
-			if($lstCtrl.css('display') == 'none'){
-				$lstCtrl.css('display', 'block');
-				$("##ddBtnProductName")[0].textContent = "▲";
 			}
 		}
 	</script>	
-	<input style="width:200px; height:25px;" type="text" id="product_name" value="#sValue#"
-		name="product_name" list="productList" onkeyup="pspMgrSearchProduct(event, this);" />
-	<button type="button" id="ddBtnProductName" onclick="pspMgrHideList(this,'lstProductName');" style="padding:0px; width:22px; height:24px; top:1px; position:relative; left:-3px; cursor:pointer;">▼</button>
-	<datalist id="lstProductName" style="display:none; height:300px; width:250px; padding-left:0px;">
-		<select class="zProductIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdChanged(this);">
-			<option value="">No Product</option>
-		</select>
-	</datalist>
+	<select class="zProductCategoryIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdCategoryChanged(this);">
+		<option value="">No Product Category</option>
+		<cfloop query="qProd">
+			<cfif Trim(sValue) EQ qProd.product_category_id>
+				<option selected value="#qProd.product_category_id#">#qProd.product_category_name#</option>
+			<cfelse>
+				<option value="#qProd.product_category_id#">#qProd.product_category_name#</option>
+			</cfif>
+		</cfloop>
+	</select>
 	</cfsavecontent>
 	<cfscript>
 		<!---
@@ -305,7 +274,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Product Picker';
+	return 'Product Category Picker';
 	</cfscript>
 </cffunction>
 
@@ -336,7 +305,7 @@
 <cffunction name="getOptionFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
-		product_id:""
+		product_category_id:""
 	};
 	return ts;
 	</cfscript>
@@ -347,28 +316,22 @@
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var output="";
-	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
-	/*db.sql="select * from #db.table("#variables.type#_option", request.zos.zcoreDatasource)# WHERE 
-	site_id = #db.param(request.zos.globals.id)# and 
-	#variables.type#_option_deleted = #db.param(0)# and
-	#variables.type#_option_group_id = #db.param(arguments.dataStruct["#variables.type#_option_group_id"])# 	
-	ORDER BY #variables.type#_option_name ASC";
-	*/
+		var db=request.zos.queryObject;
+		var output="";
+		var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="#variables.type#_option_type_id" value="25" onClick="setType(25);" <cfif value EQ 25>checked="checked"</cfif>/>
+	<input type="radio" name="#variables.type#_option_type_id" value="26" onClick="setType(26);" <cfif value EQ 26>checked="checked"</cfif>/>
 	#this.getTypeName()#<br />
-	<div id="typeOptions25" style="display:none;padding-left:30px;"> 
+	<div id="typeOptions26" style="display:none;padding-left:30px;"> 
 		<table class="table-list">
 		<tr><td>
-		Product: </td><td>
+		Product Category: </td><td>
 		<cfscript>
-		arrProdLabel=["Product ID 1","Product ID 2"];
+		arrProdLabel=["Product Category ID 1","Product Category ID 2"];
 		ssProd = StructNew(); 
 		ssProd.size=1;
-		ssProd.name = "product_id";
+		ssProd.name = "product_category_id";
 		ssProd.listLabelsDelimiter = ",";
 		ssProd.listValuesDelimiter = ",";
 		ssProd.listLabels=arrayToList(arrProdLabel, ",");
