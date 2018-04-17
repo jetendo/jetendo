@@ -97,8 +97,7 @@
 				user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
 				 and (user_server_administrator=#db.param(0)#)
 				ORDER BY member_first_name ASC, member_last_name ASC";
-				qAgents=db.execute("qAgents");
-				writedump('asaasa');
+				qAgents=db.execute("qAgents"); 
 			} 
 		}
 		</cfscript> 
