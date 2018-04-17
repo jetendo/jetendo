@@ -117,7 +117,7 @@ quickSearchCom.includeQuickSearch(ts);
 				<a class="zls-quick-search-mode-button">Search By <span class="zls-quick-search-mode-arrow-down"> </span></a>
 				<form id="z-quick-search-form" action="" method="get">
 				  	<input id="zls-quick-search-mode-input" data-negative-offset="#htmleditformat(serializeJson(ss.jumpNegativeOffset))#" class="zls-quick-search-mode-input" style="" type="text" name="query" id="query" placeholder="Type a City, County, MLS ##, <cfif ss.enableAddress>Address, </cfif><Cfif ss.enableZipCode>ZIP Code, </cfif><Cfif ss.enableSchools>School, </cfif>etc" autocomplete="off">
-				  	<input type="button" name="quickSearchButton1" value="SEARCH" class="zls-quick-search-mode-search">
+				  	<input type="submit" name="quickSearchButton1" value="SEARCH" class="zls-quick-search-mode-search">
 				</form>
 				
 			</div>

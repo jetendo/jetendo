@@ -69,8 +69,7 @@
 
 			$(".zls-quick-search-autocomplete").slideDown('fast');
  
-			var j=JSON.parse($(this).attr("data-negative-offset"));
-			console.log(j);
+			var j=JSON.parse($(this).attr("data-negative-offset")); 
 			if(zWindowSize.width <= 479){
 				zJumpToId("zls-quick-search-mode-input", j.bp479);
 			}else if(zWindowSize.width <= 767){
@@ -164,6 +163,7 @@
 			var value=$selected.attr("data-value");
 			var field=$selected.attr("data-field");
 
+			console.log("submitted: "+$selected.val()+":"+type+":"+value+":"+field);
 
 			/*if(searchType == ""){
 			 	alert("Select a Search Category");

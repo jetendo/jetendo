@@ -79,7 +79,7 @@
 			</h3>
 		</div>
 		<cfscript> 
-		if(request.zsession.user.office_id NEQ "0"){
+		if(request.zsession.user.office_id NEQ ""){
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			if(arguments.form_type EQ "user"){
@@ -98,6 +98,7 @@
 				 and (user_server_administrator=#db.param(0)#)
 				ORDER BY member_first_name ASC, member_last_name ASC";
 				qAgents=db.execute("qAgents");
+				writedump('asaasa');
 			} 
 		}
 		</cfscript> 
@@ -271,7 +272,7 @@
 			</h3>
 		</div>
 		<cfscript>
-		if(request.zsession.user.office_id NEQ "0" ){
+		if(request.zsession.user.office_id NEQ "" ){
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			if(form.method NEQ "userEdit"){
