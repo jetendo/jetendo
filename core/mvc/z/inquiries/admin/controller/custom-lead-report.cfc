@@ -2326,7 +2326,7 @@ leadchart
 				if(fs["Phone 1"] EQ ""){
 					fs["Phone 1"]=row.inquiries_phone1;
 				}
-				label=application.zcore.functions.zLimitStringLength(fs.tracking_label, 60); 
+				label=application.zcore.functions.zLimitStringLength(fs.tracking_label&" / "&referrer, 60); 
 				/*writedump(row);
 				writedump(js);
 				break;*/
@@ -2336,9 +2336,9 @@ leadchart
 					<td>#fs["Phone 1"]#</td>
 					<td>#fs.city#</td>
 					<td>#dateformat(row.inquiries_datetime, "m/d/yyyy")#</td>
-					<td>#label# / #referrer#</td>
+					<td>#label#</td>
 					
-				</tr>');//<td>#fs.source#</td>
+				</tr>'); 
 
 				rowCount++;
 			}

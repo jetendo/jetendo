@@ -1010,7 +1010,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 			}else{
 				throw(local.imageSize.errorMessage);
 			}
-		}
+		} 
 		secureCommand="getImageMagickConvertResize"&chr(9)&cs.resizeWidth&chr(9)&cs.resizeHeight&chr(9)&cs.cropWidth&chr(9)&cs.cropHeight&chr(9)&cs.cropXOffset&chr(9)&cs.cropYOffset&chr(9)&cs.sourceFilePath&chr(9)&cs.destinationFilePath;
 		output=application.zcore.functions.zSecureCommand(secureCommand, 20); 
 		if(output NEQ "1"){
@@ -1019,7 +1019,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 			}
 			return false;
 		}
-		local.imageSize2=application.zcore.functions.zGetImageSize(cs.sourceFilePath);        
+		local.imageSize2=application.zcore.functions.zGetImageSize(cs.destinationFilePath);        
 		if(local.imageSize2.success){
 			local.imageSize.width=local.imageSize2.width;
 			local.imageSize.height=local.imageSize2.height;

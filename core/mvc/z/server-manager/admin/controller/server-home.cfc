@@ -423,7 +423,7 @@
 			<p><a href="/z/listing/admin/remap-data/index">Remap Real Estate Saved Search Data</a></p>
 			<p><a href="/z/listing/tasks/sendListingAlerts/index" target="_blank">Send Email Alerts</a></p>
 			<p><a href="/z/listing/tasks/importMLS/index" target="_blank">Import Data</a> 
-			<cfif structkeyexists(application.zcore, 'importMLSRunning')>
+			<cfif structkeyexists(application.zcore, 'mlsImportIsRunning')>
 				(Running -
 					<a href="/z/listing/tasks/importMLS/abortImport">Cancel</a> 
 					<cfif structkeyexists(application.zcore, 'idxImportStatus')>

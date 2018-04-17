@@ -1430,9 +1430,9 @@ virtualFileCom.serveVirtualFile();
 	} 
 	if(variables.config.storageMethod EQ "localFilesystem"){
 		if(arguments.forceDownload){
-			application.zcore.functions.zheader( 'Content-Disposition', 'attachment; filename=' & urlencodedformat(replace(rs.data.virtual_file_name, ",", " ", "all")) );
+			application.zcore.functions.zheader( 'Content-Disposition', 'attachment; filename=' & replace(urlencodedformat(replace(rs.data.virtual_file_name, ",", " ", "all")), '%2E', '.', 'all') );
 		}else{
-			application.zcore.functions.zheader( 'Content-Disposition', 'inline; filename=' & urlencodedformat(replace(rs.data.virtual_file_name, ",", " ", "all")) );
+			application.zcore.functions.zheader( 'Content-Disposition', 'inline; filename=' & replace(urlencodedformat(replace(rs.data.virtual_file_name, ",", " ", "all")), '%2E', '.', 'all') );
 		}
 		application.zcore.functions.zXSendFile( urlencodedformat(downloadLink) );
 	}else{

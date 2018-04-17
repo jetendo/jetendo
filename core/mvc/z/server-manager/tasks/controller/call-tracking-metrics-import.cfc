@@ -39,19 +39,24 @@
 	
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
-	
+	 
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	}
 	setting requesttimeout="80000";
 	request.ignoreSlowScript=true;
 	db=request.zos.queryobject; 
+	form.sid=application.zcore.functions.zso(form, 'sid', true, 0);
 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 
 	site_calltrackingmetrics_enable_import = #db.param(1)# and 
 	site_id <> #db.param(-1)# and 
 	site_deleted = #db.param(0)# and 
 	site_active = #db.param(1)#";
+	if(form.sid NEQ 0){
+		db.sql&=" and site_id = #db.param(form.sid)# ";
+	}
+
 	qSite=db.execute("qSite");
 	for(row in qSite){
 		u=row.site_domain&"/z/server-manager/tasks/call-tracking-metrics-import/callImport";
@@ -81,6 +86,7 @@
 	/*if(request.zos.istestserver){
 		debug=true;
 	}*/
+	form.sid=application.zcore.functions.zso(form, 'sid', true, request.zos.globals.id);
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	} 
@@ -92,7 +98,7 @@
 	}
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 
 	site_calltrackingmetrics_enable_import = #db.param(1)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
+	site_id = #db.param(form.sid)# and 
 	site_deleted = #db.param(0)# and 
 	site_active = #db.param(1)#";
 	qSite=db.execute("qSite");
@@ -104,7 +110,7 @@
 		d=parsedatetime(d);
 		d=dateadd("d", -1, d);
 		startDate=dateformat(d, "yyyy-mm-dd");
-	}
+	} 
 
  
 	accessKey=request.zos.globals.calltrackingMetricsAccessKey; 

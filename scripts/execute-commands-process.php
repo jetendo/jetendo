@@ -60,6 +60,8 @@ function processContents($contents){
 		return httpXMLPost($a);
 	}else if($contents =="httpJsonPost"){
 		return httpJsonPost($a);
+	}else if($contents =="httpPost"){
+		return httpPost($a);
 	}else if($contents =="httpDownloadToFile"){
 		return httpDownloadToFile($a);
 	}else if($contents =="tarZipFilePath"){
@@ -1462,6 +1464,7 @@ function getImageMagickConvertApplyMask($a){
 	$pngColorFix='';
 	if($ext == '.png'){
 		$pngColorFix="PNG32:"; 
+		$compress=' -define png:compression-filter=5 -define png:compression-level=7 -define png:compression-strategy=1 ';
 	}else if($ext == '.gif'){
 		// do nothing
 	}else{
@@ -1635,6 +1638,7 @@ function getImageMagickConvertResize($a){
 	}
 	if($ext == '.png'){
 		$pngColorFix="PNG32:"; 
+		$compress=' -define png:compression-filter=5 -define png:compression-level=7 -define png:compression-strategy=1 ';
 	}else if($ext == '.gif'){
 		// do nothing.
 	}else{
@@ -2204,6 +2208,33 @@ function httpJsonPost($a){
 		return "0";
 	}else{
 		return $result;
+	}
+}
+function httpPost($a){
+	if(count($a) != 3){
+		echo "incorrect number of arguments: ".implode(", ", $a)."\n";
+		return "0";
+	}
+	$link=$a[0];
+	$postData=$a[1];
+	$timeout=$a[2];
+	set_time_limit($timeout+1); 
+	$ch = curl_init(); 
+	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
+	curl_setopt($ch, CURLOPT_URL, $link);  
+	curl_setopt($ch, CURLOPT_POST, 1);     
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);     
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
+	ob_start();
+	$result=curl_exec($ch);
+	$r=ob_get_clean();
+	curl_close($ch);
+	if($result===FALSE){
+		return "0";
+	}else{
+		return $result; 
 	}
 }
 function httpXMLPost($a){

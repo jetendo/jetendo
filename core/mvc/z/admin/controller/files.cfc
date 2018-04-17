@@ -91,8 +91,10 @@
 		ts.value="5000x5000";
 		ArrayAppend(request.imageSizes, ts);
 	}
-	if(not form.fileGalleryMode and form.galleryMode EQ false and request.zos.fileImage.hideTitle EQ false){
-		writeoutput('<h2>Files &amp; Images</h2>');
+	if(left(request.zos.originalURL, 15) EQ "/z/admin/files/"){
+		if(not form.fileGalleryMode and form.galleryMode EQ false and request.zos.fileImage.hideTitle EQ false){
+			writeoutput('<h2>Files &amp; Images</h2>');
+		}
 	}
 	if(form.fileGalleryMode or form.galleryMode or form.method EQ "fileGalleryViewFile" or form.method EQ "fileGalleryAddFolder" or form.method EQ "fileGalleryAdd" or form.method EQ "galleryAdd" or form.method EQ "galleryAddFolder" or form.method EQ "galleryAddFile"){
 		request.zPageDebugDisabled=true;
@@ -128,9 +130,11 @@
 		arrayDeleteAt(arrLinks,1);
 	}
 	
-	writeoutput('<div class="z-float" style="border-bottom:1px solid ##CCC; margin-bottom:5px; border-spacing:0px; padding-bottom:5px;">');
-	writeoutput(ArrayToList(arrLinks,' '));
-	writeoutput('</div>'); 
+	if(left(request.zos.originalURL, 15) EQ "/z/admin/files/"){
+		writeoutput('<div class="z-float" style="border-bottom:1px solid ##CCC; margin-bottom:5px; border-spacing:0px; padding-bottom:5px;">');
+		writeoutput(ArrayToList(arrLinks,' '));
+		writeoutput('</div>'); 
+	}
 	</cfscript>
 </cffunction>
 

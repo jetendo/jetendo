@@ -101,7 +101,7 @@
 			[ 
 				"--no-perms",
 				"--chmod=ugo=rwX",
-				"--dry-run",
+				//"--dry-run",
 				"--delete"
 			],
 			"remotes":

@@ -1597,6 +1597,12 @@
 			$( "##site_lead_reminder_start_date" ).datepicker();
 		'); 
 		</cfscript>
+		<tr>
+			<td style="vertical-align:top; width:140px;">Enable User Ticket Login?:</td>
+			<td >#application.zcore.functions.zInput_Boolean("site_enable_user_ticket_login")# (If set to yes, regular users will be able to see their own tickets and assigned leads)</td>
+		</tr>  
+
+
 
 		<tr> 
 			<td style="vertical-align:top; width:140px;">Enable Manage Menu:</td>
