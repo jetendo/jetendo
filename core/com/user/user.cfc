@@ -1788,7 +1788,7 @@ formString = userCom.loginForm(inputStruct);
 <cffunction name="selectOfficeForm" localmode="modern" access="public"> 
 	<cfscript>
 	var db=request.zos.queryObject;  
-	if(request.zsession.user.office_id EQ 0){
+	if(request.zsession.user.office_id EQ ""){
 		ts={ 
 			sortBy:"name", 
 			site_id:request.zos.globals.id
@@ -1848,7 +1848,7 @@ application.zcore.user.selectOfficeField(ts);
 	ss=arguments.ss;
 	var db=request.zos.queryObject;  
 
-	if(request.zsession.user.office_id EQ 0){
+	if(request.zsession.user.office_id EQ ""){
 		if(not application.zcore.user.checkGroupAccess("member")){
 			// don't allow accidental access to all offices for non manager users
 			arrOffice=[];

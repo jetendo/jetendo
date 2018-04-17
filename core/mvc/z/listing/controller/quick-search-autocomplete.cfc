@@ -40,7 +40,13 @@ ts={
 	enableZipCode:true,
 	enableCounty:true,
 	enableKeyword:true,
-	enableFeature:true
+	enableFeature:true,
+	jumpNegativeOffset:{
+		479:-100,
+		767:-100,
+		992:-50,
+		default:-30
+	}
 };
 quickSearchCom=createobject("component", "zcorerootmapping.mvc.z.listing.controller.quick-search-autocomplete");
 quickSearchCom.includeQuickSearch(ts);
@@ -64,9 +70,17 @@ quickSearchCom.includeQuickSearch(ts);
 		enableZipCode:true,
 		enableCounty:true,
 		enableKeyword:true,
-		enableFeature:true
+		enableFeature:true,
+		jumpNegativeOffset:{
+			bp479:-60,
+			bp767:-30,
+			bp992:-30,
+			bp1362:-30,
+			default:-30
+		}
 	};
 	structappend(ss, ts, false);
+	structappend(ss.jumpNegativeOffset, ts.jumpNegativeOffset, false);
 	arrType=[];
 	if(ts.enableNeighborhoods){
 		arrayAppend(arrType, "neighborhood");
@@ -97,16 +111,19 @@ quickSearchCom.includeQuickSearch(ts);
 	}
 	geolocation=false;
 	</cfscript> 
-<div class="zls-quick-search-mode-container">
-	<div class="zls-quick-search-mode-container2">
-		<div class="z-float">
-			<a class="zls-quick-search-mode-button">Search By <span class="zls-quick-search-mode-arrow-down"> </span></a>
-			<form id="z-quick-search-form" action="" method="get">
-			  	<input id="zls-quick-search-mode-input" class="zls-quick-search-mode-input" style="" type="text" name="query" id="query" placeholder="Type a City, County, MLS ##, <cfif ss.enableAddress>Address, </cfif><Cfif ss.enableZipCode>ZIP Code, </cfif><Cfif ss.enableSchools>School, </cfif>etc" autocomplete="off">
-			  	<input type="button" name="quickSearchButton1" value="SEARCH" class="zls-quick-search-mode-search">
-			</form>
-			
-		</div>
+	<div class="zls-quick-search-mode-container">
+		<div class="zls-quick-search-mode-container2">
+			<div class="z-float">
+				<a class="zls-quick-search-mode-button">Search By <span class="zls-quick-search-mode-arrow-down"> </span></a>
+				<form id="z-quick-search-form" action="" method="get">
+				  	<input id="zls-quick-search-mode-input" data-negative-offset="#htmleditformat(serializeJson(ss.jumpNegativeOffset))#" class="zls-quick-search-mode-input" style="" type="text" name="query" id="query" placeholder="Type a City, County, MLS ##, <cfif ss.enableAddress>Address, </cfif><Cfif ss.enableZipCode>ZIP Code, </cfif><Cfif ss.enableSchools>School, </cfif>etc" autocomplete="off">
+				  	<input type="submit" name="quickSearchButton1" value="SEARCH" class="zls-quick-search-mode-search">
+				</form>
+				
+			</div>
+		</div> 
+	</div> 
+	<script id="zls-quick-search-html-pop" type="text/template">
 		<div class="zls-quick-search-autocomplete-container">
 		  	<div class="zls-quick-search-autocomplete"> 
 		  	</div>
@@ -146,8 +163,7 @@ quickSearchCom.includeQuickSearch(ts);
 				</cfif>
 			</div>
 		</div>
-	</div> 
-</div> 
+	</script>
 </cffunction>
 
 <cffunction name="autocompleteSearch" localmode="modern" access="remote" returntype="string">

@@ -4,6 +4,9 @@
 	"use strict";
 	var searchType = ""; 
 	zArrDeferredFunctions.push(function() {
+		var popHTML=$("#zls-quick-search-html-pop").html();
+		$("body").append(popHTML);
+
 		$(document).on("click", function(){
 			if(zMouseHitTest($(".zls-quick-search-mode-button")[0], 0)){
 				// leave it open
@@ -13,6 +16,12 @@
 		});
 		searchType=$(".zls-quick-search-link-selected").attr("data-type");
 		$(".zls-quick-search-mode-button").on("click", function(e){
+			// zls-quick-search-mode-button
+			var p=zGetAbsPosition(this);
+			$('.zls-quick-search-list').css({
+				"top":(p.y+p.height)+"px",
+				"left":(p.x)+"px"
+			});
 			$('.zls-quick-search-list').slideToggle('fast');
 		});
 	    $(".zls-quick-search-link").each(function () {
@@ -28,13 +37,50 @@
 				$('.zls-quick-search-list').toggle(); 
 			});
 		});
-
+		function resizeQuickSearch(){
+			$(".zls-quick-search-mode-button").each(function(){
+				var p=zGetAbsPosition(this);
+				$('.zls-quick-search-list').css({
+					"top":(p.y+p.height)+"px",
+					"left":(p.x)+"px"
+				});
+			});
+			$(".zls-quick-search-mode-input").each(function(){
+				var p=zGetAbsPosition(this);
+				$('.zls-quick-search-autocomplete-container').css({
+					"top":(p.y+p.height)+"px",
+					"left":(p.x)+"px"
+				});
+			});
+		}
+		function scrollQuickSearch(){
+			resizeQuickSearch();
+			setTimeout(function(){ resizeQuickSearch(); }, 100);
+		}
+	    zArrScrollFunctions.push({functionName:resizeQuickSearch});
+	    zArrResizeFunctions.push({functionName:scrollQuickSearch});
 		$(".zls-quick-search-mode-input").on("focus", function(){
+			$('.zls-quick-search-list').hide();
+			var p=zGetAbsPosition(this);
+			$('.zls-quick-search-autocomplete-container').css({
+				"top":(p.y+p.height)+"px",
+				"left":(p.x)+"px"
+			});
+
 			$(".zls-quick-search-autocomplete").slideDown('fast');
-			if(zWindowSize.width < 768){
-				zJumpToId("zls-quick-search-mode-input", -60);
+ 
+			var j=JSON.parse($(this).attr("data-negative-offset")); 
+			if(zWindowSize.width <= 479){
+				zJumpToId("zls-quick-search-mode-input", j.bp479);
+			}else if(zWindowSize.width <= 767){
+				zJumpToId("zls-quick-search-mode-input", j.bp767);
+			}else if(zWindowSize.width <= 992){
+				console.log(j.bp992);
+				zJumpToId("zls-quick-search-mode-input", j.bp992);
+			}else if(zWindowSize.width <= 1362){
+				zJumpToId("zls-quick-search-mode-input", j.bp1362);
 			}else{
-				zJumpToId("zls-quick-search-mode-input", -30);
+				zJumpToId("zls-quick-search-mode-input", j.default);
 			}
 		});
 		var cancelBlur=false;
@@ -117,6 +163,7 @@
 			var value=$selected.attr("data-value");
 			var field=$selected.attr("data-field");
 
+			console.log("submitted: "+$selected.val()+":"+type+":"+value+":"+field);
 
 			/*if(searchType == ""){
 			 	alert("Select a Search Category");
