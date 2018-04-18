@@ -1392,17 +1392,21 @@ if(rs.success){
 	</cftry>
 </cffunction>
 
-
+<!--- 
+<!--- this doesn't seem to work sometimes  --->
 <cffunction name="zArrayOfStructsSort" localmode="modern" access="public">
 	<cfargument name="aOfS" type="array" required="yes">
 	<cfargument name="key" type="string" required="yes">
+	<cfargument name="sortOrder" type="string" required="no" default="asc">
+	<cfargument name="sortType" type="string" required="no" default="textnocase">
+	<cfargument name="delim" type="string" required="no" default=".">
 	<cfscript>
     //by default we'll use an ascending sort
-    var sortOrder = "asc";        
+    var sortOrder = arguments.sortOrder;
     //by default, we'll use a textnocase sort
-    var sortType = "textnocase";
+    var sortType = arguments.sortType;
     //by default, use ascii character 30 as the delim
-    var delim = ".";
+    var delim = arguments.delim;
     //make an array to hold the sort stuff
     var sortArray = arraynew(1);
     //make an array to return
@@ -1410,23 +1414,11 @@ if(rs.success){
     //grab the number of elements in the array (used in the loops)
     var count = arrayLen(arguments.aOfS);
     //make a variable to use in the loop
-    var ii = 1;
-    //if there is a 3rd argument, set the sortOrder
-    if(arraylen(arguments) GT 2){
-        sortOrder = arguments[3];
-    }
-    //if there is a 4th argument, set the sortType
-    if(arraylen(arguments) GT 3){
-        sortType = arguments[4];
-    }
-    //if there is a 5th argument, set the delim
-    if(arraylen(arguments) GT 4){
-        delim = arguments[5];
-    }
+    var ii = 1; 
     //loop over the array of structs, building the sortArray
     for(ii = 1; ii lte count; ii = ii + 1){
         sortArray[ii] = arguments.aOfS[ii][arguments.key] & delim & ii;
-    }
+    } 
     //now sort the array
     arraySort(sortArray,sortType,sortOrder);
     //now build the return array
@@ -1436,7 +1428,7 @@ if(rs.success){
     //return the array
     return returnArray;
     </cfscript>
-</cffunction>
+</cffunction> --->
 
 </cfoutput>
 </cfcomponent>
