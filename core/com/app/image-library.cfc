@@ -1743,7 +1743,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 						<li><a class="zNoContentTransition"
 					 href="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"
 					 
-					  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#"  data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" /></a></li>
+					  title="#htmleditformat(caption)#"><img src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, thumbnailWidth&"x"&thumbnailHeight, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" alt="#htmleditformat(caption)#"  data-lat="#qImages.image_latitude#" data-lon="#qImages.image_longitude#" data-altitude="#qImages.image_altitude#" data-date_taken="#DateFormat(qImages.image_taken_datetime,'mm/dd/yyyy')#" /></a></li>
 					</cfloop>
 					  <!---  data-2x-image="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize2, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  --->
 				    </ul>
