@@ -194,26 +194,6 @@
 	</select>
 	</cfsavecontent>
 	<cfscript>
-		<!---
-		var db=request.zos.queryObject;
-		db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
-		site_id = #db.param(request.zos.globals.id)# and 
-		product_deleted = #db.param(0)# and
-		product_active = #db.param(1)# 	
-		ORDER BY product_name ASC";
-		qGroup=db.execute("qGroup");
-		savecontent variable="output"{
-			selectStruct = StructNew();
-			selectStruct.name = "#arguments.prefixString##arguments.row["#variables.type#_option_id"]#";
-			selectStruct.query = qGroup;
-			selectStruct.queryLabelField = "product_name";
-			selectStruct.queryValueField = "product_id";
-			selectStruct.multiple=true;
-			selectStruct.hideSelect=true;
-			application.zcore.functions.zInputSelectBox(selectStruct);
-			application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), true);
-		}
-		--->
 		return { label: true, hidden: false, value: output};  
 	</cfscript>
 </cffunction>
@@ -338,25 +318,8 @@
 		var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="#variables.type#_option_type_id" value="26" onClick="setType(26);" <cfif value EQ 26>checked="checked"</cfif>/>
-	#this.getTypeName()#<br />
-	<div id="typeOptions26" style="display:none;padding-left:30px;"> 
-		<table class="table-list">
-		<tr><td>
-		Product Category: </td><td>
-		<cfscript>
-		arrProdLabel=["Product Category ID 1","Product Category ID 2"];
-		ssProd = StructNew(); 
-		ssProd.size=1;
-		ssProd.name = "product_category_id";
-		ssProd.listLabelsDelimiter = ",";
-		ssProd.listValuesDelimiter = ",";
-		ssProd.listLabels=arrayToList(arrProdLabel, ",");
-		ssProd.listValues=arrayToList(arrProdLabel, ",");
-		application.zcore.functions.zInputSelectBox(ssProd);
-		</cfscript> </td></tr>
-		</table>
-	</div>
+		<input type="radio" name="#variables.type#_option_type_id" value="26" onClick="setType(26);" <cfif value EQ 26>checked="checked"</cfif>/>
+		#this.getTypeName()#<br />
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction> 

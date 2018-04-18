@@ -84,6 +84,9 @@
 		<cfif application.zcore.user.checkGroupAccess("member")>
 			<li><a href="/z/admin/admin-home/index">Site Manager</a></li>
 		</cfif>
+		<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserTicketLogin', true, 0) EQ 1>
+			<li><a href="/z/inquiries/admin/manage-user-inquiries/userIndex">Ticket Manager</a></li>
+		</cfif>
 		<cfscript>
 		hasUserManagerAccess=false;
 		if(request.zsession.user.site_id EQ request.zos.globals.id){ 
