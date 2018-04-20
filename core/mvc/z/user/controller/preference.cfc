@@ -1225,16 +1225,16 @@ If the link does not work, please copy and paste the entire link in your browser
 	
 				<h2 style="margin-top:0px; padding-top:0px;">Create a new account</h2>
 				<div class="zmember-openid-buttons" style="width:100%; float:left;">
-					<div><strong>Email</strong><br />
+					<div class="z-float"><strong>Email</strong><br />
 						<input type="text" name="user_email" style=" width:260px;" value="<cfif structkeyexists(form, 'e')>#htmleditformat(form.e)#</cfif>" />
 					</div>
-					<div><strong>Password</strong> <span style="display:block;width:187px; float:right; height:20px;"><span id="passwordMatchBox" style="display:none; background-color:##900; margin-left:0px; padding:7px; font-size:14px; line-height:14px; border:1px solid ##000; color:##FFF; float:left;border-radius:5px;">Passwords don't match</span></span> <br />
+					<div class="z-float"><strong>Password</strong> <span style="display:block;width:187px; float:right; height:20px;"><span id="passwordMatchBox" style="display:none; background-color:##900; margin-left:0px; padding:7px; font-size:14px; line-height:14px; border:1px solid ##000; color:##FFF; float:left;border-radius:5px;">Passwords don't match</span></span> <br />
 						<input type="password" id="passwordPwd" onkeyup="chkPass(this.value);zLogin.checkIfPasswordsMatch();" style=" width:260px;" onclick="tempValue=this.value;this.value='';" name="user_password" value="" />
 					</div>
-					<div><strong>Confirm Password</strong><br />
+					<div class="z-float"><strong>Confirm Password</strong><br />
 						<input type="password" id="passwordPwd2" style=" width:260px;" onclick="tempValue=this.value;this.value='';" onkeyup="zLogin.checkIfPasswordsMatch();" name="user_password" value="" />
 					</div>
-					<div style="width:100%; float:left; padding-top:5px;">
+					<div class="z-float" style="width:100%; float:left; padding-top:5px;">
 						<input type="hidden" name="returnurl" value="" />
 						<button type="submit" name="submitPref" value="Update Communication Preferences" style="padding:5px; margin-bottom:5px;"> Register </button>
 					</div>
