@@ -131,16 +131,19 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="allowedLeadTypes" localmode="modern" access="public">
+<cffunction name="ticketFilterSQL" localmode="modern" access="public">
 	<cfargument name="db" type="component" required="yes">
 	<cfscript>
 	db=arguments.db;
+
+	db.sql&=" AND ((inquiries.contact_id <> #db.param(0)# and inquiries.contact_id = #db.param(request.zsession.user.contact_id)#) or inquiries.inquiries_email = #db.param(request.zsession.user.email)#  ";
 	if(structkeyexists(request, 'customTicketAllowLeadTypes')){
 		for(type in request.customTicketAllowLeadTypes){
 			arrType=listToArray(type, "|");
 			db.sql&=" or (inquiries.inquiries_type_id = #db.param(arrType[1])# and inquiries.inquiries_type_id_siteidtype=#db.param(arrType[2])#) ";
 		} 
 	}
+	db.sql&=" ) ";
 	</cfscript>
 </cffunction>
 
@@ -519,7 +522,8 @@
 		AND inquiries.inquiries_status_id = inquiries_status.inquiries_status_id 
 		AND (( inquiries_id = #db.param(form.inquiries_id)# and inquiries_parent_id = #db.param(0)# ) or 
 		(inquiries_parent_id = #db.param(form.inquiries_id)# )) ";
-		db.sql&=" AND (inquiries.contact_id = #db.param(request.zsession.user.contact_id)# or inquiries.inquiries_email = #db.param(request.zsession.user.email)# #allowedLeadTypes(db)#) 
+		ticketFilterSQL(db);
+		db.sql&=" 
 		GROUP BY inquiries_id";
 		qinquiry=db.execute("qinquiry");
 
@@ -537,7 +541,7 @@
 	</cfscript>
 
 	<div class="z-float">
-		<div class="z-float"><a href="http://modern2.test.zsite.info/z/inquiries/admin/manage-user-inquiries/userIndex">Ticket Manager/</a><br /><br /></div>
+		<div class="z-float"><a href="/z/inquiries/admin/manage-user-inquiries/userIndex">Ticket Manager/</a><br /><br /></div>
 		<div class="z-float"><h3>Ticket Id #qinquiry.inquiries_id#</h3></div>
 		<div class="z-3of5 z-ph-0"> 
 			<table style="border-spacing:0px; width:100%;" class="table-list">
@@ -1014,8 +1018,9 @@
 	db.sql="SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# 
 	WHERE site_id =#db.param(request.zos.globals.id)# and 
 	inquiries_deleted = #db.param(0)# and 
-	inquiries_id=#db.param(form.inquiries_id)#";
-	db.sql&=" AND (inquiries.contact_id = #db.param(request.zsession.user.contact_id)# or inquiries.inquiries_email = #db.param(request.zsession.user.email)# #allowedLeadTypes(db)#) ";
+	inquiries_id=#db.param(form.inquiries_id)# 
+	  ";
+	ticketFilterSQL(db);
 	rs.qData=db.execute("qData");
 	if(form.method EQ 'edit'){
 		application.zcore.template.setTag("title","Edit Lead");
@@ -1220,8 +1225,8 @@
 	where site_id = #db.param(request.zos.globals.id)# and  
 	inquiries.inquiries_datetime <> #db.param('')# and 
 	inquiries_parent_id = #db.param(0)# and 
-	inquiries_deleted = #db.param(0)# ";
-	db.sql&=" AND (inquiries.contact_id = #db.param(request.zsession.user.contact_id)# or inquiries.inquiries_email = #db.param(request.zsession.user.email)# #allowedLeadTypes(db)#) ";
+	inquiries_deleted = #db.param(0)#  ";
+	ticketFilterSQL(db);
 	variables.qinquiriesFirst=db.execute("qinquiriesFirst"); 
 
 	if(isnull(variables.qinquiriesFirst.inquiries_datetime) EQ false and isdate(variables.qinquiriesFirst.inquiries_datetime)){
@@ -1263,7 +1268,7 @@
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
 	}
 	db.sql&=" and inquiries_parent_id = #db.param(0)# ";
-	db.sql&=" AND (inquiries.contact_id = #db.param(request.zsession.user.contact_id)# or inquiries.inquiries_email = #db.param(request.zsession.user.email)# #allowedLeadTypes(db)#) ";
+	ticketFilterSQL(db);
 
 	if(form.inquiries_start_date EQ false){
 		db.sql&=" and (inquiries_datetime >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
@@ -1286,14 +1291,14 @@
 		db.sql&=" ORDER BY maxdatetime DESC ";
 	}
 	db.sql&=" LIMIT #db.param(max(0,(form.zIndex-1))*30)#,#db.param(30)#";
-	rs.qData=db.execute("qData");   
+	rs.qData=db.execute("qData");    
 	db.sql="SELECT count(inquiries.inquiries_email) count 
 	from #db.table("inquiries", request.zos.zcoreDatasource)# 
 	WHERE inquiries.site_id = #db.param(request.zos.globals.id)# and ";
 	db.sql&=" inquiries.inquiries_status_id <> #db.param(0)# and  ";
 	db.sql&=" inquiries_deleted = #db.param(0)# 
-	and inquiries_parent_id = #db.param(0)#"; 
-	db.sql&=" AND (inquiries.contact_id = #db.param(request.zsession.user.contact_id)# or inquiries.inquiries_email = #db.param(request.zsession.user.email)# #allowedLeadTypes(db)#) ";
+	and inquiries_parent_id = #db.param(0)# ";
+	ticketFilterSQL(db);
 	if(form.selected_user_id NEQ 0){
 		db.sql&=" and inquiries.user_id = #db.param(form.selected_user_id)# and 
 		user_id_siteIDType = #db.param(form.selected_user_id_siteidtype)#";
