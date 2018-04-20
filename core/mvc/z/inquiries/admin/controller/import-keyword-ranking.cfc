@@ -236,7 +236,7 @@ objCookies=GetResponseCookies(cfhttp);
 <cffunction name="semrush" access="remote" localmode="modern">
 	<cfscript>
 	init();
-	setting requesttimeout="5000";
+	setting requesttimeout="5000"; 
 	db=request.zos.queryobject;
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# 
 	WHERE site_active=#db.param(1)# and 
@@ -277,6 +277,7 @@ objCookies=GetResponseCookies(cfhttp);
 	objCookies.PHPSESSID=objCookies2.PHPSESSID.value;
 	objCookies.usertype="Paid-User";   */
 
+	arrError=[];
 	for(row in qSite){
 		// uncomment to force re-importing everything
 		//row.site_semrush_last_import_datetime="";
@@ -337,25 +338,35 @@ objCookies=GetResponseCookies(cfhttp);
 			 	}
 		 		application.zcore.functions.zDeleteFile(filePath); 
 		 		// TODO might need a field to configure local vs national for semrush
-		 		link="http://api.semrush.com/reports/v1/projects/#id#/tracking/?key=#request.zos.semrushAPIKey#&action=report&type=tracking_position_organic&display_limit=1000&display_offset=0&display_sort=0_pos_asc&date_begin=#dateformat(tempEndDate, "yyyymmdd")#&date_end=#dateformat(tempEndDate, "yyyymmdd")#&display_filter=&url=*.#site#%2F*&linktype_filter=2";
- 
-		 		//link="https://api.semrush.com/reports/tracking/?key=#request.zos.semrushAPIKey#&campaign_id=#id#&display_hash=&action=report&type=tracking_position_rankings_overview_organic&use_volume=national&date_begin=#dateformat(tempStartDate, "yyyymmdd")#&date_end=#dateformat(tempEndDate, "yyyymmdd")#&display_limit=1000000&display_filter=&display_tags=&display_sort=0_pos_asc&linktype_filter=2&url=*.#site#%2F*&export_columns=Ph%2CTg%2CDt%2CNq%2CCp&export=csv"; 
+		 		link="https://api.semrush.com/reports/v1/projects/#id#/tracking/?key=#request.zos.semrushAPIKey#&action=report&type=tracking_position_organic&display_limit=1000&display_offset=0&display_sort=0_pos_asc&date_begin=#dateformat(tempEndDate, "yyyymmdd")#&date_end=#dateformat(tempEndDate, "yyyymmdd")#&display_filter=&url=*.#site#%2F*&linktype_filter=2";  
  				fileName="#row.site_id#-semrush-#id#-keyword-report-#dateformat(tempEndDate, "yyyy-mm-dd")#.csv";
-				/* */
+				
+				/* 
+				rs=application.zcore.functions.zDownloadLink(link, 200, true); 
+				if(rs.success){
+					application.zcore.functions.zWriteFile(path&fileName, rs.cfhttp.filecontent);
+				}else{
+					arrayAppend(arrError, 'Semrush download failed: #link#');
+					continue;
+				}*/ 
+				
 				http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#fileName#" redirect="yes" method="get" timeout="200"{
-					for(strCookie in objCookies){ 
+					/*for(strCookie in objCookies){ 
 						httpparam type="COOKIE" name="#strCookie#" value="#objCookies[ strCookie ]#";
-					}
-				}   
+					}*/
+				} 
 
 				if(left(cfhttp.statuscode,3) NEQ '200'){
+					arrayAppend(arrError, 'Semrush download failed: #link#');
+					continue; 
+					/*
 					savecontent variable="out"{
 						echo('#path##row.site_id#-semrush-keyword-report.csv<br>');
 						echo('<h2>semrush.com keyword report download failed.<br>url: #link#</h2>');
 						echo('Have to figure out how to make display_hash format');
 						writedump(cfhttp);
 					}
-					throw(out);
+					throw(out);*/
 				}  
 				application.semrushImportStatus=row.site_domain&" | "&fileName;
 				ts={
@@ -389,6 +400,9 @@ objCookies=GetResponseCookies(cfhttp);
 				//echo("On the test server, we only run one import per site.<br>");	break;
 			}
 		} 
+	}
+	if(arrayLen(arrError) NEQ 0){
+		throw(arrayToList(arrError, "<br>"));
 	}
 	echo('done'); 
 	structdelete(application, 'semrushImportStatus');

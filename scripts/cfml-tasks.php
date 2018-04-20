@@ -245,6 +245,7 @@ $taskLogPathScheduler=get_cfg_var("jetendo_share_path")."task-log/scheduler.txt"
 
 @mkdir($taskLogPath, 0700);
 $arrTask=getTasks();
+ 
 $arrSchedule=array();
 $arrScheduleMap=array();
 if(file_exists($taskLogPathScheduler)){
@@ -322,7 +323,7 @@ for($i=0;$i<count($arrRun);$i++){
 	if($isTestServer){
 		echo " this is test server, skipping task\n";
 	}else{
-		$phpCmd=$script.escapeshellarg($task->url)." ".escapeshellarg($task->logName).$background;
+		$phpCmd=$script.escapeshellarg($task->url)." ".escapeshellarg($task->logName).$background; 
 		`$phpCmd`;
 	}
 }
