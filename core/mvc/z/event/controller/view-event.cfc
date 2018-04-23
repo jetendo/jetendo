@@ -35,7 +35,15 @@
 	for(row in qCalendar){
 		calendarLink=eventCom.getCalendarURL(row);
 	}
+
+
+	writeoutput('<div style="display:block; float:left; width:100%;"  id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;return=1">'); 
+	application.zcore.template.prependTag('pagetitle','<span style="display:inline;" id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;return=1">');
+	application.zcore.template.appendTag('pagetitle','</span>');  
+
 	</cfscript>  
+
+
 	
 	<cfif structkeyexists(form, 'print')>
 		<cfsavecontent variable="local.metaOutput">
@@ -134,6 +142,7 @@
 		ts.offset=0;
 		ts.limit=0;  
 		arrImage=request.zos.imageLibraryCom.displayImages(ts); 
+		/*
 		ts.layoutType="";
 		ts.output=false;
 		ts.size="1900x1080";
@@ -147,7 +156,7 @@
 			echo('>View larger images</a>');
 		}
 		echo('</div>');
-		application.zcore.functions.zSetupLightbox("zEventViewLightGallery");
+		application.zcore.functions.zSetupLightbox("zEventViewLightGallery");*/
 		echo('</div>');
 	}
 	if(application.zcore.imageLibraryCom.isBottomLayoutType(struct.event_image_library_layout)){
@@ -158,9 +167,8 @@
 		slideshowOutBottom="";
 	}
 	</cfscript>
-	
-
-	#slideshowOutTop#
+	 
+	#slideshowOutTop# 
 	<div class="zEventView1-container">
 		<cfif struct.event_description NEQ "">
 	
@@ -288,8 +296,8 @@
 				<div style="width:100%; float:left;padding-top:10px; padding-bottom:10px;"> <a href="https://maps.google.com/maps?q=#urlencodedformat(struct.event_address&", "&struct.event_city&", "&struct.event_state&" "&struct.event_zip&" "&struct.event_country)#" target="_blank">Launch In Google Maps</a></div>
 			</div>
 		</cfif>
-	</div>  
-	#slideshowOutBottom#
+	</div>   
+	#slideshowOutBottom# 
 	<div class="zEventView-buttons z-float">
 		<a href="#calendarLink#" class="zEventView1-backToCalendar">Back To Calendar</a>
 		<cfif application.zcore.user.checkGroupAccess("member") and application.zcore.adminSecurityFilter.checkFeatureAccess("Events", true)>
@@ -297,6 +305,9 @@
 		</cfif>
 	</div>
 	
+	<cfscript>
+	echo('</div>');
+	</cfscript>
  	
 </cffunction>
 </cfoutput>
