@@ -141,8 +141,12 @@
 		ts.crop=0;
 		ts.offset=0;
 		ts.limit=0;  
-		arrImage=request.zos.imageLibraryCom.displayImages(ts); 
-		/*
+		if(application.zcore.imageLibraryCom.isBottomLayoutType(struct.event_image_library_layout)){
+			ts.top=false;
+		}else{
+			ts.top=true;
+		}
+		arrImage=request.zos.imageLibraryCom.displayImages(ts);  
 		ts.layoutType="";
 		ts.output=false;
 		ts.size="1900x1080";
@@ -156,7 +160,7 @@
 			echo('>View larger images</a>');
 		}
 		echo('</div>');
-		application.zcore.functions.zSetupLightbox("zEventViewLightGallery");*/
+		application.zcore.functions.zSetupLightbox("zEventViewLightGallery"); 
 		echo('</div>');
 	}
 	if(application.zcore.imageLibraryCom.isBottomLayoutType(struct.event_image_library_layout)){
