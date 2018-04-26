@@ -2207,10 +2207,14 @@ leadchart
 			fs[field.label]=field.value;
 		}
 		label=application.zcore.functions.zLimitStringLength(fs.tracking_label, 60);
+		source=application.zcore.functions.zLimitStringLength(fs.source, 60);
+		if(label EQ ""){
+			label=source;
+		}
 		if(not structkeyexists(request.leadData.phoneGroupOffset, label)){
 			request.leadData.phoneGroupOffset[label]=count;
 			request.leadData.phoneGroup[count]={
-				label:label,
+				label:label, 
 				count:0
 			};
 		}
@@ -2503,7 +2507,7 @@ track_user_first_page
 					echo(numberformat(c.count));
 					echo(' calls</td>');
 
-					if(c.label EQ ""){
+					if(c.label EQ ""){ 
 						echo('<td style=" padding-left:10px;">(No Label)</td>');
 					}else{
 						echo('<td style=" padding-left:10px;">#c.label#</td>');
@@ -2554,20 +2558,22 @@ track_user_first_page
 					</tr>');
 				rowCount+=3;
 				for(row in qTrack){
-					echo('<tr>
-						<td>#row.track_user_source#</td>
-						<td>#row.count#</td>
-					</tr>');
-
-					rowCount++;
+					if(row.count NEQ 0){
+						echo('<tr>
+							<td>#row.track_user_source#</td>
+							<td>#row.count#</td>
+						</tr>'); 
+						rowCount++;
+					}
 				}
 				for(row in qTrack2){
-					echo('<tr>
-						<td>Organic Search</td>
-						<td>#row.count#</td>
-					</tr>');
-
-					rowCount++;
+					if(row.count NEQ 0){
+						echo('<tr>
+							<td>Organic Search</td>
+							<td>#row.count#</td>
+						</tr>');
+						rowCount++;
+					}
 				}
 				echo('</table>');
 			}
