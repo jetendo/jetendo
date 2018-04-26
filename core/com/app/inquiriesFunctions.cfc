@@ -700,7 +700,12 @@
 					</cfif></th>
 					<td style="#tdstyle#">
 						<cfscript>
-						contentIdList="'"&replace(replace(application.zcore.functions.zso(t,'content_id'),"'","","ALL"),",","','","ALL")&"'";
+						arrId=listToArray(application.zcore.functions.zso(t,'content_id'), ",");
+						arrSQLId=[];
+						for(id in arrId){
+							arrayAppend(arrSQLID, "'"&application.zcore.functions.zEscape(id)&"'");
+						}
+						contentIdList=arraytoList(arrSQLID, ",");
 						db.sql="SELECT * FROM #db.table("content", request.zos.zcoreDatasource)# content 
 						WHERE content.site_id =#db.param(request.zOS.globals.id)# and 
 						content_id IN (#db.trustedSQL(contentIdList)#)  and 

@@ -2738,5 +2738,21 @@ if(linkCount){
 	</cfscript>
 </cffunction>
 
+
+<!--- application.zcore.functions.zGetGoogleMapsAPIKey(); --->
+<cffunction name="zGetGoogleMapsAPIKey" localmode="modern" output="no" returntype="any"> 
+	<cfscript> 
+	if(request.zos.globals.googleMapsApiKey NEQ ""){
+		return request.zos.globals.googleMapsApiKey;
+	}else if(right(request.zos.globals.domain, len(request.zos.productionTestDomain)) EQ request.zos.productionTestDomain){
+		return request.zos.googleMapsApiServerKeyTestDomain; 
+	}else if(right(request.zos.globals.domain, len(request.zos.testDomain)) EQ request.zos.testDomain){
+		return request.zos.googleMapsApiServerKeyTestDomain;   
+	}else{
+		return "";
+	}
+	</cfscript>
+</cffunction>
+
 </cfoutput>
 </cfcomponent>
