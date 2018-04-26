@@ -85,6 +85,8 @@
 		},{
 			label:'Last Updated'
 		},{
+			label:'Status'
+		},{
 			label:'Type'
 		},{
 			label:'Admin'
@@ -128,6 +130,15 @@
 		application.zcore.skin.includeCSS("/z/font-awesome/css/font-awesome.min.css");
 		application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
 
+	</cfscript>
+</cffunction>
+
+<cffunction name="isTicketManager" localmode="modern" access="public">
+	<cfscript>
+	if(structkeyexists(request, 'customTicketAllowLeadTypes')){
+		return true;
+	}
+	return false;
 	</cfscript>
 </cffunction>
 
@@ -204,6 +215,32 @@
 	qCheck = db.execute("qCheck");  
 
 
+	db.sql="select * from #db.table("inquiries_status", request.zos.zcoreDatasource)# WHERE 
+	inquiries_status_id = #db.param(form.inquiries_status_id)#  and 
+	inquiries_status_deleted=#db.param(0)# ";
+	qStatus=db.execute("qStatus");
+	if(qCheck.recordcount EQ 0){
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"Invalid inquiry"}); 
+	}
+	if(qStatus.recordcount EQ 0){
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"Invalid status"}); 
+	} 
+	if(not isTicketManager()){
+		// prevent ticket owner from changing status.
+		form.inquiries_status_id=qCheck.inquiries_status_id;
+		if(qCheck.inquiries_email EQ request.zsession.user.email){
+			closedStatus={
+				8:true,
+				4:true,
+				5:true,
+				7:true
+			};
+			if(structkeyexists(closedStatus, qCheck.inquiries_status_id)){
+				// reopen the closed lead because the customer replied to it.
+				form.inquiries_status_id=2;
+			}
+		}
+	}
 	// form validation struct
 	myForm.inquiries_id.required = true;
 	myForm.inquiries_id.friendlyName = "Inquiry ID";
@@ -213,6 +250,7 @@
 		application.zcore.status.setStatus(Request.zsid, false,form,true); 
 		application.zcore.status.displayReturnJson(Request.zsid);
 	}
+
 	if(backupStatusId EQ 4 or backupStatusId EQ 5 or backupStatusId EQ 7 or backupStatusId EQ 8){		
 		// ignore validation
 	}else if(application.zcore.functions.zso(form, 'inquiries_feedback_subject') EQ ''){
@@ -225,7 +263,7 @@
 	form.site_id = request.zOS.globals.id; 
 
 	savecontent variable="customNote"{
-		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+		//echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
 		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
 		<h3>#form.inquiries_feedback_subject#</h3>
 		#form.inquiries_feedback_comments#');
@@ -341,9 +379,57 @@
 				inquiries_feedback_message_json:"", 
 				inquiries_feedback_draft:0,
 				inquiries_feedback_download_key:"",
-				inquiries_feedback_type:0 // 0 is private note, 1 is email
+				inquiries_feedback_type:1 // 0 is private note, 1 is email
 			}
 		} 
+
+		fromUser=request.zsession.user.first_name&" "&request.zsession.user.last_name;
+		if(trim(fromUser) EQ ""){
+			fromUser=request.zsession.user.email;
+		}
+
+		ts={};
+		ts.subject=form.inquiries_feedback_subject;
+		savecontent variable="output"{
+			echo('#application.zcore.functions.zHTMLDoctype()#
+			<head>
+			<meta charset="utf-8" />
+			<title></title>
+			</head>
+			
+			<body>
+				<p>There was a reply to ticket ###form.inquiries_id#:</p>
+				<p>From: #fromUser#</p>
+				<p>Status: #qStatus.inquiries_status_name#</p>
+				<p>Subject: #form.inquiries_feedback_subject#</p>
+				<p>Message: #form.inquiries_feedback_comments#</p>
+				<h2><a href="/z/event/admin/manage-user-inquiries/userView?inquiries_id=#form.inquiries_id#">Login to View or Reply to Ticket</a></h2>
+
+				<p>This email was sent from the web site:<br /><a href="#request.zos.globals.domain#">#request.zos.globals.domain#</a></p>');
+				
+
+			echo('</body>
+			</html>');
+		}
+		ts.html=output;
+		if(structkeyexists(request, 'ticketFromEmail')){
+			ts.from=request.ticketFromEmail;
+		}else{
+			ts.from=request.fromEmail; 
+		}
+
+		ts.to=qCheck.inquiries_email;
+		if(structkeyexists(request, 'ticketFromEmail')){
+			ts.cc=request.ticketFromEmail;
+		}else{
+			ts.cc=request.fromEmail; 
+		} 
+		rCom=application.zcore.email.send(ts);
+		if(rCom.isOK() EQ false){
+			rCom.setStatusErrors(request.zsid);
+			application.zcore.functions.zstatushandler(request.zsid);
+			application.zcore.functions.zabort();
+		}
 
 		// build email html  
 		inquiries_feedback_id=application.zcore.functions.zInsert(tsFeedback); 
@@ -465,6 +551,27 @@
 					</cfscript> 
 				</td>
 			</tr>
+			<cfif isTicketManager()>
+				<tr>
+					<th>Status:</th>
+					<td>
+						<cfscript> 
+						db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# inquiries_status 
+						WHERE inquiries_status_deleted = #db.param(0)# and 
+						inquiries_status_id <> #db.param(1)# 
+						ORDER BY inquiries_status_name ";
+						qInquiryStatus=db.execute("qInquiryStatus");
+						selectStruct = StructNew();
+						selectStruct.hideSelect=true;
+						selectStruct.name = "inquiries_status_id";
+						selectStruct.query = qInquiryStatus;
+						selectStruct.queryLabelField = "inquiries_status_name";
+						selectStruct.queryValueField = 'inquiries_status_id';
+						application.zcore.functions.zInputSelectBox(selectStruct); 
+						</cfscript> 
+					</td>
+				</tr>
+			</cfif>
 		</table>
 		<cfif form.method EQ "view" or form.method EQ "userView">
 			<div class="z-float z-p-10 z-bg-white z-index-3">
@@ -852,7 +959,7 @@
 	<cfscript>
 	db=request.zos.queryObject; 
 	savecontent variable="customNote"{
-		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
+		//echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
 		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
 		<h3>#form.inquiries_feedback_subject#</h3>
 		#form.inquiries_feedback_comments#');
@@ -1091,6 +1198,7 @@
 		echo('<input type="text" name="inquiries_last_name" value="#htmleditformat(form.inquiries_last_name)#" />');
 	}
 	arrayAppend(fs, {label:'Last Name', field:field}); 
+
 
 	savecontent variable="field"{
 		echo('<input type="text" name="inquiries_email" value="#htmleditformat(form.inquiries_email)#" />');
@@ -1407,6 +1515,14 @@
 	arrayAppend(columns, {field: row.inquiries_phone1});  
 	arrayAppend(columns, {field: DateFormat(row.inquiries_datetime, "m/d/yy")&" "&TimeFormat(row.inquiries_datetime, "h:mm tt")}); 
 	arrayAppend(columns, {field: DateFormat(row.inquiries_updated_datetime, "m/d/yy")&" "&TimeFormat(row.inquiries_updated_datetime, "h:mm tt")}); 
+
+	savecontent variable="field"{
+		echo(variables.statusName[row.inquiries_status_id]);
+		if(row.inquiries_spam EQ 1){
+			echo(', <strong>Marked as Spam</strong>');
+		}
+	}
+	arrayAppend(columns, {field: field});  
 	savecontent variable="field"{
 		if(structkeyexists(variables.typeNameLookup, row.inquiries_type_id&"|"&row.inquiries_type_id_siteIdType)){
 			echo(variables.typeNameLookup[row.inquiries_type_id&"|"&row.inquiries_type_id_siteIdType]);
@@ -1432,7 +1548,7 @@
 		displayAdminMenu(ts);
 
 	}
-	arrayAppend(columns, {field: field, class:"z-manager-admin", style:"width:200px; max-width:100%;"});
+	arrayAppend(columns, {field: field, class:"z-manager-admin", style:"width:60px; max-width:100%;"});
 	</cfscript> 
 </cffunction>
 
