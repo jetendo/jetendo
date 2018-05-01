@@ -350,12 +350,17 @@ objCookies=GetResponseCookies(cfhttp);
 					continue;
 				}*/ 
 				
-				http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#fileName#" redirect="yes" method="get" timeout="200"{
-					/*for(strCookie in objCookies){ 
-						httpparam type="COOKIE" name="#strCookie#" value="#objCookies[ strCookie ]#";
-					}*/
-				} 
-
+				for(g1=1;g1 <= 3;g1++){
+					http url="#link#" useragent="#variables.userAgent#" path="#path#" file="#fileName#" redirect="yes" method="get" timeout="200"{
+						/*for(strCookie in objCookies){ 
+							httpparam type="COOKIE" name="#strCookie#" value="#objCookies[ strCookie ]#";
+						}*/
+					} 
+					if(left(cfhttp.statuscode,3) EQ '200'){
+						break;
+					}
+					sleep(5000);
+				}
 				if(left(cfhttp.statuscode,3) NEQ '200'){
 					arrayAppend(arrError, 'Semrush download failed: #link#');
 					continue; 
