@@ -302,6 +302,8 @@ this.inited=false;
 						addRowFailCount++;
 						if(addRowFailCount GTE 10){
 							fileClose(request.zos.idxFileHandle);
+							throw(request.addRowErrorMessage);
+							abort;
 							application.zcore.functions.zRenameFile(request.zos.sharedPath&this.optionstruct.filepath, request.zos.sharedPath&this.optionstruct.filepath&"-corrupt-"&dateformat(now(),'yyyy-mm-dd')&'-'&timeformat(now(),'HH-mm-ss'));	
 							if(fileexists(request.zos.sharedPath&this.optionstruct.filepath&"-imported")){
 								application.zcore.functions.zCopyFile(request.zos.sharedPath&this.optionstruct.filepath&"-imported", request.zos.sharedPath&this.optionstruct.filepath);	
@@ -418,7 +420,13 @@ this.inited=false;
 		}
 		ts.arrData[request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset]=ts.listing_id;
 	}catch(Any excpt){ 
-		request.addRowErrorMessage="MLS Import Add Row failed for mls_id, "&this.optionstruct.mls_id&". Length: #arraylen(ts.arrData)# | ID Offset: #request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset# | The column header row might be missing. Current file path: "&this.optionstruct.filePath&". Reverted to previous day's file to avoid data loss.";
+		savecontent variable="out"{
+			if(request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset EQ 0){
+				echo("Couldn't find id column, you must fix the column name at top of mls-provider file and reset app scope.");
+			}
+			writedump(excpt);
+		}
+		request.addRowErrorMessage="MLS Import Add Row failed for mls_id, "&this.optionstruct.mls_id&". Length: #arraylen(ts.arrData)# | ID Offset: #request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset# | The column header row might be missing. Current file path: "&this.optionstruct.filePath&". Reverted to previous day's file to avoid data loss."&out;
 			return false;
 			
 	}
