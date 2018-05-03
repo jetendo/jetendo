@@ -898,8 +898,8 @@ notes: optionally delete an existing image that has a field in the specified dat
             }
         } 
         try{ 
-            newWidth = listGetAt(arrSizes[n],1,"x");
-            newHeight = listGetAt(arrSizes[n],2,"x");
+            newWidth = int(listGetAt(arrSizes[n],1,"x"));
+            newHeight = int(listGetAt(arrSizes[n],2,"x"));
         }catch(Any excpt){
             application.zcore.template.fail("resizeImage: size, `#arrSizes[n]#`, is an invalid format.  You must specify your sizes like 140x120 (widthxheight).",true);
         } 

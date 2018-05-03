@@ -1454,7 +1454,7 @@ function getImageMagickConvertApplyMask($a){
 	$compressQuality=93;
 	$ext=strtolower(substr($absImageOutputPath, -4));
 	if($ext == '.jpg' || $ext == '.jpeg'){
-		$cmd2="/usr/bin/identify -format '%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$cmd2="/usr/bin/identify -quiet -format '%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=trim(`$cmd2`);
 		if(is_numeric($r)){
 			$compressQuality=min($compressQuality, intval($r));
@@ -1593,7 +1593,7 @@ function getImageMagickConvertResize($a){
 	$compressQuality=93;
 
 	if($ext == '.jpg' || $ext == '.jpeg'){
-		$cmd2="/usr/bin/identify -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$cmd2="/usr/bin/identify -quiet -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=`$cmd2`; 
 		$arrR=explode("|", trim($r));
 		$currentWidth=$arrR[0];
@@ -1715,7 +1715,7 @@ function saveFaviconSet($a){
 		$found=true;
 	} 
 	if($found){
-		$cmd="/usr/bin/identify -format '%w,%h,%[colorspace],%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$cmd="/usr/bin/identify -quiet -format '%w,%h,%[colorspace],%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=`$cmd`;
 
 		$a=explode(",", trim($r));
@@ -1816,7 +1816,7 @@ function getImageMagickIdentify($a){
 			$found=true;
 		}
 		if($found){
-			$cmd	= "/usr/bin/identify -format '%w|%h|%[colorspace]|%Q|%[exif:orientation]|%[exif:GPSLatitude],%[exif:GPSLatitudeRef]|%[exif:GPSLongitude],%[exif:GPSLongitudeRef]|%[exif:GPSAltitude]|%[exif:DateTime]' ".escapeshellarg($path)." 2>&1";
+			$cmd	= "/usr/bin/identify -quiet -format '%w|%h|%[colorspace]|%Q|%[exif:orientation]|%[exif:GPSLatitude],%[exif:GPSLatitudeRef]|%[exif:GPSLongitude],%[exif:GPSLongitudeRef]|%[exif:GPSAltitude]|%[exif:DateTime]' ".escapeshellarg($path)." 2>&1";
 			$r		= `$cmd`;
 			//$a	= explode("|", trim($r));
 			$a 		= preg_split("/[|]/",trim($r));
