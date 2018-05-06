@@ -446,11 +446,11 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_sub_type_id=","&local.listing_sub_type_id&",";
 		rs.listing_style=","&local.listing_style&",";
 		rs.listing_view=","&local.listing_view&",";
-		rs.listing_lot_square_feet=ts["Lot Size Square Feet"];
-		rs.listing_square_feet=ts["Building Area Total"];
+		rs.listing_lot_square_feet=trim(replace(ts["Lot Size Square Feet"], ",", "", "all"));
+		rs.listing_square_feet=trim(replace(ts["Building Area Total"], ",", "", "all"));
 		rs.listing_subdivision=local.listing_subdivision;
 		rs.listing_year_built=ts["year built"];
-		rs.listing_office=ts["List Office MLS ID"];
+		rs.listing_office=ts["List Office MLS ID"]; 
 		rs.listing_agent=ts["List Agent MLS ID"];
 		rs.listing_latitude=curLat;
 		rs.listing_longitude=curLong;
