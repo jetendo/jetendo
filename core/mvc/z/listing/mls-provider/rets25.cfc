@@ -447,7 +447,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_style=","&local.listing_style&",";
 		rs.listing_view=","&local.listing_view&",";
 		rs.listing_lot_square_feet=ts["Lot Size Square Feet"];
-		rs.listing_square_feet=ts["Living Area"];
+		rs.listing_square_feet=ts["Building Area Total"];
 		rs.listing_subdivision=local.listing_subdivision;
 		rs.listing_year_built=ts["year built"];
 		rs.listing_office=ts["List Office MLS ID"];
@@ -525,7 +525,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 			}
 		}
 			idx["agentName"]=arguments.ss["rets25_listagentfullname"];
-			idx["agentPhone"]=arguments.ss["RETS25_LISTAGENTDIRECTWORKPHONE"];
+			idx["agentPhone"]=arguments.ss["rets25_ListAgentDirectPhone"];
 			idx["agentEmail"]=arguments.ss["rets25_listagentemail"];
 			idx["officeName"]=arguments.ss["rets25_listofficename"];
 			idx["officePhone"]=arguments.ss["RETS25_LISTOFFICEPHONE"];
