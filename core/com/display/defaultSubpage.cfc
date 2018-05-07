@@ -30,6 +30,11 @@ ts={
 	sidebarEnabled:true, // set to false to turn off sidebar for certain pages
 	sidebarTopHTML:"Top", // optional, can be empty string
 	sidebarBottomHTML:"Bottom" // optional, can be empty string
+	/*
+	sectionHeaderEnabled:true,
+	afterSectionHTML:"", 
+	enableContentContainer:true
+	*/
 }
 if(currentSection.success){
 	ts.sectionHeading=currentSection.group["Section Heading"]; // optional, can be empty string

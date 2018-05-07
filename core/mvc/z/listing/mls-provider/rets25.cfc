@@ -244,17 +244,17 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		arrS=listtoarray(ts['Special Listing Conditions'],",");
 		for(i=1;i LTE arraylen(arrS);i++){
 			c=trim(arrS[i]);
-			if(c EQ "Short Sale"){
+			if(c EQ "SHORT"){
 				s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["short sale"]]=true;
 				break;
 			}
 			// Special Sale Provision
-			if(c EQ "Real Estate Owned"){
+			if(c EQ "REAL"){
 				s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["bank owned"]]=true;
 				break;
 			}
 		}
-		if(ts['Realtor Info'] CONTAINS "In foreclosure"){
+		if(ts['Realtor Info'] CONTAINS "FORECL"){
 			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
 		} 
 		if(ts['New Construction YN'] EQ "Y"){
