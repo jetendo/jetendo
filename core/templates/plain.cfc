@@ -61,7 +61,7 @@
 	<div style="float:none;">
 	#tagStruct.content ?: ""#
 	#tagStruct.scripts ?: ""#</div>
-	<cfif structkeyexists(request, 'zDisableTrackingCode')>
+	<cfif not structkeyexists(request, 'zDisableTrackingCode')>
 		#application.zcore.functions.zvarso('Visitor Tracking Code')#
 	</cfif>
 	</body>

@@ -673,6 +673,39 @@
 						<th style="width:130px; text-align:left;">Status:</th>
 						<td>#qinquiry.inquiries_status_name#</td>
 					</tr>
+					<cfif qinquiry.inquiries_comments NEQ "">
+						<tr>
+							<th style="width:130px; text-align:left;">Comments:</th>
+							<td>#qinquiry.inquiries_comments#</td>
+						</tr>
+					</cfif>
+					<cfif trim(qinquiry.inquiries_custom_json) NEQ ''>
+						<cfscript>
+						var jsonStruct=deserializejson(qinquiry.inquiries_custom_json);
+						for(var i=1;i LTE arrayLen(jsonStruct.arrCustom);i++){
+							if(jsonStruct.arrCustom[i].value EQ ""){
+								continue;
+							}
+							if(len(jsonStruct.arrCustom[i].label) GT 30){
+								writeoutput('
+								<tr>
+									<th style="width:130px; vertical-align:top;text-align:left;">&nbsp;</th>
+									<td>
+									<p>'&htmleditformat(jsonStruct.arrCustom[i].label)&'</p>
+									<p>'&replace(jsonStruct.arrCustom[i].value, chr(10), "<br>", "all")&'</p></td>
+								</tr>
+								');	
+							}else{
+								writeoutput('
+								<tr>
+									<th style="width:130px;  vertical-align:top;text-align:left;">'&htmleditformat(jsonStruct.arrCustom[i].label)&'</th>
+									<td>'&replace(jsonStruct.arrCustom[i].value, chr(10), "<br>", "all")&'</td>
+								</tr>
+								');	
+							}
+						}
+						</cfscript>
+					</cfif>
 				</tbody>
 			</table>		
 		</div>	
