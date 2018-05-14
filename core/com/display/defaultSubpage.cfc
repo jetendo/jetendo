@@ -197,6 +197,9 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 			"URL":""
 		};
 	}
+	if(ss.sectionHeading NEQ ""){
+		ss.currentSection.section["Section Heading"]=ss.sectionHeading;
+	}
 	section=ss.currentSection.section;
 	sectionImage=ss.defaultSectionImage;
 	sectionMobileImage=ss.defaultSectionMobileImage;

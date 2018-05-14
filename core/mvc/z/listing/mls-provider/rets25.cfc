@@ -145,6 +145,9 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		
 		
 		ts["list price"]=replace(ts["list price"],",","","ALL");
+		if(ts["list price"] EQ "" or ts["list price"] EQ "0"){
+			ts["list price"]=replace(ts["current price"],",","","ALL");
+		}
 		
 		local.listing_subdivision="";
 		if(local.listing_subdivision EQ ""){
@@ -200,14 +203,15 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		moreTypes=this.listingLookupNewId("listing_sub_type",ts['Property Sub Type']);
 		if(local.listing_sub_type_id NEQ "" and moreTypes NEQ ""){
 			local.listing_sub_type_id&=","&moreTypes;
-		}
+		}else{
+			local.listing_sub_type_id=moreTypes;
+		}  
 		local.listing_type_id=this.listingLookupNewId("listing_type",ts['property type']);
-
 		
 
 		rs=getListingTypeWithCode(ts["property type"]);
 		
-		if(ts["Internet Address Display YN"] EQ "N"){
+		if(ts["Internet Address Display YN"] EQ "N" or ts["Internet Address Display YN"] EQ "0"){
 			ts["street ##"]="";
 			ts["street name"]="";
 			ts["street type"]="";
@@ -257,7 +261,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		if(ts['Realtor Info'] CONTAINS "FORECL"){
 			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
 		} 
-		if(ts['New Construction YN'] EQ "Y"){
+		if(ts['New Construction YN'] EQ "Y" or ts['New Construction YN'] EQ "1"){
 			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["new construction"]]=true;
 		}
 		if(ts.rets25_propertytype EQ "RLSE"){
@@ -407,14 +411,14 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 				}
 			}
 		}
-		if(ts["Water View YN"] EQ "Y"){
+		if(ts["Water View YN"] EQ "Y" or ts["Water View YN"] EQ "1"){
 			arrayappend(arrT2,243);
 		} 
 		local.listing_view=arraytolist(arrT2);
 		
 
 		local.listing_pool=0;
-		if(ts["Pool Private YN"] EQ "Y"){
+		if(ts["Pool Private YN"] EQ "Y" or ts["Pool Private YN"] EQ "1"){
 			local.listing_pool=1;	
 		}
 

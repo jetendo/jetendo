@@ -40,7 +40,15 @@ add option for search indexing for search table.
 		},
 		customInsertUpdate:false, // true disables the normal zInsert/zUpdate calls, so you can implement them in afterInsert and afterUpdate instead
 		methods:{}, // function receives struct named row
-		fileFields:[],
+		fileFields:[
+		/*
+		{ 
+			field:"field_file", 
+			displayPath:"",
+			uploadPath:""
+		}
+		*/
+		],
 		imageFields:[
 		/*
 		{
