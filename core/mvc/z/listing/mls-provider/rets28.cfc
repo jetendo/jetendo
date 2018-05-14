@@ -12,7 +12,7 @@ if(request.zos.istestserver){
 this.caseSensitiveLookup=true;
 this.useRetsFieldName="system";
 this.arrTypeLoop=[];//["A","B","C","D", "F", "G"];
-this.arrColumns=listtoarray("accessandtransportation,additionalrooms,age,agedescription,agentstatus,annualrent,appliances,applicationfeeamount,apxbuildingsqft,asisconditionyn,assessedvaluation,assessmentdesc,assessmentfeeamount,assessmentfeeperiod,assocapprovalrequiredyn,associationfee,associationfeecovers,associationfeeperiod,availablewithlease,avmyn,bathspartial,bathstotal,bedroom1length,bedroom1width,bedroom2length,bedroom2width,bedroom3length,bedroom3width,bedroom4length,bedroom4width,bedrooms,betweenus1andriver,businessname,businessonlyyn,ceilingheight,city,clearedynp,clearspan,closedate,closeprice,commentaryyn,commercialclass,communityname,communityover55yn,complexname,complexunits,confidentiallistingyn,construction,constructionmaterial,contractdate,cooling,county,currentlyleasedyn,dateavailable,datechange,dateestimatedcompletion,datenewlisting,streetnoidx,datepricechange,diningroomlength,diningroomwidth,direction,directions,dishwashers,displayflagaddress,displayflaglisting,documentsanddisclosures,doorfaces,dryers,electric,electricalexpense,electricitymeters,electricmeters,employees,equipmentandappliances,estimatevalueyn,exteriorfeatures,exteriorfinish,familyroomlength,familyroomwidth,floor,floorlocation,floornumber,floors,floorsperunit,floridaroomlength,floridaroomwidth,freestandingyn,furnishedyn,futurelanduse,garage,garageandcarstorage,garagecarportspaces,gasexpense,gasmeters,generictextfield1,blogyn,generictextfield2,grossincome,groundfloorbedroomyn,groundsexpense,harbormasteryn,heating,heatingandac,hoamaintfees,hoayn,idx,incluinmonthlyleaseamnt,insidefeatures,insuranceexpense,interiorfeatures,interiorimprovements,kitchenlength,kitchenwidth,landstyle,landtype,laundrylength,laundrywidth,incluinsale,leaseagent,leaseboard,leasefirm,leaseoffice,leaseoption,leaseprovisions,leaseterms,legaldescription,listagentagentid,listdate,listingagentid,listingarea,listingboardid,listingdetail,listingfirmid,listingid,listingofficeid,listingstatus,listingtype,listofficeofficeid,listprice,livingarea,livingroomlength,livingroomwidth,loadingdocks,locationdescription,lotsize,lotsizearea,maintefeecovers,maintenanceexpense,maintfeecovers,managementexpense,marinaamenities,masterbath,maxratedoccupancy,microwaves,miscellaneous,miscellaneousn,modificationtimestamp,monitorvhf16,monthlyrent,moorage,nearhighwayyn,netincome,nodrivebeachyn,occupancy,officeidx,officesqft,officestatus,openhouseaid,openhousedt,openhouserem,openhousetm,openhouseyn,operatingexpense,otheravailblefeatures,otherexpense,otherroom1length,otherroom1name,otherroom1width,otherroom2length,otherroom2name,overheaddoornumber,ownername,ownershiprequired,ownershiprequiredyn,parcelnumber,parking,parkingavailable,parkingspaceyn,parkingtotal,petfeeamount,petsynr,photocode,photocount,photoframenumber,photomodificationtimestamp,photorollnumber,pool,pooldescription,poolfeatures,poolpresent,porchlength,porchwidth,possession,postalcode,pricechangeyn,pricesqft,projectphase,propertyformat,propertysubtype,propertytype,publicremarks,ranges,refrigerators,rentalamount,rentalpropertytype,rentalrestrictions,rentalyn,rentincludes,roadfrontage,roof,security,securityandmisc,securitydepositamount,sellerconcessions,sewer,siteimprovements,slipamenities,slipdraft,slipsize,slipstorageyn,specialcontingenciesapplyyn,splityn,sqftlivingarea,sqfttotal,stateorprovince,stories,streetname,streetnumber,style,stylefeatures,subdivision,surveyyn,tangibletaxes,taxamount,taxyear,totalrooms,totalunits,totsqftarea,type,typestreet,unit1baths,unit1halfbaths,unit1monthlyrent,unit1rooms,unit1sqft,unit2baths,unit2halfbaths,unit2monthlyrent,unit2rooms,unit2sqft,unit3baths,unit3halfbaths,unit3monthlyrent,unit3rooms,unit3sqft,unit4baths,unit4halfbaths,unit4monthlyrent,unit4rooms,unit4sqft,unitnumber,useandpossibleuse,utilitiesonsite,utlitiesandfuel,virtualtoururl,virtualtouryn,washerdryerhookupsonly,washers,wastepumpyn,streetnameidx,water,waterandsewer,waterfeatures,watermainsize,watermeters,waterother,watersewerexpense,watertype,windows,windowsandwindowtrtmnt,windowtrtmnt,yearbuilt,zoning",",");
+this.arrColumns=listtoarray("additionalrooms,age,agedescription,agentstatus,annualrent,appliances,applicationfeeamount,apxbuildingsqft,asisconditionyn,assessedvaluation,assessmentdesc,associationfee,associationfeecovers,associationfeeperiod,avmyn,bathspartial,bathstotal,bedroom1length,bedroom1width,bedroom2length,bedroom2width,bedroom3length,bedroom3width,bedroom4length,bedroom4width,bedrooms,betweenus1andriver,blogyn,businessname,ceilingheight,city,clearedynp,closedate,closeprice,colistingagentid,colistingagentname,colistingofficeid,colistingofficename,commentaryyn,commercialclass,communityover55yn,complexname,complexunits,confidentiallistingyn,construction,constructionmaterial,cooling,county,currentlyleasedyn,dateavailable,datechange,datecontingency,dateestimatedcompletion,datenewlisting,datewithdrawn,daysonmarket,diningroomlength,diningroomwidth,direction,directions,dishwashers,displayflagaddress,displayflaglisting,documentsanddisclosures,doorfaces,dryers,electric,electricalexpense,electricitymeters,electricmeters,employees,equipmentandappliances,estimatevalueyn,exteriorfeatures,exteriorfinish,familyroomlength,familyroomwidth,floor,floornumber,floors,floorsperunit,floridaroomlength,floridaroomwidth,freestandingyn,furnishedyn,futurelanduse,garage,garageandcarstorage,garagecarportspaces,gasexpense,gasmeters,generictextfield1,generictextfield2,grossincome,groundfloorbedroomyn,groundsexpense,heating,heatingandac,hoayn,idx,insidefeatures,insuranceexpense,interiorfeatures,kitchenlength,kitchenwidth,landstyle,landtype,latitude,laundrylength,laundrywidth,leaseagent,leaseboard,leasefirm,leaseoffice,leaseoption,leaseterms,legaldescription,listagentagentid,listdate,listingagentid,listingagentname,listingarea,listingboardid,listingdetail,listingfirmid,listingid,listingofficeid,listingstatus,listingtype,listofficeaffilliation,listofficeofficeid,listprice,livingarea,livingroomlength,livingroomwidth,loadingdocks,locationdescription,longitude,lotsize,lotsizearea,maintenanceexpense,maintfeecovers,managementexpense,masterbath,maxratedoccupancy,microwaves,middleschool,miscellaneous,miscellaneousn,modificationtimestamp,monthlyrent,nearhighwayyn,netincome,nodrivebeachyn,officeidx,officephone,officesqft,officestatus,openhouseaid,openhousedt,openhouserem,openhousetm,openhouseyn,operatingexpense,originallistingfirmname,otheravailblefeatures,otherexpense,otherroom1length,otherroom1name,otherroom1width,otherroom2length,otherroom2name,otherroom2width,overheaddoornumber,ownername,parcelnumber,parkingtotal,petfeeamount,petsynr,photocode,photocount,photoframenumber,photomodificationtimestamp,photorollnumber,pool,pooldescription,poolfeatures,poolpresent,porchlength,porchwidth,possession,postalcode,previouslistprice,pricesqft,propertysubtype,propertytype,publicremarks,ranges,refrigerators,rentalamount,rentalpropertytype,rentalyn,rentincludes,rentlow,roadfrontage,roof,saleagentagentid,saleagentname,saleofficename,saleofficeofficeid,securityandmisc,securitydepositamount,sewer,specialcontingenciesapplyyn,splityn,sqftlivingarea,sqfttotal,stateorprovince,statuschangedate,stories,streetname,streetnameidx,streetnoidx,streetnumber,style,stylefeatures,subdivision,surveyyn,tangibletaxes,taxamount,taxyear,totalrooms,totalunits,totsqftarea,type,typestreet,unit1baths,unit1halfbaths,unit1monthlyrent,unit1rooms,unit1sqft,unit2baths,unit2halfbaths,unit2monthlyrent,unit2rooms,unit2sqft,unit3baths,unit3halfbaths,unit3monthlyrent,unit3rooms,unit3sqft,unit4baths,unit4halfbaths,unit4monthlyrent,unit4rooms,unit4sqft,unitnumber,utlitiesandfuel,virtualtoururl,virtualtouryn,washerdryerhookupsonly,washers,water,waterandsewer,waterfeatures,watermainsize,watermeters,waterother,watersewerexpense,watertype,windows,windowsandwindowtrtmnt,windowtrtmnt,yearbuilt,zoning",",");
 this.arrFieldLookupFields=[];
 this.mls_provider="rets28";
 variables.resourceStruct=structnew();
@@ -120,6 +120,10 @@ variables.tableLookup=structnew();
 		}
 	}  
 	
+	if(ts['rets28_propertytype'] EQ 2){
+		ts['rets28_propertysubtype']='V';
+	}
+
 	this.price=ts["rets28_listprice"];
 	listing_price=ts["rets28_listprice"];
 	cityName="";
@@ -314,7 +318,7 @@ LookupMulti1C
 	tempTableLookup["R"]="ResidentialProperty"; //  Single Family Site Built
 
 	propertyTable=tempTableLookup[ts['rets28_propertysubtype']];
- 
+  
 	ts=this.convertRawDataToLookupValues(ts, propertyTable, '');
 	//writedump(propertyTable);
 	//writedump(ts);abort;
@@ -424,8 +428,8 @@ LookupMulti1C
 			}else{
 				t3={};
 				for(g=1;g LTE arraylen(arrRow);g++){
-					t3[arrColumn[g]]=trim(arrRow[g]);
-				} 
+					t3[trim(arrColumn[g])]=trim(arrRow[g]);
+				}  
 				t2[t3[variables.resourceStruct["office"].id]]=t3;
 			}
 		} 
@@ -587,10 +591,10 @@ LookupMulti1C
 	idx["officeEmail"]="";
 	if(structcount(currentOffice) NEQ 0){
 		idx["officePhone"]=currentOffice.rets28_officephone;
-		idx["officeCity"]=currentOffice.rets28_city;
-		idx["officeAddress"]=currentOffice.rets28_streetaddress;
-		idx["officeZip"]=currentOffice.rets28_postalcode;
-		idx["officeState"]=currentOffice.rets28_stateorprovince;
+		//idx["officeCity"]=currentOffice.rets28_city;
+		//idx["officeAddress"]=currentOffice.rets28_streetaddress;
+		//idx["officeZip"]=currentOffice.rets28_postalcode;
+		//idx["officeState"]=currentOffice.rets28_stateorprovince;
 		idx["officeEmail"]=currentOffice.rets28_email;
 	} 
 		
