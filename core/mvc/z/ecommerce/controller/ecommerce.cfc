@@ -828,6 +828,11 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	ts.site_id=form.site_id;
 	// arrayappend(ts.arrId,trim(form.ecommerce_config_category_url_id)); 
 	arrayappend(ts.arrId,trim(form.ecommerce_config_paypal_custom_ipn_url_id));
+
+	arrayappend(ts.arrId,trim(form.ecommerce_config_product_url_id));
+	arrayappend(ts.arrId,trim(form.ecommerce_config_category_url_id));
+	arrayappend(ts.arrId,trim(form.ecommerce_config_misc_url_id));
+	
 	rCom=application.zcore.app.reserveAppUrlId(ts); 
 	if(rCom.isOK() EQ false){
 		return rCom;
@@ -886,14 +891,6 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		echo('<input type="hidden" name="ecommerce_config_id" value="#form.ecommerce_config_id#" />
 		<table style="border-spacing:0px;" class="table-list">
 		<tr>
-		<th>Paypal Merchant ID:</th>
-		<td>');
-		ts = StructNew();
-		ts.name = "ecommerce_config_paypal_merchant_id";
-		application.zcore.functions.zInput_Text(ts);
-		echo('</td>
-		</tr>
-		<tr>
 		<th>Sandbox Enabled?</th>
 		<td>');
 		form.ecommerce_config_sandbox_enabled=application.zcore.functions.zso(form, 'ecommerce_config_sandbox_enabled',true);
@@ -936,7 +933,65 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		echo('</td>
 		</tr>');
 
+		
 		echo('<tr>
+		<th>Product URL ID:</th>
+		<td>');
+		writeoutput(application.zcore.app.selectAppUrlId("ecommerce_config_product_url_id", form.ecommerce_config_product_url_id, 15));
+		echo('</td>
+		</tr>');
+		
+		echo('<tr>
+		<th>Category URL ID:</th>
+		<td>');
+		writeoutput(application.zcore.app.selectAppUrlId("ecommerce_config_category_url_id", form.ecommerce_config_category_url_id, 15));
+		echo('</td>
+		</tr>');
+		
+		echo('<tr>
+		<th>Misc URL ID:</th>
+		<td>');
+		writeoutput(application.zcore.app.selectAppUrlId("ecommerce_config_misc_url_id", form.ecommerce_config_misc_url_id, 15));
+		echo('</td>
+		</tr>');
+		 
+		echo('
+
+		<tr>
+		<th colspan="2"><h2>Payment Integration</h2></th>
+		</tr>
+
+		<tr>
+		<th colspan="2"><h3>Stripe.com</h3></th>
+		</tr>
+		<tr>
+		<th>Secret Key:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_stripe_secret_key";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Public Key:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_stripe_public_key";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th colspan="2"><h3>Paypal.com</h3></th>
+		</tr>
+		<tr>
+		<th>Paypal Merchant ID:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_paypal_merchant_id";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
 		<th>Paypal IPN Failure Email List:</th>
 		<td>');
 		selectStruct = StructNew();
@@ -958,6 +1013,9 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		echo('</td>
 		</tr>');
 		
+
+
+
 		/*
 		<tr>
 		<th>Category URL ID</th>
