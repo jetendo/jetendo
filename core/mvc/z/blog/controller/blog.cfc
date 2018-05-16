@@ -5359,7 +5359,7 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 		site_id = #db.param(request.zos.globals.id)# 
 		ORDER BY blog_category_name ASC";
 		qCategories=db.execute("qCategories"); 
-		blogCategoryLookupStruct=[];
+		request.zos.blogCategoryLookupStruct={};
 		request.zos.arrBlogCategory=[];
 		first=true;
 		for(category in qCategories){
