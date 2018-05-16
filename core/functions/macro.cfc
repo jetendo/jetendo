@@ -346,6 +346,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 	}else{
 		return;	
 	}
+	request.zos.fullscreenMobileEnabled=true;
     </cfscript>
     <cfsavecontent variable="theMeta">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=<cfif arguments.scalable>yes<cfelse>no</cfif>" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style type="text/css">/* <![CDATA[ */ a, area {-webkit-touch-callout: none;}*{ -webkit-text-size-adjust: none; }/* ]]> */</style>

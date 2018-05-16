@@ -244,7 +244,7 @@ Google Analytics:
 	keywordLink="/z/inquiries/admin/google-oauth/keyword?accountType=analytics";
 	goalLink="/z/inquiries/admin/google-oauth/goal?accountType=analytics";
 	refreshLink="/z/inquiries/admin/google-oauth/refreshToken";
-	searchConsoleLink="/z/inquiries/admin/google-oauth/searchConsole?accountType=adwords";
+	searchConsoleLink="/z/inquiries/admin/google-oauth/searchConsole?accountType=analytics";
 	</cfscript>
 	<h3>Never run more then one api call at a time because Google will start failing and it will be pointless.  They will each take several minutes to finish.</h3>
 	<h2>Adwords API Calls</h2>

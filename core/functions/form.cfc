@@ -2666,10 +2666,10 @@ zInputSlider(ts);
 		</cfscript>
 <cfsavecontent variable="output">
 #local.tempRS.output#
+<div style="float:left; width:100%;" class="zSliderInputDiv">
 <div style="float:left; width:50%;"><input type="hidden" name="zInputHiddenValues#zValue#" id="zInputHiddenValues#zValue#" onchange="#arguments.ss.onchange#" value="" />
 <cfif arguments.ss.leftLabel NEQ "">#arguments.ss.leftLabel#</cfif>
 <input type="text" style="width:#arguments.ss.fieldWidth#px;" name="#arguments.ss.name#_label" id="#arguments.ss.name#_label" value="#htmleditformat(label1value)#" onkeyup="zExpShowUpdateBar(#zValue+6#, 'block');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" onclick="zCacheSliderValues[this.id]=this.value;this.value='';" onblur="if(this.value==''){this.value=zCacheSliderValues[this.id];} zExpShowUpdateBar(#zValue+6#, 'none');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" />
-
 <input type="hidden" name="#arguments.ss.name#" id="#arguments.ss.name#" value="#htmleditformat(selectedValue1)#" /> 
 
 </div>
@@ -2681,6 +2681,7 @@ zInputSlider(ts);
 <input type="hidden" name="#arguments.ss.name2#" id="#arguments.ss.name2#" value="#htmleditformat(selectedValue2)#" />
 
 <cfif arguments.ss.rightLabel NEQ "">#arguments.ss.rightLabel#</cfif></cfif>
+</div>
 </div><br style="clear:both;" />
 <div id="zInputSliderBox#zValue#" class="zSliderBgDiv" style="width:100%; overflow:hidden;">
 <div id="zInputDragBox1_#zValue#" style="z-index:1;width:10px; height:15px; cursor:pointer; text-align:center; float:left;margin-left:#marginLeft#px; "><img src="/z/a/images/slider.jpg" alt="Click and drag this slider" width="10" height="15" style="float:left;" /></div>

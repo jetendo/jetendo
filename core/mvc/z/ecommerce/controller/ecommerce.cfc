@@ -645,10 +645,16 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 			ts.children=structnew();
 			arguments.linkStruct["Ecommerce"]=ts;
 		}
-		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Orders") EQ false){
+		/*if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Orders") EQ false){
 			ts=structnew();
 			ts.featureName="Manager Orders";
 			ts.link="/z/ecommerce/admin/order/index";
+			arguments.linkStruct["Ecommerce"].children["Orders"]=ts;
+		}*/
+		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Orders") EQ false){
+			ts=structnew();
+			ts.featureName="Orders";
+			ts.link="/admin/order-admin/index";
 			arguments.linkStruct["Ecommerce"].children["Orders"]=ts;
 		}
 	}
@@ -954,6 +960,18 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		writeoutput(application.zcore.app.selectAppUrlId("ecommerce_config_misc_url_id", form.ecommerce_config_misc_url_id, 15));
 		echo('</td>
 		</tr>');
+
+		if(form.ecommerce_config_disable_physical_shipping EQ ""){
+			form.ecommerce_config_disable_physical_shipping=0;
+		}
+		
+		echo('<tr>
+		<th>Disable Physical Shipping?</th>
+		<td>');
+		writeoutput(application.zcore.functions.zInput_Boolean("ecommerce_config_disable_physical_shipping", form.ecommerce_config_disable_physical_shipping));
+		echo('</td>
+		</tr>');
+
 		 
 		echo('
 

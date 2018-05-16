@@ -17,6 +17,7 @@ add option for search indexing for search table.
 	ts={
 		// required
 		// optional
+		listViewHTML:"",
 		customAddMethods:{},
 		customEditMethods:{},
 		addListInsertPosition:"bottom",
@@ -427,6 +428,12 @@ a version of index list with divs for the table instead of <table>
 				</cfscript>
 			</div>
 		</div>
+
+		<cfif variables.listViewHTML NEQ "">
+			<div class="z-float">
+				#variables.listViewHTML#
+			</div>
+		</cfif>
 
 		<cfif arraylen(rs.searchFields)>
 			<div class="z-float">

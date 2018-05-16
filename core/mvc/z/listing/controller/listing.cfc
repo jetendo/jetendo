@@ -2472,6 +2472,9 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 	} 
 
 	arrayappend(arguments.ss.css, "/z/a/listing/stylesheets/global.css");
+	if(structkeyexists(request.zos, 'fullscreenMobileEnabled')){
+		arrayappend(arguments.ss.css, "/z/a/listing/stylesheets/global-large-search.css"); 
+	}
 	arrayappend(arguments.ss.css, "/z/a/listing/stylesheets/listing_template.css");
 	</cfscript>
 </cffunction>
@@ -2524,6 +2527,9 @@ if(request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,
 
 if(request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
 	metaContent&=application.zcore.skin.includeCSS("/z/a/listing/stylesheets/global.css");
+	if(structkeyexists(request.zos, 'fullscreenMobileEnabled')){
+		metaContent&=application.zcore.skin.includeCSS("/z/a/listing/stylesheets/global-large-search.css");
+	}
 	if(application.zcore.app.getAppData("content").optionStruct.content_config_override_stylesheet EQ 0){
 		metaContent&=application.zcore.skin.includeCSS("/z/a/listing/stylesheets/listing_template.css");
 	}
