@@ -24,7 +24,6 @@
 	</cfscript>
 </cffunction>
 
-
 <cffunction name="getInitConfig" localmode="modern" access="private">
 	<cfscript> 
 	//variables.uploadPath=request.zos.globals.privateHomeDir&"zupload/inquiries/";
@@ -1431,7 +1430,7 @@ zArrDeferredFunctions.push(function(){
 
 <cffunction name="beforeUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
-	db=request.zos.queryObject;
+	db=request.zos.queryObject; 
 	rs=validateInsertUpdate();
 	if(not rs.success){
 		application.zcore.status.displayReturnJson(request.zsid);
@@ -1452,6 +1451,7 @@ zArrDeferredFunctions.push(function(){
 <cffunction name="beforeReturnInsertUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>   
 	urlPage = "";
+
 	if(form.method EQ "update"){
 		if(form.contact_id EQ 0){
 			link="/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid=#request.zsid#";
@@ -1482,10 +1482,13 @@ zArrDeferredFunctions.push(function(){
 	</cfscript>
 </cffunction>
 
-
+<!--- 
+	duplicate that isn't called
 <cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
+ 
+
 	savecontent variable="customNote"{
 		echo('<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:##f7df9e; font-size:12px; padding:5px 15px 5px 15px; color:##b68500;">PRIVATE NOTE</td></tr></table>');
 		echo('<p>#request.zsession.user.first_name# #request.zsession.user.last_name# (#request.zsession.user.email#) replied to lead ###form.inquiries_id#:</p>
@@ -1587,12 +1590,14 @@ zArrDeferredFunctions.push(function(){
 		application.zcore.email.send(ts);
 	}
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
 <cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	db=request.zos.queryObject; 
 	rs={success:true}; 
+	
+
 	result=application.zcore.functions.zUpdateLead(form);  
 	if(result EQ false){
 		request.zsid = application.zcore.status.setStatus(Request.zsid, "Lead failed to be updated.", false,true);
@@ -2213,7 +2218,7 @@ zArrDeferredFunctions.push(function(){
 		}]
 	});
 
-	if(form.method EQ "index"){
+	if(form.method EQ "index"){  
 		if(application.zcore.user.checkGroupAccess("administrator")){
 			ts={ 
 				sortBy:"name", 

@@ -42,7 +42,7 @@ text=eCom.convertHTMLToText(text);
 <cffunction name="cleanHTML" localmode="modern" output="no" returntype="any">
 	<cfargument name="text" type="string" required="yes">
 	<cfscript>
-	var badTagList="script|embed|base|input|textarea|button|object|iframe|form"; 
+	var badTagList="style|script|embed|base|input|textarea|button|object|iframe|form"; 
 	/*
 	// this code will unescape urlencodedformat() which causes some links to break.  We can't use this feature anywhere.  we may need to implement a different solution someday.
 	try{

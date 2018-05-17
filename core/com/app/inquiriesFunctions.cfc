@@ -165,11 +165,56 @@
         Nextel: phonenumber@messaging.nextel.com  --->
 </cffunction>
 
+<!--- 
+inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
+ --->
+<cffunction name="indexInquiry" localmode="modern" access="public">
+	<cfargument name="inquiries_id" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
+	WHERE inquiries_id = #db.param(arguments.inquiries_id)# and 
+	site_id = #db.param(arguments.site_id)# and 
+	inquiries_deleted=#db.param(0)# ";
+	qInquiry=db.execute("qInquiry");
+
+	db.sql="select * from #db.table("inquiries_feedback", request.zos.zcoreDatasource)# 
+	WHERE inquiries_id = #db.param(arguments.inquiries_id)# and 
+	site_id = #db.param(arguments.site_id)# and 
+	inquiries_feedback_deleted=#db.param(0)# ";
+	qFeedback=db.execute("qFeedback");
+
+	form.inquiries_id=arguments.inquiries_id;
+	savecontent variable="out"{
+		getViewInclude(qinquiry, false, false);
+
+		ts={
+			inquiries_id:qInquiry.inquiries_id,
+			site_id:qInquiry.site_id,
+			disableReadTracking:true,
+			disablePrivateMessages:true
+		};
+		feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
+		feedbackCom.displayLeadFeedback(ts);
+	} 
+	out=trim(application.zcore.functions.zRemoveHTMLForSearchIndexer(out));
+	out=rereplace(out, '\s\s', ' ', 'all');
+	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# 
+	SET inquiries_search=#db.param(out)# 
+	WHERE inquiries_id = #db.param(arguments.inquiries_id)# and 
+	site_id = #db.param(arguments.site_id)# and 
+	inquiries_deleted=#db.param(0)# ";
+	db.execute("qUpdate");
+	</cfscript>
+</cffunction>
 
 
 <cffunction name="getViewInclude" localmode="modern" access="public">
 	<cfargument name="qinquiry" type="query" required="yes">
 	<cfargument name="showPrivate" type="boolean" required="no" default="#true#">
+	<cfargument name="showTracking" type="boolean" required="no" default="#true#">
 	<cfscript> 
  	var db=request.zos.queryObject; 
 	var t=structnew();
@@ -777,6 +822,7 @@
 
 	</cfif>
 
+	<cfif arguments.showTracking>
 		<h3 style="margin-top:10px;">Tracking Details</h3>
 		
 		<table #tablestyle# class="table-list">
@@ -1070,6 +1116,7 @@
 				</cfif> 
 			<!-- endadmincomments --> 
 		</cfif>
+	</cfif>
 	</table> 
 
  	

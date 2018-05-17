@@ -145,6 +145,10 @@ application.zcore.functions.zInsertLead();
 	inputstruct.datasource=request.zos.zcoreDatasource;
 	inputStruct.struct=form;
 	inquiries_id = application.zcore.functions.zInsert(inputStruct); 
+
+
+	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	inquiriesCom.indexInquiry(inquiries_id, request.zos.globals.id); 
  
 	ds=application.zcore.functions.zGetInquiryById(inquiries_id);
 
@@ -202,6 +206,8 @@ application.zcore.functions.zImportLead(ts); --->
 	inputStruct.struct=ss;
 	inquiries_id = application.zcore.functions.zInsert(inputStruct); 
 
+	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	inquiriesCom.indexInquiry(inquiries_id, request.zos.globals.id); 
 	return inquiries_id;
 	</cfscript>
 </cffunction>
@@ -228,7 +234,12 @@ application.zcore.functions.zUpdateLead();
 	inputStruct.table = "inquiries";
 	inputstruct.datasource=request.zos.zcoreDatasource;
 	inputStruct.struct=ss;
-	return application.zcore.functions.zUpdate(inputStruct); 
+	result=application.zcore.functions.zUpdate(inputStruct); 
+
+
+	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	inquiriesCom.indexInquiry(ss.inquiries_id, request.zos.globals.id); 
+	return result;
 	</cfscript>
 </cffunction>
 	

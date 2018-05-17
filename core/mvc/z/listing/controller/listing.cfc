@@ -202,7 +202,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 <cffunction name="zRemoveHTMLForSearchIndexer" localmode="modern" returntype="any">
 	<cfargument name="text" type="string" required="yes">
 	<cfscript>
-	var badTagList="script|embed|base|input|textarea|button|object|iframe|form";
+	var badTagList="style|script|embed|base|input|textarea|button|object|iframe|form";
 	arguments.text=rereplacenocase(arguments.text,"<(#badTagList#).*?</\1>", " ", 'ALL');
 	arguments.text=rereplacenocase(arguments.text,"(</|<)[^>]*>", " ", 'ALL');
 	return arguments.text;

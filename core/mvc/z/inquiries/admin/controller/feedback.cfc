@@ -296,7 +296,9 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			        </cfscript> 
 
 					<cfscript>
-					ts={};
+					ts={
+						inquiries_id:form.inquiries_id
+					};
 					displayLeadFeedback(ts);
 					</cfscript>
 			    </div>
@@ -533,7 +535,9 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 		</div> 
 	</div> 
 	<cfscript>
-	ts={};
+	ts={
+		inquiries_id:form.inquiries_id
+	};
 	displayLeadFeedback(ts);
 	</cfscript>
 
@@ -896,31 +900,62 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 		</cfif> 
 	</table>
 </cffunction>
+
+
+<!--- 
+ts={
+	// required
+	inquiries_id:form.inquiries_id,
+	//optional
+	site_id:request.zos.globals.id,
+	disableReadTracking:false,
+	disablePrivateMessages:false
+};
+feedbackCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
+feedbackCom.displayLeadFeedback(ts);
+ --->
 <cffunction name="displayLeadFeedback" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
+	ts={
+		site_id:request.zos.globals.id,
+		disableReadTracking:false,
+		disablePrivateMessages:false
+	};
 	ss=arguments.ss;
+	structappend(ss, ts, false);
 	</cfscript>
 	<cfscript>  
-	db.sql="SELECT inquiries_feedback.*, user.*, 
-	if(inquiries_feedback_x_user.inquiries_feedback_x_user_id IS NULL, #db.param(0)#, #db.param(1)#) isRead
-	from #db.table("inquiries_feedback", request.zos.zcoreDatasource)# 
+	db.sql="SELECT inquiries_feedback.*, user.* ";
+
+	if(not ss.disableReadTracking){
+		db.sql&=" , 
+		if(inquiries_feedback_x_user.inquiries_feedback_x_user_id IS NULL, #db.param(0)#, #db.param(1)#) isRead ";
+	}else{
+		db.sql&=", #db.param(1)# isRead ";
+	}
+	db.sql&=" from #db.table("inquiries_feedback", request.zos.zcoreDatasource)# 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# ON 
 	user.user_id = inquiries_feedback.user_id and 
 	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_feedback.user_id_siteIDType"))# and 
-	user_deleted = #db.param(0)#
-	LEFT JOIN #db.table("inquiries_feedback_x_user", request.zos.zcoreDatasource)# ON 
-	inquiries_feedback_x_user.inquiries_feedback_id = inquiries_feedback.inquiries_feedback_id and 
-	inquiries_feedback_x_user.site_id = inquiries_feedback.site_id and 
-	inquiries_feedback_x_user.user_id=#db.param(request.zsession.user.id)# and 
-	inquiries_feedback_x_user.user_id_siteidtype=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
-	inquiries_feedback_x_user.inquiries_feedback_x_user_deleted=#db.param(0)# 
-	WHERE 
-	inquiries_id = #db.param(form.inquiries_id)# and 
-	inquiries_feedback.site_id = #db.param(request.zos.globals.id)# and 
-	inquiries_feedback_deleted=#db.param(0)# 
-	ORDER BY inquiries_feedback_datetime DESC ";
+	user_deleted = #db.param(0)# ";
+	if(not ss.disableReadTracking){
+		db.sql&=" LEFT JOIN #db.table("inquiries_feedback_x_user", request.zos.zcoreDatasource)# ON 
+		inquiries_feedback_x_user.inquiries_feedback_id = inquiries_feedback.inquiries_feedback_id and 
+		inquiries_feedback_x_user.site_id = inquiries_feedback.site_id and 
+		inquiries_feedback_x_user.user_id=#db.param(request.zsession.user.id)# and 
+		inquiries_feedback_x_user.user_id_siteidtype=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
+		inquiries_feedback_x_user.inquiries_feedback_x_user_deleted=#db.param(0)# ";
+	}
+	db.sql&=" WHERE 
+	inquiries_id = #db.param(ss.inquiries_id)# and 
+	inquiries_feedback.site_id = #db.param(ss.site_id)# and 
+	inquiries_feedback_deleted=#db.param(0)# ";
+	if(ss.disablePrivateMessages){
+		db.sql&=" and inquiries_feedback_type=#db.param(1)# ";
+	}
+	db.sql&=" ORDER BY inquiries_feedback_datetime DESC ";
 	qFeedback=db.execute("qFeedback");  
 	</cfscript>
 <style type="text/css">
@@ -1097,22 +1132,25 @@ zArrDeferredFunctions.push(function(){
 					echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');
 				}
 			}
-			if(row.isRead EQ 0){
-				ts={
-					table:"inquiries_feedback_x_user",
-					datasource:request.zos.zcoreDatasource,
-					struct:{
-						user_id:request.zsession.user.id,
-						user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id),
-						inquiries_feedback_id:row.inquiries_feedback_id,
-						inquiries_feedback_x_user_read:1,
-						site_id:request.zos.globals.id,
-						inquiries_feedback_x_user_updated_datetime:request.zos.mysqlnow,
-						inquiries_feedback_x_user_deleted:0
-					}
-				};
-				application.zcore.functions.zInsert(ts);  
-			} 
+
+			if(not ss.disableReadTracking){
+				if(row.isRead EQ 0){
+					ts={
+						table:"inquiries_feedback_x_user",
+						datasource:request.zos.zcoreDatasource,
+						struct:{
+							user_id:request.zsession.user.id,
+							user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id),
+							inquiries_feedback_id:row.inquiries_feedback_id,
+							inquiries_feedback_x_user_read:1,
+							site_id:ss.site_id,
+							inquiries_feedback_x_user_updated_datetime:request.zos.mysqlnow,
+							inquiries_feedback_x_user_deleted:0
+						}
+					};
+					application.zcore.functions.zInsert(ts);  
+				} 
+			}
 		}
 		if(qFeedBack.recordcount GT 1 and qFeedback.recordcount NEQ readCount and showAllDisplayed NEQ qFeedBack.recordcount){
 			echo('<div class="z-float z-mb-10 "><a href="##" class="z-manager-search-button z-feedback-show-all-button">Show All Older Messages</a></div>');

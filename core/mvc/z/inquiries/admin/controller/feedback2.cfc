@@ -597,7 +597,9 @@
 			        </cfscript> 
 
 					<cfscript>
-					ts={};
+					ts={
+						inquiries_id:form.inquiries_id
+					};
 					displayLeadFeedback(ts);
 					</cfscript>
 			    </div>
@@ -929,7 +931,9 @@
 		</div> 
 	</div> 
 	<cfscript>
-	ts={};
+	ts={
+		inquiries_id:form.inquiries_id
+	};
 	displayLeadFeedback(ts);
 	</cfscript>
 

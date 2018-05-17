@@ -360,7 +360,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 <cffunction name="zRemoveHTMLForSearchIndexer" localmode="modern" returntype="any">
 	<cfargument name="text" type="string" required="yes">
     <cfscript>
-	var badTagList="script|embed|base|input|textarea|button|object|iframe|form";
+	var badTagList="style|script|embed|base|input|textarea|button|object|iframe|form";
 	arguments.text=rereplacenocase(arguments.text,"<(#badTagList#).*?</\1>", " ", 'ALL');
 	arguments.text=rereplacenocase(arguments.text,"(</|<)[^>]*>", " ", 'ALL');
 	arguments.text=replacenocase(arguments.text,"&nbsp;", " ", 'ALL');

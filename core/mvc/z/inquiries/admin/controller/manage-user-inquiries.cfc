@@ -719,7 +719,9 @@
 		</div> 
 	</div> 
 	<cfscript>
-		ts={};
+		ts={
+			inquiries_id:form.inquiries_id
+		};
 		comFeedback = application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.feedback");
 		echo('<div class="z-float">');
 			comFeedback.displayLeadFeedback(ts);
