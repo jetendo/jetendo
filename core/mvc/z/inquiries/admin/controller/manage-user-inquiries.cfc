@@ -369,8 +369,7 @@
 				inquiries_feedback_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
 				inquiries_id:form.inquiries_id,
 				//user_id:user_id,
-				//contact_id:0,
-				inquiries_id:form.inquiries_id,
+				//contact_id:0, 
 				site_id:request.zos.globals.id,
 				//user_id_siteIDType:user_id_siteIDType, 
 				inquiries_feedback_created_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
@@ -436,6 +435,8 @@
 		if(not inquiries_feedback_id){ 
 			return {success:false, errorMessage:"Failed to save note"};
 		} 
+		inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+		inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 	}
 	if(form.method EQ "userInsertPrivateNote"){
 		if(form.editSource EQ "contact"){

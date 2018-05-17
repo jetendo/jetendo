@@ -200,7 +200,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 		feedbackCom.displayLeadFeedback(ts);
 	} 
 	out=trim(application.zcore.functions.zRemoveHTMLForSearchIndexer(out));
-	out=rereplace(out, '\s\s', ' ', 'all');
+	out=rereplace(out, '\s\s+', ' ', 'all');
 	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# 
 	SET inquiries_search=#db.param(out)# 
 	WHERE inquiries_id = #db.param(arguments.inquiries_id)# and 
@@ -229,7 +229,9 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 	}
 	ts=structnew();
 	ts.tablestyle=tablestyle;
-	application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts);
+	if(arguments.showTracking){
+		application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts);
+	}
 
 	showDetails=true;
 	if(arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1){
@@ -727,7 +729,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 				</td>
 			</tr>  
 		</cfif>
-		<cfif application.zcore.app.siteHasApp("content")>
+		<cfif arguments.showTracking and application.zcore.app.siteHasApp("content")>
 			<cfscript>
 			ts4=structnew();
 			ts4.contentEmailFormat=true;
@@ -752,7 +754,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 						}
 						contentIdList=arraytoList(arrSQLID, ",");
 						db.sql="SELECT * FROM #db.table("content", request.zos.zcoreDatasource)# content 
-						WHERE content.site_id =#db.param(request.zOS.globals.id)# and 
+						WHERE content.site_id =#db.param(t.site_id)# and 
 						content_id IN (#db.trustedSQL(contentIdList)#)  and 
 						content_for_sale <>#db.param(2)# and 
 						content_deleted =#db.param(0)#
@@ -926,7 +928,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 			<cfif t.inquiries_email NEQ "">
 				<cfscript>
 				db.sql="SELECT * FROM #db.table("track_user", request.zos.zcoreDatasource)# track_user 
-				WHERE track_user.site_id =#db.param(request.zOS.globals.id)# AND 
+				WHERE track_user.site_id =#db.param(t.site_id)# AND 
 				((track_user_email =#db.param(t.inquiries_email)# and 
 				track_user_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')#) or 
 				inquiries_id=#db.param(t.inquiries_id)#)  and 
@@ -953,7 +955,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 							<cfscript>
 							db.sql="SELECT count(track_page_id) count 
 							FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-							WHERE site_id =#db.param(request.zOS.globals.id)# and 
+							WHERE site_id =#db.param(t.site_id)# and 
 							track_user_id =#db.param(track_user_id)# and 
 							track_page_deleted = #db.param(0)# and 
 							track_page_qs LIKE #db.param('%gclid=%')#";
@@ -1027,13 +1029,13 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 								echo('Clicks: #qTrack.track_user_hits#<br />');
 							}
 							if(qTrack.track_user_first_page NEQ ""){
-								echo('Landing Page: <a href="#request.zos.globals.domain##qTrack.track_user_first_page#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
+								echo('Landing Page: <a href="#application.zcore.functions.zvar("domain", t.site_id)##qTrack.track_user_first_page#" class="z-manager-search-button" target="_blank">Click here</a> to view the first page they visited on the web site.');
 							}
 						/*
 						// this code was inefficient.  The new cookie "Enable User Stats Cookies" feature is able to be enabled per site instead to reduce server load for tracking.
 						db.sql="SELECT count(track_page_id) count, min(track_page_datetime) minDate , max(track_page_datetime) maxDate 
 						FROM #db.table("track_page", request.zos.zcoreDatasource)#  
-						WHERE site_id =#db.param(request.zOS.globals.id)# and 
+						WHERE site_id =#db.param(t.site_id)# and 
 						track_user_id =#db.param(qTrack.track_user_id)# and 
 						track_page_datetime BETWEEN #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 00:00:00')# and #db.param(dateformat(t.inquiries_datetime, 'yyyy-mm-dd')&' 23:59:59')# and 
 						track_page_deleted = #db.param(0)#
@@ -1060,7 +1062,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 							echo('Length of Visit:#minutes#<br />');
 							echo('Clicks:#qTrackPage.count#<br />');
 							db.sql="SELECT * FROM #db.table("track_page", request.zos.zcoreDatasource)# track_page 
-							WHERE site_id =#db.param(request.zOS.globals.id)# AND 
+							WHERE site_id =#db.param(t.site_id)# AND 
 							track_user_id =#db.param(qTrack.track_user_id)# and 
 							track_page_datetime <=#db.param(dateformat(qTrack.track_user_recent_datetime, 'yyyy-mm-dd')&' '&timeformat(qTrack.track_user_recent_datetime,'HH:mm:ss'))# and 
 							track_page_deleted = #db.param(0)# 

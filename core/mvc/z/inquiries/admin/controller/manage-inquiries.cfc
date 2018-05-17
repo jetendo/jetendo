@@ -704,8 +704,7 @@
 				inquiries_feedback_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
 				inquiries_id:form.inquiries_id,
 				//user_id:user_id,
-				//contact_id:0,
-				inquiries_id:form.inquiries_id,
+				//contact_id:0, 
 				site_id:request.zos.globals.id,
 				//user_id_siteIDType:user_id_siteIDType, 
 				inquiries_feedback_created_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"),
@@ -723,6 +722,8 @@
 		if(not inquiries_feedback_id){ 
 			return {success:false, errorMessage:"Failed to save note"};
 		} 
+		inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+		inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 		/*
 		// send email to the assigned user.
 		toEmail=qCheck.user_email;
@@ -1610,6 +1611,47 @@ zArrDeferredFunctions.push(function(){
 	return rs;
 	</cfscript>
 </cffunction>
+
+<!---  
+/z/inquiries/admin/manage-inquiries/reindexInquiriesStatus
+/z/inquiries/admin/manage-inquiries/reindexInquiries
+ --->
+<cffunction name="reindexInquiriesStatus" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	echo('Status: '&application.zcore.functions.zso(application, 'currentInquiriesReindexOffset')&" of "&application.zcore.functions.zso(application, 'currentInquiriesReindexTotal'));
+	</cfscript>
+</cffunction>
+
+<cffunction name="reindexInquiries" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	db=request.zos.queryObject; 
+	setting requesttimeout="10000";
+	offset=0;
+	application.currentInquiriesReindexOffset=0;
+
+	db.sql="select count(inquiries_id) count from #db.table("inquiries", request.zos.zcoreDatasource)# ";
+	qCount=db.execute("qCount");
+	application.currentInquiriesReindexTotal=qCount.count;
+	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions"); 
+	while(true){
+		db.sql="select inquiries_id, site_id from #db.table("inquiries", request.zos.zcoreDatasource)# 
+		LIMIT #db.param(offset)#, #db.param(30)# ";
+		qI=db.execute("qI");
+		if(qI.recordcount EQ 0){
+			break;
+		}
+		for(row in qI){
+			inquiriesCom.indexInquiry(row.inquiries_id, row.site_id);
+		}
+		offset+=30;
+		application.currentInquiriesReindexOffset=offset;
+	}
+	echo('Reindexed #offset+qI.recordcount# inquiry records.');
+	application.currentInquiriesReindexOffset='complete';
+	abort;
+	</cfscript>
+</cffunction>
+
 
 <cffunction name="beforeInsert" localmode="modern" access="private" returntype="struct">
 	<cfscript> 

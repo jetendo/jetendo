@@ -96,6 +96,9 @@
 		<cfscript>
 		form.site_id=request.zos.globals.id;
 		application.zcore.functions.zDeleteRecord("inquiries_feedback","inquiries_feedback_id,site_id",request.zos.zcoreDatasource);
+
+		inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+		inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 		if(form.returnJSON EQ 1){
 			rs={
 				success:true

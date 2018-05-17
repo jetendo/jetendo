@@ -322,8 +322,7 @@ contactCom.processMessage(ts);
 			inquiries_feedback_datetime:ss.jsonStruct.date,
 			inquiries_id:ss.inquiries_id,
 			//user_id:user_id,
-			contact_id:notifyStruct.fromContact.contact_id,
-			inquiries_id:ss.inquiries_id,
+			contact_id:notifyStruct.fromContact.contact_id, 
 			site_id:ss.messageStruct.site_id,
 			//user_id_siteIDType:user_id_siteIDType, 
 			inquiries_feedback_created_datetime:ss.jsonStruct.date,
@@ -341,6 +340,8 @@ contactCom.processMessage(ts);
 
 	// build email html  
 	inquiries_feedback_id=application.zcore.functions.zInsert(tsFeedback);
+ 
+
 	ss.inquiries_feedback_id=inquiries_feedback_id;
 	if(not inquiries_feedback_id){
 		if(debug){
@@ -407,6 +408,8 @@ contactCom.processMessage(ts);
 		inquiries_deleted=#db.param(0)# ";
 		db.execute("qUpdateInquiry"); 
 	}
+	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+	inquiriesCom.indexInquiry(ss.inquiries_id, ss.messageStruct.id);
 
 	if(request.zos.isdeveloper){
 		//writedump(arrEmail);		abort;
