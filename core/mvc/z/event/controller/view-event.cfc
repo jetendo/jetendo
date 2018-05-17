@@ -294,6 +294,12 @@
 			</cfif>
 
 		</div>
+	</div>
+	<cfscript>
+	echo('</div>');
+	</cfscript>
+	
+	<div class="zEventView1-container">
 		<cfif struct.event_address NEQ "">
 			<div id="zEventViewMapContainer" style="page-break-before: always;">
 				<div class="zEventView1-Map"  id="zEventMapDivId"></div>
@@ -309,9 +315,6 @@
 		</cfif>
 	</div>
 	
-	<cfscript>
-	echo('</div>');
-	</cfscript>
  	
 </cffunction>
 </cfoutput>

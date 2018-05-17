@@ -158,7 +158,12 @@
 						</cfscript>
 					</div>
 				</cfif>
-
+			</div>
+		</div>
+	</div>
+	<div class="z-float">
+		<div class="z-job">
+			<div class="z-column">
 				<cfif job.job_map_coordinates NEQ "">
 					<div class="z-job-map">
 						<cfscript>
