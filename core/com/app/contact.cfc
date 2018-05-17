@@ -409,7 +409,7 @@ contactCom.processMessage(ts);
 		db.execute("qUpdateInquiry"); 
 	}
 	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-	inquiriesCom.indexInquiry(ss.inquiries_id, ss.messageStruct.id);
+	inquiriesCom.indexInquiry(ss.inquiries_id, ss.messageStruct.site_id);
 
 	if(request.zos.isdeveloper){
 		//writedump(arrEmail);		abort;
