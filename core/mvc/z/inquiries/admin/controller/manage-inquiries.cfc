@@ -1624,6 +1624,7 @@ zArrDeferredFunctions.push(function(){
 
 <cffunction name="reindexInquiries" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	application.zcore.functions.z404('already run');abort;
 	db=request.zos.queryObject; 
 	setting requesttimeout="10000";
 	offset=0;
