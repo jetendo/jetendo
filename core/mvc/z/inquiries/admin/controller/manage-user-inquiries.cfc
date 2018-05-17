@@ -1349,6 +1349,13 @@
 
 	form.search_email=application.zcore.functions.zso(form, 'search_email');
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
+	form.inquiries_search=application.zcore.functions.zso(form, 'inquiries_search');
+	searchTextOriginal=replace(replace(replace(form.inquiries_search, '+', ' ', 'all'), '@', '_', 'all'), '"', '', "all");
+	if(not isnumeric(searchTextOriginal)){
+		form.searchText=application.zcore.functions.zCleanSearchText(searchTextOriginal, true);
+	}else{
+		form.searchText=searchTextOriginal;
+	}
 	form.uid=application.zcore.functions.zso(form, 'uid');
 	arrU=listToArray(form.uid, '|');
 	form.selected_user_id=0;
@@ -1396,7 +1403,11 @@
 	} 
  
 	db.sql="SELECT *, 
-	inquiries_id maxid, inquiries_datetime maxdatetime, #db.param('1')# inquiryCount
+	inquiries_id maxid, inquiries_datetime maxdatetime, #db.param('1')# inquiryCount";
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" , MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) as score ";
+	}
+	db.sql&="
 	FROM (#db.table("inquiries", request.zos.zcoreDatasource)#) 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
 	user.user_id = inquiries.user_id and 
@@ -1410,6 +1421,13 @@
 	}
 	if(form.search_email NEQ ""){
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+	}
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" and 
+		(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
+		MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) 
+		or inquiries.inquiries_search like #db.param('%#replace(form.searchText,' ','%','ALL')#%')# 
+		) ";
 	}
 	db.sql&=" and inquiries_parent_id = #db.param(0)# ";
 	ticketFilterSQL(db);
@@ -1428,11 +1446,16 @@
 		db.sql&=" and inquiries.inquiries_type_id = #db.param(listgetat(form.inquiries_type_id, 1, "|"))# and 
 		inquiries_type_id_siteIDType = #db.param(listgetat(form.inquiries_type_id, 2, "|"))# ";
 	}
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" ORDER BY score DESC, ";
+	}else{
+		db.sql&=" ORDER BY ";
+	}
 	sortColumnSQL=getSortColumnSQL();
 	if(sortColumnSQL NEQ ''){
-		db.sql&=" ORDER BY #sortColumnSQL# inquiries_id ASC";
+		db.sql&=" #sortColumnSQL# inquiries_id ASC";
 	}else{
-		db.sql&=" ORDER BY maxdatetime DESC ";
+		db.sql&=" maxdatetime DESC ";
 	}
 	db.sql&=" LIMIT #db.param(max(0,(form.zIndex-1))*30)#,#db.param(30)#";
 	rs.qData=db.execute("qData");    
@@ -1452,6 +1475,13 @@
 	}
 	if(form.search_email NEQ ""){
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+	}
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" and 
+		(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
+		MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) 
+		or inquiries.inquiries_search like #db.param('%#replace(form.searchText,' ','%','ALL')#%')# 
+		) ";
 	}
 	if(form.inquiries_start_date EQ false){
 		db.sql&=" and (inquiries_datetime >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
@@ -1495,24 +1525,30 @@
 		application.zcore.functions.zInputSelectBox(selectStruct);
 	}
 	arrayAppend(rs.searchFields, {
-		groupStyle:'width:280px; max-width:100%; ',
+		groupStyle:'width:300px; max-width:100%; ',
 		fields:[{
+			label:"Keyword",
+			formField:'<input type="search" name="inquiries_search" style="min-width:200px; width:200px;" id="inquiries_search" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_search'))#"> ',
+			field:"inquiries_search",
+			labelStyle:'width:80px;',
+			fieldStyle:'width:200px;'
+		},{
 			label:"Name",
-			formField:'<input type="search" name="inquiries_name" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
+			formField:'<input type="search" name="inquiries_name" style="min-width:200px; width:200px;" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
 			field:"inquiries_first_name",
-			labelStyle:'width:60px;',
+			labelStyle:'width:80px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Email",
 			formField:'<input type="text" name="search_email" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_email')#" /> ',
 			field:"search_email",
-			labelStyle:'width:60px;',
+			labelStyle:'width:80px;',
 			fieldStyle:'width:200px;'
 		},{
 			label:"Phone",
 			formField:'<input type="text" name="search_phone" style="min-width:200px; width:200px;" value="#application.zcore.functions.zso(form, 'search_phone')#" />',
 			field:"search_phone",
-			labelStyle:'width:60px;',
+			labelStyle:'width:80px;',
 			fieldStyle:'width:200px;'
 		}]
 	});

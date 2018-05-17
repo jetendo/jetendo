@@ -1629,13 +1629,14 @@ zArrDeferredFunctions.push(function(){
 	offset=0;
 	application.currentInquiriesReindexOffset=0;
 
-	db.sql="select count(inquiries_id) count from #db.table("inquiries", request.zos.zcoreDatasource)# ";
+	db.sql="select count(inquiries_id) count from #db.table("inquiries", request.zos.zcoreDatasource)# where inquiries_deleted=#db.param(0)#"; // site_id =#db.param(request.zos.globals.id)# and 
 	qCount=db.execute("qCount");
 	application.currentInquiriesReindexTotal=qCount.count;
 	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions"); 
 	while(true){
 		db.sql="select inquiries_id, site_id from #db.table("inquiries", request.zos.zcoreDatasource)# 
-		LIMIT #db.param(offset)#, #db.param(30)# ";
+		 where inquiries_deleted=#db.param(0)#
+		LIMIT #db.param(offset)#, #db.param(30)# "; // site_id =#db.param(request.zos.globals.id)# and 
 		qI=db.execute("qI");
 		if(qI.recordcount EQ 0){
 			break;
@@ -1981,6 +1982,14 @@ zArrDeferredFunctions.push(function(){
 	if(application.zcore.functions.zso(request.zsession, "selectedofficeid", true, 0) NEQ 0){
 		form.search_office_id=request.zsession.selectedofficeid;
 	} 
+
+	form.inquiries_search=application.zcore.functions.zso(form, 'inquiries_search');
+	searchTextOriginal=replace(replace(replace(form.inquiries_search, '+', ' ', 'all'), '@', '_', 'all'), '"', '', "all");
+	if(not isnumeric(searchTextOriginal)){
+		form.searchText=application.zcore.functions.zCleanSearchText(searchTextOriginal, true);
+	}else{
+		form.searchText=searchTextOriginal;
+	}
 	form.search_email=application.zcore.functions.zso(form, 'search_email');
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
 	form.inquiries_status_id=application.zcore.functions.zso(form, 'inquiries_status_id');
@@ -2045,8 +2054,11 @@ zArrDeferredFunctions.push(function(){
 	} 
  
 	db.sql="SELECT *, 
-	inquiries_id maxid, inquiries_datetime maxdatetime, #db.param('1')# inquiryCount
-	FROM (#db.table("inquiries", request.zos.zcoreDatasource)#) 
+	inquiries_id maxid, inquiries_datetime maxdatetime, #db.param('1')# inquiryCount ";
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" , MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) as score ";
+	}
+	db.sql&=" FROM (#db.table("inquiries", request.zos.zcoreDatasource)#) 
 	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
 	user.user_id = inquiries.user_id and 
 	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries.user_id_siteIDType"))# and 
@@ -2059,6 +2071,13 @@ zArrDeferredFunctions.push(function(){
 	}
 	if(form.search_email NEQ ""){
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+	}
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" and 
+		(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
+		MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) 
+		or inquiries.inquiries_search like #db.param('%#replace(form.searchText,' ','%','ALL')#%')# 
+		) ";
 	}
 	if(form.search_office_id NEQ ""){
 		db.sql&=" and inquiries.office_id = #db.param(form.search_office_id)# ";
@@ -2105,11 +2124,16 @@ zArrDeferredFunctions.push(function(){
 			db.sql&=" and inquiries_phone_time<>#db.param('')# ";
 		} 
 	} 
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" ORDER BY score DESC, ";
+	}else{
+		db.sql&=" ORDER BY ";
+	}
 	sortColumnSQL=getSortColumnSQL();
 	if(sortColumnSQL NEQ ''){
-		db.sql&=" ORDER BY #sortColumnSQL# inquiries_id ASC";
+		db.sql&=" #sortColumnSQL# inquiries_id ASC";
 	}else{
-		db.sql&=" ORDER BY maxdatetime DESC ";
+		db.sql&=" maxdatetime DESC ";
 	}
 	db.sql&=" LIMIT #db.param(max(0,(form.zIndex-1))*30)#,#db.param(30)#";
 	rs.qData=db.execute("qData");  
@@ -2142,6 +2166,13 @@ zArrDeferredFunctions.push(function(){
 	}
 	if(form.search_email NEQ ""){
 		db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+	}
+	if(searchTextOriginal NEQ ''){
+		db.sql&=" and 
+		(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
+		MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.searchText)#) 
+		or inquiries.inquiries_search like #db.param('%#replace(form.searchText,' ','%','ALL')#%')# 
+		) ";
 	}
 	if(form.inquiries_start_date EQ false){
 		db.sql&=" and (inquiries_datetime >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
@@ -2212,8 +2243,14 @@ zArrDeferredFunctions.push(function(){
 	arrayAppend(rs.searchFields, {
 		groupStyle:'width:280px; max-width:100%; ',
 		fields:[{
+			label:"Keyword",
+			formField:'<input type="search" name="inquiries_search" style="min-width:200px; width:200px;" id="inquiries_search" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_search'))#"> ',
+			field:"inquiries_search",
+			labelStyle:'width:60px;',
+			fieldStyle:'width:200px;'
+		},{
 			label:"Name",
-			formField:'<input type="search" name="inquiries_name" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
+			formField:'<input type="search" name="inquiries_name" style="min-width:200px; width:200px;" id="inquiries_name" value="#htmleditformat(application.zcore.functions.zso(form, 'inquiries_name'))#"> ',
 			field:"inquiries_first_name",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
@@ -2229,7 +2266,11 @@ zArrDeferredFunctions.push(function(){
 			field:"search_phone",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
-		},{
+		}]
+	});
+	arrayAppend(rs.searchFields, {
+		groupStyle:'width:280px; max-width:100%; ',
+		fields:[{
 			label:"Type",
 			formField:typeField,
 			field:"inquiries_type_id",
@@ -2241,11 +2282,7 @@ zArrDeferredFunctions.push(function(){
 			field:"inquiries_status_id",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
-		}]
-	});
-	arrayAppend(rs.searchFields, {
-		groupStyle:'width:280px; max-width:100%; ',
-		fields:[{
+		},{
 			label:"Start",
 			formField:'<input type="date" name="inquiries_start_date" value="#dateformat(form.inquiries_start_date, 'yyyy-mm-dd')#">',
 			field:"inquiries_start_date",
