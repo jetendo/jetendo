@@ -876,6 +876,7 @@ userCom.checkLogin(inputStruct);
 	request.zsession[userSiteId].last_name = qUser.user_last_name;
 	request.zsession[userSiteId].office_id = qUser.office_id;
 	request.zsession[userSiteId].email = qUser.user_email;
+	request.zsession[userSiteId].company = qUser.member_company;
 	request.zsession[userSiteId].server_administrator = qUser.user_server_administrator;
 	request.zsession[userSiteId].site_administrator = qUser.user_site_administrator;
 	request.zsession[userSiteId].enableWidgetBuilder=qUser.user_enable_widget_builder;

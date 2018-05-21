@@ -640,7 +640,7 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
 		if(structkeyexists(arguments.linkStruct,"Ecommerce") EQ false){
 			ts=structnew();
-			ts.featureName="Content Manager";
+			ts.featureName="Ecommerce";
 			ts.link='/z/ecommerce/admin/ecommerce-admin/index';
 			ts.children=structnew();
 			arguments.linkStruct["Ecommerce"]=ts;
@@ -653,9 +653,33 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		}*/
 		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Orders") EQ false){
 			ts=structnew();
-			ts.featureName="Orders";
-			ts.link="/admin/order-admin/index";
+			ts.featureName="Ecommerce";
+			ts.link="/admin/order-log-admin/index";
 			arguments.linkStruct["Ecommerce"].children["Orders"]=ts;
+		}
+		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Products") EQ false){
+			ts=structnew();
+			ts.featureName="Ecommerce";
+			ts.link="/admin/product-admin/index";
+			arguments.linkStruct["Ecommerce"].children["Products"]=ts;
+		}
+		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Product Categories") EQ false){
+			ts=structnew();
+			ts.featureName="Ecommerce";
+			ts.link="/admin/product-category-admin/index";
+			arguments.linkStruct["Ecommerce"].children["Product Categories"]=ts;
+		}
+		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"Ecommerce Settings") EQ false){
+			ts=structnew();
+			ts.featureName="Ecommerce";
+			ts.link="/admin/ecommerce-client-config-admin/index";
+			arguments.linkStruct["Ecommerce"].children["Ecommerce Settings"]=ts;
+		}
+		if(structkeyexists(arguments.linkStruct["Ecommerce"].children,"State Tax") EQ false){
+			ts=structnew();
+			ts.featureName="Ecommerce";
+			ts.link="/admin/tax-admin/index";
+			arguments.linkStruct["Ecommerce"].children["State Tax"]=ts;
 		}
 	}
 	return arguments.linkStruct;
@@ -838,6 +862,8 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	arrayappend(ts.arrId,trim(form.ecommerce_config_product_url_id));
 	arrayappend(ts.arrId,trim(form.ecommerce_config_category_url_id));
 	arrayappend(ts.arrId,trim(form.ecommerce_config_misc_url_id));
+
+	form.ecommerce_config_stripe_statement_descriptor=replacelist(form.ecommerce_config_stripe_statement_descriptor, '",<,>,''', ',,,');
 	
 	rCom=application.zcore.app.reserveAppUrlId(ts); 
 	if(rCom.isOK() EQ false){
@@ -895,6 +921,14 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 			*/
 		application.zcore.functions.zStatusHandler(request.zsid,true);
 		echo('<input type="hidden" name="ecommerce_config_id" value="#form.ecommerce_config_id#" />
+			<h2>Incomplete Feature Links</h2>
+			<p><a href="/admin/product-global-option-type-admin/index">Global Product Options</a></p>
+			<p><a href="/admin/shipping-admin/index">Shipping Settings</a></p>
+			<p><a href="/admin/customer-admin/index">Customers</a></p>
+			<p><a href="/admin/shipping-admin/index">Shipping Settings</a></p>
+			<p><a href="/admin/shipping-status-admin/index">Shipping Status</a></p>
+			<p><a href="/admin/order-status-admin/index">Order Status (site specific?)</a></p>
+			<p><a href="/admin/Import/index">Product Import</a></p>
 		<table style="border-spacing:0px;" class="table-list">
 		<tr>
 		<th>Sandbox Enabled?</th>
@@ -972,12 +1006,37 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		echo('</td>
 		</tr>');
 
-		 
+		if(form.ecommerce_config_merchant_account EQ ""){
+			form.ecommerce_config_merchant_account="stripe";
+		}
 		echo('
 
 		<tr>
 		<th colspan="2"><h2>Payment Integration</h2></th>
 		</tr>
+
+		<tr>
+		<th>Merchant Account:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_merchant_account";
+		ts.friendlyName="";
+		ts.labelList = "Stripe.com|Paypal.com|Authorize.net";
+		ts.valueList = "stripe|paypal|authorize";
+		ts.delimiter="|";
+		ts.defaultValue = "";
+		ts.style = "";
+		ts.className = "";
+		ts.required=false;
+		ts.statusbar = "";
+		ts.onclick="";
+		ts.output=true;
+		ts.struct=form;
+		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
+
+		echo('</td>
+		</tr>
+		
 
 		<tr>
 		<th colspan="2"><h3>Stripe.com</h3></th>
@@ -998,6 +1057,15 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		application.zcore.functions.zInput_Text(ts);
 		echo('</td>
 		</tr>
+		<tr>
+		<th>Statement Descriptor:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_stripe_statement_descriptor";
+		application.zcore.functions.zInput_Text(ts);
+		echo('<br><br>This 22 character phrase will appear on the customer''s billing statement.  Must not use these characters: <, >, " or ''
+			</td>
+		</tr> 
 		<tr>
 		<th colspan="2"><h3>Paypal.com</h3></th>
 		</tr>

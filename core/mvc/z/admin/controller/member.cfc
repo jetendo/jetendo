@@ -1456,6 +1456,12 @@ site_id = #db.param(request.zos.globals.id)# ";
 									<cfif application.zcore.app.siteHasApp("blog") and application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id', true) NEQ 0 and application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0> 
 										<a href="#application.zcore.app.getAppCFC("blog").getAuthorLink(row)#" target="_blank">Articles</a>
 									</cfif>
+
+									<cfif application.zcore.app.siteHasApp("ecommerce")>
+										<a href="/admin/order-log-admin/index?searchOn=1&uid=#row.user_id#|#application.zcore.functions.zGetSiteIdType(row.site_id)#">Manage Orders</a>
+										<a href="/admin/user-address-admin/index?searchOn=1&uid=#row.user_id#|#application.zcore.functions.zGetSiteIdType(row.site_id)#">Manage Addresses</a>
+										
+									</cfif>
 								</div> 
 							</div>  
  

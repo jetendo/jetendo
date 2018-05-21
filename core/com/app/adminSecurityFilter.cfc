@@ -28,6 +28,10 @@
 		ms["Sections"]={ parent:'Content Manager',value:'Sections', label:chr(9)&"Sections"};
 		ms["Theme Options"]={ parent:'Content Manager',value:'Theme Options', label:chr(9)&"Theme Options"};
 		ms["Design & Layout"]={ parent:'Content Manager',value:'Design & Layout', label:chr(9)&"Design & Layout"};
+
+		ms["Ecommerce"]={ parent:'',value:'Ecommerce', label:"Ecommerce"};
+
+
 	}
 	/*if(application.zcore.functions.zso(request.zos.globals, 'lockTheme', true, 1) EQ 0){
 		ms["Themes"]={ parent:'Content Manager',value:'', label:chr(9)&"Themes"};
