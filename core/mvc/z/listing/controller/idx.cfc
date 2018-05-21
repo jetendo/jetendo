@@ -484,6 +484,8 @@ this.inited=false;
 		request.debugstime=gettickcount();
 	}
 	nowDate1=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"); 
+
+	dataChanged=false;
 	for(i in this.datastruct){
 		arrayClear(request.zos.arrQueryLog);
 		startTime=gettickcount('nano');
@@ -502,6 +504,7 @@ this.inited=false;
 			application.idxImportTimerStruct["import-update-track-only"]+=(tempTime-startTime);
 			startTime=tempTime;
 		}else{
+			dataChanged=true;
 			if(this.datastruct[i].new){
 				this.datastruct[i].listing_track_datetime=this.nowDate;
 			}
@@ -634,6 +637,17 @@ this.inited=false;
 			}
 		}
     } 
+    if(dataChanged){
+
+		yesterday=dateformat(dateadd("d", -1, now()), "yyyy-mm-dd");
+		db.sql="update #db.table("mls", request.zos.zcoreDatasource)# 
+		set mls_cleaned_date=#db.param(yesterday)#, 
+		mls_updated_datetime=#db.param(request.zos.mysqlnow)# 
+		WHERE 
+		mls_id=#db.param(this.optionstruct.mls_id)# and 
+		mls_deleted = #db.param(0)#";
+		db.execute("qUpdateMLS");  
+    }
 	
 	arrayClear(request.zos.arrQueryLog);
 	this.datastruct=structnew();
@@ -684,7 +698,7 @@ this.inited=false;
 		 db.execute("q");
 	}else{
 		writeoutput('no dead listings<br />');	
-	}
+	} 
 	*/
 
 	db.sql="select * from #db.table("mls", request.zos.zcoreDatasource)# mls 
@@ -763,7 +777,6 @@ this.inited=false;
 					echo("Delete listing_id:"&row.listing_id&"<br>")
 					arrayAppend(arrId, "'"&row.listing_id&"'");
 				}
-				rebuildTable=true;
 				idlist=arraytolist(arrId, ",");
 				deleteCount+=qIdList.recordcount; 
 
@@ -832,6 +845,7 @@ this.inited=false;
 				listing_delete_deleted = #db2.param(0)# ";
 				db2.execute("qDelete");
 			}
+			rebuildTable=true;
 
 			db.sql="update #db.table("mls", request.zos.zcoreDatasource)# mls 
 			set mls_cleaned_date=#db.param(dateformat(now(),'yyyy-mm-dd'))#, 
@@ -855,7 +869,7 @@ this.inited=false;
 		ts.allowFulltext=true;
 		application.zcore.listingCom.zCreateMemoryTable(ts);
 	}
-
+ 
 	db.sql="select * from #db.table("mls", request.zos.zcoreDatasource)# mls 
 	where mls_status=#db.param('1')# and 
 	(mls_update_date <#db.param(dateformat(oneDayAgo,"yyyy-mm-dd"))# or 
