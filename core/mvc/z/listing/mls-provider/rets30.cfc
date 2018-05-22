@@ -172,10 +172,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		
 		this.price=ts["list price"];
 		local.listing_price=ts["list price"];
-		cityName="";
-		cid=0;
-		if(structkeyexists(request.zos.listing.cityStruct, ts["City"]&"|"&ts["State Or Province"])){
-			cid=request.zos.listing.cityStruct[ts["City"]&"|"&ts["State Or Province"]];
+		cityName=this.getRetsValue("property", "", "city", ts["city"]);
+		cid=0; 
+		if(structkeyexists(request.zos.listing.cityStruct, cityName&"|"&ts["State Or Province"])){
+			cid=request.zos.listing.cityStruct[cityName&"|"&ts["State Or Province"]];
 		}
 		local.listing_county="";
 		if(local.listing_county EQ ""){
