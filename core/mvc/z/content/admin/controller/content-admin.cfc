@@ -280,13 +280,17 @@
 			application.zcore.functions.zRedirect("/z/content/admin/content-admin/add?zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
 		}
 	}
+	/*
 	if(trim(application.zcore.functions.zso(form, 'content_metakey')) EQ ""){
 		form.content_metakey=replace(replace(form.content_name,"|"," ","ALL"),","," ","ALL");
 	}
 	if(trim(application.zcore.functions.zso(form, 'content_metadesc')) EQ ""){
 		form.content_metadesc=left(replace(replace(rereplacenocase(trim(form.content_text&" "&form.content_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 	}
+	*/
+	/*
 	if(form.method EQ "update"){
+		
 		if(application.zcore.functions.zso(form, 'content_metakey') EQ qCheck.content_metakey and qCheck.content_metakey NEQ ""){
 			if(replace(replace(qCheck.content_name,"|"," ","ALL"),","," ","ALL") EQ qCheck.content_metakey){
 				form.content_metakey=replace(replace(form.content_name,"|"," ","ALL"),","," ","ALL");
@@ -297,7 +301,7 @@
 				form.content_metadesc=left(replace(replace(rereplacenocase(trim(form.content_text&" "&form.content_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 			}
 		}
-	} 
+	} */
 	csn=form.content_name&" "&form.content_id&" "&form.property_id&" ";
 	if(structkeyexists(form, 'content_address')){
 		csn&=form.content_address&" ";	

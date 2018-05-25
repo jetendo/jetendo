@@ -1051,12 +1051,13 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 				form.blog_category_saved_search_id=request.zos.listing.functions.zMLSSearchOptionsUpdate('delete', form.blog_category_saved_search_id);
 			}
 	}
+	/*
 	if(trim(application.zcore.functions.zso(form, 'blog_category_metakey')) EQ ""){
 		form.blog_category_metakey=replace(replace(form.blog_category_name,"|"," ","ALL"),","," ","ALL");
 	}
 	if(trim(application.zcore.functions.zso(form, 'blog_category_metadesc')) EQ ""){
 		form.blog_category_metadesc=left(replace(replace(rereplacenocase(form.blog_category_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
-	}
+	}*/
 	form.site_id=request.zos.globals.id;
 
 	if(application.zcore.functions.zso(form, 'convertLinks') EQ 1){
@@ -1074,7 +1075,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		blog_category_deleted = #db.param(0)# and 
 		site_id=#db.param(request.zos.globals.id)#";
 		qCheck=db.execute("qCheck"); 
-		if(application.zcore.functions.zso(form, 'blog_category_metakey') EQ qCheck.blog_category_metakey and qCheck.blog_category_metakey NEQ ""){
+		/*if(application.zcore.functions.zso(form, 'blog_category_metakey') EQ qCheck.blog_category_metakey and qCheck.blog_category_metakey NEQ ""){
 			if(replace(replace(qCheck.blog_category_name,"|"," ","ALL"),","," ","ALL") EQ qCheck.blog_category_metakey){
 				form.blog_category_metakey=replace(replace(form.blog_category_name,"|"," ","ALL"),","," ","ALL");
 			}
@@ -1083,7 +1084,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			if(left(replace(replace(rereplacenocase(qcheck.blog_category_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150) EQ qCheck.blog_category_metakey){
 				form.blog_category_metadesc=left(replace(replace(rereplacenocase(form.blog_category_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 			}
-		}
+		}*/
 		inputStruct.forceWhereFields = "blog_category_id"; // list: forces function to use one or more fields for the WHERE statement.
 		if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 			// failed, on duplicate key or sql error
@@ -1484,12 +1485,13 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 				form.mls_saved_search_id=request.zos.listing.functions.zMLSSearchOptionsUpdate('delete', form.mls_saved_search_id);
 			}
 	}
+	/*
 	if(trim(application.zcore.functions.zso(form, 'blog_metakey')) EQ ""){
 		form.blog_metakey=replace(replace(form.blog_title,"|"," ","ALL"),","," ","ALL");
 	}
 	if(trim(application.zcore.functions.zso(form, 'blog_metadesc')) EQ ""){
 		form.blog_metadesc=left(replace(replace(rereplacenocase(trim(form.blog_story&" "&form.blog_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
-	}
+	}*/
 	if(form.method EQ "articleUpdate"){
 		db.sql="select * from #db.table("blog", request.zos.zcoreDatasource)# blog 
 		WHERE blog_id = #db.param(form.blog_id)# and 
@@ -1497,7 +1499,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		site_id=#db.param(request.zos.globals.id)# and 
 		site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)#";
 		qCheck=db.execute("qCheck"); 
-		if(application.zcore.functions.zso(form, 'blog_metakey') EQ qCheck.blog_metakey and qCheck.blog_metakey NEQ ""){
+		/*if(application.zcore.functions.zso(form, 'blog_metakey') EQ qCheck.blog_metakey and qCheck.blog_metakey NEQ ""){
 			if(replace(replace(qCheck.blog_title,"|"," ","ALL"),","," ","ALL") EQ qCheck.blog_metakey){
 				form.blog_metakey=replace(replace(form.blog_title,"|"," ","ALL"),","," ","ALL");
 			}
@@ -1506,7 +1508,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			if(left(replace(replace(rereplacenocase(trim(qcheck.blog_story&" "&qCheck.blog_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150) EQ qCheck.blog_metakey){
 				form.blog_metadesc=left(replace(replace(rereplacenocase(trim(form.blog_story&" "&form.blog_summary),"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 			}
-		}
+		}*/
 
 		StructDelete(variables,'blog_og_image');
 		arrList=ArrayNew(1);
@@ -2256,18 +2258,20 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		form.blog_tag_saved_search_id=request.zos.listing.functions.zMLSSearchOptionsUpdate('delete', form.blog_tag_saved_search_id);
 	}
 	}
+	/*
 	if(trim(application.zcore.functions.zso(form, 'blog_tag_metakey')) EQ ""){
 		form.blog_tag_metakey=replace(replace(form.blog_tag_name,"|"," ","ALL"),","," ","ALL");
 	}
 	if(trim(application.zcore.functions.zso(form, 'blog_tag_metadesc')) EQ ""){
 		form.blog_tag_metadesc=left(replace(replace(rereplacenocase(form.blog_tag_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
-	}
+	}*/
 	if(form.method EQ "tagUpdate"){
 		db.sql="select * from #db.table("blog_tag", request.zos.zcoreDatasource)# blog_tag 
 		WHERE blog_tag_id = #db.param(form.blog_tag_id)# and 
 		site_id=#db.param(request.zos.globals.id)# and 
 		blog_tag_deleted = #db.param(0)#"; 
 		qCheck=db.execute("qCheck");
+		/*
 		if(application.zcore.functions.zso(form, 'blog_tag_metakey') EQ qCheck.blog_tag_metakey and qCheck.blog_tag_metakey NEQ ""){
 			if(replace(replace(qCheck.blog_tag_name,"|"," ","ALL"),","," ","ALL") EQ qCheck.blog_tag_metakey){
 				form.blog_tag_metakey=replace(replace(form.blog_tag_name,"|"," ","ALL"),","," ","ALL");
@@ -2277,7 +2281,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			if(left(replace(replace(rereplacenocase(qcheck.blog_tag_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150) EQ qCheck.blog_tag_metakey){
 				form.blog_tag_metadesc=left(replace(replace(rereplacenocase(form.blog_tag_description,"<[^>]*>","","ALL"),"|"," ","ALL"),","," ","ALL"),150);
 			}
-		}
+		}*/
 	}
 
 
