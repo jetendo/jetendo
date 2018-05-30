@@ -96,6 +96,9 @@
 	}
 	ss.jsonFullLink="/z/event/event-calendar/getFullCalendarJson?calendarids=#calendarIdList#";
 	ss.jsonListLink="/z/event/event-calendar/getListViewCalendarJson?calendarids=#calendarIdList#";
+	if(qCalendar.event_calendar_searchable){
+		ss.searchable=true;
+	}
 	displayCalendar(ss);
 	</cfscript> 
 
@@ -108,21 +111,33 @@
 	<cfscript>
 	viewStruct=arguments.ss.viewStruct;
 	defaultView=arguments.ss.defaultView;
-	</cfscript>
-	<div id="zCalendarResultsDiv" style="width:100%;  float:left;">
 
+	count=0;
+	</cfscript>
+	<div id="zCalendarResultsDiv" style="width:100%;  float:left;"> 
 		<cfif structkeyexists(viewStruct, 'list')>
 		<div id="zCalendarHomeTabs">
 			<ul>
-				<cfif structkeyexists(viewStruct, 'list')>
-					<li><a href="##zCalendarTab_List">List View</a></li>
-				</cfif>
-	
-				<cfif structkeyexists(viewStruct, 'Month') or structkeyexists(viewStruct, '2 Months') or structkeyexists(viewStruct, 'Week') or structkeyexists(viewStruct, 'Day')>
-					<li><a href="##zCalendarTab_Calendar" class="zCalendarViewTab">Calendar View</a></li>
-				</cfif>
-				<li><a href="##" onclick="window.location.href='/z/event/event-search/index?calendarids=#form.event_calendar_id#&amp;categories=#application.zcore.functions.zso(form, 'event_category_id')#'; return false;">Search Calendar</a></li>
-	
+				<cfsavecontent variable="out">
+					<cfif structkeyexists(viewStruct, 'list')>
+						<cfset count++>
+						<li><a href="##zCalendarTab_List">List View</a></li>
+					</cfif>
+		
+					<cfif structkeyexists(viewStruct, 'Month') or structkeyexists(viewStruct, '2 Months') or structkeyexists(viewStruct, 'Week') or structkeyexists(viewStruct, 'Day')>
+						<cfset count++>
+						<li><a href="##zCalendarTab_Calendar" class="zCalendarViewTab">Calendar View</a></li>
+					</cfif>
+					<cfif structKeyExists(ss, 'searchable') and ss.searchable>
+						<cfset count++>
+						<li><a href="##" onclick="window.location.href='/z/event/event-search/index?calendarids=#form.event_calendar_id#&amp;categories=#application.zcore.functions.zso(form, 'event_category_id')#'; return false;">Search Calendar</a></li>
+					</cfif>
+				</cfsavecontent>
+				<cfscript>
+				if(count GT 1){
+					echo(out);
+				}
+				</cfscript>
 			</ul>
 		</cfif>
 	

@@ -76,6 +76,9 @@
 	ss.jsonListLink="/z/event/event-calendar/getListViewCalendarJson?categories=#form.event_category_id#";
 
 	calendarCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.event.controller.event-calendar");
+	if(qCategory.event_category_searchable){
+		ss.searchable=true;
+	}
 	calendarCom.displayCalendar(ss);
 	</cfscript> 
 

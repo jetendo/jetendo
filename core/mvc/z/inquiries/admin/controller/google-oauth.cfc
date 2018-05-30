@@ -1569,7 +1569,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			echo('Processed search console for #row.site_short_domain# | #startMonthDate# to #endDate#<br>'); 
 			startMonthDate=dateFormat(dateadd("m", 1, startMonthDate), "yyyy-mm-dd");
 			endDate=dateformat(dateadd("m", 1, endDate), "yyyy-mm-dd");
-			sleep(6000); // sleep to avoid hitting google's api limit
+			sleep(8000); // sleep to avoid hitting google's api limit
 		}
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_google_search_console_last_import_datetime=#db.param(request.zos.mysqlnow)#,

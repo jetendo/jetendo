@@ -666,7 +666,7 @@ objCookies=GetResponseCookies(cfhttp);
 			application.mozImportStatus=path&row.site_id&"-moz-keyword-report.csv";
 			processMoz(path&row.site_id&"-moz-keyword-report.csv", row.site_id);
 
-			sleep(randrange(1000, 3000));// wait some seconds to avoid looking abusive.
+			sleep(randrange(10000, 30000));// wait some seconds to avoid looking abusive.
 		}
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_seomoz_last_import_datetime=#db.param(request.zos.mysqlnow)#,
