@@ -237,11 +237,12 @@ the "remove" replacement feature has to use the id, but the other functions need
 					if(items[i].id == jsonObj.id){
 						alert('This product is already in your cart. Please view cart and change quantity instead.');
 						return;
-						found=true;
-						foundOffset=items[i].offset;
+						//found=true;
+						//foundOffset=items[i].offset;
 					}
 				}
 			}
+			
 			
 			jsonObj.offset=idOffset;
 			count++;

@@ -27,7 +27,7 @@
 	}
 	if(structkeyexists(form, 'e') and trim(form.e) NEQ ''){
 		form.submitPref="Unsubscribe";
-		c=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.user.controller.preference");
+		c=createobject("component", "zcorerootmapping.mvc.z.user.controller.preference");
 		c.update();
 	}
 	</cfscript>

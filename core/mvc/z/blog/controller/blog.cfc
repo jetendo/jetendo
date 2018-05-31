@@ -3240,6 +3240,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		form.ListId = application.zcore.status.getNewId(); 
 	} 
 	if(structkeyexists(form, 'zIndex')){ 
+		application.zcore.functions.zso(form, 'zIndex', true, 1);
 		application.zcore.status.setField(form.ListID,'zIndex',form.zIndex); 
 	}
 	if(application.zcore.functions.zso(form, 'zIndex') GT 100 or structkeyexists(form,'blog_category_id') EQ false){

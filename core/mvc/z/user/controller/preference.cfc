@@ -64,7 +64,7 @@
 				application.zcore.functions.zabort();		
 			}else{
 				application.zcore.status.setStatus(request.zsid, "The email address, #form.e#, can't be updated through this interface because you are a server administrator.",true);
-				application.zcore.functions.zRedirect("/z/user/home/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
+				application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
 			}
 		}
 		if(structkeyexists(form, 'user_password') EQ false){
@@ -150,41 +150,43 @@
 			application.zcore.functions.zRedirect("/z/user/home/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(form.e)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
 		}
 	}*/
-	if(variables.secureLogin and variables.qcheckemail.recordcount NEQ 0){
-		if(structkeyexists(form, 'nea') and trim(variables.qcheckemail.user_email_new) NEQ ''){
-			form.user_updated_datetime = request.zos.mysqlnow;
-			
-			if(application.zcore.app.siteHasApp("listing")){
-				request.zos.listing.functions.zMLSSearchOptionsUpdateEmail(variables.qcheckemail.user_email,variables.qcheckemail.user_email_new);
+	if(request.zos.originalURL NEQ "/z/user/out/update"){
+		if(variables.secureLogin and variables.qcheckemail.recordcount NEQ 0){
+			if(structkeyexists(form, 'nea') and trim(variables.qcheckemail.user_email_new) NEQ ''){
+				form.user_updated_datetime = request.zos.mysqlnow;
+				
+				if(application.zcore.app.siteHasApp("listing")){
+					request.zos.listing.functions.zMLSSearchOptionsUpdateEmail(variables.qcheckemail.user_email,variables.qcheckemail.user_email_new);
+				}
+				db.sql="UPDATE #db.table("user", request.zos.zcoreDatasource)# user 
+				SET user_confirm=#db.param('1')#, 
+				user_username = #db.param(variables.qcheckemail.user_email_new)#, 
+				user_email = #db.param(variables.qcheckemail.user_email_new)#, 
+				user_email_new = #db.param('')#, 
+				user_updated_ip = #db.param(request.zos.cgi.remote_addr)#, 
+				user_updated_datetime = #db.param(form.user_updated_datetime)#, 
+				user_confirm_ip = #db.param(request.zos.cgi.remote_addr)#, 
+				user_confirm_datetime = #db.param(form.user_updated_datetime)# , 
+				member_email = #db.param(variables.qcheckemail.user_email_new)# 
+				WHERE user_username = #db.param(form.e)# and 
+				user_deleted = #db.param(0)# and
+				#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())#";
+				qP=db.execute("qP");
+				
+				form.zusername=variables.qcheckemail.user_email_new;
+				form.zpassword=variables.qcheckemail.user_password;
+				inputStruct = StructNew();
+				inputStruct.user_group_name = "user";
+				inputStruct.noRedirect=true;
+				inputStruct.noLoginForm=true;
+				inputStruct.disableSecurePassword=true;
+				inputStruct.site_id = request.zos.globals.id;
+				// perform check 
+				application.zcore.user.checkLogin(inputStruct); 
+				variables.secureLogin=true;
+				application.zcore.status.setStatus(request.zsid, "Your new email address, #variables.qcheckemail.user_email_new#, has been confirmed.");
+				application.zcore.functions.zRedirect("/z/user/home/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(variables.qcheckemail.user_email_new)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
 			}
-			db.sql="UPDATE #db.table("user", request.zos.zcoreDatasource)# user 
-			SET user_confirm=#db.param('1')#, 
-			user_username = #db.param(variables.qcheckemail.user_email_new)#, 
-			user_email = #db.param(variables.qcheckemail.user_email_new)#, 
-			user_email_new = #db.param('')#, 
-			user_updated_ip = #db.param(request.zos.cgi.remote_addr)#, 
-			user_updated_datetime = #db.param(form.user_updated_datetime)#, 
-			user_confirm_ip = #db.param(request.zos.cgi.remote_addr)#, 
-			user_confirm_datetime = #db.param(form.user_updated_datetime)# , 
-			member_email = #db.param(variables.qcheckemail.user_email_new)# 
-			WHERE user_username = #db.param(form.e)# and 
-			user_deleted = #db.param(0)# and
-			#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())#";
-			qP=db.execute("qP");
-			
-			form.zusername=variables.qcheckemail.user_email_new;
-			form.zpassword=variables.qcheckemail.user_password;
-			inputStruct = StructNew();
-			inputStruct.user_group_name = "user";
-			inputStruct.noRedirect=true;
-			inputStruct.noLoginForm=true;
-			inputStruct.disableSecurePassword=true;
-			inputStruct.site_id = request.zos.globals.id;
-			// perform check 
-			application.zcore.user.checkLogin(inputStruct); 
-			variables.secureLogin=true;
-			application.zcore.status.setStatus(request.zsid, "Your new email address, #variables.qcheckemail.user_email_new#, has been confirmed.");
-			application.zcore.functions.zRedirect("/z/user/home/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(variables.qcheckemail.user_email_new)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
 		}
 	}
 	</cfscript>
@@ -684,14 +686,15 @@ If the link does not work, please copy and paste the entire link in your browser
 	form.user_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
 	form.contact_key=hash(form.user_salt, "sha-256");
 	db.sql="INSERT INTO #db.table("contact", request.zos.zcoreDatasource)# (contact_confirm , contact_opt_in, contact_email,contact_key, 
-	site_id , contact_sent_datetime , contact_datetime , contact_confirm_datetime , contact_confirm_count, contact_updated_datetime, contact_opt_out)
+	site_id , contact_sent_datetime , contact_datetime , contact_confirm_datetime , contact_confirm_count, contact_updated_datetime, contact_opt_out, contact_deleted)
 	VALUES( #db.param(0)#, #db.param(0)#, #db.param(form.e)#, #db.param(form.contact_key)#, 
 	#db.param(request.zos.globals.id)#, #db.param(request.zos.mysqlnow)#, #db.param(request.zos.mysqlnow)#, 
-	#db.param(request.zos.mysqlnow)#, #db.param(3)#, #db.param(request.zos.mysqlnow)#, #db.param(1)# )
+	#db.param(request.zos.mysqlnow)#, #db.param(3)#, #db.param(request.zos.mysqlnow)#, #db.param(1)#, #db.param(0)# )
 	
 	ON DUPLICATE KEY UPDATE contact_opt_in=#db.param('0')#, 
 	contact_opt_out=#db.param(1)#, 
 	contact_confirm_count=#db.param(3)#,  
+	contact_deleted=#db.param(0)#, 
 	contact_confirm_datetime = #db.param(request.zos.mysqlnow)# ";
 	db.execute("qInsert");
 	if(variables.qcheckemail.recordcount NEQ 0){
@@ -747,6 +750,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	var loginCom=0;
 	// init must run first because reset password and other features rely on this!
         this.init();
+        application.zcore.functions.zStatusHandler(request.zsid);
 	if(application.zcore.user.checkGroupAccess("user")){
 		  application.zcore.functions.zRedirect("/z/user/home/index");
 	}
