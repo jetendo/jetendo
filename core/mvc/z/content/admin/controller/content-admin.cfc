@@ -308,6 +308,7 @@
 	}
 	csn&=form.content_text&" "&form.content_text2&" "&form.content_text3;
 	form.content_search=application.zcore.functions.zCleanSearchText(csn, true);
+	
 	form.content_image_list=trim(application.zcore.functions.zExtractImagesFromHTML(form.content_text)&" "&application.zcore.functions.zExtractImagesFromHTML(form.content_text2)&" "&application.zcore.functions.zExtractImagesFromHTML(form.content_text3));
 	
 	if(application.zcore.functions.zso(form, 'content_mls_number') NEQ '' and application.zcore.functions.zso(form, 'content_mls_provider') NEQ '' and application.zcore.functions.zso(form, 'content_mls_price') NEQ ''){
@@ -2012,6 +2013,9 @@
 	if(form.searchText NEQ "" and isNumeric(form.searchText) EQ false and len(form.searchText) LTE 2){
 		application.zcore.status.setStatus(request.zsid,"The search searchText must be 3 or more characters.",form);
 		application.zcore.functions.zRedirect("/z/content/admin/content-admin/index?zsid=#request.zsid#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#");
+	}
+	if(form.searchText EQ ""){
+		form.searchText=searchTextOriginal;
 	}
 	searchTextReg=rereplace(form.searchText,"[^A-Za-z0-9[[:white:]]]*",".","ALL");
 	searchTextOReg=rereplace(form.searchTextOriginal,"[^A-Za-z0-9 ]*",".","ALL");

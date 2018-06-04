@@ -241,6 +241,10 @@ function getSysIdByListingId($listingId){
 			exit;
 		}
 		$arrSQL=$arrListingQueryFunction[$mls_id]();
+		if($listingId == ""){
+			echo("invalid listing id\n");
+			return false;
+		}
 		$sql=$arrSQL[0].$listingId."')";
 
 		$result=$cmysql->query($sql);

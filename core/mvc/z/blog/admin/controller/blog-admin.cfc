@@ -1966,6 +1966,9 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			application.zcore.status.setStatus(request.zsid,"The search searchText must be 3 or more characters.",form);
 			application.zcore.functions.zRedirect("/z/blog/admin/blog-admin/articleList?zsid=#request.zsid#&site_x_option_group_set_id=#form.site_x_option_group_set_id#");
 		}
+		if(form.searchText EQ ""){
+			form.searchText=searchTextOriginal;
+		}
 	}
 	searchTextReg=rereplace(form.searchText,"[^A-Za-z0-9[[:white:]]]*",".","ALL");
 	searchTextOReg=rereplace(searchTextOriginal,"[^A-Za-z0-9 ]*",".","ALL");
@@ -2122,8 +2125,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		<div class="z-float z-mb-10">
 			<input type="text" name="searchtext" id="searchtext" placeholder="ID or Keyword" value="#htmleditformat(application.zcore.functions.zso(form, 'searchtext'))#" style="min-width:200px;width:75%; max-width:400px;" size="20" maxchars="10" /> 
 			<select id="searchBlogCategoryId" name="searchBlogCategoryId" style="width:250px;">
-				<option value="" disabled>Search By Category</option>
-				<option value=""></option>
+				<option value="">-- Select Category --</option> 
 				<cfloop query="qCategory">
 					<cfif form.searchBlogCategoryId EQ qCategory.blog_category_id>
 						<option selected value="#qCategory.blog_category_id#">#qCategory.blog_category_name#</option>
@@ -2134,7 +2136,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			</select>
 
 			<input type="submit" name="searchForm" value="Search" class="z-manager-search-button" /> 
-			<cfif application.zcore.functions.zso(form, 'searchtext') NEQ ''> | 
+			<cfif application.zcore.functions.zso(form, 'searchtext') NEQ ''> 
 				<input type="button" name="searchForm2" value="Clear Search" class="z-manager-search-button" onclick="window.location.href='/z/blog/admin/blog-admin/articleList?searchtext=';" />
 			</cfif>
 			<input type="hidden" name="zIndex" value="1" />

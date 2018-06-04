@@ -339,6 +339,12 @@ if ($handle = opendir($mp)) {
 						$cur=$mp.$entry."/".$entry2;
 						$idname=$entry."-".$entry2;
 						$idonlyname=substr($entry2, 0, $pos);
+						if($idonlyname == ""){
+							echo "empty idonlyname: ".$cur."\n";
+							continue;
+						}
+						// uncomment to debug file path
+						//echo $cur."\n";
 						if($iCount1 % 100 == 0){
 							if($iCount1 !=0){
 								echo "process ".$iCount1."\n";
