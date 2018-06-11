@@ -144,6 +144,8 @@
 			qProd = db.execute("qProd");
 		}
 		catch(Any e){qProd = QueryNew("product_id, product_name");}
+
+		productName="";
 	</cfscript>
 	<cfsavecontent variable="output">
 	<script>
@@ -152,6 +154,9 @@
 			<cfloop query="qProd">
 				arrProdInSpecial.push({id:"#qProd.product_id#", name: "#qProd.product_name#", category:"#qProd.product_category_id#"});
 				<cfif Trim(sValue) EQ qProd.product_id>
+					<cfscript>
+					productName=qProd.product_name;
+					</cfscript>
 					$("###arguments.prefixString##arguments.row["#variables.type#_option_id"]#").append("<option selected data-category=\"#qProd.product_category_id#\" value=\"#qProd.product_id#\">#qProd.product_name#</option>");
 				</cfif>
 			</cfloop>
@@ -198,7 +203,7 @@
 			}
 		}
 	</script>	
-	<input style="width:200px; height:25px;" type="text" id="product_name_#arguments.row["#variables.type#_option_id"]#" value="#sValue#"
+	<input style="width:200px; height:25px;" type="text" id="product_name_#arguments.row["#variables.type#_option_id"]#" value="#productName#"
 		name="product_name_#arguments.row["#variables.type#_option_id"]#" list="productList" onkeyup="pspMgrSearchProduct_#arguments.row["#variables.type#_option_id"]#(event, this);" />
 	<button type="button" id="ddBtnProductName" onclick="pspMgrHideList_#arguments.row["#variables.type#_option_id"]#(this,'lstProductName');" style="padding:0px; width:22px; height:24px; top:1px; position:relative; left:-3px; cursor:pointer;">▼</button>
 	<datalist id="lstProductName" style="display:none; height:300px; width:250px; padding-left:0px;">

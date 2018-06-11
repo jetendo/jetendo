@@ -755,9 +755,9 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	// category urls
 	db.sql="SELECT * from #db.table("product_category", request.zos.globals.datasource)#
 	WHERE site_id=#db.param(arguments.site_id)# and 
-	product_category_override_url<>#db.param('')# and 
+	product_category_unique_url<>#db.param('')# and 
 	product_category_deleted = #db.param(0)#
-	ORDER BY product_category_override_url DESC";
+	ORDER BY product_category_unique_url DESC";
 	qF=db.execute("qF");
 	loop query="qF"{
 		t9=structnew();
@@ -765,7 +765,7 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		t9.urlStruct=structnew();
 		t9.urlStruct[request.zos.urlRoutingParameter]="/product-category/index";
 		t9.urlStruct.product_category_id=qF.product_category_id;
-		arguments.sharedStruct.uniqueURLStruct[trim(qF.product_category_override_url)]=t9;
+		arguments.sharedStruct.uniqueURLStruct[trim(qF.product_category_unique_url)]=t9;
 	}
 	t9=structnew();
 	t9.type=1;
