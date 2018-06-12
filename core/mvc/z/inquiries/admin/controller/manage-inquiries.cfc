@@ -2216,7 +2216,7 @@ zArrDeferredFunctions.push(function(){
 		if(not application.zcore.app.siteHasApp("rental")){
 			db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
 		}
-		db.sql&="ORDER BY inquiries_type_sort ASC, inquiries_type_name ASC ";
+		db.sql&="ORDER BY inquiries_type_name ASC ";
 		qTypes=db.execute("qTypes");
 		selectStruct = StructNew();
 		selectStruct.name = "inquiries_type_id";

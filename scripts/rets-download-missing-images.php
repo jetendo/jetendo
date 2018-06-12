@@ -89,9 +89,11 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 				if(!file_exists($fpath.$fname)){ // || $row["listing_id"] =='28-1036138' || $row["listing_id"] =='25-O5559132'
 					ob_start();
 					if(isset($forceDownloadAll[$mls_id])){
+						echo "download all images for : ".$row["listing_id"]."\n";
 						$r=zDownloadRetsImages($row["listing_id"], "", 0);
 						$c=0; 
 					}else{
+						echo "download: ".$fpath.$fname."\n";
 						$r=zDownloadRetsImages($row["listing_id"], "", $i);
 					}
 					$out=ob_get_clean();
@@ -108,6 +110,7 @@ while($mlsRow=$result2->fetch_array(MYSQLI_ASSOC)){
 						$downloadCount++;
 					}
 				}else{
+					echo "existed:".$fpath.$fname."\n";
 					if($count1 % 300 == 0){
 						echo "Processed ".$count1." images | mls_id = ".$mls_id." | Downloaded ".$downloadCount." missing images\n";
 					}

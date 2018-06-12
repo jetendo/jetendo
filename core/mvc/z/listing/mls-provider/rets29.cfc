@@ -428,7 +428,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 			
 			for(i=1;i LTE arguments.ss.listing_photocount;i++){
 				
-				local.fNameTemp1=idx.rets29_matrix_unique_id&"-"&i&".jpeg";
+				local.fNameTemp1=idx.listing_id&"-"&i&".jpeg";
 				local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
 				local.absPath='#request.zos.sharedPath#mls-images/29/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
 				//if(fileexists(local.absPath)){
@@ -489,9 +489,9 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		var qId=0;
 		var db=request.zos.queryObject;
 		var local=structnew();
-		// rets29_matrix_unique_id 
-		request.lastPhotoId=this.mls_id&"-"&arguments.sysid;
-		local.fNameTemp1=arguments.sysid&"-"&arguments.num&".jpeg"; 
+		// rets29_matrix_unique_id  
+		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
+		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg"; 
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
 		local.absPath='#request.zos.sharedPath#mls-images/29/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
 		if(fileexists(local.absPath)){
