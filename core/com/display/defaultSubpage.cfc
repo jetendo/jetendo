@@ -175,19 +175,27 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
  
 	if(not structkeyexists(ss, 'currentSection')){
 		throw("ss.currentSection is required");
-	}   
+	}    
 	arrSide=[]; 
+	overrideSectionImage="";
+	overrideSectionMobileImage="";
 	if(structkeyexists(ss.currentSection, 'arrLink')){
 		for(i=1;i<=arraylen(ss.currentSection.arrLink);i++){
-			link=ss.currentSection.arrLink[i]; 
+			link=ss.currentSection.arrLink[i];  
 			a=('<li ');
-			if(link.url EQ request.zos.originalURL){
+			if(link.url EQ request.zos.originalURL){ 
 				a&=(' class="active" ');
+				if(structkeyexists(link, 'Image') and link.image NEQ ""){
+					overrideSectionImage=link.image;
+				}
+				if(structkeyexists(link, 'Mobile Image') and link["Mobile Image"] NEQ ""){
+					overrideSectionMobileImage=link["Mobile Image"];
+				}
 			}
 			a&=('><a  href="#link["URL"]#">#link["Link Text"]#</a></li>');
 			arrayAppend(arrSide, a);
 		}   
-	}
+	} 
 	if(not structkeyexists(ss.currentSection, 'section')){
 		ss.currentSection.section={
 			"Image":"",
@@ -203,10 +211,14 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	section=ss.currentSection.section;
 	sectionImage=ss.defaultSectionImage;
 	sectionMobileImage=ss.defaultSectionMobileImage;
-	if(section["Image"] NEQ ""){
+	if(overrideSectionImage NEQ ""){
+		sectionImage=overrideSectionImage;
+	}else if(section["Image"] NEQ ""){
 		sectionImage=section["Image"];
 	}
-	if(section["Mobile Image"] NEQ ""){
+	if(overrideSectionMobileImage NEQ ""){
+		sectionMobileImage=overrideSectionMobileImage;
+	}else if(section["Mobile Image"] NEQ ""){
 		sectionMobileImage=section["Mobile Image"];
 	} 
 	</cfscript>  

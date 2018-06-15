@@ -2015,7 +2015,7 @@
 		application.zcore.functions.zRedirect("/z/content/admin/content-admin/index?zsid=#request.zsid#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#");
 	}
 	if(form.searchText EQ ""){
-		form.searchText=searchTextOriginal;
+		form.searchText=form.searchTextOriginal;
 	}
 	searchTextReg=rereplace(form.searchText,"[^A-Za-z0-9[[:white:]]]*",".","ALL");
 	searchTextOReg=rereplace(form.searchTextOriginal,"[^A-Za-z0-9 ]*",".","ALL");
