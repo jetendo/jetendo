@@ -16,6 +16,8 @@ The site option group structure must be exactly this to use this code:
 		Sub-group: Link
 			Link Text // text field, required
 			URL // url field, required
+			Image (3840x800 for 4k or 1920x400 for 1080p) // image, optional
+			Mobile Image (960 x 400) // image, optional
 */
  
 // need a get current section function that returns the current section.

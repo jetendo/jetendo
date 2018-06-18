@@ -1777,8 +1777,8 @@ displayGroupCom.ajaxInsert();
 	application.zcore.routing.initRewriteRuleApplicationStruct(application.sitestruct[request.zos.globals.id]);
 	
 	if(form.method EQ "insert" and structkeyexists(request.zsession, "site_option_group_return") and request.zsession['site_option_group_return'] NEQ ""){
-		tempLink=request.zsession["site_option_group_return"&form.site_option_group_id];
-		structdelete(request.zsession,"site_option_group_return"&form.site_option_group_id);
+		tempLink=request.zsession["site_option_group_return"];
+		structdelete(request.zsession,"site_option_group_return");
 		application.zcore.functions.z301Redirect(replace(tempLink, "zsid=", "ztv=", "all"));
 	}else if(structkeyexists(request.zsession, "site_option_group_return"&form.site_option_group_id)){
 		tempLink=request.zsession["site_option_group_return"&form.site_option_group_id];
