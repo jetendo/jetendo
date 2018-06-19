@@ -262,7 +262,7 @@
 	<cfscript>
 
  	if(arraylen(ss.arrData) EQ 0){
- 		js.html="<p>No events found.</p>";
+ 		js.html="<p>There are no events at this time. Please check back later.</p>";
  	}
 	application.zcore.functions.zReturnJson(js);
 	</cfscript>

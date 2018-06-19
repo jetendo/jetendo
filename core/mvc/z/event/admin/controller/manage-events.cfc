@@ -1328,7 +1328,7 @@
 	<cfscript>
 	
 	if(qList.recordcount EQ 0){
-		echo('<p>No events found</p>');
+		echo('<p>There are no events at this time. Please check back later.</p>');
 	}
 	if(qCount.count GT perpage){
 		echo(searchNav);
