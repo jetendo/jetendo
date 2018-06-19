@@ -67,7 +67,9 @@ var zLoggedIn=false;
 									id:"zContinueSession",
 									method:"get",
 									callback:function(r){
-										console.log('Session extended');
+										console.log('Session extended'); 
+										showingIdleLogoutWarning=false;
+										zCloseModal();
 									},
 									errorCallback:function(){ alert('Unknown error occurred'); },
 									url:"/z/user/home/extendSession"
