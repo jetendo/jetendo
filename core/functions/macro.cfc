@@ -1321,6 +1321,7 @@ if(rs.success){
 	<cftry>
 		<cfscript>
 		arrSocialImage=[];
+		arguments.theURL=replace(arguments.theURL, "?__a=1", "?");
 		cachePath=application.zcore.functions.zURLEncode(arguments.theURL, '_');
 		if(not structkeyexists(application, 'instagramFeedCache')){
 			application.instagramFeedCache={};
@@ -1328,37 +1329,49 @@ if(rs.success){
 		if(request.zos.zreset NEQ "site" and structkeyexists(application.instagramFeedCache, cachePath) and application.instagramFeedCache[cachePath].date EQ dateformat(now(), "yyyy-mm-dd")){
 			arrSocialImage=application.instagramFeedCache[cachePath].arrSocialImage;
 		}else{
-			rs=application.zcore.functions.zDownloadLink(arguments.theURL);
+			rs=application.zcore.functions.zDownloadLink(arguments.theURL); 
 			if(rs.success){
-				if(rs.cfhttp.filecontent NEQ "" and isJson(rs.cfhttp.filecontent)){
-					jsonObj=deserializeJSON(rs.cfhttp.filecontent); 
-					arrImage=jsonObj.graphql.user.edge_owner_to_timeline_media.edges; 
-					for(i=1;i LTE min(5, arrayLen(arrImage));i++){
-						image=arrImage[i].node; 
-						thumbnailImage=image.thumbnail_src;
-						for(thumbnail in image.thumbnail_resources){
-							if(thumbnail.config_width EQ arguments.thumbnailSize){
-								thumbnailImage=thumbnail.src;
-							}
-						}   
-						ts={
-							id:image.id,
-							image:image.display_url,
-							link:"https://www.instagram.com/p/"&image.shortcode&"/",
-							likeCount:image.edge_liked_by.count,
-							commentCount:image.edge_media_to_comment.count,
-							date:DateAdd("s", image.taken_at_timestamp, DateConvert("utc2Local", "January 1 1970 00:00")),
-							image:thumbnailImage,
-							owner:image.owner.id,
-							shortCode:image.shortcode,
-							imageWidth:image.dimensions.width,
-							imageHeight:image.dimensions.height,
-							thumbnailWidth:arguments.thumbnailSize,
-							thumbnailHeight:arguments.thumbnailSize,
-							caption:image.edge_media_to_caption.edges[1].node.text,
-							is_video:image.is_video
-						};
-						arrayAppend(arrSocialImage, ts);
+				//if(rs.cfhttp.filecontent NEQ "" and isJson(rs.cfhttp.filecontent)){
+				if(rs.cfhttp.filecontent NEQ ""){
+					searchText='<script type="text/javascript">window._sharedData = ';
+					pos=findnocase(searchText, rs.cfhttp.filecontent);
+					t=""; 
+					if(pos NEQ 0){
+						pos2=findnocase('</script>', rs.cfhttp.filecontent, pos); 
+						if(pos2 NEQ 0){
+							t=mid(rs.cfhttp.filecontent, pos+len(searchText), pos2-(pos+len(searchText)+1) ); 
+						}
+					} 
+					if(t NEQ "" and isJson(t)){
+						jsonObj=deserializeJSON(t); 
+						arrImage=jsonObj.entry_data.ProfilePage[1].graphql.user.edge_owner_to_timeline_media.edges; 
+						for(i=1;i LTE min(5, arrayLen(arrImage));i++){
+							image=arrImage[i].node; 
+							thumbnailImage=image.thumbnail_src;
+							for(thumbnail in image.thumbnail_resources){
+								if(thumbnail.config_width EQ arguments.thumbnailSize){
+									thumbnailImage=thumbnail.src;
+								}
+							}   
+							ts={
+								id:image.id,
+								image:image.display_url,
+								link:"https://www.instagram.com/p/"&image.shortcode&"/",
+								likeCount:image.edge_liked_by.count,
+								commentCount:image.edge_media_to_comment.count,
+								date:DateAdd("s", image.taken_at_timestamp, DateConvert("utc2Local", "January 1 1970 00:00")),
+								image:thumbnailImage,
+								owner:image.owner.id,
+								shortCode:image.shortcode,
+								imageWidth:image.dimensions.width,
+								imageHeight:image.dimensions.height,
+								thumbnailWidth:arguments.thumbnailSize,
+								thumbnailHeight:arguments.thumbnailSize,
+								caption:image.edge_media_to_caption.edges[1].node.text,
+								is_video:image.is_video
+							};
+							arrayAppend(arrSocialImage, ts);
+						} 
 					}
 				}
 				application.instagramFeedCache[cachePath]={
@@ -1372,7 +1385,7 @@ if(rs.success){
 		return {success:true, arrSocialImage:arrSocialImage};
 		</cfscript>
 		<cfcatch type="any">
-			<cfscript> 
+			<cfscript>  
 			savecontent variable="out"{
 				echo('<h2>Instagram API Failure</h2>');
 				writedump(cfcatch);
