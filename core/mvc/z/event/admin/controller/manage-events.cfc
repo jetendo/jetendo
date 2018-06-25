@@ -1328,7 +1328,12 @@
 	<cfscript>
 	
 	if(qList.recordcount EQ 0){
-		echo('<p>There are no events at this time. Please check back later.</p>');
+ 		noEventMessage=application.zcore.functions.zso(application.zcore.app.getAppData("event").optionStruct, 'event_config_no_event_message');
+ 		if(noEventMessage EQ ""){
+	 		js.html="<p>There are no events at this time. Please check back later.</p>";
+	 	}else{
+	 		js.html=noEventMessage;
+	 	}
 	}
 	if(qCount.count GT perpage){
 		echo(searchNav);

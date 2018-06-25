@@ -1761,6 +1761,18 @@ searchEvents(ts);
 		echo('<br>Don''t enable this on any commercial web site.  It is only free for personal/non-profit use.</td>
 		</tr>
 		<tr>
+		<th>No Event Message:</th>
+		<td>');
+		 
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "event_config_no_event_message";
+		htmlEditor.value			= form.event_config_no_event_message;
+		htmlEditor.width			= "100%";
+		htmlEditor.height		= 150;
+		htmlEditor.createSimple();
+		echo('<br>Note: This text appears when no events match the search.</td>
+		</tr>
+		<tr>
 		<th>Disable Robot Recurring<br />Event Indexing:</th>
 		<td>');
 

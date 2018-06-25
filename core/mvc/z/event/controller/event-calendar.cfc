@@ -262,7 +262,12 @@
 	<cfscript>
 
  	if(arraylen(ss.arrData) EQ 0){
- 		js.html="<p>There are no events at this time. Please check back later.</p>";
+ 		noEventMessage=application.zcore.functions.zso(application.zcore.app.getAppData("event").optionStruct, 'event_config_no_event_message');
+ 		if(noEventMessage EQ ""){
+	 		js.html="<p>There are no events at this time. Please check back later.</p>";
+	 	}else{
+	 		js.html=noEventMessage;
+	 	}
  	}
 	application.zcore.functions.zReturnJson(js);
 	</cfscript>

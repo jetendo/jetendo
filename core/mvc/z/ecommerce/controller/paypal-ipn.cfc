@@ -90,8 +90,11 @@ To debug a specific ipn message, you can add the value of paypal_ipn_log_data in
 		if(trim(cfhttp.FileContent) EQ "VERIFIED"){
 			return { postedData:arraytolist(arrForm2, "&"), errorMessage:"", success:true};
 		}else{
-
-			return { postedData:arraytolist(arrForm2, "&"), errorMessage:"Failed to verify IPN with result being: #cfhttp.FileContent#", success:false};
+			if(structkeyexists(ss, 'for_auction') and ss.for_auction EQ true){
+				return { postedData:arraytolist(arrForm2, "&"), errorMessage:"Ignoring auction ipn errors on purpose now.", success:true};
+			}else{
+				return { postedData:arraytolist(arrForm2, "&"), errorMessage:"Failed to verify IPN with result being: #cfhttp.FileContent#", success:false};
+			}
 		}
 	} 
 	</cfscript>
