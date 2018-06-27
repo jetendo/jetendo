@@ -1119,7 +1119,8 @@ a.z-manager-assign:hover span{ color:#369;}
 .zEventView1-0{width:100%; float:left;}
 .zEventView1-print:link, .zEventView1-print:visited{display:block; float:left; padding:5px; text-decoration:none;border:1px solid #666; background-color:#999; color:#FFF; border-radius:5px;}
 .zEventView1-print:hover{background-color:#000;}
-.zEventView1-1{width:100px; display:table-cell;  font-weight:bold;}
+.zEventView1-1{width:100px; display:table-cell; vertical-align:top; font-weight:bold;}
+
 .zEventView1-2{ display:table-cell;  font-size:15px; line-height:19px;padding-top:16px;padding-bottom:16px; margin-left:37px;}
 
 .zEventView1-3{width:100%; float:left; padding-bottom:20px;}

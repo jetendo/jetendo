@@ -1,5 +1,98 @@
 <cfcomponent>
 <cfoutput>
+
+<cffunction name="encodeForVCalendar" localmode="modern" access="public">
+	<cfargument name="s" type="string" required="yes">
+	<cfscript>
+	s=arguments.s;
+	/*
+	s=replace(s, chr(10), "\u005E\u006E", "all");
+	s=replace(s, chr(13), "", "all");
+	s=replace(s, "^", "\u005E\u005E", "all");
+	s=replace(s, '"', "\u005E\u0027", "all");*/
+	s=replace(s, chr(10), "\n", "all"); 
+	s=replace(s, chr(13), "", "all"); 
+	//s=wrap(s,62);
+	return s;
+	</cfscript>
+</cffunction>	
+
+<cffunction name="download" localmode="modern" access="remote">
+	<cfscript>
+	form.event_id=application.zcore.functions.zso(form, "event_id", true);
+	form.event_recur_id=application.zcore.functions.zso(form, "event_recur_id", true);
+	//echo(encodeForVCalendar("Test"" \\ing ^with caret and break#chr(10)#break"));abort;
+	ts={};
+	if(form.event_recur_id NEQ 0){
+		ts.event_recur_id=form.event_recur_id;
+	}
+	ts.onlyFutureEvents=false;
+	ts.perpage=1;
+	if(application.zcore.user.checkGroupAccess("member")){
+		ts.showInactive=true;
+	} 
+	eventCom=application.zcore.app.getAppCFC("event");
+	rs=eventCom.searchEvents(ts);  
+	if(rs.count NEQ 1){
+		application.zcore.functions.z404("Event, #form.event_id#, is missing");
+	}
+	row=rs.arrData[1];
+	actualLink=eventCom.getEventRecurURL(row); 
+	address="";
+	if(row.event_location NEQ ""){
+		address&=row.event_location;
+	}
+	if(row.event_address NEQ ""){
+		if(address NEQ ""){
+			address&=", ";
+		}
+		address&=row.event_address;
+	}
+	if(row.event_city NEQ ""){
+		if(address NEQ ""){
+			address&=", ";
+		}
+		address&=row.event_city&" ";
+	}
+	if(row.event_state NEQ ""){
+		address&=row.event_state&" ";
+	}
+	if(row.event_zip NEQ ""){
+		address&=row.event_zip&" ";
+	}
+	if(row.event_country NEQ ""){
+		address&=row.event_country;
+	}
+	
+	tz=gettimezoneinfo(); 
+	updatedDate=DateAdd("h", tz.utcHourOffset, row.event_updated_datetime);
+	startDate=DateAdd("h", tz.utcHourOffset, row.event_recur_start_datetime);
+	endDate=DateAdd("h", tz.utcHourOffset, row.event_recur_end_datetime);
+
+	savecontent variable="out"{
+		echo('BEGIN:VCALENDAR#chr(10)#');
+		echo('PRODID:website');
+		echo('VERSION:2.0#chr(10)#');
+		echo('BEGIN:VEVENT#chr(10)#');
+		echo('DTSTAMP:#dateformat(updatedDate,'yyyymmdd')&"T"&timeformat(updatedDate, "HHmmss")&"Z"##chr(10)#');
+		echo('DTSTART:#dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z"##chr(10)#');
+		echo('DTEND:#dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z"##chr(10)#');
+		echo('LOCATION:#encodeForVCalendar(address)##chr(10)#');
+		echo('DESCRIPTION:#encodeForVCalendar(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description))##chr(10)#');
+		echo('SUMMARY:#encodeForVCalendar(row.event_name)##chr(10)#');
+		echo('PRIORITY:3#chr(10)#');
+		echo('UID:#application.zcore.functions.zURLEncode(request.zos.globals.domain, "-")&"-"&row.event_id&"-"&row.event_recur_id#');
+		echo('END:VEVENT#chr(10)#');
+		echo('END:VCALENDAR#chr(10)#');
+	}
+
+	header name="Content-Disposition"  value="attachment;filename=#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
+	application.zcore.functions.zHeader("Content-Type", "text/calendar");
+	echo(out);
+	abort;
+	</cfscript>
+</cffunction>
+
 <cffunction name="displayEvent" localmode="modern" access="private">
 	<cfargument name="struct" type="struct" required="yes">
 	<cfscript>
@@ -235,19 +328,24 @@
 						</cfif>
 					</div>
 				</div>
-			</cfif>
+			</cfif> 
 			<div class="zEventView1-0 zEventView-share">
 				<div class="zEventView1-1">Share:</div>
 				<div class="zEventView1-2"> 
-					<a href="##"  data-ajax="false" onclick="zShowModalStandard('/z/misc/share-with-friend/index?title=#urlencodedformat(struct.event_name)#&amp;link=#urlencodedformat(request.zos.currentHostName&struct.__url)#', 540, 630);return false;" rel="nofollow" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_03.jpg" alt="Share by email" width="30" height="30" /></a>
-					<a href="https://www.facebook.com/sharer/sharer.php?u=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_05.jpg" alt="Share on facebook" width="30" height="30" /></a>
-					<a href="https://twitter.com/share?url=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_07.jpg" alt="Share on twitter" width="30" height="30" /></a>
-					<a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=#urlencodedformat(request.zos.currentHostName&struct.__url)#&amp;title=#urlencodedformat(struct.event_name)#&amp;summary=&amp;source=#urlencodedformat(request.zos.globals.shortDomain)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_09.jpg" alt="Share on linkedin" width="30" height="30" /></a> 
-					<a href="#request.zos.originalURL#?print=1" target="_blank" class="zEventView1-print" rel="nofollow">Print</a>
+					<div class="z-float">
+						<a href="##"  data-ajax="false" onclick="zShowModalStandard('/z/misc/share-with-friend/index?title=#urlencodedformat(struct.event_name)#&amp;link=#urlencodedformat(request.zos.currentHostName&struct.__url)#', 540, 630);return false;" rel="nofollow" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_03.jpg" alt="Share by email" width="30" height="30" /></a>
+						<a href="https://www.facebook.com/sharer/sharer.php?u=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_05.jpg" alt="Share on facebook" width="30" height="30" /></a>
+						<a href="https://twitter.com/share?url=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_07.jpg" alt="Share on twitter" width="30" height="30" /></a>
+						<a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=#urlencodedformat(request.zos.currentHostName&struct.__url)#&amp;title=#urlencodedformat(struct.event_name)#&amp;summary=&amp;source=#urlencodedformat(request.zos.globals.shortDomain)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_09.jpg" alt="Share on linkedin" width="30" height="30" /></a> 
+						<a href="#request.zos.originalURL#?print=1" target="_blank" class="zEventView1-print" rel="nofollow">Print</a>
+					</div>
+					<div class="z-float">
+						<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print">Add To My Calendar</a>
+					</div>
 				</div>
 			</div>
 
-			<cfif application.zcore.functions.zso(application.zcore.app.getAppData("event").optionStruct, 'event_config_add_to_calendar_enabled') EQ "1">
+			<!--- <cfif application.zcore.functions.zso(application.zcore.app.getAppData("event").optionStruct, 'event_config_add_to_calendar_enabled') EQ "1">
 				<cfscript>
 				application.zcore.skin.includeJS("//addthisevent.com/libs/1.6.0/ate.min.js");
 				arrLocation=[];
@@ -292,7 +390,7 @@
 					</div>
 				</div>
 			</cfif>
-
+ --->
 		</div>
 	</div>
 	<cfscript>
@@ -353,6 +451,7 @@
 	application.zcore.template.prependTag('meta','<meta name="robots" content="noindex,follow" />'); 
 	db=request.zos.queryObject; 
 	form.event_recur_id=application.zcore.functions.zso(form, 'event_recur_id', true);
+	ts={};
 	ts.event_recur_id=form.event_recur_id;
 	ts.onlyFutureEvents=false;
 	ts.perpage=1;

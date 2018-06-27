@@ -1753,13 +1753,17 @@ searchEvents(ts);
 		}
 		echo(application.zcore.functions.zInput_Boolean("event_config_enable_suggest_event"));
 		echo('</td>
-		</tr>
+		</tr>');
+		/*
+		// this is always on now because we implements ics file download instead
+		echo('
 		<tr>
 		<th>Enable Add To Calendar:</th>
 		<td>');
 		echo(application.zcore.functions.zInput_Boolean("event_config_add_to_calendar_enabled"));
 		echo('<br>Don''t enable this on any commercial web site.  It is only free for personal/non-profit use.</td>
-		</tr>
+		</tr> */
+		echo('
 		<tr>
 		<th>No Event Message:</th>
 		<td>');

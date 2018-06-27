@@ -1518,7 +1518,9 @@ leadchart
 			db.sql&=" keyword_ranking_secondary=#db.param(0)# and ";
 		}
 		db.sql&="  
-		site_id = #db.param(request.zos.globals.id)# and ";
+		site_id = #db.param(request.zos.globals.id)# and 
+		keyword_ranking_run_datetime >=#db.param('2000-01-01 00:00:00')# and
+		";
 		if(keywordStartDate NEQ ""){
 			db.sql&=" keyword_ranking_run_datetime >=#db.param(keywordStartDate)# and ";
 		}
