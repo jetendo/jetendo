@@ -49,7 +49,7 @@
 		form.method EQ "publicAjaxInsertGroup"){
 
 	}else{ 
-		if(form.method EQ "manageGroup" or form.method EQ "addGroup" or form.method EQ "editGroup" or form.method EQ "deleteGroup" or form.method EQ "insertGroup" or form.method EQ "updateGroup" or form.method EQ "getRowHTML"){
+		if(form.method EQ "archiveGroup" or form.method EQ "unarchiveGroup" or form.method EQ "manageGroup" or form.method EQ "addGroup" or form.method EQ "editGroup" or form.method EQ "deleteGroup" or form.method EQ "insertGroup" or form.method EQ "updateGroup" or form.method EQ "getRowHTML"){
 			if(not application.zcore.adminSecurityFilter.checkFeatureAccess("Site Options")){
 				// check if user has access to site_option_group_id only 
 				groupId=application.zcore.functions.zso(form, 'site_option_group_id', true);
@@ -3321,6 +3321,18 @@ Define this function in another CFC to override the default email format
 			application.zcore.functions.zredirect("/z/admin/site-options/index");
 		}
 
+		if(qGroup.site_option_group_enable_archiving EQ 1){
+			form.showArchived=application.zcore.functions.zso(form, 'showArchived');
+			if(form.showArchived EQ "1"){
+				request.zsession['siteOptionGroupShowArchived#qGroup.site_option_group_id#']=true;
+			}else if(form.showArchived EQ "0"){
+				structdelete(request.zsession, 'siteOptionGroupShowArchived#qGroup.site_option_group_id#');
+			}
+		}
+		showArchived=false;
+		if(structkeyexists(request.zsession, 'siteOptionGroupShowArchived#qGroup.site_option_group_id#')){
+			showArchived=true;
+		}
 		if(methodBackup EQ "userManageGroup"){ 
 			arrUserGroup=listToArray(qGroup.site_option_group_user_group_id_list, ",");
 			hasAccess=false;
@@ -3720,6 +3732,9 @@ Define this function in another CFC to override the default email format
 		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
 			db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
 		}
+		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+		}
 		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 		site_option_group.site_option_group_type=#db.param('1')# ";
@@ -3742,6 +3757,9 @@ Define this function in another CFC to override the default email format
 		} 
 		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
 			db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+		}
+		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
 		}
 		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
@@ -3785,6 +3803,9 @@ Define this function in another CFC to override the default email format
 			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
 				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
 			}
+			if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+			}
 			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 			site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 			site_option_group.site_option_group_type=#db.param('1')# ";
@@ -3820,6 +3841,9 @@ Define this function in another CFC to override the default email format
 			} 
 			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
 				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+			}
+			if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
 			}
 			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 			site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
@@ -3869,6 +3893,10 @@ Define this function in another CFC to override the default email format
 		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 		site_option_group.site_option_group_type=#db.param('1')# ";
+
+		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+		}
 		//GROUP BY site_x_option_group_set.site_x_option_group_set_id
 		if(arraylen(arrSortSQL)){
 			db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
@@ -3914,6 +3942,9 @@ Define this function in another CFC to override the default email format
 		if(form.site_x_option_group_set_parent_id NEQ 0){
 			db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
 		} 
+		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+		}
 		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 		site_option_group.site_option_group_type=#db.param('1')# ";
@@ -3966,6 +3997,14 @@ Define this function in another CFC to override the default email format
 				} 
 				if(methodBackup EQ "manageGroup" and qGroup.site_option_group_disable_export EQ 0){
 					echo(' <a href="/z/admin/site-option-group/export?site_option_group_id=#qGroup.site_option_group_id#" class="z-button" target="_blank">Export CSV</a>');
+				}
+
+				if(qGroup.site_option_group_enable_archiving EQ 1){
+					if(showArchived){ 
+						echo(' <a href="/z/admin/site-options/#methodBackup#?site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&showArchived=0" class="z-button">Hide Archived</a>'); 
+					}else{
+						echo(' <a href="/z/admin/site-options/#methodBackup#?site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&showArchived=1" class="z-button">Show Archived</a>');
+					}
 				}
 				echo(' #sortLink#</div>'); 
 			}
@@ -4152,6 +4191,14 @@ Define this function in another CFC to override the default email format
 								echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.sectionURL, "site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#row.site_option_group_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#">Manage Section</a> ');
 								hasMultipleEditFeatures=true;
 							}
+							if(row.site_option_group_enable_archiving EQ 1){
+								if(row.site_x_option_group_set_archived EQ 1){
+									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.unarchiveURL, "site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#row.site_option_group_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#">Unarchive</a> ');
+								}else{
+									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.archiveURL, "site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#row.site_option_group_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#" onclick="archiveGroupRecord(this); return false;">Archive</a> ');
+								}
+								hasMultipleEditFeatures=true;
+							}
 							echo('</div>');
 						}
 						if(hasMultipleEditFeatures){
@@ -4301,6 +4348,46 @@ Define this function in another CFC to override the default email format
 		}
 	}
 	</cfscript> 
+	<script type="text/javascript"> 
+	function archiveGroupRecord(obj){ 
+		var tr, table;
+		var i=0;
+		linkObj=obj;
+		while(true){
+			i++;
+			if(obj.tagName.toLowerCase() == 'tr'){
+				tr=obj;
+			}else if(obj.tagName.toLowerCase() == 'table'){
+				table=obj;
+				break;
+			}
+			obj=obj.parentNode;
+			if(i > 50){
+				alert('infinite loop. invalid table html structure');
+				return false;
+			}
+		}
+		var cellCount=zCalculateTableCells(table);
+
+		var t={
+			id:"ajaxGroupArchive",
+			method:"post",
+			postObj:{},
+			ignoreOldRequests:false,
+			callback:function(r){
+				r=JSON.parse(r);
+				if(r.success){ 
+					$(tr).html('<td class="zDeletedRow" colspan="'+cellCount+'">Row Archived</td>');
+				}
+			},
+			errorCallback:function(){
+				alert("Archived failed, please try again later.");
+			},
+			url:linkObj.href
+		};  
+		zAjax(t);
+	}
+	</script>
 
 
 </cffunction>
@@ -5002,7 +5089,9 @@ Define this function in another CFC to override the default email format
 			insertURL:"/z/admin/site-options/userInsertGroup",
 			updateURL:"/z/admin/site-options/userUpdateGroup",
 			listURL:"/z/admin/site-options/userManageGroup",
-			getRowURL:"/z/admin/site-options/userGetRowHTML"
+			getRowURL:"/z/admin/site-options/userGetRowHTML",
+			archiveURL:"/z/admin/site-options/userArchiveGroup",
+			unarchiveURL:"/z/admin/site-options/userUnarchiveGroup"
 		};
 	}else{
 		defaultStruct={
@@ -5016,20 +5105,80 @@ Define this function in another CFC to override the default email format
 			updateURL:"/z/admin/site-options/updateGroup",
 			listURL:"/z/admin/site-options/manageGroup",
 			errorURL:"/z/admin/site-options/index",
-			getRowURL:"/z/admin/site-options/getRowHTML"
+			getRowURL:"/z/admin/site-options/getRowHTML",
+			archiveURL:"/z/admin/site-options/archiveGroup",
+			unarchiveURL:"/z/admin/site-options/unarchiveGroup"
 		};
 	}
 	return defaultStruct;
 </cfscript>
 </cffunction>
 
-<cffunction name="userDeleteGroup" localmode="modern" access="remote">
-	<cfargument name="struct" type="struct" required="no" default="#{}#">
+<cffunction name="userArchiveGroup" localmode="modern" access="remote"> 
 	<cfscript>
 	validateUserGroupAccess(); 
-	this.deleteGroup(arguments.struct);
+	this.archiveGroup();
 	</cfscript>
 </cffunction>
+
+<cffunction name="userUnarchiveGroup" localmode="modern" access="remote">
+	<cfscript>
+	validateUserGroupAccess(); 
+	this.unarchiveGroup();
+	</cfscript>
+</cffunction>
+
+<cffunction name="archiveGroup" localmode="modern" access="remote"> 
+	<cfscript>
+	var db=request.zos.queryObject;
+	init();
+	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true);
+	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
+	form.site_option_group_id=application.zcore.functions.zso(form, 'site_option_group_id', true);
+	db.sql="update #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# SET 
+	site_x_option_group_set_archived=#db.param(1)# 
+	WHERE 
+	site_x_option_group_set_deleted=#db.param(0)# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# ";
+	db.execute("qUpdate");/**/
+
+	application.zcore.functions.zReturnJson({success:true});
+	/*
+	application.zcore.status.setStatus(request.zsid, "Record archived.");
+	if(form.method EQ "userUnarchiveGroup"){
+		application.zcore.functions.zRedirect("/z/admin/site-options/userManageGroup?site_option_group_id=#row.site_option_group_id#&site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+	}else{
+		application.zcore.functions.zRedirect("/z/admin/site-options/manageGroup?site_option_group_id=#row.site_option_group_id#&site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+	}*/
+	</cfscript>
+</cffunction>
+
+<cffunction name="unarchiveGroup" localmode="modern" access="remote">
+	<cfscript>
+	var db=request.zos.queryObject;
+	init();
+	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true);
+	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
+	form.site_option_group_id=application.zcore.functions.zso(form, 'site_option_group_id', true);
+	db.sql="update #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# SET 
+	site_x_option_group_set_archived=#db.param(0)# 
+	WHERE 
+	site_x_option_group_set_deleted=#db.param(0)# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# ";
+	db.execute("qUpdate");
+
+	application.zcore.status.setStatus(request.zsid, "Record unarchived.");
+	if(form.method EQ "userUnarchiveGroup"){
+		application.zcore.functions.zRedirect("/z/admin/site-options/userManageGroup?site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_id=#form.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#");
+	}else{
+		application.zcore.functions.zRedirect("/z/admin/site-options/manageGroup?site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_id=#form.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#");
+	}
+	</cfscript>
+</cffunction>
+
+	
 
 <cffunction name="deleteGroup" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">

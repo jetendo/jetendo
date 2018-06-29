@@ -1954,6 +1954,10 @@ displayGroupCom.ajaxInsert();
 					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Admin?","member.site-option-group.edit site_option_group_disable_admin")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("site_option_group_disable_admin")#</td>
 				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Archiving?","member.site-option-group.edit site_option_group_enable_archiving")#</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_group_enable_archiving")#</td>
+				</tr>
 				<cfif form.site_option_group_parent_id EQ 0> 
 					<tr>
 						<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable New Button","member.site-option-group.edit site_option_group_enable_new_button")#</th>

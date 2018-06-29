@@ -821,7 +821,7 @@ $headers = array(
 	<cfscript>
 	form.accountType="adwords";
 	rs=getKeywordStats(0, ["Flights from London to New York", "London Flights"]);
-	//rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><ns2:requestId>0005619168f967e80ac14c051300f74e</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>197</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>4248747</value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>3934797</value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>')};
+	//rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201806" xmlns="https://adwords.google.com/api/adwords/o/v201806"><ns2:requestId>0005619168f967e80ac14c051300f74e</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>197</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201806" xmlns="https://adwords.google.com/api/adwords/o/v201806"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>4248747</value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>SEARCH_VOLUME</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LongAttribute"><Attribute.Type>LongAttribute</Attribute.Type><value>3934797</value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>')};
 	if(not rs.success){ 
 		echo(rs.errorMessage);		abort;
 	}
@@ -888,7 +888,7 @@ $headers = array(
 	//rs=getKeywordStatsMonthly(0, ["Flights from London to New York", "London Flights"]);
 	//writedump(rs);abort; 
 	// this was a stats response with monthly searches
-	rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><ns2:requestId>000561906c0814580aec568c680d512d</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>226</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710" xmlns="https://adwords.google.com/api/adwords/o/v201710"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>4417788</count></value><value><year>2017</year><month>10</month><count>9836306</count></value><value><year>2017</year><month>9</month><count>8496396</count></value><value><year>2017</year><month>8</month><count>1212821</count></value><value><year>2017</year><month>7</month><count>2911047</count></value><value><year>2017</year><month>6</month><count>5121332</count></value><value><year>2017</year><month>5</month><count>48068</count></value><value><year>2017</year><month>4</month><count>5889451</count></value><value><year>2017</year><month>3</month><count>105440</count></value><value><year>2017</year><month>2</month><count>3994551</count></value><value><year>2017</year><month>1</month><count>8163845</count></value><value><year>2016</year><month>12</month><count>787929</count></value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>8284056</count></value><value><year>2017</year><month>10</month><count>3396650</count></value><value><year>2017</year><month>9</month><count>1813169</count></value><value><year>2017</year><month>8</month><count>7316914</count></value><value><year>2017</year><month>7</month><count>4127112</count></value><value><year>2017</year><month>6</month><count>1422728</count></value><value><year>2017</year><month>5</month><count>6340440</count></value><value><year>2017</year><month>4</month><count>2140069</count></value><value><year>2017</year><month>3</month><count>1430838</count></value><value><year>2017</year><month>2</month><count>7911019</count></value><value><year>2017</year><month>1</month><count>2077186</count></value><value><year>2016</year><month>12</month><count>957383</count></value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>') };
+	rs={success:true, data:xmlparse('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><ResponseHeader xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201806" xmlns="https://adwords.google.com/api/adwords/o/v201806"><ns2:requestId>000561906c0814580aec568c680d512d</ns2:requestId><ns2:serviceName>TargetingIdeaService</ns2:serviceName><ns2:methodName>get</ns2:methodName><ns2:operations>1</ns2:operations><ns2:responseTime>226</ns2:responseTime></ResponseHeader></soap:Header><soap:Body><getResponse xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201806" xmlns="https://adwords.google.com/api/adwords/o/v201806"><rval><totalNumEntries>2</totalNumEntries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>london flights</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>4417788</count></value><value><year>2017</year><month>10</month><count>9836306</count></value><value><year>2017</year><month>9</month><count>8496396</count></value><value><year>2017</year><month>8</month><count>1212821</count></value><value><year>2017</year><month>7</month><count>2911047</count></value><value><year>2017</year><month>6</month><count>5121332</count></value><value><year>2017</year><month>5</month><count>48068</count></value><value><year>2017</year><month>4</month><count>5889451</count></value><value><year>2017</year><month>3</month><count>105440</count></value><value><year>2017</year><month>2</month><count>3994551</count></value><value><year>2017</year><month>1</month><count>8163845</count></value><value><year>2016</year><month>12</month><count>787929</count></value></value></data></entries><entries><data><key>KEYWORD_TEXT</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="StringAttribute"><Attribute.Type>StringAttribute</Attribute.Type><value>flights from london to new york</value></value></data><data><key>TARGETED_MONTHLY_SEARCHES</key><value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MonthlySearchVolumeAttribute"><Attribute.Type>MonthlySearchVolumeAttribute</Attribute.Type><value><year>2017</year><month>11</month><count>8284056</count></value><value><year>2017</year><month>10</month><count>3396650</count></value><value><year>2017</year><month>9</month><count>1813169</count></value><value><year>2017</year><month>8</month><count>7316914</count></value><value><year>2017</year><month>7</month><count>4127112</count></value><value><year>2017</year><month>6</month><count>1422728</count></value><value><year>2017</year><month>5</month><count>6340440</count></value><value><year>2017</year><month>4</month><count>2140069</count></value><value><year>2017</year><month>3</month><count>1430838</count></value><value><year>2017</year><month>2</month><count>7911019</count></value><value><year>2017</year><month>1</month><count>2077186</count></value><value><year>2016</year><month>12</month><count>957383</count></value></value></data></entries></rval></getResponse></soap:Body></soap:Envelope>') };
 	// search_volume didn't return anything, so we have to calculate the average ourselves for each term
 	if(not rs.success){
 		echo(rs.errorMessage);
@@ -977,12 +977,12 @@ adwordsLiveManagerAccount
 	xmlText='<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
-		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201806" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
 			#getAdwordsAuthXML()#
 		</ns1:RequestHeader>
 	</soapenv:Header>
 	<soapenv:Body>
-	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201806">
 	         <selector>
 	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
 	            for(keyword in arrKeyword){
@@ -991,16 +991,16 @@ adwordsLiveManagerAccount
 	            xmlText&='
 	            </searchParameters>
 				<searchParameters xsi:type="NetworkSearchParameter">
-					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
-						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
-						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
-						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
-						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201806">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetPartnerSearchNetwork>
 					</networkSetting>
 				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201806">1000</id>
 	               </languages>
 	            </searchParameters>
 	           
@@ -1012,8 +1012,8 @@ adwordsLiveManagerAccount
 	            
 	            
 	            <paging>
-	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201806">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201806">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
@@ -1042,15 +1042,15 @@ networkSetting:
 	/*
 	 <searchParameters xsi:type="LocationSearchParameter">
 	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201806">2840</id>
 	               </locations>
 	            </searchParameters> 
 	            */
 	            //<requestType>STATS</requestType>
 	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
 
-	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText); 
+	// https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService?wsdl
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService', xmlText); 
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1077,7 +1077,7 @@ networkSetting:
 	arrXML=[];
 	// work version that includes search partners
 	/*
-arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201710">
+arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="https://adwords.google.com/api/adwords/o/v201806" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201806">
 <SOAP-ENV:Header>
 <ns1:RequestHeader>
 			#getAdwordsAuthXML()#
@@ -1110,8 +1110,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			<ns1:requestedAttributeTypes>GLOBAL_MONTHLY_SEARCHES</ns1:requestedAttributeTypes> 
 
 			<ns1:paging>
-			   <ns2:startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</ns2:startIndex>
-			   <ns2:numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</ns2:numberResults>
+			   <ns2:startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201806">#arguments.startIndex#</ns2:startIndex>
+			   <ns2:numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201806">500</ns2:numberResults>
 			</ns1:paging>
 		</ns1:selector>
 	</ns1:get>
@@ -1121,12 +1121,12 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	arrayAppend(arrXML, '<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
-		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201806" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
 			#getAdwordsAuthXML()#
 		</ns1:RequestHeader>
 	</soapenv:Header>
 	<soapenv:Body>
-	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201806">
 	         <selector>
 	            <searchParameters xsi:type="RelatedToQuerySearchParameter">');
 	            for(keyword in arrKeyword){
@@ -1134,16 +1134,16 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	            }
 	            arrayAppend(arrXML, '</searchParameters> 
 				<searchParameters xsi:type="NetworkSearchParameter">
-					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
-						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
-						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
-						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
-						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201806">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetPartnerSearchNetwork>
 					</networkSetting>
 				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201806">1000</id>
 	               </languages>
 	            </searchParameters>
 	            <ideaType>KEYWORD</ideaType>
@@ -1152,16 +1152,16 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	            <requestedAttributeTypes>SEARCH_VOLUME</requestedAttributeTypes> 
 	            
 	            <paging>
-	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201806">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201806">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
 	  </soapenv:Body>
 	</soapenv:Envelope>');   
-	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
+	// https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService?wsdl
 	xmlText=arrayToList(arrXML, '');
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);   
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService', xmlText);   
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1187,12 +1187,12 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	xmlText='<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Header>
-		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201710" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+		<ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/o/v201806" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
 			#getAdwordsAuthXML()#
 		</ns1:RequestHeader>
 	</soapenv:Header>
 	<soapenv:Body>
-	      <get xmlns="https://adwords.google.com/api/adwords/o/v201710">
+	      <get xmlns="https://adwords.google.com/api/adwords/o/v201806">
 	         <selector>
 	            <searchParameters xsi:type="RelatedToQuerySearchParameter">';
 	            for(keyword in arrKeyword){
@@ -1201,21 +1201,21 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	            xmlText&='
 	            </searchParameters>
 				<searchParameters xsi:type="NetworkSearchParameter">
-					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201710">
-						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetGoogleSearch>
-						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">true</targetSearchNetwork>
-						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetContentNetwork>
-						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201710">false</targetPartnerSearchNetwork>
+					<networkSetting xmlns="https://adwords.google.com/api/adwords/o/v201806">
+						<targetGoogleSearch xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetGoogleSearch>
+						<targetSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">true</targetSearchNetwork>
+						<targetContentNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetContentNetwork>
+						<targetPartnerSearchNetwork xmlns="https://adwords.google.com/api/adwords/cm/v201806">false</targetPartnerSearchNetwork>
 					</networkSetting>
 				</searchParameters>
 	            <searchParameters xsi:type="LanguageSearchParameter">
 	               <languages>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">1000</id>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201806">1000</id>
 	               </languages>
 	            </searchParameters>
 	            <searchParameters xsi:type="LocationSearchParameter">
 	               <locations>
-	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201710">2840</id>
+	                  <id xmlns="https://adwords.google.com/api/adwords/cm/v201806">2840</id>
 	               </locations>
 	            </searchParameters>
 	            <ideaType>KEYWORD</ideaType>
@@ -1224,8 +1224,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	            <requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes> 
 	            
 	            <paging>
-	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201710">#arguments.startIndex#</startIndex>
-	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201710">500</numberResults>
+	               <startIndex xmlns="https://adwords.google.com/api/adwords/cm/v201806">#arguments.startIndex#</startIndex>
+	               <numberResults xmlns="https://adwords.google.com/api/adwords/cm/v201806">500</numberResults>
 	            </paging>
 	         </selector>
 	      </get>
@@ -1234,8 +1234,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 	            //<requestType>STATS</requestType>
 	//<requestedAttributeTypes>TARGETED_MONTHLY_SEARCHES</requestedAttributeTypes>
 
-	// https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService?wsdl
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201710/TargetingIdeaService', xmlText);  
+	// https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService?wsdl
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/o/v201806/TargetingIdeaService', xmlText);  
 	return rs;
 	</cfscript>
 </cffunction>

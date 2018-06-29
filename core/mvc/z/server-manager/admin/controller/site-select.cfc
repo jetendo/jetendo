@@ -263,7 +263,7 @@
 				<div class="siteSelect1">
 					<div class="siteSelect4">
 					<div class="siteSelect2">
-						<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#qSites.site_id#';return false;" style="text-decoration:none; <cfif qSites.site_active EQ 0>color:##900;</cfif>" title="Manage">#qSites.site_sitename#</a>
+						<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#qSites.site_id#';return false;" style="text-decoration:none; <cfif qSites.site_active EQ 0>color:##900;</cfif>" title="Manage"><cfif qSites.site_domain CONTAINS "https:">https://</cfif>#qSites.site_sitename#</a>
 					</div>
 					<div class="site-links siteSelect3"> | <a href="#qSites.site_domain#" target="_blank" style="">View</a> | 
 					<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#qSites.site_id#';return false;">Manage</a></div>
