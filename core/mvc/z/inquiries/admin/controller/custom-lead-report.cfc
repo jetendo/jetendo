@@ -19,8 +19,7 @@
 	db=request.zos.queryObject;
 	init();
 
-	echo('disabled until approved');
-	abort;
+	//echo('disabled until approved');	abort;
 	// loop all sites (like marketing reports script);
 	// call each domain directly
 	db.sql="select *, replace(replace(site_short_domain, #db.param("."&request.zos.testDomain)#, #db.param('')#), #db.param('www.')#, #db.param('')#) shortDomain
@@ -41,15 +40,11 @@
 	selectedMonth=dateformat(dateadd("m", -1, now()), "yyyy-mm");
 	sent=0;
 	for(row in qSite){
-		if(dateformat(row.company_report_autosend_current_date, "yyyy-mm") NEQ selectedMonth){
+		if(row.site_report_sent_datetime NEQ "" and dateformat(row.site_report_sent_datetime, "yyyy-mm") GTE selectedMonth){
 			// not ready to send data this month
 			continue;
 		}
-		if(row.site_report_sent_datetime NEQ "" and row.company_report_autosend_current_date NEQ "" and dateformat(row.site_report_sent_datetime, "yyyymm") GTE dateformat(row.company_report_autosend_current_date, "yyyymm")){
-			// report already sent
-			continue;
-		}
-		link=row.site_domain&"/z/inquiries/admin/custom-lead-report/index?selectedMonth=#selectedMonth#"; 
+		link=row.site_domain&"/z/inquiries/admin/custom-lead-report/sendReportEmail?selectedMonth=#selectedMonth#"; 
 		r1=application.zcore.functions.zdownloadlink(link);
 		if(r1.success){
 			writeoutput(r1.cfhttp.FileContent);
@@ -66,7 +61,7 @@
 		// TODO: remove when this is ready to go live.
 		break;
 	}
-	echo("#sent# reports sent");
+	echo("#sent# of #qSite.recordcount# reports sent");
 	abort;
 	</cfscript>
 </cffunction>
@@ -250,6 +245,15 @@
 	if(reportStartDate NEQ ""){
 		db.sql&=" and `#arguments.dateField#`>=#db.param(dateformat(reportStartDate, "yyyy-mm-dd")&" 00:00:00")# ";
 	}
+	</cfscript>
+</cffunction>
+
+<cffunction name="generateReport" localmode="modern" access="remote">  
+	<cfscript>  
+	if(not request.zos.isServer and not request.zos.isDeveloper){
+		application.zcore.functions.z404("Only server or developer can visit this page.");
+	}
+	index();
 	</cfscript>
 </cffunction>
 
