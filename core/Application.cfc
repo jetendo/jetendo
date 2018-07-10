@@ -264,7 +264,7 @@ request.zos.cgi=local.tempCGI;
     }else{
         this.Name = request.zos.cgi.http_host;
         this.ApplicationTimeout = CreateTimeSpan( 30, 0, 0, 0 );
-        this.SessionTimeout=CreateTimeSpan(0,0,20,0); 
+        this.SessionTimeout=CreateTimeSpan(0,0,30,0); 
         this.SessionManagement = true;
         return;
     }

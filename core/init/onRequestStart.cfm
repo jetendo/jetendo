@@ -376,7 +376,7 @@
 	ts={};
 	ts.name="zenable";
 	ts.value=1;
-	ts.expires=60*request.zos.sessionExpirationInMinutes;
+	ts.expires=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0);
 	application.zcore.functions.zCookie(ts);  
 	/*
 	// this may be causing the startup crash problem

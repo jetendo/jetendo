@@ -21,7 +21,7 @@
 			if(application.zcore.functions.zso(request.zos.globals, 'enableUserStats', true, 0) EQ 1){
 				ts.name="zhit";
 				ts.value=max(1, application.zcore.functions.zso(cookie, 'zhit', true)-1);
-				ts.expires=60*request.zos.sessionExpirationInMinutes;
+				ts.expires=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0);
 				application.zcore.functions.zCookie(ts); 
 			}
 			if(arraylen(request.zsession.trackingArrPages) NEQ 0 and arrayisdefined(request.zsession.trackingArrPages, arraylen(request.zsession.trackingArrPages))){
@@ -150,20 +150,20 @@ USER WAS PERMANENTLY BLOCKED.');
 			ts=structnew();
 			ts.name="zreferrer";
 			ts.value=request.zos.cgi.http_referer;
-			ts.expires=60*60*24*30;
+			ts.expires=30;
 			application.zcore.functions.zCookie(ts);
 		}else{
 			ts=structnew();
 			ts.name="zreferrer";
 			ts.value=cookie.zreferrer;
-			ts.expires=60*60*24*30;
+			ts.expires=30;
 			application.zcore.functions.zCookie(ts);
 		}
 		if(structkeyexists(form, 'zsource') and form.zsource NEQ ""){
 			ts=structnew();
 			ts.name="zsource";
 			ts.value=form.zsource;
-			ts.expires=60*60*24*30;
+			ts.expires=30;
 			application.zcore.functions.zCookie(ts);
 		}else if(structkeyexists(cookie, 'zsource') and cookie.zsource NEQ ""){
 			form.zsource=cookie.zsource;	
@@ -181,7 +181,7 @@ USER WAS PERMANENTLY BLOCKED.');
 			}else{
 				ts.value=request.zos.mysqlnow;
 			}
-			ts.expires=60*request.zos.sessionExpirationInMinutes;
+			ts.expires=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0);
 			application.zcore.functions.zCookie(ts); 
 			ts=structnew();
 			ts.name="zfirstpage";
@@ -193,12 +193,12 @@ USER WAS PERMANENTLY BLOCKED.');
 					ts.value&="?"&request.zos.cgi.query_string;
 				}
 			}
-			ts.expires=60*request.zos.sessionExpirationInMinutes;
+			ts.expires=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0);
 			application.zcore.functions.zCookie(ts); 
 			ts=structnew();
 			ts.name="zhit";
 			ts.value=application.zcore.functions.zso(cookie, 'zhit', true)+1;
-			ts.expires=60*request.zos.sessionExpirationInMinutes;
+			ts.expires=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0);
 			application.zcore.functions.zCookie(ts); 
 		}
 		// check session

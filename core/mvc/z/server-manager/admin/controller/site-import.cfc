@@ -181,7 +181,7 @@
 	ts={};
 	ts.name="sidParent";
 	ts.value=form.sidParent;
-	ts.expires=60*60*24*7*365;
+	ts.expires="nenver";
 	application.zcore.functions.zCookie(ts); 
 
 	if(form.importType EQ ""){
