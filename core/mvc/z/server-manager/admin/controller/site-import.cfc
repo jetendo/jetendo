@@ -181,7 +181,7 @@
 	ts={};
 	ts.name="sidParent";
 	ts.value=form.sidParent;
-	ts.expires="nenver";
+	ts.expires="never";
 	application.zcore.functions.zCookie(ts); 
 
 	if(form.importType EQ ""){
