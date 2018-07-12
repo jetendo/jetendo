@@ -1562,8 +1562,12 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 				if(qRank.recordcount EQ 0){
 					ga_month_keyword_id=application.zcore.functions.zInsert(ts2); 
 				}else{
+					// lets ignore the duplicate error, it doesn't matter.
 					ts2.struct.ga_month_keyword_id=qRank.ga_month_keyword_id;
-					application.zcore.functions.zUpdate(ts2);
+					try{
+						application.zcore.functions.zUpdate(ts2);
+					}catch(Any e){
+					}
 				}   
 			} 
 			echo('Processed search console for #row.site_short_domain# | #startMonthDate# to #endDate#<br>'); 
