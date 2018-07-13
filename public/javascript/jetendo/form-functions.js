@@ -758,18 +758,46 @@ var zLastAjaxVarName=""; */
 		}
 		action+="&x_ajax_id="+escape(obj.id);
 
+		var isMacSafari=false;
+		if(navigator.userAgent.indexOf("Safari") != -1 && navigator.userAgent.indexOf("Macintosh") != -1){
+			isMacSafari=true;
+			var fileFieldCache={};
+		}  
+
+		
+
 		if(typeof window.FormData != "undefined" && typeof obj.formId != "undefined"){
 			var form = document.getElementById(obj.formId);
+			if(isMacSafari){
+				var offset1=0;
+				$('input[type="file"]', $("#"+obj.formId)).each(function(){
+					if(this.files.length == 0){
+						fileFieldCache[offset1]={parent:$(this).parent(), element:$(this).detach()};
+						offset1++; 
+					}
+				});
+			}
+
 			var formData = new FormData(form);
+
 			var postObjTemp=zGetFormDataByFormId(obj.formId);
 			for(var i in postObjTemp){
 				if(postObjTemp[i] == ""){
 					formData.append(i, ""); 
 				}
-			}
+			} 
+
 			req.open(zAjaxData[obj.id].method, action, true); 
 			req.send(formData);
-		}else{
+			setTimeout(function(){
+				if(isMacSafari){
+					for(var id in fileFieldCache){
+						fileFieldCache[id].parent.append(fileFieldCache[id].element);
+					} 
+				} 
+			}, 500);
+
+		}else{ 
 			if(zAjaxData[obj.id].method.toLowerCase() === "get"){
 				req.open(zAjaxData[obj.id].method,action,true);
 				//req.setRequestHeader("Accept-Encoding","gzip,deflate;q=0.5");
