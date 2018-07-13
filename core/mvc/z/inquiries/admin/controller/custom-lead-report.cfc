@@ -834,12 +834,16 @@
 					var verticalLabel=$(this).attr("data-json-vertical-label");
 					var areaColor=$(this).attr("data-chart-area-color");
 					var data=JSON.parse($(this).attr("data-jsondata"));
+					var minValue=100000000;
 					for(var i=0;i<data.length;i++){
 						data[i].date=parseTime(data[i].date);
-					} 
+						if(data[i].close < minValue){
+							minValue=data[i].close;
+						}
+					}  
 					x.domain(d3.extent(data, function(d) {  return d.date; }));
-					y.domain([0, d3.max(data, function(d) { return d.close; })]);
-					area.y0(y(0));
+					y.domain([minValue, d3.max(data, function(d) { return d.close; })]);
+					area.y0(y(minValue));
 
 					g.append("path")
 					      .datum(data)
