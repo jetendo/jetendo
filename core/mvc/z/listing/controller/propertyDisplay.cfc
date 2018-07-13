@@ -502,7 +502,7 @@ propertyDisplayCom.init(ts);
 		idx.arrayIndex=i;
 		idx.listing_id=row.listing_id; 
 		idx.mls_id=listgetat(row.listing_id,1,"-");
-		if(this.optionStruct.getDetails){
+		if(this.optionStruct.getDetails or true){
 			structappend(idx, request.zos.listingMlsComObjects[idx.mls_id].getDetails(row, currentrow), true);
 			request.zos.requestLogEntry('propertyDisplay.cfc after getDetails() for listing_id = #row.listing_id#');
 		}else{
@@ -517,7 +517,7 @@ propertyDisplayCom.init(ts);
 			idx.photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1, idx.sysidfield);
 		}else{
 			idx.photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1);
-		} 
+		}  
  
 		savecontent variable="tempText"{
 			if(useCustomListingLayout){ 
@@ -818,7 +818,7 @@ propertyDisplayCom.init(ts);
 				}
 			}
 		}
-	}
+	} 
 	</cfscript>
 	<div class="zls-list-grid-listingdiv" style="width:33%; box-sizing:border-box; ">
 		<input type="hidden" name="m#arguments.idx.listing_id#_mlstempimagepaths" id="m#arguments.idx.listing_id#_mlstempimagepaths" value="#htmleditformat(replace(thePaths,'&amp;','&','all'))#" />

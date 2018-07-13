@@ -329,7 +329,18 @@ if(isset($_GET['d'])){
 }
 if(!isset($_GET['f']) || !isset($_GET['w']) || !isset($_GET['h']) || !isset($_GET['m'])){
 	if($debug){
-		echo "One of the required request parameters is missing.";
+		if(!isset($_GET['f'])){
+			echo "f is required";
+		}
+		if(!isset($_GET['w'])){
+			echo "w is required";
+		}
+		if(!isset($_GET['h'])){
+			echo "h is required";
+		}
+		if(!isset($_GET['m'])){
+			echo "m is required";
+		}
 		exit;	
 	}
 	z404();
@@ -361,8 +372,7 @@ if(isset($_GET['p']) && $_GET['p'] != "" && $_GET['p'] != "0"){
 	}
 }else{
 	$_GET['p']="";
-}
-
+} 
 $h=md5($_GET['m']."-".$_GET['f']);
 $filename=$_GET['m']."/".substr($h,0,2)."/".substr($h, 2, 1)."/".$_GET['m']."-".$_GET['f'];
 if($debug) echo "new path: ".$serverRootPath.$filename."<br />";
@@ -514,6 +524,12 @@ try {
 					if($debug) echo "NO DOWNLOAD ERROR<br>";
 				}
 				$temp=".".rand(1,100000);
+				if($_GET['w']=='10000' && $_GET['h']=='10000'){
+					// ignore further processing if no resize is needed
+					header('Content-type: image/jpeg');
+					echo $a;
+					exit;
+				}
 				$r=file_put_contents($serverRootPath.$filename.$temp, $a);
 				if($r === FALSE || filesize($serverRootPath.$filename.$temp) == 0){
 					if($debug){

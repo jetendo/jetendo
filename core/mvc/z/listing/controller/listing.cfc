@@ -150,27 +150,30 @@ this.app_id=11;
 var local=structnew();
 // check for same domain or domainalias
 local.c=replace(arguments.photourl, request.zos.currentHostName&"/", "/");
+if(arguments.photourl contains "/z/index.php?method=size"){
+	return arguments.photourl;
+}
 if(compare(arguments.photourl, local.c) NEQ 0){
 	if(left(local.c, 12) EQ "/zretsphotos"){
 		if(arguments.width EQ 10000 or arguments.height EQ 10000){ 
 			return local.c; 
 		}else if(listlen(arguments.listing_id,"-") EQ 3){
-			return request.zos.currentHostName&"/z/index.php?method=size&amp;w=#arguments.width#&amp;h=#arguments.height#&amp;m=#replace(arguments.listing_id,"-","&amp;f=")#&amp;a=#arguments.autocrop#";
+			return request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&m=#replace(arguments.listing_id,"-","&f=")#&a=#arguments.autocrop#";
 		}else{
-			return request.zos.currentHostName&"/z/index.php?method=size&amp;w=#arguments.width#&amp;h=#arguments.height#&amp;m=#replace(arguments.listing_id,"-","&amp;f=")#-#arguments.num#.jpeg&amp;a=#arguments.autocrop#";
+			return request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&m=#replace(arguments.listing_id,"-","&f=")#-#arguments.num#.jpeg&a=#arguments.autocrop#";
 		} 
 	}else{
 		return request.zos.currentHostName&'/z/a/listing/images/image-not-available.gif';	
 	}
 }else{
 	if(arguments.width EQ 10000 or arguments.height EQ 10000){
-		if(left(arguments.photourl,5) EQ "http:"){ 
-			return request.zos.currentHostName&"/z/index.php?method=size&amp;w=#arguments.width#&amp;h=#arguments.height#&amp;m=#replace(arguments.listing_id,"-","&amp;f=")#-#arguments.num#.jpeg&amp;p=#urlencodedformat(arguments.photourl)#&amp;a=#arguments.autocrop#";
+		if(left(arguments.photourl,5) EQ "http:" or left(arguments.photourl,6) EQ "https:"){ 
+			return request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&m=#replace(arguments.listing_id,"-","&f=")#-#arguments.num#.jpeg&p=#urlencodedformat(arguments.photourl)#&a=#arguments.autocrop#";
 		}else{
 			return request.zos.currentHostName&arguments.photourl;
 		}
 	}else{
-		return request.zos.currentHostName&"/z/index.php?method=size&amp;w=#arguments.width#&amp;h=#arguments.height#&amp;p=#urlencodedformat(arguments.photourl)#&amp;m=#replace(arguments.listing_id,"-","&amp;f=")#-#arguments.num#.jpeg&amp;a=#arguments.autocrop#";
+		return request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&p=#urlencodedformat(arguments.photourl)#&m=#replace(arguments.listing_id,"-","&f=")#-#arguments.num#.jpeg&a=#arguments.autocrop#";
 	} 
 }
 </cfscript>

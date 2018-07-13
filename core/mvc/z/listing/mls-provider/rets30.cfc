@@ -12,7 +12,7 @@
 	this.useRetsFieldName="system";
 
 
-	this.arrColumns=listtoarray("ACPercentage,AccountingandLegalExpens,AcreageDescription,ActiveOpenHouseCount,ADACompliant,AdditionalBusinessNames,AdditionalFurnishedInfo,AddlMoveInCostYN,AddressInternetDisplay,AddressonInternet,AdjustedAreaSF,AdvertisingExpenses,AgentAlternatePhone,AgentLicenseNum,AgentsOfficeExtension,Amenities,AnnualBaseRate,ApplicationFee,ApprovalInformation,ApproxSqftTotalArea,ApproximateLotSize,Area,AssocFeePaidPer,AssociationFee,AssumableChattelBalance,AssumableYN,AuctionType,AuctionYN,AvailableDate,AvailableDocuments,AVM,BalconyPorchandorPatioYN,BathsFull,BathsHalf,BathsTotal,BedroomDescription,BedsTotal,Blogging,BoardIdentifier,BoatDockAccommodates,BoatServices,BonusAmount,BonusYN,BrandName,BrokerRemarks,BuildingAreaAltSource,BuildingAreaAlternative,BuildingIncludes,BuildingNameNumber,BuildingNumber,BuildingSqFt,CableAvailableYN,CancelledDate,CarportDescription,CeilingDescription,CeilingHeight,City,CloseDate,ClosePrice,CoAgentLicenseNum,CoListAgentDirectWorkPhone,CoListAgentEmail,CoListAgentFullName,CoListAgentMLSID,CoListAgent_MUI,CoListOfficeMLSID,CoListOffice_MUI,CoListOfficeName,CoListOfficePhone,CoSellAgentLicenseNum,CoSellingAgentDirectWorkPhone,CoSellingAgentEmail,CoSellingAgentFullName,CoSellingAgentMLSID,CoSellingAgent_MUI,CoSellingOfficeMLSID,CoSellingOffice_MUI,CoSellingOfficeName,CoSellingOfficePhone,ColumnDescription,CommonAreaMaintAmount,CommonAreaMaintIncludes,ComplexName,ComprehensivePlanUse,ComptoBuyersAgent,ComptoNonRepresentative,ComptoTransactionBroker,ConditionalDate,ConstructionType,ConvertibleBedroomYN,CoolingDescription,CostofSales,CountyLandCode,CountyOrParish,CurrentPrice,DadeAssessedAmtSOHValue,DadeMarketAmtAssessedAmt,DaysOpen,DecalNumber,DeedRestrictions,DenDimensions,DepositInformation,Design,DesignDescription,Development,DevelopmentName,DiningAreaDimensions,DiningDescription,DiningRoomDimensions,Directions,DockHeight,DockInformation,DockNumber,DOM,DoorHeight,EaveHeight,EfficiencyYN,ElectricService,ElementarySchool,ElevationAboveSeaLevel,EnvironmentalAudit,EquestrianFeatures,EquipmentAppliances,ExcludeFromInventoryStats,ExpInclAcctgLegalYN,ExpInclAdvLicPermitYN,ExpInclElectricYN,ExpInclExterminationYN,ExpInclGasOilYN,ExpInclInsuranceYN,ExpInclJanitorYN,ExpInclLawnMaintenanceYN,ExpInclMaintandRepairYN,ExpInclManagementYN,ExpInclMiscellaneousYN,ExpInclPoolServiceYN,ExpInclPropertyTaxYN,ExpInclReplaceReserveYN,ExpInclRetaxYN,ExpInclSuppliesYN,ExpInclTrashYN,ExpInclWaterSewerYN,ExpenseAmount,ExpensesIncluded,ExpirationDate,ExteriorFeatures,FeeDescription,FillDescription,FillFromRecord_MUI,FillFromRecord_TableID,FireProtection,FixtureValue,FloodZone,FloorDescription,FolioNum2ndParcel,ForLeaseMLSNumber,ForLeaseYN,ForSaleMLSNumber,ForSaleYN,FrontExposure,FurnAnnualRent,FurnOffSeasonRent,FurnSeasonalRent,FurnishedInfoList,FurnishedInfoSold,GarageDescription,GasDescription,GeographicArea,GreenEnergyEfficient,GrossOperatingIncome,GrossRent,GrossRentIncome,GrossSales,GrossScheduledIncome,GroundCover,GroundCoverDescription,GuestHouseDescription,HardshipPackage,HeatingDescription,HousingOlderPersonsAct,IDXOptInYN,ImprovementHeightBUS,ImprovementHeightCOM,IncExpStatementPeriod,InformationAvailable,InputBrokerRemarks,InsuranceExpense,IntendedUse,InteriorCeilingHeight,InteriorFeatures,InternetRemarks,InternetYN,InventoryValue,IsDeleted,Jurisdiction,LandImprovements,LandLeaseAmount,LandLeaseFeePaidPer,LastChangeTimestamp,LastChangeType,LastStatus,LeasePrice,LeaseTermInfo,LeaseTermRemaining,LegalDescription,LenderApproval,Licenses,ListAgentDirectWorkPhone,ListAgentEmail,ListAgentFullName,ListAgentMLSID,ListAgent_MUI,ListOfficeMLSID,ListOffice_MUI,ListOfficeName,ListOfficePhone,ListPrice,ListingContractDate,ListingType,Location,LocationofProperty,LotDepth,LotDescription,LotFrontage,LotSqFootage,LotorTrackNum,LPAmtSqFt,MainLivingArea,MaintFeePaidPer,MaintandRepairsExpense,MaintenanceChargeMonth,MaintenanceFeeIncludes,MaintenanceIncludes,ManagementCompany,ManagementCompanyPhone,ManagementExpense,ManufacturedHomeMiscell,ManufacturedHomeSize,MasterBathroomDescription,MatrixModifiedDT,Matrix_Unique_ID,MaximumCeilingHeight,MaximumLeasableSqft,MemberFeePaidPer,MembershipPurchRqdYN,MembershipPurchaseFee,MiddleSchool,MilestoBeach,MilestoExpressway,MinSFLivingAreaReqmt,MinimumLeasePeriod,MinimumNumofDaysforLease,Miscellaneous,MiscellaneousExpense,MiscellaneousImprovements,MiscellaneousInformation,MLSNumber,ModelName,MoveInDollars,MultipleOffersAcceptedYN,MunicipalCode,Neighborhoods,NetOperatingIncome,NumBays,NumBuildings,NumCarportSpaces,NumCeilingFans,NumEmployees,NumFloors,NumGarageSpaces,NumInteriorLevels,NumLeasesYear,NumLoadingDoors,NumMeters,NumOffices,NumParcels,NumParkingSpaces,NumSeats,NumStories,NumTenants,NumTimesLeasedYear,NumToilets,NumUnits,OccupancyInformation,OccupancyPercentage,OffMarketDate,OfficeFaxNumber,OnSiteUtilities,OriginalEntryTimestamp,OriginalListPrice,OtherExpenses,OtherIncomeExpense,OwnerAgentYN,Ownership,PACEYN,ParcelNumber,ParcelNumberMLX,ParkingDescription,ParkingRestrictions,ParkingSpaceNumber,PatioBalconyDimensions,PendingDate,PetRestrictions,PetsAllowedYN,PhotoCount,PhotoModificationTimestamp,PoolDescription,PoolDimensions,PoolYN,PossessionInformation,PostalCode,PostalCodePlus4,PreviousStatus,PriceAcre,PriceChangeTimestamp,PropTypeTypeofBuilding,PropertyDescription,PropertyDetachedYN,PropertySqFt,PropertySubType,PropertyType,PropertyTypeInformation,ProviderKey,RailDescription,RATIO_ClosePrice_By_ListPrice,RealEstateTaxes,RecLeaseMoFeePaidPer,RecLeaseMonth,ReimbursableSqFt,Remarks,RentIncludes,RentPeriod,RentStatusApril,RentStatusAugust,RentStatusDecember,RentStatusFebruary,RentStatusJanuary,RentStatusJuly,RentStatusJune,RentStatusMarch,RentStatusMay,RentStatusNovember,RentStatusOctober,RentStatusSeptember,RentalDepositIncludes,RentalPaymentIncludes,REOYN,Restrictions,RoadDescription,RoadFrntgDescription,RoadFrontage,RoadTypeDescription,Roof,RoofDescription,RoomCount,RoomsDescription,SaleIncludes,SaleIncludesINCL,SaleIncludesSALE,SaleTerms,Section,SecurityInformation,SellerContributionsAmt,SellerContributionsYN,SellingAgentDirectWorkPhone,SellingAgentEmail,SellingAgentFullName,SellingAgentLicenseNum,SellingAgentMLSID,SellingOfficeMLSID,SellingOfficeName,SellingOfficePhone,SeniorHighSchool,SeparateMeterYN,SerialNumber,ServiceExpense,SewerDescription,ShortSaleAddendumYN,ShortSaleYN,ShowingInstructions,ShowingSuiteEmailInfoYN,ShowingSuiteSettingYN,ShowingTimeFlag,SoldPriceperSF,SourceofExpenses,SpaYN,SpecialAssessmentYN,SpecialInformation,SprinklerDescription,SqFtLAofGuestHouse,SqFtLivArea,SqFtOccupied,SqFtTotal,StateOrProvince,Status,StatusChangeTimestamp,StatusContractualSearchDate,StormProtection,StreetDirPrefix,StreetDirSuffix,StreetName,StreetNumber,StreetNumberNumeric,StreetSuffix,StreetViewParam,Style,StyleTran,StyleofBusiness,StyleofProperty,SubBoardID,SubdivisionComplexBldg,SubdivisionInformation,SubdivisionName,SubdivisionNumber,SupplementCount,SupplementModificationTimestamp,SupplementRemarksYN,SupplementalRemarks,SupplyExpense,SurfaceDescription,TaxAmount,TaxInformation,TaxYear,TempOffMarketDate,TenantPays,TermsAvailable,TermsConsidered,TotalAcreage,TotalAssumableLoans,TotalExpenses,TotalFloorsInBuilding,TotalMortgage,TotalMoveInDollars,TotalNumofUnitsInBuildin,TotalNumofUnitsInComplex,TotalUnits,TownshipRange,TrainingAvailableYN,TransactionType,TrashExpense,TypeofAssociation,TypeofBuilding,TypeofBusiness,TypeofContingencies,TypeofGoverningBodies,TypeofOwnership,TypeofProperty,TypeofSoil,TypeofTrees,UnfurnAnnualRent,UnfurnOffSeasonRent,UnfurnSeasonalRent,UnitCount,UnitDesign,UnitFloorLocation,UnitNumber,UnitView,Usage,UsageDescription,UtilitiesAvailable,UtilityExpense,UtilityRoomDimension,VacancyRate,VarDualRateCompYN,View,VirtualTour,WaterAccess,WaterDescription,WaterView,WaterfrontDescription,WaterfrontFrontage,WaterfrontPropertyYN,WaterviewDescription,WebAddress,WindowsTreatment,WithdrawnDate,YearBuilt,YearBuiltDescription,YearEstablished,YearofAddition,ZoningInformation", ",");
+	this.arrColumns=listtoarray("ACPercentage,AccountingandLegalExpens,AcreageDescription,ActiveOpenHouseCount,ADACompliant,AdditionalBusinessNames,AdditionalFurnishedInfo,AddlMoveInCostYN,AddressInternetDisplay,AddressonInternet,AdjustedAreaSF,AdvertisingExpenses,AgentAlternatePhone,AgentLicenseNum,AgentsOfficeExtension,Amenities,AnnualBaseRate,ApplicationFee,ApprovalInformation,ApproxSqftTotalArea,ApproximateLotSize,Area,AssocFeePaidPer,AssociationFee,AssumableChattelBalance,AssumableYN,AuctionType,AuctionYN,AvailableDate,AvailableDocuments,AVM,BalconyPorchandorPatioYN,BathsFull,BathsHalf,BathsTotal,BedroomDescription,BedsTotal,Blogging,BoardIdentifier,BoatDockAccommodates,BoatServices,BonusAmount,BonusYN,BrandName,BrokerRemarks,BuildingAreaAltSource,BuildingAreaAlternative,BuildingIncludes,BuildingNameNumber,BuildingNumber,BuildingSqFt,CableAvailableYN,CancelledDate,CarportDescription,CeilingDescription,CeilingHeight,City,CloseDate,ClosePrice,CoAgentLicenseNum,CoListAgentDirectWorkPhone,CoListAgentEmail,CoListAgentFullName,CoListAgentMLSID,CoListAgent_MUI,CoListOfficeMLSID,CoListOffice_MUI,CoListOfficeName,CoListOfficePhone,CoSellAgentLicenseNum,CoSellingAgentDirectWorkPhone,CoSellingAgentEmail,CoSellingAgentFullName,CoSellingAgentMLSID,CoSellingAgent_MUI,CoSellingOfficeMLSID,CoSellingOffice_MUI,CoSellingOfficeName,CoSellingOfficePhone,ColumnDescription,CommonAreaMaintAmount,CommonAreaMaintIncludes,ComplexName,ComprehensivePlanUse,ComptoBuyersAgent,ComptoNonRepresentative,ComptoTransactionBroker,ConditionalDate,ConstructionType,ConvertibleBedroomYN,CoolingDescription,CostofSales,CountyLandCode,CountyOrParish,CurrentPrice,DadeAssessedAmtSOHValue,DadeMarketAmtAssessedAmt,DaysOpen,DecalNumber,DeedRestrictions,DenDimensions,DepositInformation,Design,DesignDescription,Development,DevelopmentName,DiningAreaDimensions,DiningDescription,DiningRoomDimensions,Directions,DockHeight,DockInformation,DockNumber,DOM,DoorHeight,EaveHeight,EfficiencyYN,ElectricService,ElementarySchool,ElevationAboveSeaLevel,EnvironmentalAudit,EquestrianFeatures,EquipmentAppliances,ExcludeFromInventoryStats,ExpInclAcctgLegalYN,ExpInclAdvLicPermitYN,ExpInclElectricYN,ExpInclExterminationYN,ExpInclGasOilYN,ExpInclInsuranceYN,ExpInclJanitorYN,ExpInclLawnMaintenanceYN,ExpInclMaintandRepairYN,ExpInclManagementYN,ExpInclMiscellaneousYN,ExpInclPoolServiceYN,ExpInclPropertyTaxYN,ExpInclReplaceReserveYN,ExpInclRetaxYN,ExpInclSuppliesYN,ExpInclTrashYN,ExpInclWaterSewerYN,ExpenseAmount,ExpensesIncluded,ExpirationDate,ExteriorFeatures,FeeDescription,FillDescription,FillFromRecord_MUI,FillFromRecord_TableID,FireProtection,FixtureValue,FloodZone,FloorDescription,FolioNum2ndParcel,ForLeaseMLSNumber,ForLeaseYN,ForSaleMLSNumber,ForSaleYN,FrontExposure,FurnAnnualRent,FurnOffSeasonRent,FurnSeasonalRent,FurnishedInfoList,FurnishedInfoSold,GarageDescription,GasDescription,GeographicArea,GreenEnergyEfficient,GrossOperatingIncome,GrossRent,GrossRentIncome,GrossSales,GrossScheduledIncome,GroundCover,GroundCoverDescription,GuestHouseDescription,HardshipPackage,HeatingDescription,HousingOlderPersonsAct,IDXOptInYN,ImprovementHeightBUS,ImprovementHeightCOM,IncExpStatementPeriod,InformationAvailable,InputBrokerRemarks,InsuranceExpense,IntendedUse,InteriorCeilingHeight,InteriorFeatures,InternetRemarks,InternetYN,InventoryValue,IsDeleted,Jurisdiction,LandImprovements,LandLeaseAmount,LandLeaseFeePaidPer,LastChangeTimestamp,LastChangeType,LastStatus,LeasePrice,LeaseTermInfo,LeaseTermRemaining,LegalDescription,LenderApproval,Licenses,ListAgentDirectWorkPhone,ListAgentEmail,ListAgentFullName,ListAgentMLSID,ListAgent_MUI,ListOfficeMLSID,ListOffice_MUI,ListOfficeName,ListOfficePhone,ListPrice,ListingContractDate,ListingType,Location,LocationofProperty,LotDepth,LotDescription,LotFrontage,LotSqFootage,LotorTrackNum,LPAmtSqFt,MainLivingArea,MaintFeePaidPer,MaintandRepairsExpense,MaintenanceChargeMonth,MaintenanceFeeIncludes,MaintenanceIncludes,ManagementCompany,ManagementCompanyPhone,ManagementExpense,ManufacturedHomeMiscell,ManufacturedHomeSize,MasterBathroomDescription,MatrixModifiedDT,Matrix_Unique_ID,MaximumCeilingHeight,MaximumLeasableSqft,MemberFeePaidPer,MembershipPurchRqdYN,MembershipPurchaseFee,MiddleSchool,MilestoBeach,MilestoExpressway,MinSFLivingAreaReqmt,MinimumLeasePeriod,MinimumNumofDaysforLease,Miscellaneous,MiscellaneousExpense,MiscellaneousImprovements,MiscellaneousInformation,MLSNumber,ModelName,MoveInDollars,MultipleOffersAcceptedYN,MunicipalCode,Neighborhoods,NetOperatingIncome,NumBays,NumBuildings,NumCarportSpaces,NumCeilingFans,NumEmployees,NumFloors,NumGarageSpaces,NumInteriorLevels,NumLeasesYear,NumLoadingDoors,NumMeters,NumOffices,NumParcels,NumParkingSpaces,NumSeats,NumStories,NumTenants,NumTimesLeasedYear,NumToilets,NumUnits,OccupancyInformation,OccupancyPercentage,OffMarketDate,OfficeFaxNumber,OnSiteUtilities,OriginalEntryTimestamp,OriginalListPrice,OtherExpenses,OtherIncomeExpense,OwnerAgentYN,Ownership,PACEYN,ParcelNumber,ParcelNumberMLX,ParkingDescription,ParkingRestrictions,ParkingSpaceNumber,PatioBalconyDimensions,PendingDate,PetRestrictions,PetsAllowedYN,PhotoCount,PhotoModificationTimestamp,PoolDescription,PoolDimensions,PoolYN,PossessionInformation,PostalCode,PostalCodePlus4,PreviousStatus,PriceAcre,PriceChangeTimestamp,PropTypeTypeofBuilding,PropertyDescription,PropertyDetachedYN,PropertySqFt,PropertySubType,PropertyType,PropertyTypeInformation,ProviderKey,RailDescription,RATIO_ClosePrice_By_ListPrice,RealEstateTaxes,RecLeaseMoFeePaidPer,RecLeaseMonth,ReimbursableSqFt,Remarks,RentIncludes,RentPeriod,RentStatusApril,RentStatusAugust,RentStatusDecember,RentStatusFebruary,RentStatusJanuary,RentStatusJuly,RentStatusJune,RentStatusMarch,RentStatusMay,RentStatusNovember,RentStatusOctober,RentStatusSeptember,RentalDepositIncludes,RentalPaymentIncludes,REOYN,Restrictions,RoadDescription,RoadFrntgDescription,RoadFrontage,RoadTypeDescription,Roof,RoofDescription,RoomCount,RoomsDescription,SaleIncludes,SaleIncludesINCL,SaleIncludesSALE,SaleTerms,Section,SecurityInformation,SellerContributionsAmt,SellerContributionsYN,SellingAgentDirectWorkPhone,SellingAgentEmail,SellingAgentFullName,SellingAgentLicenseNum,SellingAgentMLSID,SellingOfficeMLSID,SellingOfficeName,SellingOfficePhone,SeniorHighSchool,SeparateMeterYN,SerialNumber,ServiceExpense,SewerDescription,ShortSaleAddendumYN,ShortSaleYN,ShowingInstructions,ShowingSuiteEmailInfoYN,ShowingSuiteSettingYN,ShowingTimeFlag,SoldPriceperSF,SourceofExpenses,SpaYN,SpecialAssessmentYN,SpecialInformation,SprinklerDescription,SqFtLAofGuestHouse,SqFtLivArea,SqFtOccupied,SqFtTotal,StateOrProvince,Status,StatusChangeTimestamp,StatusContractualSearchDate,StormProtection,StreetDirPrefix,StreetDirSuffix,StreetName,StreetNumber,StreetNumberNumeric,StreetSuffix,StreetViewParam,Style,StyleTran,StyleofBusiness,StyleofProperty,SubBoardID,SubdivisionComplexBldg,SubdivisionInformation,SubdivisionName,SubdivisionNumber,SupplementCount,SupplementModificationTimestamp,SupplementRemarksYN,SupplementalRemarks,SupplyExpense,SurfaceDescription,TaxAmount,TaxInformation,TaxYear,TempOffMarketDate,TenantPays,TermsAvailable,TermsConsidered,TotalAcreage,TotalAssumableLoans,TotalExpenses,TotalFloorsInBuilding,TotalMortgage,TotalMoveInDollars,TotalNumofUnitsInBuildin,TotalNumofUnitsInComplex,TotalUnits,TownshipRange,TrainingAvailableYN,TransactionType,TrashExpense,TypeofAssociation,TypeofBuilding,TypeofBusiness,TypeofContingencies,TypeofGoverningBodies,TypeofOwnership,TypeofProperty,TypeofSoil,TypeofTrees,UnfurnAnnualRent,UnfurnOffSeasonRent,UnfurnSeasonalRent,UnitCount,UnitDesign,UnitFloorLocation,UnitNumber,UnitView,Usage,UsageDescription,UtilitiesAvailable,UtilityExpense,UtilityRoomDimension,VacancyRate,VarDualRateCompYN,View,VirtualTour,WaterAccess,WaterDescription,WaterView,WaterfrontDescription,WaterfrontFrontage,WaterfrontPropertyYN,WaterviewDescription,WebAddress,WindowsTreatment,WithdrawnDate,YearBuilt,YearBuiltDescription,YearEstablished,YearofAddition,ZoningInformation,LargePhoto location", ",");
 	this.arrFieldLookupFields=arraynew(1);
 	this.mls_provider="rets30";
 	this.sysidfield="rets30_matrix_unique_id";
@@ -55,7 +55,9 @@
 				if(structkeyexists(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.metaStruct["property"].tableFields, this.arrColumns[i])){
 					this.emptyStruct[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.metaStruct["property"].tableFields[this.arrColumns[i]].longname]="";
 				}else{
-					throw("I must update the arrColumns list - missing: "&this.arrColumns[i]);	
+					if(this.arrColumns[i] NEQ "LargePhoto location"){
+						throw("I must update the arrColumns list - missing: "&this.arrColumns[i]);	
+					}
 				}
 			}
 		}
@@ -79,6 +81,9 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 			throw("RETS#this.mls_id#: This row was not long enough to contain all columns: "&application.zcore.functions.zparagraphformat(arraytolist(arguments.ss.arrData,chr(10)))&""); 
 		}
 		for(i=1;i LTE arraylen(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns);i++){
+			if(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i] EQ "rets30_largephotolocation"){
+				continue;
+			}
 			col=(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.metaStruct["property"].tableFields[removechars(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i],1,7)].longname);
 			ts["rets30_"&removechars(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i],1,7)]=arguments.ss.arrData[i];
 			if(arguments.ss.arrData[i] EQ '0'){
@@ -95,6 +100,9 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 			}
 			columnIndex[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i]]=i;
 		}
+		// force photo field to work
+		ts["LargePhoto location"]=arguments.ss.arrData[arraylen(arguments.ss.arrData)]; 
+		columnIndex["LargePhoto location"]=arraylen(arguments.ss.arrData);
 
 		for(i in ts){
 			if((right(i, 4) EQ "date" or i CONTAINS "timestamp") and isdate(ts[i])){
@@ -466,13 +474,12 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		//writedump(rs);		writedump(ts);abort;
 
 		rs.listing_track_sysid=ts["rets30_matrix_unique_id"];
-
+		rs["LargePhoto location"]=ts["LargePhoto location"];
 		tempTime=gettickcount('nano');
 		application.idxImportTimerStruct.parseRow2+=(tempTime-startTime);
 		startTime=tempTime;
 
 		//writedump(rs);abort;
-
 		return {
 			listingData:rs,
 			columnIndex:columnIndex,
@@ -496,6 +503,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		if(arguments.ss.listing_photocount EQ 0){
 			idx["photo1"]='/z/a/listing/images/image-not-available.gif';
 		}else{
+			request.lastPhotoId=idx.listing_id;
+			ts=getCachedRequestListingImageUrls(idx); 
+			structappend(idx, ts, true); 
+			/*
 			i=1;
 			
 			for(i=1;i LTE arguments.ss.listing_photocount;i++){
@@ -503,18 +514,14 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 				local.fNameTemp1=arguments.ss.listing_id&"-"&i&".jpeg";
 				local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
 				local.absPath='#request.zos.sharedPath#mls-images/30/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
-				//if(fileexists(local.absPath)){
-					if(i EQ 1){
-						request.lastPhotoId=arguments.ss.listing_id;
-					}
-					idx["photo"&i]=request.zos.retsPhotoPath&'30/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
-				/*}else{
-					idx["photo"&i]='/z/a/listing/images/image-not-available.gif';
-					if(i EQ 1){
-						request.lastPhotoId="";
-					}
-				}*/
-			}
+				if(i EQ 1){
+					request.lastPhotoId=arguments.ss.listing_id;
+				}
+				idx["photo"&i]=request.zos.retsPhotoPath&'30/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+			}*/
+			// LargePhoto location
+			// https://rets.sef.mlsmatrix.com/Rets/GetRetsMedia.ashx?Key=26938795&TableID=9&Type=1&Number=0&Size=3&usd=-1&ust=PaYDAM9gPz8vk(Bl55dX8lj79FJXpyFvCk(7TxlttNjqixNJMUUHGw))
+			/**/
 		}
 		idx["agentName"]=arguments.ss["rets30_listagentfullname"];
 		idx["agentPhone"]=arguments.ss["RETS30_LISTAGENTDIRECTWORKPHONE"];
@@ -547,6 +554,34 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		</cfscript>
     </cffunction>
     
+
+	<cffunction name="getCachedRequestListingImageUrls" localmode="modern" access="public">
+		<cfargument name="idx" type="struct" required="yes">
+		<cfscript>
+		if(not structkeyexists(request.zos, 'listingImageURLCache')){
+			request.zos.listingImageURLCache={};
+		}
+		if(structkeyexists(request.zos.listingImageURLCache, arguments.idx.listing_id)){
+			return request.zos.listingImageURLCache[arguments.idx.listing_id];
+		}
+		arrPhoto=listToArray(application.zcore.functions.zso(arguments.idx, "LargePhoto Location"), ",");
+		ts={};
+		for(i=1;i<=arraylen(arrPhoto);i++){
+			ts["photo"&i]=application.zcore.listingCom.getThumbnail(arrPhoto[i], arguments.idx.listing_id, i, 10000, 10000, 0); 
+		}
+		request.zos.listingImageURLCache[arguments.idx.listing_id]=ts;
+		return ts;
+		</cfscript>
+	</cffunction>
+    <!--- 
+	
+			arrPhoto=listToArray(application.zcore.functions.zso(idx, "LargePhoto Location"), ",");
+			for(i=1;i<=arraylen(arrPhoto);i++){
+				idx["photo"&i]=arrPhoto[i];
+			}
+			writedump(idx);
+			abort;
+     --->
     
     <cffunction name="getPhoto" localmode="modern" output="no" returntype="any">
     	<cfargument name="mls_pid" type="string" required="yes">
@@ -556,6 +591,21 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		var qId=0;
 		var db=request.zos.queryObject;
 		var local=structnew();
+
+		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
+		if(structkeyexists(request.zos, 'listingImageURLCache')){
+			if(structkeyexists(request.zos.listingImageURLCache, this.mls_id&"-"&arguments.mls_pid)){
+				if(structkeyexists(request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid], "photo"&arguments.num)){
+					return request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid]["photo"&arguments.num];
+				}
+			}
+		}
+		request.lastPhotoId="";
+		return "";
+		/*
+
+
+
 		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
@@ -565,7 +615,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		}else{
 			request.lastPhotoId="";
 			return "";
-		}
+		}*/
 		</cfscript>
     </cffunction>
 	

@@ -255,7 +255,7 @@ show_infobar: false,<!--- 				//BOOLEAN - flag to show or hide infobar --->
 infobar_opacity: 1<!--- 				//FLOAT - transparency for info bar --->
 }
     </cfsavecontent>
-    <input type="hidden" name="zGalleryViewSlideshow1_data" id="zGalleryViewSlideshow1_data" value="#htmleditformat(theJS)#" />
+    <input type="hidden" name="zGalleryViewSlideshow1_data" id="zGalleryViewSlideshow1_data" value="#htmleditformat(theJS)#" /> 
 	<div class="zGalleryViewSlideshowContainer">
 		<ul id="zGalleryViewSlideshow1" class="zGalleryViewSlideshow">
 		<cfset hasPhotos=false>
