@@ -340,7 +340,22 @@
 						<a href="#request.zos.originalURL#?print=1" target="_blank" class="zEventView1-print" rel="nofollow">Print</a>
 					</div>
 					<div class="z-float">
-						<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print">Add To My Calendar</a>
+						<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print" style="margin-right:5px; margin-bottom:5px;">Add To My Calendar</a>
+
+						<cfscript>
+						
+						tz=gettimezoneinfo(); 
+						updatedDate=DateAdd("h", tz.utcHourOffset, struct.event_updated_datetime);
+						startDate=DateAdd("h", tz.utcHourOffset, struct.event_recur_start_datetime);
+						endDate=DateAdd("h", tz.utcHourOffset, struct.event_recur_end_datetime);
+ 
+						startDateConverted=dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z";
+						endDateConverted=dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z";
+						</cfscript>
+						<a href="https://www.google.com/calendar/render?action=TEMPLATE&text=#urlencodedformat(struct.event_name)#&dates=#startDateConverted#/#endDateConverted#&details=For+details,+click+here:+#request.zos.globals.domain##request.zos.originalURL#&sf=true&output=xml" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print">Add To Google Calendar</a>
+
+
+
 					</div>
 				</div>
 			</div>
