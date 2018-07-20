@@ -291,6 +291,7 @@
 				parseInt(singleColumnWidth);
 			}
 			var columnCount=$(this).attr("data-column-count");
+
 			if(columnCount==null || columnCount == ""){
 				columnCount=0;
 			}
@@ -300,76 +301,102 @@
 			}else{
 				var children=$(this).children();
 			} 
-			if($(this).width()<=singleColumnWidth){
-				$(children).height("auto");
-				return;
-			}else{
-				$(children).height("auto");
-			}
-			/*
-			$(children).each(function(){
-				console.log($(this).height()+":"+$(this).outerHeight(false));
-			});
-			return;
-			*/
-			var columnChildren=[];
-			var columnChildrenImages=[];
-			if(columnCount==0){
-				columnChildren[0]={
-					children:children,
-					images:[],
-					imagesLoaded:0
+			
+			if(columnCount > 0 && typeof CSS !="undefined" && CSS.supports("display", "inline-grid")){
+				var arrAuto=[];
+				for(var i=0;i<columnCount;i++){
+					arrAuto.push("auto");
 				}
-				$("img", children).each(function(){
-					columnChildren[0].images.push(this);
-					if(this.complete){
-						columnChildren[0].imagesLoaded++;
-					}
-				});
+				if($(this).width()<=singleColumnWidth){
+					$(this).css({
+						"display":"inline-grid",
+						"grid-template-columns": "auto"
+					});
+				}else{
+					$(this).css({
+						"display":"inline-grid",
+						"grid-template-columns": arrAuto.join(" "),
+						"grid-column-gap": "20px",
+						"vertical-align":"top",
+						"grid-row-gap": "20px"
+					});
+				}
 			}else{
-				var count=0;
-				var currentOffset=0; 
-				for(var i=0;i<children.length;i++){
-					if(typeof columnChildren[currentOffset] == "undefined"){
-						columnChildren[currentOffset]={
-							children:[],
-							images:[],
-							imagesLoaded:0
-						} 
+				if($(this).width()<=singleColumnWidth){
+					$(children).height("auto");
+					return;
+				}else{
+					$(children).css({
+						"display": "inline-block", 
+						"vertical-align": "top"
+					});
+					$(children).height("auto");
+				}
+				/*
+				$(children).each(function(){
+					console.log($(this).height()+":"+$(this).outerHeight(false));
+				});
+				return;
+				*/
+				var columnChildren=[];
+				var columnChildrenImages=[];
+				if(columnCount==0){
+					columnChildren[0]={
+						children:children,
+						images:[],
+						imagesLoaded:0
 					}
-					columnChildren[currentOffset].children.push(children[i]);
-					$("img", children[i]).each(function(){
-						columnChildren[currentOffset].images.push(this);
+					$("img", children).each(function(){
+						columnChildren[0].images.push(this);
 						if(this.complete){
-							columnChildren[currentOffset].imagesLoaded++;
+							columnChildren[0].imagesLoaded++;
 						}
 					});
-					count++;
-					if(count>=columnCount){
-						count=0;
-						currentOffset++;
-					}
-				}  
-			} 
-			for(var i=0;i<columnChildren.length;i++){
-				var c=columnChildren[i]; 
-				if(c.images.length){  
-					var images=$(c.images); 
-					if(c.imagesLoaded != images.length){
-						images.bind("load", function(e){
-							c.imagesLoaded++;
-							if(c.imagesLoaded>=images.length){ 
-								setTimeout(function(){
-									forceChildEqualHeights(c.children);  
-								}, 10);
+				}else{
+					var count=0;
+					var currentOffset=0; 
+					for(var i=0;i<children.length;i++){
+						if(typeof columnChildren[currentOffset] == "undefined"){
+							columnChildren[currentOffset]={
+								children:[],
+								images:[],
+								imagesLoaded:0
+							} 
+						}
+						columnChildren[currentOffset].children.push(children[i]);
+						$("img", children[i]).each(function(){
+							columnChildren[currentOffset].images.push(this);
+							if(this.complete){
+								columnChildren[currentOffset].imagesLoaded++;
 							}
 						});
+						count++;
+						if(count>=columnCount){
+							count=0;
+							currentOffset++;
+						}
+					}  
+				} 
+				for(var i=0;i<columnChildren.length;i++){
+					var c=columnChildren[i]; 
+					if(c.images.length){  
+						var images=$(c.images); 
+						if(c.imagesLoaded != images.length){
+							images.bind("load", function(e){
+								c.imagesLoaded++;
+								if(c.imagesLoaded>=images.length){ 
+									setTimeout(function(){
+										forceChildEqualHeights(c.children);  
+									}, 10);
+								}
+							});
+						}
 					}
+					forceChildEqualHeights(c.children); 
+					setTimeout(function(){ 
+						forceChildEqualHeights(c.children);  
+					}, 10);
 				}
-				forceChildEqualHeights(c.children); 
-				setTimeout(function(){ 
-					forceChildEqualHeights(c.children);  
-				}, 10);
 			}
 		}); 
 		if($(".z-equal-height").length > 0){
