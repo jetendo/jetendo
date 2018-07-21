@@ -109,7 +109,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 				ts[i]=dateformat(d, "m/d/yyyy")&" "&timeformat(d, "h:mm tt");
 			}else if(ts[i] EQ 0 or ts[i] EQ 1){
 
-			}else if(isnumeric(ts[i]) and right(ts[i], 3) EQ ".00"){
+			}else if(len(ts[i]) lt 14 and isnumeric(ts[i]) and right(ts[i], 3) EQ ".00"){
 				ts[i]=numberformat(ts[i]);
 			}else{
 				ts[i]=replace(ts[i], ",", ", ", "all");
