@@ -808,8 +808,13 @@
 				htmlEditor.width			= "100%";
 				htmlEditor.height		= 400;
 				htmlEditor.create();
-				</cfscript></td>
+				</cfscript></td> 
 			</tr>
+			<tr>
+				<th>#application.zcore.functions.zOutputHelpToolTip("Active","member.member.edit user_active")#</th>
+				<td>#application.zcore.functions.zInput_Boolean("user_active", form.user_active)#
+				</td>
+			</tr> 
 			<cfscript> 
 			if(variables.metaFieldInUse){
 				metaFields=variables.metaCom.displayForm("user", "Basic", "last", true);
