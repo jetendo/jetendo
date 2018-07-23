@@ -8,7 +8,13 @@
 	form.zIndex=application.zcore.functions.zso(form,'zIndex',true,1);
 	form.ugid=application.zcore.functions.zso(form, 'ugid', true);
 	form.searchtext=trim(application.zcore.functions.zso(form,'searchtext'));
-	form.returnMethod=application.zcore.functions.zso(form, 'returnMethod', false, "");
+	form.returnMethod=application.zcore.functions.zso(form, 'returnMethod', false, ""); 
+	if(structkeyexists(application.siteStruct[request.zos.globals.id], 'metaCache') and structkeyexists(application.siteStruct[request.zos.globals.id]['metaCache'], 'metaObjectCache') and structkeyexists(application.siteStruct[request.zos.globals.id]['metaCache']['metaObjectCache'], 'user')){
+		variables.metaFieldInUse=true;
+		variables.metaCom=createObject("component", "zcorerootmapping.com.zos.meta");
+	}else{
+		variables.metaFieldInUse=false;
+	}
 	if(form.method EQ "showPublicUsers"){
 		form.returnMethod="showPublicUsers";
 	}
@@ -30,18 +36,18 @@
 	memberUserGroupId= userGroupCom.getGroupId('member',request.zos.globals.id);
 	variables.userUserGroupIdCopy = userGroupCom.getGroupId('user',request.zos.globals.id);
 	db.sql="SELECT * FROM 
-#db.table("user_group_x_group", request.zos.zcoreDatasource)# 
-WHERE user_group_id = #db.param(form.ugid)# and 
-user_group_child_id=#db.param(memberUserGroupId)# and 
-user_group_x_group_deleted=#db.param(0)# and 
-site_id = #db.param(request.zos.globals.id)# ";
+	#db.table("user_group_x_group", request.zos.zcoreDatasource)# 
+	WHERE user_group_id = #db.param(form.ugid)# and 
+	user_group_child_id=#db.param(memberUserGroupId)# and 
+	user_group_x_group_deleted=#db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)# ";
 	qGroupCheck=db.execute("qGroupCheck");
 
 	db.sql="SELECT user_group_id FROM 
-#db.table("user_group_x_group", request.zos.zcoreDatasource)# 
-WHERE user_group_child_id = #db.param(memberUserGroupId)# and  
-user_group_x_group_deleted=#db.param(0)# and 
-site_id = #db.param(request.zos.globals.id)# ";
+	#db.table("user_group_x_group", request.zos.zcoreDatasource)# 
+	WHERE user_group_child_id = #db.param(memberUserGroupId)# and  
+	user_group_x_group_deleted=#db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)# ";
 	qMemberGroups=db.execute("qMemberGroups");
 	memberAccessStruct={};
 	arrMemberGroups=[];
@@ -185,6 +191,13 @@ site_id = #db.param(request.zos.globals.id)# ";
 		if(qCheck.member_photo NEQ ""){
 			application.zcore.functions.zDeleteFile(application.zcore.functions.zVar('privatehomedir',qCheck.userSiteId)&removechars(request.zos.memberImagePath,1,1)&qCheck.member_photo);
 		}
+		if(variables.metaFieldInUse){
+			structappend(form, variables.metaCom.getData("user", form), false); 
+			rsDelete=variables.metaCom.delete("user", form); 
+			if(not rsDelete.success){
+				application.zcore.functions.zReturnJson({success:false, errorMessage:rs.errorMessage});
+			}
+		}
 		db.sql="DELETE FROM #db.table("user", request.zos.zcoreDatasource)#  WHERE 
 		user_id = #db.param(qCheck.user_id)# and 
 		user_deleted = #db.param(0)# and 
@@ -320,6 +333,15 @@ site_id = #db.param(request.zos.globals.id)# ";
 		}
 	}
 	form.user_alternate_email=arrayToList(arrEmail2, ",");
+	if(variables.metaFieldInUse){
+		arrError=variables.metaCom.validate("user", form);
+		if(arrayLen(arrError)){
+			fail=true;
+			for(e in arrError){
+				application.zcore.status.setStatus(request.zsid, e, form, true);
+			}
+		}
+	}
 	if(fail){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true);
 		if(form.method EQ 'insert'){
@@ -338,6 +360,9 @@ site_id = #db.param(request.zos.globals.id)# ";
 			// force same office
 			form.office_id=qU2.office_id;
 		}
+	}
+	if(variables.metaFieldInUse){
+		form.user_meta_json=variables.metaCom.save("user", form); 
 	}
 	form.member_phone=application.zcore.functions.zso(form, 'member_phone');
 	structappend(ts,form);
@@ -573,6 +598,9 @@ site_id = #db.param(request.zos.globals.id)# ";
 	qMember=db.execute("qMember");
 	application.zcore.functions.zQueryToStruct(qMember, form, "user_group_id");
 	application.zcore.functions.zStatusHandler(request.zsid,true);
+	if(variables.metaFieldInUse){
+		structappend(form, variables.metaCom.getData("user", form), false); 
+	}
 	</cfscript>
 	<h2>
 		<cfif currentMethod EQ 'add'>
@@ -599,8 +627,22 @@ site_id = #db.param(request.zos.globals.id)# ";
 		tabCom.enableSaveButtons();
 		</cfscript>
 		#tabCom.beginTabMenu()# 
-		#tabCom.beginFieldSet("Basic")#
+		#tabCom.beginFieldSet("Basic")# 
 		<table  class="table-list">
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Basic", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=arraylen(metaFields);i>=1;i--){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 			<cfif application.zcore.user.checkGroupAccess("administrator") and (request.zsession.user.id NEQ form.user_id or request.zsession.user.site_id NEQ request.zos.globals.id)>
 				<cfscript>
 				db.sql="SELECT * FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group WHERE 
@@ -768,10 +810,38 @@ site_id = #db.param(request.zos.globals.id)# ";
 				htmlEditor.create();
 				</cfscript></td>
 			</tr>
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Basic", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){ 
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 		</table>
 		#tabCom.endFieldSet()# 
 		#tabCom.beginFieldSet("Advanced")#
 		<table style="  border-spacing:0px;" class="table-list">
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=arraylen(metaFields);i>=1;i--){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 			<cfif application.zcore.user.checkGroupAccess("administrator") and structcount(request.zsession.user.limitManagerFeatureStruct) EQ 0>
 				<tr>
 					<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Limit Manager Features","member.member.edit user_limit_manager_features")#</th>
@@ -1046,6 +1116,21 @@ site_id = #db.param(request.zos.globals.id)# ";
 					<td style="vertical-align:top; ">#application.zcore.functions.zInput_Boolean("user_enable_widget_builder", form.user_enable_widget_builder)#</td>
 				</tr>
 			</cfif>
+			<cfscript>
+			
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){ 
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 	
 		</table>
 		#tabCom.endFieldSet()# 
