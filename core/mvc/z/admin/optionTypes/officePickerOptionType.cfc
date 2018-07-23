@@ -12,7 +12,7 @@
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfscript>
-	return "1|1";
+	return "1";
 	</cfscript>
 </cffunction>
 
@@ -59,42 +59,28 @@
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
-	<cfscript>
-	arrGroup=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
-	for(i=1;i LTE arraylen(arrGroup);i++){
-		arrGroup[i]=application.zcore.functions.zescape(arrGroup[i]);
-	}
-	userGroupIdSQL="'"&arrayToList(arrGroup, "','")&"'";
+	<cfscript> 
 	db=request.zos.queryObject;
-	db.sql="SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("user.site_id"))# as siteIDType
-	FROM #db.table("user", request.zos.zcoreDatasource)# user 
+	db.sql="SELECT * 
+	FROM #db.table("office", request.zos.zcoreDatasource)# 
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	user_deleted = #db.param(0)# ";
-	if(arrayLen(arrGroup)){
-		db.sql&=" and user_group_id in ("&db.trustedSQL(userGroupIdSQL)&")";
-	}
-	db.sql&=" ORDER BY user_first_name, user_last_name, user_username";
-	qUser=db.execute("qUser");
+	office_deleted = #db.param(0)#
+	ORDER BY office_name";
+	qOffice=db.execute("qOffice");
 
 	savecontent variable="out"{
 		selectStruct = StructNew();
 		selectStruct.name = arguments.prefixString&arguments.row["#variables.type#_option_id"];
-		selectStruct.query = qUser;
+		selectStruct.query = qOffice;
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
 		selectStruct.queryParseLabelVars=true;
-		selectStruct.queryParseValueVars=true;
-		if(arguments.optionStruct.user_displaytype EQ 0){
-			selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-		}else if(arguments.optionStruct.user_displaytype EQ 1){
-			selectStruct.queryLabelField = "##member_company## (##user_username##)";
-		}else if(arguments.optionStruct.user_displaytype EQ 2){
-			selectStruct.queryLabelField = "##user_username##";
-		}
+		selectStruct.queryParseValueVars=true; 
+		selectStruct.queryLabelField = "##office_name##"; 
 		selectStruct.inlineStyle="width:200px; max-width:100%;";
-		selectStruct.queryValueField = "##user_id##|##siteIdType##";
+		selectStruct.queryValueField = "##office_id##";
 		selectStruct.output=true; 
-			selectStruct.size=3;
-			application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); "); 
+		selectStruct.size=3;
+		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); "); 
 
 		echo('Search: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select:<br />');
 		value=application.zcore.functions.zInputSelectBox(selectStruct); 
@@ -146,7 +132,6 @@
 	var db=request.zos.queryObject;
 	if(arguments.value NEQ ""){
 		return db.trustedSQL("concat(',', "&arguments.databaseField&", ',') like '%,"&application.zcore.functions.zescape(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])&",%'");
-		//return arguments.databaseField&' like '&db.trustedSQL("'%"&application.zcore.functions.zescape(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])&"%'");
 	}
 	return '';
 	</cfscript>
@@ -195,52 +180,37 @@
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
-	<cfscript>
-	arrGroup=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
-	for(i=1;i LTE arraylen(arrGroup);i++){
-		arrGroup[i]=application.zcore.functions.zescape(arrGroup[i]);
-	}
-	userGroupIdSQL="'"&arrayToList(arrGroup, "','")&"'";
+	<cfscript> 
 	db=request.zos.queryObject;
-	db.sql="SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("user.site_id"))# as siteIDType
-	FROM #db.table("user", request.zos.zcoreDatasource)# user 
+	db.sql="SELECT * 
+	FROM #db.table("office", request.zos.zcoreDatasource)# 
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	user_deleted = #db.param(0)# ";
-	if(arrayLen(arrGroup)){
-		db.sql&=" and user_group_id in ("&db.trustedSQL(userGroupIdSQL)&")";
-	}
-	db.sql&=" ORDER BY user_first_name, user_last_name, user_username";
-	qUser=db.execute("qUser");
+	office_deleted = #db.param(0)# 
+	ORDER BY office_name";
+	qOffice=db.execute("qOffice");
 	selectStruct = StructNew();
 	selectStruct.name = arguments.prefixString&arguments.row["#variables.type#_option_id"];
-	selectStruct.query = qUser;
+	selectStruct.query = qOffice;
 	selectStruct.selectedValues=application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
 	selectStruct.queryParseLabelVars=true;
 	selectStruct.queryParseValueVars=true;
-	if(arguments.optionStruct.user_displaytype EQ 0){
-		selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-	}else if(arguments.optionStruct.user_displaytype EQ 1){
-		selectStruct.queryLabelField = "##member_company## (##user_username##)";
-	}else if(arguments.optionStruct.user_displaytype EQ 2){
-		selectStruct.queryLabelField = "##user_username##";
-	}
-	selectStruct.queryValueField = "##user_id##|##siteIdType##";
-	selectStruct.output=false;
-	if(application.zcore.functions.zso(arguments.optionStruct, 'user_multipleselection') EQ 'Yes'){
+	selectStruct.queryLabelField = "##office_name##";
+	selectStruct.queryValueField = "##office_id##";
+	selectStruct.output=false; 
+	if(application.zcore.functions.zso(arguments.optionStruct, "office_multipleselection") EQ "Yes"){ 
 		selectStruct.multiple=true;
 		selectStruct.size=5;
 		selectStruct.hideSelect=true;
-		application.zcore.functions.zSetupMultipleSelect(selectStruct.name, selectStruct.selectedValues);
-	}else{
+		application.zcore.functions.zSetupMultipleSelect(selectStruct.name, selectStruct.selectedValues); 
+	}else{ 
 		selectStruct.size=5;
-		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
-	}
-
+		application.zcore.skin.addDeferredScript('  $("###selectStruct.name#").filterByText($("###selectStruct.name#_InputField"), true); '); 
+	} 
 	value=application.zcore.functions.zInputSelectBox(selectStruct);
 	if(not selectStruct.multiple){
-
-		value='Search: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value;
-	}
+ 
+		value='Search: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value; 
+	} 
 	return { label: true, hidden: false, value:value};  
 	</cfscript>
 </cffunction>
@@ -250,53 +220,27 @@
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	arrV=[];
-	arrGroup=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
-	for(i=1;i LTE arraylen(arrGroup);i++){
-		arrGroup[i]=application.zcore.functions.zescape(arrGroup[i]);
-	}
-	userGroupIdSQL="'"&arrayToList(arrGroup, "','")&"'";
+	arrV=[]; 
 	arrayAppend(arrV, '
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="SELECT *, ##db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("user.site_id"))## as siteIDType
-	FROM ##db.table("user", request.zos.zcoreDatasource)## user 
+	db.sql="SELECT * 
+	FROM ##db.table("office", request.zos.zcoreDatasource)## 
 	WHERE site_id = ##db.param(request.zos.globals.id)## and 
-	user_deleted = ##db.param(0)## ";
-	');
-	if(arrayLen(arrGroup)){
-		arrayAppend(arrV, ' 
-		db.sql&=" and user_group_id in ("&db.trustedSQL(#userGroupIdSQL#)&")";
-		');
-	}
-	arrayAppend(arrV, ' 
-	db.sql&=" ORDER BY user_first_name, user_last_name, user_username";
-	qUser=db.execute("qUser");
+	office_deleted = ##db.param(0)## 
+	ORDER BY office_name";
+	qOffice=db.execute("qOffice");
 	selectStruct = StructNew();
 	selectStruct.name = "#arguments.fieldName#";
-	selectStruct.query = qUser;
+	selectStruct.query = qOffice;
 	selectStruct.selectedValues=application.zcore.functions.zso(form, "#arguments.fieldName#");
 	selectStruct.queryParseLabelVars=true;
 	selectStruct.queryParseValueVars=true;
-	');
-	if(arguments.optionStruct.user_displaytype EQ 0){
-		arrayAppend(arrV, ' 
-		selectStruct.queryLabelField = "####user_first_name#### ####user_last_name#### (####user_username####)";
-		');
-	}else if(arguments.optionStruct.user_displaytype EQ 1){
-		arrayAppend(arrV, ' 
-		selectStruct.queryLabelField = "####member_company#### (####user_username####)";
-		');
-	}else if(arguments.optionStruct.user_displaytype EQ 2){
-		arrayAppend(arrV, ' 
-		selectStruct.queryLabelField = "####user_username####";
-		');
-	}
-	arrayAppend(arrV, ' 
-	selectStruct.queryValueField = "####user_id####|####siteIdType####";
+	selectStruct.queryLabelField = "####office_name####";
+	selectStruct.queryValueField = "####office_id####";
 	selectStruct.output=false;
 	');
-	if(application.zcore.functions.zso(arguments.optionStruct, "user_multipleselection") EQ "Yes"){
+	if(application.zcore.functions.zso(arguments.optionStruct, "office_multipleselection") EQ "Yes"){
 		arrayAppend(arrV, ' 
 		selectStruct.multiple=true;
 		selectStruct.size=5;
@@ -331,21 +275,14 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	returnValue="";
-	arrUser=listToArray(arguments.value, "|");
-	if(arraylen(arrUser) EQ 2){
-		db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# user 
-		where site_id = #db.param(application.zcore.functions.zGetSiteIdFromSiteIdType(arrUser[2]))# and 
-		user_deleted = #db.param(0)# and
-		user_id = #db.param(arrUser[1])# ";
-		qUser=db.execute("qUser");
-		if(qUser.recordcount NEQ 0){
-			if(arguments.optionStruct.user_displaytype EQ 0){
-				returnValue=qUser.user_first_name&" "&qUser.user_last_name&" ("&qUser.user_username&")";
-			}else if(arguments.optionStruct.user_displaytype EQ 1){
-				returnValue= qUser.member_company&" ("&qUser.user_username&")";
-			}else if(arguments.optionStruct.user_displaytype EQ 2){
-				returnValue=qUser.user_username;
-			}
+	arrOffice=listToArray(arguments.value, "|");
+	if(arraylen(arrOffice) EQ 2){
+		db.sql="select * from #db.table("office", request.zos.zcoreDatasource)# 
+		where site_id = #db.param(request.zos.globals.id)# and 
+		office_deleted = #db.param(0)#  ";
+		qOffice=db.execute("qOffice");
+		if(qOffice.recordcount NEQ 0){ 
+			returnValue=qOffice.office_name; 
 		}
 	}
 	return returnValue; 
@@ -383,7 +320,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'User Picker';
+	return 'Office Picker';
 	</cfscript>
 </cffunction>
 
@@ -399,10 +336,8 @@
 		application.zcore.status.setStatus(Request.zsid, false,arguments.dataStruct,true);
 		return { success:false};
 	}
-	ts={
-		user_group_id_list:application.zcore.functions.zso(arguments.dataStruct, 'user_group_id_list'),
-		user_displaytype:application.zcore.functions.zso(form, 'user_displaytype'),
-		user_multipleselection:application.zcore.functions.zso(form, 'user_multipleselection')
+	ts={ 
+		office_multipleselection:application.zcore.functions.zso(form, 'office_multipleselection')
 	};
 	arguments.dataStruct["#variables.type#_option_type_json"]=serializeJson(ts);
 	return { success:true, optionStruct: ts};
@@ -412,10 +347,8 @@
 
 <cffunction name="getOptionFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
-	ts={
-		user_group_id_list:"0",
-		user_displaytype:"",
-		user_multipleselection:"No"
+	ts={ 
+		office_multipleselection:"No"
 	};
 	return ts;
 	</cfscript>
@@ -433,55 +366,21 @@
 	</cfscript>
 	<cfsavecontent variable="output">
 		<script type="text/javascript">
-		function validateOptionType16(postObj, arrError){   
-			if(postObj.user_group_id_list == ''){
-				arrError.push('You must select at least one user group in the Limit User Groups field.');
-			}
+		function validateOptionType27(postObj, arrError){    
 		}
 		</script>
-	<input type="radio" name="#variables.type#_option_type_id" value="16" onClick="setType(16);" <cfif value EQ "16">checked="checked"</cfif>/>
-	User Picker<br />
-		<div id="typeOptions16" style="display:none;padding-left:30px;"> 
-			<table style="border-spacing:0px;">
-			<tr><td>Display Type: </td><td>
-			<cfscript>
-			arguments.optionStruct.user_displaytype=application.zcore.functions.zso(arguments.optionStruct, 'user_displaytype', true, 0);
-			var ts = StructNew();
-			ts.name = "user_displaytype";
-			ts.style="border:none;background:none;";
-			ts.labelList = "First/Last Name/Email,Company/Email,Email";
-			ts.valueList = "0,1,2";
-			ts.hideSelect=true;
-			ts.struct=arguments.optionStruct;
-			writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
-			</cfscript>
-			</td></tr>
-			<tr><td style="vertical-align:top;">Limit User Groups: </td>
-			<td>
-			<cfscript>
-			form.user_group_id_list=application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list');
-			db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
-			WHERE site_id = #db.param(request.zos.globals.id)#  and 
-			user_group_deleted = #db.param(0)#
-			ORDER BY user_group_name asc"; 
-			var qGroup2=db.execute("qGroup2"); 
-			ts = StructNew();
-			ts.name = "user_group_id_list";
-			ts.friendlyName="";
-			// options for query data
-			ts.query = qGroup2;
-			ts.queryLabelField = "user_group_friendly_name";
-			ts.queryValueField = "user_group_id";
-			writeoutput(application.zcore.functions.zInput_Checkbox(ts));
-			</cfscript></td></tr>
+	<input type="radio" name="#variables.type#_option_type_id" value="27" onClick="setType(27);" <cfif value EQ "27">checked="checked"</cfif>/>
+	Office Picker<br />
+		<div id="typeOptions27" style="display:none;padding-left:30px;"> 
+			<table style="border-spacing:0px;"> 
 			<tr><td>Multiple Selections: </td><td>
 			<cfscript>
-			arguments.optionStruct.user_multipleselection=application.zcore.functions.zso(arguments.optionStruct, 'user_multipleselection', false, "No");
-			if(arguments.optionStruct.user_multipleselection EQ ""){
-				arguments.optionStruct.user_multipleselection="No";
+			arguments.optionStruct.office_multipleselection=application.zcore.functions.zso(arguments.optionStruct, 'office_multipleselection', false, "No");
+			if(arguments.optionStruct.office_multipleselection EQ ""){
+				arguments.optionStruct.office_multipleselection="No";
 			}
 			var ts = StructNew();
-			ts.name = "user_multipleselection";
+			ts.name = "office_multipleselection";
 			ts.style="border:none;background:none;";
 			ts.labelList = "Yes,No";
 			ts.valueList = "Yes,No";

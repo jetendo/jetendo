@@ -77,7 +77,8 @@
 		"23": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.imageLibraryOptionType"),
 		"24": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.stylesetOptionType"),
 		"25": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.productOptionType"),
-		"26": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.productCategoryOptionType")
+		"26": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.productCategoryOptionType"),
+		"27": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.officePickerOptionType")
 	};
 
 	return ts;
