@@ -358,6 +358,7 @@
 		LeadComparison:0,
 		TopVerifiedRankings:0,
 		facebookReach:0,
+		facebookLikes:0,
 		VerifiedRankings:0,
 		OrganicSearch:0,
 		PhoneLog:0,
@@ -371,6 +372,7 @@
 		Summary:false,
 		LeadComparison:false,
 		facebookReach:false,
+		facebookLikes:false,
 		TopVerifiedRankings:false,
 		VerifiedRankings:false,
 		OrganicSearch:false,
@@ -1021,6 +1023,9 @@
 			<tr style="{facebookReachStyle}">
 				<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="facebookReach" <cfif request.leadData.disableContentSection.facebookReach>checked="checked"</cfif>></td>
 				<td>Facebook Reach</td><td>{facebookReachPageNumber}</td></tr>  
+			<tr style="{facebookLikesStyle}">
+				<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="facebookLikes" <cfif request.leadData.disableContentSection.facebookLikes>checked="checked"</cfif>></td>
+				<td>Facebook Likes</td><td>{facebookLikesPageNumber}</td></tr>  
 		</cfif>
 		<tr style="{leadTypeSummaryStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="leadTypeSummary" <cfif request.leadData.disableContentSection.leadTypeSummary>checked="checked"</cfif>></td>
@@ -2877,8 +2882,11 @@ track_user_first_page
 
 	db.sql="select * from #db.table("facebook_post", request.zos.zcoreDatasource)# WHERE 
 	facebook_post_created_datetime>=#db.param(request.leadData.startMonthDate)# and 
-	facebook_post_created_datetime<#db.param(request.leadData.endDate)# and 
-	facebook_page_id IN (#db.param(pageInternalIdList)#) and 
+	facebook_post_created_datetime<#db.param(request.leadData.endDate)# and ";
+	if(request.zos.globals.facebookInsightsStartDate NEQ ""){
+		db.sql&=" facebook_post_created_datetime>=#db.param(dateformat(request.zos.globals.facebookInsightsStartDate, "yyyy-mm-dd"))# and ";
+	}
+	db.sql&=" facebook_page_id IN (#db.param(pageInternalIdList)#) and 
 	facebook_post_deleted=#db.param(0)#  
 	ORDER BY facebook_post_reach DESC 
 	LIMIT #db.param(0)#, #db.param(5)#";
@@ -2886,7 +2894,11 @@ track_user_first_page
 
 	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE 
 	facebook_month_datetime>=#db.param(request.leadData.startDate)# and 
-	facebook_month_datetime<#db.param(request.leadData.endDate)# and 
+	facebook_month_datetime<#db.param(request.leadData.endDate)# and ";
+	if(request.zos.globals.facebookInsightsStartDate NEQ ""){
+		db.sql&=" facebook_month_datetime>=#db.param(dateformat(request.zos.globals.facebookInsightsStartDate, "yyyy-mm-dd"))# and ";
+	}
+	db.sql&=" 
 	site_id =#db.param(request.zos.globals.id)# and 
 	facebook_month_deleted=#db.param(0)#  
 	ORDER BY facebook_month_datetime ASC  ";
@@ -2900,7 +2912,11 @@ track_user_first_page
 		db.sql&=" facebook_month_datetime>=#db.param(dateformat(dateadd("yyyy", -1, dateadd("m", -1, request.leadData.endDate)), "yyyy-mm-dd"))# and 
 		facebook_month_datetime<#db.param(dateformat(dateadd("yyyy", -1, dateadd("d", -1, request.leadData.endDate)), "yyyy-mm-dd"))# and ";
 	}
-	db.sql&=" site_id =#db.param(request.zos.globals.id)# and 
+	db.sql&=" site_id =#db.param(request.zos.globals.id)# and ";
+	if(request.zos.globals.facebookInsightsStartDate NEQ ""){
+		db.sql&=" facebook_month_datetime>=#db.param(dateformat(request.zos.globals.facebookInsightsStartDate, "yyyy-mm-dd"))# and ";
+	}
+	db.sql&=" 
 	facebook_month_deleted=#db.param(0)#  
 	ORDER BY facebook_month_datetime ASC 
 	LIMIT #db.param(0)#, #db.param(1)# ";
@@ -2909,7 +2925,11 @@ track_user_first_page
 	db.sql="select * from #db.table("facebook_month", request.zos.zcoreDatasource)# WHERE ";  
 	db.sql&=" facebook_month_datetime>=#db.param(dateformat(dateadd("yyyy", -1, dateadd("d", -1, request.leadData.endDate)), "yyyy-mm-01"))# and 
 		facebook_month_datetime<=#db.param(request.leadData.startMonthDate)# and "; 
-	db.sql&=" site_id =#db.param(request.zos.globals.id)# and 
+	db.sql&=" site_id =#db.param(request.zos.globals.id)# and ";
+	if(request.zos.globals.facebookInsightsStartDate NEQ ""){
+		db.sql&=" facebook_month_datetime>=#db.param(dateformat(request.zos.globals.facebookInsightsStartDate, "yyyy-mm-dd"))# and ";
+	}
+	db.sql&=" 
 	facebook_month_deleted=#db.param(0)#  
 	ORDER BY facebook_month_datetime ASC  ";
 	qMonthChart=db.execute("qMonthChart");   
@@ -2940,6 +2960,7 @@ track_user_first_page
 	showFooter();
 	request.leadData.contentSection.facebookLog=request.leadData.pageCount; 
 	request.leadData.contentSection.facebookReach=request.leadData.pageCount; 
+	request.leadData.contentSection.facebookLikes=request.leadData.pageCount; 
 	</cfscript>	
  
 	<cfif arrayLen(js) NEQ 0> 
@@ -3006,24 +3027,28 @@ track_user_first_page
   		}
   	}
 	echo('</tr>');
-	echo('<tr><th>Likes</th>');
-	if(form.facebookQuarters){
-		n=1;
-		for(row in qMonthChart){ 
-			if(n MOD 4 EQ 1){
-				echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
+
+	if(not request.leadData.disableContentSection["facebookLikes"]){
+
+		echo('<tr><th>Likes</th>');
+		if(form.facebookQuarters){
+			n=1;
+			for(row in qMonthChart){ 
+				if(n MOD 4 EQ 1){
+					echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
+				}
+				n++;
 			}
-			n++;
-		}
-	}else{
-		for(row in qMonthPreviousYear){ 
-	  		echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
+		}else{
+			for(row in qMonthPreviousYear){ 
+		  		echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
+		  	}
+			for(row in qMonth){ 
+	  			echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
+	  		}
 	  	}
-		for(row in qMonth){ 
-  			echo('<td>#numberformat(row.facebook_month_paid_likes+row.facebook_month_organic_likes, "_")#</td>');
-  		}
-  	}
-	echo('</tr>'); 
+		echo('</tr>'); 
+	}
 
 	if(not request.leadData.disableContentSection["facebookReach"]){
 		//echo('<tr><th>Unlikes</th><td>#numberformat(row.facebook_month_unlikes, "_")#</td></tr>');
