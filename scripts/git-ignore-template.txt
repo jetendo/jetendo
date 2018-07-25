@@ -6,6 +6,7 @@ hardcoded-urls
 _notes
 zupload
 __zdeploy-*.txt
+*.sublime-workspace
 
 #################
 ## Eclipse
