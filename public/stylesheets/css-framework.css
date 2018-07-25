@@ -313,10 +313,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
   animation: none;
 }
 
-.z-show-at-1362{display:none;}
-.z-show-at-992{display:none;}
-.z-show-at-767{display:none;}
-.z-show-at-479{display:none;}
+
+.z-show-at-1362{display:none !important;}
+.z-show-at-992{display:none !important;}
+.z-show-at-767{display:none !important;}
+.z-show-at-479{display:none !important;}
 
 .z-mobileMenuButton {display:none;}
 .z-mobileMenuDiv {display:none;}
