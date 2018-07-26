@@ -656,7 +656,7 @@ if(structkeyexists(Request.zOS, 'globals') and structkeyexists(request.zos.globa
 		<span class="medium">Connection Failure: #request.zos.CGI.HTTP_HOST#</span><br><br>
 		Connection Failures result from the server trying to CFHTTP to a page on our server that generated an error.  It's extremely important to address these issues ASAP.<br><br>
 		<cfif newId NEQ "0" and newID NEQ "">
-			<a href="<cfif testServerFlagged>#request.zOS.zcoreTestAdminDomain#<cfelse>#request.zOS.zcoreAdminDomain#</cfif>/z/server-manager/admin/log/index?action=view&log_id=#newId#">Click here</a> to view detailed information on this error.<br><br>
+			<a href="<cfif testServerFlagged>#request.zOS.zcoreTestAdminDomain#<cfelse>#request.zOS.zcoreAdminDomain#</cfif>/z/server-manager/admin/log/view?log_id=#newId#">Click here</a> to view detailed information on this error.<br><br>
 		<cfelse>
 			Failed to save error in database. Dumping to email instead:<br>
 			
@@ -685,7 +685,7 @@ if(structkeyexists(Request.zOS, 'globals') and structkeyexists(request.zos.globa
 			<body>
 			<span class="medium">Error on #request.zos.CGI.HTTP_HOST#</span><br><br>
 			<cfif newID NEQ "" and newID NEQ "0">
-				<a href="<cfif testServerFlagged>#request.zOS.zcoreTestAdminDomain#<cfelse>#request.zOS.zcoreAdminDomain#</cfif>/z/server-manager/admin/log/index?action=view&log_id=#newId#">Click here</a> to view detailed information on this error.<br><br>
+				<a href="<cfif testServerFlagged>#request.zOS.zcoreTestAdminDomain#<cfelse>#request.zOS.zcoreAdminDomain#</cfif>/z/server-manager/admin/log/view?log_id=#newId#">Click here</a> to view detailed information on this error.<br><br>
 			<cfelse>
 				Failed to save error. Dumping to email instead:<br>
 				

@@ -1099,7 +1099,7 @@ application.zcore.functions.zLogError(ts);
 			<body>
 			<span class="medium">#arguments.ss.type# on #request.zos.currentHostName#</span><br /><br />
 		
-			<a href="#request.zos.globals.serverDomain#/z/server-manager/admin/log/index?action=view&log_id=#log_id#">Click here</a> to view detailed information on this error.<br><br>
+			<a href="#request.zos.globals.serverDomain#/z/server-manager/admin/log/view?log_id=#log_id#">Click here</a> to view detailed information on this error.<br><br>
 		
 			You will have to login using an account with Server Administrator access.<br /><br />
 			User''s IP: #request.zos.cgi.remote_addr# ');
@@ -1551,7 +1551,7 @@ application.zcore.functions.zLogError(ts);
 <body>
 Error on #request.zos.cgi.http_host#<br />
 <br />
-<a href="#request.zos.globals.serverdomain#/server-manager/admin/log/index?action=view&log_id=#log_id#">Click here to view detailed information on this error.</a>
+<a href="#request.zos.globals.serverdomain#/server-manager/admin/log/view?log_id=#log_id#">Click here to view detailed information on this error.</a>
 <br />
 <br />
 You will have to login using your Server Administrator password.

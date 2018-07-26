@@ -1,5 +1,12 @@
 <cfcomponent>
 <cfoutput>
+<cffunction name="view" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	form.action="view";
+	index();
+	</cfscript>
+</cffunction>
+
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	var db=request.zos.queryObject;
