@@ -320,6 +320,8 @@
 						"vertical-align":"top",
 						"grid-row-gap": "20px"
 					});
+					children.css({ "width":"100%"});
+					
 				}
 			}else{
 				if($(this).width()<=singleColumnWidth){
