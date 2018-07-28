@@ -275,14 +275,21 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	returnValue="";
-	arrOffice=listToArray(arguments.value, "|");
-	if(arraylen(arrOffice) EQ 2){
-		db.sql="select * from #db.table("office", request.zos.zcoreDatasource)# 
+	arrOffice=listToArray(arguments.value, ","); 
+	if(arguments.value NEQ ""){
+		db.sql="select group_concat(office_name separator #db.param(", ")#) officeName from #db.table("office", request.zos.zcoreDatasource)# 
 		where site_id = #db.param(request.zos.globals.id)# and 
-		office_deleted = #db.param(0)#  ";
+		office_id IN (";
+		for(i=1;i<=arraylen(arrOffice);i++){
+			if(i NEQ 1){
+				db.sql&=", ";
+			}
+			db.sql&=" #db.param(arrOffice[i])# ";
+		}
+		db.sql&=") and office_deleted = #db.param(0)#  ";
 		qOffice=db.execute("qOffice");
 		if(qOffice.recordcount NEQ 0){ 
-			returnValue=qOffice.office_name; 
+			returnValue=qOffice.officeName; 
 		}
 	}
 	return returnValue; 
