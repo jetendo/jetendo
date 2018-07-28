@@ -302,7 +302,7 @@
 				var children=$(this).children();
 			} 
 			
-			if(columnCount > 0 && typeof CSS !="undefined" && CSS.supports("display", "inline-grid")){
+			/*if(columnCount > 0 && typeof CSS !="undefined" && CSS.supports("display", "inline-grid")){
 				var arrAuto=[];
 				for(var i=0;i<columnCount;i++){
 					arrAuto.push("auto");
@@ -323,7 +323,7 @@
 					children.css({ "width":"100%"});
 					
 				}
-			}else{
+			}else{*/
 				if($(this).width()<=singleColumnWidth){
 					$(children).height("auto");
 					return;
@@ -399,7 +399,7 @@
 						forceChildEqualHeights(c.children);  
 					}, 10);
 				}
-			}
+			//}
 		}); 
 		if($(".z-equal-height").length > 0){
 			console.log("The class name should be z-equal-heights, not z-equal-height");
