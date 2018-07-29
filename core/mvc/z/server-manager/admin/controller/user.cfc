@@ -749,9 +749,8 @@
 			userGroupId = userGroupCom.getGroupId('user',request.zos.globals.id);
 			db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)#  
 			WHERE site_id = #db.param(form.sid)# and 
-			user_group_deleted = #db.param(0)# and 
-			user_group_id <> #db.param(userGroupId)# 
-			ORDER BY user_group_name asc"; 
+			user_group_deleted = #db.param(0)#
+			ORDER BY user_group_name asc"; //  and 		user_group_id <> #db.param(userGroupId)# 
 			var qGroup2=db.execute("qGroup2");  
 			</cfscript>
 			<tr>

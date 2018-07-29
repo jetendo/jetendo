@@ -454,6 +454,10 @@ To view more info about this new user, click the following link:
 				emailCom.sendEmailTemplate(ts); // should i continue ignoring failures?
 			}
 		}
+		statusChanged=true;
+		if(structkeyexists(application.sitestruct[request.zos.globals.id].zcorecustomfunctions, 'userStatusChange') and statusChanged){
+			application.sitestruct[request.zos.globals.id].zcorecustomfunctions.userStatusChange(str.user_id, "add");
+		}
 		return str.user_id;
 		</cfscript>
 		
@@ -651,7 +655,11 @@ Thank you from #request.zos.globals.shortdomain#
         	<cfscript>if(request.zos.isDeveloper){ application.zcore.functions.zError("user_admin.cfc user doesn't exist."); }</cfscript>
 			<cfreturn false> <!--- user doesn't exist. --->
 		</cfif>
-		<cfscript>		
+		<cfscript>	
+		statusChanged=false;
+		if(qCheck.user_active NEQ str.user_active){
+			statusChanged=true;
+		}	
 		if(structkeyexists(str, 'sendConfirmOptIn') EQ false){
 			if(application.zcore.functions.zvar('sendConfirmOptIn',str.site_id) EQ 1){
 				if(((structkeyexists(str, 'user_pref_list') and str.user_pref_list EQ 1) or (structkeyexists(str, 'user_pref_sharing') and str.user_pref_sharing EQ 1)) and qCheck.user_confirm EQ 0){
@@ -762,6 +770,9 @@ Thank you from #request.zos.globals.shortdomain#
 			ts.user_id=str.user_id;
 			emailCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.app.email");
 			emailCom.sendEmailTemplate(ts); // should i continue ignoring failures?
+		}
+		if(structkeyexists(application.sitestruct[request.zos.globals.id].zcorecustomfunctions, 'userStatusChange') and statusChanged){
+			application.sitestruct[request.zos.globals.id].zcorecustomfunctions.userStatusChange(str.user_id, "update");
 		}
 		return true;
 		</cfscript>

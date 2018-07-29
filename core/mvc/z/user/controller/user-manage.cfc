@@ -479,6 +479,8 @@ finish simplifying this script.
 		}
 		application.zcore.listingCom.updateAgentIdStruct(form.user_id);
 	} 
+
+
 	application.zcore.functions.zRedirect('/z/user/user-manage/index?zsid=#request.zsid#&zIndex=#form.zIndex#&ugid=#form.ugid#&searchtext=#URLEncodedFormat(form.searchtext)#'); 
 	</cfscript>
 </cffunction>
@@ -921,6 +923,10 @@ finish simplifying this script.
 				<th>#application.zcore.functions.zOutputHelpToolTip("Zip Code","member.member.edit user_zip")#</th>
 				<td><input type="text" name="user_zip" value="#form.user_zip#" /></td>
 			</tr> 
+			<tr>
+				<th>#application.zcore.functions.zOutputHelpToolTip("Active","member.member.edit user_active")#</th>
+				<td>#application.zcore.functions.zInput_Boolean("user_active", form.user_active)#</td>
+			</tr> 
 		</cfif>
 			<tr><td colspan="2">
 				<button name="saveButton" type="submit">Save</button>
@@ -1115,6 +1121,7 @@ finish simplifying this script.
 			<th>ID</th>
 			<th>Office</th> 
 			<th>Name/Access Rights</th>
+			<th>Status</th>
 			<!--- <th>Sort</th> --->
 			<th>Admin</th>
 		</tr>
@@ -1153,6 +1160,7 @@ finish simplifying this script.
 					</cfif>
 					#qMember.user_group_friendly_name#
 				</td>  
+				<td><cfif qMember.user_active EQ 1>Active<cfelse>Inactive</cfif></td>
 				<!--- <td><cfif qMember.member_public_profile EQ 1>#variables.queueSortCom.getAjaxHandleButton(qMember.user_id)#</cfif></td>  --->
 				<td> 
 					<cfif request.zos.globals.enableDemoMode>

@@ -538,7 +538,7 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
 	</cfif>
 	<cfscript>
 	// remove bad code before sending
-	arguments.ss.html=trim(this.cleanHTML(arguments.ss.html));
+	arguments.ss.html=trim(arguments.ss.html);//trim(this.cleanHTML(arguments.ss.html));
 	arguments.ss.to=trim(arguments.ss.to);
 	arguments.ss.failto=trim(arguments.ss.failto);
 	arguments.ss.text=trim(arguments.ss.text);

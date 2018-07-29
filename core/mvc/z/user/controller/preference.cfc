@@ -752,7 +752,12 @@ If the link does not work, please copy and paste the entire link in your browser
         this.init();
         application.zcore.functions.zStatusHandler(request.zsid);
 	if(application.zcore.user.checkGroupAccess("user")){
-		  application.zcore.functions.zRedirect("/z/user/home/index");
+
+		if(application.zcore.user.checkGroupAccess("user") and application.zcore.functions.zso(form, 'redirectOnLogin') NEQ ""){
+			application.zcore.functions.zRedirect(form.redirectOnLogin);
+		}else{
+		  	application.zcore.functions.zRedirect("/z/user/home/index");
+		}
 	}
         application.zcore.template.setTag("title", "Your Account");
         application.zcore.template.setTag("pagetitle", "Your Account");
