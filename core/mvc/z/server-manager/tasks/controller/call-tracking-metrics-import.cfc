@@ -266,6 +266,7 @@
 			structdelete(t99, 'email');
 			structdelete(t99, 'billed_amount');
 			structdelete(t99, 'billed_at');
+			structdelete(t99, 'audio');
 			structdelete(t99, 'excluded');
 			structdelete(t99, 'tracking_number_format');
 			structdelete(t99, 'business_number_format');
