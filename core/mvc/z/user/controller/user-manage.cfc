@@ -19,7 +19,7 @@ finish simplifying this script.
 
 	if(request.zsession.user.site_id NEQ request.zos.globals.id){
 		// must be a higher rights dev account or multiple site account.  These types of accounts only work in the full site manager interface.
-		application.zcore.functions.zRedirect("/z/user/user-manage/index");
+		application.zcore.functions.zRedirect("/z/user/preference/index");
 	}
  
 	db.sql="select * from #db.table("user_group", request.zos.zcoreDatasource)# WHERE 
