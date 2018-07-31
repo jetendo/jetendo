@@ -1244,11 +1244,11 @@
 					<td>#application.zcore.functions.zInput_Boolean("site_option_allow_public")#</td>
 				</tr>
 			<!--- <cfif form.site_option_group_id NEQ '' and form.site_option_group_id NEQ 0> --->
+				<tr>
+					<th>Use for URL/Nav Title:</th>
+					<td>#application.zcore.functions.zInput_Boolean("site_option_url_title_field")#</td>
+				</tr>
 				<cfif qOptionGroup.site_option_group_enable_unique_url EQ 1>
-					<tr>
-						<th>Use for URL Title:</th>
-						<td>#application.zcore.functions.zInput_Boolean("site_option_url_title_field")#</td>
-					</tr>
 					<tr>
 						<th>Use for Search Summary:</th>
 						<td>#application.zcore.functions.zInput_Boolean("site_option_search_summary_field")#</td>
