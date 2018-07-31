@@ -29,8 +29,8 @@
 	/*}else{
 		inputStruct.secureLogin=false;
 	}*/
-	inputStruct.site_id = request.zos.globals.id;
-	rs=application.zcore.user.checkLogin(inputStruct); 
+	inputStruct.site_id = request.zos.globals.id; 
+	rs=application.zcore.user.checkLogin(inputStruct);  
 	local.isDeveloper="0";
 	if(rs.success){
 		success=true;

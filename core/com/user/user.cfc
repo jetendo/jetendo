@@ -570,6 +570,7 @@ userCom.checkLogin(inputStruct);
 			if(ss.noLoginForm){
 				rs.error=1;
 				rs.success=false;
+				this.setLoginLog(0);
 				return rs;
 			}else{
 				// set login form options

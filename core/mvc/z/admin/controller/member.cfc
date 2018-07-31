@@ -810,6 +810,11 @@
 				htmlEditor.create();
 				</cfscript></td> 
 			</tr>
+			<cfscript>
+			if(form.user_active EQ ""){
+				form.user_active=1;
+			}
+			</cfscript>
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Active","member.member.edit user_active")#</th>
 				<td>#application.zcore.functions.zInput_Boolean("user_active", form.user_active)#
