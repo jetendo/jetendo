@@ -1347,6 +1347,14 @@ function installSublimeProjectFiles($a){
 			}
 			rename($source, $destination);
 		}
+		$source=$p."sites-writable/".$site."/rsync-publish.bat";
+		$destination=$p."sites/".$site."/rsync-publish.bat";
+		if(file_exists($source)){
+			if(file_exists($destination)){
+				unlink($destination);
+			}
+			rename($source, $destination);
+		}
 	}
 	return "1";
 }

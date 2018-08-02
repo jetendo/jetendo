@@ -85,7 +85,7 @@
 	],
 	"settings":
 	{
-		"rsync_ssh":
+		<!--- "rsync_ssh":
 		{
 			"excludes":
 			[
@@ -127,14 +127,23 @@
 				]
 			},
 			"sync_on_save": false
-		}
-	}
+		} --->
+	},
+    "build_systems":
+    [
+        {
+            "name": "Rsync",
+            "cmd": ["#request.zos.sambaInstallPath#sites/#arguments.shortDomainPath#/rsync-publish.bat"]
+        }
+    ]
 } 
 </cfsavecontent>
 	<cfscript>
 	return out;
 	</cfscript>
 </cffunction>
+
+
 
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript> 
@@ -150,9 +159,15 @@
 			"remote_host": "jetendodev.yourdomain.com",
 			"remote_path": "/path/to/jetendo/sites/",
 			"remote_port": 22,
-			"ssh_key_path":"C:/ServerData/jetendo-server/custom-secure-scripts/jetendodev-rsync-key"
+			"ssh_key_path":"C:/ServerData/jetendo-server/custom-secure-scripts/jetendodev-rsync-key",
+			"rsync_host":"127.0.0.2",
+			"rsync_user":"user",
+			"rsync_key_path":"/cygdrive/c/ServerData/jetendo-server/custom-secure-scripts/jetendodev-rsync-pw",
+			"rsync_remote_sites_path":"sites/",
+			"rsync_local_sites_path":"/cygdrive/c/ServerData/jetendo-server/jetendo/sites/"
 		}');
 	}
+	
 	/*
 	if(structkeyexists(form, 'zid') EQ false){
 		form.zid = application.zcore.status.getNewId();
@@ -164,7 +179,7 @@
 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 
 	site_deleted=#db.param(0)# and 
-	site_active=#db.param(1)# and 
+	site_active=#db.param(1)# and  
 	site_id<>#db.param(-1)# ";
 	qSite=db.execute("qSite");
 
@@ -178,7 +193,10 @@
 		//writedump(path);abort;
 		//writedump(shortDomainPath);
 		application.zcore.functions.zWriteFile(path&shortDomainPath&".sublime-project", contents);
-		//break;
+
+		contents="rsync -v -zar --no-perms --chmod=ugo=rwX --delete #request.zos.sharedTestServer.rsync_local_sites_path##shortDomainPath#/ #request.zos.sharedTestServer.rsync_user#@#request.zos.sharedTestServer.rsync_host#::#request.zos.sharedTestServer.rsync_remote_sites_path##shortDomainPath#/ --password-file=#request.zos.sharedTestServer.rsync_key_path# --exclude=_build --exclude=*.sublime-workspace --exclude=Build --exclude=.git* --exclude=*.sublime-project --exclude=rsync-publish.bat --exclude=.DS_Store --exclude=blib";
+
+		application.zcore.functions.zWriteFile(path&"rsync-publish.bat", contents); 
 	} 
 	result=application.zcore.functions.zSecureCommand("installSublimeProjectFiles"&chr(9)&arrayToList(arrSite, ","), 20);
 	//writedump(result);
