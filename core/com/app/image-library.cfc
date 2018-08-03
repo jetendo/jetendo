@@ -45,7 +45,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	ts.struct.image_library_datetime=request.zos.mysqlnow;
 	image_library_id=application.zcore.functions.zInsert(ts);
 	if(image_library_id EQ false){
-		application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - getNewLibraryId() failed to insert into image_library.");
+		throw("Error: zcorerootmapping.com.app.image-library.cfc - getNewLibraryId() failed to insert into image_library.");
 	}
 	return image_library_id;
 	</cfscript>
@@ -1905,6 +1905,9 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	application.zcore.template.setTag("title", "Image Library");
 	form.image_library_id=application.zcore.functions.zso(form, 'image_library_id');
 	tempId=form.image_library_id;
+	if(form.image_library_id NEQ "" and not isnumeric(form.image_library_id)){
+		application.zcore.functions.z404("Invalid request");
+	}
 
 	var qLibrary=this.getLibraryById(form.image_library_id);
 	var i=0;
