@@ -657,7 +657,7 @@ Thank you from #request.zos.globals.shortdomain#
 		</cfif>
 		<cfscript>	
 		statusChanged=false;
-		if(qCheck.user_active NEQ str.user_active){
+		if(structkeyexists(str, 'user_active') and qCheck.user_active NEQ str.user_active){
 			statusChanged=true;
 		}	
 		if(structkeyexists(str, 'sendConfirmOptIn') EQ false){

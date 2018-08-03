@@ -190,6 +190,10 @@
 	arr1=listtoarray(v,";");
 	for(n=1;n LTE arraylen(arr1);n++){
 		arr2=listtoarray(arr1[n],"=");
+		if(arraylen(arr2) NEQ 2){
+			echo("Invalid request.");
+			abort;
+		}
 		ts[arr2[1]]=arr2[2];
 	}
 	if(structkeyexists(ts,'byday') and ts.byday NEQ ""){
