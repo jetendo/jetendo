@@ -269,6 +269,10 @@
 		tableOfContents();
 		websiteLeads();
 		leadComparison();
+		leadSummaryByTypeData();
+		leadSummaryOut=leadSummaryByType();
+
+		echo(leadSummaryOut);
 		request.leadData.keywordData={};
 		getKeywordData(); 
 
@@ -316,16 +320,12 @@
 		newsletterStats();
 		blogLog();
 		facebookLog();
-		leadSummaryByTypeData();
 		//to do 
 		if(structkeyexists(form, 'enableSourceChart')){
 			websiteLeadsBarChart();
 		}
 		phoneLogOut=phoneCallLog();
 		webFormOut=webformLog();
-		leadSummaryOut=leadSummaryByType();
-
-		echo(leadSummaryOut);
 		echo(phoneLogOut);
 		echo(webFormOut);
 
@@ -1002,9 +1002,13 @@
 		<tr style="{SummaryStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="Summary" <cfif request.leadData.disableContentSection.Summary>checked="checked"</cfif>></td> 
 			<td>Website Leads</td><td>{SummaryPageNumber}</td>
+		</tr>
 		<tr style="{LeadComparisonStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="LeadComparison" <cfif request.leadData.disableContentSection.LeadComparison>checked="checked"</cfif>></td>
 			<td>Lead Comparison</td><td>{LeadComparisonPageNumber}</td></tr>
+		<tr style="{leadTypeSummaryStyle}">
+			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="leadTypeSummary" <cfif request.leadData.disableContentSection.leadTypeSummary>checked="checked"</cfif>></td>
+			<td>Lead Summary By Type</td><td>{leadTypeSummaryPageNumber}</td></tr>
 		<tr style="{TopVerifiedRankingsStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="TopVerifiedRankings" <cfif request.leadData.disableContentSection.TopVerifiedRankings>checked="checked"</cfif>></td>
 			<td>Top Verified Keyword Rankings</td><td>{TopVerifiedRankingsPageNumber}</td></tr>
@@ -1031,9 +1035,6 @@
 				<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="facebookLikes" <cfif request.leadData.disableContentSection.facebookLikes>checked="checked"</cfif>></td>
 				<td>Facebook Likes</td><td>{facebookLikesPageNumber}</td></tr>  
 		</cfif>
-		<tr style="{leadTypeSummaryStyle}">
-			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="leadTypeSummary" <cfif request.leadData.disableContentSection.leadTypeSummary>checked="checked"</cfif>></td>
-			<td>Lead Summary By Type</td><td>{leadTypeSummaryPageNumber}</td></tr>
 		<tr style="{PhoneLogStyle}">
 			<td class="hide-on-print" style="width:1%; padding-right:0px;"><input type="checkbox" name="disableSection" value="PhoneLog" <cfif request.leadData.disableContentSection.PhoneLog>checked="checked"</cfif>></td>
 			<td>Phone Call Lead Log</td><td>{PhoneLogPageNumber}</td></tr>
