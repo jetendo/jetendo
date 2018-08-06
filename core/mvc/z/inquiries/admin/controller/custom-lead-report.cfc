@@ -275,6 +275,10 @@
 		// if client only has moz, then it can't show report.
 		// how to fix?
 
+		kd=request.leadData.keywordData;
+		TopVerifiedRankings(kd);
+		verifiedRankings(kd);
+		/*
 		labelLookup={};
 		arrId=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushIdList'), ",");
 		arrLabel=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushLabelList'), ","); 
@@ -307,7 +311,7 @@
 			}else{
 				//throw("Invalid Source Label: #arrLabel[i]#");
 			}
-		} 
+		} */
 		incomingOrganic();
 		newsletterStats();
 		blogLog();
@@ -1412,7 +1416,7 @@ leadchart
 	</cfscript>
 </cffunction>
 	
-<cffunction name="getKeywordData" localmode="modern" access="public"> 
+<!--- <cffunction name="getKeywordData" localmode="modern" access="public"> 
 	<cfscript>
 	db=request.zos.queryObject;
 
@@ -1684,7 +1688,258 @@ leadchart
 	</cfscript>
 
 </cffunction>
+ --->
 
+
+<cffunction name="getKeywordData" localmode="modern" access="public"> 
+	<cfscript>
+	db=request.zos.queryObject;
+
+	reportStartDate="";
+	if(application.zcore.functions.zso(request.zos.globals, "reportStartDate") NEQ ""){
+		reportStartDate=dateformat(request.zos.globals.reportStartDate, "yyyy-mm-dd");
+	}
+	keywordStartDate=reportStartDate;
+	if(application.zcore.functions.zso(request.zos.globals, 'keywordRankingStartDate') NEQ ""){
+		keywordStartDate=dateformat(request.zos.globals.keywordRankingStartDate, "yyyy-mm-dd");
+	} 
+	vs={};
+	ks={}; 
+	// build keyword report with separation on source label
+	// exclude moz / search console with keyword_ranking_secondary=#db.param(1)#
+
+	request.leadData.keywordData={};
+
+	db.sql="select keyword_ranking_source_id, keyword_ranking_keyword  
+	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE 
+	 site_id = #db.param(request.zos.globals.id)# and 
+	keyword_ranking_deleted=#db.param(0)# 
+	GROUP BY keyword_ranking_source_id, keyword_ranking_keyword";
+	qKeywordList=db.execute("qKeywordList");   
+
+	db.sql="select *,
+	DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#) date, 
+	MIN(IF(keyword_ranking_position = #db.param(0)#, #db.param(1000)#, keyword_ranking_position)) topPosition, 
+	max(keyword_ranking_search_volume) highestSearchVolume
+	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
+	keyword_ranking_run_datetime>=#db.param(request.leadData.startDate)# and 
+	keyword_ranking_run_datetime<#db.param(request.leadData.endDate)# and 
+	site_id = #db.param(request.zos.globals.id)# and 
+	keyword_ranking_deleted=#db.param(0)# ";
+	filterOtherTableSQL(db, "keyword_ranking_run_datetime");
+	//keyword_ranking_position<>#db.param(0)# and 
+	db.sql&="
+	GROUP BY DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#), keyword_ranking_keyword";
+	request.leadData.keywordData.qKeyword=db.execute("qKeyword"); 
+
+	// TODO also need the previous search too request.leadData.keywordData.qPreviousKeyword, etc
+	db.sql="select *,
+	DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#) date, 
+	MIN(IF(keyword_ranking_position = #db.param(0)#, #db.param(1000)#, keyword_ranking_position)) topPosition, 
+	max(keyword_ranking_search_volume) highestSearchVolume 
+	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
+	keyword_ranking_run_datetime>=#db.param(request.leadData.previousStartDate)# and 
+	keyword_ranking_run_datetime<#db.param(request.leadData.previousEndDate)# and 
+	site_id = #db.param(request.zos.globals.id)# and 
+	keyword_ranking_deleted=#db.param(0)# ";
+	filterOtherTableSQL(db, "keyword_ranking_run_datetime"); 
+	db.sql&="
+	GROUP BY DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#), keyword_ranking_keyword";
+	// keyword_ranking_position<>#db.param(0)# and 
+	request.leadData.keywordData.qPreviousKeyword=db.execute("qPreviousKeyword");
+
+
+	db.sql="select 
+	DATE_FORMAT(min(keyword_ranking_run_datetime), #db.param('%Y-%m')#) date 
+	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE   
+	site_id = #db.param(request.zos.globals.id)# and 
+	keyword_ranking_run_datetime >=#db.param('2000-01-01 00:00:00')# and
+	";
+	if(keywordStartDate NEQ ""){
+		db.sql&=" keyword_ranking_run_datetime >=#db.param(keywordStartDate)# and ";
+	}
+	db.sql&="keyword_ranking_deleted=#db.param(0)# ";
+	filterOtherTableSQL(db, "keyword_ranking_run_datetime");  
+	qFirstKeyword=db.execute("qFirstKeyword"); 
+ 
+	db.sql="select distinct keyword_ranking_source_id 
+	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# 
+	WHERE
+	site_id = #db.param(request.zos.globals.id)# and 
+	keyword_ranking_deleted=#db.param(0)# ";
+	qLabel=db.execute("qLabel"); 
+
+	arrId=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushIdList'), ",");
+	arrLabel=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushLabelList'), ","); 
+	sourceLabelLookup={};
+	if(arrayLen(arrId) EQ 1 and arrayLen(arrLabel) EQ 0){
+		arrayAppend(arrLabel, 'National');
+	}
+	if(arrayLen(arrId) NEQ arraylen(arrLabel)){
+		throw("SEMRUSH ID and Label list are not the same length.");
+	}
+	for(i=1;i<=arraylen(arrId);i++){
+		sourceLabelLookup[arrId[i]]=arrLabel[i];
+	}
+	if(qLabel.recordcount GTE 2){
+		defaultKeywordLabel=application.zcore.functions.zso(request.zos.globals, 'semrushLabelPrimary'); 
+		if(defaultKeywordLabel EQ ""){
+			defaultKeywordLabel="National";
+		}
+		request.enableKeywordAudience=true;
+	}else{
+		defaultKeywordLabel="";
+	}
+	sourceLabelLookup[""]=defaultKeywordLabel;
+
+	keywordVolumeSortStruct={};
+	uniqueKeyword={};
+	count=0;
+	for(row in request.leadData.keywordData.qKeyword){
+		if(row.keyword_ranking_source_id EQ ""){
+			row.keyword_ranking_source_id=defaultKeywordLabel;
+		}
+		row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+		if(not structkeyexists(ks, row.date)){
+			ks[row.date]={};
+			for(row2 in qKeywordList){
+				ks[row.date][row2.keyword_ranking_source_id&chr(9)&row2.keyword_ranking_keyword]=0;
+			}
+		}
+		if(row.topPosition NEQ 0 and row.topPosition NEQ 1000){
+			ks[row.date][row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.topPosition;
+		} 
+		if(not structkeyexists(vs, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+			vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=0;
+		}
+		if(row.highestSearchVolume > vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]){
+			vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.highestSearchVolume;
+		}
+		if(not structkeyexists(uniqueKeyword, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+			uniqueKeyword[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=true;
+			keywordVolumeSortStruct[count]={
+				keyword:row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword,
+				volume:vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]
+			}
+		}
+		count++;
+	}  
+	count=0;
+
+	if(qFirstKeyword.recordcount){
+		db.sql="select *,
+		DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#) date, 
+		MIN(IF(keyword_ranking_position = #db.param(0)#, #db.param(1000)#, keyword_ranking_position)) topPosition, 
+		max(keyword_ranking_search_volume) highestSearchVolume
+		from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
+		keyword_ranking_run_datetime>=#db.param(qFirstKeyword.date&"-01 00:00:00")# and 
+		keyword_ranking_run_datetime<#db.param(dateformat(dateadd("m", 1, qFirstKeyword.date&"-01"), "yyyy-mm-dd")&" 00:00:00")# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		keyword_ranking_deleted=#db.param(0)# ";
+		filterOtherTableSQL(db, "keyword_ranking_run_datetime"); 
+		db.sql&="
+		GROUP BY DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#), keyword_ranking_source_id, keyword_ranking_keyword";
+		qFirstRankKeyword=db.execute("qFirstRankKeyword");
+		//keyword_ranking_position<>#db.param(0)# and 
+		request.leadData.keywordData.qFirstRankKeyword=qFirstRankKeyword;
+
+//writedump(qKeywordList);writedump(qFirstRankKeyword);
+		for(row in qFirstRankKeyword){
+			if(row.keyword_ranking_source_id EQ ""){
+				row.keyword_ranking_source_id=defaultKeywordLabel;
+			}
+			row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+			if(not structkeyexists(ks, row.date)){
+				ks[row.date]={};
+				for(row2 in qKeywordList){
+					ks[row.date][row2.keyword_ranking_source_id&chr(9)&row2.keyword_ranking_keyword]=0;
+				}
+			}
+			if(row.topPosition NEQ 0 and row.topPosition NEQ 1000){
+				ks[row.date][row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.topPosition;
+			} 
+			if(not structkeyexists(vs, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+				vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=0;
+			}
+			if(row.highestSearchVolume > vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]){
+				vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.highestSearchVolume;
+			}
+			if(not structkeyexists(uniqueKeyword, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+				uniqueKeyword[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=true;
+				keywordVolumeSortStruct[count]={
+					keyword:row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword,
+					volume:vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]
+				}
+			}
+			count++;
+		} 
+	}
+
+	for(row in request.leadData.keywordData.qPreviousKeyword){
+		if(row.keyword_ranking_source_id EQ ""){
+			row.keyword_ranking_source_id=defaultKeywordLabel;
+		}
+		row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+		if(form.yearToDateLeadLog EQ 0){
+			if(not structkeyexists(ks, row.date)){
+				ks[row.date]={};
+				for(row2 in qKeywordList){
+					ks[row.date][row2.keyword_ranking_source_id&chr(9)&row2.keyword_ranking_keyword]=0;
+				}
+			}
+			if(row.topPosition NEQ 0 and row.topPosition NEQ 1000){
+				ks[row.date][row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.topPosition;
+			}
+			if(not structkeyexists(vs, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+				vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=0;
+			}
+			if(row.highestSearchVolume > vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]){
+				vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=row.highestSearchVolume;
+			}
+		}
+		if(not structkeyexists(uniqueKeyword, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword)){
+			uniqueKeyword[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=true;
+			keywordVolumeSortStruct[count]={
+				keyword:row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword,
+				volume:vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]
+			};
+		}
+		count++;
+	} 
+	request.leadData.keywordData.arrVolumeSort=structsort(keywordVolumeSortStruct, "numeric", "desc", "volume"); 
+	for(date in ks){
+		cs=ks[date];
+		for(keyword in cs){
+			kw[keyword]=true;
+		}
+	}
+	request.leadData.keywordData.arrKeyword=[];
+	request.leadData.keywordData.arrKeywordDate=structkeyarray(ks); 
+	if(request.leadData.keywordData.qFirstRankKeyword.recordcount NEQ 0 or request.leadData.keywordData.qKeyword.recordcount NEQ 0 or request.leadData.keywordData.qPreviousKeyword.recordcount NEQ 0){
+		arraySort(request.leadData.keywordData.arrKeywordDate, "text", "asc");
+		keywordSortStruct={};
+		ts=ks[request.leadData.keywordData.arrKeywordDate[arraylen(request.leadData.keywordData.arrKeywordDate)]];
+		count=0;
+		for(keyword in ts){
+			keywordSortStruct[count]={keyword:keyword, position:ts[keyword]};
+			if(keywordSortStruct[count].position EQ 0){
+				keywordSortStruct[count].position=1000;
+			}
+			count++; 
+		}
+		arrKey=structsort(keywordSortStruct, "numeric", "asc", "position");
+		for(i in arrKey){
+			arrayAppend(request.leadData.keywordData.arrKeyword, keywordSortStruct[i].keyword);
+		}
+	}  
+	request.leadData.keywordData.keywordDataStruct={ 
+		ks:ks,
+		vs:vs,
+		keywordVolumeSortStruct:keywordVolumeSortStruct 
+	};  
+	</cfscript>
+
+</cffunction>
  
 <cffunction name="topVerifiedRankings" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
@@ -1702,10 +1957,13 @@ leadchart
 		request.leadData.contentSection.TopVerifiedRankings=request.leadData.pageCount; 
 		</cfscript>
 		<cfsavecontent variable="tableHead">  
-			<h2 style="margin-top:0px;">Top Verified #arguments.ss.sourceLabel#</h2>
+			<h2 style="margin-top:0px;">Top Verified Google Rankings<!--- #arguments.ss.sourceLabel# ---></h2>
 			<table class="keywordTable1 leadTable1">
 				<tr>
 					<th style="width:1%; white-space:nowrap;">Keyword</th>
+					<cfif structkeyexists(request, 'enableKeywordAudience')>
+						<th style="width:1%; white-space:nowrap;">Audience</th>
+					</cfif>
 					<cfscript>
 					for(date in ss.arrKeywordDate){ 
 						if(isValidMonth(date) and isValidKeywordMonth(date)){
@@ -1733,9 +1991,19 @@ leadchart
 					count=0;
 				}
 				topKeyword=false;
+				if(structkeyexists(request, 'enableKeywordAudience')){
+					arrK=listToArray(keyword, chr(9));
+					keywordOnly=arrK[2];
+					audienceLabel=arrK[1];
+				}else{
+					keywordOnly=keyword;
+				}
 				savecontent variable="keyOut"{
 					echo('<tr>');
-					echo('<th style="width:1%; white-space:nowrap;" data-id="##">#keyword#</th>');
+					echo('<th style="width:1%; white-space:nowrap;" data-id="##">#keywordOnly#</th>');
+					if(structkeyexists(request, 'enableKeywordAudience')){
+						echo('<td style="width:1%; white-space:nowrap;">#audienceLabel#</td>');
+					}
 					for(n=1;n<=arrayLen(ss.arrKeywordDate);n++){
 						date=ss.arrKeywordDate[n];
 						if(not isValidMonth(date) or not isValidKeywordMonth(date)){
@@ -1814,10 +2082,13 @@ leadchart
 	keywordVolumeSortStruct=arguments.ss.keywordDataStruct.keywordVolumeSortStruct;
 	</cfscript> 
 	<cfsavecontent variable="tableHead">  
-		<h2 style="margin-top:0px;">Verified <!--- Google Keyword Ranking Results --->#arguments.ss.sourceLabel#</h2>
+		<h2 style="margin-top:0px;">Verified Google Rankings<!--- Google Keyword Ranking Results ---><!--- #arguments.ss.sourceLabel# ---></h2>
 		<table class="keywordTable1 leadTable1">
 			<tr>
 				<th style="width:1%; white-space:nowrap;">Keyword</th>
+				<cfif structkeyexists(request, 'enableKeywordAudience')>
+					<th style="width:1%; white-space:nowrap;">Audience</th>
+				</cfif>
 				<cfscript>
 				for(date in ss.arrKeywordDate){
 					if(isValidMonth(date) and isValidKeywordMonth(date)){
@@ -1846,8 +2117,18 @@ leadchart
 			}
 			count=0;
 		}
+		if(structkeyexists(request, 'enableKeywordAudience')){
+			arrK=listToArray(keyword, chr(9));
+			keywordOnly=arrK[2];
+			audienceLabel=arrK[1];
+		}else{
+			keywordOnly=keyword;
+		} 
 		echo('<tr>');
-		echo('<th style="width:1%; white-space:nowrap;">#keyword#</th>');
+		echo('<th style="width:1%; white-space:nowrap;" data-id="##">#keywordOnly#</th>');
+		if(structkeyexists(request, 'enableKeywordAudience')){
+			echo('<td style="width:1%; white-space:nowrap;">#audienceLabel#</td>');
+		} 
 		for(n=1;n<=arrayLen(ss.arrKeywordDate);n++){
 			date=ss.arrKeywordDate[n];
 			if(not isValidMonth(date) or not isValidKeywordMonth(date)){	
