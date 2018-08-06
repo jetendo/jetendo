@@ -1690,6 +1690,21 @@ leadchart
 </cffunction>
  --->
 
+<cffunction name="fixSourceId" localmode="modern" access="public">
+	<cfargument name="sourceLabelLookup" type="struct" required="yes">
+	<cfargument name="row" type="struct" required="yes">
+	<cfscript>
+	row=arguments.row;
+	if(structkeyexists(request, 'enableKeywordAudience')){
+		if(row.keyword_ranking_source_id EQ ""){
+			row.keyword_ranking_source_id=request.defaultKeywordLabel;
+		}
+		row.keyword_ranking_source_id=arguments.sourceLabelLookup[row.keyword_ranking_source_id];
+	}else{
+		row.keyword_ranking_source_id="";
+	}
+	</cfscript>
+</cffunction>
 
 <cffunction name="getKeywordData" localmode="modern" access="public"> 
 	<cfscript>
@@ -1771,35 +1786,32 @@ leadchart
 
 	arrId=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushIdList'), ",");
 	arrLabel=listToArray(application.zcore.functions.zso(request.zos.globals, 'semrushLabelList'), ","); 
-	sourceLabelLookup={};
-	if(arrayLen(arrId) EQ 1 and arrayLen(arrLabel) EQ 0){
-		arrayAppend(arrLabel, 'National');
-	}
-	if(arrayLen(arrId) NEQ arraylen(arrLabel)){
-		throw("SEMRUSH ID and Label list are not the same length.");
-	}
+	sourceLabelLookup={}; 
+	uniqueLabel={};
 	for(i=1;i<=arraylen(arrId);i++){
-		sourceLabelLookup[arrId[i]]=arrLabel[i];
-	}
-	if(qLabel.recordcount GTE 2){
-		defaultKeywordLabel=application.zcore.functions.zso(request.zos.globals, 'semrushLabelPrimary'); 
-		if(defaultKeywordLabel EQ ""){
-			defaultKeywordLabel="National";
+		if(arraylen(arrLabel) GTE i){
+			sourceLabelLookup[arrId[i]]=arrLabel[i];
+			uniqueLabel[arrLabel[i]]=true; 
+		}else{
+			sourceLabelLookup[arrId[i]]="";
 		}
+	} 
+	if(structcount(uniqueLabel) GT 1){
 		request.enableKeywordAudience=true;
+		request.defaultKeywordLabel=application.zcore.functions.zso(request.zos.globals, 'semrushLabelPrimary'); 
+		if(request.defaultKeywordLabel EQ ""){
+			request.defaultKeywordLabel="All";
+		}
 	}else{
-		defaultKeywordLabel="";
-	}
-	sourceLabelLookup[""]=defaultKeywordLabel;
+		request.defaultKeywordLabel="";
+	} 
+	sourceLabelLookup[""]=request.defaultKeywordLabel; 
 
 	keywordVolumeSortStruct={};
 	uniqueKeyword={};
 	count=0;
 	for(row in request.leadData.keywordData.qKeyword){
-		if(row.keyword_ranking_source_id EQ ""){
-			row.keyword_ranking_source_id=defaultKeywordLabel;
-		}
-		row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+		fixSourceId(sourceLabelLookup, row);
 		if(not structkeyexists(ks, row.date)){
 			ks[row.date]={};
 			for(row2 in qKeywordList){
@@ -1845,10 +1857,7 @@ leadchart
 
 //writedump(qKeywordList);writedump(qFirstRankKeyword);
 		for(row in qFirstRankKeyword){
-			if(row.keyword_ranking_source_id EQ ""){
-				row.keyword_ranking_source_id=defaultKeywordLabel;
-			}
-			row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+			fixSourceId(sourceLabelLookup, row);
 			if(not structkeyexists(ks, row.date)){
 				ks[row.date]={};
 				for(row2 in qKeywordList){
@@ -1876,10 +1885,7 @@ leadchart
 	}
 
 	for(row in request.leadData.keywordData.qPreviousKeyword){
-		if(row.keyword_ranking_source_id EQ ""){
-			row.keyword_ranking_source_id=defaultKeywordLabel;
-		}
-		row.keyword_ranking_source_id=sourceLabelLookup[row.keyword_ranking_source_id];
+		fixSourceId(sourceLabelLookup, row);
 		if(form.yearToDateLeadLog EQ 0){
 			if(not structkeyexists(ks, row.date)){
 				ks[row.date]={};
