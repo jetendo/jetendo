@@ -277,8 +277,8 @@ objCookies=GetResponseCookies(cfhttp);
 	objCookies.PHPSESSID=objCookies2.PHPSESSID.value;
 	objCookies.usertype="Paid-User";   */
 
-	arrError=[];
-	for(row in qSite){
+	arrError=[]; 
+	for(row in qSite){ 
 		// uncomment to force re-importing everything
 		//row.site_semrush_last_import_datetime="";
 
@@ -382,8 +382,11 @@ objCookies=GetResponseCookies(cfhttp);
 					sourceId:id,
 					secondary:secondary
 				}; 
-				processSemRush(ts); 
-
+				rs=processSemRush(ts); 
+				if(not rs.success){
+					arrayAppend(arrError, rs.errorMessage);
+					continue; 
+				} 
 				sleep(randrange(1000, 3000));// wait some seconds to avoid looking abusive.
 			} 
 			tempStartDate=dateadd("m", 1, tempStartDate);
@@ -430,9 +433,11 @@ objCookies=GetResponseCookies(cfhttp);
 	js=deserializeJson(application.zcore.functions.zReadFile(ss.filePath)); 
 
 	if(not structkeyexists(js, 'data')){
-		echo('SEMRush download failed for path: #ss.filePath#:');
-		writedump(js);
-		abort;
+		rs={
+			success:false,
+			errorMessage:'SEMRush download failed for path: #ss.filePath#'
+		};
+		return rs;
 	}
 	for(i in js.data){
 		ds=js.data[i];
@@ -510,92 +515,13 @@ objCookies=GetResponseCookies(cfhttp);
 			}
 		}
 	}
-
-	/* 
-	// old csv file format which they disabled access to.
-
-	arrLine=listToArray(application.zcore.functions.zReadFile(filePath), chr(10)); 
-	// delete first 5 lines because the format is non-sense
-	for(i=1;i<=6;i++){
-		arrayDeleteAt(arrLine, 1);
-	}
-	arrColumn=listToArray(arrLine[1], ",");
-
-	rankingColumn=arrColumn[3];
-	arrC=listToArray(rankingColumn, "_");
-	keywordCheckDate=arrC[2];
-	keywordCheckDate=left(keywordCheckDate, 4)&"/"&mid(keywordCheckDate, 5, 2)&"/"&right(keywordCheckDate, 2); 
-
-	arrayDeleteAt(arrLine, 1);
-
-	for(n=1;n<=arraylen(arrLine);n++){
-		line=trim(arrLine[n]);
-		if(line EQ ""){
-			continue;
-		}
-		arrRow=listToArray(line, ",", true); 
-		if(arrayLen(arrRow) NEQ arrayLen(arrColumn)){
-			throw("Row #n# has #arrayLen(arrRow)# columns, but it must be #arrayLen(arrColumn)#.  Please review the file structure manually: #filePath#");
-		}
-	}
-	for(n=1;n<=arraylen(arrLine);n++){
-		line=trim(arrLine[n]);
-		if(line EQ ""){
-			continue;
-		}
-		arrRow=listToArray(line, ",", true);
-		cs={};
-		for(i=1;i<=arraylen(arrColumn);i++){
-			cs[trim(arrColumn[i])]=trim(arrRow[i]);
-		}
-		if(not isnumeric(cs[rankingColumn])){
-			cs[rankingColumn]=0;
-		}
-
-		// TODO: consider optimizing this to track the last import date somewhere, so we only need to compare the new data to reduce the amount of queries that run.
-		db.sql="select * from #db.table("keyword_ranking", request.zos.zcoreDatasource)# 
-		WHERE site_id = #db.param(arguments.site_id)# and 
-		keyword_ranking_deleted=#db.param(0)# and 
-		keyword_ranking_position=#db.param(cs[rankingColumn])# and
-		keyword_ranking_run_datetime=#db.param(dateformat(keywordCheckDate, "yyyy-mm-dd")&" 00:00:00")# and 
-		keyword_ranking_keyword=#db.param(cs.keyword)# and
-		keyword_ranking_source=#db.param("3")#";
-		qRank=db.execute("qRank"); 
-		//writedump(cs[rankingColumn]);
-		//abort;
-		//writedump(qRank);
-
-		ts={
-			table:"keyword_ranking",
-			datasource:request.zos.zcoreDatasource,
-			struct:{
-				keyword_ranking_source:"3", // 1 is moz.com, 2 is webposition.com, 3 is semrush.com, 4 is manual
-				site_id:arguments.site_id,
-				keyword_ranking_position:cs[rankingColumn],
-				keyword_ranking_run_datetime:dateformat(keywordCheckDate, "yyyy-mm-dd")&" 00:00:00",
-				keyword_ranking_keyword:cs.keyword,
-				keyword_ranking_updated_datetime:request.zos.mysqlnow,
-				keyword_ranking_deleted:0,
-				keyword_ranking_search_volume:cs["Search Volume"]
-			}
-		};
-		if(qRank.recordcount EQ 0){
-			// only import new records
-			//writedump(ts);
-			//abort;
-			keyword_ranking_id=application.zcore.functions.zInsert(ts); 
-			//writedump(keyword_ranking_id);
-			//abort;
-		}else{ 
-			if(qRank.keyword_ranking_position NEQ 0 and qRank.keyword_ranking_position GT ts.struct.keyword_ranking_position){
-				// update
-				ts.struct.keyword_ranking_id=qRank.keyword_ranking_id;
-				result=application.zcore.functions.zUpdate(ts); 
-			}
-		}
-	}*/
+ 
 	echo(ss.filePath&' processed<br>');
 	application.zcore.functions.zRenameFile(ss.filePath, replace(ss.filePath, ".csv", "")&"-processed.csv");
+	rs={
+		success:true
+	};
+	return rs;
 	</cfscript>
 </cffunction>
 	

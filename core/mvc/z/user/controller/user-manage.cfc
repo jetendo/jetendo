@@ -33,7 +33,11 @@ finish simplifying this script.
 		throw("Invalid user group id for user: #request.zsession.user.id# group id: #request.zsession.user.group_id#");
 	}
 	if(qGroup.user_group_manage_full_subuser_group_id_list EQ "" and qGroup.user_group_manage_partial_subuser_group_id_list EQ ""){
-		application.zcore.functions.z404("Access denied for this user group: #qGroup.user_group_name#");
+		if(application.zcore.user.checkGroupAccess("administrator")){
+			application.zcore.functions.zRedirect("/z/admin/member/showPublicUsers");
+		}else{
+			application.zcore.functions.z404("Access denied for this user group: #qGroup.user_group_name#");
+		}
 	}
 	request.managedGroupStruct={};
 	request.managedFullGroupStruct={};
