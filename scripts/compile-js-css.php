@@ -43,7 +43,7 @@ function compileSiteFiles($row, &$arrDebug=array()){
 			file_put_contents($ignoreFile, "zcompiled\n".implode("\n", $arrLine));
 		}
 	}else{
-		file_put_contents($ignoreFile, "__zdeploy-*.txt\nzcompiled\n*.sublime-project");
+		file_put_contents($ignoreFile, "__zdeploy-*.txt\nzcompiled\n*.sublime-workspace\n.DS_Store");
 	}
 	
 	if(file_exists($jsMD5Path)){
