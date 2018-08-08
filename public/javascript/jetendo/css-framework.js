@@ -262,7 +262,8 @@
 	// if data-children-class is specified, the equal heights will be performed on the elements matching the class instead of the children of the container.
 	function forceChildEqualHeights(children){  
 		var lastHeight=0; 
-		$(children).height("auto");
+		$(children).css("height", "auto");
+
 		$(children).each(function(){  
 			var height=$(this).outerHeight(false); 
 			if(height>lastHeight){
@@ -272,8 +273,12 @@
 		if(lastHeight == 0){
 			lastHeight="auto";
 		} 
-		$(children).height(lastHeight); 
+
+		$(children).css("height", lastHeight+"px");   
 	} 
+
+
+
 
 	function zForceChildEqualHeights(){  
 		var containers=$(".z-equal-heights");
@@ -333,7 +338,7 @@
 						"vertical-align": "top"
 					});
 					$(children).height("auto");
-				}
+				} 
 				/*
 				$(children).each(function(){
 					console.log($(this).height()+":"+$(this).outerHeight(false));

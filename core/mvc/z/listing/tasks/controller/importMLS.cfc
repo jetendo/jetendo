@@ -32,7 +32,7 @@
 	if(not request.zos.isServer and not request.zos.isDeveloper){
 		application.zcore.functions.z404("Only server or developer can access this url.");
 	}
-	setting requesttimeout="200";
+	setting requesttimeout="15000";
 	request.ignoreslowscript=true;
 	myloops=46;
  
