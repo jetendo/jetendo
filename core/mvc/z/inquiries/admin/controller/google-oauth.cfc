@@ -294,6 +294,8 @@ Google Analytics:
 			<cfif s NEQ "">
 				(Status: #s# | <a href="/z/inquiries/admin/google-oauth/reportIndex?googleSearchConsoleCancel=1">Cancel</a>)
 			</cfif> </p> 
+
+		<p>Adwords Status: #application.zcore.functions.zso(form, 'googleAdwordsAPIStatus')#</p>
 		<!--- <p><a href="#goalLink#" target="_blank">Google Analytics Goals</a></p>  --->
 		<p><a href="#refreshLink#?accountType=analytics">Refresh Token (#dateformat(application.googleAnalyticsAccessToken.analytics.expiresDatetime, "m/d/yyyy")&" "&timeformat(application.googleAnalyticsAccessToken.analytics.expiresDatetime, "h:mm tt")#)</a></p>
 	<cfelse>
