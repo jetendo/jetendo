@@ -614,12 +614,15 @@ If the link does not work, please copy and paste the entire link in your browser
 		ts=structnew();
 		ts.leadEmail=form.user_email;
 		rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
-		mail   charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
-			writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username# This user has signed up as a user on your web site.   This is not a direct sales inquiry.
+
+		if(application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false){
+			mail   charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
+writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username# This user has signed up as a user on your web site.   This is not a direct sales inquiry.
 
 To view more info about this new user, click the following link: 
 
 #request.zos.currentHostName#/z/admin/member/edit?user_id=#form.user_id#');
+			}
 		}
 	}
 	if(variables.qcheckemail.recordcount eq 0){
