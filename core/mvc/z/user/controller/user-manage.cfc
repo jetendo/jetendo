@@ -306,7 +306,7 @@ finish simplifying this script.
 	form.member_phone=application.zcore.functions.zso(form, 'member_phone');
 	structappend(ts,form);
 
-	ts.user_active=form.user_active;
+	ts.user_active=application.zcore.functions.zso(form, 'user_active', false, '1');
 	ts.user_phone=form.member_phone;
 	ts.user_openid_required=0;//application.zcore.functions.zso(form,'user_openid_required',false,0); 
 	ts.user_first_name = application.zcore.functions.zso(form,'member_first_name');
