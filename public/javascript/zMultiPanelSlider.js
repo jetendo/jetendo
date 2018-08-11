@@ -218,7 +218,7 @@
 			} );
 			slider.on( 'touchend', function( event ) { 
 				delete this.lastTouchPosition;
-				return false;
+				//return false;
 			} ); 
 		}
 		self.setActivePager=function(){
