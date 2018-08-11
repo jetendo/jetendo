@@ -93,7 +93,7 @@
 
 			left=Math.round(((100-currentSlideWidthPercent)/2)*100)/100;
 			firstPercent=Math.round((left-(currentSlideWidthPercent*middlePanelOffset))*100)/100;
-			console.log("firstPercent:"+firstPercent);
+			//console.log("firstPercent:"+firstPercent);
 			//console.log(sliderPosition);
 			//console.log("sliderPosition.width: "+sliderPosition.width+" panelCount:"+panelCount+" slideWidth:"+slideWidth+" options.slideMinimumWidth:"+options.slideMinimumWidth+"  currentSlideWidthPercent:"+currentSlideWidthPercent+" firstPercent:"+firstPercent+" left:"+left);
 			// reposition all the slides - reload if panel count should change
@@ -181,6 +181,7 @@
 			});
 			slider.on( 'mouseup mouseout', function( event ) {
 				//event.preventDefault();
+				delete this.lastMousePositionY;
 				delete this.lastMousePositionX;
 				//return false;
 			} ); 
@@ -486,6 +487,29 @@
 				return;
 			}
 			animating=false;
+
+			panelTotalOffset+=currentVelocity;
+			if(Math.abs(panelTotalOffset) >= currentSlideWidthPercent){ 
+				panelLeftCache=[];
+				var slideIndex=currentSlideIndex; 
+				if(panelTotalOffset>0){   
+					var firstPanel=arrPanelOrder[0];
+					var lastPanel=arrPanelOrder.pop();
+					arrPanelOrder.unshift(lastPanel);  
+					var loadSlideIndex=getSlideIndex(slideIndex, -middlePanelOffset-1); 
+					var slide=options.arrSlide[loadSlideIndex]; 
+					$(options.selector+" ."+lastPanel).html(slide.html); 
+					currentSlideIndex=getSlideIndex(slideIndex, -1);
+				}else if(panelTotalOffset<0){  
+					var loadSlideIndex=getSlideIndex(slideIndex, middlePanelOffset+1);  
+					var firstPanel=arrPanelOrder.shift();
+					arrPanelOrder.push(firstPanel);   
+					var slide=options.arrSlide[loadSlideIndex]; 
+					$(options.selector+" ."+firstPanel).html(slide.html); 
+					currentSlideIndex=getSlideIndex(slideIndex, 1);  
+				} 
+				panelTotalOffset=0;
+			}
 			for(var i=0;i<arrPanelOrder.length;i++){
 				var panel=$(options.selector+" ."+arrPanelOrder[i])[0];
 				if(typeof panelLeftCache[arrPanelOrder[i]]=="undefined"){
@@ -496,41 +520,6 @@
 				var newLeft=(Math.round(panelLeftCache[arrPanelOrder[i]]*100)/100)+"%"; 
 				panel.style.left=newLeft;
 			}  
-
-			panelTotalOffset+=currentVelocity;
-			if(Math.abs(panelTotalOffset) >= currentSlideWidthPercent){ 
-				var slideIndex=currentSlideIndex; 
-				if(panelTotalOffset>0){   
-					var firstPanel=arrPanelOrder[0];
-					var lastPanel=arrPanelOrder.pop();
-					arrPanelOrder.unshift(lastPanel); 
-					var newLeft=firstPercent; 
-					panelLeftCache[lastPanel]=newLeft;
-					$("."+firstPanel, slider).css("left", newLeft+"%"); 
-					var loadSlideIndex=getSlideIndex(slideIndex, -middlePanelOffset-1); 
-					var slide=options.arrSlide[loadSlideIndex]; 
-					$(options.selector+" ."+lastPanel).html(slide.html);
-					//$(options.selector+" ."+lastPanel).html((loadSlideIndex+middlePanelOffset-1)+slide.html);
-
-					currentSlideIndex=getSlideIndex(slideIndex, -1); // 23 on first change
-				}else if(panelTotalOffset<0){  
-					var loadSlideIndex=getSlideIndex(slideIndex, middlePanelOffset+1);  
-					var firstPanel=arrPanelOrder.shift();
-					arrPanelOrder.push(firstPanel); 
-					var newLeft=0;
-					var newLeft=firstPercent+((arrPanelOrder.length-1)*currentSlideWidthPercent); 
-					panelLeftCache[firstPanel]=newLeft;
-					$(options.selector+" ."+firstPanel).css("left", newLeft+"%"); 
-					var slide=options.arrSlide[loadSlideIndex]; 
-					$(options.selector+" ."+firstPanel).html(slide.html);
-					//$(options.selector+" ."+firstPanel).html((loadSlideIndex+middlePanelOffset)+slide.html);
-
-					// the slideIndex must change
-					currentSlideIndex=getSlideIndex(slideIndex, 1);  
-				}
-				//console.log("middlePanelOffset:"+middlePanelOffset+" loadSlideIndex:"+loadSlideIndex+" slideIndex:"+slideIndex+" currentSlideIndex:"+currentSlideIndex);
-				panelTotalOffset=0;
-			}
 
 			window.requestAnimationFrame(runAnimation);
 		};  
@@ -548,9 +537,9 @@
 			}
 			var pos=zGetAbsPosition(slider[0]); 
 
-			var sliderWidth=pos.width-pos.x;
+			var sliderWidth=pos.width;
 
-			var percentMouseX=zMousePosition.x/sliderWidth;
+			var percentMouseX=(zMousePosition.x-pos.x)/sliderWidth;
 			var velocityRange=options.mouseMoveMaxVelocity-options.mouseMoveMinVelocity;
 			var newVelocity=0;
 			var reducedVelocityChange=0;
