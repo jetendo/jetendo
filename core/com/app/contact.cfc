@@ -66,6 +66,7 @@ if(rs.success){
 	ORDER BY contact_parent_id ASC
 	LIMIT #db.param(0)#, #db.param(1)# ";
 	qContact=db.execute("qContact");
+
 	if(qContact.recordcount NEQ 0){
 		return {success:true, contact_id:qContact.contact_id}
 	} 
@@ -357,11 +358,15 @@ contactCom.processMessage(ts);
 	ss.jsonStruct.htmlProcessed=processedHTML; 
 	if(request.zos.isdeveloper){
 		//writedump(notifyStruct.emailSendStruct);
-	}
+	} 
 	for(type in notifyStruct.emailSendStruct){
 		typeStruct=notifyStruct.emailSendStruct[type];
 		for(i=1;i<=arraylen(typeStruct);i++){     
-			rs=buildFeedbackEmail(ss, notifyStruct.mainContact.contact_id, typeStruct[i].email, typeStruct[i].isUser, typeStruct[i].isAssignedUser, typeStruct[i].isManagerUser);
+			if(structcount(notifyStruct.mainContact) EQ 0){
+				rs=buildFeedbackEmail(ss, 0, typeStruct[i].email, typeStruct[i].isUser, typeStruct[i].isAssignedUser, typeStruct[i].isManagerUser);
+			}else{
+				rs=buildFeedbackEmail(ss, notifyStruct.mainContact.contact_id, typeStruct[i].email, typeStruct[i].isUser, typeStruct[i].isAssignedUser, typeStruct[i].isManagerUser);
+			}
 			rs.subject=ss.jsonStruct.subject;
 			rs.from=typeStruct[i].email;
 			rs.to=typeStruct[i].originalEmail;
@@ -370,7 +375,7 @@ contactCom.processMessage(ts);
 			}
 			arrayAppend(arrEmail, rs);
 		}
-	} 
+	}  
   
 	// change inquiry status to contacted if it is still a new lead status and the response wasn't detected as a non-human reply or the original sender.
 	ss.inquiries_status_id=application.zcore.functions.zso(ss, "inquiries_status_id", true, 0);
@@ -382,7 +387,7 @@ contactCom.processMessage(ts);
 		site_id = #db.param(ss.messageStruct.site_id)# and  
 		inquiries_deleted=#db.param(0)# ";
 		db.execute("qUpdateInquiry");  
-	}else if(not ss.privateMessage and notifyStruct.mainContact.contact_id NEQ notifyStruct.fromContact.contact_id and ss.jsonStruct.humanReplyStruct.score > 0 and structkeyexists(notifyStruct.fromContact, 'isAssignedUser') and fromContact.isAssignedUser){ 
+	}else if(not ss.privateMessage and (structcount(notifyStruct.mainContact) EQ 0 or notifyStruct.mainContact.contact_id NEQ notifyStruct.fromContact.contact_id) and ss.jsonStruct.humanReplyStruct.score > 0 and structkeyexists(notifyStruct.fromContact, 'isAssignedUser') and fromContact.isAssignedUser){ 
 		if(qInquiry.inquiries_status_id EQ 2){
 			newStatusId=3;		
 		}else if(qInquiry.inquiries_status_id EQ 1){
@@ -424,7 +429,9 @@ contactCom.processMessage(ts);
 		}
 		if(application.zcore.functions.zvar("enablePlusEmailRouting", ss.messageStruct.site_id, 0) EQ 0){
 			emailStruct.from=request.fromEmail;
-			emailStruct.replyTo=notifyStruct.mainContact.contact_email;
+			if(structcount(notifyStruct.mainContact) NEQ 0){
+				emailStruct.replyTo=notifyStruct.mainContact.contact_email;
+			}
 		}
 		/*
 		// TODO: remove when we're done testing:
@@ -616,7 +623,7 @@ contactCom.processMessage(ts);
 	}
 	// tested successfully
 	// send to main contact if they are not the current message sender.
-	if(structcount(mainContact) EQ 0){ 
+	if(structcount(mainContact) NEQ 0){ 
 		if(mainContact.contact_id NEQ fromContactId or (ss.enableCopyToSelf)){
 			ts={
 				site_id:ss.messageStruct.site_id,
@@ -665,8 +672,10 @@ contactCom.processMessage(ts);
 	contact_deleted=#db.param(0)# and 
 	inquiries_x_contact.inquiries_id=#db.param(ss.inquiries_id)#";
 	qContact=db.execute("qContact"); 
+	subscribedStruct={};
 	for(row in qContact){
 		if(not structkeyexists(emailStruct, row.contact_email)){
+			subscribedStruct[row.contact_email]=true;
 			ts={
 				site_id:ss.messageStruct.site_id,
 				contact_id:row.contact_id,
@@ -878,27 +887,29 @@ contactCom.processMessage(ts);
 	}
 	// anyone missing still who was addressed in the email? force creation of a new "contact" record, and add that email here. 
 	// tested successfully
-	arrType=["to", "cc"];
+	arrType=["to", "cc"]; 
 	for(type in arrType){
 		for(row in ss.jsonStruct[type]){
-			if(not structkeyexists(emailStruct, row.email)){
+			if(not structkeyexists(emailStruct, row.email) or (not structkeyexists(subscribedStruct, row.email) and row.email EQ fromContact.contact_email)){
 				// insert to inquiries_x_contact as to
 				contact=getContactByEmail(row.email, row.name, ss.messageStruct.site_id);
-				ts={
-					table:"inquiries_x_contact",
-					datasource:request.zos.zcoreDatasource,
-					struct:{
-						contact_id:contact.contact_id, 
-						inquiries_id:ss.inquiries_id, 
-						site_id:ss.messageStruct.site_id, 
-						inquiries_x_contact_type:type, 
-						inquiries_x_contact_deleted:0,
-						inquiries_x_contact_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss")
+				if(structcount(contact) NEQ 0){
+					ts={
+						table:"inquiries_x_contact",
+						datasource:request.zos.zcoreDatasource,
+						struct:{
+							contact_id:contact.contact_id, 
+							inquiries_id:ss.inquiries_id, 
+							site_id:ss.messageStruct.site_id, 
+							inquiries_x_contact_type:type, 
+							inquiries_x_contact_deleted:0,
+							inquiries_x_contact_updated_datetime:dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss")
+						}
+					};
+					application.zcore.functions.zInsert(ts); 
+					if(debug){
+						echo('Added email "#type#" contact, #contact.contact_email#, to inquiry for future replies only<br>');
 					}
-				};
-				application.zcore.functions.zInsert(ts); 
-				if(debug){
-					echo('Added email "#type#" contact, #contact.contact_email#, to inquiry for future replies only<br>');
 				}
 			}
 		}
@@ -1186,7 +1197,7 @@ contactCom.processMessage(ts);
 		domain=application.zcore.functions.zvar("domain", ss.messageStruct.site_id);
 	} 
 	if(arguments.isManagerUser){
-		viewLeadLink="#domain#/z/inquiries/admin/feedback/view?inquiries_id=#ss.inquiries_id#";
+		viewLeadLink="#domain#/z/inquiries/admin/manage-inquiries/view?inquiries_id=#ss.inquiries_id#";
 		viewContactLink="#domain#/z/inquiries/admin/feedback/viewContact?contact_id=#arguments.contact_id#&inquiries_id=#ss.inquiries_id#";
 	}else{
 		viewLeadLink="#domain#/z/inquiries/admin/manage-inquiries/userView?inquiries_id=#ss.inquiries_id#";
@@ -1351,6 +1362,9 @@ scheduleLeadEmail(ts);
 	<cfscript>
 	db=request.zos.queryObject;
 	arguments.email=trim(arguments.email);
+	if(not application.zcore.functions.zEmailValidate(arguments.email)){
+		return {};
+	}
 	arguments.name=trim(arguments.name);
 	db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# WHERE 
 	contact_email = #db.param(arguments.email)# and 
@@ -1437,6 +1451,9 @@ scheduleLeadEmail(ts);
 	<cfargument name="site_id" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
+	if(trim(arguments.contact_id) EQ "" or arguments.contact_id EQ 0){
+		return {};
+	}
 	db.sql="select * from #db.table("contact", request.zos.zcoreDatasource)# WHERE 
 	contact_id = #db.param(arguments.contact_id)# and 
 	contact_deleted = #db.param(0)# and
@@ -1611,7 +1628,7 @@ contactCom.getFromAddressForContactByStruct(contact, idString);
 </cffunction>
 
 <!--- 
-contactCom.getFromAddressForContactById(contact_id, site_id, idString);
+email=contactCom.getFromAddressForContactById(contact_id, site_id, idString);
  --->
 <cffunction name="getFromAddressForContactById" localmode="modern" access="public">
 	<cfargument name="contact_id" type="string" required="yes">
@@ -1631,8 +1648,12 @@ contactCom.getFromAddressForContactById(contact_id, site_id, idString);
 	}
 
 	contact = this.getContactById( arguments.contact_id, arguments.site_id );
-
-	return contact.contact_email;
+	if(structcount(contact) EQ 0){
+		rs={success:false, errorMessage:"Contact doesn't exist."};
+	}else{
+		rs={success:true, contact.contact_email};
+	}
+	return rs;
 	</cfscript>
 	
 </cffunction>
@@ -1663,6 +1684,76 @@ contactCom.getFromAddressForContactById(contact_id, site_id, idString);
 	// echo(application.zcore.functions.zGenerateStrongPassword(16,16, true));
 	</cfscript>
 </cffunction> 
+
+
+<!--- 
+<cfscript>
+// run this when a user is being assigned to an inquiry
+ts={
+	contact_id:contact_id, // the contact being shared
+	accessible_by_contact_id: request.zsession.user.contact_id, // the user who will have access to the contact
+	site_id: request.zos.globals.id
+};
+contactCom.addContactToContact(ts);
+</cfscript>
+--->
+<cffunction name="addContactToContact" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	db=request.zos.queryObject;
+	db.sql="SELECT count(contact_id) count FROM #db.table("contact_x_contact", request.zos.zcoreDatasource)# WHERE 
+	contact_id = #db.param(ss.contact_id)# and 
+	contact_x_contact_accessible_by_contact_id=#db.param(ss.accessible_by_contact_id)# and 
+	site_id = #db.param(ss.site_id)# and 
+	contact_x_contact_deleted=#db.param(0)# ";
+	qI=db.execute("qI");
+	if(qI.recordcount EQ 0 or qI.count EQ 0){
+		db.sql="INSERT IGNORE INTO #db.table("contact_x_contact", request.zos.zcoreDatasource)# SET 
+		site_id=#db.param(ss.site_id)#,
+		contact_id=#db.param(ss.contact_id)#, 
+		contact_x_contact_accessible_by_contact_id=#db.param(ss.accessible_by_contact_id)#, 
+		contact_x_contact_deleted=#db.param(0)# ";
+		db.execute("qDelete");		
+	}
+	</cfscript>
+</cffunction>
+
+<!--- 
+<cfscript>
+// run this when a user is being unassigned from an inquiry
+ts={
+	contact_id:contact_id, // the contact being shared
+	user_id: user_id, // the user who had access
+	user_id_siteIdType: user_id_siteIdType,
+	accessible_by_contact_id: request.zsession.user.contact_id, // the contact_id for the user who had access
+	site_id: request.zos.globals.id
+};
+contactCom.removeContactFromContact(ts);
+</cfscript>
+--->
+<cffunction name="removeContactFromContact" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	db=request.zos.queryObject;
+	db.sql="SELECT count(inquiries_id) count FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE 
+	contact_id = #db.param(ss.contact_id)# and 
+	site_id = #db.param(ss.site_id)# and 
+	inquiries_deleted=#db.param(0)# and 
+	user_id=#db.param(ss.user_id)# and 
+	user_id_siteIdType=#db.param(ss.user_id_siteIdType)#";
+	qI=db.execute("qI");
+	if(qI.recordcount EQ 0 or qI.count EQ 0){
+		db.sql="delete FROM #db.table("contact_x_contact", request.zos.zcoreDatasource)# WHERE 
+		site_id=#db.param(ss.site_id)# and 
+		contact_x_contact_accessible_by_contact_id=#db.param(ss.accessible_by_contact_id)# and 
+		contact_x_contact_deleted=#db.param(0)# ";
+		db.execute("qDelete");
+		
+	}
+	</cfscript>
+</cffunction>
 
 </cfoutput>	
 </cfcomponent>

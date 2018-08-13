@@ -334,7 +334,7 @@
 						}
 						writeoutput('" style="text-align:center; white-space:nowrap; width:20px;">');
 						if(inquiries_id NEQ '0'){
-							writeoutput('<a href="/z/inquiries/admin/feedback/view?inquiries_id=#inquiries_id#" style="color:##FFFFFF;">#dateformat(form.inc_date,"d")#</a>
+							writeoutput('<a href="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#inquiries_id#" style="color:##FFFFFF;">#dateformat(form.inc_date,"d")#</a>
 							<input type="hidden" name="avail_date" value="#dateformat(form.inc_date,"yyyy-mm-dd")#" />');
 						}else{
 							writeoutput('#dateformat(form.inc_date,"d")#<br />

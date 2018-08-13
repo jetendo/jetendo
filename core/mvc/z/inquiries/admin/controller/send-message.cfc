@@ -449,12 +449,7 @@
 		// need a list of the groups that have access to member
 		qUser=application.zcore.user.getUsersWithGroupAccess("member", false, true);
 
-		arrContactId=[];
-		/*for(row in qUser){
-			// TODO: fix inefficient loop of queries - unavoidable for now - need to add attribute to getUsersWithGroupAccess that will return contact record in left join
-			contact=variables.contactCom.getContactByEmail(row.user_email, row.user_first_name&" "&row.user_last_name, request.zos.globals.id);
-			arrayAppend(arrContactId, contact.contact_id); 
-		}*/
+		arrContactId=[]; 
 		if(arrayLen(arrContactId) NEQ 0){
 			db.sql = 'SELECT inquiries_x_contact.inquiries_x_contact_id, 
 			inquiries_x_contact.contact_id,		

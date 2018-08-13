@@ -163,7 +163,7 @@
 	FROM #db.table("office", request.zos.zcoreDatasource)#  
 	WHERE office.site_id = #db.param(arguments.site_id)# and 
 	office_deleted = #db.param(0)# 
-	ORDER BY office.office_sort, office.office_name "; 
+	ORDER BY office.office_name "; 
 	qOffice=db.execute("qOffice");
 	ts={};
 	ts.arrOfficeSorted=[];

@@ -436,7 +436,7 @@
 					<td style="white-space:nowrap;">#DateFormat(qinquiries.inquiries_end_date, "m/d/yy")#</td>
 					<td style="white-space:nowrap;">#DateFormat(qinquiries.inquiries_datetime, "m/d/yy")# #TimeFormat(qinquiries.inquiries_datetime, "h:mm tt")#&nbsp;</td>
 					<td style="white-space:nowrap;">
-						<a href="/z/inquiries/admin/feedback/view?inquiries_id=#qinquiries.inquiries_id#">View</a> | 
+						<a href="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#qinquiries.inquiries_id#">View</a> | 
 						<!--- <a href="/z/inquiries/admin/manage-inquiries/edit?inquiries_id=#qinquiries.inquiries_id#&amp;zpageid=#form.zPageId#">Edit</a> | --->
 						<cfif qinquiries.inquiries_reservation_status EQ 2>
 							Cancelled

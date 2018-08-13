@@ -183,7 +183,7 @@
 								writeoutput('" style="text-align:center; white-space:nowrap; width:20px;">');
 								
 								if(inquiries_id NEQ '0'){
-									writeoutput('<a href="/z/inquiries/admin/feedback/view?inquiries_id=#inquiries_id#" style="color:##FFFFFF;">#dateformat(form.inc_date,"d")#</a>');
+									writeoutput('<a href="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#inquiries_id#" style="color:##FFFFFF;">#dateformat(form.inc_date,"d")#</a>');
 								}else{
 									writeoutput('#dateformat(form.inc_date,"d")#');
 								}

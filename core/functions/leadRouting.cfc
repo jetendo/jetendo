@@ -102,6 +102,8 @@ application.zcore.functions.zRecordLead();
 	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
 	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
 	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
+	ss.contact_assigned_user_id=application.zcore.functions.zso(ss, 'contact_assigned_user_id', true);
+	ss.contact_assigned_user_id_siteIdType=application.zcore.functions.zso(ss, 'contact_assigned_user_id_siteIdType'); 
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
 	ss.site_id = request.zOS.globals.id; 
 
@@ -117,8 +119,16 @@ application.zcore.functions.zRecordLead();
 			rsContact=contactCom.storeContactForInquiry(tsContact);
 			if(rsContact.success){
 				ss.contact_id=rsContact.contact_id;
-			}
+			} 
 		}
+	}else{ 
+		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+		contact_assigned_user_id=#db.param(ss.contact_assigned_user_id)#, 
+		contact_assigned_user_id_siteIdType=#db.param(ss.contact_assigned_user_id_siteIdType)# 
+		WHERE contact_id = #db.param(ss.contact_id)# and 
+		contact_deleted=#db.param(0)# and 
+		site_id=#db.param(ss.site_id)#";
+		db.execute("qUpdateContact");
 	}
 	</cfscript>
 </cffunction>
@@ -138,8 +148,8 @@ application.zcore.functions.zInsertLead();
 	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
 		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	}
-	// TODO: need to reenable when contacts are done
-	//application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
+
+	application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
 	inputstruct.datasource=request.zos.zcoreDatasource;
@@ -197,8 +207,8 @@ application.zcore.functions.zImportLead(ts); --->
 	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
 		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	}
-	// TODO: need to reenable when contacts are done
-	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
+
+	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -227,8 +237,8 @@ application.zcore.functions.zUpdateLead();
 	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
 	ss.site_id = request.zOS.globals.id; 
-	// TODO: need to reenable when contacts are done
-	//application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
+
+	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";
@@ -495,8 +505,7 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	}
 	form.inquiries_id=inquiries_id;
 	if(not structkeyexists(request.zos, 'debugleadrouting')){
-  		/*
-  		// TODO: need to reenable when contacts are done
+
 		contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 		ts=contactCom.getDefaultMessageConfig(); 
 		ts.contact_id=application.zcore.functions.zso(form, 'contact_id', true);
@@ -561,14 +570,14 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	  
 		rs=contactCom.processMessage(ts);   
 
-		*/
+		/*
 		mail spoolenable="no" to="#rs.assignEmail#" cc="#rs.cc#" bcc="#rs.bcc#" from="#request.fromemail#" replyto="#rs.leademail#" subject="#arguments.ss.subject#" type="html"{
 			for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
 				mailparam file="#arguments.ss.arrAttachments[n]#" disposition="attachment";
 			}
 			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 		    iemailCom.getEmailTemplate("", true);
-		}
+		}*/
 	}else{
 		echo("Would send email as follows:
 		from: #request.fromemail#<br>

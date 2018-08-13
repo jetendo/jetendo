@@ -99,7 +99,7 @@
 				ORDER BY member_first_name ASC, member_last_name ASC";
 				qAgents=db.execute("qAgents"); 
 			} 
-		}
+		} 
 		</cfscript> 
 		<script type="text/javascript">
 		/* <![CDATA[ */
@@ -161,6 +161,7 @@
 
 
 			<cfscript>  
+			form.user_id=application.zcore.functions.zso(form, 'user_id');
 			// when user selects office, the user drop down should change to show only users in that office.
 			if(form.user_id NEQ 0){
 				form.inquiries_assign_email="";
@@ -607,9 +608,13 @@
 	if(application.zcore.functions.zso(form, 'user_id') CONTAINS "|"){
 		form.user_id_siteIDType=listGetAt(form.user_id, 2, "|");
 		form.user_id=listGetAt(form.user_id, 1, "|");
+		form.contact_assigned_user_id=form.user_id;
+		form.contact_assigned_user_id_siteIdType=form.user_id_siteIdType;
 	}else{
 		form.user_id=0;
 		form.user_id_siteIDType=0;
+		form.contact_assigned_user_id=0;
+		form.contact_assigned_user_id_siteIdType=0;
 	} 
 
 	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)#  
@@ -665,6 +670,15 @@
 		form.assign_name=qMember.user_first_name&" "&qMember.user_last_name;
 		form.assign_email=qMember.user_username;
 	}
+	if(qInquiry.contact_id NEQ 0){
+		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+		contact_assigned_user_id=#db.param(form.contact_assigned_user_id)#, 
+		contact_assigned_user_id_siteIdType=#db.param(form.contact_assigned_user_id_siteIdType)# 
+		WHERE contact_id = #db.param(form.contact_id)# and 
+		contact_deleted=#db.param(0)# and 
+		site_id=#db.param(request.zos.globals.id)#";
+		db.execute("qUpdateContact");
+	}
 		 
 	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET ";
 	if(form.user_id EQ 0){
@@ -672,7 +686,9 @@
 		inquiries_assign_name=#db.param(form.assign_name)#, 
 		user_id = #db.param("")#, ";
 	}else{
-		db.sql&=" inquiries_assign_email = #db.param("")#, 
+		db.sql&=" 
+		inquiries_assign_name=#db.param("")#,
+		inquiries_assign_email = #db.param("")#, 
 		user_id = #db.param(form.user_id)#, 
 		user_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(form.user_id_siteIDType))#, "; 
 	}
@@ -685,6 +701,7 @@
 	 site_id = #db.param(request.zos.globals.id)# and 
 	 inquiries_deleted=#db.param(0)# ";
 	db.execute("qUpdate");
+
 	form.groupEmail=false;
 	toEmail=form.assign_email;   
 

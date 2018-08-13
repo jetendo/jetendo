@@ -240,7 +240,7 @@
 			continue;
 		}
 		if(structkeyexists(memberStruct, uid)){ 
-			leadLink=request.zos.globals.domain&"/z/inquiries/admin/feedback/view?inquiries_id="&qI.inquiries_id;
+			leadLink=request.zos.globals.domain&"/z/inquiries/admin/manage-inquiries/view?inquiries_id="&qI.inquiries_id;
 			domain=request.zos.globals.domain;
 			shortDomain=replace(replace(request.zos.globals.domain, "http://", ""), "https://", "");
 		}else{

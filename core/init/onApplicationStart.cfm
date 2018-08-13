@@ -139,11 +139,7 @@
 			"/z/_com/listing/search"={ url="/z/listing/search/index" },
 			"/z/_a/content/slideshow"={ url="/z/misc/slideshow/index" },
 			"/z/_a/content/slideshow_embed"={ url="/z/misc/slideshow/embed" },
-			"/z/_a/listing/cma-inquiry"={ url="/z/listing/cma-inquiry/index"},
-			"/z/_a/member/inquiries/index"={ url="/z/inquiries/admin/manage-inquiries/index" },
-			"/z/_a/member/inquiries/feedback"={ url="/z/inquiries/admin/feedback/view" },
-			 "/z/_zcore-app/listing/quick-search"={url="/z/listing/quick-search/index" },
-			 "/z/_zcore-app/listing/cma-inquiry"={url="/z/listing/cma-inquiry/index" }
+			"/z/_a/listing/cma-inquiry"={ url="/z/listing/cma-inquiry/index"},  
 		}
 		
 	};
