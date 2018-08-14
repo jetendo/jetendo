@@ -34,7 +34,7 @@ $result2=$cmysql->query("SELECT * FROM mls WHERE
 mls_status = '1' and 
 mls_deleted='0' and 
 mls_provider LIKE 'rets%' 
-and mls_id NOT IN ('12', '19', '20', '16')
+and mls_id NOT IN ('12', '19', '20', '16', '30', '27')
 ORDER BY mls_update_date desc", MYSQLI_STORE_RESULT);
 // errors:
 // 12 = User Agent not registered or denied.

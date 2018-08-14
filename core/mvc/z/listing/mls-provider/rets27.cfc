@@ -97,11 +97,11 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	}  
 	if(arraylen(arguments.ss.arrData) LT arraylen(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns)){
 		application.zcore.template.fail("RETS#this.mls_id#: This row was not long enough to contain all columns: "&application.zcore.functions.zparagraphformat(arraytolist(arguments.ss.arrData,chr(10)))&""); 
-	}
-	photoLocation="";
+	} 
 	for(i=1;i LTE arraylen(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns);i++){
 		if(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i] EQ "rets27_hireslocation"){
-			photoLocation=arguments.ss.arrData[i];
+			ts["HiRes location"]=arguments.ss.arrData[i]; 
+			columnIndex["HiRes location"]=i;
 			continue;
 		}
 		col=(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.metaStruct["property"].tableFields[removechars(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns[i],1,7)].longname);
@@ -218,28 +218,8 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	
 	if(ts['Unit ##'] NEQ ''){
 		address&=" Unit: "&ts["Unit ##"];
-	} 
-	/*
-	s2=structnew();
-	liststatus=this.getRetsValue("property", ts["rets27_list_8"], 'list_15', ts["status"]);
-	if(liststatus EQ "Active"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["active"]]=true;
-	}else if(liststatus EQ "Canceled"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Cancelled"]]=true;
-	}else if(liststatus EQ "Pending"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["pending"]]=true;
-	}else if(liststatus EQ "Expired"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["expired"]]=true;
-	}else if(liststatus EQ "Closed"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["sold"]]=true; 
-	}else if(liststatus EQ "Contingent"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["contingent"]]=true;
-	}else if(liststatus EQ "Deleted"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["deleted"]]=true;
-	}else if(liststatus EQ "Temp Off Market"){
-		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["temporarily withdrawn"]]=true;
-	}*/
-	listing_liststatus="1";//structkeylist(s2,",");
+	}  
+	listing_liststatus="1"; 
 	
 	arrT3=[];
 	uns=structnew();
@@ -423,17 +403,36 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	rs.listing_data_detailcache1=listing_data_detailcache1;
 	rs.listing_data_detailcache2=listing_data_detailcache2;
 	rs.listing_data_detailcache3=listing_data_detailcache3; 
+	rs["HiRes location"]=ts["HiRes location"]; 
 
 	rs.listing_track_sysid="";
 	rs2={
 		listingData:rs,
 		columnIndex:columnIndex,
 		arrData:arguments.ss.arrData
-	};
-	//writedump(photoLocation);	writedump(rs2);abort;
+	}; 
 	return rs2;
 	</cfscript>
 </cffunction> 
+
+<cffunction name="getCachedRequestListingImageUrls" localmode="modern" access="public">
+	<cfargument name="idx" type="struct" required="yes">
+	<cfscript>
+	if(not structkeyexists(request.zos, 'listingImageURLCache')){
+		request.zos.listingImageURLCache={};
+	}
+	if(structkeyexists(request.zos.listingImageURLCache, arguments.idx.listing_id)){
+		return request.zos.listingImageURLCache[arguments.idx.listing_id];
+	}
+	arrPhoto=listToArray(application.zcore.functions.zso(arguments.idx, "HiRes location"), ",");
+	ts={};
+	for(i=1;i<=arraylen(arrPhoto);i++){
+		ts["photo"&i]=application.zcore.listingCom.getThumbnail(arrPhoto[i], arguments.idx.listing_id, i, 10000, 10000, 0); 
+	}
+	request.zos.listingImageURLCache[arguments.idx.listing_id]=ts;
+	return ts;
+	</cfscript>
+</cffunction>
     
 <cffunction name="getDetails" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
@@ -450,12 +449,16 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	if(idx.listing_photocount EQ 0){
 		idx["photo1"]='/z/a/listing/images/image-not-available.gif';
 	}else{
+		ts=getCachedRequestListingImageUrls(idx); 
+		structappend(idx, ts, true); 
+		/*
 		i=1;
 		for(i=1;i LTE idx.listing_photocount;i++){
 			fNameTemp1="27-"&idx.urlMlsPid&"-"&i&".jpeg";
 			fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
 			idx["photo"&i]=request.zos.retsPhotoPath&'27/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
 		}
+		*/
 	} 
 	idx["agentName"]="";
 	idx["agentPhone"]="";
@@ -492,9 +495,20 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	<cfargument name="num" type="numeric" required="no" default="#1#">
 	<cfscript>
 	request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
+	if(structkeyexists(request.zos, 'listingImageURLCache')){
+		if(structkeyexists(request.zos.listingImageURLCache, this.mls_id&"-"&arguments.mls_pid)){
+			if(structkeyexists(request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid], "photo"&arguments.num)){
+				return request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid]["photo"&arguments.num];
+			}
+		}
+	}
+	request.lastPhotoId="";
+	/*
+	request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 	fNameTemp1="27-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 	fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
 	return request.zos.retsPhotoPath&'27/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+	*/
 	
 	</cfscript>
 </cffunction>
