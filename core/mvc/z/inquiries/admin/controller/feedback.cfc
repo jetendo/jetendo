@@ -13,18 +13,18 @@
 	if(form.method EQ "userView" or form.method EQ "userViewContact" or form.method EQ "viewContact"){
 		hasAccessToContact=false;
 		if(form.contact_id NEQ 0 ){
-			db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE ";
-			db.sql&=" contact_id = #db.param(form.contact_id)#";
-			db.sql&=" AND contact_deleted = #db.param(0)#  
-			AND contact.site_id = #db.param(request.zos.globals.id)#";
-			if(form.method EQ "userView" or form.method EQ "userViewContact"){
-				//WHO ARE WE? DEALER / MANAGER / SALES		
-		    	db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db);
-			}else if(structkeyexists(request.zos.userSession.groupAccess, 'administrator') EQ false){
-				//WE ARE AGENT
-				db.sql&=" and contact.contact_assigned_user_id = #db.param(request.zsession.user.id)#  
-				AND contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
-			}
+			contactFilter=variables.inquiriesCom.getContactLeadFilterSQL(db);
+
+			db.sql="SELECT * 
+			#db.trustedSQL(contactFilter.selectSQL)#
+			 FROM #db.table("contact", request.zos.zcoreDatasource)# 
+			#db.trustedSQL(contactFilter.leftJoinSQL)#
+			 WHERE 
+			 #db.trustedSQL(contactFilter.whereSQL)#
+			contact.contact_id = #db.param(form.contact_id)#
+			 AND contact_deleted = #db.param(0)#  
+			AND contact.site_id = #db.param(request.zos.globals.id)# 
+			GROUP BY contact.contact_id ";
 			qContact=db.execute("qContact"); 
 			if(qContact.recordcount){
 				hasAccessToContact=true;

@@ -32,9 +32,9 @@
 			getEditData:'getEditData',
 			getEditForm:'getEditForm',
 			beforeUpdate:'beforeUpdate',
-			afterUpdate:'',
+			afterUpdate:'afterUpdate',
 			beforeInsert:'beforeInsert',
-			afterInsert:'',
+			afterInsert:'afterInsert',
 			getDeleteData:'getDeleteData',
 			executeDelete:'executeDelete',
 			beforeReturnInsertUpdate:''
@@ -256,12 +256,15 @@
 	if(not structkeyexists(request.zsession, 'user')){
 		return false;
 	}
+	contactFilter=variables.inquiriesCom.getContactLeadFilterSQL(db); 
 	db.sql="select contact.contact_id 
 	FROM #db.table("contact", request.zos.zcoreDatasource)# 
-	WHERE contact_deleted=#db.param(0)# and 
+	#db.trustedSQL(contactFilter.leftJoinSQL)#
+	WHERE #db.trustedSQL(contactFilter.whereSQL)# 
+	contact_deleted=#db.param(0)# and 
 	contact.site_id = #db.param(request.zos.globals.id)# and 
-	contact.contact_id = #db.param(arguments.contact_id)# ";
-	db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db); 
+	contact.contact_id = #db.param(arguments.contact_id)# 
+	GROUP BY contact.contact_id ";
 	qCheckLead=db.execute("qCheckLead"); 
 	if(qCheckLead.recordcount GT 0){
 		return true;
@@ -445,25 +448,48 @@
 
 <cffunction name="beforeUpdate" localmode="modern" access="private" returntype="struct">
 	<cfscript>
-		if(application.zcore.user.checkGroupAccess("administrator") and form.contact_assigned_user_id NEQ ""){
-			arr = listToArray(form.contact_assigned_user_id, "|");
-			form.contact_assigned_user_id  				= arr[1];;
-			form.contact_assigned_user_id_siteidtype	= application.zcore.functions.zGetSiteIdType(arr[2]);
-		}else{
-			form.contact_assigned_user_id  				= request.zsession.user.id;
-	    	form.contact_assigned_user_id_siteidtype	= application.zcore.user.getSiteIdTypeFromLoggedOnUser();
-	    }	
-		db=request.zos.queryObject;
-		rs=validateInsertUpdate();
-		if(not rs.success){
-			application.zcore.status.displayReturnJson(request.zsid);
-		} 
-		db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)#
-		WHERE contact_deleted = #db.param(0)# and  
-		contact_id=#db.param(form.contact_id)# and 
-		site_id=#db.param(request.zos.globals.id)# ";
-		qData=db.execute("qData");
-		return {success:true, qData:qData};
+	db=request.zos.queryObject;
+	rs=validateInsertUpdate();
+	if(not rs.success){
+		application.zcore.status.displayReturnJson(request.zsid);
+	} 
+	db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)#
+	WHERE contact_deleted = #db.param(0)# and  
+	contact_id=#db.param(form.contact_id)# and 
+	site_id=#db.param(request.zos.globals.id)# ";
+	qData=db.execute("qData");
+	return {success:true, qData:qData};
+	</cfscript>
+</cffunction>
+
+
+
+<cffunction name="afterInsert" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	afterUpdate();
+	</cfscript>
+</cffunction>
+
+<cffunction name="afterUpdate" localmode="modern" access="private" returntype="struct">
+	<cfscript>
+	db=request.zos.queryObject;
+
+	if(application.zcore.user.checkGroupAccess("administrator") and form.contact_assigned_user_id NEQ ""){
+		arr = listToArray(form.contact_assigned_user_id, "|");
+		form.contact_assigned_user_id  				= arr[1];
+		form.contact_assigned_user_id_siteidtype	= application.zcore.functions.zGetSiteIdType(arr[2]);
+	}else{
+		form.contact_assigned_user_id  				= request.zsession.user.id;
+    	form.contact_assigned_user_id_siteidtype	= application.zcore.user.getSiteIdTypeFromLoggedOnUser();
+    }	
+    contact=getContactByUserId(form.contact_assigned_user_id, form.contact_assigned_user_id_siteidtype);
+    ts={
+		contact_id:form.contact_id, // the contact being shared
+		accessible_by_contact_id: contact.contact_id, // the user who will have access to the contact
+		site_id: request.zos.globals.id
+	};
+	contactCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-contact");
+    contactCom.addContactToContact(ts);
 	</cfscript>
 </cffunction>
 
@@ -515,22 +541,21 @@
 <cffunction name="getEditData" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	var db=request.zos.queryObject; 
-
+	
+	contactFilter=variables.inquiriesCom.getContactLeadFilterSQL(db);
+			 
 	form.contact_id=application.zcore.functions.zso(form, 'contact_id', true);
 	rs={};
 	db.sql="SELECT * 
+	#db.trustedSQL(contactFilter.selectSQL)#
 	FROM #db.table("contact", request.zos.zcoreDatasource)#
+	#db.trustedSQL(contactFilter.leftJoinSQL)#
 	WHERE 
+	#db.trustedSQL(contactFilter.whereSQL)#
 	contact.site_id =#db.param(request.zos.globals.id)# and 
 	contact_deleted = #db.param(0)# and 
-	contact.contact_id=#db.param(form.contact_id)#";
-
-	if(form.method EQ "userEdit"){
-		db.sql&=" #variables.inquiriesCom.getContactLeadFilterSQL(db)#";
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
-		db.sql&=" AND contact_assigned_user_id = #db.param(request.zsession.user.id)# 
-		AND contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
-	}
+	contact.contact_id=#db.param(form.contact_id)# 
+	GROUP BY contact.contact_id ";
 	rs.qData=db.execute("qData");
  	
 	if(form.method EQ 'edit'){
@@ -545,20 +570,18 @@
 <cffunction name="getListReturnData" localmode="modern" access="private" returntype="struct">
 	<cfscript>
 	var db=request.zos.queryObject;  
- 
+ 	contactFilter=variables.inquiriesCom.getContactLeadFilterSQL(db);
+			 
 	db.sql="SELECT * 
+	#db.trustedSQL(contactFilter.selectSQL)#
 	FROM #db.table("contact", request.zos.zcoreDatasource)#
-	WHERE contact.site_id = #db.param(request.zos.globals.id)# and 
+	#db.trustedSQL(contactFilter.leftJoinSQL)#
+	WHERE 
+	#db.trustedSQL(contactFilter.whereSQL)# 
+	contact.site_id = #db.param(request.zos.globals.id)# and 
 	contact_deleted = #db.param(0)# and 
-	contact.contact_id=#db.param(form.contact_id)#	"; 
-	if(form.method EQ "userInsert" or form.method EQ "userUpdate"){ 
-		db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db); 
-	}else{
-		if(not application.zcore.user.checkGroupAccess("administrator")){
-			db.sql&=" and contact_assigned_user_id = #db.param(request.zsession.user.id)# and contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#";
-		}
-	}
-	db.sql&=" GROUP BY contact.contact_id ";
+	contact.contact_id=#db.param(form.contact_id)#	
+	GROUP BY contact.contact_id ";
 	rs={};
 	rs.qData=db.execute("qData");
 	return rs;
@@ -889,13 +912,7 @@
 	form.search_email=application.zcore.functions.zso(form, 'search_email');
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
 	form.contact_status_id=application.zcore.functions.zso(form, 'contact_status_id');
-	form.uid=application.zcore.functions.zso(form, 'uid');
-	arrU=listToArray(form.uid, '|');
-	form.selected_user_id=0;
-	if(arrayLen(arrU) EQ 2){
-		form.selected_user_id=arrU[1];
-		form.selected_user_id_siteIDType=arrU[2];
-	}
+	form.selected_client_id=application.zcore.functions.zso(form, 'cid', true);
 	if(structkeyexists(form, 'leadcontactfilter')){
 		request.zsession.leadcontactfilter=form.leadcontactfilter;		
 	}else if(isDefined('request.zsession.leadcontactfilter') EQ false){
@@ -912,21 +929,35 @@
 		request.zsession.leadviewspam=0;	
 	//}
 
+	contactFilter=variables.inquiriesCom.getContactLeadFilterSQL(db);
+			
+			
+			
+
  
-	db.sql="select min(contact_datetime) as contact_datetime 
-	from #db.table("contact", request.zos.zcoreDatasource)# 
-	WHERE contact.site_id = #db.param(request.zos.globals.id)# and  
+	db.sql="select min(contact_datetime) as contact_datetime  
+	from (#db.table("contact", request.zos.zcoreDatasource)# ";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
+		}
+	}
+	db.sql&=" ) 
+	#db.trustedSQL(contactFilter.leftJoinSQL)#  
+	WHERE 
+	contact.site_id = #db.param(request.zos.globals.id)# and  
 	contact_parent_id = #db.param(0)# and 
-	contact_deleted = #db.param(0)# ";
-	
-	if(form.method EQ "userIndex"){
-		db.sql&=variables.inquiriesCom.getContactLeadFilterSQL(db);
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
-		db.sql&=" AND contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
-		contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
-	} else if(form.selected_user_id NEQ '0'){
-		db.sql&=" and contact_assigned_user_id = #db.param(form.selected_user_id)# and 
-		contact_assigned_user_id_siteidtype = #db.param(form.selected_user_id_siteidtype)# ";
+	contact_deleted = #db.param(0)# 
+	#db.trustedSQL(contactFilter.whereSQL)#
+	";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=" and 
+			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
+			contact_x_contact.contact_id = contact.contact_id and 
+			contact_x_contact_deleted=#db.param(0)# and 
+			contact_x_contact.site_id = contact.site_id  ";
+		}
 	}
 	db.sql&=" GROUP BY contact.contact_id ";
 	variables.qinquiriesFirst=db.execute("qinquiriesFirst"); 
@@ -948,11 +979,34 @@
 		if(dateCompare(form.contact_start_date, form.contact_end_date) EQ 1)
 			form.contact_end_date = form.contact_start_date;
 	} 
+ 
+			
+			 
 	db.sql="SELECT *, 
 	contact.contact_id maxid, contact_datetime maxdatetime 
-	FROM #db.table("contact", request.zos.zcoreDatasource)#
-	WHERE contact_deleted = #db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)# ";
+	#db.trustedSQL(contactFilter.selectSQL)# 
+	FROM ( #db.table("contact", request.zos.zcoreDatasource)# ";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
+		}
+	}
+	db.sql&=" )
+	#db.trustedSQL(contactFilter.leftJoinSQL)#
+	WHERE 
+	#db.trustedSQL(contactFilter.whereSQL)#
+	contact_deleted = #db.param(0)# and 
+	contact.site_id = #db.param(request.zos.globals.id)# 
+	";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=" and 
+			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
+			contact_x_contact.contact_id = contact.contact_id and 
+			contact_x_contact_deleted=#db.param(0)# and 
+			contact_x_contact.site_id = contact.site_id  ";
+		}
+	} 
 	if(form.search_phone NEQ ""){
 		db.sql&=" and contact.contact_phone1 like #db.param("%"&form.search_phone&"%")# ";
 	}
@@ -962,13 +1016,7 @@
 	if(form.search_office_id NEQ "0"){
 		db.sql&=" and contact.office_id = #db.param(form.search_office_id)# ";
 	}
-
-	if(form.method EQ "userIndex"){
-		db.sql&=" #variables.inquiriesCom.getContactLeadFilterSQL(db)# ";
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
-		db.sql&=" AND contact_assigned_user_id = #db.param(request.zsession.user.id)# 
-		 and contact_assigned_user_id_siteidtype=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
-	}
+ 
 	if(form.contact_start_date NEQ "" AND form.contact_end_date NEQ ""){
 		db.sql&=" and (contact_datetime >= #db.param(dateformat(form.contact_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
 		contact_datetime <= #db.param(dateformat(form.contact_end_date, "yyyy-mm-dd")&' 23:59:59')#) ";
@@ -979,25 +1027,37 @@
 	sortColumnSQL=getSortColumnSQL();
 	db.sql&=" GROUP BY contact.contact_id ";
 	if(sortColumnSQL NEQ ''){
-		db.sql&=" ORDER BY #sortColumnSQL# contact_id ASC";
+		db.sql&=" ORDER BY #sortColumnSQL# contact.contact_id ASC";
 	} else{
 		db.sql&=" ORDER BY maxdatetime DESC ";
 	}
 	db.sql&=" LIMIT #db.param(max(0,(form.zIndex-1))*30)#,#db.param(30)#";
 
-	rs.qData=db.execute("qData");  
-
+	rs.qData=db.execute("qData");   
+			 
 	db.sql="SELECT count(*) COUNT 
-	from #db.table("contact", request.zos.zcoreDatasource)#
-	WHERE contact.site_id = #db.param(request.zos.globals.id)# ";
-
-	db.sql&=" and contact_deleted = #db.param(0)# and contact_parent_id = #db.param(0)# "; 
-	if(form.method EQ "userIndex"){
-		db.sql&=" #variables.inquiriesCom.getContactLeadFilterSQL(db)#";
-	}else if(not application.zcore.user.checkGroupAccess("administrator")){
-		db.sql&=" AND contact.contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
-		contact.contact_assigned_user_id_siteidtype = #db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())# ";
+	from ( #db.table("contact", request.zos.zcoreDatasource)# ";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
+		}
 	}
+	db.sql&=" )
+	#db.trustedSQL(contactFilter.leftJoinSQL)#
+	WHERE 
+	#db.trustedSQL(contactFilter.whereSQL)#
+	contact.site_id = #db.param(request.zos.globals.id)# 
+	";
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		if(form.selected_client_id NEQ '0'){
+			db.sql&=" and 
+			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
+			contact_x_contact.contact_id = contact.contact_id and 
+			contact_x_contact_deleted=#db.param(0)# and 
+			contact_x_contact.site_id = contact.site_id  ";
+		}
+	}
+	db.sql&=" and contact_deleted = #db.param(0)# and contact_parent_id = #db.param(0)# "; 
 	if(form.search_office_id NEQ "0"){
 		db.sql&=" and contact.office_id = #db.param(form.search_office_id)# ";
 	}
@@ -1014,6 +1074,7 @@
 	if(application.zcore.functions.zso(form, 'contact_name') NEQ ""){
 		db.sql&=" and concat(contact_first_name, #db.param(" ")#, contact_last_name) LIKE #db.param('%#form.contact_name#%')#";
 	}
+	db.sql&=" GROUP BY contact.contact_id ";
 	rs.qCount=db.execute("qCount");   
 	rs.searchFields=[]; 
 
@@ -1057,6 +1118,8 @@
 		}]
 	});
 
+	// TODO: there is code for contact_id search, but no search form element yet.  see manage-inquiries for this code?
+
 	arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 	if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice) GT 1){
 		savecontent variable="officeField"{
@@ -1085,6 +1148,42 @@
 			fields:[ { label:"", formField:officeField, field:'search_office_id'} ] 
 		});
 	}
+	if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
+		userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+		user_group_id = userGroupCom.getGroupId('agent',request.zos.globals.id);
+		db.sql="SELECT contact.contact_id, user_id, user_username, member_company, user_first_name, user_last_name 
+		FROM #db.table("user", request.zos.zcoreDatasource)# user, 
+		#db.table("contact", request.zos.zcoreDatasource)# 
+		WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+		contact.contact_email=user.user_username and 
+		contact.site_id = user.site_id and 
+		user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))#  
+		 and (user_server_administrator=#db.param(0)# ) and 
+		 user_deleted = #db.param(0)#
+		ORDER BY member_first_name ASC, member_last_name ASC";
+		qAgents=db.execute("qAgents");
+		savecontent variable="contactField"{
+			echo('
+			Assignee:<br>Type to filter assignees: '); 
+			selectStruct = StructNew();
+			selectStruct.name = "cid";
+			echo('<input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select assigness:<br>');
+			selectStruct.query = qAgents;
+			selectStruct.size=3;
+			selectStruct.selectedValues=form.uid;
+			selectStruct.queryLabelField = "##user_first_name## ##user_last_name## / ##user_username## / ##member_company##";
+			selectStruct.queryParseLabelVars = true;
+			selectStruct.queryParseValueVars = true; 
+			selectStruct.inlineStyle="width:100%; max-width:100%;";
+			selectStruct.queryValueField = '##contact_id##';
+			application.zcore.functions.zInputSelectBox(selectStruct);
+	   		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
+	   	}
+		arrayAppend(rs.searchFields, { 
+			groupStyle:'width:280px; max-width:100%; ',
+			fields:[ { label:"", formField:contactField, field:'cid'}]
+		});
+	} 
 	return rs;
 	</cfscript>
 </cffunction>

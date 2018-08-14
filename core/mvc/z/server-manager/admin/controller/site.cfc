@@ -1581,6 +1581,12 @@
 			<td >#application.zcore.functions.zInput_Boolean("site_enable_user_office_assign")# (The non-manager users will be able to re-assign their leads to other offices they belong to.)</td>
 		</tr>  
 		<tr>
+			<td style="vertical-align:top; width:140px;">Contact Sharing</td>
+			<td><input name="site_contact_list_grouping" type="radio" value="0" <cfif form.site_contact_list_grouping EQ 0 or form.site_contact_list_grouping EQ "">checked="checked"</cfif> style="background:none; border:none;"> Shared With All Manager Users
+			<input name="site_contact_list_grouping" type="radio" value="1" <cfif form.site_contact_list_grouping EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Shared With Same Office
+			<input name="site_contact_list_grouping" type="radio" value="2" <cfif form.site_contact_list_grouping EQ 2>checked="checked"</cfif> style="background:none; border:none;"> No Sharing</td>
+		</tr>
+		<tr>
 			<td style="vertical-align:top; width:140px;">Lead Reminder Start Date:</td>
 			<td ><cfscript>
 			if(isdate(form.site_lead_reminder_start_date)){

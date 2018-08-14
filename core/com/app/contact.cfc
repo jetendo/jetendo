@@ -1714,7 +1714,7 @@ contactCom.addContactToContact(ts);
 		contact_id=#db.param(ss.contact_id)#, 
 		contact_x_contact_accessible_by_contact_id=#db.param(ss.accessible_by_contact_id)#, 
 		contact_x_contact_deleted=#db.param(0)# ";
-		db.execute("qDelete");		
+		db.execute("qInsert");		
 	}
 	</cfscript>
 </cffunction>

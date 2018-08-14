@@ -5,11 +5,15 @@
 	if(not request.zos.isTestServer){
 		application.zcore.functions.z404("This can only be run on the test server.");
 	}
+	unloadCount=0;
 	for(i in application.siteStruct){
 		if(i NEQ request.zos.globals.id){
+			unloadCount++;
 			structdelete(application.siteStruct, i);
 		}
 	}
+	echo(unloadCount&" sites unloaded");
+	abort;
 	</cfscript>
 </cffunction>
 
@@ -319,7 +323,7 @@
 			<p><a href="/z/server-manager/admin/mobile-conversion/index">Mobile Conversion</a></p>
 		  	<h3>Maintenance Scripts</h3>
 		  	<cfif request.zos.isTestServer>
-		  		<p><a href="/z/server-manager/admin/server-home/unloadOtherSites">Unload Other Sites</a></p>
+		  		<p><a href="/z/server-manager/admin/server-home/unloadOtherSites">Unload Other Sites</a> Note: You can use /z/server-manager/admin/server-home/unloadOtherSites on any specific site to unload the others to reduce VM memory usage)</p>
 		  	</cfif>
 			<p><a href="/?zInitStatus=1" target="_blank">Show Jetendo Init Status &amp; Statistics</a></p>
 			<p><a href="/z/server-manager/api/git-status/index" target="_blank">Developer git status report</a></p>

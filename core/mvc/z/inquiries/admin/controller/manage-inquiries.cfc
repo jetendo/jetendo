@@ -179,6 +179,7 @@
 <cffunction name="loadManageLeadGroupData" localmode="modern" access="public">
 	<cfscript>
 	request.userIdList="";  
+	request.contactIdList="";
 	request.groupIdList="";
 	found=false;
 	groupStruct={};
@@ -226,7 +227,9 @@
 	if(structcount(groupStruct) NEQ 0){
 		groupIdList=structkeylist(groupStruct);
 		// build a userIdList of user that belong to request.zsession.user.office_id and the user groups this user can manage 
-		request.userIdList=getUserIdListByOfficeIdListAndGroupIdList(request.zsession.user.office_id, groupIdList); 
+		rsList=getUserIdListByOfficeIdListAndGroupIdList(request.zsession.user.office_id, groupIdList); 
+		request.userIdList=rsList.userIdList;
+		request.contactIdList=rsList.contactIdList;
 	}  
 	if(not application.zcore.user.checkGroupAccess("member")){
 		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
@@ -292,31 +295,87 @@
 	</cfscript>
 </cffunction>
 
+
+<!--- 
+rs=getContactLeadFilterSQL(db);
+ --->
 <cffunction name="getContactLeadFilterSQL" localmode="modern" access="public">
 	<cfargument name="db" type="component" required="yes">
 	<cfscript>
 	db=arguments.db;
-	if(not structkeyexists(request, 'userIdList')){
+	if(not structkeyexists(request, 'contactIdList')){
 		loadManageLeadGroupData();
 	}
-
-	savecontent variable="out"{
-		if(not application.zcore.user.checkGroupAccess("administrator")){
-			echo(' and ( ');
-
-			if(request.zsession.user.office_id NEQ ""){ 
-				echo(' (contact.contact_assigned_user_id=#db.param(0)# and contact.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
-			}
-			if(request.userIdList NEQ ""){
-				echo(' (contact.contact_assigned_user_id IN (#db.trustedSQL(request.userIdList)#) and contact.contact_assigned_user_id_siteIdType=#db.param(1)#) or ');
-			}
-			// current user 
-			echo(' (contact.contact_assigned_user_id = #db.param(request.zsession.user.id)# and 
-			contact.contact_assigned_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
-			) ');
-		}
+	ts={
+		selectSQL:"",
+		leftJoinSQL:"",
+		whereSQL:""
+	}; 
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		return ts;
 	}
-	return out;
+	hasMemberAccess=application.zcore.user.checkGroupAccess("member");
+	contactGrouping=application.zcore.functions.zvar("contactListGrouping", request.zos.globals.id, 0);
+
+	if(hasMemberAccess){
+		if(contactGrouping EQ 0){
+			// none
+		}else if(contactGrouping EQ 1 or contactGrouping EQ 2){
+			// office
+			// need list of all contact_id for the users in this office 
+			if(request.zsession.user.office_id NEQ ""){ 
+				ts.whereSQL&=" contact.office_id IN (#request.zsession.user.office_id#) ";
+			}else{
+				// if a user is not an administrator and isn't in an office, we shouldn't allow them to see any contacts, just in case.
+				ts.whereSQL&=" contact.contact_id = -1 ";
+			}
+			
+		}else if(contactGrouping EQ 2){
+			// user 
+			ts.selectSQL&=", contact_x_contact_id ";
+			ts.whereSQL&=" ( ";
+			if(request.zsession.user.office_id NEQ ""){ 
+				ts.whereSQL&=" contact.office_id IN (#request.zsession.user.office_id#) or ";
+			}
+			ts.whereSQL&=" contact_x_contact_id <> '' )";
+			ts.leftJoinSQL&=" LEFT JOIN #db.table("contact_x_contact", request.zos.zcoreDatasource)# ON  
+			contact_x_contact.contact_id=contact.contact_id and 
+			( contact_x_contact_accessible_by_contact_id=#application.zcore.functions.zescape(request.zsession.user.contact_id)# ";
+
+			if(request.contactIdList NEQ ""){
+				arrContact=listToArray(request.contactIdList, ",");
+				for(contactId in arrContact){
+					ts.leftJoinSQL&=" or contact_x_contact_accessible_by_contact_id = '#application.zcore.functions.zescape(contactId)#' ";
+				} 
+			}
+			ts.leftJoinSQL&=" ) and 
+			contact_x_contact.site_id=contact.site_id and 
+			contact_x_contact_deleted=0 ";
+			
+		}  
+	}else{
+		// no manager access
+		// Important, make sure to prevent access to all contacts if the user doesn't have access to another user or an office
+		ts.selectSQL&=", contact_x_contact_id ";
+		ts.whereSQL&=" ( ";
+		if(request.zsession.user.office_id NEQ ""){ 
+			ts.whereSQL&=" contact.office_id IN (#request.zsession.user.office_id#) or ";
+		}
+		ts.whereSQL&=" contact_x_contact_id <> '' )";
+		ts.leftJoinSQL&=" LEFT JOIN #db.table("contact_x_contact", request.zos.zcoreDatasource)# ON  
+		contact_x_contact.contact_id=contact.contact_id and 
+		( contact_x_contact_accessible_by_contact_id=#application.zcore.functions.zescape(request.zsession.user.contact_id)# "; 
+		if(request.contactIdList NEQ ""){
+			arrContact=listToArray(request.contactIdList, ",");
+			for(contactId in arrContact){
+				ts.leftJoinSQL&=" or contact_x_contact_accessible_by_contact_id = '#application.zcore.functions.zescape(contactId)#' ";
+			}  
+		}
+		ts.leftJoinSQL&=" ) and 
+		contact_x_contact.site_id=contact.site_id and 
+		contact_x_contact_deleted=0 "; 
+	}  
+	return ts;
 	</cfscript>
 </cffunction>
 
@@ -357,9 +416,13 @@
     arrOfficeId=listToArray(arguments.officeIdList, ",");
     arrGroupId=listToArray(arguments.groupIdList, ",");
 
-    db.sql="SELECT group_concat(distinct user_id SEPARATOR #db.param(',')#) idlist 
+    db.sql="SELECT group_concat(distinct user_id SEPARATOR #db.param(',')#) userIdList, group_concat(distinct contact.contact_id SEPARATOR #db.param(',')#) contactidlist 
     FROM #db.table("user", request.zos.zcoreDatasource)# 
-    WHERE site_id = #db.param(request.zos.globals.id)# AND 
+    LEFT JOIN #db.table("contact", request.zos.zcoreDatasource)# ON 
+    contact.site_id = #db.param(request.zos.globals.id)# and 
+    contact_email=user.user_username and 
+    contact_deleted=#db.param(0)# 
+    WHERE user.site_id = #db.param(request.zos.globals.id)# AND 
     user_active=#db.param(1)# and 
     user_deleted=#db.param(0)# and ";
     if(arrayLen(arrGroupId) EQ 0){
@@ -391,10 +454,10 @@
     }
     db.sql&=" ORDER BY user_first_name ASC, user_last_name ASC";
     qUser=db.execute("qUser");  
-    if(quser.idlist EQ ""){
+    if(qUser.userIdList EQ ""){
     	return "";
     }else{
-	    return qUser.idlist;
+	    return { userIdList:qUser.userIdList, replace(replace(","&qUser.contactIdList&",", ",0,", "", "all"), ",,", ",", "all") };
 	}
     </cfscript>
 </cffunction>
@@ -1456,9 +1519,7 @@ zArrDeferredFunctions.push(function(){
 		arrUser=listToArray(form.user_id, "|");
 		if(arraylen(arrUser) EQ 2){
 			form.user_id_siteIdType=application.zcore.functions.zGetSiteIdType(arrUser[2]);
-			form.user_id=arrUser[1];
-			form.contact_assigned_user_id=form.user_id;
-			form.contact_assigned_user_id_siteIdType=form.user_id_siteIdType;
+			form.user_id=arrUser[1]; 
 		}else{
 			return {success:false, errorMessage:"Invalid user_id format"};
 		}
