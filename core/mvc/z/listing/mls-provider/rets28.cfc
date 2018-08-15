@@ -228,7 +228,8 @@ variables.tableLookup=structnew();
 		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["temporarily withdrawn"]]=true;
 	}
 	listing_liststatus=structkeylist(s2,",");*/
-	s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["active"]]=true;
+
+		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["active"]]=true;
 	listing_liststatus=structkeylist(s2,",");
 	
 	/*arrT3=[];
@@ -336,8 +337,10 @@ LookupMulti1C
 	s={};
 	if(application.zcore.functions.zso(ts, 'rets28_yearbuilt') EQ year(now())){
 		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["new construction"]]=true;
-	}
-	if(ts["rets28_propertysubtype"] EQ "E" or ts["rets28_propertysubtype"] EQ "N"){
+	} 
+
+	//if(ts["rets28_propertysubtype"] EQ "E" or ts["rets28_propertysubtype"] EQ "N"){
+	if(ts["rets28_propertytype"] EQ "For Rent-Commercial" or ts["rets28_propertytype"] EQ "For Rent-Residential"){
 		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]]=true; 
 	}else{
 		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]]=true;
