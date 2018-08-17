@@ -303,7 +303,11 @@ zSlideShow(ts);
 	ts.site_id = request.zos.globals.id;
 	var i=0;
 	structappend(arguments.ss,ts,false); 
-	 application.zcore.functions.zRequireSlideshowJS();
+
+	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle2.js");
+	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle2.swipe.min.js", '', 2);
+	application.zcore.skin.includeJS("/z/javascript/jquery/Slides/source/slides.jquery-new.js");
+	// application.zcore.functions.zRequireSlideshowJS();
 	if(structkeyexists(application.sitestruct, arguments.ss.site_id)){
 		if(structkeyexists(arguments.ss,'slideshow_codename')){
 			if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct, arguments.ss.slideshow_codename)){

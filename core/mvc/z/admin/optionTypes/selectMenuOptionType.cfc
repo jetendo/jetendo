@@ -446,18 +446,68 @@
 			<tr><td>Use Group: </td>
 			<td>
 			<cfscript>
+			// and 	#variables.type#_option_group_parent_id=#db.param(0)# 
 			db.sql="SELECT * FROM #db.table("#variables.type#_option_group", request.zos.zcoreDatasource)#
 			WHERE `#variables.type#_id` = #db.param(request.zos.globals.id)#  and 
-			#variables.type#_option_group_deleted = #db.param(0)# and 
-			#variables.type#_option_group_parent_id=#db.param(0)# 
+			#variables.type#_option_group_deleted = #db.param(0)# 
 			ORDER BY #variables.type#_option_group_display_name"; 
 			var qGroup2=db.execute("qGroup2");
+			gs={};
+			for(group in qGroup2){
+				gs[group.site_option_group_id]={row:group, arrParent:[], arrParentID:[]};
+			}
+			for(group in qGroup2){
+				currentGroup=group;
+				for(i=1;i<=50;i++){
+					if(currentGroup.site_option_group_parent_id NEQ 0){
+						arrayPrepend(gs[group.site_option_group_id].arrParentID, gs[currentGroup.site_option_group_parent_id].row.site_option_group_id);
+						arrayPrepend(gs[group.site_option_group_id].arrParent, gs[currentGroup.site_option_group_parent_id].row.site_option_group_display_name);
+						currentGroup=gs[currentGroup.site_option_group_parent_id].row;
+					}else{
+						break;
+					}
+					if(i EQ 50){
+						throw("Infinite loop detected in the group heirarchy");
+					}
+				}
+			}
+			arrGroup=[];
+			mainGroupID="";
+			if(arrayLen(gs[form.site_option_group_id].arrParentID) NEQ 0){
+				mainGroupID=gs[form.site_option_group_id].arrParentID[1];
+			}
+			for(group in qGroup2){
+				parentText="";
+				if(arrayLen(gs[group.site_option_group_id].arrParent) NEQ 0){
+					parentText=arrayToList(gs[group.site_option_group_id].arrParent, " -> ")&" -> ";
+				}
+				ts={
+					label:parentText&gs[group.site_option_group_id].row.site_option_group_display_name,
+					id:group.site_option_group_id
+				};
+				if(arrayLen(gs[group.site_option_group_id].arrParent) EQ 0){
+					arrayAppend(arrGroup, ts);
+				}else{
+					found=false; 
+					for(parentId in gs[group.site_option_group_id].arrParentID){
+						if(parentId EQ mainGroupID){
+							found=true;
+							break;
+						}
+					}
+					// verify if the current group exists in the parent heirarchy before allowing it
+					if(found){
+						arrayAppend(arrGroup, ts);
+					}
+				}
+			} 
+
 			var selectStruct = StructNew();
 			form.selectmenu_groupid=application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_groupid');
 			selectStruct.name = "selectmenu_groupid";
-			selectStruct.query = qGroup2;
-			selectStruct.queryLabelField = "#variables.type#_option_group_display_name";
-			selectStruct.queryValueField = "#variables.type#_option_group_id";
+			selectStruct.query = arrGroup;
+			selectStruct.queryLabelField = "label";
+			selectStruct.queryValueField = "id";
 			application.zcore.functions.zInputSelectBox(selectStruct);
 			</cfscript></td></tr>
 			<tr><td>Label Field: </td>

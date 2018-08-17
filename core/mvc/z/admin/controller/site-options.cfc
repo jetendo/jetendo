@@ -3612,6 +3612,7 @@ Define this function in another CFC to override the default email format
 		if(not structkeyexists(arguments.struct, 'recurse') and form.site_option_group_id NEQ 0 and arraylen(arrSearchTable)){ 
 			arrayAppend(arrSearch, '<form action="#arguments.struct.listURL#" method="get">
 			<input type="hidden" name="searchOn" value="1" />
+			<input type="hidden" name="site_x_option_group_set_parent_id" value="#form.site_x_option_group_set_parent_id#" />
 			<input type="hidden" name="site_option_group_id" value="#form.site_option_group_id#" />
 			<input type="hidden" name="site_option_app_id" value="#form.site_option_app_id#" />
 			<div class="z-float " style="border-bottom:1px solid ##CCC; padding-bottom:10px;">');
@@ -3685,7 +3686,7 @@ Define this function in another CFC to override the default email format
 				arrayAppend(arrSearch, '</div>');
 			}
 			arrayAppend(arrSearch, '<div class="z-float-left">&nbsp;<br><input type="submit" name="searchSubmit1" value="Search" class="z-manager-search-button" /> 
-				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#form.site_option_group_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
+				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#form.site_option_group_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
 			</div></div></form>');
 
 			if ( qGroup.site_option_group_enable_sorting EQ 1 ) {

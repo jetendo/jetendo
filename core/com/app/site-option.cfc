@@ -1619,7 +1619,11 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 				}else{
 					resort=true;
 				} 
-				if(resort){ 
+				if(resort){  
+
+					if(not structkeyexists(t9.optionGroupSetId, row.site_x_option_group_set_parent_id&"_childGroup")){
+						t9.optionGroupSetId[row.site_x_option_group_set_parent_id&"_childGroup"]={};
+					}
 					if(not structkeyexists(t9.optionGroupSetId[row.site_x_option_group_set_parent_id&"_childGroup"], row.site_option_group_id)){
 						t9.optionGroupSetId[row.site_x_option_group_set_parent_id&"_childGroup"][row.site_option_group_id]=[];
 					}
@@ -1886,6 +1890,39 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		delimiter=",";
 	}
 	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
+		parentId=form.site_x_option_group_set_parent_id;
+		// need parent group of ts.selectmenu_groupid
+		db.sql="select * from #db.table("site_option_group", request.zos.zcoreDatasource)# 
+		WHERE site_option_group_id=#db.param(ts.selectmenu_groupid)# and 
+		site_option_group_deleted=#db.param(0)# and 
+		site_id = #db.param(request.zos.globals.id)# ";
+		qParentGroup=db.execute("qParentGroup");
+		found=false;
+		if(qParentGroup.site_option_group_parent_id NEQ 0 and form.site_x_option_group_set_parent_id NEQ 0){ 
+			for(i=1;i<=50;i++){
+				db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# WHERE 
+				 site_x_option_group_set_deleted=#db.param(0)# and 
+				 site_x_option_group_set_id=#db.param(parentId)# and 
+				 site_id = #db.param(request.zos.globals.id)#";
+				qParentSet=db.execute("qParentSet"); 
+				if(qParentSet.site_option_group_id EQ qParentGroup.site_option_group_parent_id){
+					parentId=qParentSet.site_x_option_group_set_id;
+					found=true;
+					break;
+				}
+				if(qParentSet.site_x_option_group_set_parent_id EQ 0){
+					break;
+				}else{
+					parentId=qParentSet.site_x_option_group_set_parent_id;
+				}
+				if(i EQ 50){
+					throw("Infinite loop detected in group heirarchy");
+				}
+			}
+		}
+		if(not found){
+			parentId=0;
+		} 
 		db.sql="select s1.site_option_id labelFieldId, s2.site_option_id valueFieldId ";
 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 			db.sql&=",  s3.site_option_id parentFieldID ";
@@ -1925,13 +1962,20 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 			db.sql&=", s3.site_x_option_group_value parentId ";
 		//	db.sql&=", s3.site_x_option_group_value parentId ";
 		 }
-		 db.sql&=" from 
+		 db.sql&=" from (
+		 #db.table("site_x_option_group_set", request.zos.zcoredatasource)# set1,
 		 #db.table("site_x_option_group", request.zos.zcoredatasource)# s1 , 
 		 #db.table("site_x_option_group", request.zos.zcoredatasource)# s2 ";
 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 			db.sql&=" ,#db.table("site_x_option_group", request.zos.zcoredatasource)# s3";
 		 }
-		db.sql&=" WHERE 
+		db.sql&=") WHERE ";
+		if(parentID NEQ 0){
+			db.sql&=" set1.site_x_option_group_set_parent_id=#db.param(parentId)# and ";
+		}
+		db.sql&=" set1.site_x_option_group_set_deleted=#db.param(0)# and 
+		set1.site_x_option_group_set_id=s1.site_x_option_group_set_id and
+		set1.site_id = s1.site_id and 
 		s1.site_x_option_group_deleted = #db.param(0)# and 
 		s2.site_x_option_group_deleted = #db.param(0)# and 
 		s1.site_option_id = #db.param(local.qTemp.labelFieldId)# and 
@@ -1958,6 +2002,10 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		ORDER BY label asc ";
 		local.qTemp2=db.execute("qTemp2");
 		//writedump(qtemp2);abort;
+
+
+		// ts.selectmenu_groupid
+		// site_option_group_id=9
 		if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 			local.ds=structnew();
 			local.ds2=structnew();

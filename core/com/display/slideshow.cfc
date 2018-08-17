@@ -681,7 +681,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 			i=g2;
 			mls_id=listgetat(row.listing_id,1,"-");
 			mls_pid=listgetat(row.listing_id,2,"-");
-			structappend(variables, request.zos.listingMlsComObjects[mls_id].baseGetDetails(row, i), true);
+			structappend(variables, request.zos.listingMlsComObjects[mls_id].getDetails(row, i), true);
 			variables.listing_id=row.listing_id;
 			titleStruct = request.zos.listing.functions.zListinggetTitle(variables);
 			propertyLink = '/#titleStruct.urlTitle#-#variables.urlMlsId#-#variables.urlMLSPId#.html';

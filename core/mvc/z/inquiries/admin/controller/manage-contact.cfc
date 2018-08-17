@@ -399,9 +399,9 @@
 	db=request.zos.queryObject;
 	rs={success:true};
  
- 	if(form.contact_email EQ "" and form.contact_phone1 EQ ""){
+ 	/*if(form.contact_email EQ "" and form.contact_phone1 EQ ""){
  		return {success:false, errorMessage:"Email and/or phone are required."};
- 	}
+ 	}*/
 	if(form.method EQ "insert" or form.method EQ "userInsert"){
 		form.contact_datetime=request.zos.mysqlnow;
 	}
@@ -466,7 +466,8 @@
 
 <cffunction name="afterInsert" localmode="modern" access="private" returntype="struct">
 	<cfscript>
-	afterUpdate();
+	rs=afterUpdate();
+	return rs;
 	</cfscript>
 </cffunction>
 
@@ -474,22 +475,27 @@
 	<cfscript>
 	db=request.zos.queryObject;
 
+	contactCom=createObject("component", "zcorerootmapping.com.app.contact");
 	if(application.zcore.user.checkGroupAccess("administrator") and form.contact_assigned_user_id NEQ ""){
 		arr = listToArray(form.contact_assigned_user_id, "|");
-		form.contact_assigned_user_id  				= arr[1];
-		form.contact_assigned_user_id_siteidtype	= application.zcore.functions.zGetSiteIdType(arr[2]);
+		userId  				= arr[1];
+		userSiteId	= arr[2];
 	}else{
-		form.contact_assigned_user_id  				= request.zsession.user.id;
-    	form.contact_assigned_user_id_siteidtype	= application.zcore.user.getSiteIdTypeFromLoggedOnUser();
+		userId  				= request.zsession.user.id;
+    	userSiteId	= request.zsession.user.site_id;
     }	
-    contact=getContactByUserId(form.contact_assigned_user_id, form.contact_assigned_user_id_siteidtype);
-    ts={
-		contact_id:form.contact_id, // the contact being shared
-		accessible_by_contact_id: contact.contact_id, // the user who will have access to the contact
-		site_id: request.zos.globals.id
-	};
-	contactCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-contact");
-    contactCom.addContactToContact(ts);
+    user=application.zcore.user.getUserById(userId, userSiteId);
+    if(structcount(user) NEQ 0){
+	    contact=contactCom.getContactByEmail(user.user_username, trim(user.user_first_name&" "&user.user_last_name), userSiteId);
+	    ts={
+			contact_id:form.contact_id, // the contact being shared
+			accessible_by_contact_id: contact.contact_id, // the user who will have access to the contact
+			site_id: request.zos.globals.id
+		};
+	    contactCom.addContactToContact(ts);
+    }
+	rs={success:true};
+	return rs;
 	</cfscript>
 </cffunction>
 
@@ -912,7 +918,7 @@
 	form.search_email=application.zcore.functions.zso(form, 'search_email');
 	form.search_phone=application.zcore.functions.zso(form, 'search_phone');
 	form.contact_status_id=application.zcore.functions.zso(form, 'contact_status_id');
-	form.selected_client_id=application.zcore.functions.zso(form, 'cid', true);
+	form.selected_contact_id=application.zcore.functions.zso(form, 'cid', true);
 	if(structkeyexists(form, 'leadcontactfilter')){
 		request.zsession.leadcontactfilter=form.leadcontactfilter;		
 	}else if(isDefined('request.zsession.leadcontactfilter') EQ false){
@@ -938,7 +944,7 @@
 	db.sql="select min(contact_datetime) as contact_datetime  
 	from (#db.table("contact", request.zos.zcoreDatasource)# ";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
 		}
 	}
@@ -951,7 +957,7 @@
 	#db.trustedSQL(contactFilter.whereSQL)#
 	";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=" and 
 			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
 			contact_x_contact.contact_id = contact.contact_id and 
@@ -987,7 +993,7 @@
 	#db.trustedSQL(contactFilter.selectSQL)# 
 	FROM ( #db.table("contact", request.zos.zcoreDatasource)# ";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
 		}
 	}
@@ -999,7 +1005,7 @@
 	contact.site_id = #db.param(request.zos.globals.id)# 
 	";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=" and 
 			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
 			contact_x_contact.contact_id = contact.contact_id and 
@@ -1038,7 +1044,7 @@
 	db.sql="SELECT count(*) COUNT 
 	from ( #db.table("contact", request.zos.zcoreDatasource)# ";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=", #db.table("contact_x_contact", request.zos.zcoreDatasource)# ";
 		}
 	}
@@ -1049,7 +1055,7 @@
 	contact.site_id = #db.param(request.zos.globals.id)# 
 	";
 	if(application.zcore.user.checkGroupAccess("administrator")){
-		if(form.selected_client_id NEQ '0'){
+		if(form.selected_contact_id NEQ '0'){
 			db.sql&=" and 
 			contact_x_contact_accessible_by_contact_id = #db.param(form.selected_contact_id)# and 
 			contact_x_contact.contact_id = contact.contact_id and 
@@ -1157,6 +1163,7 @@
 		WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
 		contact.contact_email=user.user_username and 
 		contact.site_id = user.site_id and 
+		contact_deleted=#db.param(0)# and 
 		user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))#  
 		 and (user_server_administrator=#db.param(0)# ) and 
 		 user_deleted = #db.param(0)#
@@ -1170,7 +1177,6 @@
 			echo('<input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select assigness:<br>');
 			selectStruct.query = qAgents;
 			selectStruct.size=3;
-			selectStruct.selectedValues=form.uid;
 			selectStruct.queryLabelField = "##user_first_name## ##user_last_name## / ##user_username## / ##member_company##";
 			selectStruct.queryParseLabelVars = true;
 			selectStruct.queryParseValueVars = true; 

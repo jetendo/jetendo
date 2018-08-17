@@ -35,7 +35,7 @@
 	}
 	form.virtual_folder_id=application.zcore.functions.zso(form, 'virtual_folder_id', true);
 	form.virtual_file_id=application.zcore.functions.zso(form, 'virtual_file_id', true);
-
+	variables.currentFile={};
 	// force current file or folder to be loaded
 	if(form.virtual_file_id NEQ 0){
 		rs=request.zos.siteVirtualFileCom.getFileById(form.virtual_file_id);
@@ -733,6 +733,10 @@
 	form.fileGalleryMode=true; 
 	Request.zOS.debuggerEnabled=false;
 	application.zcore.functions.zSetPageHelpId("2.5.5"); 
+
+	if(structcount(variables.currentFile) EQ 0){
+		application.zcore.functions.z404("currentFile was missing from request.");
+	}
 
 	viewLink=request.zos.siteVirtualFileCom.getViewLink(variables.currentFile);
 	downloadLink=request.zos.siteVirtualFileCom.getDownloadLink(variables.currentFile);
