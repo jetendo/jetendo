@@ -417,10 +417,10 @@ for($i4=0;$i4 < 62;$i4++){
 		$result=`/usr/sbin/service nginx configtest 2>&1`;
 
 		echo "result:".$result.":endresult\n"; 
-		if(strpos($result, "successful") !== FALSE){
+		if(strpos($result, "successful") !== FALSE || strpos($result, "(running)") !== FALSE){
 			`/usr/sbin/service nginx reload 2>&1`;
 			$result=`/usr/sbin/service nginx status 2>&1`;
-			if(strpos($result, "nginx found running") !== FALSE){ 
+			if(strpos($result, "nginx found running") !== FALSE || strpos($result, "(running)") !== FALSE){ 
 				@unlink($sharePath.'hostmap.conf.backup');
 				$message="The hostmap.conf file was published, and nginx was reloaded successfully.";
 			}else{

@@ -4,7 +4,7 @@
 	<cfscript>
 	var t3=0;
 	var t9=0;		
-	var ts=arguments.ss;
+	var ts=arguments.ss; 
 	ts.tempTokenCache=structnew();
  
 	ts.queryCache=structnew('soft');
@@ -578,7 +578,7 @@
 	ts.processList=structnew(); 
 	ts.serverglobals.serveremail = request.zos.developerEmailTo;
 	ts.serverglobals.serverpass = ""; 
-	if(request.zos.cgi.local_host CONTAINS "."&request.zos.testDomain){
+	if(request.zos.cgi.http_host CONTAINS "."&request.zos.testDomain){
 		ts.serverglobals.serverdomain = request.zOS.zcoreTestAdminDomain;
 		ts.serverglobals.serversecuredomain = request.zOS.zcoreTestAdminDomain;
 		ts.serverglobals.servershortdomain = replace(replace(request.zOS.zcoreTestAdminDomain,"http://",""),"https://","");
@@ -885,7 +885,7 @@
 
 
 <cffunction name="onApplicationStart" localmode="modern" access="public"  returntype="any" output="yes" hint="Fires when the application is first created.">
-	<cfscript>
+	<cfscript> 
 	application.serverStartTickCount=gettickcount(); 
 	// get all sites, and whether they have listing app, because we want to load sites not needing listing app first.
 	query name="qS" datasource="#request.zos.zcoreDatasource#"{

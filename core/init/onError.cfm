@@ -33,7 +33,7 @@
 		if(request.zos.isDeveloperIpMatch and request.zos.cgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and request.zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){ 
 			writedump(arguments);
 			abort;
-		}
+		} 
 		header statuscode="503" statustext="Service Temporarily Unavailable";
     	header name="retry-after" value="60";
 		echo('<h1>Service Temporarily Unavailable</h1>');abort;

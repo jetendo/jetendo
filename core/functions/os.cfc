@@ -759,7 +759,7 @@ if(not rs.success){
 	cssLength=arraylen(request.zos.arrCSSIncludes);
 	
 	if(not structkeyexists(request, 'disableGlobalHTMLHeadCode') and request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
-		if(structkeyexists(request.zos,'inMemberArea') and request.zos.inMemberArea EQ false){
+		if(structkeyexists(request.zos,'inMemberArea') and request.zos.inMemberArea EQ false and structkeyexists(application.sitestruct[request.zos.globals.id], 'globalHTMLHeadSourceArrCSS')){
 			for(i=1;i LTE arraylen(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrCSS);i++){
 				tout&=application.zcore.skin.includeCSS(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrCSS[i],'last');
 			}

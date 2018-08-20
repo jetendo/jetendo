@@ -34,9 +34,7 @@ if($r->num_rows == 0){
 		'" has permission to create the database or create it manually and re-run this script.';
 	}
 }
-
-
-
+ 
 // source code install & integrity checks
 
 if(zIsTestServer()){

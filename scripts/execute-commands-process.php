@@ -1165,7 +1165,7 @@ function publishNginxSiteConfig($a){
 			unlink($outPath);
 			`/usr/sbin/service nginx reload 2>&1`;
 			$result=`/usr/sbin/service nginx status 2>&1`;
-			if(strpos($result, "nginx found running") !== FALSE){ 
+			if(strpos($result, "nginx found running") !== FALSE || strpos($result, "(running)") !== FALSE){ 
 				// success
 				return json_encode($rs);
 			}else{
@@ -1215,8 +1215,13 @@ function publishNginxSiteConfig($a){
 			"ssl_certificate ".$nginxSSLPath.$sslRow["ssl_hash"]."/".$row["site_id"].".crt;\n".
 			"ssl_certificate_key ".$nginxSSLPath.$sslRow["ssl_hash"]."/".$row["site_id"].".key;\n");
 			if($row["site_nginx_disable_jetendo"] == "0"){
-				array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-ssl-vhost.conf;\n". 
-				"include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost.conf;\n");
+				array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-ssl-vhost.conf;\n");
+
+				if(zIsTestServer()){
+					array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost-development.conf;\n");
+				}else{ 
+					array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost.conf;\n");
+				}
 			}
 		array_push($arrConfig, "}\n");
 	}else{
@@ -1228,7 +1233,11 @@ function publishNginxSiteConfig($a){
 		"server_name  ".implode(" ", $arrSite).";\n".
 		$row["site_nginx_config"]."\n");
 			if($row["site_nginx_disable_jetendo"] == "0"){
-				array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost.conf;\n");
+				if(zIsTestServer()){
+					array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost-development.conf;\n");
+				}else{
+					array_push($arrConfig, "include ".get_cfg_var("jetendo_server_path")."system/nginx-conf/jetendo-vhost.conf;\n");
+				}
 			}
 		array_push($arrConfig, "}\n");
 	}
@@ -1241,11 +1250,11 @@ function publishNginxSiteConfig($a){
 	file_put_contents($outPath, $out);
 
 	$result=`/usr/sbin/service nginx configtest 2>&1`;
-	if(strpos($result, "successful") !== FALSE){
+	if(strpos($result, "successful") !== FALSE || strpos($result, "(running)") !== FALSE){
 		`/usr/sbin/service nginx reload 2>&1`;
 		$result=`/usr/sbin/service nginx status 2>&1`;
 		//echo "result:".$result.":endresult\n";
-		if(strpos($result, "nginx found running") !== FALSE){ 
+		if(strpos($result, "nginx found running") !== FALSE || strpos($result, "(running)") !== FALSE){ 
 			// success
 		}else{
 			echo "Nginx failed to reload..\n";

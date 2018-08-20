@@ -140,10 +140,11 @@
 	ts=structnew(); 
 	ts.globals=duplicate(application.zcore.serverglobals); 
 	// consider loading this fresh right here instead of in zcore OnInternalApplicationStart
-	row=application.zcoreSiteDataStruct[id];
+	row=application.zcoreSiteDataStruct[id]; 
 
 	tempPath=application.zcore.functions.zGetDomainInstallPath(row.site_short_domain);
 	tempPath2=application.zcore.functions.zGetDomainWritableInstallPath(row.site_short_domain);
+
 	if(fileexists(tempPath2&"_cache/scripts/global.json")){
 		tempGlobal=deserializeJson(application.zcore.functions.zreadfile(tempPath2&"_cache/scripts/global.json"));
 		structappend(tempGlobal, application.zcore.serverGlobals, false);
@@ -336,10 +337,15 @@
 		}
 	}else{
 		site_id=getSiteId();
-	} 
+	}  
 	// TODO need to avoid running this if the core is not fully loaded yet.
 	if(request.zos.isTestServer and not structkeyexists(application,'onInternalApplicationStartRunning')){ 
 		if(site_id NEQ 0){
+			if(not structkeyexists(application,'zcore') or not structkeyexists(application.zcore,'functions')){
+				onApplicationStart();
+				OnInternalApplicationStart();
+				loadSite(application.zcore.serverGlobals.serverid);
+			}
 			if(not structkeyexists(application.zcoreSitesLoaded, site_id)){ 
 				setSiteRequestGlobals(site_id); 
 				if(structkeyexists(application.zcoreSitesNotListingLoaded, site_id)){
@@ -557,7 +563,7 @@
 		}
 		
 		
-		if(request.zos.isDeveloper){
+		if(request.zos.isDeveloper or request.zos.isTestServer){
 			if(structkeyexists(form, 'zOSDebuggerLastOutput')){
 				form.znotemplate=1;
 				if(isDefined('request.zsession.zOSDebuggerLastOutput')){
@@ -901,7 +907,7 @@
 					application.zcore.functions.z404("Domain alias match not found");
 				}
 			}else{
-				application.zcore.functions.z404("System domain doesn't match host name.");	
+				application.zcore.functions.z404("System domain (#replace(replace(request.zos.globals.domain,"http://",""),"https://","")# doesn't match host name (#request.zos.cgi.http_host#).");	
 			}
 		}
 	}

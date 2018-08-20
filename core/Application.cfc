@@ -146,14 +146,14 @@ if(structkeyexists(requestData.headers,'x-forwarded-for')){
 }
 if(structkeyexists(requestData.headers,'http_host')){
 	local.tempCGI.http_host=requestData.headers.http_host;
-}
+} 
 setupGlobals(local.tempCGI);
 request.zos.requestLogEntry=requestLogEntry;
 request.zos.requestData=requestData;
 request.zos.cgi=local.tempCGI;
 </cfscript>
 
-<cffunction name="onCoreRequest" localmode="modern" returntype="any" output="no">
+<cffunction name="onCoreRequest" localmode="modern" returntype="any" output="yes">
     <cfscript>
     var local=structnew();
 	request.zos.arrRunTime=arraynew(1);
