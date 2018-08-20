@@ -21,6 +21,12 @@ finish simplifying this script.
 		// must be a higher rights dev account or multiple site account.  These types of accounts only work in the full site manager interface.
 		application.zcore.functions.zRedirect("/z/user/preference/index");
 	}
+	if(structkeyexists(application.siteStruct[request.zos.globals.id], 'metaCache') and structkeyexists(application.siteStruct[request.zos.globals.id]['metaCache'], 'metaObjectCache') and structkeyexists(application.siteStruct[request.zos.globals.id]['metaCache']['metaObjectCache'], 'user')){
+		variables.metaFieldInUse=true;
+		variables.metaCom=createObject("component", "zcorerootmapping.com.zos.meta");
+	}else{
+		variables.metaFieldInUse=false;
+	}
  
 	db.sql="select * from #db.table("user_group", request.zos.zcoreDatasource)# WHERE 
 	user_group_id=#db.param(request.zsession.user.group_id)# and 
@@ -153,6 +159,13 @@ finish simplifying this script.
 		if(qCheck.member_photo NEQ ""){
 			application.zcore.functions.zDeleteFile(application.zcore.functions.zVar('privatehomedir',qCheck.userSiteId)&removechars(request.zos.memberImagePath,1,1)&qCheck.member_photo);
 		}
+		if(variables.metaFieldInUse){
+			structappend(form, variables.metaCom.getData("user", form), false); 
+			rsDelete=variables.metaCom.delete("user", form); 
+			if(not rsDelete.success){
+				application.zcore.functions.zReturnJson({success:false, errorMessage:rs.errorMessage});
+			}
+		}
 		db.sql="DELETE FROM #db.table("user", request.zos.zcoreDatasource)#  WHERE 
 		user_id = #db.param(qCheck.user_id)# and 
 		user_deleted = #db.param(0)# and 
@@ -228,6 +241,15 @@ finish simplifying this script.
 		}
 		form.office_id=arrayToList(arrOfficeNew, ",");
 	} 
+	if(variables.metaFieldInUse){
+		arrError=variables.metaCom.validate("user", form);
+		if(arrayLen(arrError)){
+			error=true;
+			for(e in arrError){
+				application.zcore.status.setStatus(request.zsid, e, form, true);
+			}
+		}
+	}
 	if(error){
 		if(form.method EQ 'insert'){
 			application.zcore.functions.zRedirect('/z/user/user-manage/add?zsid=#request.zsid#&zIndex=#form.zIndex#&ugid=#form.ugid#&searchtext=#URLEncodedFormat(form.searchtext)#');
@@ -390,6 +412,9 @@ finish simplifying this script.
 		structdelete(form,'member_password');	
 		structdelete(variables,'member_password');		
 	}
+	if(variables.metaFieldInUse){
+		form.user_meta_json=variables.metaCom.save("user", form); 
+	}
 	ts.site_id=request.zos.globals.id; 
 	if(form.method EQ "update"){
 		ts.user_id = form.user_id;
@@ -512,6 +537,9 @@ finish simplifying this script.
 	qMember=db.execute("qMember");
 	application.zcore.functions.zQueryToStruct(qMember);
 	application.zcore.functions.zStatusHandler(request.zsid,true);
+	if(variables.metaFieldInUse){
+		structappend(form, variables.metaCom.getData("user", form), false); 
+	}
 	</cfscript>
 	<h2>
 		<cfif currentMethod EQ 'add'>
@@ -527,6 +555,34 @@ finish simplifying this script.
 			cancelURL="/z/user/user-manage/index?zIndex=#form.zIndex#&amp;ugid=#form.ugid#&amp;searchtext=#URLEncodedFormat(form.searchtext)#"; 
 		</cfscript> 
 		<table  class="table-list"> 
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Basic", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=arraylen(metaFields);i>=1;i--){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=arraylen(metaFields);i>=1;i--){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 			<cfscript>
 			db.sql="SELECT * FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group WHERE 
 			user_group_deleted = #db.param(0)# and 
@@ -583,11 +639,11 @@ finish simplifying this script.
 				<th>#application.zcore.functions.zOutputHelpToolTip("Last Name","member.member.edit member_last_name")#</th>
 				<td><input type="text" name="member_last_name" value="<cfif form.member_last_name EQ ''>#form.user_last_name#<cfelse>#form.member_last_name#</cfif>" size="30" /></td>
 			</tr>
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("Company","member.member.edit member_company")#</th>
 				<td><input type="text" name="member_company" value="#form.member_company#" size="30" /></td>
 			</tr>
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("Title","member.member.edit member_title")#</th>
 				<td><input type="text" name="member_title" value="#form.member_title#" size="30" /></td>
 			</tr>
@@ -653,281 +709,266 @@ finish simplifying this script.
 				</tr> 
 			</cfif>
 		<cfif request.userFullEditAccess> 
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("CC Email(s)","member.member.edit user_alternate_email")#</th>
 				<td><input type="text" name="user_alternate_email" maxlength="255" value="#htmleditformat(form.user_alternate_email)#"  />
 				<br />Note: Updates to assigned leads will be CC'd to this list of emails.  Comma separate multiple email addresses. You can't login as this user with alternate emails.</td>
 			</tr>
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("Phone","member.member.edit member_phone")#</th>
 				<td><input type="text" name="member_phone" value="<cfif form.member_phone EQ ''>#form.user_phone#<cfelse>#form.member_phone#</cfif>" size="30" /></td>
 			</tr>
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("Web Site","member.member.edit member_website")#</th>
 				<td><input type="text" name="member_website" value="#form.member_website#" size="30" />
 					<br />(URLs Must begin with http:// or https://)</td>
-			</tr>
-			<!--- <cfif application.zcore.app.siteHasApp("content") and application.zcore.app.getAppData("content").optionStruct.content_config_url_listing_user_id NEQ 0 and application.zcore.app.getAppData("content").optionStruct.content_config_url_listing_user_id NEQ "">
-				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Show Profile","member.member.edit member_public_profile")#</th>
-					<td><input type="radio" name="member_public_profile" value="1" style="border:none; background:none;" <cfif form.member_public_profile EQ '1'>checked="checked"</cfif> />
-						Yes (Make visible to public) |
-						<input type="radio" name="member_public_profile" value="0" style="border:none; background:none;" <cfif form.member_public_profile EQ 0 or form.member_public_profile EQ ''>checked="checked"</cfif> />
-						No </td>
-				</tr>
-			</cfif>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Hide Public Email?","member.member.edit user_hide_public_email")#</th>
-				<td><input type="radio" name="user_hide_public_email" value="1" style="border:none; background:none;" <cfif form.user_hide_public_email EQ '1'>checked="checked"</cfif> />
-					Yes |
-					<input type="radio" name="user_hide_public_email" value="0" style="border:none; background:none;" <cfif form.user_hide_public_email EQ 0 or form.user_hide_public_email EQ ''>checked="checked"</cfif> />
-					No </td>
-			</tr> ---> 
+			</tr> 
 
-
-			<tr>
+			<tr class="zUserManageOptionalProfile">
 				<th>#application.zcore.functions.zOutputHelpToolTip("Photo","member.member.edit member_photo")#</th>
 				<td>#application.zcore.functions.zInputImage('member_photo', application.zcore.functions.zVar('privatehomedir')&removechars(request.zos.memberImagePath,1,1), request.zos.globals.siteroot&request.zos.memberImagePath)# </td>
 			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Description","member.member.edit member_description")#</th>
-				<td><cfscript>
-				htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
-				htmlEditor.instanceName	= "member_description";
-				htmlEditor.value			= form.member_description;
-				htmlEditor.width			= "100%";
-				htmlEditor.height		= 400;
-				htmlEditor.create();
-				</cfscript></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Google+ URL","member.member.edit user_googleplus_url")#</th>
-				<td><input type="text" name="user_googleplus_url" value="#form.user_googleplus_url#" size="30" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Twitter URL","member.member.edit user_twitter_url")#</th>
-				<td><input type="text" name="user_twitter_url" value="#form.user_twitter_url#" size="30" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Facebook URL","member.member.edit user_facebook_url")#</th>
-				<td><input type="text" name="user_facebook_url" value="#form.user_facebook_url#" size="30" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Instagram URL","member.member.edit user_instagram_url")#</th>
-				<td><input type="text" name="user_instagram_url" value="#form.user_instagram_url#" size="30" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("LinkedIn URL","member.member.edit user_linkedin_url")#</th>
-				<td><input type="text" name="user_linkedin_url" value="#form.user_linkedin_url#" size="30" /></td>
-			</tr> 
-			<cfif application.zcore.app.siteHasApp("listing")>
+			<tbody class="zUserManageOptionalProfile">
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Sort Listings","member.member.edit user_listing_sort")#</th>
-					<td><input type="radio" style="border:none; background:none;"  name="user_listing_sort" value="2" <cfif form.user_listing_sort EQ '2' or form.user_listing_sort EQ ''>checked="checked"</cfif> />
-						Price Ascending&nbsp;&nbsp;&nbsp;&nbsp;
-						<input type="radio" style="border:none; background:none;"  name="user_listing_sort" value="1" <cfif form.user_listing_sort EQ '1'>checked="checked"</cfif> />
-						Price Descending </td>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Description","member.member.edit member_description")#</th>
+					<td><cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "member_description";
+					htmlEditor.value			= form.member_description;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 400;
+					htmlEditor.create();
+					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("MLS Agent ID","member.member.edit mlsagentid")#</th>
-					<td>Please type the agent id for each MLS database or leave it blank: 
-						<cfscript>
-						db.sql="SELECT * FROM #db.table("mls", request.zos.zcoreDatasource)# mls, 
-						#db.table("app_x_mls", request.zos.zcoreDatasource)# app_x_mls 
-						WHERE mls.mls_id = app_x_mls.mls_id and 
-						app_x_mls_deleted = #db.param(0)# and 
-						mls_deleted = #db.param(0)# and
-						app_x_mls.site_id=#db.param(request.zos.globals.id)# and 
-						mls_status = #db.param('1')#
-						ORDER BY mls_name";
-						qMLS=db.execute("qMLS");
-						mAIstruct=structnew();
-						if(form.member_mlsagentid NEQ ''){
-							arrP=listtoarray(form.member_mlsagentid,',');
-							for(i=1;i LTE arraylen(arrP);i++){
-								if(arrP[i] NEQ ""){
-									arrI=listtoarray(arrP[i],'-');
-									if(arraylen(arrI) EQ 2){
-										mAIstruct[arrI[1]]=arrI[2];
+					<th>#application.zcore.functions.zOutputHelpToolTip("Google+ URL","member.member.edit user_googleplus_url")#</th>
+					<td><input type="text" name="user_googleplus_url" value="#form.user_googleplus_url#" size="30" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Twitter URL","member.member.edit user_twitter_url")#</th>
+					<td><input type="text" name="user_twitter_url" value="#form.user_twitter_url#" size="30" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Facebook URL","member.member.edit user_facebook_url")#</th>
+					<td><input type="text" name="user_facebook_url" value="#form.user_facebook_url#" size="30" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Instagram URL","member.member.edit user_instagram_url")#</th>
+					<td><input type="text" name="user_instagram_url" value="#form.user_instagram_url#" size="30" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("LinkedIn URL","member.member.edit user_linkedin_url")#</th>
+					<td><input type="text" name="user_linkedin_url" value="#form.user_linkedin_url#" size="30" /></td>
+				</tr> 
+				<cfif application.zcore.app.siteHasApp("listing")>
+					<tr>
+						<th>#application.zcore.functions.zOutputHelpToolTip("Sort Listings","member.member.edit user_listing_sort")#</th>
+						<td><input type="radio" style="border:none; background:none;"  name="user_listing_sort" value="2" <cfif form.user_listing_sort EQ '2' or form.user_listing_sort EQ ''>checked="checked"</cfif> />
+							Price Ascending&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" style="border:none; background:none;"  name="user_listing_sort" value="1" <cfif form.user_listing_sort EQ '1'>checked="checked"</cfif> />
+							Price Descending </td>
+					</tr>
+					<tr>
+						<th>#application.zcore.functions.zOutputHelpToolTip("MLS Agent ID","member.member.edit mlsagentid")#</th>
+						<td>Please type the agent id for each MLS database or leave it blank: 
+							<cfscript>
+							db.sql="SELECT * FROM #db.table("mls", request.zos.zcoreDatasource)# mls, 
+							#db.table("app_x_mls", request.zos.zcoreDatasource)# app_x_mls 
+							WHERE mls.mls_id = app_x_mls.mls_id and 
+							app_x_mls_deleted = #db.param(0)# and 
+							mls_deleted = #db.param(0)# and
+							app_x_mls.site_id=#db.param(request.zos.globals.id)# and 
+							mls_status = #db.param('1')#
+							ORDER BY mls_name";
+							qMLS=db.execute("qMLS");
+							mAIstruct=structnew();
+							if(form.member_mlsagentid NEQ ''){
+								arrP=listtoarray(form.member_mlsagentid,',');
+								for(i=1;i LTE arraylen(arrP);i++){
+									if(arrP[i] NEQ ""){
+										arrI=listtoarray(arrP[i],'-');
+										if(arraylen(arrI) EQ 2){
+											mAIstruct[arrI[1]]=arrI[2];
+										}
 									}
 								}
 							}
-						}
-						</cfscript>
-						<script type="text/javascript">/* <![CDATA[ */ 
-							zmlsagentidarray=new Array();
+							</cfscript>
+							<script type="text/javascript">/* <![CDATA[ */ 
+								zmlsagentidarray=new Array();
+								 /* ]]> */
+								 </script>
+								<table style="border-spacing:0px;">
+									<cfloop query="qmls">
+									<tr <cfif qmls.currentrow MOD 2 EQ 0>style="background-color:##EFEFEF;"</cfif>>
+										<td><script type="text/javascript">/* <![CDATA[ */ 
+											zmlsagentidarray[#qmls.mls_id#]="mlsagentid#qmls.mls_id#";
+											 /* ]]> */
+											 </script> 
+											#qmls.mls_name#:
+											<input type="hidden" name="mls_id" value="#qmls.mls_id#" /></td>
+										<td><input type="text" name="mlsagentid#qmls.mls_id#" id="mlsagentid#qmls.mls_id#" 
+										value="<cfif application.zcore.functions.zso(form, 'mlsagentid#qmls.mls_id#') NEQ ''>#application.zcore.functions.zso(form, 'mlsagentid#qmls.mls_id#')#<cfelseif structkeyexists(mAIstruct, qmls.mls_id)>#mAIstruct[qmls.mls_id]#</cfif>" /></td>
+									</tr>
+									</cfloop>
+								</table>
+								<br /><br /><script type="text/javascript">
+							/* <![CDATA[ */ 
+							function lookupAgentIdCallback(r){
+								var myObj=eval('('+r+')');
+								if(myObj.success){
+									if(typeof(zmlsagentidarray[myObj.mlsproviderid])!="undefined"){
+										var c=document.getElementById(zmlsagentidarray[myObj.mlsproviderid]);
+										c.value=myObj.agentid;
+									}
+								}
+								alert(myObj.message);
+							}
+							function lookupAgentId(){
+									
+								var tempObj={};
+								tempObj.id="zMapListing";
+								tempObj.url="/z/user/user-manage/lookupagentid?zmlsnum="+escape(document.getElementById("zmlsnum").value);
+								tempObj.callback=lookupAgentIdCallback;
+								tempObj.cache=false;
+								zAjax(tempObj);
+							}
 							 /* ]]> */
 							 </script>
-							<table style="border-spacing:0px;">
-								<cfloop query="qmls">
-								<tr <cfif qmls.currentrow MOD 2 EQ 0>style="background-color:##EFEFEF;"</cfif>>
-									<td><script type="text/javascript">/* <![CDATA[ */ 
-										zmlsagentidarray[#qmls.mls_id#]="mlsagentid#qmls.mls_id#";
-										 /* ]]> */
-										 </script> 
-										#qmls.mls_name#:
-										<input type="hidden" name="mls_id" value="#qmls.mls_id#" /></td>
-									<td><input type="text" name="mlsagentid#qmls.mls_id#" id="mlsagentid#qmls.mls_id#" 
-									value="<cfif application.zcore.functions.zso(form, 'mlsagentid#qmls.mls_id#') NEQ ''>#application.zcore.functions.zso(form, 'mlsagentid#qmls.mls_id#')#<cfelseif structkeyexists(mAIstruct, qmls.mls_id)>#mAIstruct[qmls.mls_id]#</cfif>" /></td>
-								</tr>
-								</cfloop>
-							</table>
-							<br /><br /><script type="text/javascript">
-						/* <![CDATA[ */ 
-						function lookupAgentIdCallback(r){
-							var myObj=eval('('+r+')');
-							if(myObj.success){
-								if(typeof(zmlsagentidarray[myObj.mlsproviderid])!="undefined"){
-									var c=document.getElementById(zmlsagentidarray[myObj.mlsproviderid]);
-									c.value=myObj.agentid;
-								}
-							}
-							alert(myObj.message);
-						}
-						function lookupAgentId(){
-								
-							var tempObj={};
-							tempObj.id="zMapListing";
-							tempObj.url="/z/user/user-manage/lookupagentid?zmlsnum="+escape(document.getElementById("zmlsnum").value);
-							tempObj.callback=lookupAgentIdCallback;
-							tempObj.cache=false;
-							zAjax(tempObj);
-						}
-						 /* ]]> */
-						 </script>
-						<h3>Agent Id Lookup</h3>
-						<p>Enter the MLS ## for one of this agent's listings to find their agent id.  This also works if you have multiple MLS providers, but you must have one MLS ## from each mls provider.</p>
-						<p>
-							<input type="text" name="zmlsnum" id="zmlsnum" value="" />
-							<input type="button" name="b1111" value="Lookup" onclick="lookupAgentId();" />
-					
-					</td>
+							<h3>Agent Id Lookup</h3>
+							<p>Enter the MLS ## for one of this agent's listings to find their agent id.  This also works if you have multiple MLS providers, but you must have one MLS ## from each mls provider.</p>
+							<p>
+								<input type="text" name="zmlsnum" id="zmlsnum" value="" />
+								<input type="button" name="b1111" value="Lookup" onclick="lookupAgentId();" />
+						
+						</td>
+					</tr>
+					<tr>
+						<th>#application.zcore.functions.zOutputHelpToolTip("Auto-assign Listing Inquiries","member.member.edit user_autoassign_listing_inquiry")#</th>
+						<td>#application.zcore.functions.zInput_Boolean("user_autoassign_listing_inquiry", form.user_autoassign_listing_inquiry)#
+							| If set to yes, this agent's listing inquiries will automatically be assigned to them in the future.  The MLS Agent ID above must be correct for this to work.
+						</td>
+					</tr> 
+
+				</cfif> 
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Phone","member.member.edit user_pref_phone")#</th>
+					<td><input type="radio" style="border:none; background:none;"  name="user_pref_phone"  value="1" <cfif form.user_pref_phone EQ '1' or form.user_pref_phone EQ ''>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_phone" value="0" <cfif form.user_pref_phone EQ '0'>checked="checked"</cfif> />
+						no</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Auto-assign Listing Inquiries","member.member.edit user_autoassign_listing_inquiry")#</th>
-					<td>#application.zcore.functions.zInput_Boolean("user_autoassign_listing_inquiry", form.user_autoassign_listing_inquiry)#
-						| If set to yes, this agent's listing inquiries will automatically be assigned to them in the future.  The MLS Agent ID above must be correct for this to work.
-					</td>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Email Mailing List","member.member.edit user_pref_list")#</th>
+					<td><input type="radio" style="border:none; background:none;"  name="user_pref_list" value="1" <cfif form.user_pref_list EQ '1' or form.user_pref_list EQ ''>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_list" value="0" <cfif form.user_pref_list EQ '0'>checked="checked"</cfif> />
+						no</td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Personal Emails","member.member.edit user_pref_email")#</th>
+					<td><input type="radio" style="border:none; background:none;"  name="user_pref_email" value="1" <cfif form.user_pref_email EQ '1' or form.user_pref_email EQ ''>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_email" value="0" <cfif form.user_pref_email EQ '0'>checked="checked"</cfif> />
+						no</td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Physical Mail","member.member.edit user_pref_mail")#</th>
+					<td><input type="radio" style="border:none; background:none;"  name="user_pref_mail" value="1" <cfif form.user_pref_mail EQ '1' or form.user_pref_mail EQ ''>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_mail" value="0" <cfif form.user_pref_mail EQ '0'>checked="checked"</cfif> />
+						no</td>
+					<td></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Fax","member.member.edit user_pref_fax")#</th>
+					<td><input type="radio" style="border:none; background:none;"  name="user_pref_fax" value="1" <cfif form.user_pref_fax EQ '1' or form.user_pref_fax EQ ''>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_fax" value="0" <cfif form.user_pref_fax EQ '0'>checked="checked"</cfif> />
+						no</td>
 				</tr> 
-
-			</cfif> 
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Phone","member.member.edit user_pref_phone")#</th>
-				<td><input type="radio" style="border:none; background:none;"  name="user_pref_phone"  value="1" <cfif form.user_pref_phone EQ '1' or form.user_pref_phone EQ ''>checked="checked"</cfif> />
+				<cfif structkeyexists(request,'realestateprefform')> 
+					<tr> 
+						<td colspan="2">
+					Are you already working with another real estate professional?<br />
+					<input type="radio" style="border:none; background:none;"  name="user_pref_realtor" value="1" <cfif form.user_pref_realtor EQ '1'>checked="checked"</cfif> />
 					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_phone" value="0" <cfif form.user_pref_phone EQ '0'>checked="checked"</cfif> />
-					no</td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Email Mailing List","member.member.edit user_pref_list")#</th>
-				<td><input type="radio" style="border:none; background:none;"  name="user_pref_list" value="1" <cfif form.user_pref_list EQ '1' or form.user_pref_list EQ ''>checked="checked"</cfif> />
-					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_list" value="0" <cfif form.user_pref_list EQ '0'>checked="checked"</cfif> />
-					no</td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Personal Emails","member.member.edit user_pref_email")#</th>
-				<td><input type="radio" style="border:none; background:none;"  name="user_pref_email" value="1" <cfif form.user_pref_email EQ '1' or form.user_pref_email EQ ''>checked="checked"</cfif> />
-					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_email" value="0" <cfif form.user_pref_email EQ '0'>checked="checked"</cfif> />
-					no</td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Physical Mail","member.member.edit user_pref_mail")#</th>
-				<td><input type="radio" style="border:none; background:none;"  name="user_pref_mail" value="1" <cfif form.user_pref_mail EQ '1' or form.user_pref_mail EQ ''>checked="checked"</cfif> />
-					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_mail" value="0" <cfif form.user_pref_mail EQ '0'>checked="checked"</cfif> />
-					no</td>
-				<td></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Fax","member.member.edit user_pref_fax")#</th>
-				<td><input type="radio" style="border:none; background:none;"  name="user_pref_fax" value="1" <cfif form.user_pref_fax EQ '1' or form.user_pref_fax EQ ''>checked="checked"</cfif> />
-					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_fax" value="0" <cfif form.user_pref_fax EQ '0'>checked="checked"</cfif> />
-					no</td>
-			</tr> 
-			<cfif structkeyexists(request,'realestateprefform')> 
-				<tr> 
-					<td colspan="2">
-				Are you already working with another real estate professional?<br />
-				<input type="radio" style="border:none; background:none;"  name="user_pref_realtor" value="1" <cfif form.user_pref_realtor EQ '1'>checked="checked"</cfif> />
-				yes&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="radio" style="border:none; background:none;"  name="user_pref_realtor" value="0" <cfif form.user_pref_realtor EQ '0' or form.user_pref_realtor EQ ''>checked="checked"</cfif> />
-				no
-				</td>
-				</tr>
-				<tr><td colspan="2">
-				Would you like notified when there are new Hot Deals?<br />
-				<input type="radio" style="border:none; background:none;"  name="user_pref_hotdeals" value="1" <cfif form.user_pref_hotdeals EQ '1' or form.user_pref_hotdeals EQ ''>checked="checked"</cfif> />
-				yes&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="radio" style="border:none; background:none;"  name="user_pref_hotdeals" value="0" <cfif form.user_pref_hotdeals EQ '0'>checked="checked"</cfif> />
-				no
-				</td>
-				</tr>
-			</cfif>
-			<tr><td colspan="2">
-				Are you interested in receiving information on new products &amp; services we may have in the future?<br />
-				<input type="radio" style="border:none; background:none;"  name="user_pref_new" value="1" <cfif form.user_pref_new EQ '1' or form.user_pref_new EQ ''>checked="checked"</cfif> />
-				yes&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="radio" style="border:none; background:none;"  name="user_pref_new" value="0" <cfif form.user_pref_new EQ '0'>checked="checked"</cfif> />
-				no
-				<cfif structkeyexists(request,'realestateprefform') eq false>
-					
+					<input type="radio" style="border:none; background:none;"  name="user_pref_realtor" value="0" <cfif form.user_pref_realtor EQ '0' or form.user_pref_realtor EQ ''>checked="checked"</cfif> />
+					no
 					</td>
 					</tr>
 					<tr><td colspan="2">
-					May we share your contact information with our partners who may offer you related products and services?<br />
-					<input type="radio" style="border:none; background:none;"  name="user_pref_sharing" value="1" <cfif form.user_pref_sharing EQ '1'>checked="checked"</cfif> />
+					Would you like notified when there are new Hot Deals?<br />
+					<input type="radio" style="border:none; background:none;"  name="user_pref_hotdeals" value="1" <cfif form.user_pref_hotdeals EQ '1' or form.user_pref_hotdeals EQ ''>checked="checked"</cfif> />
 					yes&nbsp;&nbsp;&nbsp;&nbsp;
-					<input type="radio" style="border:none; background:none;"  name="user_pref_sharing" value="0" <cfif form.user_pref_sharing EQ '0' or form.user_pref_sharing EQ ''>checked="checked"</cfif> />
+					<input type="radio" style="border:none; background:none;"  name="user_pref_hotdeals" value="0" <cfif form.user_pref_hotdeals EQ '0'>checked="checked"</cfif> />
 					no
+					</td>
+					</tr>
 				</cfif>
-			</td>
-			</tr>
-			<tr><td colspan="2">
-				What email format do you prefer?<br />
-				<input type="radio" style="border:none; background:none;"  name="user_pref_html" value="1" <cfif form.user_pref_html EQ '1' or form.user_pref_html EQ ''>checked="checked"</cfif> />
-				HTML&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="radio" style="border:none; background:none;"  name="user_pref_html" value="0" <cfif form.user_pref_html EQ '0'>checked="checked"</cfif> />
-				Plain Text<br />
-				<br />
-			</td>
-			</tr>
-			<cfif form.user_fax neq ''>
-				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Fax","member.member.edit user_fax")#</th>
-					<td><input type="text" name="user_fax" value="#form.user_fax#" /></td>
+				<tr><td colspan="2">
+					Are you interested in receiving information on new products &amp; services we may have in the future?<br />
+					<input type="radio" style="border:none; background:none;"  name="user_pref_new" value="1" <cfif form.user_pref_new EQ '1' or form.user_pref_new EQ ''>checked="checked"</cfif> />
+					yes&nbsp;&nbsp;&nbsp;&nbsp;
+					<input type="radio" style="border:none; background:none;"  name="user_pref_new" value="0" <cfif form.user_pref_new EQ '0'>checked="checked"</cfif> />
+					no
+					<cfif structkeyexists(request,'realestateprefform') eq false>
+						
+						</td>
+						</tr>
+						<tr><td colspan="2">
+						May we share your contact information with our partners who may offer you related products and services?<br />
+						<input type="radio" style="border:none; background:none;"  name="user_pref_sharing" value="1" <cfif form.user_pref_sharing EQ '1'>checked="checked"</cfif> />
+						yes&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="radio" style="border:none; background:none;"  name="user_pref_sharing" value="0" <cfif form.user_pref_sharing EQ '0' or form.user_pref_sharing EQ ''>checked="checked"</cfif> />
+						no
+					</cfif>
+				</td>
 				</tr>
-			</cfif>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Address","member.member.edit user_street")#</th>
-				<td><input type="text" name="user_street" value="#form.user_street#" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Address 2","member.member.edit user_street2")#</th>
-				<td><input type="text" name="user_street2" value="#form.user_street2#" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("City","member.member.edit user_city")#</th>
-				<td><input type="text" name="user_city" value="#form.user_city#" /></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("State","member.member.edit user_state")#</th>
-				<td><cfscript>
-				writeoutput(application.zcore.functions.zStateSelect("user_state", application.zcore.functions.zso(form, 'user_state')));
-				</cfscript></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Country","member.member.edit user_country")#</th>
-				<td><cfscript>
-				writeoutput(application.zcore.functions.zCountrySelect("user_country", application.zcore.functions.zso(form, 'user_country')));
-				</cfscript></td>
-			</tr>
-			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Zip Code","member.member.edit user_zip")#</th>
-				<td><input type="text" name="user_zip" value="#form.user_zip#" /></td>
-			</tr> 
+				<tr><td colspan="2">
+					What email format do you prefer?<br />
+					<input type="radio" style="border:none; background:none;"  name="user_pref_html" value="1" <cfif form.user_pref_html EQ '1' or form.user_pref_html EQ ''>checked="checked"</cfif> />
+					HTML&nbsp;&nbsp;&nbsp;&nbsp;
+					<input type="radio" style="border:none; background:none;"  name="user_pref_html" value="0" <cfif form.user_pref_html EQ '0'>checked="checked"</cfif> />
+					Plain Text<br />
+					<br />
+				</td>
+				</tr>
+				<cfif form.user_fax neq ''>
+					<tr>
+						<th>#application.zcore.functions.zOutputHelpToolTip("Fax","member.member.edit user_fax")#</th>
+						<td><input type="text" name="user_fax" value="#form.user_fax#" /></td>
+					</tr>
+				</cfif>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Address","member.member.edit user_street")#</th>
+					<td><input type="text" name="user_street" value="#form.user_street#" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Address 2","member.member.edit user_street2")#</th>
+					<td><input type="text" name="user_street2" value="#form.user_street2#" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("City","member.member.edit user_city")#</th>
+					<td><input type="text" name="user_city" value="#form.user_city#" /></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("State","member.member.edit user_state")#</th>
+					<td><cfscript>
+					writeoutput(application.zcore.functions.zStateSelect("user_state", application.zcore.functions.zso(form, 'user_state')));
+					</cfscript></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Country","member.member.edit user_country")#</th>
+					<td><cfscript>
+					writeoutput(application.zcore.functions.zCountrySelect("user_country", application.zcore.functions.zso(form, 'user_country')));
+					</cfscript></td>
+				</tr>
+				<tr>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Zip Code","member.member.edit user_zip")#</th>
+					<td><input type="text" name="user_zip" value="#form.user_zip#" /></td>
+				</tr> 
+			</tbody>
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Active","member.member.edit user_active")#</th>
 				<td>#application.zcore.functions.zInput_Boolean("user_active", form.user_active)#</td>
@@ -938,6 +979,34 @@ finish simplifying this script.
 				<button name="cancelButton" type="button" onclick="window.location.href='#cancelURL#';">Cancel</button>
 
 			</td></tr>
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Basic", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){ 
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
+			<cfscript> 
+			if(variables.metaFieldInUse){
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){ 
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+			}
+			</cfscript>
 		</table>  
 	</form>
 </cffunction>

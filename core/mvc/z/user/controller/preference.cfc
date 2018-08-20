@@ -914,7 +914,7 @@ If the link does not work, please copy and paste the entire link in your browser
 					<td><span style=" font-weight:bold;">Password</span>&nbsp;</td>
 					<td><input type="password" style=" width:100%;" onclick="tempValue=this.value;this.value='';" onblur="if(this.value == ''){ this.value='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';}" name="user_password" value="<cfif len(form.user_password) NEQ 0>#(replace(ljustify('',8),' ','&nbsp;','ALL'))#</cfif>" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td><span style=" font-weight:bold;">Alternative Email(s)</span></td>
 					<td><input type="text" name="user_alternate_email" style=" width:100%;" value="#htmleditformat(form.user_alternate_email)#" /><br />Note: you can separate multiple emails with commas.</td>
 				</tr> 
@@ -926,47 +926,47 @@ If the link does not work, please copy and paste the entire link in your browser
 					<td>Last Name</td>
 					<td><input type="text" name="user_last_name" value="#htmleditformat(form.user_last_name)#" style=" width:100%;" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Company</td>
 					<td><input type="text" name="member_company" value="#htmleditformat(form.member_company)#" style=" width:100%;" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Phone</td>
 					<td><input type="text" name="user_phone" style=" width:100%;" value="#htmleditformat(form.user_phone)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Fax</td>
 					<td><input type="text" name="user_fax" style=" width:100%;" value="#htmleditformat(form.user_fax)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Address&nbsp;</td>
 					<td><input type="text" name="user_street" style=" width:100%;" value="#htmleditformat(form.user_street)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Address 2&nbsp;</td>
 					<td><input type="text" name="user_street2" style=" width:100%;" value="#htmleditformat(form.user_street2)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>City&nbsp;</td>
 					<td><input type="text" name="user_city" style=" width:100%;" value="#htmleditformat(form.user_city)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>State&nbsp;</td>
 					<td><cfscript>
 					writeoutput(application.zcore.functions.zStateSelect("user_state", application.zcore.functions.zso(form, 'user_state'), "width:100%;"));
 					</cfscript></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Country&nbsp;</td>
 					<td><cfscript>
 					writeoutput(application.zcore.functions.zCountrySelect("user_country", application.zcore.functions.zso(form, 'user_country'), "width:100%;"));
 					</cfscript></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td>Zip Code</td>
 					<td><input type="text" name="user_zip" style=" width:100%;" value="#htmleditformat(form.user_zip)#" /></td>
 				</tr>
-				<tr>
+				<tr class="zUserPreferenceOptionalProfile">
 					<td colspan="2">Email Signature&nbsp;<br> 
 
 						<cfscript>
@@ -989,7 +989,7 @@ If the link does not work, please copy and paste the entire link in your browser
 				    </cfscript>
 			</cfif>
 			</div>
-			<div class="z-user-preference-right">
+			<div class="z-user-preference-right zUserPreferenceOptionalProfile ">
 				<p style="font-size:130%; font-weight:bold;">How may we reach you?</p>
 				<table style="border-spacing:0px; width:98%;" class="zinquiry-form-table">
 					<tr>

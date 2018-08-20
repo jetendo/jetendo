@@ -687,8 +687,11 @@ var zLastAjaxVarName=""; */
 				}
 				if(req.status!==200 && req.status!==301 && req.status!==302){
 					if(id===null || id===""){
+						if(zIsDeveloper() || zIsTestServer()){
+							alert("You must return a x_ajax_id header with a value that matches the x_ajax_id that was sent with the request.");
+						}
 						if(zAjaxLastRequestId !== false){
-							id=zAjaxLastRequestId;
+							id=zAjaxLastRequestId; 
 							var continueExecution=req.showRequestError();
 							if(continueExecution){
 								zAjaxData[id].errorCallback(req);
