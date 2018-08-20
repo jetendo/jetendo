@@ -1699,8 +1699,9 @@ leadchart
 	if(structkeyexists(request, 'enableKeywordAudience')){
 		if(row.keyword_ranking_source_id EQ ""){
 			row.keyword_ranking_source_id=request.defaultKeywordLabel;
+		}else{
+			row.keyword_ranking_source_id=arguments.sourceLabelLookup[row.keyword_ranking_source_id];
 		}
-		row.keyword_ranking_source_id=arguments.sourceLabelLookup[row.keyword_ranking_source_id];
 	}else{
 		row.keyword_ranking_source_id="";
 	}
@@ -1797,6 +1798,13 @@ leadchart
 			sourceLabelLookup[arrId[i]]="";
 		}
 	} 
+	/*if(request.zos.isdeveloper){
+		writedump(arrId);
+		writedump(arrLabel);
+		writedump(uniqueLabel);
+		writedump(sourceLabelLookup);
+		abort;
+	}*/
 	if(structcount(uniqueLabel) GT 1){
 		request.enableKeywordAudience=true;
 		request.defaultKeywordLabel=application.zcore.functions.zso(request.zos.globals, 'semrushLabelPrimary'); 
@@ -1852,7 +1860,7 @@ leadchart
 		filterOtherTableSQL(db, "keyword_ranking_run_datetime"); 
 		db.sql&="
 		GROUP BY DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#), keyword_ranking_source_id, keyword_ranking_keyword";
-		qFirstRankKeyword=db.execute("qFirstRankKeyword");
+		qFirstRankKeyword=db.execute("qFirstRankKeyword"); 
 		//keyword_ranking_position<>#db.param(0)# and 
 		request.leadData.keywordData.qFirstRankKeyword=qFirstRankKeyword;
 
@@ -1983,7 +1991,7 @@ leadchart
 		</cfsavecontent>
 			<cfscript> 
 			echo(tableHead);
-			count=0;
+			count=0; 
 			// need to implement page breaks here..
 			for(i=1;i LTE arrayLen(ss.arrKeyword);i++){
 				keyword=ss.arrKeyword[i];
@@ -1999,9 +2007,14 @@ leadchart
 				}
 				topKeyword=false;
 				if(structkeyexists(request, 'enableKeywordAudience')){
-					arrK=listToArray(keyword, chr(9));
-					keywordOnly=arrK[2];
-					audienceLabel=arrK[1];
+					arrK=listToArray(keyword, chr(9)); 
+					if(arrayLen(arrK) EQ 2){
+						keywordOnly=arrK[2];
+						audienceLabel=arrK[1];
+					}else{
+						keywordOnly=keyword;
+						audienceLabel="";
+					}
 				}else{
 					keywordOnly=keyword;
 				}
