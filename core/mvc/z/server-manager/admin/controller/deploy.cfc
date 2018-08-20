@@ -11,7 +11,7 @@
 	}
 	safeLink=link&"/z/server-manager/api/site/getSiteById?sid=#row.site_x_deploy_server_remote_site_id#";
 	newLink=safeLink&"&zusername=#urlencodedformat(row.deploy_server_email)#&zpassword=#urlencodedformat(row.deploy_server_password)#"; 
-	r1=application.zcore.functions.zDownloadLink(newLink, 30);
+	r1=application.zcore.functions.zDownloadLink(newLink, 30); 
 	rs={success:true};
 	if(not r1.success){
 		rs.success=false;

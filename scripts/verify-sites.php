@@ -541,7 +541,7 @@ if(!$fail){
 				$end=strpos($contents, $endString);
 			}
 			$fileBeginContents=substr($contents, 0, $begin+strlen($beginString));
-			$fileContentsHosts=trim(substr($contents, $begin+strlen($beginString), $end-($begin+strlen($beginString))));
+			$fileContentsHosts=trim(substr($contents, $begin+strlen($beginString)+1, $end-($begin+strlen($beginString)+1)));
 			$fileEndContents=substr($contents, $end);
 
 			$arrLine=explode("\n", $fileBeginContents);
