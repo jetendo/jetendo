@@ -642,30 +642,32 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 	var ts=structnew();
 	var i=0;
 	var c=0;
-	arguments.ss.assignUserId=0;
-	arguments.ss.autoAssignMember=false;
-	arguments.ss.autoAssignOffice=false;
-	arguments.ss.routeIndex=0;
-	arguments.ss.leadEmail=arguments.toEmailAddress;
+	ts={};
+	ts.office_id="";
+	ts.assignUserId=0;
+	ts.autoAssignMember=false;
+	ts.autoAssignOffice=false;
+	ts.routeIndex=0;
+	ts.leadEmail=arguments.toEmailAddress;
 	if(structkeyexists(application.sitestruct[request.zos.globals.id].leadRoutingStruct, 'arrData')){
 		for(i=1;i LTE arraylen(application.sitestruct[request.zos.globals.id].leadRoutingStruct.arrData);i++){
 			c=application.sitestruct[request.zos.globals.id].leadRoutingStruct.arrData[i];
 			if(c.data.inquiries_type_id EQ arguments.inquiries_type_id and c.data.inquiries_type_id_siteIDType EQ arguments.inquiries_type_id_siteIDType){
-				arguments.ss.routeIndex=i;
+				ts.routeIndex=i;
 				break;
 			}
 		}
-		if(arguments.ss.routeIndex EQ 0){
+		if(ts.routeIndex EQ 0){
 			for(i=1;i LTE arraylen(application.sitestruct[request.zos.globals.id].leadRoutingStruct.arrData);i++){
 				c=application.sitestruct[request.zos.globals.id].leadRoutingStruct.arrData[i];
 				if(c.data.inquiries_type_id EQ "0" or c.data.inquiries_type_id EQ ""){
-					arguments.ss.routeIndex=i;
+					ts.routeIndex=i;
 					break;
 				}
 			}
 		}
 	}
-	return application.zcore.functions.zProcessLeadRoute(arguments.ss);
+	return application.zcore.functions.zProcessLeadRoute(ts);
 	</cfscript>
 </cffunction>
 
@@ -688,6 +690,7 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 	var qi=0;
 	var db=request.zos.queryObject;
 	rs.inquiries_id = arguments.ss.inquiries_id;
+	rs.office_id=arguments.ss.office_id;
 	rs.success=true;
 	rs.routeIndex=0;
 	rs.assignUserId=0;
@@ -1066,6 +1069,7 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 	var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 	var c=0;
 	rs.leademail=arguments.ss.leademail;
+	rs.office_id=arguments.ss.office_id;
 	rs.user_id=0;
 	rs.bcc="";
 	rs.cc="";
