@@ -256,7 +256,7 @@
 		inquiryHeaderMessage=application.zcore.functions.zso(form, 'inquiryHeaderMessage');
 		if(inquiryHeaderMessage NEQ ""){
 			echo('<p>'&inquiryHeaderMessage&'</p>');
-		}
+		} 
 		</cfscript>
         <p>* denotes required field.</p>
             <cfscript>

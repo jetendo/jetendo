@@ -1315,7 +1315,7 @@ if(isQuery(qContent)){
 			}
 			if(useSummary){
 				parseStruct.summary=qpar.content_summary;
-				if(content_summary EQ ""){
+				if(qpar.content_summary EQ ""){
 					parseStruct.summary=qpar.content_text;
 				}
 				parseStruct.summary=rereplace(parseStruct.summary,"<[^>]*>"," ","ALL");

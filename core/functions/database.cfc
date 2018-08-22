@@ -78,11 +78,29 @@
 		FROM information_schema.COLUMNS 
 		WHERE  TABLE_SCHEMA IN ('#preserveSingleQuotes(arraytolist(ts.arrGlobalDatasources, "','"))#') ");
 	}
+	ignoreDefault={
+		"0":true,
+		"\N":true,
+		"''":true,
+		"'0'":true,
+		"'0000-00-00 00:00:00'":true,
+		"'1'":true,
+		"NULL":true,
+		"0.000000000000000000":true,
+		"0.00":true,
+		"'0000-00-00'":true,
+		"0.0000":true,
+		"'0.0.0.0'":true
+	};
 	for(row in qD){
 		if(not structkeyexists(ts.tableColumns, row.table)){
 			ts.tableColumns[row.table]={};
 		}
-		ts.tableColumns[row.table][row.COLUMN_NAME]=row.COLUMN_DEFAULT;
+		if(structkeyexists(ignoreDefault, row.COLUMN_DEFAULT) or row.COLUMN_DEFAULT EQ "0" or row.COLUMN_DEFAULT EQ null){
+			ts.tableColumns[row.table][row.COLUMN_NAME]="";
+		}else{
+			ts.tableColumns[row.table][row.COLUMN_NAME]=row.COLUMN_DEFAULT;
+		}
 	}
 	/*
 	// doesn't appear to be used yet, and this breaks new startup process
