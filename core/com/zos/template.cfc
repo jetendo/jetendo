@@ -729,7 +729,7 @@ for(local.row in local.qSite){
 		finalString = HTMLCodeFormat(finalString);
 	}
 
-	if(not structkeyexists(request, 'disableGlobalHTMLHeadCode') and structkeyexists(request.zos,'inMemberArea') and request.zos.inMemberArea EQ false){
+	if(not structkeyexists(request, 'disableGlobalHTMLHeadCode') and structkeyexists(request.zos,'inMemberArea') and request.zos.inMemberArea EQ false and structkeyexists(application.sitestruct[request.zos.globals.id], 'globalHTMLHeadSource')){
 		finalString=replace(finalString, '</head>',application.sitestruct[request.zos.globals.id].globalHTMLHeadSource&'</head>');
 	}
 	request.zos.endtime=gettickcount('nano');
