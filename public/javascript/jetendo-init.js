@@ -171,9 +171,9 @@ function zGlobalErrorHandler(message, url, lineNumber, columnOffset, errorObj) {
 	}catch(e){
 		// ignore errors.
 		//throw(e);
+		console.log(e);
 	}
-}
-
+} 
 if(!forcedUpgradeMessage){
 	window.onerror=zGlobalErrorHandler;
 }

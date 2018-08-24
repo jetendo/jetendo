@@ -485,7 +485,7 @@
 </cffunction>
 
 <!--- application.zcore.skin.getVersionURL("/images/header.jpg") --->
-<cffunction name="getVersionURL" localmode="modern" access="public">
+<cffunction name="getVersionURL" localmode="modern" access="public" output="no">
 	<cfargument name="link" type="string" required="yes">
 	<cfscript>
 	link=arguments.link;
