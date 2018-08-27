@@ -103,12 +103,25 @@
 				}
 				if(not resultStruct.success){
 					savecontent variable="out"{
+						echo('<h2>Auto-renew Lets Encrypt Secure Certificate Failed:</h2>');
+						echo("Renewing #row.ssl_common_name# | SAN Domain List: #row.ssl_domain_list#<br>");
 						if(structkeyexists(resultStruct, 'output') and isArray(resultStruct.output)){
 							arrayToList(resultStruct.output, "<hr>");
 						}
 						writedump(resultStruct);
+					} 
+					ts={
+						type:"Custom",
+						errorHTML:out,
+						scriptName:'/z/server-manager/tasks/renew-lets-encrypt-ssl',
+						url:request.zos.globals.domain&request.zos.originalURL,
+						exceptionMessage:"Domain failed authentication for secure certificate",
+						// optional
+						lineNumber:'1'
 					}
-					throw("Auto-renew Lets Encrypt Secure Certificate Failed: "&resultStruct.errorMessage&"<br>"&out);
+					application.zcore.functions.zLogError(ts);
+					sleep(5000);
+					continue;
 				}
 				d=resultStruct.ssl_expiration_datetime;
 				form.ssl_expiration_datetime=createdatetime(d.year, d.month, d.day, d.hour, d.minute, d.second);

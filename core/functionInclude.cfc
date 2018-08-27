@@ -1,11 +1,12 @@
 <cfcomponent output="no">
 <cffunction name="init" localmode="modern" access="public" output="no" returntype="struct">
 	<cfscript> 
+	return createobject("component", "zcorerootmapping.com.zos.functions");
 
-    var ts={}; 
+    //var ts={}; 
 
-	functions=createobject("component", "zcorerootmapping.com.zos.functions");
-	structappend(ts, functions, true);
+	//functions=createobject("component", "zcorerootmapping.com.zos.functions");
+	//structappend(ts, functions, true);
 	/*
 	var arrFunctionFile=['object', 'codeExport', 'database', 'dateAndTime', 'display', 'fileAndDirectory', 'form', 'macro', 'navigation', 'os', 'publishing', 'searchEngineSafeURLs', 'session', 'string', 'validation', 'xml', 'leadRouting'];
 	var i=0;
@@ -16,7 +17,7 @@
 		structappend(ts, com, true);
 	}
 	*/
-	return ts;
+	//return ts;
 	</cfscript>   
 </cffunction>
 </cfcomponent>
