@@ -24,7 +24,7 @@ if(application.zcore.functions.zso(os, 'mls_option_detail_layout') EQ 2 and not 
 		return;
 	}
 }else if(application.zcore.functions.zso(os, 'mls_option_detail_layout') EQ 1){
-	detailCom=application.zcore.functions.zcreateobject("component", "detail-new");
+	detailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.property.controller.detail-new");
 	detailCom.index();
 	return;
 }
