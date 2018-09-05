@@ -771,8 +771,8 @@
 		<!--<div id="divTablePiano" style="padding-top:10px; float:left;">
 			<cfscript>
 				/*pianoData = [
-					{Campaign:"Modern Piano Moving (Display)", Impressions:552602, Clicks:8551, CTR:1.55, "Avg. CPC":0.06, Cost:520.07,  "Avg. Position":1.00, Conversions:75,"Cost/Conv":6.93},
-					{Campaign:"Modern Piano Moving (Search)", Impressions:58396, Clicks:2097, CTR:3.59, "Avg. CPC":2.18, Cost:4572.01,  "Avg. Position":3.30, Conversions:393, "Cost/Conv":11.63},
+					{Campaign:"(Display)", Impressions:552602, Clicks:8551, CTR:1.55, "Avg. CPC":0.06, Cost:520.07,  "Avg. Position":1.00, Conversions:75,"Cost/Conv":6.93},
+					{Campaign:" (Search)", Impressions:58396, Clicks:2097, CTR:3.59, "Avg. CPC":2.18, Cost:4572.01,  "Avg. Position":3.30, Conversions:393, "Cost/Conv":11.63},
 					{Campaign:"Remarketing (Display)", Impressions:29698, Clicks:664, CTR:2.24, "Avg. CPC":0.08, Cost:54.87,  "Avg. Position":1.00, Conversions:2, "Cost/Conv":27.44},
 					{Campaign:"Recruit Drivers", Impressions:10568, Clicks:132, CTR:1.25, "Avg. CPC":4.27, Cost:563.02,  "Avg. Position":2.50, Conversions:6, "Cost/Conv":93.18}
 				]
