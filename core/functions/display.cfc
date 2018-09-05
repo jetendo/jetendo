@@ -558,18 +558,16 @@ zSlideShow(ts);
 	<cfscript>
 	var theJS="";
 	</cfscript>
-  <cfif structkeyexists(request,'zRequiredSlideshowJSCalled') EQ false>
-<cfsavecontent variable="theJS"><script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){setTimeout(zSlideshowInit,10);});/* ]]> */</script></cfsavecontent>
-  <cfscript>
-	  request.zRequiredSlideshowJSCalled=true;
-	  application.zcore.functions.zRequireJquery();
-	if(request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
-		  application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle.all.js");
-		  application.zcore.skin.includeJS("/z/javascript/jquery/Slides/source/slides.jquery-new.js");
-	}
-	application.zcore.template.appendTag("meta",theJS);
-  </cfscript>
-  </cfif>
+	<cfif structkeyexists(request,'zRequiredSlideshowJSCalled') EQ false> 
+		<cfscript>
+		request.zRequiredSlideshowJSCalled=true;
+		application.zcore.functions.zRequireJquery();
+		if(request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
+			application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle.all.js");
+			application.zcore.skin.includeJS("/z/javascript/jquery/Slides/source/slides.jquery-new.js");
+		} 
+		</cfscript>
+	</cfif>
 </cffunction>
 
 <!--- 

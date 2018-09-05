@@ -529,7 +529,8 @@ var zGalleryReloadTimeoutId=0;
 				}
 			});
 	}
-	function zSlideshowInit(){
+
+	function zSlideshowInit(){  
 		for(var i=0;i<zArrSlideshowIds.length;i++){
 			$('.zslideshowslides_container'+zArrSlideshowIds[i].id).css("display","block");
 			var c=zArrSlideshowIds[i];
@@ -598,6 +599,9 @@ var zGalleryReloadTimeoutId=0;
 				}
 		}
 	}
+	zArrDeferredFunctions.push(function(){
+		zSlideshowInit();
+	});
 	function zSlideshowClickLink(u){
 		if(window.location.href.indexOf('/z/misc/slideshow/embed') !== -1){
 			top.location.href=u;

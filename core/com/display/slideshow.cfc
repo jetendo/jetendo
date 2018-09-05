@@ -639,7 +639,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 		ts.forcePerPage=true;
 		ts.disableInstantSearch=true;
 		request.forceHighOffset=true;
-		returnStruct=request.zos.listing.functions.zMLSSearchOptionsDisplay(variables.qslideshow.mls_saved_search_id, ts);
+		returnStruct=request.zos.listing.functions.zMLSSearchOptionsDisplay(variables.qslideshow.mls_saved_search_id, ts); 
 		flashOut.count=returnStruct.count;
 		
 

@@ -1417,6 +1417,11 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			</cfscript>
         </cfif><br />;Time: #((getTickCount()-start48)/1000)&" seconds"#
         </span>
+        <cfif structkeyexists(form, 'abortOnSearchResults')>
+        	<cfscript>
+        	abort;
+        	</cfscript>
+        </cfif>
     </cfif>
 
     </cfif>
