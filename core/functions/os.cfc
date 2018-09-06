@@ -2529,8 +2529,11 @@ User's IP: #request.zos.cgi.remote_addr#
 	| <a href="/z/server-manager/admin/white-label/index?zid=#arguments.zid#&amp;sid=#form.sid#">White-Label</a>
 	| <a href="/z/server-manager/admin/cloud-admin/listContainers?zid=#arguments.zid#&amp;sid=#form.sid#">Cloud</a>
 	| <a href="/z/server-manager/admin/compress-images/compressSitePrivateHomedirImages?zid=#arguments.zid#&amp;sid=#form.sid#">Compress User Images</a>
+	<cfif request.zos.isTestServer>
+	| <a href="/z/server-manager/admin/generate-sublime-project/index?zid=#arguments.zid#&amp;sid=#form.sid#">Generate Sublime Project</a>
+	</cfif>
 	
-	| <a href="/z/server-manager/admin/site/downloadste?zid=#arguments.zid#&amp;sid=#form.sid#">Dreamweaver STE</a>
+	<!--- | <a href="/z/server-manager/admin/site/downloadste?zid=#arguments.zid#&amp;sid=#form.sid#">Dreamweaver STE</a> --->
 	<cfif qSite.site_theme_sync_site_id NEQ 0> | <a href="/z/server-manager/admin/site/manualSync?zid=#arguments.zid#&amp;sid=#form.sid#">Sync Source Code</a></cfif>
 	| <a href="/z/server-manager/admin/download-site-backup/index?zid=#arguments.zid#&amp;sid=#form.sid#">Backup</a>
 	| <a href="/z/server-manager/admin/user/index?zid=#arguments.zid#&amp;sid=#form.sid#">Users</a> 

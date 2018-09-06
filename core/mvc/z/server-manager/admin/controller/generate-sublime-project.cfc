@@ -167,20 +167,16 @@
 			"rsync_local_sites_path":"/cygdrive/c/ServerData/jetendo-server/jetendo/sites/"
 		}');
 	}
-	
-	/*
-	if(structkeyexists(form, 'zid') EQ false){
-		form.zid = application.zcore.status.getNewId();
-		if(structkeyexists(form, 'sid')){
-			application.zcore.status.setField(form.zid, 'site_id', form.sid);
-		}
-	}
-	form.sid = application.zcore.status.getField(form.zid, 'site_id');*/
+	 
+	form.sid = application.zcore.status.getField(form.zid, 'site_id');
 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 
 	site_deleted=#db.param(0)# and 
 	site_active=#db.param(1)# and  
 	site_id<>#db.param(-1)# ";
+	if(form.sid NEQ 0){
+		db.sql&=" and site_id = #db.param(form.sid)# ";
+	}
 	qSite=db.execute("qSite");
 
 	arrSite=[];
@@ -201,11 +197,15 @@
 	result=application.zcore.functions.zSecureCommand("installSublimeProjectFiles"&chr(9)&arrayToList(arrSite, ","), 20);
 	//writedump(result);
 	if(result EQ 1){
-		echo("Project files installed.");
+		application.zcore.status.setStatus(request.zsid, "Project files installed");
 	}else{
-		echo("Project files install failed.");
+		application.zcore.status.setStatus(request.zsid, "Project file install failed", form, true);
 	}
-	abort;
+	if(form.sid NEQ 0){
+		application.zcore.functions.zRedirect("/z/server-manager/admin/site-select/index?action=select&zid=#form.zid#&sid=#form.sid#&zsid=#request.zsid#");
+	}else{
+		application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index");
+	}
 	</cfscript>
 </cffunction>
 </cfoutput>
