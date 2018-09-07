@@ -29,6 +29,7 @@ sslDeleteCertificate#chr(9)#ssl_hash
 sslGenerateKeyAndCSR#chr(9)#serializedJson
 sslInstallCertificate#chr(9)#serializedJson
 sslSavePublicKeyCertificates#chr(9)#serializedJson
+sslInstallLetsEncryptCertificate#chr(9)#serializedJson
 tarZipFilePath#chr(9)#tarAbsoluteFilePath#chr(9)#changeToAbsoluteDirectory#chr(9)#absolutePathToTar
 tarZipSitePath#chr(9)#siteDomain#chr(9)#curDate
 tarZipSiteUploadPath#chr(9)#siteDomain#chr(9)#curDate
@@ -256,7 +257,7 @@ function sslInstallLetsEncryptCertificate($a){
 		echo($rs->errorMessage."\n");
 		return json_encode($rs);
 	}
-
+ 
 	$arrDomain=explode(",", str_replace("\r", "", str_replace("\n", "", str_replace("'", '', str_replace('"', '', $js->domainList)))));
 	$js->commonName=trim(str_replace('"', '', $js->commonName));
 	$js->shortDomain=str_replace('"', '', $js->shortDomain);
@@ -330,6 +331,10 @@ function sslInstallLetsEncryptCertificate($a){
 	
 	$nginxCertificatePath="/var/jetendo-server/nginx/ssl/".$js->ssl_hash."/".$js->site_id.".crt";
 	$nginxPrivateKeyPath="/var/jetendo-server/nginx/ssl/".$js->ssl_hash."/".$js->site_id.".key"; 
+
+	$nginxCertificateBackupPath="/var/jetendo-server/nginx/ssl/".$js->ssl_hash."/".$js->site_id.".crt";
+	$nginxPrivateKeyBackupPath="/var/jetendo-server/nginx/ssl/".$js->ssl_hash."/".$js->site_id.".key"; 
+ 
 	$currentPath="/etc/letsencrypt/live-ecdsa/".$js->site_id."/letmp/";
 	if(!is_dir($currentPath)){
 		mkdir($currentPath, 0400, true);
@@ -385,7 +390,7 @@ function sslInstallLetsEncryptCertificate($a){
 			$rs->success=false;
 			$rs->errorMessage="Failed to sign Let's Encrypt CSR";
 			echo($rs->errorMessage."\n");
-			sslDeleteCertificate(array($js->ssl_hash));
+			//sslDeleteCertificate(array($js->ssl_hash));
 			return json_encode($rs);
 		}
  
