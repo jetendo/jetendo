@@ -824,7 +824,13 @@ function convertHTMLTOPDF($a){
 	}
 	// Portrait or Landscape
 	// A4 or letter
-    $c=' --orientation Portrait --page-size letter --margin-top "0mm" --margin-bottom "0mm" --margin-left "0mm" --margin-right "0mm" --dpi 96 --zoom 2 ';
+    $c=' --orientation Portrait --page-size letter --margin-top "0mm" --margin-bottom "0mm" --margin-left "0mm" --margin-right "0mm" --dpi 96 --zoom ';
+
+	if(zIsTestServer()){
+		$c.="2 ";
+	}else{
+		$c.="1 ";
+	}
     //$c=' --orientation Portrait --page-size letter ';
 
 	// if we ever allow use to edit the html, we should parse the html for links that don't match site_short_domain.
