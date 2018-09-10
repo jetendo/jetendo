@@ -1890,7 +1890,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		delimiter=",";
 	}
 	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
-		parentId=form.site_x_option_group_set_parent_id;
+		parentId=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
 		// need parent group of ts.selectmenu_groupid
 		db.sql="select * from #db.table("site_option_group", request.zos.zcoreDatasource)# 
 		WHERE site_option_group_id=#db.param(ts.selectmenu_groupid)# and 
