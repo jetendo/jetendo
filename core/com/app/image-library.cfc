@@ -1774,18 +1774,20 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		application.zcore.imageLibraryCom.registerSize(arguments.ss.image_library_id, newSize, arguments.ss.crop);
 		hasCaptions=false;
 		</cfscript> 
-		<div class="zGalleryViewSlideshowContainer">
-			<ul id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#" class="zGalleryViewSlideshow">
-			<cfloop query="qImages">
-				<cfscript>
-				caption=qImages.image_caption;
-				if(caption EQ ""){
-					caption=arguments.ss.defaultAltText;
-				}
-				</cfscript>
-				<li><img data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
-			</cfloop>
-			</ul> 
+		<div class="z-center-children z-float">
+			<div class="zGalleryViewSlideshowContainer" style="width:auto;">
+				<ul id="zGalleryViewSlideshow#request.zGalleryViewSlideShowIndex#" class="zGalleryViewSlideshow">
+				<cfloop query="qImages">
+					<cfscript>
+					caption=qImages.image_caption;
+					if(caption EQ ""){
+						caption=arguments.ss.defaultAltText;
+					}
+					</cfscript>
+					<li><img data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, newSize, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
+				</cfloop>
+				</ul> 
+			</div>
 		</div>
 		<script>
 			var arrImages = {};
