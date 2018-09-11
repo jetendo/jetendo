@@ -2519,8 +2519,10 @@ leadchart
 			"tracking_label":"",
 			"called_at":""
 		};
-		for(field in js.arrCustom){
-			fs[field.label]=field.value;
+		if(isStruct(js) and structkeyexists(js, 'arrCustom')){
+			for(field in js.arrCustom){
+				fs[field.label]=field.value;
+			}
 		}
 		label=application.zcore.functions.zLimitStringLength(fs.tracking_label, 60);
 		source=application.zcore.functions.zLimitStringLength(fs.source, 60);
@@ -2636,8 +2638,10 @@ leadchart
 					"called_at":"",
 					"referrer":""
 				};
-				for(field in js.arrCustom){
-					fs[field.label]=field.value;
+				if(isStruct(js) and structkeyexists(js, 'arrCustom')){
+					for(field in js.arrCustom){
+						fs[field.label]=field.value;
+					}
 				}
 				if(fs.referrer NEQ ""){
 					referrer=application.zcore.functions.zLimitStringLength(fs.referrer, 30);
@@ -2731,9 +2735,11 @@ leadchart
 						"tracking_label":"",
 						"called_at":""
 					};
-					for(field in js.arrCustom){
-						fs[field.label]=field.value;
-					}  
+					if(isStruct(js) and structkeyexists(js, 'arrCustom')){
+						for(field in js.arrCustom){
+							fs[field.label]=field.value;
+						} 
+					} 
 					//echo('</table>');
 					if(fs["Phone 1"] EQ ""){
 						fs["Phone 1"]=row.inquiries_phone1;
