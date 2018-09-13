@@ -1,9 +1,4 @@
-<cfcomponent displayname="Application" output="no" hint="Handle the application.">  
-<cfscript>
-// config.cfc has all the configurable options.
-// DO NOT EDIT Application.cfc unless you are going to change the behavior of the Jetendo Core.
-
-
+<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfscript>
 // BEGIN override cfml admin settings
 // regional
 // default locale used for formating dates, numbers ...

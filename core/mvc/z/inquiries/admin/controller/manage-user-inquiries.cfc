@@ -448,7 +448,11 @@
 		if(form.editSource EQ "contact"){
 			link="/z/inquiries/admin/feedback/viewContact?contactTab=4&contact_id=#form.contact_id#&inquiries_id=#form.inquiries_id#";
 		}else{
-			link="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#form.inquiries_id#";
+			if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+				link="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#form.inquiries_id#";
+			}else{
+				link="/z/inquiries/admin/feedback/view?inquiries_id=#form.inquiries_id#";
+			}
 		}
 	}
 	application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink:link}); 

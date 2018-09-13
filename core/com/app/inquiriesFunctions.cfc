@@ -87,7 +87,11 @@
 		}
 		if(not structkeyexists(request, 'noleadsystemlinks')){
 			assignDomain=request.zos.currentHostName;
-			loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/view";
+			if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+				loginURL="#assignDomain#/z/inquiries/admin/manage-inquiries/view";
+			}else{
+				loginURL="#assignDomain#/z/inquiries/admin/feedback/view";
+			}
 			if(form.user_id NEQ 0 and form.user_id_siteIDType EQ 1){ 
 				if(application.zcore.functions.zso(request.zos.globals, 'publicUserManagerDomain') NEQ ""){
 					assignDomain=request.zos.globals.publicUserManagerDomain;
@@ -235,7 +239,12 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 
 	showDetails=true;
 	if(arguments.qInquiry.inquiries_disable_detailed_lead_email EQ 1){
-		if(request.zos.originalURL EQ "/z/inquiries/admin/manage-inquiries/view"){
+		if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+			link="/z/inquiries/admin/manage-inquiries/view";
+		}else{
+			link="/z/inquiries/admin/feedback/view";
+		}
+		if(request.zos.originalURL EQ link){
 			showDetails=true;
 		}else if(request.zos.originalURL EQ "/z/inquiries/admin/manage-inquiries/userView"){
 			showDetails=true;

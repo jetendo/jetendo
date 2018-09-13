@@ -303,7 +303,14 @@
 			<cfloop query="qinquiries">
 				<cfset ArrayAppend(arrId,qinquiries.inquiries_id)>
 				<tr <cfif qinquiries.inquiries_status_id EQ 1 or qinquiries.inquiries_status_id EQ 2><cfif qinquiries.currentrow mod 2 EQ 0>class="row1"<cfelse>class="row2"</cfif><cfelse><cfif qinquiries.currentrow mod 2 EQ 0>class="row2"<cfelse>class="row1"</cfif></cfif>>
-					<td><a href="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#qinquiries.inquiries_id#">#qinquiries.inquiries_first_name# #qinquiries.inquiries_last_name#</a></td>
+					<cfscript>
+					if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+						link="/z/inquiries/admin/manage-inquiries/view?inquiries_id=#qinquiries.inquiries_id#";
+					}else{
+						link="/z/inquiries/admin/feedback/view?inquiries_id=#qinquiries.inquiries_id#";
+					}
+					</cfscript>
+					<td><a href="#link#">#qinquiries.inquiries_first_name# #qinquiries.inquiries_last_name#</a></td>
 					<td>#qinquiries.inquiries_phone1#&nbsp;</td>
 					<td><cfif qinquiries.inquiries_email NEQ "">
 							<a href="mailto:#qinquiries.inquiries_email#">#qinquiries.inquiries_email#</a>

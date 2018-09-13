@@ -670,14 +670,16 @@
 		form.assign_name=qMember.user_first_name&" "&qMember.user_last_name;
 		form.assign_email=qMember.user_username;
 	}
-	if(qInquiry.contact_id NEQ 0){
-		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
-		contact_assigned_user_id=#db.param(form.contact_assigned_user_id)#, 
-		contact_assigned_user_id_siteIdType=#db.param(form.contact_assigned_user_id_siteIdType)# 
-		WHERE contact_id = #db.param(form.contact_id)# and 
-		contact_deleted=#db.param(0)# and 
-		site_id=#db.param(request.zos.globals.id)#";
-		db.execute("qUpdateContact");
+	if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+		if(qInquiry.contact_id NEQ 0){
+			db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+			contact_assigned_user_id=#db.param(form.contact_assigned_user_id)#, 
+			contact_assigned_user_id_siteIdType=#db.param(form.contact_assigned_user_id_siteIdType)# 
+			WHERE contact_id = #db.param(form.contact_id)# and 
+			contact_deleted=#db.param(0)# and 
+			site_id=#db.param(request.zos.globals.id)#";
+			db.execute("qUpdateContact");
+		}
 	}
 		 
 	db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)# SET ";

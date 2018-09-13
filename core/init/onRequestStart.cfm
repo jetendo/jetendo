@@ -277,6 +277,11 @@
 			showInitStatus();
 		}
 	}   
+
+	if(request.zos.isTestServer){
+		// only on test server for now.
+		request.zos.enableNewLeadManagement=true;
+	}
 	if((request.zos.isDeveloperIpMatch or request.zos.isServer)){
 		if(structkeyexists(form, 'zForceReset')){
 			structdelete(application,'onInternalApplicationStartRunning');
@@ -404,6 +409,8 @@
 
 	application.zcore.functions.zheader("P3P", "CP='Not using P3P, find the privacy policy on our site instead.'");
 	 
+
+	// TODO: figure out how to remove so I can use CFFLUSH in next version also in onRequest and onRequestEnd
 	savecontent variable="local.output"{
 		request.zos.requestLogEntry('Application.cfc onRequestStart begin');
 		if(structkeyexists(application, 'zDeployExclusiveLock') and ((request.zos.isDeveloper EQ false and request.zos.isServer EQ false) or not structkeyexists(form, 'zreset') or form.zreset EQ "")){	
@@ -605,6 +612,7 @@
 		if(not structkeyexists(application.siteStruct[request.zos.globals.id], 'virtualFileCache')){
 			request.zos.siteVirtualFileCom.reloadCache(application.siteStruct[request.zos.globals.id]);
 		}
+
 
 		//writeoutput(((gettickcount('nano')-local.s)/1000000000)&' seconds0simple stuff<br />');	local.s=gettickcount('nano');
 		//writeoutput(((gettickcount('nano')-local.s)/1000000000)&' seconds0<br />');	local.s=gettickcount('nano');

@@ -6,9 +6,10 @@
 	setting requesttimeout="10000";
     application.zcore.adminSecurityFilter.requireFeatureAccess("Lead Export");
 
+	inquiriesCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
+	inquiriesCom.inquiriesSearchInit();
 	if(form.method EQ "userExport"){
 		// allow export
-	    inquiriesCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
 	    inquiriesCom.userInit();
 	}else if(application.zcore.user.checkGroupAccess("member") EQ false){
 		application.zcore.functions.z404("Only manager members can export leads.");	
@@ -196,6 +197,11 @@
 							writeoutput(' and (inquiries_datetime >= #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
 							inquiries_datetime <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#)');
 						}
+/*
+
+	ts=["inquiries_search", "inquiries_name", "search_email", "search_phone", "inquiries_type_id", "inquiries_status_id", "inquiries_start_date", "inquiries_end_date", "inquiries_interested_in_model", "inquiries_interested_in_category"];
+*/
+
 						if(application.zcore.functions.zso(form, 'inquiries_type_id') NEQ ""){
 							echo(' and inquiries.inquiries_type_id = #db.param(listgetat(form.inquiries_type_id, 1, "|"))# and 
 							inquiries_type_id_siteIDType = #db.param(listgetat(form.inquiries_type_id, 2, "|"))# ');
@@ -208,70 +214,18 @@
 						writeoutput(' ORDER BY inquiries_datetime DESC');
 					} 
 				}else{ 
-					savecontent variable="theSql"{
-						writeoutput('SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries WHERE
-						inquiries.site_id = #db.param(request.zOS.globals.id)# and 
-						inquiries.inquiries_status_id <> #db.param(0)# and 
-						inquiries_deleted = #db.param(0)# and 
-						inquiries.inquiries_spam = #db.param(0)# and 
-						inquiries_parent_id = #db.param(0)#');
-						if(form.search_office_id NEQ "0"){
-							echo(' and inquiries.office_id = #db.param(form.search_office_id)# ');
-						}
-						
-						if(form.method EQ "userExport"){ 
-							echo(inquiriesCom.getUserLeadFilterSQL(db)); 
-						}else if(structkeyexists(request.zos.userSession.groupAccess, "administrator") EQ false){
-							writeoutput(' AND inquiries.user_id = #db.param(request.zsession.user.id)# and 
-							user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#');
-						}
-						if(form.selected_user_id NEQ 0){
-							writeoutput(' and inquiries.user_id = #db.param(form.selected_user_id)# and 
-							user_id_siteIDType = #db.param(form.selected_user_id_siteidtype)# ');
-						}
-						if(application.zcore.functions.zso(form,'searchType',true) EQ 0){
-							if(form.inquiries_start_date EQ false){
-								writeoutput(' and (inquiries_datetime >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
-								inquiries_datetime <= #db.param(dateformat(now(), "yyyy-mm-dd")&' 23:59:59')#)');
-							}else{
-								writeoutput(' and (inquiries_datetime >= #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
-								inquiries_datetime <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#)');
-							}
-						}else{
-							if(form.inquiries_start_date EQ false){
-								writeoutput(' and (inquiries_start_date >= #db.param(dateformat(dateadd("d", -14, now()), "yyyy-mm-dd")&' 00:00:00')# and 
-								inquiries_end_date <= #db.param(dateformat(now(), "yyyy-mm-dd")&' 23:59:59')#)');
-							}else{
-								writeoutput(' and (inquiries_start_date >= #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
-								inquiries_end_date <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#)');
-							}
-						}
-						if(application.zcore.functions.zso(form, 'inquiries_type_id') NEQ ""){
-							echo(' and inquiries.inquiries_type_id = #db.param(listgetat(form.inquiries_type_id, 1, "|"))# and 
-							inquiries_type_id_siteIDType = #db.param(listgetat(form.inquiries_type_id, 2, "|"))# ');
-						}
-						if(application.zcore.functions.zso(form,'inquiries_name') NEQ ""){
-							writeoutput(' and concat(inquiries_first_name, #db.param(" ")#, inquiries_last_name) LIKE #db.param('%#form.inquiries_name#%')#');
-						}
-						if(isDefined('request.zsession.leadcontactfilter')){
-							if(request.zsession.leadcontactfilter EQ 'new'){
-								writeoutput(' and inquiries.inquiries_status_id =#db.param('1')#');
-							}else if(request.zsession.leadcontactfilter EQ 'email'){
-								writeoutput(' and inquiries_phone1 =#db.param('')# 	and inquiries_phone_time=#db.param('')#');
-							}else if(request.zsession.leadcontactfilter EQ 'phone'){
-								writeoutput(' and inquiries_phone1 <>#db.param('')# 	and inquiries_phone_time=#db.param('')#');
-							}else if(request.zsession.leadcontactfilter EQ 'forced'){
-								writeoutput(' and inquiries_phone_time<>#db.param('')#');
-							}
-						} 
-						if(application.zcore.functions.zso(form, 'exporttype') EQ 1){
-							writeoutput(' GROUP BY inquiries_email');
-						}else if(application.zcore.functions.zso(form, 'exporttype') EQ 2){
-							writeoutput(' GROUP BY inquiries_phone1, inquiries_phone2');
-						}
-						writeoutput(' ORDER BY inquiries_datetime DESC ');
+ 
+					db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries WHERE
+					inquiries.site_id = #db.param(request.zOS.globals.id)# and  
+					inquiries_deleted = #db.param(0)#  ";
+					inquiriesCom.inquiriesSearchFilterSQL(db);
+					if(application.zcore.functions.zso(form, 'exporttype') EQ 1){
+						db.sql&=" GROUP BY inquiries_email ";
+					}else if(application.zcore.functions.zso(form, 'exporttype') EQ 2){
+						db.sql&=" GROUP BY inquiries_phone1, inquiries_phone2 ";
 					}
-				}
+					db.sql&=" ORDER BY inquiries_datetime DESC ";
+				} 
 				if(form.whichfields EQ 0){ 
 					if(form.format EQ 'html'){ 
 						echo('<tr class="header">'); 
@@ -307,9 +261,8 @@
 					} 
 				}
 
-				db.sql=theSQL&" LIMIT #db.param(doffset)#, #db.param(100)# ";
-				qInquiries=db.execute("qInquiries");
-				//writedump(qInquiries);abort;
+				db.sql&=" LIMIT #db.param(doffset)#, #db.param(100)# ";
+				qInquiries=db.execute("qInquiries");  
 				if(qInquiries.recordcount EQ 0){
 					break;
 				}
