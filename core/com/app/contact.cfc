@@ -890,7 +890,7 @@ contactCom.processMessage(ts);
 	arrType=["to", "cc"]; 
 	for(type in arrType){
 		for(row in ss.jsonStruct[type]){
-			if(not structkeyexists(emailStruct, row.email) or (not structkeyexists(subscribedStruct, row.email) and row.email EQ fromContact.contact_email)){
+			if(not structkeyexists(emailStruct, row.email) or (not structkeyexists(subscribedStruct, row.email) and (structkeyexists(fromContact, 'contact_email') and row.email EQ fromContact.contact_email))){
 				// insert to inquiries_x_contact as to
 				contact=getContactByEmail(row.email, row.name, ss.messageStruct.site_id);
 				if(structcount(contact) NEQ 0){

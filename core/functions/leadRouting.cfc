@@ -97,6 +97,8 @@ application.zcore.functions.zRecordLead();
 <cffunction name="zBeforeInquiryInsertUpdate" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
+	db=request.zos.queryObject;
+
 	ss=arguments.ss;
 	ss.inquiries_email=application.zcore.functions.zso(ss, 'inquiries_email');
 	ss.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone1'));
@@ -107,28 +109,30 @@ application.zcore.functions.zRecordLead();
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
 	ss.site_id = request.zOS.globals.id; 
 
-	ss.contact_id=application.zcore.functions.zso(ss, 'contact_id', true);
-	if(ss.contact_id EQ 0){
-		if(trim(ss.inquiries_email&ss.inquiries_phone1_formatted&ss.inquiries_phone2_formatted&ss.inquiries_phone3_formatted) NEQ ""){
-			contactCom=createobject("component", "zcorerootmapping.com.app.contact");
+	if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+		ss.contact_id=application.zcore.functions.zso(ss, 'contact_id', true);
+		if(ss.contact_id EQ 0){
+			if(trim(ss.inquiries_email&ss.inquiries_phone1_formatted&ss.inquiries_phone2_formatted&ss.inquiries_phone3_formatted) NEQ ""){
+				contactCom=createobject("component", "zcorerootmapping.com.app.contact");
 
-			tsContact={ 
-				dataStruct:ss,
-				site_id:ss.site_id
-			};
-			rsContact=contactCom.storeContactForInquiry(tsContact);
-			if(rsContact.success){
-				ss.contact_id=rsContact.contact_id;
-			} 
+				tsContact={ 
+					dataStruct:ss,
+					site_id:ss.site_id
+				};
+				rsContact=contactCom.storeContactForInquiry(tsContact);
+				if(rsContact.success){
+					ss.contact_id=rsContact.contact_id;
+				} 
+			}
+		}else{ 
+			db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
+			contact_assigned_user_id=#db.param(ss.contact_assigned_user_id)#, 
+			contact_assigned_user_id_siteIdType=#db.param(ss.contact_assigned_user_id_siteIdType)# 
+			WHERE contact_id = #db.param(ss.contact_id)# and 
+			contact_deleted=#db.param(0)# and 
+			site_id=#db.param(ss.site_id)#";
+			db.execute("qUpdateContact");
 		}
-	}else{ 
-		db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
-		contact_assigned_user_id=#db.param(ss.contact_assigned_user_id)#, 
-		contact_assigned_user_id_siteIdType=#db.param(ss.contact_assigned_user_id_siteIdType)# 
-		WHERE contact_id = #db.param(ss.contact_id)# and 
-		contact_deleted=#db.param(0)# and 
-		site_id=#db.param(ss.site_id)#";
-		db.execute("qUpdateContact");
 	}
 	</cfscript>
 </cffunction>
@@ -568,16 +572,18 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 		}  
 		//writedump(ts);    abort; 
 	  
-		rs=contactCom.processMessage(ts);   
 
-		/*
-		mail spoolenable="no" to="#rs.assignEmail#" cc="#rs.cc#" bcc="#rs.bcc#" from="#request.fromemail#" replyto="#rs.leademail#" subject="#arguments.ss.subject#" type="html"{
-			for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
-				mailparam file="#arguments.ss.arrAttachments[n]#" disposition="attachment";
+		if(structkeyexists(request.zos, 'enableNewLeadManagement')){
+			rs=contactCom.processMessage(ts);   
+		}else{
+			mail spoolenable="no" to="#rs.assignEmail#" cc="#rs.cc#" bcc="#rs.bcc#" from="#request.fromemail#" replyto="#rs.leademail#" subject="#arguments.ss.subject#" type="html"{
+				for(n=1;n<=arrayLen(arguments.ss.arrAttachments);n++){
+					mailparam file="#arguments.ss.arrAttachments[n]#" disposition="attachment";
+				}
+				iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
+			    iemailCom.getEmailTemplate("", true);
 			}
-			iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-		    iemailCom.getEmailTemplate("", true);
-		}*/
+		}
 	}else{
 		echo("Would send email as follows:
 		from: #request.fromemail#<br>
