@@ -1505,7 +1505,7 @@ rs.data;
 	db = request.zos.queryObject; 
 	if(variables.config.enableCache NEQ "disabled" and variables.config.enableCache NEQ "folders"){
 		ts=application.siteStruct[request.zos.globals.id].virtualFileCache.fileDataStruct;
-		if(structkeyexists(ts, arguments.virtual_file_id) and structcount(ts[arguments.virtual_file_id]){
+		if(structkeyexists(ts, arguments.virtual_file_id) and structcount(ts[arguments.virtual_file_id])){
 			return {success:true, data:ts[arguments.virtual_file_id]};
 		}
 	}else{

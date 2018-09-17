@@ -6,6 +6,7 @@ Command reference:
 convertHTMLTOPDF#chr(9)#site_short_domain#chr(9)#htmlFile#chr(9)#pdfFile#chr(9)#javascriptDelay
 getDiskUsage#chr(9)#absolutePath
 getFileMD5Sum#chr(9)#absoluteFilePath
+imageMagickConvertSVGtoPNG#chr(9)#absoluteSource#chr(9)#absoluteDestination
 getImageMagickIdentify#chr(9)#absoluteFilePath
 getImageMagickConvertResize#chr(9)&#resizeWidth#chr(9)#resizeHeight#chr(9)#cropWidth#chr(9)#cropHeight#chr(9)#cropXOffset#chr(9)#cropYOffset#chr(9)#absoluteSourceFilePath#chr(9)#absoluteDestinationFilePath
 getImageMagickConvertApplyMask#chr(9)#absoluteImageInputPath#chr(9)#absoluteImageOutputPath
@@ -81,6 +82,8 @@ function processContents($contents){
 		return tarZipGlobalDatabase($a);
 	}else if($contents =="gzipFilePath"){
 		return gzipFilePath($a);
+	}else if($contents =="imageMagickConvertSVGtoPNG"){
+		return imageMagickConvertSVGtoPNG($a);
 	}else if($contents =="getImageMagickIdentify"){
 		return getImageMagickIdentify($a);
 	}else if($contents =="getImageMagickConvertResize"){ 
@@ -1827,6 +1830,45 @@ function convertFileCharsetISO88591toUTF8($a){
 		return "1";
 	} 
 	return "0"; 
+}
+		// imageMagickConvertSVGtoPNG#chr(9)#absoluteSource#chr(9)#absoluteDestination
+function imageMagickConvertSVGtoPNG($a){
+	set_time_limit(100);
+	if(count($a) != 2){
+		return '0|invalid arguments count, 2 arguments are required';
+	}
+	$absoluteSource=$a[0];
+	$absoluteDestination=$a[1];
+	$p=get_cfg_var("jetendo_root_path");
+	$found=true;
+	$sourcePath=getAbsolutePath($absoluteSource);
+	if(substr($sourcePath, 0, strlen($p)) != $p){
+		$found=false;
+	}
+	if(!file_exists($sourcePath)){
+		$found=false;
+	}
+	$destinationDir=getAbsolutePath(dirname($absoluteDestination));
+	if(substr($destinationDir, 0, strlen($p)) != $p){
+		$found=false;
+	}
+	if(!is_dir($destinationDir)){
+		return '0|destination directory does not exist';
+	}
+	if(file_exists($absoluteDestination)){
+		unlink($absoluteDestination);
+	}
+	if(!$found){
+		return '0|invalid source or destination';
+	} 
+	$cmd	= "/usr/local/bin/convert -background none ".escapeshellarg($sourcePath)." -alpha on ".escapeshellarg("png32:".$absoluteDestination)." 2>&1";
+	$r		= `$cmd`;
+	//echo $cmd."\n".$r."\n";
+	if(file_exists($absoluteDestination)){
+		return '1';
+	}else{
+		return '0|convert failed - '.$cmd;
+	}
 }
 function getImageMagickIdentify($a){
 	set_time_limit(100);
