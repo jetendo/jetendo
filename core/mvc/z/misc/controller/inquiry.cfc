@@ -258,7 +258,7 @@
 			echo('<p>'&inquiryHeaderMessage&'</p>');
 		} 
 		</cfscript>
-        <p>* denotes required field.</p>
+        <p>* Denotes required field.</p>
             <cfscript>
             form.set9=application.zcore.functions.zGetHumanFieldIndex();
             </cfscript>

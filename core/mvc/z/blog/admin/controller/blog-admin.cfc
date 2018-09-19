@@ -2545,7 +2545,7 @@ ts.struct=form;
 		application.zcore.functions.zQueryToStruct(qEdit, form);
 		application.zcore.functions.zStatusHandler(request.zsid,true, false, form);
 		</cfscript>
-		* denotes required field.
+		* Denotes required field.
 		<cfscript>
 		ts=StructNew();
 		ts.name="zMLSSearchForm";
@@ -2708,7 +2708,7 @@ tabCom.enableSaveButtons();
 		form.blog_datetime=now();
 	}
 	</cfscript>
-	* denotes required field.
+	* Denotes required field.
 	<cfscript>
 	ts=StructNew();
 	ts.name="zMLSSearchForm";
@@ -3538,7 +3538,7 @@ if(cancelURL EQ ""){
 tabCom.setCancelURL(cancelURL);
 tabCom.enableSaveButtons();
 </cfscript>
-<p>* denotes required field</p>
+<p>* Denotes required field</p>
 #tabCom.beginTabMenu()#
    #tabCom.beginFieldSet("Basic")# 
 	<table style="border-spacing:0px; width:100%; border:'0';" class="table-list">

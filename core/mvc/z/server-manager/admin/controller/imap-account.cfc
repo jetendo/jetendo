@@ -174,7 +174,7 @@
 	}
 	echo ( ' IMAP Account</h2>' );
 	</cfscript>
-	<p>* denotes required field.</p>
+	<p>* Denotes required field.</p>
 	<form class="zFormCheckDirty" action="#action#" method="post" enctype="multipart/form-data">
 		<table style="width: 100%;" class="table-list">
 			<tr>

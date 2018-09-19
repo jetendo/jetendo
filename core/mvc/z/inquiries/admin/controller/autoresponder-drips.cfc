@@ -219,7 +219,7 @@
 	</ul>
 	<p>If you need to insert a literal percent sign in the email, like 100%, you must type it twice so that it is not removed.  For example: 100%%.</p>
 	<p>%unsubscribeLink% can be inserted into the Link URL in the Footer HTML or it will be added automatically to the bottom of the email.</p>
-	<p>* denotes required field</p>
+	<p>* Denotes required field</p>
 	<form id="listForm1" action="/z/inquiries/admin/autoresponder-drips/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?inquiries_autoresponder_id=#inquiries_autoresponder_id#&inquiries_autoresponder_drip_id=#form.inquiries_autoresponder_drip_id#" method="post" enctype="multipart/form-data">
 	#tabCom.beginTabMenu()#
 	#tabCom.beginFieldSet("Basic")#

@@ -57,7 +57,7 @@ application.zcore.template.setTag("pagenav",tempPageNav);
     
 	form.set9=application.zcore.functions.zGetHumanFieldIndex();
 	</cfscript>
-            <p>* denotes required field.</p>
+            <p>* Denotes required field.</p>
 	<form class="zFormCheckDirty" id="myForm" action="/z/misc/mortgage-quote/send" method="post" onsubmit="zSet9('zset9_#form.set9#');" style="margin:0px; padding:0px;">
     <input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
     #application.zcore.functions.zFakeFormFields()#

@@ -349,7 +349,7 @@
 	ts45.disableChildContentSummary=true;
 	application.zcore.app.getAppCFC("content").setContentIncludeConfig(ts45);
 	application.zcore.app.getAppCFC("content").getPropertyInclude(0, variables.qC39821n);
-	writeoutput('<p style="clear:both;">* denotes required field.</p>');
+	writeoutput('<p style="clear:both;">* Denotes required field.</p>');
 	db.sql="SELECT *
 	from #db.table("inquiries", request.zos.zcoreDatasource)# inquiries
 	WHERE inquiries_id = #db.param(-1)# and 

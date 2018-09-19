@@ -653,7 +653,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 			Renew/Update
 		</cfif>
 		LetsEncrypt.org Certificate</h2>
-	<p>* denotes required field</p>
+	<p>* Denotes required field</p>
 	<form class="zFormCheckDirty" name="editForm" action="/z/server-manager/admin/ssl/insertLetsEncrypt?sid=#form.sid#&amp;ssl_id=#form.ssl_id#" method="post" style="margin:0px;">
 	<table style="width:100%; border-spacing:0px;" class="table-list"> 
 		<tr>
@@ -759,7 +759,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 	<cfelse>
 		Activate
 	</cfif> SSL Certificate</h2>
-	<p>* denotes required field</p>
+	<p>* Denotes required field</p>
 	<form class="zFormCheckDirty" name="editForm" action="/z/server-manager/admin/ssl/#newAction#?sid=#form.sid#&amp;ssl_id=#form.ssl_id#" method="post" style="margin:0px;">
 	<table style="width:100%; border-spacing:0px;" class="table-list"> 
 		<tr>

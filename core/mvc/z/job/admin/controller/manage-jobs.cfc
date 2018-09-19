@@ -425,7 +425,7 @@
 	}
 
 	</cfscript>
-	<p>* denotes required field.</p>
+	<p>* Denotes required field.</p>
 	<form class="zFormCheckDirty" action="#action#" method="post" enctype="multipart/form-data" <cfif not notPublic>onsubmit="zSet9('zset9_#form.set9#');"</cfif>>
 		<cfif notPublic>
 			
@@ -693,6 +693,12 @@
 				<th>Web Site URL</th>
 				<td><input type="text" name="job_website" style="width:95%;" value="#htmleditformat(form.job_website)#" /></td>
 			</tr>
+			<tr>
+				<th>Override Application URL</th>
+				<td><input type="text" name="job_apply_url" style="width:95%;" value="#htmleditformat(form.job_apply_url)#" /></td>
+			</tr>
+
+			
 			<tr>
 				<th style="width:1%; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Photos","member.job.edit job_image_library_id")#</th>
 				<td>

@@ -88,7 +88,7 @@
 		<p>We ask that you provide us a reasonable amount of time to respond and/or make corrections.</p>
 		<p>Make sure your contact information is accurate, we are not able to respond to claims with incorrect contact information.</p>
 		<h3>Copyright Abuse Form</h3>
-		<p>* denotes required field.</p>
+		<p>* Denotes required field.</p>
 		<cfscript>
 		form.set9=application.zcore.functions.zGetHumanFieldIndex();
 		</cfscript>

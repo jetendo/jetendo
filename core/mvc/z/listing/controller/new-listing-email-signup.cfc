@@ -38,7 +38,7 @@
             <input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
             #application.zcore.functions.zFakeFormFields()# 
 <script type="text/javascript">/* <![CDATA[ */ zArrDeferredFunctions.push(function(){zFormData["zMLSSearchForm"]=new Object(); zFormData["zMLSSearchForm"].arrFields=[]; });/* ]]> */</script>
-	<p>* denotes required field.</p>
+	<p>* Denotes required field.</p>
 	<div style="float:left; width:100%; padding-bottom:20px; "> 
 	<table style="border-spacing:0px;" class="table-list">
 	<cfif isDefined('request.zsession.user.id')>

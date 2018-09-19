@@ -4667,7 +4667,7 @@ Define this function in another CFC to override the default email format
 				<p><strong>Note: Updating this record will re-submit this listing for approval.</strong></p>
 			</cfif>
 		</cfif>
-		<p>* denotes required field.
+		<p>* Denotes required field.
 		<cfif methodBackup EQ "addGroup" or methodBackup EQ "editGroup">
 			 | <a href="/z/admin/site-option-group/help?site_option_group_id=#form.site_option_group_id#" target="_blank">View help in new window.</a>
 		</cfif>

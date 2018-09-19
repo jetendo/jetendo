@@ -1418,7 +1418,11 @@ searchJobs(ts);
 			<div class="z-job-row-buttons">
 				<cfif application.zcore.functions.zso(application.zcore.app.getAppData( 'job' ).optionStruct, 'job_config_disable_apply_online', true, 0) EQ 0>
 	
-					<a href="#request.zos.globals.domain#/z/job/apply/index?jobId=#job.job_id#" class="z-button z-job-row-button apply-now"><div class="z-t-16">Apply Now</div></a>
+					<cfif job.job_apply_url NEQ "">
+						<a href="#job.job_apply_url#" class="z-button z-job-row-button apply-now" target="_blank"><div class="z-t-16">Apply Now</div></a>
+					<cfelse>
+						<a href="#request.zos.globals.domain#/z/job/apply/index?jobId=#job.job_id#" class="z-button z-job-row-button apply-now"><div class="z-t-16">Apply Now</div></a>
+					</cfif>
 				</cfif>
 				<a href="#job.__url#" class="z-button z-job-row-button view-details"><div class="z-t-16">View Details</div></a>
 			</div>

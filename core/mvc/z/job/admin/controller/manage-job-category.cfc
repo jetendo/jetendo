@@ -179,7 +179,7 @@
 		<cfelse>
 			Edit
 		</cfif> Job Category</h2>
-		<p>* denotes required field.</p>
+		<p>* Denotes required field.</p>
 	<form class="zFormCheckDirty" action="/z/job/admin/manage-job-category/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?job_category_id=#form.job_category_id#" method="post">
 		<input type="hidden" name="modalpopforced" value="#form.modalpopforced#" />
 		<table style="width:100%;" class="table-list">

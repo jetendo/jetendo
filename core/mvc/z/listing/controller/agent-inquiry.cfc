@@ -63,7 +63,7 @@ agentCom.displayAgentInquiryForm(user_id, user_id_siteIdType);
 	</cfscript>
     
     <a id="cjumpform"></a> 
-    <p>* denotes required field.</p>
+    <p>* Denotes required field.</p>
         <cfscript>
         form.set9=application.zcore.functions.zGetHumanFieldIndex();
         </cfscript>

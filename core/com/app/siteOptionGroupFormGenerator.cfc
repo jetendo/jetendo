@@ -94,7 +94,7 @@ add options for:
 	<h2>Generate Custom Database-driven Form Code From Site Option Group</h2>
 	<h3>Selected Group: #request.qGroup.site_option_group_display_name#</h3>
  
-	<p>* denotes required field.</p>
+	<p>* Denotes required field.</p>
 	<form action="/z/_com/app/siteOptionGroupFormGenerator?method=displayForm&amp;site_option_group_id=#form.site_option_group_id#" method="post">
 		<table class="table-list">
 			<tr>

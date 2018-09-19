@@ -183,6 +183,9 @@
 		if ( NOT structKeyExists( job, 'job_status' ) ) {
 			application.zcore.functions.z404( 'Job not found' );
 		}
+		if(job.job_apply_url NEQ ""){
+			application.zcore.functions.zRedirect(job.job_apply_url);
+		}
 
 		if ( job.job_status NEQ 1 ) {
 			application.zcore.functions.z404( 'Job not active' );
