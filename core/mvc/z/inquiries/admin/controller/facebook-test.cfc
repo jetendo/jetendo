@@ -322,6 +322,10 @@ these tables are done:
 		method:'GET',
 		link:'/me/accounts',
 		throwOnError:true
+	};
+	if(form.fpid NEQ 0){
+		// this doesn't work, so we are forced to pull all accounts (dumb)
+		//ts.link&="?business_id=#form.fpid#";
 	}
 	if(structkeyexists(application, 'cancelFacebookImport')){
 		structdelete(application, 'cancelFacebookImport');
@@ -342,7 +346,7 @@ these tables are done:
 	maxRequests=50; // 1250 account limit
 	requestCount=1;
 	while(true){
-		if(structkeyexists(rs.response.paging, 'next')){
+		if(structkeyexists(rs.response, 'paging') and structkeyexists(rs.response.paging, 'next')){
 			ts.link=rs.response.paging.next;
 			//form.disableFacebookCache=true;
 			echo('<p>'&ts.link&'</p>');
@@ -363,6 +367,7 @@ these tables are done:
 			break;
 		}
 	}
+	//writedump(arrAccount);abort;
 	//structdelete(form, 'disableFacebookCache');
 	//echo(serializeJson(rs)); abort;
  
@@ -418,14 +423,18 @@ these tables are done:
 	arrError=[];
 	for(n2=1;n2<=arraylen(arrAccount);n2++){
 		page=arrAccount[n2];
-		if(form.fpid NEQ "0"){
+		if(form.fpid NEQ 0){
+			if(page.id NEQ form.fpid){ 
+				continue;
+			}
+			/*
 			if(structkeyexists(pageStruct, page.id)){ 
 				if(pageStruct[page.id].facebook_page_external_id NEQ page.id){
 					continue;
 				}
 			}else{
 				continue;
-			}
+			}*/
 		}  
 		ps={
 			page:page,
@@ -604,8 +613,8 @@ these tables are done:
 					}
 				}
 			}
-			//writedump(pageStruct);
-			//writedump(pageInfo); abort;
+			// writedump(pageStruct);
+			// writedump(pageInfo); abort;
 
 			if(not structkeyexists(pageStruct, page.id)){
 				ts={

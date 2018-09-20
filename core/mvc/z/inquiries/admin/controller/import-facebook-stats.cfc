@@ -6,6 +6,10 @@
 	variables.userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36";
 
  	form.fpid=application.zcore.functions.zso(form, 'fpid', true, 0); 
+ 	form.fpid_other=application.zcore.functions.zso(form, 'fpid_other', true, 0); 
+ 	if(form.fpid_other NEQ 0){
+ 		form.fpid=0;
+ 	}
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	}
@@ -44,6 +48,7 @@
 	<p>By default, all pages will be imported.  If you select a page below, and then click the import link, it will import only the selected page. If the page doesn't exist yet, you must import all pages.</p>
 	<div class="z-mb-20">
 		<form action="" method="get">
+			<p>
 			<cfscript>
 			selectStruct = StructNew();
 			selectStruct.name = "fpid";
@@ -53,11 +58,17 @@
 			selectStruct.queryValueField = "facebook_page_id"; 
 			application.zcore.functions.zInputSelectBox(selectStruct);
 			</cfscript> 
-			<input type="submit" name="select1" value="Select">
+			or type page ID: <input type="text" name="fpid_other" value=""></p>
+			<p><input type="submit" name="select1" value="Select"></p>
 		</form>
 	</div>
 
-	<cfif qPageSelected.recordcount EQ 0>
+	<cfif form.fpid_other NEQ 0>
+		<h3>Page ID Selected: #form.fpid_other#</h3>
+		<cfscript>
+		form.fpid=form.fpid_other;
+		</cfscript>
+	<cfelseif qPageSelected.recordcount EQ 0>
 		<h3>No Page Selected</h3>
 	<cfelse>
 		<h3>Page Selected: #qPageSelected.facebook_page_name#</h3>
