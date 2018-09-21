@@ -3393,11 +3393,15 @@ local.blogIdBackup=form.blog_id;
 		  <tr>
 			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Comments","member.blog.comments blog_comment_text")#</th>
 			<td>
-			<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#form.blog_comment_text#</textarea><br />
-			<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250" /> characters left 
-			<script type="text/javascript">
-			/* <![CDATA[ */textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);/* ]]> */
-			</script>
+				<cfif application.zcore.user.checkGroupAccess("administrator")>
+					<textarea name="blog_comment_text" cols="53" rows="5">#htmleditformat(form.blog_comment_text)#</textarea>
+				<cfelse>
+					<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#htmleditformat(form.blog_comment_text)#</textarea><br />
+					<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250" /> characters left 
+					<script type="text/javascript">
+					/* <![CDATA[ */textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);/* ]]> */
+					</script>
+				</cfif>
 			</td>
 		  </tr>
 			<th>&nbsp;<input type="hidden" name="blog_id" value="#form.blog_id#" /></th>
@@ -3732,11 +3736,15 @@ tabCom.enableSaveButtons();
 		  <tr>
 			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Comments","member.blog.reviewComment blog_comment_text")#</th>
 			<td>
-			<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#form.blog_comment_text#</textarea><br />
-			<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250"> characters left 
-			<script type="text/javascript">
-			textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);
-			</script>
+				<cfif application.zcore.user.checkGroupAccess("administrator")>
+					<textarea name="blog_comment_text" cols="53" rows="5">#htmleditformat(form.blog_comment_text)#</textarea>
+				<cfelse>
+					<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#form.blog_comment_text#</textarea><br />
+					<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250"> characters left 
+					<script type="text/javascript">
+					textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);
+					</script>
+				</cfif>
 			</td>
 		  </tr>
 			<th>&nbsp;<input type="hidden" name="blog_id" value="#form.blog_id#" /><input type="hidden" name="blog_comment_id" value="#form.blog_comment_id#" /></th>
