@@ -2093,7 +2093,7 @@ leadchart
 <cffunction name="verifiedRankings" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	if(request.leadData.disableContentSection["VerifiedRankings"] and arrayLen(ss.arrVolumeSort)){
+	if(request.leadData.disableContentSection["VerifiedRankings"] or arrayLen(ss.arrVolumeSort) EQ 0){
 		return;
 	}
 	ss=arguments.ss;
@@ -3577,11 +3577,10 @@ track_user_first_page
 
 	if(request.leadData.notUpToDate){
 		htmlOut=replace(htmlOut, 'class="uptodateDiv"', 'class="uptodateDiv"  style="display:none;" ');
-	}
-
+	} 
 	for(i in request.leadData.contentSection){
 		v=request.leadData.contentSection[i]; 
-		if(v EQ 0){
+		if(v EQ 0 or request.leadData.disableContentSection[i]){
 			htmlOut=replace(htmlOut, '{#i#Style}', 'display:none;');
 		}else{
 			htmlOut=replace(htmlOut, '{#i#Style}', ' '); 
