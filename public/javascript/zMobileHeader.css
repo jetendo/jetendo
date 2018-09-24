@@ -113,7 +113,9 @@
 .z-mobile-header .z-mobile-menu.open {
 	opacity: 1;
 	right: 0;
+	padding-bottom:50px;
 }
+
 .z-mobile-header-overlay{
 	display:none; 
 }

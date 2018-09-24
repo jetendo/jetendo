@@ -762,13 +762,10 @@ var zLastAjaxVarName=""; */
 		action+="&x_ajax_id="+escape(obj.id);
 
 		var isMacSafari=false;
-		if(navigator.userAgent.indexOf("Safari") != -1 && navigator.userAgent.indexOf("Macintosh") != -1){
+		if(navigator.userAgent.indexOf("Safari") != -1 && (navigator.userAgent.indexOf("Mac OS") != -1)){
 			isMacSafari=true;
 			var fileFieldCache={};
 		}  
-
-		
-
 		if(typeof window.FormData != "undefined" && typeof obj.formId != "undefined"){
 			var form = document.getElementById(obj.formId);
 			if(isMacSafari){

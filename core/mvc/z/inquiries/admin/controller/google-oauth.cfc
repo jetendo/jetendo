@@ -1412,11 +1412,17 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 
  	link='https://analyticsreporting.googleapis.com/v4/reports:batchGet?access_token=#application.googleAnalyticsAccessToken[form.accountType].access_token#&alt=json';
  	//echo(link);
- 	jsonString=serializeJson(arguments.jsonStruct); 
-	jsonString=application.zcore.functions.zHttpJsonPost(link, jsonString, 20);
+ 	jsonStringInput=serializeJson(arguments.jsonStruct); 
+	jsonString=application.zcore.functions.zHttpJsonPost(link, jsonStringInput, 20);
 	
 	if(jsonString EQ false or not isJson(jsonString)){
-		throw(jsonString);
+		savecontent variable="out"{
+			echo('<h2>Json request to #link# failed.</h2><p>Input:</p>');
+			writedump(jsonStringInput);
+			echo('<p>Response</p>');
+			writedump(jsonString);
+		}
+		throw(out);
 	}
 	js=deserializeJson(jsonString); 
 	if(structkeyexists(js, 'error')){
