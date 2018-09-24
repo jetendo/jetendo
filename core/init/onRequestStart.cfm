@@ -78,8 +78,8 @@
 		echo('<p>Init is running. Please wait for it to complete.  You can refresh this page.</p>');
 	}else{
 		echo('<p>Init is NOT running</p>');
-		echo('<p>Did the server fail to load properly? <a href="/?zReset=app&zforce=1&zcoreRunFirstInit=1" target="_blank">Run Init Again</a> | <a href="/z/server-manager/tasks/sync-sessions/index?testInitAllSites=1" target="_blank">Test Loading All Sites</a></p>');
 	}
+	echo('<p>Did the server fail to load properly? <a href="/?zReset=app&zforce=1&zcoreRunFirstInit=1" target="_blank">Run Init Again</a> | <a href="/z/server-manager/tasks/sync-sessions/index?testInitAllSites=1" target="_blank">Test Loading All Sites</a></p>');
 
 	if(structkeyexists(application, 'zcoreIsInit')){
 		echo('<p>Jetendo Core is loaded</p>');
