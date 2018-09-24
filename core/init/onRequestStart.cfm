@@ -145,14 +145,19 @@
 	tempPath=application.zcore.functions.zGetDomainInstallPath(row.site_short_domain);
 	tempPath2=application.zcore.functions.zGetDomainWritableInstallPath(row.site_short_domain);
 
-	if(fileexists(tempPath2&"_cache/scripts/global.json")){
-		tempGlobal=deserializeJson(application.zcore.functions.zreadfile(tempPath2&"_cache/scripts/global.json"));
-		structappend(tempGlobal, application.zcore.serverGlobals, false);
-		tempGlobal.homeDir=tempPath;
-		tempGlobal.secureHomeDir=tempPath;
-		tempGlobal.privateHomeDir=tempPath2; 
-		application.zcore.siteglobals[id]=tempGlobal;
-	}
+	if(not fileexists(tempPath2&"_cache/scripts/global.json")){
+		application.zcore.functions.zOS_cacheSiteAndUserGroups(id);
+		application.zcore.functions.zCacheJsonSiteAndUserGroup(id, ts.globals);
+		if(not fileexists(tempPath2&"_cache/scripts/global.json")){
+			throw("Unable to publish global.json for site_id=#id#");
+		}
+	} 
+	tempGlobal=deserializeJson(application.zcore.functions.zreadfile(tempPath2&"_cache/scripts/global.json"));
+	structappend(tempGlobal, application.zcore.serverGlobals, false);
+	tempGlobal.homeDir=tempPath;
+	tempGlobal.secureHomeDir=tempPath;
+	tempGlobal.privateHomeDir=tempPath2; 
+	application.zcore.siteglobals[id]=tempGlobal;
 
 	structappend(ts.globals, application.zcore.siteGlobals[id],true);
 	
@@ -301,7 +306,7 @@
 		}
 		if(structkeyexists(form, 'zcoreRunFirstInit')){ 
 			application.serverStartTickCount=gettickcount();
-			if(structkeyexists(application,'onInternalApplicationStartRunning')){
+			if(structkeyexists(application,'onInternalApplicationStartRunning') and not structkeyexists(form, 'zforce')){
 				echo('Another request is running the application init process already, please wait for it to complete.');
 				abort;
 			}
