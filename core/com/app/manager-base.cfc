@@ -395,7 +395,7 @@ a version of index list with divs for the table instead of <table>
 		</cfscript>
 		<div class="z-float">
 			<div class="z-manager-quick-menu">
-				<h2>#variables.title#</h2>
+				<h2>#variables.title# <cfif arrayLen(variables.quickLinks)><i class="fa fa-caret-down" style="font-size:16px;"></i></cfif></h2>
 				<cfscript>
 				if(arrayLen(variables.quickLinks)){
 					echo('<div class="z-manager-quick-menu-links">');
