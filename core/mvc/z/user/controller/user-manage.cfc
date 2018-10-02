@@ -61,16 +61,18 @@ finish simplifying this script.
 	// also use this to restrict which offices in add/edit user
 	request.arrLoggedInUserOffice=listToArray(request.zsession.user.office_id, ",");
 
-	db.sql="select * from #db.table("office", request.zos.zcoreDatasource)# 
-	WHERE
-	office_deleted=#db.param(0)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
-	office_id in (#db.trustedSQL(request.zsession.user.office_id)#) 
-	ORDER BY office_name ASC";
-	request.qLoggedInUserOffices=db.execute("qOffice");
 	request.userOfficeLookupStruct={};
-	for(row in request.qLoggedInUserOffices){
-		request.userOfficeLookupStruct[row.office_id]=row;
+	if(request.zsession.user.office_id NEQ ""){
+		db.sql="select * from #db.table("office", request.zos.zcoreDatasource)# 
+		WHERE
+		office_deleted=#db.param(0)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		office_id in (#db.trustedSQL(request.zsession.user.office_id)#) 
+		ORDER BY office_name ASC";
+		request.qLoggedInUserOffices=db.execute("qOffice");
+		for(row in request.qLoggedInUserOffices){
+			request.userOfficeLookupStruct[row.office_id]=row;
+		}
 	}
 	request.userFullEditAccess=false;
 	form.user_id=application.zcore.functions.zso(form, 'user_id', true, 0);
