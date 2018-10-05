@@ -1242,9 +1242,9 @@ finish simplifying this script.
 					<cfif request.zos.globals.enableDemoMode>
 						DEMO | Admin disabled
 					<cfelse> 
-						<a href="##" onclick="if(window.confirm('Are you send you want to send a password reset email to #qMember.user_username#?')){ window.location.href='/z/user/user-manage/sendUserPasswordResetEmail?user_id=#qMember.user_id#&amp;zIndex=#form.zIndex#&amp;ugid=#form.ugid#&amp;searchtext=#URLEncodedFormat(form.searchtext)#'; } return false;">Send Reset Password Email</a> | 
+						<a href="##" onclick="if(window.confirm('Are you sure you want to send a password reset email to #qMember.user_username#?')){ window.location.href='/z/user/user-manage/sendUserPasswordResetEmail?user_id=#qMember.user_id#&amp;zIndex=#form.zIndex#&amp;ugid=#form.ugid#&amp;searchtext=#URLEncodedFormat(form.searchtext)#'; } return false;">Send Reset Password Email</a> | 
 						<cfif qMember.user_invited EQ 1>
-							<a href="##" onclick="if(window.confirm('Are you send you want to send a new invitation email to #qMember.user_username#?')){ window.location.href='/z/user/user-manage/resendInvite?user_id=#qMember.user_id#&amp;zIndex=#form.zIndex#&amp;ugid=#form.ugid#&amp;searchtext=#URLEncodedFormat(form.searchtext)#'; } return false;">Re-send Invite</a> | 
+							<a href="##" onclick="if(window.confirm('Are you sure you want to send a new invitation email to #qMember.user_username#?')){ window.location.href='/z/user/user-manage/resendInvite?user_id=#qMember.user_id#&amp;zIndex=#form.zIndex#&amp;ugid=#form.ugid#&amp;searchtext=#URLEncodedFormat(form.searchtext)#'; } return false;">Re-send Invite</a> | 
 						</cfif>
 
 
