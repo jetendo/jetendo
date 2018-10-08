@@ -94,6 +94,11 @@
 	variables.queueSortCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.queueSort");
 	variables.queueSortCom.init(variables.queueSortStruct);
 	variables.queueSortCom.returnJson(); 
+
+	if(structkeyexists(form, 'showAll') and form.showAll EQ 1){
+		// sorting can break sometimes, we force a new sort all the time to quick fix that.
+		variables.queueSortCom.sortAll();
+	}
 	
 	db.sql="select * FROM #db.table("site", request.zos.zcoreDatasource)# site 
 	where site_id <> #db.param(request.zos.globals.id)# and 
