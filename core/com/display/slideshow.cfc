@@ -146,14 +146,15 @@ document.getElementById("#imgid#").onerror=function(){zImageOnError(this);};
 	var ts=arguments.ss;
 	var imgid="zslideshow-"&gettickcount()&'-'&ts.slideIndex;
 	</cfscript>
-	<cfif ts.arrImages[ts.slideIndex] NEQ "">
+	<cfif ts.arrImages[ts.slideIndex] NEQ ""> 
 		<a id="#imgid#" target="_parent" style="width:100%;" href="<cfif ts.arrLink[ts.slideIndex] EQ "">##<cfelse>#htmleditformat(ts.arrLink[ts.slideIndex])#</cfif>" title="<cfif variables.qslideshow.slideshow_tab_type_id EQ 2>#application.zcore.listingCom.getThumbnail(ts.arrImages[ts.slideIndex], ts.arrPhotoId[ts.slideIndex], 1, ts.slideshowConfig.imageWidth, ts.slideshowConfig.imageHeight, 1)#<cfelse>#ts.arrImages[ts.slideIndex]#</cfif>"> <span class="zSlideshowLargePhotoImg" style="display:block;position:relative; width:#ts.slideshowConfig.imageWidth#px; height:#ts.slideshowConfig.imageHeight#px; text-align:center; float:left; z-index:1; overflow:hidden;"> <img src="/z/a/images/s.gif"  id="#imgid#_img" alt="#htmleditformat(ts.arrText[ts.slideIndex])#" /></span>
 		<cfif ts.arrFullText[ts.slideIndex] NEQ "">
 			<span class="zSlideshowLargePhotoText" style="display:block; position:relative; z-index:3; font-size:16px; line-height:18px; text-align:center; width:#ts.slideshowConfig.imageWidth#px; height:20px;color:##FFF; float:left; padding-top:10px; padding-bottom:10px; overflow:auto; top:-40px;">#ts.arrFullText[ts.slideIndex]#</span><span class="zSlideshowLargePhotoTextBg" style="display:block; position:relative; background-color:##000; width:#ts.slideshowConfig.imageWidth#px; height:25px; float:left; top:-85px; z-index:2; padding-top:10px; padding-bottom:10px; opacity:0.7">&nbsp;</span>
-		</cfif>
-		<script type="text/javascript">/* <![CDATA[ */
+		</cfif><script type="text/javascript">/* <![CDATA[ */
 document.getElementById("#imgid#_img").onerror=function(){zImageOnError(this);};
-/* ]]> */</script></a>
+/* ]]> */</script>
+		</a>
+		
 	</cfif>
 </cffunction>
 

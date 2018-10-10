@@ -566,11 +566,18 @@ var zGalleryReloadTimeoutId=0;
 					c.slideDelay=4000;
 					zArrSlideshowIds[i].slideDelay=4000;
 				}
+				// console.log('iasadas here');
+				// return;
+				
+
 				$('#zUniqueSlideshowLargeId'+c.id).cycle({
 					before: zImageLazyLoadUpdate,
 					fx: 'fade',
-					timeout: c.slideDelay
+					timeout:c.slideDelay,
+					slides:'> a',
+					speed:300
 				});
+
 			}
 			if(c.layout === 1 || c.layout===0){
 				var d=c.slideDelay;

@@ -11,6 +11,8 @@
 	<cfscript>
 	var ts=0;
 	Request.zOS.debuggerEnabled=false;
+
+	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle.all.js");
 	if(structkeyexists(form, 'slideshow_id') EQ false){
 		application.zcore.functions.z404("form.slideshow_id was not defined.");//301redirect("/");	
 	}

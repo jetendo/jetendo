@@ -1860,7 +1860,10 @@
 
 <cffunction name="insertGroup" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	this.updateGroup();
+
+	lock name="zInsertSiteOptionGroup#request.zos.globals.id#" type="exclusive" timeout="20"{
+		this.updateGroup();
+	}
 	</cfscript>
 </cffunction>
 
