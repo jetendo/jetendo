@@ -2626,7 +2626,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		if(arguments.displayStruct.randomize){ 
 			db.sql="select count(blog.blog_id) count
 			from #db.table("blog", request.zos.zcoreDatasource)# blog  
-			left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
+			left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category #db.trustedSQL(" FORCE INDEX (`newindex2`)")# on 
 			blog_x_category.blog_id = blog.blog_id and 
 			blog_x_category.site_id = blog.site_id and 
 			blog_x_category_deleted = #db.param(0)# 
@@ -2674,7 +2674,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		#db.trustedsql(rs.select)#  
 		from #db.table("blog", request.zos.zcoreDatasource)# blog 
 		#db.trustedsql(rs.leftJoin)#
-		left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
+		left join #db.table("blog_x_category", request.zos.zcoreDatasource)# #db.trustedSQL(" FORCE INDEX (`newindex2`)")# on 
 		blog_x_category.blog_id = blog.blog_id and 
 		blog_x_category.site_id = blog.site_id and 
 		blog_x_category_deleted = #db.param(0)#
@@ -2751,7 +2751,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	#db.trustedsql(rs.select)#  
 	from #db.table("blog", request.zos.zcoreDatasource)# blog 
 	#db.trustedsql(rs.leftJoin)#
-	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
+	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# #db.trustedSQL(" FORCE INDEX (`newindex2`)")# on 
 	blog_x_category.blog_id = blog.blog_id and 
 	blog_x_category.site_id = blog.site_id and 
 	blog_x_category_deleted = #db.param(0)#
@@ -2796,7 +2796,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	#db.trustedsql(rs.select)#  
 	from #db.table("blog", request.zos.zcoreDatasource)# blog 
 	#db.trustedsql(rs.leftJoin)#
-	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
+	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# #db.trustedSQL(" FORCE INDEX (`newindex2`)")# on 
 	blog_x_category.blog_id = blog.blog_id and 
 	blog_x_category.site_id = blog.site_id and 
 	blog_x_category_deleted = #db.param(0)#

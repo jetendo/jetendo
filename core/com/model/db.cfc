@@ -475,6 +475,12 @@ Copyright (c) 2013 Far Beyond Code LLC.
 				tableStruct.table=trim(tableStruct.table);
 				tableStruct.tableAlias=trim(tableStruct.table);
 			}
+			if(tableStruct.tableAlias CONTAINS "FORCE " or tableStruct.tableAlias CONTAINS "USE "){ 
+				tableStruct.tableAlias=trim(listgetat(tableStruct.tableAlias, 1, " "));
+				if(tableStruct.tableAlias EQ "FORCE" or tableStruct.tableAlias EQ "USE"){
+					tableStruct.tableAlias=tableStruct.table;
+				}
+			}
 			if(findnocase(variables.tableSQLString,tableStruct.table) EQ 0){
 				arrayappend(parseStruct.arrError, "All tables in queries must be generated with dbQuery.table(table, datasource); function. This table wasn't: "&tableStruct.table);
 			}else{

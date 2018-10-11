@@ -44,6 +44,11 @@ this.charset.resource="UTF-8";
 this.scopeCascading = "standard";
 
 
+
+if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "AhrefsBot" or cgi.http_user_agent CONTAINS "MJ12bot"){
+	header statuscode="404" statustext="Page not found";
+	abort;
+}
 // END override cfml admin settings
 
 </cfscript>
