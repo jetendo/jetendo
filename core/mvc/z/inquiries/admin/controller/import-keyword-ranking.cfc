@@ -362,7 +362,7 @@ objCookies=GetResponseCookies(cfhttp);
 					sleep(5000);
 				}
 				if(left(cfhttp.statuscode,3) NEQ '200'){
-					arrayAppend(arrError, 'Semrush download failed: #link#');
+					arrayAppend(arrError, 'Semrush download failed:  site: #row.site_domain# | api link: #link#');
 					continue; 
 					/*
 					savecontent variable="out"{
@@ -583,7 +583,7 @@ objCookies=GetResponseCookies(cfhttp);
 			} 
 			if(left(cfhttp.statuscode,3) NEQ '200'){
 				savecontent variable="out"{
-					echo('<h2>moz.com keyword report download failed.<br>url: #link#</h2>');
+					echo('<h2>moz.com keyword report download failed.</h2><p>site: #row.site_domain#<br>url: #link#</p>');
 					writedump(cfhttp);
 				}
 				throw(out);
