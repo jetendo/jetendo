@@ -51,7 +51,7 @@
 
 		if(structkeyexists(application.siteStruct[request.zos.globals.id].zcoreCustomFunctions, 'memberDashboard')){
 			echo(application.siteStruct[request.zos.globals.id].zcoreCustomFunctions.memberDashboard());
-			echo('<hr />');
+			//echo('<hr />');
 		}
 			// TODO: add stuff for listing / rentals here someday like saved searches, inquiries, etc.
 
