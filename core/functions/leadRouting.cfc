@@ -153,6 +153,27 @@ application.zcore.functions.zInsertLead();
 		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	}
 
+	if(structkeyexists(request.zos.globals, 'leadBlockText') and request.zos.globals.leadBlockText NEQ ""){
+		arrBlock=listToArray(request.zos.globals.leadBlockText, ",", false);
+		blockLead=false;
+		for(n in form){
+			for(i=1;i LTE arraylen(arrBlock);i++){
+				if(len(trim(arrBlock[i])) LT 5){
+					continue; // ignore short phrases to be careful
+				}
+				if(isSimpleValue(form[n]) and form[n] NEQ "" and form[n] CONTAINS arrBlock[i]){
+					blockLead=true;
+					break;
+				}
+			}
+			if(blockLead){
+				break;
+			}
+		}
+		if(blockLead){ 
+			application.zcore.functions.zRedirect("/z/misc/thank-you/complete?modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
+		}  
+	}
 	application.zcore.functions.zBeforeInquiryInsertUpdate(form); 
 	inputStruct = StructNew();
 	inputStruct.table = "inquiries";

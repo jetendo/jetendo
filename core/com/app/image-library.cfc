@@ -2068,6 +2068,9 @@ application.zcore.imageLibraryCom.displayImages(ts);
 					</div>
 				</div>
 				<div class="z-float z-mb-10">
+					Warning: At this time, please don't upload more then 10 images a time. It may cause the server to crash.
+				</div>
+				<div class="z-float z-mb-10">
 					<span id="submitDiv1">
 						<input type="submit" name="submit222" value="Upload" class="z-manager-search-button" style="-webkit-appearance: none;" onclick="$('##submitDiv1').hide();$('##waitDiv1').show();" />
 					</span>

@@ -1,5 +1,12 @@
 <cfcomponent>
 <cfoutput>
+<cffunction name="complete" localmode="modern" access="remote" output="yes">
+	<cfscript>
+	// this function is for disabling conversation tracking
+	index();
+	</cfscript>
+</cffunction>
+
 <cffunction name="index" localmode="modern" access="remote" output="yes">
 	<cfscript>
 	var ts=0;
@@ -40,7 +47,9 @@
 			</cfscript>
 		</cfif>
 	</cfif>
-	#application.zcore.functions.zVarSO("Lead Conversion Tracking Code")#
+	<cfif form.method NEQ "complete">
+		#application.zcore.functions.zVarSO("Lead Conversion Tracking Code")#
+	</cfif>
 </cffunction>
 </cfoutput>
 </cfcomponent>

@@ -1836,6 +1836,11 @@
 			<td style="vertical-align:top; width:140px;">Disqus Shortname:</td>
 			<td><input name="site_disqus_shortname" type="text" value="#htmleditformat(form.site_disqus_shortname)#" /> (This replaces built-in comments with disqus.com and adds comments to more features of the web site.)</td>
 		</tr>
+		<tr>
+			<td style="vertical-align:top; width:140px;">Lead Block Text:</td>
+			<td><input name="site_lead_block_text" type="text" value="#htmleditformat(form.site_lead_block_text)#" /><br>
+			(If any text or email matches these comma separated phrases, the lead will be permanently discarded.)</td>
+		</tr>
 		<tr >
 			<td style="vertical-align:top; width:140px;">Exclude File/Dir<br />From Deployment:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_deploy_excluded_paths", "table-error","")#><textarea name="site_deploy_excluded_paths" type="text" cols="70" rows="10" >#htmleditformat(form.site_deploy_excluded_paths)#</textarea><p>Enter one excluded path/file per line. The path should be relative to this site's sites folder.  For example "#request.zos.sitesPath#site1_com/large-files" can be excluded with "large-files" without quotes, which would exclude this directory and anything inside it. </p>
