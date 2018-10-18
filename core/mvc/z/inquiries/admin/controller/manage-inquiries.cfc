@@ -6,9 +6,9 @@
 	variables.hasLeadsAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Leads");
 	if(variables.hasLeadsAccess){
 		links=[
-			{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
+			//{ link:"/z/inquiries/admin/manage-contact/add", label:"Add Contact" }, 
 			{ link:"/z/inquiries/admin/manage-inquiries/index?zManagerAddOnLoad=1", label:"Add Lead"}, 
-			{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
+			//{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
 			{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
 			{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
 			{ link:"/z/inquiries/admin/routing/index", label:"Lead Routing" }, 

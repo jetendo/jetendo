@@ -372,6 +372,10 @@
 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript> 
+	if(not request.zos.istestserver){
+		echo("Managing contacts is not implemented yet. All the information should be in the lead. Please go back.");
+		abort;
+	}
  	init();
 	super.index();
 	</cfscript>

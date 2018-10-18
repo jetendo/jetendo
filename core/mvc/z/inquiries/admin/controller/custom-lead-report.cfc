@@ -2656,7 +2656,7 @@ leadchart
 				break;*/
 				// Phone 1
 				echo('<tr>
-					<td style="width:1%; white-space:nowrap;">#fs.Name#</td>
+					<td style="width:1%; white-space:nowrap;">#application.zcore.functions.zLimitStringLength(fs.Name, 20)#</td>
 					<td>#fs["Phone 1"]#</td>
 					<td>#fs.city#</td>
 					<td>#dateformat(row.inquiries_datetime, "m/d/yyyy")#</td>
