@@ -324,19 +324,12 @@
 	if(structkeyexists(request.zos.globals, 'enableCSSFramework') and request.zos.globals.enableCSSFramework EQ 1){
 		frameworkEnabled=true;
 	} 
-	breakExtraStruct={
-		"479":"s",
-		"767":"m",
-		"992":"b",
-		"1362":"h"
-	};
 
 	for(n=1;n<=arraylen(breakStruct.arrBreak);n++){
 		breakpoint=breakStruct.arrBreak[n]; 
 		dataStruct=breakStruct.data[breakpoint];
 		//uniqueStruct={};
 		arrCSS=breakStruct.css[breakpoint];
-		arrCSSLast=[];
 		tempScaleText=max(round(16*dataStruct.textScale), dataStruct.textMinimumFontSize); 
 
 		if(frameworkEnabled){
@@ -516,28 +509,43 @@
 					width-=percentMargin; 
 					width=min(maxWidth, int(width*100)/100);  
 				}  
-				padding=' padding-left:#dataStruct.columnPaddingSidePercent#%; padding-right:#dataStruct.columnPaddingSidePercent#%; padding-top:#dataStruct.columnPaddingTopPercent#%; padding-bottom:#dataStruct.columnPaddingBottomPercent#%;'; 
-				if(isSingleColumn){
-					v='.z-#n2#of#limit#{ float:left; margin-left:#numberformat(margin, '_.___')#%; margin-right:#numberformat(margin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-height:1px; max-width:100%; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%; display:block; }'; 
-				}else{    
-					if(breakpoint LTE 992){
-						v=".z-#n2#of#limit#{ float:left; margin-left:#numberformat(margin, '_.___')#%; margin-right:#numberformat(margin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-width:#breakStruct.minimum_column_width#px; max-width:#maxWidth#%; width:#numberformat(width, '_.___')#%; }";
-					}else{
-						v=".z-#n2#of#limit#{ float:left; margin-left:#numberformat(margin, '_.___')#%; margin-right:#numberformat(margin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; max-width:#maxWidth#%; width:#numberformat(width, '_.___')#%; }";
-					} 
-				}
+				padding=' padding-left:#dataStruct.columnPaddingSidePercent#%; padding-right:#dataStruct.columnPaddingSidePercent#%; padding-top:#dataStruct.columnPaddingTopPercent#%; padding-bottom:#dataStruct.columnPaddingBottomPercent#%;';
+
+				v='.z-#n2#of#limit#{ float:left; margin-left:#numberformat(margin, '_.___')#%; margin-right:#numberformat(margin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%;}';
+
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS, v);
-				}   
-				if(structkeyexists(breakExtraStruct, breakpoint)){
-					fullcolumnCount=round(100/percent);
-					fullcolumnCount=n2;
-					fullmargin=dataStruct.columnGapSidePercent/2;  
-					fullmarginTemp=dataStruct.columnGapSidePercent;
-					fullwidth=width-dataStruct.columnGapSidePercent;
-					fullmaxWidth=100;  
-					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#{ float:left; margin-left:#numberformat(fullmargin, '_.___')#%; margin-right:#numberformat(fullmargin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; max-width:#fullmaxWidth#%; width:#numberformat(fullwidth, '_.___')#%; }");
+				}  
+				if(isSingleColumn){
+					v='.z-#n2#of#limit#{ min-height:1px; max-width:100%; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%; display:block; }';
+					//v='.z-#n2#of#limit#{ min-height:1px; max-width:100%; width:100%; margin-left:0px; margin-right:0px; display:block; }';
+					if(not structkeyexists(uniqueStruct, v)){
+						uniqueStruct[v]=true;
+						arrayAppend(arrCSS, v);
+					}   
+				}else{    
+					if(breakpoint LTE 992){
+						v=".z-#n2#of#limit#{ min-width:#breakStruct.minimum_column_width#px; max-width:#maxWidth#%; width:#numberformat(width, '_.___')#%; }";
+					}else{
+						v=".z-#n2#of#limit#{ max-width:#maxWidth#%; width:#numberformat(width, '_.___')#%; }";
+					} 
+					if(not structkeyexists(uniqueStruct, v)){
+						uniqueStruct[v]=true;
+						arrayAppend(arrCSS, v);
+					}  
+				}
+				/*	if(n2 EQ 1 and limit EQ 2 ){
+					writedump(v);
+					writedump(percent);
+					writedump(breakpoint);
+					writedump(columnCount);
+					writedump(columnWidth&" < "&breakStruct.minimum_column_width&" | "&n2&":"&limit);
+					// abort;
+					}*/
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
 				}  
 				// offset classes
 				if(isSingleColumn){
@@ -572,22 +580,16 @@
 					arrayAppend(arrCSS, v);
 				} 
 			}
-
 			v='.z-h-#i#{font-size:#tempScaleHeading#px;  padding-bottom:#round(max(dataStruct.minimumPadding, tempScaleHeading*0.45))#px;}';
-			breakTemp=v&chr(10);
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
 			}
 			v='.z-t-#i#{font-size:#tempScaleText#px; }';
-			breakTemp&=v&chr(10);
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
 			} 
-			if(structkeyexists(breakExtraStruct, breakpoint)){
-				arrayAppend(arrCSS, replace(breakTemp, ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
-			}
 			headingEnabled=0; 
 			if(i EQ "36"){
 				headingEnabled=1;
@@ -608,8 +610,41 @@
 					arrayAppend(arrCSS, v);
 				}
 			} 
+			if(breakpoint EQ "1362"){
+				v='.zmd-h-#i#{font-size:#i#px;  padding-bottom:#round(max(dataStruct.minimumPadding, i*0.45))#px;}';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				}
+				v='.zmd-t-#i#{font-size:#i#px; }';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				} 
+			}else if(breakpoint EQ "992"){
+				v='.zsm-h-#i#{font-size:#i#px;  padding-bottom:#round(max(dataStruct.minimumPadding, i*0.45))#px;}';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				}
+				v='.zsm-t-#i#{font-size:#i#px; }';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				} 
+			}else if(breakpoint EQ "479"){
+				v='.zxs-h-#i#{font-size:#i#px;  padding-bottom:#round(max(dataStruct.minimumPadding, i*0.45))#px;}';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				}
+				v='.zxs-t-#i#{font-size:#i#px; }';
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				} 
+			}
 		}
-		breakStruct.css[breakpoint]=arrayMerge(arrCSS, arrCSSLast); 
 	}   
 	savecontent variable="out"{
 		for(i=1;i<=arraylen(breakStruct.arrBreak);i++){
@@ -622,8 +657,92 @@
 				echo(arrayToList(breakStruct.css[breakpoint], chr(10))&chr(10)); 
 			}
 		}  
+		// arrCSS2=[];
+		// for(g=0;g<=15;g++){
+		// 	c=g*10; 
+			// v='.z-fp-#c#{ padding-left:#c#px; padding-right:#c#px; padding-top:#c#px; padding-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v); 
+			// } 
+			// v='.z-fpt-#c#{ padding-top:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fpr-#c#{ padding-right:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fpb-#c#{ padding-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fpl-#c#{ padding-left:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fpv-#c#{ padding-top:#c#px; padding-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fph-#c#{ padding-left:#c#px; padding-right:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fm-#c#{ margin-left:#c#px; margin-right:#c#px; margin-top:#c#px; margin-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmt-#c#{ margin-top:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmr-#c#{ margin-right:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmb-#c#{ margin-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fml-#c#{ margin-left:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmv-#c#{ margin-top:#c#px; margin-bottom:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmh-#c#{ margin-left:#c#px; margin-right:#c#px; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmv-#c#-auto{ margin-top:#c#px; margin-bottom:#c#px; margin-left:auto; margin-right:auto; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+			// v='.z-fmh-#c#-auto{ margin-left:#c#px; margin-right:#c#px; margin-top:auto; margin-bottom:auto; }';
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS2, v);
+			// } 
+		// }
+		// echo(arrayToList(arrCSS2, chr(10))&chr(10));
 		uniqueStruct={};
-
 		for(i=1;i<=arraylen(breakStruct.arrBreak);i++){
 			breakpoint=breakStruct.arrBreak[i];   
 			dataStruct=breakStruct.data[breakpoint];
@@ -640,115 +759,92 @@
 		 		mt=dataStruct.boxMarginTopPercent*multiplier;
 		 		mb=dataStruct.boxMarginBottomPercent*multiplier;
 		 		mh=dataStruct.boxMarginSidePercent*multiplier;
-				arrTemp=[];
 		 		v='.z-p-#g*10#{ padding-left:#ph#px; padding-right:#ph#px; padding-top:#pt#px; padding-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v); 
 				} 
 				v='.z-pt-#g*10#{ padding-top:#pt#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-pr-#g*10#{ padding-right:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-pb-#g*10#{ padding-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-pl-#g*10#{ padding-left:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-pv-#g*10#{ padding-top:#pt#px; padding-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-ph-#g*10#{ padding-left:#ph#px; padding-right:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-m-#g*10#{ margin-left:#ph#px; margin-right:#ph#px; margin-top:#pt#px; margin-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mt-#g*10#{ margin-top:#pt#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mr-#g*10#{ margin-right:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mb-#g*10#{ margin-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-ml-#g*10#{ margin-left:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mv-#g*10#{ margin-top:#pt#px; margin-bottom:#pb#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mh-#g*10#{ margin-left:#ph#px; margin-right:#ph#px; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mv-#g*10#-auto{ margin-top:#pt#px; margin-bottom:#pb#px; margin-left:auto; margin-right:auto; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
 				v='.z-mh-#g*10#-auto{ margin-left:#ph#px; margin-right:#ph#px; margin-top:auto; margin-bottom:auto; }';
-				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
-				if(structkeyexists(breakExtraStruct, breakpoint)){
-					arrayAppend(arrCSS2, replace(arrayToList(arrTemp, chr(10)), ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
-				}
- 
 				multiplier+=0.8; 
 			}
 			if(breakpoint NEQ 'Default'){
-				if(arrayLen(arrCSS2) NEQ 0){
-					echo('@media screen and (max-width: #breakpoint#px) {'&chr(10)); 
-					echo(arrayToList(arrCSS2, chr(10))&chr(10)); 
-					echo('}'&chr(10));
-				}
+				echo('@media screen and (max-width: #breakpoint#px) {'&chr(10)); 
+				echo(arrayToList(arrCSS2, chr(10))&chr(10)); 
+				echo('}'&chr(10));
 			}else{
 				echo(arrayToList(arrCSS2, chr(10))&chr(10)); 
 			}
