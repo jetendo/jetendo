@@ -1494,6 +1494,8 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			js=deserializeJson(jsonString); 
 			if(structkeyexists(js, 'error')){
 				savecontent variable="out"{
+					echo("domain:"&row.site_short_domain&"<br>");
+					echo(link&"<br>");
 					echo('API Call Failure.  Input:');
 					writedump(jsonStruct);
 					echo('Response:');
