@@ -22,6 +22,7 @@ if($method=='host-time'){
 	function zSecureCommand($command, $timeoutInSeconds){ 
 		$secureHashDate=md5(rand(10000000, 90000000)."-php-".uniqid()); 
 		$startPath=get_cfg_var("jetendo_root_path")."execute/start/".$secureHashDate.".txt";
+		$activePath=get_cfg_var("jetendo_root_path")."execute/active/".$secureHashDate.".txt";
 		$completePath=get_cfg_var("jetendo_root_path")."execute/complete/".$secureHashDate.".txt"; 
 		$r=file_put_contents($startPath, $command);
 		if($r===FALSE){
@@ -33,10 +34,12 @@ if($method=='host-time'){
 			usleep(100000); 
 			if(file_exists($completePath)){
 				$contents=file_get_contents($completePath);
+				unlink($activePath);
 				unlink($completePath);
 				return [true, $contents];
 			}else if(zMicrotimeFloat()-$startTime > $timeoutInSeconds){
 				unlink($startPath);
+				unlink($activePath);
 				unlink($completePath);
 				return [false, "secureCommand failed"];
 			}

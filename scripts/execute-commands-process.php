@@ -1,6 +1,7 @@
 <?php
 require("library.php");
 set_time_limit(70);
+ini_set('memory_limit', '256MB');
 /*
 Command reference:
 convertHTMLTOPDF#chr(9)#site_short_domain#chr(9)#htmlFile#chr(9)#pdfFile#chr(9)#javascriptDelay
@@ -2468,47 +2469,6 @@ function microtimeFloat()
     list($usec, $sec) = explode(" ", microtime());
     return ((float)$usec + (float)$sec);
 }
-function runCommand($argv){
-	$debug=false;
-	if(count($argv) == 3){
-		if($argv[2]!="debug"){
-			echo "Invalid argument count.";
-			exit;
-		}else{
-			$debug=true;
-		}
-		$results=processContents($argv[1]);
-		echo "result:".$results."\n\n";
-		return;
-	}else if(count($argv) != 2){
-		echo "Invalid argument count.";
-		exit;
-	}	
-	$debug=false;
-	$timeout=60; // seconds
-	$timeStart=microtimeFloat();
-	$completePath=get_cfg_var("jetendo_root_path")."execute/complete/";
-	$startPath=get_cfg_var("jetendo_root_path")."execute/start/";
-
-	$startFile=$startPath.$argv[1];
-	$completeFile=$completePath.$argv[1];
-	if(!file_exists($startFile)){
-		echo "Start file was missing: ".$startFile."\n";
-		exit;
-	}
-
-	$contents=file_get_contents($startFile);
-	unlink($startFile);
-	$results=processContents($contents);
-	$fp=fopen($completeFile, "w");
-		echo "\n".$results."\n\n";
-	if($debug){
-	}
-	echo "Completed: ".$argv[1]."\n";
-	fwrite($fp, $results);
-	fclose($fp);
-			
-}
 
 
 function gitClone($a){
@@ -2565,6 +2525,87 @@ function gitClone($a){
 	$r=`$cmd`;
 	*/ 
 	return "1|Success";
+}
+function runCommand($argv){
+	$debug=false;
+	if(count($argv) == 3){
+		if($argv[2]!="debug"){
+			echo "Invalid argument count.";
+			exit;
+		}else{
+			$debug=true;
+		}
+		$results=processContents($argv[1]);
+		echo "result:".$results."\n\n";
+		return;
+	}else if(count($argv) != 2){
+		echo "Invalid argument count.";
+		exit;
+	}	
+	$debug=false;
+	// $timeout=60; // seconds
+	$timeStart=microtimeFloat();
+	$completePath=get_cfg_var("jetendo_root_path")."execute/complete/";
+	$activePath=get_cfg_var("jetendo_root_path")."execute/active/";
+	$startPath=get_cfg_var("jetendo_root_path")."execute/start/";
+
+	$startFile=$startPath.$argv[1];
+	$activeFile=$activePath.$argv[1];
+	$completeFile=$completePath.$argv[1]; 
+	if(!file_exists($startFile.".running")){
+		echo "Start file was missing: ".$startFile.".running"."\n";
+		while(file_exists($activeFile)){
+			unlink($activeFile); 
+			usleep(30000);
+		}
+		exit;
+	}
+
+	try{
+		$contents=file_get_contents($startFile.".running");
+		// if(file_exists($startFile)){
+		// 	unlink($startFile);
+		// }
+		if($contents===FALSE){
+			$out="Failed to read start file";
+			file_put_contents($completeFile.".error", $out);
+			echo $out."\n"; 
+		}else{
+			$results=processContents($contents);
+			$result=file_put_contents($completeFile.".temp".$timeStart, $results);
+			if($result===FALSE){
+				$out="Failed to write completeFile";
+				file_put_contents($completeFile.".error", $out);
+				echo $out."\n"; 
+			}else{
+				echo "\n".$results."\n\n";
+				echo "Completed: ".$argv[1]."\n";
+				$result=rename($completeFile.".temp".$timeStart, $completeFile);
+				if($result===FALSE){
+					$out="Failed to rename completeFile to final name";
+					file_put_contents($completeFile.".error", $out);
+					echo $out."\n"; 
+				}
+			}
+		}
+	}catch(Exception $e){
+		// prevent thread starvation when there are errors. 
+
+		ob_start();
+		var_dump($e);
+		$out=ob_get_clean();
+		file_put_contents($completeFile.".error", $out);
+		echo $out."\n";
+	}
+	while(file_exists($activeFile)){
+		unlink($activeFile); 
+		usleep(30000);
+	}
+	while(file_exists($startFile.".running")){
+		unlink($startFile.".running"); 
+		usleep(30000);
+	}
+			
 }
 runCommand($argv);
 

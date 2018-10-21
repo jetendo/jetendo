@@ -96,6 +96,7 @@ $cmd='/bin/chown -R '.get_cfg_var("jetendo_www_user").':'.get_cfg_var("jetendo_w
 @mkdir(get_cfg_var("jetendo_root_path")."execute/", 0770);
 @mkdir(get_cfg_var("jetendo_root_path")."execute/start", 0770);
 @mkdir(get_cfg_var("jetendo_root_path")."execute/complete", 0770);
+@mkdir(get_cfg_var("jetendo_root_path")."execute/active", 0770);
 $cmd='/bin/chown -R '.get_cfg_var("jetendo_www_user").':'.get_cfg_var("jetendo_www_user")." ".get_cfg_var("jetendo_root_path")."execute/";
 `$cmd`;
 @mkdir(get_cfg_var("jetendo_root_path")."themes/jetendo-default-theme", 0550);

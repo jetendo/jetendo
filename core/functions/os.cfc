@@ -61,6 +61,7 @@
 	<cfscript>
 	secureHashDate=hash(randrange(10000000, 90000000))&"-"&dateformat(now(),"yyyymmdd")&"-"&timeformat(now(),"HHmmss");
 	startPath=request.zos.installPath&"execute/start/"&secureHashDate&".txt";
+	activePath=request.zos.installPath&"execute/active/"&secureHashDate&".txt";
 	completePath=request.zos.installPath&"execute/complete/"&secureHashDate&".txt";
 	application.zcore.functions.zwritefile(startPath, arguments.command);
 	
@@ -70,10 +71,12 @@
 		sleep(100);
 		if(fileexists(completePath)){
 			contents=application.zcore.functions.zreadfile(completePath);
+			application.zcore.functions.zdeletefile(activePath);
 			application.zcore.functions.zdeletefile(completePath);
 			return contents;
 		}else if(gettickcount()-startTime GTE arguments.timeoutInSeconds){
 			application.zcore.functions.zdeletefile(startPath);
+			application.zcore.functions.zdeletefile(activePath);
 			application.zcore.functions.zdeletefile(completePath);
 			throw("Timeout occurred while running zSecureCommand: #listGetAt(arguments.command, 1, chr(9))#.  The temporary files were automatically deleted. You may need to verify the PHP cron job is working correctly if this command continues to fail.");
 		}

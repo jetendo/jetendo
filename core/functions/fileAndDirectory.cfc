@@ -750,7 +750,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	<cfscript>
 	var output = 0;
 	secureCommand="getImageMagickIdentify"&chr(9)&arguments.source;
-	output=trim(application.zcore.functions.zSecureCommand(secureCommand, 10));
+	output=trim(application.zcore.functions.zSecureCommand(secureCommand, 200));
 	if(output CONTAINS "," and listlen(output,",", true) GTE 9){
 		arrOut=listtoarray(output, ",", true);
 		ext=application.zcore.functions.zGetFileExt(arguments.source);
@@ -983,6 +983,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 				}
 			}
 		}
+		
 		resizeCMD&=' "#arguments.source#" "#filePath#"';
 		cs.sourceFilePath=arguments.source;
 		cs.destinationFilePath=filePath;
@@ -1012,7 +1013,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 			}
 		} 
 		secureCommand="getImageMagickConvertResize"&chr(9)&cs.resizeWidth&chr(9)&cs.resizeHeight&chr(9)&cs.cropWidth&chr(9)&cs.cropHeight&chr(9)&cs.cropXOffset&chr(9)&cs.cropYOffset&chr(9)&cs.sourceFilePath&chr(9)&cs.destinationFilePath;
-		output=application.zcore.functions.zSecureCommand(secureCommand, 20); 
+		output=application.zcore.functions.zSecureCommand(secureCommand, 200); 
 		if(output NEQ "1"){
 			if(request.zos.isDeveloper){
 				throw("Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output);
@@ -1060,7 +1061,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	if(not fileexists(arguments.ss.absImageMaskPath)){
 		throw("arguments.ss.absImageMaskPath, ""#arguments.ss.absImageMaskPath#"", doesn't exist.");
 	}
-	result=application.zcore.functions.zSecureCommand("getImageMagickConvertApplyMask"&chr(9)&arguments.ss.absImageInputPath&chr(9)&arguments.ss.absImageOutputPath&chr(9)&arguments.ss.absImageMaskPath, 20);
+	result=application.zcore.functions.zSecureCommand("getImageMagickConvertApplyMask"&chr(9)&arguments.ss.absImageInputPath&chr(9)&arguments.ss.absImageOutputPath&chr(9)&arguments.ss.absImageMaskPath, 200);
 	if(result NEQ "" and result EQ false){
 		return false;
 	}else{

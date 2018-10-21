@@ -262,6 +262,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	if(not request.zos.isDeveloper){
 		zDebug=false;
 	}
+	setting requesttimeout="1000";
 
 	if(not structkeyexists(cookie, 'zenable')){
 		application.zcore.functions.z404("No cookie set, so generateImage is prevented to avoid hotlinks to dynamic image requests.");
@@ -274,6 +275,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	}else{
 		arguments.crop=1;	
 	}
+	
 	arrSize=listtoarray(arguments.size,"x");
 	if(arraylen(arrSize) NEQ 2){
 		if(request.zos.cgi.QUERY_STRING CONTAINS "&amp;size=" or arguments.size EQ ""){
@@ -874,6 +876,8 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 	var imageCount=0;
 	var returnValue=0;
 	var arrOut=arraynew(1); 
+
+	setting requesttimeout="10000";
 	form.disableImageProcessOutput=application.zcore.functions.zso(form, 'disableImageProcessOutput', false, false);
 	form.image_caption=application.zcore.functions.zso(form, 'image_caption');
 	form.image_file=application.zcore.functions.zso(form, 'image_file');
@@ -2066,10 +2070,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 					<div id="htmlFileUpload" class="z-float"> 
 						<input type="file" name="imagefiles" id="imagefiles" multiple="multiple" style="width:100%;" />
 					</div>
-				</div>
-				<div class="z-float z-mb-10">
-					Warning: At this time, please don't upload more then 10 images a time. It may cause the server to crash.
-				</div>
+				</div> 
 				<div class="z-float z-mb-10">
 					<span id="submitDiv1">
 						<input type="submit" name="submit222" value="Upload" class="z-manager-search-button" style="-webkit-appearance: none;" onclick="$('##submitDiv1').hide();$('##waitDiv1').show();" />
