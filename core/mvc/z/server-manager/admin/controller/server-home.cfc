@@ -1,5 +1,5 @@
 <cfcomponent>
-<cfoutput>
+<cfoutput> 
 <cffunction name="unloadOtherSites" access="remote" localmode="modern" roles="serveradministrator">
 	<cfscript>
 	if(not request.zos.isTestServer){
@@ -7,9 +7,13 @@
 	}
 	unloadCount=0;
 	for(i in application.siteStruct){
+		if(i EQ 1){
+			continue;
+		}
 		if(i NEQ request.zos.globals.id){
 			unloadCount++;
 			structdelete(application.siteStruct, i);
+			structdelete(application.siteAccessCache, i);
 		}
 	}
 	echo(unloadCount&" sites unloaded");

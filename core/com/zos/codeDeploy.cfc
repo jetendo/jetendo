@@ -37,6 +37,7 @@
 	tFunctions.onRequestStart2=onRequestStart2;
 	tFunctions.onRequestStart3=onRequestStart3;
 	tFunctions.onRequestStart4=onRequestStart4;
+	tFunctions.unloadSitesByAccessDate=unloadSitesByAccessDate;
 	tFunctions.onExecuteCacheReset=onExecuteCacheReset;
 	tFunctions.onCodeDeploy=onCodeDeploy;
 	tFunctions.onRequestEnd=onRequestEnd;

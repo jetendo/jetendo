@@ -833,6 +833,7 @@
 	
 	if(request.zos.istestserver){
 		request.searchServerCollectionName="entiresite-"&variables.site_id;
+		unloadSitesByAccessDate();
 	} 
 	request.zos.sslManagerEnabled=false;
 	request.zos.currentHostName=request.zos.globals.domain;
@@ -1357,6 +1358,24 @@
 			application.zcore.functions.z301Redirect("#protocol&ds.domain_redirect_new_domain&tempURL&q#"); 
 		}
 	} 
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="unloadSitesByAccessDate" access="public" localmode="modern">
+	<cfscript>
+	if(not request.zos.isTestServer){
+		application.zcore.functions.z404("This can only be run on the test server.");
+	}
+	if(not structkeyexists(application, 'siteAccessCache')){
+		application.siteAccessCache={};
+	}
+	application.siteAccessCache[request.zos.globals.id]={site_id:request.zos.globals.id, lastAccessDate:dateformat(now(), "yyyymmdd")&timeformat(now(),"HHmmss")}; 
+	arrKey=structsort(application.siteAccessCache, "numeric", "asc", "lastAccessDate"); 
+	unloadCount=0;
+	for(n=1;n<=arraylen(arrKey)-3;n++){
+		structdelete(application.siteAccessCache, arrKey[n]);
+	}
 	</cfscript>
 </cffunction>
 </cfoutput>

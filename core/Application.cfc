@@ -231,6 +231,7 @@ request.zos.cgi=local.tempCGI;
 		local.tFunctions.onRequestStart2=onRequestStart2;
 		local.tFunctions.onRequestStart3=onRequestStart3;
 		local.tFunctions.onRequestStart4=onRequestStart4;
+		local.tFunctions.unloadSitesByAccessDate=unloadSitesByAccessDate;
 		local.tFunctions.onCodeDeploy=onCodeDeploy;
 		local.tFunctions.onRequestEnd=onRequestEnd;
 		local.tFunctions.onRequest=onRequest;
