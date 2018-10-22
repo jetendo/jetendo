@@ -2344,6 +2344,12 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 	var qMapCheck=0;
 	var tempSQL=0;
 
+	if(structkeyexists(request.zsession, 'zListingHideMap') EQ false){
+		request.zsession.zListingHideMap=true;
+	}
+	if(request.zos.functions.zso(form, 'search_map_coordinates_list') NEQ ""){
+		request.zsession.zListingHideMap=false;
+	}
 
 	// proxy cache disabled on all real estate sites to avoid bugs.
 	application.zcore.functions.zNoCache();

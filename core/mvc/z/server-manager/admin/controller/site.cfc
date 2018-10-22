@@ -765,7 +765,7 @@
 			application.zcore.status.setStatus(Request.zsid, "Site, '#form.site_sitename#', Updated Successfully.");
 		}
 	}
-	application.zcore.functions.zSecureCommand("verifySitePaths", 20);
+	application.zcore.functions.zSecureCommand("verifySitePaths", 40);
 	if(currentMethod EQ "insert"){
 		application.zcore.functions.zcreatedirectory(sdomain2&'zupload');
 		application.zcore.functions.zcreatedirectory(sdomain2&'zcache');

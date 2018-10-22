@@ -1,7 +1,7 @@
 <?php
 require("library.php");
 set_time_limit(70);
-ini_set('memory_limit', '256MB');
+ini_set('memory_limit', '512M');
 /*
 Command reference:
 convertHTMLTOPDF#chr(9)#site_short_domain#chr(9)#htmlFile#chr(9)#pdfFile#chr(9)#javascriptDelay

@@ -87,7 +87,6 @@ if($debug && !zIsTestServer()){
 	$background=' 2>&1 ';
 }else{
 	$background=" > /dev/null 2>/dev/null &";
-	$background=" > /dev/null 2>/dev/null &";
 }
 $arrEntry=array();
 
@@ -220,10 +219,10 @@ while(true){
 				// }
 				continue;
 			} 
-			$phpCmd=$script.escapeshellarg($entry).$background;
 			// this is useful for debugging background output as separate files instead of having to run the commands
-			
-			//$phpCmd=$script.escapeshellarg($entry)." > /var/jetendo-server/jetendo/execute/complete/".$entry."output.temp 2>/var/jetendo-server/jetendo/execute/complete/".$entry."error.temp &";
+			//$background=" > /var/jetendo-server/jetendo/execute/complete/output.".$entry.".temp 2>/var/jetendo-server/jetendo/execute/complete/error.".$entry.".temp &";
+
+			$phpCmd=$script.escapeshellarg($entry).$background;
 			rename($startPath.$entry, $startPath.$entry.".running");
 			if(file_exists($startPath.$entry.".running")){
 				file_put_contents($activePath.$entry, $type);

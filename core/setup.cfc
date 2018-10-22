@@ -183,7 +183,7 @@
 		application.zcore.functions.zUpdate(ts);
 	}
 	
-	application.zcore.functions.zSecureCommand("verifySitePaths", 20);
+	application.zcore.functions.zSecureCommand("verifySitePaths", 40);
 	application.zcore.functions.zcreatedirectory(t9.site_privatehomedir&'zupload');
 	application.zcore.functions.zcreatedirectory(t9.site_privatehomedir&'zcache');
 	application.zcore.functions.zcreatedirectory(t9.site_privatehomedir&'_cache');

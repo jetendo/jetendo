@@ -1444,5 +1444,77 @@ if(rs.success){
     </cfscript>
 </cffunction> --->
 
+<!--- 
+
+ts={
+    marginRadiusInMiles:1, // can be decimal
+    markers:[{
+        latitude:29.223495746432107,
+        longitude:-81.09727218747139
+    }],
+    width:"100%",
+    height:"350",
+    displayMapLink:true
+};
+application.zcore.functions.zDisplayMapWithMarker(ts);
+ --->
+<cffunction name="zDisplayMapWithMarker" localmode="modern" access="remote">
+    <cfargument name="ss" type="struct" required="yes">
+    <cfscript>
+    ss=arguments.ss;
+    ts={
+        marginRadiusInMiles:1,
+        markers:[],
+        width:"100%",
+        height:"350",
+        displayMapLink:false
+    };
+    structappend(ss, ts, false);
+    if(arrayLen(ss.markers) EQ 0){
+        throw("ss.markers is required with this structure: {latitude:0, longitude:0}");
+    }
+
+    // get min and max lat/long from markers
+    minLatitude=ss.markers[1].latitude;
+    maxLatitude=ss.markers[1].latitude;
+    minLongitude=ss.markers[1].longitude;
+    maxLongitude=ss.markers[1].longitude;
+    if(arraylen(ss.markers)>1){
+        for(i=2;i<=arraylen(ss.markers);i++){
+            if(ss.markers[i].latitude<minLatitude){
+                minLatitude=ss.markers[i].latitude;
+            }
+            if(ss.markers[i].latitude>maxLatitude){
+                maxLatitude=ss.markers[i].latitude;
+            }
+            if(ss.markers[i].longitude<minLongitude){
+                minLongitude=ss.markers[i].longitude;
+            }
+            if(ss.markers[i].latitude>maxLongitude){
+                maxLongitude=ss.markers[i].longitude;
+            }
+        }
+    }
+    ss.marginRadiusInMiles/=2;
+
+    milesPerLatitude=69.172;
+    radians=((minLatitude+maxLatitude)/2)*0.0174533;
+    milesPerLongitude=radians*69.172; // usually over 50 miles 
+    
+    if(milesPerLongitude EQ 0){
+    	return;
+    }
+    minLatitudeFinal=minLatitude-(ss.marginRadiusInMiles/milesPerLatitude);
+    maxLatitudeFinal=maxLatitude+(ss.marginRadiusInMiles/milesPerLatitude);
+    minLongitudeFinal=minLongitude-(ss.marginRadiusInMiles/milesPerLongitude);
+    maxLongitudeFinal=maxLongitude+(ss.marginRadiusInMiles/milesPerLongitude);
+ 
+    echo('<iframe width="#ss.width#" height="#ss.height#" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=#minLongitudeFinal#%2C#minLatitudeFinal#%2C#maxLongitudeFinal#%2C#maxLatitudeFinal#&amp;layer=mapnik&amp;marker=#ss.markers[1].latitude#%2C#ss.markers[1].longitude#" style="border: 1px solid black"></iframe>');
+    if(ss.displayMapLink){
+        echo('<br/><small><a href="https://www.openstreetmap.org/?mlat=29.22350&amp;mlon=-81.09727##map=19/29.22350/-81.09727">View Larger Map</a></small>');
+    }
+    </cfscript>
+</cffunction>
+
 </cfoutput>
 </cfcomponent>

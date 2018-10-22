@@ -3969,6 +3969,12 @@ propertyDataCom.setSearchCriteria(form);
 				res=propDisplayCom.display();
 			}
 		}
+		if(structkeyexists(request.zsession, 'zListingHideMap') EQ false){
+			request.zsession.zListingHideMap=true;
+		}
+		if(request.zos.functions.zso(form, 'search_map_coordinates_list') NEQ ""){
+			request.zsession.zListingHideMap=false;
+		}
 		</cfscript>	
 
         <cfif structkeyexists(application.sitestruct[request.zos.globals.id], 'zListingMapCheck') and isDefined('request.zsession.zListingHideMap') and request.zsession.zListingHideMap EQ false and tempHideMap EQ false>

@@ -12,10 +12,8 @@
 	var theMapProp=0;
 	var returnStruct3=0;
 	var noCoordinates=0;
-	var centerCoorAlreadySet=0;
-	var googleMapAPI=0;
-	var theMapText=0;
-	var googleMapsApiV3=0;
+	var centerCoorAlreadySet=0; 
+	var theMapText=0; 
 	var rts=0;
 	var backupCoordinatesList=0;
 	var primaryCityId=0;
@@ -25,13 +23,7 @@
 	var i=0;
 	var mapStageStruct=application.zcore.functions.zso(arguments.mapStruct, 'mapStageStruct', false, structnew());
 	var local=structnew();
-	structappend(local, arguments.mapStruct, true);
-	googleMapsApiV3=true; 
-	if(request.zos.istestserver){
-		googleMapAPI='http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAdWwlJtBeGqzqle5PA3K2rxQT_xEequXl6lA3l_nxdJ6wHr2iHBTiP0zRPrn7zi_kbxANAOSeWbggsg';
-	}else{
-		googleMapAPI='http://maps.google.com/maps?file=api&v=2&key=#request.zos.globals.googlemapsapikey#';
-	}
+	structappend(local, arguments.mapStruct, true); 
 	if(structkeyexists(mapStageStruct, 'height') EQ false){
 		if(request.cgi_script_name NEQ '/z/listing/property/detail/index' and request.cgi_script_name NEQ '/z/listing/property/detail-new/index'){
 			mapStageStruct=StructNew();
@@ -144,7 +136,8 @@
 		mapstageStruct.avgLong=application.zcore.app.getAppData("listing").sharedStruct.avgLong;
 	}
  
-			application.zcore.template.appendTag('scripts', '<div id="zMapOverlayDivV3" style="position:absolute; left:0px; top:0px; display:none; z-index:1000;"></div>');
+	application.zcore.template.appendTag('scripts', '<div id="zMapOverlayDivV3" style="position:absolute; left:0px; top:0px; display:none; z-index:1000;"></div>');
+	disableGoogleMaps=false;
 	</cfscript> 
 	<cfsavecontent variable="theMapText">
 		<div id="zMapAllDiv" style="float:left;width:100%">
@@ -162,8 +155,26 @@
 			</table>
 			</div>
 		<cfelseif request.cgi_script_name EQ '/z/listing/property/detail/index' or request.cgi_script_name EQ '/z/listing/property/detail-new/index'>
+
+			<cfif listing_latitude NEQ "" and listing_longitude NEQ "">
+				<cfscript>
+				disableGoogleMaps=true;
+				ts={
+				    marginRadiusInMiles:3, // can be decimal
+				    // note this doesn't support multiple markers or custom marker html when clicked yet
+				    markers:[{
+				        latitude:#listing_latitude#,
+				        longitude:#listing_longitude#
+				    }],
+				    width:"100%",
+				    height:mapStageStruct.height,
+				    displayMapLink:false
+				};
+				application.zcore.functions.zDisplayMapWithMarker(ts);
+				</cfscript>
+			</cfif>
 		
-			<cfsavecontent variable="tempMetaBing">
+			<!--- <cfsavecontent variable="tempMetaBing">
 			<script type="text/javascript">
 			/* <![CDATA[ */ zOneLatitude=#listing_latitude#;
 			zOneLongitude=#listing_longitude#;
@@ -188,7 +199,7 @@
 			<h3>360&deg; Street View</h3>
 			Note: Drag your mouse to view 360&deg;.  The default view may not be facing the property.<br />
 			<div id="pano" style="width:480px; height: 270px; "></div>
-			</div>
+			</div> --->
 		
 		</cfif>
 		</div>
@@ -257,7 +268,9 @@
 	<input type="hidden" name="zMapLoadInputVars1" class="zMapLoadInputVarsClass" value="#htmleditformat(theMapProp)#" />
 	
 	<cfscript>
-	application.zcore.functions.zRequireGoogleMaps();
+	if(not disableGoogleMaps){
+		application.zcore.functions.zRequireGoogleMaps();
+	}
 	</cfscript>
 </cffunction>
 </cfoutput>
