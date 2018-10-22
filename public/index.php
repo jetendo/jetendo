@@ -34,12 +34,13 @@ if($method=='host-time'){
 			usleep(100000); 
 			if(file_exists($completePath)){
 				$contents=file_get_contents($completePath);
-				unlink($activePath);
+				@unlink($activePath);
 				unlink($completePath);
 				return [true, $contents];
 			}else if(zMicrotimeFloat()-$startTime > $timeoutInSeconds){
-				unlink($startPath);
-				unlink($activePath);
+				@unlink($startPath);
+				@unlink($startPath.".running");
+				@unlink($activePath);
 				unlink($completePath);
 				return [false, "secureCommand failed"];
 			}

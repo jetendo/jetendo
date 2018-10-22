@@ -462,7 +462,7 @@
 	}
 
 
-	request.leadData.phoneMonthStruct=typeIdLookup["Phone Call"];
+	request.leadData.phoneMonthStruct=typeIdLookup["Phone Call"]; 
 	// get previous period
 
 	db.sql="SELECT 
@@ -490,7 +490,7 @@
 	inquiries_datetime<#db.param(request.leadData.previousEndDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	inquiries_type_id=#db.param(request.leadData.phoneMonthStruct.inquiries_type_id)# and 
-	inquiries_type_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	inquiries_type_id_siteIDType=#db.param(4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)#"; 
 	filterInquiryTableSQL(db);
 	db.sql&="
@@ -533,7 +533,7 @@
 	inquiries_datetime<#db.param(request.leadData.previousEndDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	inquiries_type_id=#db.param(request.leadData.phoneMonthStruct.inquiries_type_id)# and 
-	inquiries_type_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	inquiries_type_id_siteIDType=#db.param(4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)# "; 
 	filterInquiryTableSQL(db);
 	db.sql&="
@@ -569,14 +569,13 @@
 	inquiries_datetime<#db.param(request.leadData.endDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	inquiries_type_id=#db.param(request.leadData.phoneMonthStruct.inquiries_type_id)# and 
-	inquiries_type_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	inquiries_type_id_siteIDType=#db.param(4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)#"; 
 	filterInquiryTableSQL(db);
 	db.sql&="
 	GROUP BY DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) 
 	ORDER BY date ";
-	qMonthPhone=db.execute("qMonthPhone"); 
-
+	qMonthPhone=db.execute("qMonthPhone");  
 
 	db.sql="SELECT 
 	DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) date, 
@@ -613,7 +612,7 @@
 	inquiries_datetime<#db.param(request.leadData.endDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	inquiries_type_id=#db.param(request.leadData.phoneMonthStruct.inquiries_type_id)# and 
-	inquiries_type_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	inquiries_type_id_siteIDType=#db.param(4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)# "; 
 	filterInquiryTableSQL(db);
 	db.sql&="
@@ -2476,7 +2475,7 @@ leadchart
 	inquiries_datetime<#db.param(request.leadData.endDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	inquiries_type_id=#db.param(request.leadData.phoneMonthStruct.inquiries_type_id)# and 
-	inquiries_type_id_siteIDType=#db.param(application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	inquiries_type_id_siteIDType=#db.param(4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)#"; 
 	filterInquiryTableSQL(db);
 	db.sql&="
@@ -2497,7 +2496,7 @@ leadchart
 	inquiries_datetime<#db.param(request.leadData.endDate)# and 
 	inquiries_deleted=#db.param(0)# and  
 	concat(inquiries_type_id, #db.param('-')#, inquiries_type_id_siteIDType) <> 
-	#db.param(request.leadData.phoneMonthStruct.inquiries_type_id&'-'&application.zcore.functions.zGetSiteIdType(request.leadData.phoneMonthStruct.site_id))# and 
+	#db.param(request.leadData.phoneMonthStruct.inquiries_type_id&'-'&4)# and 
 	inquiries.site_id = #db.param(request.zos.globals.id)#"; 
 	filterInquiryTableSQL(db);
 	db.sql&="
