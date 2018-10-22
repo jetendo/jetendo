@@ -234,8 +234,7 @@
 
 <cffunction name="getSiteId" localmode="modern" access="public">
 	<cfscript>
-	site_id=0;
-	temphomedir=Request.zOSHomeDir;  
+	site_id=0; 
 	temphomedir=Request.zOSHomeDir;//replace(expandpath('/'),"\","/","all");
 	tempdomain="http://"&lcase(request.zos.cgi.server_name);
 	tempsecuredomain="https://"&lcase(request.zos.cgi.server_name); // need to be able to override this.
@@ -348,6 +347,7 @@
 	}else{
 		site_id=getSiteId();
 	}  
+ 
 	// TODO need to avoid running this if the core is not fully loaded yet.
 	if(request.zos.isTestServer and not structkeyexists(application,'onInternalApplicationStartRunning')){ 
 		if(site_id NEQ 0){
@@ -355,7 +355,7 @@
 				onApplicationStart();
 				OnInternalApplicationStart();
 				loadSite(application.zcore.serverGlobals.serverid);
-			}
+			} 
 			if(not structkeyexists(application.zcoreSitesLoaded, site_id)){ 
 				setSiteRequestGlobals(site_id); 
 				if(structkeyexists(application.zcoreSitesNotListingLoaded, site_id)){
@@ -963,8 +963,7 @@
 		setting requesttimeout="3000";
 		application.zcore.functions.zOS_rebuildCache();
 		application.zcore.functions.zredirect("/");
-	}
-	
+	} 
 	request.zos.emailData={
 		sitePath:'/e/attachments/',
 		from:'',
@@ -973,7 +972,7 @@
 		username:request.zos.globals.emailusername,
 		password:request.zos.globals.emailpassword,
 		zemail_account_id:false
-	};
+	}; 
 	
 	request.zos.httpCompressionType="deflate;q=0.5";
 	request.zos.searchServerCollectionName="entiresite_verity";
@@ -1026,7 +1025,7 @@
 	}else if(structkeyexists(application.zcore, 'runOnCodeDeploy')){
 		structdelete(application.zcore, 'runOnCodeDeploy');
 		variables.onCodeDeploy();
-	}
+	} 
 	
 	//request.zOS.page.forceSynchronization = true;
 	
@@ -1050,7 +1049,7 @@
 		for(var i=1;i LTE arrayLen(arrIp);i++){
 			ipStruct[arrIp[i]]=true;
 		}
-	} 
+	}  
 	if(request.zos.globals.parentId NEQ 0){
 		loginBypassIp=application.zcore.functions.zvar('requireLoginByPassIpList', request.zos.globals.parentId);
 		if(loginBypassIp NEQ ""){
@@ -1060,7 +1059,7 @@
 			}
 		} 
 	}
-	request.bypassLoginIPStruct=ipStruct;
+	request.bypassLoginIPStruct=ipStruct; 
 
 
 	if(not request.zos.isServer and ((request.zos.globals.requireLogin EQ 1 and not structkeyexists(ipStruct, request.zos.cgi.remote_addr) and request.zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN "W3C_Validator") or local.requireMemberAreaLogin)){
@@ -1068,7 +1067,7 @@
 			if(request.zos.migrationMode){
 				writeoutput('<h2>Server Migration In Progress</h2><p>Please try again in a few hours.</p>');
 				application.zcore.functions.zabort();
-			}
+			} 
 			if(local.requireMemberAreaLogin){
 				request.zos.inMemberArea=true;
 				application.zcore.skin.disableMinCat(); 
@@ -1076,7 +1075,7 @@
 					redirectURL='https://'&lcase(request.zos.globals.sslManagerDomain)&request.zos.originalURL&"?"&request.zos.cgi.query_string;  
 					application.zcore.functions.z301Redirect(redirectURL);
 				}
-			}
+			} 
 			if(application.zcore.user.isCustomSet() EQ false){
 				application.zcore.user.setCustomTable();
 			}
@@ -1097,12 +1096,12 @@
 			}
 			if(left(request.cgi_script_name, 8) EQ "/member/" or (variables.site_id EQ request.zos.globals.serverid and request.zos.isServer EQ false)){ 
 				application.zcore.template.setTemplate("zcorerootmapping.templates.administrator",true,true);
-			}
+			} 
 		}
 	}else if(request.cgi_script_name EQ "/z/user/login/index"){ 
 		request.zos.inMemberArea=true;
 		application.zcore.skin.disableMinCat();
-	}
+	} 
 	if(application.zcore.user.checkGroupAccess("user")){ 
 		header name="Expires" value="0";
 		header name="Pragma" value="no-cache";
@@ -1143,7 +1142,7 @@
 	} 
 	if(structkeyexists(form,'zab') EQ false){
 		application.zcore.tracking.init();
-	}
+	} 
 	application.zcore.functions.zRequireJquery();
 	</cfscript>
 </cffunction>

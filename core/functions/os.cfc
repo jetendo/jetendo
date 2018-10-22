@@ -1398,7 +1398,13 @@ application.zcore.functions.zLogError(ts);
 				return arguments.defaultValue;	
 			}
 		}else{
+			backupSiteID=request.zos.globals.id;
+			// TODO: might be better if we didn't have to call this
 			application.zcore.functions.zOS_cacheSiteAndUserGroups(arguments.site_id);
+			if(structkeyexists(application.zcore.siteglobals,backupSiteID)){
+				request.zos.globals=application.zcore.siteglobals[backupSiteID];
+			}
+			setSiteRequestGlobals(backupSiteId);
 
 			if(structkeyexists(application.zcore.siteGlobals, arguments.site_id)){
 				if(structkeyexists(application.zcore.siteGlobals[arguments.site_id],arguments.name)){
@@ -2760,5 +2766,22 @@ if(linkCount){
 	</cfscript>
 </cffunction>
 
+<cffunction name="setSiteRequestGlobals" localmode="modern" access="public">
+	<cfargument name="site_id" type="numeric" required="yes">
+	<cfscript>
+	id=arguments.site_id;
+	row=application.zcoreSiteDataStruct[id];
+	request.zos.cgi.http_host=replace(replace(row.site_domain, 'https://', ''), 'http://', '');
+    local.zOSTempVar=replace(replacenocase(replacenocase(request.zos.cgi.http_host,'www.',''),'.'&request.zos.testDomain,''),".","_","all");
+    Request.zOSHomeDir = request.zos.sitesPath&local.zOSTempVar&"/";
+    Request.zOSPrivateHomeDir = request.zos.sitesWritablePath&local.zOSTempVar&"/";
+    request.cgi_script_name=replacenocase(cgi.script_name,request.zRootPath,"/");  
+    request.zRootDomain=replace(replace(lcase(request.zOS.CGI.http_host),"www.",""),"."&request.zos.testDomain,"");
+    request.zCookieDomain=replace(lcase(request.zOS.CGI.http_host),"www.","");
+    request.zRootPath="/"&replace(request.zRootDomain,".","_","all")&"/"; 
+    request.zRootSecureCfcPath="jetendo-sites-writable."&replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";
+    request.zRootCfcPath=replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";  
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

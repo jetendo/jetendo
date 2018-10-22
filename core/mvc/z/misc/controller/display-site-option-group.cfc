@@ -43,14 +43,9 @@
 
 	sog=application.siteStruct[request.zos.globals.id].globals.soGroupData;
 	setStruct={}; 
-	cacheIsOk=true;
 	if(structkeyexists(sog, 'optionGroupSetQueryCache') and structkeyexists(sog.optionGroupSetQueryCache, form.site_x_option_group_set_id)){
 		setStruct=duplicate(sog.optionGroupSetQueryCache[form.site_x_option_group_set_id]); 
-		if(setStruct.site_option_group_view_cfc_path EQ ""){
-			cacheIsOk=false;
-		}
-	}
-	if(not cacheIsOk){
+	}else{
 		db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set,
 		#db.table("site_option_group", request.zos.zcoreDatasource)# 
 		WHERE site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
@@ -125,7 +120,7 @@
 			QueryAddColumn(qSet, "recordcount", "VARCHAR", [1]);
 		}
 		local.groupCom[setStruct.site_option_group_view_cfc_method](qSet);
-	}else{ 
+	}else{
 		application.zcore.functions.z404("site_option_group_view_cfc_path and site_option_group_view_cfc_method must be set when editing the site option group to allow rendering of the group.");
 	}
 	echo('</div>');
