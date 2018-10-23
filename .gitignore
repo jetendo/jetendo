@@ -20,6 +20,7 @@ core/config.cfc
 core/facebook-debug.cfc
 execute/start/*
 execute/complete/*
+execute/active/*
 sites-writable
 logs
 scripts/jetendo.ini
