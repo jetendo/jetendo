@@ -56,6 +56,7 @@ $commandTypeLookup["httpJsonPost"]="http";
 $commandTypeLookup["httpDownloadToFile"]="http";
 $commandTypeLookup["importSite"]="serveradministrator";
 $commandTypeLookup["importSiteUploads"]="serveradministrator";
+$commandTypeLookup["installSublimeProjectFiles"]="serveradministrator";
 $commandTypeLookup["installThemeToSite"]="serveradministrator";
 $commandTypeLookup["mysqlDumpTable"]="serveradministrator";
 $commandTypeLookup["mysqlRestoreTable"]="serveradministrator";
@@ -220,7 +221,7 @@ while(true){
 				continue;
 			} 
 			// this is useful for debugging background output as separate files instead of having to run the commands
-			$background=" > /var/jetendo-server/jetendo/execute/complete/output.".$entry.".temp 2>/var/jetendo-server/jetendo/execute/complete/error.".$entry.".temp &";
+			//$background=" > /var/jetendo-server/jetendo/execute/complete/output.".$entry.".temp 2>/var/jetendo-server/jetendo/execute/complete/error.".$entry.".temp &";
 
 			$phpCmd=$script.escapeshellarg($entry).$background;
 			rename($startPath.$entry, $startPath.$entry.".running");
