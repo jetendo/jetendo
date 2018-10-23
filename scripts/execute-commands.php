@@ -203,7 +203,7 @@ while(true){
 					$type=$commandTypeLookup[$parts[0]];
 				}else{
 					echo("Command missing in commandTypeLookup: ". $parts[0]."\n");
-					unlink($c);
+					unlink($startPath.$entry);
 					continue;
 				}
 				$commandQueue[$entry]=$type;
@@ -220,7 +220,7 @@ while(true){
 				continue;
 			} 
 			// this is useful for debugging background output as separate files instead of having to run the commands
-			//$background=" > /var/jetendo-server/jetendo/execute/complete/output.".$entry.".temp 2>/var/jetendo-server/jetendo/execute/complete/error.".$entry.".temp &";
+			$background=" > /var/jetendo-server/jetendo/execute/complete/output.".$entry.".temp 2>/var/jetendo-server/jetendo/execute/complete/error.".$entry.".temp &";
 
 			$phpCmd=$script.escapeshellarg($entry).$background;
 			rename($startPath.$entry, $startPath.$entry.".running");
