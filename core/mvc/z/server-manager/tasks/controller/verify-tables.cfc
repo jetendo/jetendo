@@ -24,17 +24,50 @@
 			application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 		}
 		
+		// var triggerTemplate="BEGIN    
+		// IF (@zDisableTriggers IS NULL) THEN
+		// 	IF (NEW.`##keyName##` > 0) THEN
+		// 		SET @zLastInsertId = NEW.`##keyName##`;
+		// 	ELSE
+		// 		SET @zLastInsertId=(
+		// 				SELECT IFNULL(
+		// 				(MAX(`##keyName##`) - (MAX(`##keyName##`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
+		// 				FROM `##tableName##` 
+		// 				WHERE `##tableName##`.site_id = NEW.site_id
+		// 			);
+		// 		SET NEW.`##keyName##`=@zLastInsertId;
+		// 	END IF;
+		// END IF;
+		// END";
 		var triggerTemplate="BEGIN    
 		IF (@zDisableTriggers IS NULL) THEN
 			IF (NEW.`##keyName##` > 0) THEN
 				SET @zLastInsertId = NEW.`##keyName##`;
-			ELSE
+			ELSE 
 				SET @zLastInsertId=(
-						SELECT IFNULL(
-						(MAX(`##keyName##`) - (MAX(`##keyName##`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
-						FROM `##tableName##` 
-						WHERE `##tableName##`.site_id = NEW.site_id
-					);
+					SELECT table_increment_table_id 
+					FROM `table_increment` 
+					WHERE `table_increment`.site_id = NEW.site_id and 
+					table_increment_table = '##tableName##' FOR UPDATE
+				) ;
+				IF (@zLastInsertId IS NULL) THEN
+					INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
+					NEW.site_id, 
+					'##tableName##', 
+					IFNULL(MAX(`##keyName##`), 0)  as value
+					FROM `##tableName##` 
+					WHERE `##tableName##`.site_id = NEW.site_id;
+					SET @zLastInsertId=(
+						SELECT table_increment_table_id
+						FROM `table_increment` 
+						WHERE `table_increment`.site_id = NEW.site_id and 
+						table_increment_table = '##tableName##' FOR UPDATE
+					) ; 
+				END IF;
+				SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
+				UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+				WHERE `table_increment`.site_id = NEW.site_id and 
+				table_increment_table = '##tableName##';
 				SET NEW.`##keyName##`=@zLastInsertId;
 			END IF;
 		END IF;
@@ -187,17 +220,52 @@
 								IF (@zDisableTriggers IS NULL) THEN
 									IF (NEW.`#local.curPrimaryKeyId#` > 0) THEN
 										SET @zLastInsertId = NEW.`#local.curPrimaryKeyId#`;
-									ELSE
+									ELSE 
 										SET @zLastInsertId=(
-											SELECT IFNULL(
-											(MAX(`#local.curPrimaryKeyId#`) - (MAX(`#local.curPrimaryKeyId#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
+											SELECT table_increment_table_id 
+											FROM `table_increment` 
+											WHERE `table_increment`.site_id = NEW.site_id and 
+											table_increment_table = '#local.curTableName#' FOR UPDATE
+										) ;
+										IF (@zLastInsertId IS NULL) THEN
+											INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
+											NEW.site_id, 
+											'#local.curTableName#', 
+											IFNULL(MAX(`#local.curPrimaryKeyId#`), 0)  as value
 											FROM `#local.curTableName#` 
-											WHERE `#local.curTableName#`.site_id = NEW.site_id
-										);
+											WHERE `#local.curTableName#`.site_id = NEW.site_id;
+											SET @zLastInsertId=(
+												SELECT table_increment_table_id
+												FROM `table_increment` 
+												WHERE `table_increment`.site_id = NEW.site_id and 
+												table_increment_table = '#local.curTableName#' FOR UPDATE
+											) ; 
+										END IF;
+										SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
+										UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+										WHERE `table_increment`.site_id = NEW.site_id and 
+										table_increment_table = '#local.curTableName#';
 										SET NEW.`#local.curPrimaryKeyId#`=@zLastInsertId;
 									END IF;
 								END IF;
 							END";
+							// old version was broken
+							// db.sql="CREATE TRIGGER `"&local.curDatasource&"`.`#local.curTableName#_auto_inc` BEFORE INSERT ON `#local.curTableName#` 
+							//     FOR EACH ROW BEGIN
+							// 	IF (@zDisableTriggers IS NULL) THEN
+							// 		IF (NEW.`#local.curPrimaryKeyId#` > 0) THEN
+							// 			SET @zLastInsertId = NEW.`#local.curPrimaryKeyId#`;
+							// 		ELSE
+							// 			SET @zLastInsertId=(
+							// 				SELECT IFNULL(
+							// 				(MAX(`#local.curPrimaryKeyId#`) - (MAX(`#local.curPrimaryKeyId#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
+							// 				FROM `#local.curTableName#` 
+							// 				WHERE `#local.curTableName#`.site_id = NEW.site_id
+							// 			);
+							// 			SET NEW.`#local.curPrimaryKeyId#`=@zLastInsertId;
+							// 		END IF;
+							// 	END IF;
+							// END";
 							/* old simple method:
 									ELSE
 									SET @zLastInsertId=(

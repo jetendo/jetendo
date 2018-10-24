@@ -1393,17 +1393,52 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		IF (@zDisableTriggers IS NULL) THEN
 			IF (NEW.`#arguments.primaryKeyFieldName#` > 0) THEN
 				SET @zLastInsertId = NEW.`#arguments.primaryKeyFieldName#`;
-			ELSE
+			ELSE 
 				SET @zLastInsertId=(
-					SELECT IFNULL(
-					(MAX(`#arguments.primaryKeyFieldName#`) - (MAX(`#arguments.primaryKeyFieldName#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
+					SELECT table_increment_table_id 
+					FROM `table_increment` 
+					WHERE `table_increment`.site_id = NEW.site_id and 
+					table_increment_table = '#arguments.table#' FOR UPDATE
+				) ;
+				IF (@zLastInsertId IS NULL) THEN
+					INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
+					NEW.site_id, 
+					'#arguments.table#', 
+					IFNULL(MAX(`#arguments.primaryKeyFieldName#`), 0)  as value
 					FROM `#arguments.table#` 
-					WHERE `#arguments.table#`.site_id = NEW.site_id
-				);
+					WHERE `#arguments.table#`.site_id = NEW.site_id;
+					SET @zLastInsertId=(
+						SELECT table_increment_table_id
+						FROM `table_increment` 
+						WHERE `table_increment`.site_id = NEW.site_id and 
+						table_increment_table = '#arguments.table#' FOR UPDATE
+					) ; 
+				END IF;
+				SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
+				UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+				WHERE `table_increment`.site_id = NEW.site_id and 
+				table_increment_table = '#arguments.table#';
 				SET NEW.`#arguments.primaryKeyFieldName#`=@zLastInsertId;
 			END IF;
 		END IF;
 	END";
+	// This version caused deadlocks and was not allowing simultaneous inserts
+	// db.sql="CREATE TRIGGER `"&arguments.datasource&"`.`#arguments.table#_auto_inc` BEFORE INSERT ON `#arguments.table#` 
+	//     FOR EACH ROW BEGIN
+	// 	IF (@zDisableTriggers IS NULL) THEN
+	// 		IF (NEW.`#arguments.primaryKeyFieldName#` > 0) THEN
+	// 			SET @zLastInsertId = NEW.`#arguments.primaryKeyFieldName#`;
+	// 		ELSE
+	// 			SET @zLastInsertId=(
+	// 				SELECT IFNULL(
+	// 				(MAX(`#arguments.primaryKeyFieldName#`) - (MAX(`#arguments.primaryKeyFieldName#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
+	// 				FROM `#arguments.table#` 
+	// 				WHERE `#arguments.table#`.site_id = NEW.site_id
+	// 			);
+	// 			SET NEW.`#arguments.primaryKeyFieldName#`=@zLastInsertId;
+	// 		END IF;
+	// 	END IF;
+	// END";
 	db.execute("q");
 	</cfscript>
 	 
