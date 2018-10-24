@@ -58,7 +58,7 @@
 			for(row in qTable){
 				local.curTableName=row["Tables_in_"&local.curDatasource];
 				local.curTable=local.curDatasource&"."&local.curTableName;
-				if(structkeyexists(application.zcore.verifyTablesExcludeStruct, local.curDatasource) and structkeyexists(application.zcore.verifyTablesExcludeStruct[local.curDatasource], local.curTableName)){
+				if(structkeyexists(application.zcore.verifyTablesExcludeStruct, local.curDatasource) and structkeyexists(application.zcore.verifyTablesExcludeStruct[local.curDatasource], local.curTableName)){ 
 					continue; // skip tables that have their own primary key generation method
 				}
 				db.sql="show fields from `"&local.curDatasource&"`.`"&local.curTableName&"`";

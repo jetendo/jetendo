@@ -784,6 +784,7 @@
 
 	ts.verifyTablesExcludeStruct={};
 	ts.verifyTablesExcludeStruct[request.zos.zcoreDatasource]={
+		"table_increment":true
 	};
 	
 	ts.primaryKeyMapStruct={};

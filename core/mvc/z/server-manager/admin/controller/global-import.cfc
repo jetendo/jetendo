@@ -189,12 +189,18 @@ application.zcore.functions.zRedirect("/z/server-manager/admin/global-import/ind
 		local.c.datasource=n;
 		local.c.verifyQueriesEnabled=false;
 		dbNoVerify=application.zcore.db.newQuery(local.c);
-		dbNoVerify.sql="set @zDisableTriggers=1";
-		dbNoVerify.execute("qDisableTrigger");
-		for(i=1;i LTE arrayLen(local.dsStruct[n]);i++){
-			dbNoVerify.sql=local.dsStruct[n][i];
-			if(debug) writeoutput(dbNoVerify.sql&"<br />");
-			dbNoVerify.execute("qLoad");
+		try{
+			dbNoVerify.sql="set @zDisableTriggers=1";
+			dbNoVerify.execute("qDisableTrigger");
+			for(i=1;i LTE arrayLen(local.dsStruct[n]);i++){
+				dbNoVerify.sql=local.dsStruct[n][i];
+				if(debug) writeoutput(dbNoVerify.sql&"<br />");
+				dbNoVerify.execute("qLoad");
+			}
+		}catch(Any e){
+			dbNoVerify.sql="set @zDisableTriggers=NULL";
+			dbNoVerify.execute("qEnableTrigger");
+			rethrow;
 		}
 		dbNoVerify.sql="set @zDisableTriggers=NULL";
 		dbNoVerify.execute("qEnableTrigger");

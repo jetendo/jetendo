@@ -132,6 +132,8 @@
 	if(isstruct(arguments.ss.result) and structkeyexists(arguments.ss.result, 'executionTime')){
 		if(arguments.ss.totalExecutionTime GT 1000){
 			arrayprepend(request.zos.arrRunTime, {time:gettickcount('nano'), name:'Slow query logged | Total Execution Time: #arguments.ss.totalExecutionTime# | Query Execution Time: #arguments.ss.result.executionTime# | SQL Statement: #arguments.ss.sql#'});
+		}else if(request.zos.isTestServer and request.zos.isDeveloper){
+			arrayprepend(request.zos.arrRunTime, {time:gettickcount('nano'), name:'Total Execution Time: #arguments.ss.totalExecutionTime# | Query Execution Time: #arguments.ss.result.executionTime# | SQL Statement: #arguments.ss.sql#'});
 		}
 	}
 	</cfscript>

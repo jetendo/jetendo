@@ -504,6 +504,13 @@
 	for(i=1;i LTE arraylen(application.zcore.arrGlobalDatasources);i++){
 		dsStruct[application.zcore.arrGlobalDatasources[i]]=[];
 	}
+
+	/*
+	FLUSH TABLES WITH READ LOCK;
+ 
+
+UNLOCK TABLES;
+*/
 	dsStruct[globals.site_datasource]=[];
 	for(i=1;i LTE arrayLen(arrRestore);i++){
 		skipTable=false;
@@ -617,15 +624,21 @@
 		dbNoVerify=application.zcore.db.newQuery(c);
 		dbNoVerify.sql="set @zDisableTriggers=1";
 		dbNoVerify.execute("qDisableTrigger");
-		for(i=1;i LTE arrayLen(dsStruct[n]);i++){
-			dbNoVerify.sql=dsStruct[n][i];
-			if(dbNoVerify.sql CONTAINS "`site_id`"){
-				dbNoVerify.sql=replace(dbNoVerify.sql, ";", "")&" SET `site_id` = '"&form.sid&"'";
+		try{
+			for(i=1;i LTE arrayLen(dsStruct[n]);i++){
+				dbNoVerify.sql=dsStruct[n][i];
+				if(dbNoVerify.sql CONTAINS "`site_id`"){
+					dbNoVerify.sql=replace(dbNoVerify.sql, ";", "")&" SET `site_id` = '"&form.sid&"'";
+				}
+				if(debug) writeoutput(dbNoVerify.sql&";<br />");
+				writeLogEntry(";#dbNoVerify.sql#;");
+				result=dbNoVerify.execute("qLoad");
+				writeLogEntry("load result: #result#");
 			}
-			if(debug) writeoutput(dbNoVerify.sql&";<br />");
-			writeLogEntry(";#dbNoVerify.sql#;");
-			result=dbNoVerify.execute("qLoad");
-			writeLogEntry("load result: #result#");
+		}catch(Any e){
+			dbNoVerify.sql="set @zDisableTriggers=NULL";
+			dbNoVerify.execute("qEnableTrigger");
+			rethrow;
 		}
 		dbNoVerify.sql="set @zDisableTriggers=NULL";
 		dbNoVerify.execute("qEnableTrigger");

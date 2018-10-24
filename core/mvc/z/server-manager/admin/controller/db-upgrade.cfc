@@ -378,32 +378,42 @@
 	if(not fileexists(arguments.filePath)){
 		throw("importTableData failed because arguments.filePath, ""#arguments.filePath#"", doesn't exist.");
 	}
-	if(arguments.hasSiteId){
-		query name="qDelete" datasource="#arguments.datasource#"{
-			echo(preserveSingleQuotes("delete from `#arguments.datasource#`.`#arguments.table#` 
-			where site_id = 0"));
+	try{
+		if(arguments.hasSiteId){
+			query name="qDelete" datasource="#arguments.datasource#"{
+				echo(preserveSingleQuotes("delete from `#arguments.datasource#`.`#arguments.table#` 
+				where site_id = 0"));
+			}
+			query name="qDisableTrigger" datasource="#arguments.datasource#"{
+				echo(preserveSingleQuotes("set @zDisableTriggers=1"));
+			}
+		}else{
+			query name="qTruncate" datasource="#arguments.datasource#"{
+				echo("truncate table `#arguments.datasource#`.`#arguments.table#`");
+			}
 		}
-		query name="qDisableTrigger" datasource="#arguments.datasource#"{
-			echo(preserveSingleQuotes("set @zDisableTriggers=1"));
+
+		query name="qLoadData" datasource="#arguments.datasource#"{
+			echo(preserveSingleQuotes("LOAD DATA LOCAL INFILE '#escape(arguments.filePath)#' 
+			REPLACE INTO TABLE `#arguments.datasource#`.`#arguments.table#` 
+			FIELDS TERMINATED BY ',' ENCLOSED BY '""' 
+		 	ESCAPED BY '\\' LINES TERMINATED BY '\n' STARTING BY ''
+			IGNORE 1 LINES (#arguments.columnList#)"));
 		}
-	}else{
-		query name="qTruncate" datasource="#arguments.datasource#"{
-			echo("truncate table `#arguments.datasource#`.`#arguments.table#`");
+		if(arguments.hasSiteId){
+			query name="qEnableTrigger" datasource="#arguments.datasource#"{
+				echo(preserveSingleQuotes("set @zDisableTriggers=NULL"));
+			}
 		}
+	}catch(Any e){
+		if(arguments.hasSiteId){
+			query name="qEnableTrigger" datasource="#arguments.datasource#"{
+				echo(preserveSingleQuotes("set @zDisableTriggers=NULL"));
+			}
+		}
+		rethrow;
 	}
 
-	query name="qLoadData" datasource="#arguments.datasource#"{
-		echo(preserveSingleQuotes("LOAD DATA LOCAL INFILE '#escape(arguments.filePath)#' 
-		REPLACE INTO TABLE `#arguments.datasource#`.`#arguments.table#` 
-		FIELDS TERMINATED BY ',' ENCLOSED BY '""' 
-	 	ESCAPED BY '\\' LINES TERMINATED BY '\n' STARTING BY ''
-		IGNORE 1 LINES (#arguments.columnList#)"));
-	}
-	if(arguments.hasSiteId){
-		query name="qEnableTrigger" datasource="#arguments.datasource#"{
-			echo(preserveSingleQuotes("set @zDisableTriggers=NULL"));
-		}
-	}
 	</cfscript>
 	
 </cffunction>
@@ -975,7 +985,7 @@
 		writeoutput('Structure comparison executed.<br />');
 		if(arrayLen(arrDiff)){
 			success=false;
-			writeoutput('The follow SQL changes were generated.<hr />');
+			writeoutput('The following SQL changes were generated.<hr />');
 			for(i=1;i LTE arraylen(arrDiff);i++){
 				echo(arrDiff[i]&"; <hr />");
 			}
@@ -1013,6 +1023,9 @@
 		if(not structkeyexists(arguments.newDsStruct.tableStruct, i)){
 			arrTemp=listToArray(i, ".");
 			currentTable=arrTemp[2];
+			if(structkeyexists(application.zcore.verifyTablesExcludeStruct, arguments.schema) and structkeyexists(application.zcore.verifyTablesExcludeStruct[arguments.schema], currentTable)){ 
+				continue; // skip tables that have their own primary key generation method
+			}
 			arguments.changedTableStruct[currentTable]=true;
 			arrayAppend(rs.arrSQL, "DROP TABLE `#replace(i, ".", "`.`")#`");
 		}
@@ -1022,6 +1035,9 @@
 	for(i in arguments.newDsStruct.tableStruct){
 		arrTemp=listToArray(i, ".");
 		currentTable=arrTemp[2];
+		if(structkeyexists(application.zcore.verifyTablesExcludeStruct, arguments.schema) and structkeyexists(application.zcore.verifyTablesExcludeStruct[arguments.schema], currentTable)){ 
+			continue; // skip tables that have their own primary key generation method
+		}
 		if(structkeyexists(excludeTableStruct, currentTable)){
 			continue;
 		}	
