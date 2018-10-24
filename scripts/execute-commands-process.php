@@ -39,7 +39,7 @@ verifySitePaths
 saveFaviconSet#chr(9)#sourceFilePath#chr(9)#destinationPath
 convertFileCharsetISO88591toUTF8#chr(9)#sourceFilePath
 gitClone#chr(9)#cloneLink#chr(9)#homedir
-installSublimeProjectFile#chr(9)#listOfShortDomainPaths
+installSublimeProjectFiles#chr(9)#listOfShortDomainPaths
 */
 
 function processContents($contents){

@@ -53,6 +53,8 @@ $commandTypeLookup["getNewerCoreMVCFiles"]="serveradministrator";
 $commandTypeLookup["gzipFilePath"]="serveradministrator";
 $commandTypeLookup["httpDownload"]="http";
 $commandTypeLookup["httpJsonPost"]="http";
+$commandTypeLookup["httpPost"]="http";
+$commandTypeLookup["httpXMLPost"]="http";
 $commandTypeLookup["httpDownloadToFile"]="http";
 $commandTypeLookup["importSite"]="serveradministrator";
 $commandTypeLookup["importSiteUploads"]="serveradministrator";
@@ -73,10 +75,12 @@ $commandTypeLookup["tarZipSiteUploadPath"]="serveradministrator";
 $commandTypeLookup["verifySitePaths"]="serveradministrator";
 $commandTypeLookup["saveFaviconSet"]="image";
 $commandTypeLookup["convertFileCharsetISO88591toUTF8"]="serveradministrator";
-$commandTypeLookup["gitClone"]="serveradministrator";
-$commandTypeLookup["installSublimeProjectFile"]="serveradministrator";
-
-
+$commandTypeLookup["gitClone"]="serveradministrator"; 
+$commandTypeLookup["untarZipSiteImportPath"]="serveradministrator";
+$commandTypeLookup["notifyBindZone"]="serveradministrator";
+$commandTypeLookup["reloadBindZone"]="serveradministrator";
+$commandTypeLookup["renameSite"]="serveradministrator";
+$commandTypeLookup["tarZipGlobalDatabase"]="serveradministrator";
 
 $runningThreads=0;
 
@@ -203,7 +207,10 @@ while(true){
 				if(isset($commandTypeLookup[$parts[0]])){
 					$type=$commandTypeLookup[$parts[0]];
 				}else{
-					echo("Command missing in commandTypeLookup: ". $parts[0]."\n");
+					$out=("Command missing in commandTypeLookup: ". $parts[0]."\n");
+					echo($out);
+					file_put_contents($completePath."error.".$entry.".temp", $out);
+
 					unlink($startPath.$entry);
 					continue;
 				}

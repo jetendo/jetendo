@@ -59,7 +59,7 @@
 	<cfargument name="command" type="string" required="yes">
 	<cfargument name="timeoutInSeconds" type="numeric" required="yes">
 	<cfscript>
-	secureHashDate=hash(randrange(10000000, 90000000))&"-"&dateformat(now(),"yyyymmdd")&"-"&timeformat(now(),"HHmmss");
+	secureHashDate=hash(randrange(10000000, 90000000))&"-"&dateformat(now(),"yyyymmdd")&"-"&timeformat(now(),"HHmmss"); 
 	startPath=request.zos.installPath&"execute/start/"&secureHashDate&".txt";
 	activePath=request.zos.installPath&"execute/active/"&secureHashDate&".txt";
 	completePath=request.zos.installPath&"execute/complete/"&secureHashDate&".txt";
