@@ -141,29 +141,18 @@ this.customStruct = StructNew();
 	3 - manually logged out
 	*/
 	count=0;
-	lock name="zloginLogSite#request.zos.globals.id#" type="exclusive" timeout="20"{
-		// try{
-			db.sql="INSERT INTO #db.table("login_log", request.zos.zcoreDatasource)# SET 
-			login_log_datetime=#db.param(request.zos.mysqlnow)#,
-			login_log_deleted=#db.param(0)#,
-			login_log_ip=#db.param(request.zos.cgi.remote_addr)#,
-			login_log_status=#db.param(arguments.status)#,
-			login_log_user_agent=#db.param(cgi.HTTP_USER_AGENT)#,
-			login_log_updated_datetime=#db.param(request.zos.mysqlnow)#, ";
-			if(structkeyexists(form, 'zusername')){
-				db.sql&=" login_log_username = #db.param(form.zusername)#,";
-			}
-			db.sql&=" site_id=#db.param(request.zos.globals.id)# ";
-			db.execute("qLog");
-		// }catch(Any e){
-		// 	count++;
-		// 	if(count GT 2){
-		// 		rethrow;
-		// 	}else{
-		// 		retry;
-		// 	}
-		// }
+	db.sql="INSERT INTO #db.table("login_log", request.zos.zcoreDatasource)# SET 
+	login_log_datetime=#db.param(request.zos.mysqlnow)#,
+	login_log_deleted=#db.param(0)#,
+	login_log_ip=#db.param(request.zos.cgi.remote_addr)#,
+	login_log_status=#db.param(arguments.status)#,
+	login_log_user_agent=#db.param(cgi.HTTP_USER_AGENT)#,
+	login_log_updated_datetime=#db.param(request.zos.mysqlnow)#, ";
+	if(structkeyexists(form, 'zusername')){
+		db.sql&=" login_log_username = #db.param(form.zusername)#,";
 	}
+	db.sql&=" site_id=#db.param(request.zos.globals.id)# ";
+	db.execute("qLog"); 
 	</cfscript>
 </cffunction>
 
