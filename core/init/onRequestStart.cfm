@@ -137,7 +137,18 @@
 	<cfscript>
 	id=arguments.site_id;
 	siteStartTickCount=getTickCount();
-	ts=structnew(); 
+	ts=structnew();
+	timeLimit=0; 
+	sleepTime=500;
+	while(not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'serverglobals')){
+		sleep(sleepTime);
+		timeLimit+=sleepTime;
+		if(timeLimit GT 10000){
+			header statuscode="500" statustext="500 Internal Server Error";
+			echo("Please try again in a few seconds.");
+			abort;
+		}
+	}
 	ts.globals=duplicate(application.zcore.serverglobals); 
 	// consider loading this fresh right here instead of in zcore OnInternalApplicationStart
 	row=application.zcoreSiteDataStruct[id]; 

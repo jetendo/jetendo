@@ -3309,32 +3309,38 @@ Define this function in another CFC to override the default email format
 			form.enableSorting = 0;
 			form.disableSorting = 1;
 		}
+		sog=application.zcore.siteOptionCom.getTypeData(request.zos.globals.id); 
 
 		form.site_option_group_id=application.zcore.functions.zso(form, 'site_option_group_id',true);
 		form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id',true);
-		db.sql="SELECT * FROM #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group WHERE 
-		site_option_group_id = #db.param(form.site_option_group_id)# and 
-		site_option_group_deleted = #db.param(0)# and
-		site_id IN (#db.trustedsql(variables.siteIdList)# ) ";
-		qGroup=db.execute("qGroup");
-		if(qGroup.recordcount EQ 0){
+		mainGroupStruct=application.zcore.functions.zso(sog.optionGroupLookup, form.site_option_group_id, false, {});
+		if(structcount(mainGroupStruct) EQ 0){
 			application.zcore.functions.zredirect("/z/admin/site-options/index");
-		}
+		} 
+		// db.sql="SELECT * FROM #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group WHERE 
+		// site_option_group_id = #db.param(form.site_option_group_id)# and 
+		// site_option_group_deleted = #db.param(0)# and
+		// site_id =#db.trustedsql(request.zos.globals.id)# ";
+		// qGroup=db.execute("qGroup"); 
+		
+		// if(mainGroupStruct.recordcount EQ 0){
+		// 	application.zcore.functions.zredirect("/z/admin/site-options/index");
+		// }
 
-		if(qGroup.site_option_group_enable_archiving EQ 1){
+		if(mainGroupStruct.site_option_group_enable_archiving EQ 1){
 			form.showArchived=application.zcore.functions.zso(form, 'showArchived');
 			if(form.showArchived EQ "1"){
-				request.zsession['siteOptionGroupShowArchived#qGroup.site_option_group_id#']=true;
+				request.zsession['siteOptionGroupShowArchived#mainGroupStruct.site_option_group_id#']=true;
 			}else if(form.showArchived EQ "0"){
-				structdelete(request.zsession, 'siteOptionGroupShowArchived#qGroup.site_option_group_id#');
+				structdelete(request.zsession, 'siteOptionGroupShowArchived#mainGroupStruct.site_option_group_id#');
 			}
 		}
 		showArchived=false;
-		if(structkeyexists(request.zsession, 'siteOptionGroupShowArchived#qGroup.site_option_group_id#')){
+		if(structkeyexists(request.zsession, 'siteOptionGroupShowArchived#mainGroupStruct.site_option_group_id#')){
 			showArchived=true;
 		}
 		if(methodBackup EQ "userManageGroup"){ 
-			arrUserGroup=listToArray(qGroup.site_option_group_user_group_id_list, ",");
+			arrUserGroup=listToArray(mainGroupStruct.site_option_group_user_group_id_list, ",");
 			hasAccess=false;
 			for(i=1;i LTE arraylen(arrUserGroup);i++){
 				if(application.zcore.user.checkGroupIdAccess(arrUserGroup[i])){
@@ -3348,27 +3354,48 @@ Define this function in another CFC to override the default email format
 		}
 
 
-		db.sql="select *, count(s3.site_option_group_id) childCount 
-		from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group 
-		left join #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# s3 ON 
-		site_option_group.site_option_group_id = s3.site_option_group_id and 
-		s3.site_id = site_option_group.site_id  and 
-		s3.site_x_option_group_set_master_set_id = #db.param(0)# and 
-		s3.site_x_option_group_set_deleted = #db.param(0)# ";
-		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-			db.sql&=" and site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+		// these are groups that children of mainGroupStruct
+		// we also get the count of those children's set records
+		arrChildGroup=[];
+		for(groupId in sog.optionGroupLookup){
+			group=sog.optionGroupLookup[groupId];
+			if(group.site_option_group_parent_id EQ form.site_option_group_id){
+				arrayAppend(arrChildGroup, group);
+			}
 		}
-		db.sql&=" where 
-		site_option_group_deleted = #db.param(0)# and
-		site_option_group.site_option_group_parent_id = #db.param(form.site_option_group_id)# and 
-		site_option_group.site_id = #db.param(request.zos.globals.id)# 
-		GROUP BY site_option_group.site_option_group_id
-		ORDER BY site_option_group.site_option_group_display_name";
-		q1=db.execute("q1");
+		// db.sql="select * 
+		// from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group  
+		// where 
+		// site_option_group_deleted = #db.param(0)# and
+		// site_option_group.site_option_group_parent_id = #db.param(form.site_option_group_id)# and 
+		// site_option_group.site_id = #db.param(request.zos.globals.id)# 
+		// GROUP BY site_option_group.site_option_group_id
+		// ORDER BY site_option_group.site_option_group_display_name";
+		// q1=db.execute("q1");
+		// this childCount wasn't used anymore
+		// db.sql="select *, count(s3.site_option_group_id) childCount 
+		// from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group 
+		// left join #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# s3 ON 
+		// site_option_group.site_option_group_id = s3.site_option_group_id and 
+		// s3.site_id = site_option_group.site_id  and 
+		// s3.site_x_option_group_set_master_set_id = #db.param(0)# and 
+		// s3.site_x_option_group_set_deleted = #db.param(0)# ";
+		// if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+		// 	db.sql&=" and site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+		// }
+		// db.sql&=" where 
+		// site_option_group_deleted = #db.param(0)# and
+		// site_option_group.site_option_group_parent_id = #db.param(form.site_option_group_id)# and 
+		// site_option_group.site_id = #db.param(request.zos.globals.id)# 
+		// GROUP BY site_option_group.site_option_group_id
+		// ORDER BY site_option_group.site_option_group_display_name";
+		// q1=db.execute("q1");
+
+
 		sortEnabled=true;
 		subgroupRecurseEnabled=false;
 		subgroupStruct={}; 
-		for(n in q1){
+		for(n in arrChildGroup){
 			if(methodBackup EQ "userManageGroup"){ 
 				arrUserGroup=listToArray(n.site_option_group_user_group_id_list, ",");
 				hasAccess=false;
@@ -3386,7 +3413,7 @@ Define this function in another CFC to override the default email format
 			}
 		}
 		if(form.enableSorting EQ 0){
-			for(n in q1){
+			for(n in arrChildGroup){
 				if(n.site_option_group_enable_list_recurse EQ "1"){
 					sortEnabled=false;
 					subgroupRecurseEnabled=true;
@@ -3398,7 +3425,7 @@ Define this function in another CFC to override the default email format
 			sortEnabled=false;
 			subgroupRecurseEnabled=false;
 		}
-		if(structkeyexists(arguments.struct, 'recurse') or qGroup.site_option_group_enable_sorting EQ 0){
+		if(structkeyexists(arguments.struct, 'recurse') or mainGroupStruct.site_option_group_enable_sorting EQ 0){
 			sortEnabled=false;
 		}
 		if(methodBackup EQ "userManageGroup"){
@@ -3427,7 +3454,7 @@ Define this function in another CFC to override the default email format
 			r1=queueSortCom.init(queueSortStruct);
 			if(structkeyexists(form, 'zQueueSort')){
 				// update cache
-				if(request.zos.enableSiteOptionGroupCache and qGroup.site_option_group_enable_cache EQ 1){
+				if(request.zos.enableSiteOptionGroupCache and mainGroupStruct.site_option_group_enable_cache EQ 1){
 					application.zcore.siteOptionCom.updateOptionGroupSetIdCache(request.zos.globals.id, form.site_x_option_group_set_id); 
 				}
 				//application.zcore.functions.zOS_cacheSiteAndUserGroups(request.zos.globals.id);
@@ -3436,7 +3463,7 @@ Define this function in another CFC to override the default email format
 			}
 			if(structkeyexists(form, 'zQueueSortAjax')){
 				// update cache
-				if(request.zos.enableSiteOptionGroupCache and qGroup.site_option_group_enable_cache EQ 1){
+				if(request.zos.enableSiteOptionGroupCache and mainGroupStruct.site_option_group_enable_cache EQ 1){
 					application.zcore.siteOptionCom.resortOptionGroupSets(request.zos.globals.id, form.site_option_app_id, form.site_option_group_id, form.site_x_option_group_set_parent_id); 
 				}else{
 
@@ -3479,33 +3506,38 @@ Define this function in another CFC to override the default email format
 				queueSortCom.returnJson();
 			}
 		}
-		if(form.site_option_group_id NEQ 0){
-			db.sql="select * from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group 
-			where site_option_group_id = #db.param(form.site_option_group_id)# and 
-			site_option_group_deleted = #db.param(0)# and
-			site_id = #db.param(request.zos.globals.id)# 
-			ORDER BY site_option_group_display_name";
-			q12=db.execute("q12");
-			if(q12.recordcount EQ 0){
-				application.zcore.functions.z301redirect("/z/admin/site-options/index");	
-			}
+		// if(form.site_option_group_id NEQ 0){
+		// 	db.sql="select * from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group 
+		// 	where site_option_group_id = #db.param(form.site_option_group_id)# and 
+		// 	site_option_group_deleted = #db.param(0)# and
+		// 	site_id = #db.param(request.zos.globals.id)# 
+		// 	ORDER BY site_option_group_display_name";
+		// 	q12=db.execute("q12");
+		// 	if(q12.recordcount EQ 0){
+		// 		application.zcore.functions.z301redirect("/z/admin/site-options/index");	
+		// 	}
+		// }
+		// db.sql="select * from #db.table("site_option", request.zos.zcoreDatasource)# site_option 
+		// where site_option_group_id = #db.param(form.site_option_group_id)# and 
+		// site_option_deleted = #db.param(0)# and
+		// site_id =#db.param(request.zos.globals.id)# 
+		// ORDER BY site_option_sort";
+		// qS2=db.execute("qS2");
+		arrMainOption=[];
+		for(optionId in sog.optionGroupFieldLookup[form.site_option_group_id]){
+			arrayAppend(arrMainOption, sog.optionLookup[optionId]);
 		}
-		db.sql="select * from #db.table("site_option", request.zos.zcoreDatasource)# site_option 
-		where site_option_group_id = #db.param(form.site_option_group_id)# and 
-		site_option_deleted = #db.param(0)# and
-		site_id =#db.param(request.zos.globals.id)# 
-		ORDER BY site_option_sort";
-		qS2=db.execute("qS2");
+
 		parentIndex=0;
 		arrSearchTable=[];
 		arrSortSQL=[];
-		for(row in qS2){
+		for(row in arrMainOption){
 			if(row.site_option_admin_searchable EQ 1){
 				arrayAppend(arrSearchTable, row);
 			}
 			added=false;
 			ts2={};
-			if(qGroup.site_option_group_parent_field NEQ "" and qGroup.site_option_group_parent_field EQ row.site_option_name){
+			if(mainGroupStruct.site_option_group_parent_field NEQ "" and mainGroupStruct.site_option_group_parent_field EQ row.site_option_name){
 				added=true;
 				arrayappend(arrRow, row);
 				arrayappend(arrLabel, row.site_option_display_name);
@@ -3545,14 +3577,14 @@ Define this function in another CFC to override the default email format
 				fakePrimaryType=row.site_option_type_id;	
 			}
 		} 
-		if(fakePrimaryId EQ 0 and qS2.recordcount NEQ 0){
-			for(row in qS2){
+		if(fakePrimaryId EQ 0 and arrayLen(arrMainOption) NEQ 0){
+			for(row in arrMainOption){
 				fakeRow=row;
 				break;
 			}
-			fakePrimaryId=qS2.site_option_id;
-			fakePrimaryLabel=qS2.site_option_display_name;
-			fakePrimaryType=qS2.site_option_type_id;
+			fakePrimaryId=arrMainOption[1].site_option_id;
+			fakePrimaryLabel=arrMainOption[1].site_option_display_name;
+			fakePrimaryType=arrMainOption[1].site_option_type_id;
 		}
 		if(arraylen(arrVal) EQ 0){
 			arrayAppend(arrDisplay, 1);
@@ -3578,18 +3610,18 @@ Define this function in another CFC to override the default email format
 			if(methodBackup EQ "userManageGroup"){ 
 				application.zcore.template.setTag('pagenav', '<p><a href="/z/user/home/index">User Home Page</a></p>');
 			}
-			theTitle="#htmleditformat(qGroup.site_option_group_display_name)#(s)";
+			theTitle="#htmleditformat(mainGroupStruct.site_option_group_display_name)#(s)";
 			application.zcore.template.setTag("title",theTitle);
 			if(methodBackup EQ "publicAddGroup" or methodBackup EQ "publicEditGroup"){ 
 				application.zcore.template.setTag("pagetitle",theTitle);  
 			} 
-			curParentId=q12.site_option_group_parent_id;
+			curParentId=mainGroupStruct.site_option_group_parent_id;
 			curParentSetId=form.site_x_option_group_set_parent_id;
 			if(not structkeyexists(arguments.struct, 'hideNavigation') or not arguments.struct.hideNavigation){
-				application.zcore.siteOptionCom.getSetParentLinks(q12.site_option_group_id, curParentId, curParentSetId, false);
+				application.zcore.siteOptionCom.getSetParentLinks(mainGroupStruct.site_option_group_id, curParentId, curParentSetId, false);
 			}
-			if(qGroup.site_option_group_list_description NEQ ""){
-				listDescription=qGroup.site_option_group_list_description;
+			if(mainGroupStruct.site_option_group_list_description NEQ ""){
+				listDescription=mainGroupStruct.site_option_group_list_description;
 			}
 		}
 
@@ -3663,7 +3695,7 @@ Define this function in another CFC to override the default email format
 			}
 			arrSearchSQL=arrNewSearchSQL; 
 			
-			if(qGroup.site_option_group_enable_approval EQ 1){
+			if(mainGroupStruct.site_option_group_enable_approval EQ 1){
 				if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
 					if(structkeyexists(form, 'searchOn')){
 						searchStruct['site_x_option_group_set_approved']=application.zcore.functions.zso(form,'site_x_option_group_set_approved');
@@ -3689,7 +3721,7 @@ Define this function in another CFC to override the default email format
 				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#form.site_option_group_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
 			</div></div></form>');
 
-			if ( qGroup.site_option_group_enable_sorting EQ 1 ) {
+			if ( mainGroupStruct.site_option_group_enable_sorting EQ 1 ) {
 				if ( structKeyExists( form, 'searchOn' ) and form.searchOn) {
 					// echo( 'Sorting disabled when searching.' );
 					arrayAppend(arrSearch, '<div style="width:100%; float:left; padding: 10px; border-bottom: 1px solid ##CCCCCC;"><strong>Sorting is disabled when searching.</strong></div>' );
@@ -3697,75 +3729,36 @@ Define this function in another CFC to override the default email format
 			}
 		}
 		status=application.zcore.functions.zso(searchStruct, 'site_x_option_group_set_approved');
-		db.sql="SELECT count(site_option_group.site_option_group_id) count
-		FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
-		#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  ";
-		for(i=1;i LTE arraylen(arrVal);i++){
-			if(structkeyexists(searchFieldEnabledStruct, i)){
-				db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
-				s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
-				s#i#.site_option_id = #db.param(arrVal[i])# and 
-				s#i#.site_option_group_id = site_option_group.site_option_group_id and 
-				s#i#.site_id = site_option_group.site_id and 
-				s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
-				s#i#.site_x_option_group_deleted = #db.param(0)# ";
+
+
+		if(mainGroupStruct.site_option_group_limit GT 0){
+			db.sql="SELECT count(site_option_group.site_option_group_id) count
+			FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
+			#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  "; 
+			db.sql&="WHERE  
+			site_x_option_group_set_deleted = #db.param(0)# and 
+			site_option_group_deleted = #db.param(0)# and 
+			site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
+			site_x_option_group_set_master_set_id = #db.param(0)# and 
+			site_option_group.site_id=site_x_option_group_set.site_id and 
+			site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id "; 
+			if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
+				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
 			}
+			if(form.site_x_option_group_set_parent_id NEQ 0){
+				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+			} 
+			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+			}
+			if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
+				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+			}
+			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
+			site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
+			site_option_group.site_option_group_type=#db.param('1')# ";
+			qCountAllLimit=db.execute("qCountAllLimit");
 		}
-		db.sql&="WHERE  
-		site_x_option_group_set_deleted = #db.param(0)# and 
-		site_option_group_deleted = #db.param(0)# and 
-		site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
-		site_option_group.site_id=site_x_option_group_set.site_id and 
-		site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id "; 
-		if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
-			db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
-		}
-		if(form.site_x_option_group_set_parent_id NEQ 0){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
-		}
-		if(status NEQ ""){
-			db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
-		}
-		if(arraylen(arrSearchSQL)){
-			db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
-		}
-		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
-		}
-		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
-			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
-		}
-		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
-		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
-		site_option_group.site_option_group_type=#db.param('1')# ";
-		qCountAll=db.execute("qCountAll"); 
-		db.sql="SELECT count(site_option_group.site_option_group_id) count
-		FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
-		#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  "; 
-		db.sql&="WHERE  
-		site_x_option_group_set_deleted = #db.param(0)# and 
-		site_option_group_deleted = #db.param(0)# and 
-		site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
-		site_option_group.site_id=site_x_option_group_set.site_id and 
-		site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id "; 
-		if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
-			db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
-		}
-		if(form.site_x_option_group_set_parent_id NEQ 0){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
-		} 
-		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
-		}
-		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
-			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
-		}
-		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
-		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
-		site_option_group.site_option_group_type=#db.param('1')# ";
-		qCountAllLimit=db.execute("qCountAllLimit");
 
 		if(methodBackup EQ "userManageGroup"){
 			db.sql="SELECT count(site_option_group.site_option_group_id) count
@@ -3804,7 +3797,7 @@ Define this function in another CFC to override the default email format
 			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
 				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
 			}
-			if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+			if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
 				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
 			}
 			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
@@ -3812,47 +3805,97 @@ Define this function in another CFC to override the default email format
 			site_option_group.site_option_group_type=#db.param('1')# ";
 			qCount=db.execute("qCount");
 
-
-			db.sql="SELECT count(site_option_group.site_option_group_id) count
-			FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
-			#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  ";
-			for(i=1;i LTE arraylen(arrVal);i++){
-				if(structkeyexists(searchFieldEnabledStruct, i)){
-					db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
-					s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
-					s#i#.site_option_id = #db.param(arrVal[i])# and 
-					s#i#.site_option_group_id = site_option_group.site_option_group_id and 
-					s#i#.site_id = site_option_group.site_id and 
-					s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
-					s#i#.site_x_option_group_deleted = #db.param(0)# ";
+			if(mainGroupStruct.site_option_group_user_child_limit NEQ 0){
+				db.sql="SELECT count(site_option_group.site_option_group_id) count
+				FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
+				#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  ";
+				for(i=1;i LTE arraylen(arrVal);i++){
+					if(structkeyexists(searchFieldEnabledStruct, i)){
+						db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
+						s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+						s#i#.site_option_id = #db.param(arrVal[i])# and 
+						s#i#.site_option_group_id = site_option_group.site_option_group_id and 
+						s#i#.site_id = site_option_group.site_id and 
+						s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
+						s#i#.site_x_option_group_deleted = #db.param(0)# ";
+					}
 				}
+				db.sql&="WHERE  
+				site_x_option_group_set_deleted = #db.param(0)# and 
+				site_option_group_deleted = #db.param(0)# and 
+				site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
+				site_x_option_group_set_master_set_id = #db.param(0)# and 
+				site_option_group.site_id=site_x_option_group_set.site_id and 
+				site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id ";
+				if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
+					db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+				}
+				if(form.site_x_option_group_set_parent_id NEQ 0){
+					db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+				} 
+				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+					db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+				}
+				if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
+					db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+				}
+				db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
+				site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
+				site_option_group.site_option_group_type=#db.param('1')# ";
+				qCountLimit=db.execute("qCountLimit"); 
 			}
-			db.sql&="WHERE  
-			site_x_option_group_set_deleted = #db.param(0)# and 
-			site_option_group_deleted = #db.param(0)# and 
-			site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
-			site_x_option_group_set_master_set_id = #db.param(0)# and 
-			site_option_group.site_id=site_x_option_group_set.site_id and 
-			site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id ";
-			if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
-				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+		}else{ 
+			if(arraylen(arrSearchSQL) GT 0 or mainGroupStruct.site_option_group_enable_cache EQ 0){
+				db.sql="SELECT count(site_option_group.site_option_group_id) count
+				FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
+				#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  ";
+				for(i=1;i LTE arraylen(arrVal);i++){
+					if(structkeyexists(searchFieldEnabledStruct, i)){
+						db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
+						s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+						s#i#.site_option_id = #db.param(arrVal[i])# and 
+						s#i#.site_option_group_id = site_option_group.site_option_group_id and 
+						s#i#.site_id = site_option_group.site_id and 
+						s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
+						s#i#.site_x_option_group_deleted = #db.param(0)# ";
+					}
+				}
+				db.sql&="WHERE  
+				site_x_option_group_set_deleted = #db.param(0)# and 
+				site_option_group_deleted = #db.param(0)# and 
+				site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
+				site_x_option_group_set_master_set_id = #db.param(0)# and 
+				site_option_group.site_id=site_x_option_group_set.site_id and 
+				site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id "; 
+				if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
+					db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+				}
+				if(form.site_x_option_group_set_parent_id NEQ 0){
+					db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+				}
+				if(status NEQ ""){
+					db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+				}
+				if(arraylen(arrSearchSQL)){
+					db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
+				}
+				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+					db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+				}
+				if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
+					db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+				}
+				db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
+				site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
+				site_option_group.site_option_group_type=#db.param('1')# ";
+				qCount=db.execute("qCount"); 
+			}else{
+				// get the things
+				qCount={recordcount:1, count: 0 };
 			}
-			if(form.site_x_option_group_set_parent_id NEQ 0){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
-			} 
-			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
-			}
-			if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
-			}
-			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
-			site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
-			site_option_group.site_option_group_type=#db.param('1')# ";
-			qCountLimit=db.execute("qCountLimit"); 
-		}else{
-			qCount=qCountAll;
 		} 
+
+
 		db.sql="SELECT site_option_group.*,  site_x_option_group_set.*";
 		for(i=1;i LTE arraylen(arrVal);i++){
 			db.sql&=" , s#i#.site_x_option_group_value sVal#i# ";
@@ -3895,7 +3938,7 @@ Define this function in another CFC to override the default email format
 		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 		site_option_group.site_option_group_type=#db.param('1')# ";
 
-		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
+		if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
 			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
 		}
 		//GROUP BY site_x_option_group_set.site_x_option_group_set_id
@@ -3904,61 +3947,65 @@ Define this function in another CFC to override the default email format
 		}else{
 			db.sql&=" ORDER BY site_x_option_group_set_sort asc ";
 		}
-		if(qGroup.site_option_group_admin_paging_limit NEQ 0){
-			db.sql&=" LIMIT #db.param((form.zIndex-1)*qGroup.site_option_group_admin_paging_limit)#, #db.param(qGroup.site_option_group_admin_paging_limit)# ";
+		if(mainGroupStruct.site_option_group_admin_paging_limit NEQ 0){
+			db.sql&=" LIMIT #db.param((form.zIndex-1)*mainGroupStruct.site_option_group_admin_paging_limit)#, #db.param(mainGroupStruct.site_option_group_admin_paging_limit)# ";
 		}
 		qS=db.execute("qS");
-		db.sql="SELECT site_option_group.*,  site_x_option_group_set.*";
-		for(i=1;i LTE arraylen(arrVal);i++){
-			db.sql&=" , s#i#.site_x_option_group_value sVal#i# ";
+
+
+		if(mainGroupStruct.site_option_group_limit GT 0){
+			db.sql="SELECT site_option_group.*,  site_x_option_group_set.*";
+			for(i=1;i LTE arraylen(arrVal);i++){
+				db.sql&=" , s#i#.site_x_option_group_value sVal#i# ";
+			}
+			db.sql&=" FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
+			#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set) ";
+			for(i=1;i LTE arraylen(arrVal);i++){
+				db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
+				s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+				s#i#.site_option_id = #db.param(arrVal[i])# and 
+				s#i#.site_option_group_id = site_option_group.site_option_group_id and 
+				s#i#.site_id = site_option_group.site_id and 
+				s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
+				s#i#.site_x_option_group_deleted = #db.param(0)# ";
+			}
+			db.sql&="
+			WHERE  
+			site_option_group_deleted = #db.param(0)# and
+			site_x_option_group_set_master_set_id = #db.param(0)# and 
+			site_x_option_group_set_deleted = #db.param(0)# and 
+			site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
+			site_option_group.site_id=site_x_option_group_set.site_id and 
+			site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id ";
+			if(arraylen(arrSearchSQL)){
+				db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
+			}
+			if(status NEQ ""){
+				db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+			}
+			if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
+				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+			}
+			if(form.site_x_option_group_set_parent_id NEQ 0){
+				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+			} 
+			if(mainGroupStruct.site_option_group_enable_archiving EQ 1 and not showArchived){
+				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+			}
+			db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
+			site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
+			site_option_group.site_option_group_type=#db.param('1')# ";
+			//GROUP BY site_x_option_group_set.site_x_option_group_set_id
+			if(arraylen(arrSortSQL)){
+				db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
+			}else{
+				db.sql&=" ORDER BY site_x_option_group_set_sort asc ";
+			}
+			if(mainGroupStruct.site_option_group_admin_paging_limit NEQ 0){
+				db.sql&=" LIMIT #db.param((form.zIndex-1)*mainGroupStruct.site_option_group_admin_paging_limit)#, #db.param(mainGroupStruct.site_option_group_admin_paging_limit)# ";
+			}
+			qSCount=db.execute("qSCount");
 		}
-		db.sql&=" FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
-		#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set) ";
-		for(i=1;i LTE arraylen(arrVal);i++){
-			db.sql&="LEFT JOIN #db.table("site_x_option_group", request.zos.zcoreDatasource)# s#i# on 
-			s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
-			s#i#.site_option_id = #db.param(arrVal[i])# and 
-			s#i#.site_option_group_id = site_option_group.site_option_group_id and 
-			s#i#.site_id = site_option_group.site_id and 
-			s#i#.site_option_app_id = #db.param(form.site_option_app_id)# and 
-			s#i#.site_x_option_group_deleted = #db.param(0)# ";
-		}
-		db.sql&="
-		WHERE  
-		site_option_group_deleted = #db.param(0)# and
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
-		site_x_option_group_set_deleted = #db.param(0)# and 
-		site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and 
-		site_option_group.site_id=site_x_option_group_set.site_id and 
-		site_option_group.site_option_group_id=site_x_option_group_set.site_option_group_id ";
-		if(arraylen(arrSearchSQL)){
-			db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
-		}
-		if(status NEQ ""){
-			db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
-		}
-		if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
-			db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
-		}
-		if(form.site_x_option_group_set_parent_id NEQ 0){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
-		} 
-		if(qGroup.site_option_group_enable_archiving EQ 1 and not showArchived){
-			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
-		}
-		db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
-		site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
-		site_option_group.site_option_group_type=#db.param('1')# ";
-		//GROUP BY site_x_option_group_set.site_x_option_group_set_id
-		if(arraylen(arrSortSQL)){
-			db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
-		}else{
-			db.sql&=" ORDER BY site_x_option_group_set_sort asc ";
-		}
-		if(qGroup.site_option_group_admin_paging_limit NEQ 0){
-			db.sql&=" LIMIT #db.param((form.zIndex-1)*qGroup.site_option_group_admin_paging_limit)#, #db.param(qGroup.site_option_group_admin_paging_limit)# ";
-		}
-		qSCount=db.execute("qSCount");
 		//writedump(qS);abort;
 		// sort and indent 
 		if(parentIndex NEQ 0){
@@ -3968,12 +4015,12 @@ Define this function in another CFC to override the default email format
 		rowStruct={};
 		rowIndexFix=1;
 		if(structkeyexists(arguments.struct, 'recurse') and qS.recordcount NEQ 0){
-			echo('<h3>Sub-group: #q12.site_option_group_display_name#</h3>');
+			echo('<h3>Sub-group: #mainGroupStruct.site_option_group_display_name#</h3>');
 		}
 		addEnabled=true;
 		sortLink='';
 		if(not structkeyexists(arguments.struct, 'recurse')){
-			if(qGroup.site_option_group_enable_sorting EQ 1){
+			if(mainGroupStruct.site_option_group_enable_sorting EQ 1){
 				if(not sortEnabled and subgroupRecurseEnabled){
 					sortLink=('<a href="/z/admin/site-options/#methodBackup#?site_option_group_id=#form.site_option_group_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&amp;enableSorting=1" class="z-manager-search-button">Enable Sorting</a>');
 					
@@ -3982,25 +4029,25 @@ Define this function in another CFC to override the default email format
 				}
 			}
 		} 
-		if(qGroup.site_option_group_limit EQ 0 or qCountAllLimit.count LT qGroup.site_option_group_limit){
+		if(mainGroupStruct.site_option_group_limit EQ 0 or qCountAllLimit.count LT mainGroupStruct.site_option_group_limit){
 			if(methodBackup EQ "userManageGroup"){ 
-				if(qGroup.site_option_group_user_child_limit NEQ 0 and qCountLimit.count GTE qGroup.site_option_group_user_child_limit){
+				if(mainGroupStruct.site_option_group_user_child_limit NEQ 0 and qCountLimit.count GTE mainGroupStruct.site_option_group_user_child_limit){
 					addEnabled=false;
 				}
 			}
 			if(structkeyexists(arguments.struct, 'recurse') EQ false){ 
-				echo('<div class="z-float z-mb-10"><h2 style="display:inline-block; ">#qGroup.site_option_group_display_name#(s)</h2> &nbsp;&nbsp; ');
+				echo('<div class="z-float z-mb-10"><h2 style="display:inline-block; ">#mainGroupStruct.site_option_group_display_name#(s)</h2> &nbsp;&nbsp; ');
 				if(addEnabled){
 					writeoutput('<a href="#application.zcore.functions.zURLAppend(arguments.struct.addURL, "site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#form.site_option_group_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#")#&modalpopforced=1" onclick="zTableRecordAdd(this, ''sortRowTable''); return false; " class="z-manager-quick-add-link z-manager-search-button ">Add</a>');
 					if(application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1){
 						application.zcore.skin.addDeferredScript(' $(".z-manager-quick-add-link").trigger("click"); ');
 					} 
 				} 
-				if(methodBackup EQ "manageGroup" and qGroup.site_option_group_disable_export EQ 0){
-					echo(' <a href="/z/admin/site-option-group/export?site_option_group_id=#qGroup.site_option_group_id#" class="z-button" target="_blank">Export CSV</a>');
+				if(methodBackup EQ "manageGroup" and mainGroupStruct.site_option_group_disable_export EQ 0){
+					echo(' <a href="/z/admin/site-option-group/export?site_option_group_id=#mainGroupStruct.site_option_group_id#" class="z-button" target="_blank">Export CSV</a>');
 				}
 
-				if(qGroup.site_option_group_enable_archiving EQ 1){
+				if(mainGroupStruct.site_option_group_enable_archiving EQ 1){
 					if(showArchived){ 
 						echo(' <a href="/z/admin/site-options/#methodBackup#?site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&showArchived=0" class="z-button">Hide Archived</a>'); 
 					}else{
@@ -4012,13 +4059,15 @@ Define this function in another CFC to override the default email format
 		}else{
 
 			if(structkeyexists(arguments.struct, 'recurse') EQ false){
-				echo('<div class="z-float z-mb-10"><h2 style="display:inline-block; ">#qGroup.site_option_group_display_name#(s)</h2> &nbsp;&nbsp; #sortLink#</div>');
+				echo('<div class="z-float z-mb-10"><h2 style="display:inline-block; ">#mainGroupStruct.site_option_group_display_name#(s)</h2> &nbsp;&nbsp; #sortLink#</div>');
 			}
 
 		} 
 		echo(listDescription);
-		if(qCountAllLimit.recordcount NEQ 0 and qCountAllLimit.count > 0){
-			echo(arraytolist(arrSearch, ""));
+		if(not structkeyexists(arguments.struct, 'recurse') and form.site_option_group_id NEQ 0 and arraylen(arrSearchTable)){ 
+			if(mainGroupStruct.site_option_group_limit EQ 0 or (qCountAllLimit.recordcount NEQ 0 and qCountAllLimit.count > 0)){
+				echo(arraytolist(arrSearch, ""));
+			}
 		}
 		if(qS.recordcount){
 			columnCount=0;
@@ -4037,7 +4086,7 @@ Define this function in another CFC to override the default email format
 					columnCount++;
 				}
 			}
-			if(qGroup.site_option_group_enable_approval EQ 1){
+			if(mainGroupStruct.site_option_group_enable_approval EQ 1){
 				echo('<th>Approval Status</th>');
 				columnCount++;
 			}
@@ -4103,7 +4152,7 @@ Define this function in another CFC to override the default email format
 							writeoutput('</td>');
 						}
 					}
-					if(qGroup.site_option_group_enable_approval EQ 1){
+					if(mainGroupStruct.site_option_group_enable_approval EQ 1){
 						echo('<td>'&application.zcore.siteOptionCom.getStatusName(row.site_x_option_group_set_approved)&'</td>');
 					}
 					/*if(sortEnabled){
@@ -4165,10 +4214,10 @@ Define this function in another CFC to override the default email format
 								editLink&="&amp;disableSorting=1";
 							}
 							echo('<a href="#editLink#"  onclick="zTableRecordEdit(this);  return false;">Edit</a> ');
-							if(q1.recordcount NEQ 0){ 
-								for(var n in q1){
+							if(arrayLen(arrChildGroup) NEQ 0){ 
+								for(n in arrChildGroup){
 									if(structkeyexists(subgroupStruct, n.site_option_group_id)){
-										link=application.zcore.functions.zURLAppend(arguments.struct.listURL, "site_option_group_id=#q1.site_option_group_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_id#");
+										link=application.zcore.functions.zURLAppend(arguments.struct.listURL, "site_option_group_id=#n.site_option_group_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_id#");
 										echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(n.site_option_group_display_name)#(s)</a>'); // n.childCount
 										hasMultipleEditFeatures=true;
 									}
@@ -4176,8 +4225,8 @@ Define this function in another CFC to override the default email format
 							}
 							copyLink="";
 							if(methodBackup NEQ "userManageGroup" and methodBackup NEQ "userGetRowHTML"){
-								if(qGroup.site_option_group_limit EQ 0 or qSCount.recordcount LT qGroup.site_option_group_limit){
-									if(qGroup.site_option_group_enable_versioning EQ 1 and row.site_x_option_group_set_parent_id EQ 0){
+								if(mainGroupStruct.site_option_group_limit EQ 0 or qSCount.recordcount LT mainGroupStruct.site_option_group_limit){
+									if(mainGroupStruct.site_option_group_enable_versioning EQ 1 and row.site_x_option_group_set_parent_id EQ 0){
 										copyLink=application.zcore.functions.zURLAppend(arguments.struct.copyURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#"); 
 										echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.versionURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#")#">Versions</a>');
 										hasMultipleEditFeatures=true;
@@ -4217,8 +4266,8 @@ Define this function in another CFC to override the default email format
 						//zShowModalStandard(this.href, 2000,2000, true, true);
 						allowDelete=true;
 						if(methodBackup EQ "userManageGroup" or methodBackup EQ "userGetRowHTML"){
-							if(qGroup.site_option_group_allow_delete_usergrouplist NEQ ""){
-								arrUserGroup=listToArray(qGroup.site_option_group_allow_delete_usergrouplist, ",");
+							if(mainGroupStruct.site_option_group_allow_delete_usergrouplist NEQ ""){
+								arrUserGroup=listToArray(mainGroupStruct.site_option_group_allow_delete_usergrouplist, ",");
 								allowDelete=false;
 								for(i=1;i LTE arraylen(arrUserGroup);i++){
 									if(application.zcore.user.checkGroupIdAccess(arrUserGroup[i])){
@@ -4229,7 +4278,7 @@ Define this function in another CFC to override the default email format
 							}
 						}
 						if(allowDelete){
-							if(methodBackup NEQ "userManageGroup" and methodBackup NEQ "userGetRowHTML" and not application.zcore.functions.zIsForceDeleteEnabled(row.site_x_option_group_set_override_url) and qGroup.site_option_group_enable_locked_delete EQ 0){
+							if(methodBackup NEQ "userManageGroup" and methodBackup NEQ "userGetRowHTML" and not application.zcore.functions.zIsForceDeleteEnabled(row.site_x_option_group_set_override_url) and mainGroupStruct.site_option_group_enable_locked_delete EQ 0){
 								//echo('Delete disabled');
 							}else{
 								echo('<div class="z-manager-button-container"><a href="##"  onclick="zDeleteTableRecordRow(this, ''#deleteLink#'');  return false;" class="z-manager-delete" title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></a></div>');
@@ -4247,8 +4296,8 @@ Define this function in another CFC to override the default email format
 				backupSiteOptionGroupId=form.site_option_group_id;
 				backupSiteXOptionGroupSetParentId=form.site_x_option_group_set_parent_id;
 				savecontent variable="recurseOut"{
-					if(subgroupRecurseEnabled and form.enableSorting EQ 0 and q1.recordcount NEQ 0){
-						for(var n in q1){
+					if(subgroupRecurseEnabled and form.enableSorting EQ 0 and arrayLen(arrChildGroup) NEQ 0){
+						for(var n in arrChildGroup){
 							if(n.site_option_group_enable_list_recurse EQ "1"){
 								form.site_option_group_app_id=row.site_option_app_id;
 								form.site_x_option_group_set_parent_id=row.site_x_option_group_set_id;
@@ -4299,7 +4348,7 @@ Define this function in another CFC to override the default email format
 			} 
 			writeoutput('</tbody></table>');
 			if(form.site_option_group_id NEQ 0){
-				if(qGroup.site_option_group_admin_paging_limit NEQ 0){
+				if(mainGroupStruct.site_option_group_admin_paging_limit NEQ 0){
 					searchStruct = StructNew();
 					searchStruct.count = qCount.count;
 					searchStruct.index = form.zIndex;
@@ -4307,7 +4356,7 @@ Define this function in another CFC to override the default email format
 					searchStruct.url = application.zcore.functions.zURLAppend(arguments.struct.listURL, "site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#");
 					searchStruct.indexName = "zIndex";
 					searchStruct.buttons = 5;
-					searchStruct.perpage = qGroup.site_option_group_admin_paging_limit;
+					searchStruct.perpage = mainGroupStruct.site_option_group_admin_paging_limit;
 					if(searchStruct.count GT searchStruct.perpage){
 						writeoutput( '<table class="table-list" style="width:100%; border-spacing:0px;" ><tr><td style="padding:0px;">'&application.zcore.functions.zSearchResultsNav(searchStruct)&'</td></tr></table>');
 					}
@@ -4334,7 +4383,7 @@ Define this function in another CFC to override the default email format
 		*/
 	}else{
 		hasListRecurseGroup=false; 
-		for(var n in q1){
+		for(var n in arrChildGroup){
 			if(n.site_option_group_enable_list_recurse EQ "1"){
 				hasListRecurseGroup=true;
 				break;
