@@ -1235,9 +1235,8 @@
 					ts.user_group_name = "serveradministrator";
 					rs=application.zcore.user.checkLogin(ts);
 				}else{
-					if(not application.zcore.user.hasSourceAdminAccess()){
-						application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
-						application.zcore.functions.zRedirect("/z/admin/admin-home/index?zsid=#request.zsid#");
+					if(not application.zcore.user.hasSourceAdminAccess()){ 
+						application.zcore.functions.zRedirect("/z/admin/admin-home/index");
 					}
 					if((left(request.cgi_script_name, 17) EQ '/z/listing/tasks/' or left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/') and structkeyexists(request.zsession, 'user') and not application.zcore.user.checkAllCompanyAccess()){
 						application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
