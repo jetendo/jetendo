@@ -103,20 +103,23 @@
 			<table style="border-spacing:0px; width:100%;" class="table-list">
 				<tr class="table-shadow">
 					<td colspan="13" class="tiny"><h2 style="display:inline;">Sites</h2> &nbsp;&nbsp;
+					<cfif not request.zos.isTestServer and (not structkeyexists(request.zos, 'importSiteUserStruct') or not structkeyexists(request.zos.importSiteUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))>
+						<!--- no permission --->
+					<cfelse>
 						<a href="/z/server-manager/admin/site/newDomain" class="z-manager-search-button">Add Site</a> 
-					<cfif application.zcore.user.checkAllCompanyAccess()>
-						<a href="/z/server-manager/admin/site-import/index" class="z-manager-search-button">Import Site</a>
-						<a href="/z/server-manager/admin/company/index">Companies</a>
+
+						<cfif application.zcore.user.checkAllCompanyAccess()>
+							<a href="/z/server-manager/admin/site-import/index" class="z-manager-search-button">Import Site</a>
+							<a href="/z/server-manager/admin/company/index">Companies</a> 
+						 
+							| <a href="/z/server-manager/admin/global-import/index">Import Global Database</a>
+						</cfif>
 					</cfif>
 					<!--- | <a href="#request.cgi_script_name#?action=manageBudget">Manage Budgets</a>  --->
 						<cfif application.zcore.functions.zso(request.zsession, 'showInactiveSites', true, 0) EQ 1>
 							| <a href="/z/server-manager/admin/site-select/index?showInactiveSites=0">Hide Inactive</a>
 							<cfelse>
 							| <a href="/z/server-manager/admin/site-select/index?showInactiveSites=1">Show Inactive</a>
-						</cfif>
-						<cfif application.zcore.user.checkAllCompanyAccess()>
-						 
-							| <a href="/z/server-manager/admin/global-import/index">Import Global Database</a>
 						</cfif>
 					</td>
 					<td style="text-align:right" colspan="13" class="tiny"><input type="text" name="site_search" value="#application.zcore.functions.zso(form, 'site_search')#" style="min-width:100px; width:100%; max-width:200px;" size="35">

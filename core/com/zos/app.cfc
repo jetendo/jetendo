@@ -70,36 +70,43 @@
 		structappend(arguments.sharedStruct, request.zos.adminMenuStruct, true);
 	}
 	if(application.zcore.user.checkServerAccess()){
-		ts=structnew();
-		ts.link="/z/server-manager/admin/server-home/index"; 
-		ts.children=structnew();
-		arguments.sharedStruct["Server Manager"]=ts;
+		if(not application.zcore.user.hasSourceAdminAccess()){
+			ts=structnew();
+			ts.link="/z/admin/site-backup/index"; 
+			ts.children=structnew();
+			arguments.sharedStruct["Backup"]=ts;
+		}else{
+			ts=structnew();
+			ts.link="/z/server-manager/admin/server-home/index"; 
+			ts.children=structnew();
+			arguments.sharedStruct["Server Manager"]=ts;
 
-		curStruct=arguments.sharedStruct["Server Manager"];
-		ts=structnew();
-		ts.link="/z/server-manager/admin/server-home/index";
-		curStruct.children["Dashboard"]=ts;
-		ts=structnew();
-		ts.link="/z/server-manager/admin/site-select/index";
-		curStruct.children["Sites"]=ts;
-		
-		if(application.zcore.user.checkAllCompanyAccess() and request.zos.isTestServer){
+			curStruct=arguments.sharedStruct["Server Manager"];
 			ts=structnew();
-			ts.link="/z/_com/zos/app?method=appList";
-			curStruct.children["Apps"]=ts;
+			ts.link="/z/server-manager/admin/server-home/index";
+			curStruct.children["Dashboard"]=ts;
 			ts=structnew();
-			ts.link="/z/server-manager/admin/log/index?sid=";
-			curStruct.children["Logs"]=ts;
+			ts.link="/z/server-manager/admin/site-select/index";
+			curStruct.children["Sites"]=ts;
+			
+			if(application.zcore.user.checkAllCompanyAccess() and request.zos.isTestServer){
+				ts=structnew();
+				ts.link="/z/_com/zos/app?method=appList";
+				curStruct.children["Apps"]=ts;
+				ts=structnew();
+				ts.link="/z/server-manager/admin/log/index?sid=";
+				curStruct.children["Logs"]=ts;
+				ts=structnew();
+				ts.link="/z/server-manager/admin/deploy/index";
+				curStruct.children["Deploy"]=ts;
+				ts=structnew();
+				ts.link="/z/server-manager/admin/deploy/index?sid="&request.zos.globals.id;
+				curStruct.children["Deploy This Site"]=ts;
+			}
+			ts.link="/z/server-manager/admin/site-select/index?action=select&sid="&request.zos.globals.id;
+			curStruct.children["Edit This Site"]=ts;
 			ts=structnew();
-			ts.link="/z/server-manager/admin/deploy/index";
-			curStruct.children["Deploy"]=ts;
-			ts=structnew();
-			ts.link="/z/server-manager/admin/deploy/index?sid="&request.zos.globals.id;
-			curStruct.children["Deploy This Site"]=ts;
 		}
-		ts.link="/z/server-manager/admin/site-select/index?action=select&sid="&request.zos.globals.id;
-		curStruct.children["Edit This Site"]=ts;
-		ts=structnew();
 	}
 	
 	if((structkeyexists(request.zos.userSession.groupAccess, "administrator") or structkeyexists(request.zos.userSession.groupAccess, "agent"))){// or (structkeyexists(request.zos.userSession.groupAccess, "agent") EQ false)){

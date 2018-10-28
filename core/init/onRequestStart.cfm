@@ -1216,8 +1216,7 @@
 	var i=0;
 	var template=0;
 	var cfcatch=0;
-	// silenced output
-	savecontent variable="local.output"{
+	// silenced output 
 		if(request.zos.inServerManager){
 			application.zcore.functions.zNoCache();
 			runningTask=false;
@@ -1236,6 +1235,10 @@
 					ts.user_group_name = "serveradministrator";
 					rs=application.zcore.user.checkLogin(ts);
 				}else{
+					if(not application.zcore.user.hasSourceAdminAccess()){
+						application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
+						application.zcore.functions.zRedirect("/z/admin/admin-home/index?zsid=#request.zsid#");
+					}
 					if((left(request.cgi_script_name, 17) EQ '/z/listing/tasks/' or left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/') and structkeyexists(request.zsession, 'user') and not application.zcore.user.checkAllCompanyAccess()){
 						application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
 						application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index?zsid=#request.zsid#");
@@ -1295,6 +1298,7 @@
 		}catch(Any local.e){
 			local.roles="";
 		}
+	savecontent variable="local.output"{
 	}
 	request.zos.requestLogEntry('Application.cfc onRequestStart4 before processRequestURL');
 	application.zcore.routing.processRequestURL(request.zos.cgi.SCRIPT_NAME);

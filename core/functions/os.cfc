@@ -276,9 +276,12 @@ if(not rs.success){
 
 <cffunction name="zIsWidgetBuilderEnabled" localmode="modern" returntype="boolean" access="public">
 	<cfscript>
+	if(not application.zcore.user.hasSourceAdminAccess()){
+		return false;
+	}
 	if(application.zcore.user.checkServerAccess()){
 		return true;
-	}else if(application.zcore.user.checkGroupAccess("member")){
+	}else if(application.zcore.user.checkGroupAccess("administrator")){
 		if(isdefined('request.zsession.user.enableWidgetBuilder') and request.zsession.user.enableWidgetBuilder EQ 1){
 			return true;
 		}else{

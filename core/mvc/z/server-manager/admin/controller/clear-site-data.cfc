@@ -1,8 +1,17 @@
 <cfcomponent>
 <cfoutput>
+<cffunction name="init" localmode="modern" access="public">
+	<cfscript>
+	if(not request.zos.isTestServer){
+		application.zcore.functions.z404("You can only use this feature on the test server");
+	}
+	</cfscript>
+</cffunction>
+
 <!--- /z/server-manager/admin/clear-site-data/index?sid=#form.sid# --->
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	init();
 	application.zcore.functions.zStatusHandler(request.zsid);
 	var db=request.zos.queryObject;
 	form.sid=application.zcore.functions.zso(form, 'sid', true, 0);
@@ -93,6 +102,7 @@
 
 <cffunction name="process" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	init();
 	var db=request.zos.queryObject;
 	form.sid=application.zcore.functions.zso(form, 'sid', true, 0);
 	if(form.sid EQ 0){

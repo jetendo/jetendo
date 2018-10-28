@@ -1,13 +1,24 @@
 <cfcomponent>
 <cfoutput>
+<!--- <cffunction name="init" localmode="modern" access="public">
+	<cfscript> 
+	if(not request.zos.isTestServer or not structkeyexists(request.zos, 'importSiteUserStruct') or not structkeyexists(request.zos.importSiteUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id)){
+		echo("You don't have permission to use the import site feature.");
+	}
+	</cfscript>
+</cffunction> --->
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	var db=request.zos.queryObject;
 	var selectStruct=0;
+	// init();
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8.1.2");
 	application.zcore.functions.zStatusHandler(request.zsid);
+	if(not request.zos.isTestServer or not structkeyexists(request.zos, 'importSiteUserStruct') or not structkeyexists(request.zos.importSiteUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id)){
+		echo("You don't have permission to use the import site feature.");
+	}
 	</cfscript>
 	
 	<form id="siteImportForm" action="/z/server-manager/admin/site-import/process" method="post" enctype="multipart/form-data">
@@ -166,6 +177,7 @@
 	var db=request.zos.queryObject;
 	var dbNoVerify=request.zos.noVerifyQueryObject; 
 	var debug=false;
+	// init();
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
 	setting requesttimeout="3600";

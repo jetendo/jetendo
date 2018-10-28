@@ -89,37 +89,37 @@
 				<td class="table-list" style="vertical-align:top; width:150px;">Backup Type:</td>
 				<td class="table-white">
 				<cfscript>
-				local.curDomain=replace(replace(qsite.site_short_domain, 'www.', ''), "."&request.zos.testDomain, "");
-				if(fileexists("#request.zos.backupDirectory#site-archives/#local.curDomain#.tar")){
-					local.totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#site-archives/#local.curDomain#.tar")&" | compressed";
-					directory action="list" directory="#request.zos.backupDirectory#site-archives/" filter="#local.curDomain#.tar" name="local.qDir";
-					local.totalSize&=" backup made on "&dateformat(local.qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(local.qDir.dateLastModified, "HH:mm:ss");
+				curDomain=replace(replace(qsite.site_short_domain, 'www.', ''), "."&request.zos.testDomain, "");
+				if(fileexists("#request.zos.backupDirectory#site-archives/#curDomain#.tar")){
+					totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#site-archives/#curDomain#.tar")&" | compressed";
+					directory action="list" directory="#request.zos.backupDirectory#site-archives/" filter="#curDomain#.tar" name="qDir";
+					totalSize&=" backup made on "&dateformat(qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(qDir.dateLastModified, "HH:mm:ss");
 				}else{
-					local.totalSize="No backup exists yet.";
+					totalSize="No backup exists yet.";
 				}
 				</cfscript>
-				<input type="radio" name="backupType" value="1" checked="checked" /> Site Database &amp; Source (#local.totalSize#)<br />
+				<input type="radio" name="backupType" value="1" checked="checked" /> Site Database &amp; Source (#totalSize#)<br />
 				<cfscript>
-				if(fileexists("#request.zos.backupDirectory#site-archives/#local.curDomain#-zupload.7z")){
-					local.totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#site-archives/#local.curDomain#-zupload.7z")&" | compressed";
-					directory action="list" directory="#request.zos.backupDirectory#site-archives/" filter="#local.curDomain#-zupload.7z" name="local.qDir";
-					local.totalSize&=" backup made on "&dateformat(local.qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(local.qDir.dateLastModified, "HH:mm:ss");
+				if(fileexists("#request.zos.backupDirectory#site-archives/#curDomain#-zupload.7z")){
+					totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#site-archives/#curDomain#-zupload.7z")&" | compressed";
+					directory action="list" directory="#request.zos.backupDirectory#site-archives/" filter="#curDomain#-zupload.7z" name="qDir";
+					totalSize&=" backup made on "&dateformat(qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(qDir.dateLastModified, "HH:mm:ss");
 				}else{
-					local.totalSize=application.zcore.functions.zGetDiskUsage("#application.zcore.functions.zGetDomainWritableInstallPath(qsite.site_short_domain)#/zupload/")&" | not compressed yet";
+					totalSize=application.zcore.functions.zGetDiskUsage("#application.zcore.functions.zGetDomainWritableInstallPath(qsite.site_short_domain)#/zupload/")&" | not compressed yet";
 				}
 				</cfscript>
-				<input type="radio" name="backupType" value="2" /> Site Uploads (#local.totalSize#)<br />
+				<input type="radio" name="backupType" value="2" /> Site Uploads (#totalSize#)<br />
 				<cfscript>
 				if(fileexists("#request.zos.backupDirectory#global-database.tar")){
-					local.totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#global-database.tar")&" | compressed";
-					directory action="list" directory="#request.zos.backupDirectory#" filter="global-database.tar" name="local.qDir";
-					local.totalSize&=" backup made on "&dateformat(local.qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(local.qDir.dateLastModified, "HH:mm:ss");
+					totalSize=application.zcore.functions.zGetDiskUsage("#request.zos.backupDirectory#global-database.tar")&" | compressed";
+					directory action="list" directory="#request.zos.backupDirectory#" filter="global-database.tar" name="qDir";
+					totalSize&=" backup made on "&dateformat(qDir.dateLastModified, "yyyy-mm-dd")&" at "&timeformat(qDir.dateLastModified, "HH:mm:ss");
 				}else{
-					local.totalSize="backup doesn't exist yet.";
+					totalSize="backup doesn't exist yet.";
 				}
 				</cfscript>
 				<cfif application.zcore.user.checkAllCompanyAccess()>
-					<input type="radio" name="backupType" value="3" /> Global Database (#local.totalSize# | Contains all non-site specific data)<br />
+					<input type="radio" name="backupType" value="3" /> Global Database (#totalSize# | Contains all non-site specific data)<br />
 				</cfif>
 				</td>
 			</tr>

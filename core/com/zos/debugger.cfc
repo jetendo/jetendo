@@ -115,105 +115,114 @@
 		</cfif> 
       <div style="width:99%; float:left; ">
         <div class="zOS_mode_table" id="zOS_mode_table_tag" style="width:100%;display:block; ">
-          <div class="zOS_mode_td">DevTools | 
-			<cfif request.zos.isTestServer>
-				<a href="/z/server-manager/admin/deploy/index?sid=#request.zos.globals.id#" class="z-manager-search-button" style="color:##FFF;" target="_blank">Deploy Site</a> 
-			</cfif>
-              Reset: 
-	      <a href="##" class="z-manager-search-button" style="color:##FFF;" onclick="zOS_mode_submit('reset','true','site');return false;"  >Site</a> 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','code');return false;"  class="zOS_mode_link">Code</a> | 
-              <a href="##" onclick="zOS_mode_submit('reset','true','app');return false;"  class="zOS_mode_link">App</a> | 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','app', '&amp;zforce=1');return false;"  class="zOS_mode_link">App &amp; Skin</a> | 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','app', '&amp;zforcelisting=1');return false;"  class="zOS_mode_link">App &amp; Listing</a> | 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','app','&amp;zforcelisting=1&amp;zrebuildramtable=1');return false;"  >App &amp; DB Ram</a> | 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','template');return false;"  class="zOS_mode_link">Template</a> | 
-	      <a href="##" onclick="zOS_mode_submit('reset','true','session');return false;" >Session</a> | 
-              <a href="##" onclick="zOS_mode_submit('reset','true','all');return false;" >All</a> | 
-              <!--- <a href="##" onclick="zOS_mode_submit('reset','true','all', '&amp;zforce=1');return false;"  class="zOS_mode_link">All &amp; Skin Cache Rebuild</a> |  --->
+			<div class="zOS_mode_td">DevTools | 
+				<cfif application.zcore.user.hasSourceAdminAccess()>
+					<cfif request.zos.isTestServer>
+						<a href="/z/server-manager/admin/deploy/index?sid=#request.zos.globals.id#" class="z-manager-search-button" style="color:##FFF;" target="_blank">Deploy Site</a> 
+					</cfif>
 
-              <a href="##" onclick="zOS_mode_submit('reset','true','cache');return false;" >Rebuild Globals</a></div>
-            <div class="zOS_mode_td"> 
-            	Debug:
-            
-              <cfif isDefined('request.zsession.modes.debug')>
-                <a href="##" onclick="zOS_mode_submit('debug','false');return false;" >On</a>
-                <cfelse>
-                <a href="##" onclick="zOS_mode_submit('debug','true');return false;" >Off</a>
-              </cfif>
-              | Time:
-              <cfset request.zsession.modes.time=true>
-              <cfif isDefined('request.zsession.modes.time')>
-                <a href="##" onclick="zOS_mode_submit('time','false');return false;" >On</a>
-                <cfelse>
-                <a href="##" onclick="zOS_mode_submit('time','true');return false;" >Off</a>
-              </cfif>
-              <br />Var Dump:
-              <cfif isDefined('request.zsession.modes.varDump')>
-#request.zsession.modes.varDumpName#                                                                            &nbsp; <a href="##" onclick="zOS_mode_submit('varDump','false');return false;" >On</a>
-                <input type="hidden" name="zOS_modeVarDumpName" id="zOS_modeVarDumpName" value="" class="zOS_modeInput" />
-                <cfelse>
-                <input type="text" name="zOS_modeVarDumpName" id="zOS_modeVarDumpName" value="" class="zOS_modeInput" />
-                &nbsp; <a href="##" onclick="zOS_mode_submit('varDump','true');return false;" >Off</a>
-              </cfif>
-              | Verify Queries: 
-            	<cfif isDefined('request.zsession.verifyQueries') and request.zsession.verifyQueries>
-                 <a href="##" onclick="zOS_mode_submit('VerifyQueries','false');return false;" >On</a>
-                <cfelse>
-                &nbsp; <a href="##" onclick="zOS_mode_submit('VerifyQueries','true');return false;" >Off</a>
-                </cfif>
-			<br />
-              <a href="#application.zcore.functions.zURLAppend(link, "zdebugurl=1")#">Debug URL</a> 
-              | Debug Lead Routing: 
-            	<cfif isDefined('request.zsession.debugleadrouting') and request.zsession.debugleadrouting>
-                 <a href="##" onclick="zOS_mode_submit('debugleadrouting','false');return false;">On</a>
-                <cfelse>
-                &nbsp; <a href="##" onclick="zOS_mode_submit('debugleadrouting','true');return false;">Off</a>
-                </cfif>
+					Reset: 
+					<a href="##" class="z-manager-search-button" style="color:##FFF;" onclick="zOS_mode_submit('reset','true','site');return false;"  >Site</a> 
+					<a href="##" onclick="zOS_mode_submit('reset','true','code');return false;"  class="zOS_mode_link">Code</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','app');return false;"  class="zOS_mode_link">App</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','app', '&amp;zforce=1');return false;"  class="zOS_mode_link">App &amp; Skin</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','app', '&amp;zforcelisting=1');return false;"  class="zOS_mode_link">App &amp; Listing</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','app','&amp;zforcelisting=1&amp;zrebuildramtable=1');return false;"  >App &amp; DB Ram</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','template');return false;"  class="zOS_mode_link">Template</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','session');return false;" >Session</a> | 
+					<a href="##" onclick="zOS_mode_submit('reset','true','all');return false;" >All</a> | 
+					<!--- <a href="##" onclick="zOS_mode_submit('reset','true','all', '&amp;zforce=1');return false;"  class="zOS_mode_link">All &amp; Skin Cache Rebuild</a> |  --->
 
-                <!--- this is not fully implemented yet
-              | Force Health Failure: 
-            	<cfif isDefined('request.zsession.forceHealthFailure') and request.zsession.forceHealthFailure>
-                 <a href="##" onclick="zOS_mode_submit('forceHealthFailure','false');return false;">On 1</a>
-                <cfelse>
-                &nbsp; <a href="##" onclick="zOS_mode_submit('forceHealthFailure','true');return false;">Off 1</a>
-                </cfif>
-            	<cfif isDefined('request.zsession.forceHealthFailure2') and request.zsession.forceHealthFailure2>
-                 <a href="##" onclick="zOS_mode_submit('forceHealthFailure2','false');return false;">On 2</a>
-                <cfelse>
-                &nbsp; <a href="##" onclick="zOS_mode_submit('forceHealthFailure2','true');return false;">Off 2</a>
-                </cfif> 
-                 --->
-              | <a title="Write access will be disabled for all users on all sites, but lead forms will continue to function.">Read-only Mode</a>: 
-                <cfif structkeyexists(application, 'zReadOnlyModeEnabled') and application.zReadOnlyModeEnabled>
-                 <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','false');return false;" title="Click to turn off read-only mode">On</a>
-                <cfelse>
-                &nbsp; <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','true');return false;" title="Click to turn on read-only mode">Off</a>
-                </cfif><br>
-                Throw on redirect: 
-                <cfif structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect>
-	                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','false');return false;" title="Click to turn off throw on redirect">On</a>
-	            <cfelse>
-	                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','true');return false;" title="Click to turn on throw on redirect">Off</a>
-	            </cfif>
-                <br />
-                <cfif structkeyexists(request.zos.requestData.headers, 'ssl_session_id')>
-					<cfif structkeyexists(request.zsession, 'ssl_session_id')>
-						<cfif request.zsession.ssl_session_id NEQ request.zos.requestData.headers.ssl_session_id>
-               				ssl_session_id changed<br />
-               			<cfelse>
-               				ssl_session_id reused
-						</cfif>
-					<cfelse>
-						new session
-               		</cfif>
-					<cfscript>
-					request.zsession.ssl_session_id=request.zos.requestData.headers.ssl_session_id;
-					</cfscript>
-				</cfif> 
-               	<cfif structkeyexists(application, 'customSessionStruct')>
-					#structcount(application.customSessionStruct)# Active Sessions
+					<a href="##" onclick="zOS_mode_submit('reset','true','cache');return false;" >Rebuild Globals</a>
+				<cfelse>
+					Reset: <a href="##" class="z-manager-search-button" style="color:##FFF;" onclick="zOS_mode_submit('reset','true','site');return false;"  >Site</a> 
+
 				</cfif>
-              </div>
+			</div>
+          	<cfif application.zcore.user.hasSourceAdminAccess()>
+	            <div class="zOS_mode_td"> 
+	            	Debug:
+	            
+	              <cfif isDefined('request.zsession.modes.debug')>
+	                <a href="##" onclick="zOS_mode_submit('debug','false');return false;" >On</a>
+	                <cfelse>
+	                <a href="##" onclick="zOS_mode_submit('debug','true');return false;" >Off</a>
+	              </cfif>
+	              | Time:
+	              <cfset request.zsession.modes.time=true>
+	              <cfif isDefined('request.zsession.modes.time')>
+	                <a href="##" onclick="zOS_mode_submit('time','false');return false;" >On</a>
+	                <cfelse>
+	                <a href="##" onclick="zOS_mode_submit('time','true');return false;" >Off</a>
+	              </cfif>
+	              <br />Var Dump:
+	              <cfif isDefined('request.zsession.modes.varDump')>
+	#request.zsession.modes.varDumpName#                                                                            &nbsp; <a href="##" onclick="zOS_mode_submit('varDump','false');return false;" >On</a>
+	                <input type="hidden" name="zOS_modeVarDumpName" id="zOS_modeVarDumpName" value="" class="zOS_modeInput" />
+	                <cfelse>
+	                <input type="text" name="zOS_modeVarDumpName" id="zOS_modeVarDumpName" value="" class="zOS_modeInput" />
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('varDump','true');return false;" >Off</a>
+	              </cfif>
+	              | Verify Queries: 
+	            	<cfif isDefined('request.zsession.verifyQueries') and request.zsession.verifyQueries>
+	                 <a href="##" onclick="zOS_mode_submit('VerifyQueries','false');return false;" >On</a>
+	                <cfelse>
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('VerifyQueries','true');return false;" >Off</a>
+	                </cfif>
+				<br />
+	              <a href="#application.zcore.functions.zURLAppend(link, "zdebugurl=1")#">Debug URL</a> 
+	              | Debug Lead Routing: 
+	            	<cfif isDefined('request.zsession.debugleadrouting') and request.zsession.debugleadrouting>
+	                 <a href="##" onclick="zOS_mode_submit('debugleadrouting','false');return false;">On</a>
+	                <cfelse>
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('debugleadrouting','true');return false;">Off</a>
+	                </cfif>
+
+	                <!--- this is not fully implemented yet
+	              | Force Health Failure: 
+	            	<cfif isDefined('request.zsession.forceHealthFailure') and request.zsession.forceHealthFailure>
+	                 <a href="##" onclick="zOS_mode_submit('forceHealthFailure','false');return false;">On 1</a>
+	                <cfelse>
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('forceHealthFailure','true');return false;">Off 1</a>
+	                </cfif>
+	            	<cfif isDefined('request.zsession.forceHealthFailure2') and request.zsession.forceHealthFailure2>
+	                 <a href="##" onclick="zOS_mode_submit('forceHealthFailure2','false');return false;">On 2</a>
+	                <cfelse>
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('forceHealthFailure2','true');return false;">Off 2</a>
+	                </cfif> 
+	                 --->
+	              | <a title="Write access will be disabled for all users on all sites, but lead forms will continue to function.">Read-only Mode</a>: 
+	                <cfif structkeyexists(application, 'zReadOnlyModeEnabled') and application.zReadOnlyModeEnabled>
+	                 <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','false');return false;" title="Click to turn off read-only mode">On</a>
+	                <cfelse>
+	                &nbsp; <a href="##" onclick="zOS_mode_submit('enableReadOnlyMode','true');return false;" title="Click to turn on read-only mode">Off</a>
+	                </cfif><br>
+	                Throw on redirect: 
+	                <cfif structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect>
+		                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','false');return false;" title="Click to turn off throw on redirect">On</a>
+		            <cfelse>
+		                <a href="##" onclick="zOS_mode_submit('enableThrowOnRedirect','true');return false;" title="Click to turn on throw on redirect">Off</a>
+		            </cfif>
+	                <br />
+	                <cfif structkeyexists(request.zos.requestData.headers, 'ssl_session_id')>
+						<cfif structkeyexists(request.zsession, 'ssl_session_id')>
+							<cfif request.zsession.ssl_session_id NEQ request.zos.requestData.headers.ssl_session_id>
+	               				ssl_session_id changed<br />
+	               			<cfelse>
+	               				ssl_session_id reused
+							</cfif>
+						<cfelse>
+							new session
+	               		</cfif>
+						<cfscript>
+						request.zsession.ssl_session_id=request.zos.requestData.headers.ssl_session_id;
+						</cfscript>
+					</cfif> 
+	               	<cfif structkeyexists(application, 'customSessionStruct')>
+						#structcount(application.customSessionStruct)# Active Sessions
+					</cfif>
+             	 </div>
+		    </cfif>
             <div class="zOS_mode_td">
               <cfif isDefined('request.zsession.tracking.track_user_hits')>Hits: #request.zsession.tracking.track_user_hits#</cfif>
               <cfif isDefined('request.zsession.zlistingpageviewcount')> Listing Pages: #request.zsession.zlistingpageviewcount#</cfif>
@@ -246,7 +255,11 @@
 					total: #application.zGeocodeCacheLimitTotal#
 				</cfif><br />
 			</cfif>
-	      <a href="/z/server-manager/admin/mobile-conversion/responsive?link=#urlencodedformat(request.zos.originalURL)#" target="_blank">Responsive Conversion</a></div>
+			<cfif request.zos.isTestServer>
+		    	<a href="/z/server-manager/admin/mobile-conversion/responsive?link=#urlencodedformat(request.zos.originalURL)#" target="_blank">Responsive Conversion</a>
+	      </cfif>
+	  </div>
+
           </div>
           </cfif>
   </cfsavecontent>

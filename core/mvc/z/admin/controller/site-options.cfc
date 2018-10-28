@@ -86,7 +86,7 @@
 		return;
 	}
 	devToolsEnabled=false;
-	if(application.zcore.user.checkGroupAccess("member") and application.zcore.functions.zIsWidgetBuilderEnabled()){
+	if(application.zcore.user.checkGroupAccess("administrator") and application.zcore.functions.zIsWidgetBuilderEnabled()){
 		allowedMethods={
 			"manageGroup":true,
 			"manageOptions":true

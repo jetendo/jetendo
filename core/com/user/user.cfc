@@ -2091,5 +2091,33 @@ getOffices(ts);
 	return arrOffice;
 	</cfscript>
 </cffunction>
+
+
+<!--- 
+used to disable all server manager features on production unless their user id matches the config
+if(application.zcore.user.hasSourceAdminAccess()){
+}
+ --->
+<cffunction name="hasSourceAdminAccess" localmode="modern" access="public">
+	<cfscript>
+	// if(request.zos.isTestServer and application.zcore.user.checkServerAccess()){
+	// 	return true;
+	// } 
+	// if(request.zos.isServer){
+	// 	return true;
+	// }
+	if(not request.zos.isDeveloper){ 
+		return false;
+	}
+	if(not structkeyexists(request.zos, 'sourceAdminUserStruct')){ 
+		return true;
+	}
+	if(not structkeyexists(request.zos.sourceAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id)){ 
+		return false; 
+	} 
+	return true;
+	</cfscript>
+</cffunction>
+
 </cfoutput>
 </cfcomponent>
