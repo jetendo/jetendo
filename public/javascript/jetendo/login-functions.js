@@ -35,14 +35,19 @@ var zLoggedIn=false;
 			}else{
 				
 				var secondsBeforeLogout=130;
-				if(n-newDate-30<=secondsBeforeLogout*1000){ 
+				if(n-newDate<=secondsBeforeLogout*1000){ 
 					if(typeof zTokenLogin != "undefined" && zTokenLogin){
 						// session lasts forever
 						var obj={
 							id:"zContinueSession",
 							method:"get",
 							callback:function(r){
-								console.log('Session extended automatically');
+								var r=JSON.parse(r);
+								if(r.success){
+									console.log('Session extended automatically');
+								}else{
+									window.location.replace('/z/user/home/index?zlogout=1');
+								}
 							},
 							errorCallback:function(){ 
 								console.log('Failed to extend session automatically'); 
@@ -67,7 +72,12 @@ var zLoggedIn=false;
 									id:"zContinueSession",
 									method:"get",
 									callback:function(r){
-										console.log('Session extended'); 
+										var r=JSON.parse(r);
+										if(r.success){
+											console.log('Session extended'); 
+										}else{
+											window.location.replace('/z/user/home/index?zlogout=1');
+										}
 										showingIdleLogoutWarning=false;
 										zCloseModal();
 									},

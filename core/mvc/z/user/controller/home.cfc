@@ -2,7 +2,11 @@
 <cfoutput>
 <cffunction name="extendSession" access="remote" localmode="modern">
 	<cfscript>
-	ts={success:true};
+	if(application.zcore.user.checkGroupAccess("user")){
+		ts={success:true};
+	}else{
+		ts={success:false};
+	}
 	application.zcore.functions.zReturnJson(ts);
 	</cfscript>
 </cffunction>

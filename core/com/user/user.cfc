@@ -2112,6 +2112,9 @@ if(application.zcore.user.hasSourceAdminAccess()){
 	if(not structkeyexists(request.zos, 'sourceAdminUserStruct')){ 
 		return true;
 	}
+	if(not structkeyexists(request.zsession, 'user')){
+		return false;
+	}
 	if(not structkeyexists(request.zos.sourceAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id)){ 
 		return false; 
 	} 

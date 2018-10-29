@@ -116,7 +116,7 @@
       <div style="width:99%; float:left; ">
         <div class="zOS_mode_table" id="zOS_mode_table_tag" style="width:100%;display:block; ">
 			<div class="zOS_mode_td">DevTools | 
-				<cfif application.zcore.user.hasSourceAdminAccess()>
+				<cfif structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess()>
 					<cfif request.zos.isTestServer>
 						<a href="/z/server-manager/admin/deploy/index?sid=#request.zos.globals.id#" class="z-manager-search-button" style="color:##FFF;" target="_blank">Deploy Site</a> 
 					</cfif>
@@ -139,7 +139,7 @@
 
 				</cfif>
 			</div>
-          	<cfif application.zcore.user.hasSourceAdminAccess()>
+          	<cfif structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess()>
 	            <div class="zOS_mode_td"> 
 	            	Debug:
 	            
