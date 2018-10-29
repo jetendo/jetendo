@@ -71,7 +71,7 @@
 		request.zos.requestLogEntry('Application.cfc onRequestEnd end');
 		application.zcore.functions.zEndOfRunningScript();  
 		
-		if(request.zos.isdeveloper and structkeyexists(request.zos, 'debugbarOutput')){
+		if((request.zos.isdeveloper or request.zos.istestserver) and structkeyexists(request.zos, 'debugbarOutput')){
 			if(isDefined('request.zsession.modes.time') and request.zos.debugbarStruct.returnString NEQ ""){ 
 				echo(replace(request.zos.debugbarStruct.returnString, '##zdebuggerTimeOutput##', '<br />Page generated in '&((gettickcount('nano')-Request.zOS.startTime)/1000000000)&' seconds.',"one"));
 				echo(request.zos.debugbarStruct.returnString2&request.zos.debugbarOutput);

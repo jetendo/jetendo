@@ -2,7 +2,7 @@
 <cfoutput><cffunction name="init" localmode="modern" returntype="any" output="false">
   <cfscript>
 		var i = 0;
-		if(request.zos.isdeveloper){
+		if(request.zos.isdeveloper or request.zos.istestserver){
 			if(Request.zOS.debuggerEnabled EQ false){
 				return "";
 			}
@@ -100,7 +100,7 @@
 		}
 		</cfscript>
   <cfsavecontent variable="returnString">
-	<cfif request.zos.isdeveloper>
+	<cfif request.zos.isdeveloper or request.zos.isTestserver>
 	<br style="clear:both;" /> 
     <form name="zOS_mode_form" id="zOS_mode_form" onsubmit="return zOS_mode_check();" action="#link#" method="post">
       <input type="hidden" name="zOS_mode" id="zOS_mode" value="debug" />
@@ -116,7 +116,7 @@
       <div style="width:99%; float:left; ">
         <div class="zOS_mode_table" id="zOS_mode_table_tag" style="width:100%;display:block; ">
 			<div class="zOS_mode_td">DevTools | 
-				<cfif structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess()>
+				<cfif request.zos.isTestServer or (structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess())>
 					<cfif request.zos.isTestServer>
 						<a href="/z/server-manager/admin/deploy/index?sid=#request.zos.globals.id#" class="z-manager-search-button" style="color:##FFF;" target="_blank">Deploy Site</a> 
 					</cfif>
@@ -139,7 +139,7 @@
 
 				</cfif>
 			</div>
-          	<cfif structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess()>
+          	<cfif request.zos.isTestServer or (structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess())>
 	            <div class="zOS_mode_td"> 
 	            	Debug:
 	            
@@ -263,7 +263,7 @@
           </div>
           </cfif>
   </cfsavecontent>
-  <cfsavecontent variable="returnString2"><cfif request.zos.isdeveloper></div></form></cfif></cfsavecontent>
+  <cfsavecontent variable="returnString2"><cfif request.zos.isdeveloper or request.zos.isTestServer></div></form></cfif></cfsavecontent>
   
   <cfset returnString = replace(returnString, chr(10), "", "ALL")>
   <cfset returnString = replace(returnString, chr(13), "", "ALL")>
@@ -400,7 +400,7 @@
   </cfif>
   </cfsavecontent>
   <cfset dumpcode="">
-  <cfscript>
+  <cfscript> 
 		if(len(trim(returnString)) EQ 0){
 			request.zsession.zOSDebuggerLastOutput = '';
 			return '';
