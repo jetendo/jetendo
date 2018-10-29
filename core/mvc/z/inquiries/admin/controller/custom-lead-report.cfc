@@ -1729,7 +1729,8 @@ leadchart
 	db.sql="select keyword_ranking_source_id, keyword_ranking_keyword  
 	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE 
 	 site_id = #db.param(request.zos.globals.id)# and 
-	keyword_ranking_deleted=#db.param(0)# 
+	keyword_ranking_deleted=#db.param(0)# and 
+	keyword_ranking_source<> #db.param(4)# 
 	GROUP BY keyword_ranking_source_id, keyword_ranking_keyword";
 	qKeywordList=db.execute("qKeywordList");   
 
@@ -1740,7 +1741,8 @@ leadchart
 	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
 	keyword_ranking_run_datetime>=#db.param(request.leadData.startDate)# and 
 	keyword_ranking_run_datetime<#db.param(request.leadData.endDate)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
+	site_id = #db.param(request.zos.globals.id)#  and 
+	keyword_ranking_source<> #db.param(4)# and 
 	keyword_ranking_deleted=#db.param(0)# ";
 	filterOtherTableSQL(db, "keyword_ranking_run_datetime");
 	//keyword_ranking_position<>#db.param(0)# and 
@@ -1756,7 +1758,8 @@ leadchart
 	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
 	keyword_ranking_run_datetime>=#db.param(request.leadData.previousStartDate)# and 
 	keyword_ranking_run_datetime<#db.param(request.leadData.previousEndDate)# and 
-	site_id = #db.param(request.zos.globals.id)# and 
+	site_id = #db.param(request.zos.globals.id)#  and 
+	keyword_ranking_source<> #db.param(4)# and 
 	keyword_ranking_deleted=#db.param(0)# ";
 	filterOtherTableSQL(db, "keyword_ranking_run_datetime"); 
 	db.sql&="
@@ -1781,7 +1784,8 @@ leadchart
 	db.sql="select distinct keyword_ranking_source_id 
 	from #db.table("keyword_ranking", request.zos.zcoreDatasource)# 
 	WHERE
-	site_id = #db.param(request.zos.globals.id)# and 
+	site_id = #db.param(request.zos.globals.id)#  and 
+	keyword_ranking_source<> #db.param(4)# and 
 	keyword_ranking_deleted=#db.param(0)# ";
 	qLabel=db.execute("qLabel"); 
 
@@ -1854,7 +1858,8 @@ leadchart
 		from #db.table("keyword_ranking", request.zos.zcoreDatasource)# WHERE  
 		keyword_ranking_run_datetime>=#db.param(qFirstKeyword.date&"-01 00:00:00")# and 
 		keyword_ranking_run_datetime<#db.param(dateformat(dateadd("m", 1, qFirstKeyword.date&"-01"), "yyyy-mm-dd")&" 00:00:00")# and 
-		site_id = #db.param(request.zos.globals.id)# and 
+		site_id = #db.param(request.zos.globals.id)#  and 
+		keyword_ranking_source<> #db.param(4)# and 
 		keyword_ranking_deleted=#db.param(0)# ";
 		filterOtherTableSQL(db, "keyword_ranking_run_datetime"); 
 		db.sql&="
@@ -2124,6 +2129,7 @@ leadchart
 	request.leadData.contentSection.VerifiedRankings=request.leadData.pageCount;  
 	count=0;
 	// need to implement page breaks here..
+
 	for(i=1;i LTE arrayLen(ss.arrVolumeSort);i++){
 		keyword=keywordVolumeSortStruct[ss.arrVolumeSort[i]].keyword;
 		if(count > request.leadData.rowLimit){
@@ -2172,6 +2178,14 @@ leadchart
 		echo('</tr>');
 		count++;
 	}
+	// if(structkeyexists(form, 'debugkey')){
+	// 	echo('</table>');
+	// 	writedump(ks);
+	// 	writedump(keywordVolumeSortStruct);
+	// 	writedump(ss.arrVolumeSort);
+	// 	writedump(ss.arrKeywordDate);
+	// 	abort;
+	// }
 	</cfscript>
 	</table>   
 </cffunction>

@@ -40,6 +40,7 @@
 	<p><a href="/z/inquiries/admin/import-keyword-ranking/webposition" target="_blank">Test Webposition.com Backup Import</a> (Status: #webpositionStatus#)</p>
 	<p><a href="/z/inquiries/admin/import-keyword-ranking/moz" target="_blank">Test Moz.com Import</a> (Status: #mozStatus#)</p>
 	<p><a href="/z/inquiries/admin/import-keyword-ranking/semrush" target="_blank">Test SEMRush.com Import</a> (Status: #semrushStatus#)</p>
+	<h2>This feature was disabled because it break Verified Keyword Ranking report.</h2>
 
 	<h2>Manual Keyword Ranking Import</h2>
 	<p>Format must be excel CSV and Columns must be Keyword, Position, Date, Volume.</p>
