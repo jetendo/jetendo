@@ -3524,10 +3524,14 @@ Define this function in another CFC to override the default email format
 		// ORDER BY site_option_sort";
 		// qS2=db.execute("qS2");
 		arrMainOption=[];
+		mainOptionStruct={};
 		for(optionId in sog.optionGroupFieldLookup[form.site_option_group_id]){
-			arrayAppend(arrMainOption, sog.optionLookup[optionId]);
+			mainOptionStruct[optionId]={ sort: sog.optionLookup[optionId].site_option_sort, row: sog.optionLookup[optionId]};
 		}
-
+		arrKey=structsort(mainOptionStruct, "numeric", "asc", "sort");
+		for(i=1;i<=arrayLen(arrKey);i++){
+			arrayAppend(arrMainOption, mainOptionStruct[arrKey[i]].row);
+		} 
 		parentIndex=0;
 		arrSearchTable=[];
 		arrSortSQL=[];

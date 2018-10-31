@@ -41,7 +41,7 @@
 			if(datediff("n", application.zcore.mlsImportIsRunning, now()) GT 5){
 				structdelete(application.zcore, 'mlsImportIsRunning');
 			}else{
-				throw('importMLS is already running | <a href="/z/listing/tasks/importMLS/index?zforce=1">Force execution</a>');
+				application.zcore.functions.z404('importMLS is already running | <a href="/z/listing/tasks/importMLS/index?zforce=1">Force execution</a>');
 				abort;
 			}
 		}
