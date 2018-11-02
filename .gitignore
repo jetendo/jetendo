@@ -25,7 +25,7 @@ sites-writable
 logs
 scripts/jetendo.ini
 scripts/mysql-backup/backup_dbs_config.php
-
+.vscode/*
 
 #################
 ## Eclipse
