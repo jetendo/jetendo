@@ -5,29 +5,34 @@
 // Get someArg value inside iframe dialog
  
 
-function zInsertGalleryFile(content){
+function zInsertTinymceWidget(content, allowInline){
 	var editor=parent.tinymce.activeEditor; 
 	var position=10;
 	// get content from the tinymce iframe body
 	// <p>test</p><p><Strong><em>tetest</    replace <p>  with <p id="3423423423">   
 	var bodyContent=editor.getContent(); 
-	var currentElement=editor.selection.getNode(); 
+	var currentElement=editor.selection.getNode();  
+	// columns, etc
 	var lastElement=currentElement;
 	while(currentElement){
 		currentElement=currentElement.parentNode;
 		console.log(currentElement);
-		if(currentElement.tagName=="BODY"){
-			break;
+		if(allowInline){
+			if(currentElement.tagName=="P" || currentElement.tagName=="DIV"){
+				break;
+			}
+		}else{
+			if(currentElement.tagName=="BODY"){
+				break;
+			}
 		}
 		lastElement=currentElement;
 	}
 	var rootElement=lastElement; 
 	var df = document.createElement('div');
 	df.innerHTML =content;   
-	// TODO: undo/redo doesn't work because we do dom directly.  tinymce doesn't let us set the state ourselves with store functions
 	if(rootElement.tagName=="BODY"){
-		position=0;
-			rootElement.appendChild(df);
+		rootElement.appendChild(df);
 	}else{
 		if (rootElement.nextSibling) { 
 			rootElement.parentNode.insertBefore(df, rootElement.nextSibling);
@@ -35,13 +40,7 @@ function zInsertGalleryFile(content){
 			rootElement.parentNode.appendChild(df);
 		}
 	}
-	
-	// parent.window.executeInsertContent(position, content);
-	/*function(){
-		moveCaret(parent.window, position);
-		editor.insertContent(content);
-
-	});*/
+	editor.undoManager.add();
 	editor.windowManager.close(); 
 }
 </script>

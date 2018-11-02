@@ -4,6 +4,8 @@ Copy the zsaimage directory to the plugins directory of the new version:
 Copy the zsafile directory to the plugins directory of the new version:
 /path/to/jetendo/public/a/scripts/tiny_mce/plugins/zsafile/
 
+Copy the zsawidget directory to the plugins directory of the new version:
+/path/to/jetendo/public/a/scripts/tiny_mce/plugins/zsawidget/
 
 Added float:left to .mce-btn-group .mce-btn
 /z/a/scripts/tiny_mce/skins/lightgray/skin.min.css

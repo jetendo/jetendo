@@ -98,6 +98,7 @@ htmlEditor.create();
 >
 
 	<cfparam name="this.instanceName" type="string" />
+	<cfparam name="this.autoResize" type="boolean" default="#false#" />
 	<cfparam name="this.width" type="string" default="100%" />
 	<cfparam name="this.height" type="string" default="200" />
 	<cfparam name="this.toolbarSet" type="string" default="Default" />
@@ -177,6 +178,7 @@ zArrDeferredFunctions.push(function(){
 		paste_remove_spans: 1,
 		remove_script_host : 0,
 		relative_urls : 0,
+		forced_root_block : 'p',
 		setup : function(ed) {
 			ed.on('blur', function(e) {
 				if(typeof tinyMCE != "undefined"){
@@ -197,13 +199,19 @@ zArrDeferredFunctions.push(function(){
 	  height: 500,*/
 	  theme: 'modern',
 	  plugins: [
-	    'advlist autolink lists link zsaimage zsafile zsawidget charmap print preview hr anchor pagebreak',
+	  <cfif this.autoResize>
+	  	'autoresize',
+	  	</cfif>
+	  	<cfif request.zos.isTestServer>
+	  		'zsawidget',
+	  	</cfif>
+	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
 	    'insertdatetime media nonbreaking save table directionality', // contextmenu
 	    'emoticons paste textcolor colorpicker textpattern' // imagetools
 	  ], // template 
 	  fontsize_formats: '12px 14px 18px 24px 36px 42px 48px',
-	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile zsawidget',
+	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	<cfif request.zos.isTestServer>zsawidget</cfif>',
 	  toolbar2: 'print preview media | forecolor backcolor emoticons',
 	  image_advtab: true, 
 	  content_css: [ 
@@ -214,10 +222,15 @@ zArrDeferredFunctions.push(function(){
 		</cfif>
 	    "#this.config.EditorAreaCSS#?zversion="+Math.random()
 	  ]
+	  <cfif this.autoResize>
+	  ,resize:false
+	  ,init_instance_callback: function (inst) { inst.execCommand('mceAutoResize'); }
+	  </cfif>
 	 }); 
 	tinymce.EditorManager.execCommand('mceAddEditor', true, "#this.instanceName#");
-	});
-	</script></cfsavecontent>
+ 
+});
+</script></cfsavecontent>
 <cfscript>
 application.zcore.template.appendTag("scripts",theScript);
 </cfscript>
