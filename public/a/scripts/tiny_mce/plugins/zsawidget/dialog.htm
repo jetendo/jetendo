@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0px;">
+<script type="text/javascript">
+// Get someArg value inside iframe dialog
+ 
+
+function zInsertGalleryFile(content){
+	var editor=parent.tinymce.activeEditor; 
+	var position=10;
+	// get content from the tinymce iframe body
+	// <p>test</p><p><Strong><em>tetest</    replace <p>  with <p id="3423423423">   
+	var bodyContent=editor.getContent(); 
+	var currentElement=editor.selection.getNode(); 
+	var lastElement=currentElement;
+	while(currentElement){
+		currentElement=currentElement.parentNode;
+		console.log(currentElement);
+		if(currentElement.tagName=="BODY"){
+			break;
+		}
+		lastElement=currentElement;
+	}
+	var rootElement=lastElement; 
+	var df = document.createElement('div');
+	df.innerHTML =content;   
+	// TODO: undo/redo doesn't work because we do dom directly.  tinymce doesn't let us set the state ourselves with store functions
+	if(rootElement.tagName=="BODY"){
+		position=0;
+			rootElement.appendChild(df);
+	}else{
+		if (rootElement.nextSibling) { 
+			rootElement.parentNode.insertBefore(df, rootElement.nextSibling);
+		}else {
+			rootElement.parentNode.appendChild(df);
+		}
+	}
+	
+	// parent.window.executeInsertContent(position, content);
+	/*function(){
+		moveCaret(parent.window, position);
+		editor.insertContent(content);
+
+	});*/
+	editor.windowManager.close(); 
+}
+</script>
+<iframe id="iframeGalleryId" src="/z/misc/tinymce-widgets/index" width="100%" height="10" scrolling="auto" marginheight="0" marginwidth="0" frameborder="0" style="border:0px; padding:0px; margin:0px; margin-bottom:0px; "></iframe>
+<!--	<h3>Custom dialog</h3>
+	Input some text: <input id="content">
+	<button onclick="top.tinymce.activeEditor.windowManager.getWindows()[0].close();">Close window</button>-->
+	<script type="text/javascript">
+	function setIframeHeight(){
+		console.log(parent.$);
+		
+		parent.$(".mce-floatpanel").each(function(){
+			if(parent.$(this).attr("aria-label") == "Add Widget"){ 
+				parent.$( this).attr('style', 'left:5%; top:5%; width:90%;    border-width: 1px;    z-index: 65536;    ');
+				parent.$('.mce-window-body', this).attr('style', 'width:100%; ');
+				parent.$('.mce-foot', this).attr('style', 'width:100%; ');
+				parent.$('.mce-container-body', this).attr('style', 'width:100%; ');
+				parent.$('.mce-foot .mce-btn', this).attr('style', 'float:left; position:relative; left:0px; margin-top:5px; margin-bottom:5px; margin-left:10px; ');  
+			}
+		});
+		var parentWindowHeight=parent.zWindowSize.height; 
+		parent.$(".mce-window-body").height(Math.round(parentWindowHeight*.7)+"px");
+		
+		var body = document.body, html = document.documentElement;
+
+		var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight )-10;
+		document.getElementById("iframeGalleryId").height=height;
+		
+		 
+	}
+	parent.$(window).bind("resize clientresize", function(){
+		setIframeHeight();
+	});
+	setIframeHeight();
+	</script>
+</body>
+</html>

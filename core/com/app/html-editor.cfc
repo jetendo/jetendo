@@ -197,18 +197,19 @@ zArrDeferredFunctions.push(function(){
 	  height: 500,*/
 	  theme: 'modern',
 	  plugins: [
-	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
+	    'advlist autolink lists link zsaimage zsafile zsawidget charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
 	    'insertdatetime media nonbreaking save table directionality', // contextmenu
 	    'emoticons paste textcolor colorpicker textpattern' // imagetools
 	  ], // template 
 	  fontsize_formats: '12px 14px 18px 24px 36px 42px 48px',
-	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile',
+	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile zsawidget',
 	  toolbar2: 'print preview media | forecolor backcolor emoticons',
 	  image_advtab: true, 
 	  content_css: [ 
 	  	<cfif not structkeyexists(request, 'zDisableTinyMCEJetendoFrameworkCSS')>
 	  	"/z/stylesheets/zOS.css?zversion="+Math.random(),
+		"/zupload/layout-global.css?zversion="+Math.random(),
 		"/z/stylesheets/css-framework.css?zversion="+Math.random(),
 		</cfif>
 	    "#this.config.EditorAreaCSS#?zversion="+Math.random()
