@@ -353,6 +353,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 .ze-1of2, .ze-1of3, .ze-1of4, .ze-a1of3, .ze-a2of3{ padding-left:10px; padding-right:10px;}
 /* end ie11 fix */
 
+
+.ze-row{width:100%; float:left;}
 .ze-1of2{width:50%; padding-right:var(--ze-column-padding); float:left; }
 .ze-1of2:nth-child(1){ 
 	padding-left:var(--ze-column-no-padding);

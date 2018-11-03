@@ -6,30 +6,31 @@
 	request.zos.debuggerEnabled=false;
 	</cfscript>
 	<style>
-	.ze-row > div{border: 1px solid ##eee;}
+	.ze-row > div{border: 1px solid ##ccc;}
 	.ze-row > div{border-right:1px solid ##eee;}
 
-	.widget-container{background-color:rgba(0,0,0,.2) !important; padding-left:1%; padding-top:1%;}
-	.widget-box{ width:32.333%; background-color:##FFF; min-width:280px; margin-right:1%; margin-bottom:1%; float:left; border:1px solid ##EEE; box-shadow:0px 0px 10px rgba(0,0,0,0.5); }
-	.widget-box h3{ background-color:##CCC; display:block; padding:5px; font-weight:normal; font-size:16px; color:##666;}
-	.widget-button{ display:none; float:right; padding:3px;  font-size:12px; margin-right:5px; cursor:pointer;}
+	.widget-container{ box-sizing:border-box; font-size:14px; padding-left:1%; padding-top:1%;}
+	.widget-box{ cursor:pointer;width:32.333%; background-color:##FFF; min-width:280px; margin-right:0.5%; margin-bottom:.5%; float:left; border:1px solid ##EEE;  }
+	.widget-heading{ background-color:##CCC; display:block; padding:5px; font-weight:normal; font-size:16px; color:##666;}
+	.widget-button{ display:none; float:right; padding:3px;  font-size:12px; margin-right:5px;  }
 	.widget-box:hover{ transition:all ease-in 0.1s; box-shadow:0px 5px 20px rgba(0,0,0,.5); margin-top:-2px; background-color:##EEE; border:1px solid rgba(0,0,0,.5);}
 	.widget-box:hover .widget-button{display:block;} 
 	.widget-template{padding:5px; background-color:##F2F2F2;}
-	.widget-template .ze-row, .widget-template p{ background-color:##FFF;}
-	.widget-template .ze-row > div, .widget-template p{ padding:5px;}
+	.widget-template .ze-row{ background-color:##FFF;}
+	.widget-template .ze-row > div{ padding:5px;}
+	.widget-template p{ margin:0px; padding-bottom:10px;}
 	</style>   
 	<div class="widget-container z-center-children z-equal-heights z-float" data-column-count="3">
 
 		<div class="widget-box">
-			<h3>1 Column <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">1 Column <div class="widget-button">Click to Insert</div></div>
 			<div class="a2col widget-template">
 				<p>Column1</p>
 			</div>
 		</div>
-
+ 
 		<div class="widget-box">
-			<h3>2 Columns <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">2 Columns <div class="widget-button">Click to Insert</div></div>
 			<div class="a2col widget-template">
 				<section class="ze-row">
 					<div class="ze-1of2"><p>Column1</p></div>
@@ -40,7 +41,7 @@
 		</div>
 
 		<div class="widget-box">
-			<h3>3 Columns <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">3 Columns <div class="widget-button">Click to Insert</div></div>
 			<div class="a3col widget-template">
 				<section class="ze-row">
 					<div class="ze-1of3"><p>Column1</p></div>
@@ -52,7 +53,7 @@
 		</div>
 
 		<div class="widget-box">
-			<h3>1/3 &amp; 2/3 Column <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">1/3 &amp; 2/3 Column <div class="widget-button">Click to Insert</div></div>
 			<div class="a1third2third widget-template">
 				<section class="ze-row">
 					<div class="ze-a1of3"><p>Column1</p></div>
@@ -63,7 +64,7 @@
 		</div>
 
 		<div class="widget-box">
-			<h3>2/3 &amp; 1/3 Column <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">2/3 &amp; 1/3 Column <div class="widget-button">Click to Insert</div></div>
 			<div class="a1third2third widget-template">
 				<section class="ze-row">
 					<div class="ze-a2of3"><p>Column1</p></div>
@@ -74,7 +75,7 @@
 		</div>
 
 		<div class="widget-box">
-			<h3>4 Columns <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">4 Columns <div class="widget-button">Click to Insert</div></div>
 			<div class="a4col widget-template">
 				<section class="ze-row">
 					<div class="ze-1of4"><p>Column1</p></div>
@@ -86,14 +87,14 @@
 			</div>
 		</div>
 		<div class="widget-box">
-			<h3>Button <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">Button <div class="widget-button">Click to Insert</div></div>
 			<div class="abutton widget-template" data-allow-inline="1">
 				<p class="ze-row"><a href="##" class="z-button">Button</a></p> 
 			</div>
 		</div> 
 			
 		<div class="widget-box">
-			<h3>2 Column Content Flow <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">2 Column Content Flow <div class="widget-button">Click to Insert</div></div>
 			<div class="a2colText widget-template">
 				<section class="ze-row"> 
 					<div class="ze-column-count2">
@@ -105,7 +106,7 @@
 		</div>
 
 		<div class="widget-box">
-			<h3>3 Column Content Flow <div class="widget-button">Click to Insert</div></h3>
+			<div class="widget-heading">3 Column Content Flow <div class="widget-button">Click to Insert</div></div>
 			<div class="a3colText widget-template">
 				<section class="ze-row"> 
 					<div class="ze-column-count3">
@@ -208,12 +209,12 @@ application.zcore.template.setPlainTemplate();
 </section>
 <section class="ze-row">
 <div class="ze-column ze-column-count2">
-<p>st dignissim. Aliquam facilisis, tortor at efficitur rutrum, dui dolor porttitor libero, quis laoreet augue enim vel ipsum. Sed sit amet odio malesuada nisi molestie posuere sit amet at sem. st dignissim. Aliquam facilisis, tortor at efficitur rutrum, dui dolor porttitor libero, quis laoreet augue enim vel ipsum. Sed sit amet odio malesuada nisi molestie posuere sit amet at sem.</p>
+<p>This is a 2 column content flow widget.  As you type more text, it starts to put some of the text in the second column so that the left and right columns are automatically balanced. This is a 2 column content flow widget.  As you type more text, it starts to put some of the text in the second column so that the left and right columns are automatically balanced.</p>
 </div>
 </section>
 <section class="ze-row">
 <div class="ze-column ze-column-count3">
-<p>st dignissim. Aliquam facilisis, tortor at efficitur rutrum, dui dolor porttitor libero, quis laoreet augue enim vel ipsum. Sed sit amet odio malesuada nisi molestie posuere sit amet at sem. st dignissim. Aliquam facilisis, tortor at efficitur rutrum, dui dolor porttitor libero, quis laoreet augue enim vel ipsum. Sed sit amet odio malesuada nisi molestie posuere sit amet at sem.</p>
+<p>This is a 3 column content flow widget.  As you type more text, it starts to put some of the text in the second column so that the columns are automatically balanced. This is a 3 column content flow widget.  As you type more text, it starts to put some of the text in the second column so that the columns are automatically balanced. This is a 3 column content flow widget.  As you type more text, it starts to put some of the text in the second column so that the columns are automatically balanced.</p>
 </div>
 </section>
 <p>&nbsp;</p>

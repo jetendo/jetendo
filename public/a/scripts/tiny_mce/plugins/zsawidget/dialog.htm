@@ -31,20 +31,25 @@ function zInsertTinymceWidget(content, allowInline){
 	var rootElement=lastElement; 
 	var df = document.createElement('div');
 	df.innerHTML =content;   
-	if(rootElement.tagName=="BODY"){
-		rootElement.appendChild(df);
-	}else{
-		if (rootElement.nextSibling) { 
-			rootElement.parentNode.insertBefore(df, rootElement.nextSibling);
-		}else {
-			rootElement.parentNode.appendChild(df);
+	for(var i=df.childNodes.length-1;i>=0;i--){
+		if(df.childNodes[i].nodeName == "#text"){
+			continue;
+		}
+		if(rootElement.tagName=="BODY"){ 
+			rootElement.appendChild(df.childNodes[i]);
+		}else{
+			if (rootElement.nextSibling) {  
+				rootElement.parentNode.insertBefore(df.childNodes[i], rootElement.nextSibling);
+			}else { 
+				rootElement.parentNode.appendChild(df.childNodes[i]);
+			}
 		}
 	}
 	editor.undoManager.add();
 	editor.windowManager.close(); 
 }
 </script>
-<iframe id="iframeGalleryId" src="/z/misc/tinymce-widgets/index" width="100%" height="10" scrolling="auto" marginheight="0" marginwidth="0" frameborder="0" style="border:0px; padding:0px; margin:0px; margin-bottom:0px; "></iframe>
+<iframe id="iframeGalleryId" src="/z/misc/tinymce-widgets/index" width="99%" height="10" scrolling="auto" marginheight="0" marginwidth="0" frameborder="0" style="border:0px; padding:0px; margin:0px; margin-bottom:0px; "></iframe>
 <!--	<h3>Custom dialog</h3>
 	Input some text: <input id="content">
 	<button onclick="top.tinymce.activeEditor.windowManager.getWindows()[0].close();">Close window</button>-->

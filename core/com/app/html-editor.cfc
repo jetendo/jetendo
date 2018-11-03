@@ -165,8 +165,13 @@ application.zcore.template.prependTag("scripts",theMeta);
 </cfsavecontent>
 	
 	<cfsavecontent variable="theScript"><script type="text/javascript">
-zArrDeferredFunctions.push(function(){
-
+zArrDeferredFunctions.push(function(){ 
+	function removeClasses(e){ 
+		for(var i=0;i<e.childNodes.length;i++){
+			e.childNodes[i]=removeClasses(e.childNodes[i]);
+		}
+		$(e).removeAttr("id").removeAttr("class");
+	}
 	tinymce.init({ 
 		branding: false,
 		fix_table_elements: 0,  
@@ -179,6 +184,22 @@ zArrDeferredFunctions.push(function(){
 		remove_script_host : 0,
 		relative_urls : 0,
 		forced_root_block : 'p',
+		paste_preprocess: function(plugin, args) {
+			console.log(args.content);
+			// strip all the classes that start with ze- or z-
+			var c=args.content;
+			c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+			c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+			c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
+			c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
+			console.log(c);
+			var d=document.createElement("div");
+			d.innerHTML=c; 
+			removeClasses(d);
+			c=d.innerHTML.replace(/<p>\s*<\/p>/g, ""); 
+			console.log(c);
+			args.content=c;
+		},
 		setup : function(ed) {
 			ed.on('blur', function(e) {
 				if(typeof tinyMCE != "undefined"){
@@ -205,11 +226,11 @@ zArrDeferredFunctions.push(function(){
 	  	'zsawidget',
 	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
-	    'insertdatetime media nonbreaking save table directionality', // contextmenu
+	    'insertdatetime media nonbreaking save directionality', // contextmenu table
 	    'emoticons paste textcolor colorpicker textpattern' // imagetools
 	  ], // template 
 	  fontsize_formats: '12px 14px 18px 24px 36px 42px 48px',
-	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	zsawidget',
+	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	zsawidget fullscreen',
 	  toolbar2: 'print preview media | forecolor backcolor emoticons',
 	  image_advtab: true, 
 	  content_css: [ 
