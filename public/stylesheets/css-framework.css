@@ -354,6 +354,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 /* end ie11 fix */
 
 
+
+.ze-row img{max-width:100%;}
 .ze-row{width:100%; float:left;}
 .ze-1of2{width:50%; padding-right:var(--ze-column-padding); float:left; }
 .ze-1of2:nth-child(1){ 
