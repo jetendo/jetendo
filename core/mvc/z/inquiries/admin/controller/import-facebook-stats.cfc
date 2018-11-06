@@ -45,6 +45,7 @@
 	qPageSelected=db.execute("qPageSelected");
 	</cfscript>
 	<h2>Import Facebook Stats</h2>
+	<p><strong>Important:</strong> If a new page id was just added, this script currently requires importing all accounts the first time.</p>
 	<p>By default, all pages will be imported.  If you select a page below, and then click the import link, it will import only the selected page. If the page doesn't exist yet, you must import all pages.</p>
 	<div class="z-mb-20">
 		<form action="" method="get">

@@ -219,6 +219,9 @@
 			}
 			if(arrM[n] EQ "zsascript"){
 				tmp=t9[i].scriptName;
+				if(left(tmp, 5) EQ "/z/_-"){
+					tmp=left(tmp, 7);
+				}
 				pos2=find('__zcoreinternalroutingpath=',t9[i].queryString);
 				if(pos2 NEQ 0){
 					pos=find("&",	t9[i].queryString,pos2);

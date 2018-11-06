@@ -3305,6 +3305,10 @@ track_user_first_page
 	<h2>Facebook Marketing This Month</h2> 
  
 	<cfscript>
+	
+	if(form.facebookQuarters){
+		echo('<p>Up to 4 previous quarters are displayed below.</p>');
+	}
 	/*if(request.zos.isdeveloper){
 		writedump(qMonthChart);
 		abort;
