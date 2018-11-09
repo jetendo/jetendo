@@ -313,6 +313,15 @@ if(file_exists($taskLogPathScheduler)){
 }
 file_put_contents($taskLogPathScheduler, $scheduleOutput);
 
+/* 
+TODO: track if script is still running before running another - there was a duplicate problem at one point.
+
+
+
+
+*/
+
+
 $script='/usr/bin/php "'.get_cfg_var("jetendo_scripts_path").'cfml-task-execute.php" ';
 $background=" > /dev/null 2>/dev/null &";
 

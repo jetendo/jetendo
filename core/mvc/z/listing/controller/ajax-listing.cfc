@@ -4,6 +4,9 @@
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 	<cfscript>
 	//db=request.zos.queryObject;
+	if(not application.zcore.app.siteHasApp("listing")){
+		application.zcore.functions.z404("Site doesn't have listing app");
+	}
 	form.ssid=application.zcore.functions.zso(form, 'ssid');
 	form.getMapSummary=application.zcore.functions.zso(form, 'getMapSummary', true, 0);
 	ss=application.zcore.listingStruct.functions.zMLSSearchOptionsDisplay(form.ssid);

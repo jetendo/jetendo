@@ -3669,7 +3669,7 @@ Define this function in another CFC to override the default email format
 				var optionStruct=arrOptionStruct[curValIndex];
 				var currentCFC=application.zcore.siteOptionCom.getTypeCFC(row.site_option_type_id);
 				if(currentCFC.isSearchable()){
-					arrayAppend(arrSearch, '<div class="z-float-left z-pr-10 z-pb-10">'&row.site_option_name&'<br />');
+					arrayAppend(arrSearch, '<div class="z-float-left z-pr-10 z-pb-10">'&row.site_option_display_name&'<br />');
 					var tempValue=currentCFC.getSearchValue(row, optionStruct, 'newvalue', form, searchStruct);
 					if(structkeyexists(form, 'searchOn')){
 						arrSearchSQL[curValIndex]=currentCFC.getSearchSQL(row, optionStruct, 'newvalue', form, 's#curValIndex#.site_x_option_group_value',  's#curValIndex#.site_x_option_group_date_value', tempValue); 
