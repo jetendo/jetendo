@@ -911,7 +911,7 @@
 	.topFiveColor{background-color:##e9ea96;}
 	.topTenColor{background-color:##96dcf8;}
 	.topTwentyColor{background-color:##bacde4;}
-	.topFiftyColor{background-color:##fbd57f;}
+	.topHundredColor{background-color:##fbd57f;}
 	.wrapper{  padding:20px; } 
 	.print-footer {
 	    text-align:right;
@@ -2039,7 +2039,7 @@ leadchart
 								position=1000;
 							}
 							if(arrayLen(ss.arrKeywordDate) EQ n){
-								if(position<51){
+								if(position<=100){
 									topKeyword=true;
 								}
 								if(position < 6){
@@ -2048,8 +2048,8 @@ leadchart
 								 	className="topTenColor";
 								}else if(position < 21){
 									className="topTwentyColor";
-								}else if(position <51){
-									className="topFiftyColor";
+								}else if(position <=100){
+									className="topHundredColor";
 								}else{
 									echo('<td>&nbsp;</td>');// style="background-color:##CCC;"
 									continue;
@@ -2088,7 +2088,7 @@ leadchart
 			<div style="padding:10px; margin-right:20px; border:1px solid ##000; float:left; white-space:nowrap; margin-bottom:20px;" class="topFiveColor">Top Five (1st Page)</div> 
 			<div style="padding:10px; margin-right:20px; border:1px solid ##000; float:left; white-space:nowrap; margin-bottom:20px;" class="topTenColor">Top Ten (1st Page)</div>  
 			<div style="padding:10px; margin-right:20px; border:1px solid ##000; float:left; white-space:nowrap; margin-bottom:20px;" class="topTwentyColor">Top Twenty (2nd Page)</div> 
-			<div style="padding:10px; margin-right:20px; border:1px solid ##000; float:left; white-space:nowrap; margin-bottom:20px;" class="topFiftyColor">Top 50</div>  
+			<div style="padding:10px; margin-right:20px; border:1px solid ##000; float:left; white-space:nowrap; margin-bottom:20px;" class="topHundredColor">Top 100</div>  
 		</div>
 		<p>This is your current ranking position for your targeted keywords on Google Search. Page rankings 1 through 10 appear on the first results page, 11 through 20 on the second, etc. Our goal is first page placement for all of your targeted keywords.  Search volume varies over time.</p> 
 

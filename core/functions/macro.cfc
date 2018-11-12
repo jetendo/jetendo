@@ -1453,11 +1453,11 @@ ts={
         longitude:-81.09727218747139
     }],
     width:"100%",
-    height:"350",
-    displayMapLink:true
+    height:"350"
 };
 application.zcore.functions.zDisplayMapWithMarker(ts);
  --->
+
 <cffunction name="zDisplayMapWithMarker" localmode="modern" access="remote">
     <cfargument name="ss" type="struct" required="yes">
     <cfscript>
@@ -1466,10 +1466,10 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
         marginRadiusInMiles:1,
         markers:[],
         width:"100%",
-        height:"350",
-        displayMapLink:false
+        height:"350"
     };
     structappend(ss, ts, false);
+
     if(arrayLen(ss.markers) EQ 0){
         throw("ss.markers is required with this structure: {latitude:0, longitude:0}");
     }
@@ -1509,12 +1509,91 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
     minLongitudeFinal=minLongitude-(ss.marginRadiusInMiles/milesPerLongitude);
     maxLongitudeFinal=maxLongitude+(ss.marginRadiusInMiles/milesPerLongitude);
  
-    echo('<iframe width="#ss.width#" height="#ss.height#" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=#minLongitudeFinal#%2C#minLatitudeFinal#%2C#maxLongitudeFinal#%2C#maxLatitudeFinal#&amp;layer=mapnik&amp;marker=#ss.markers[1].latitude#%2C#ss.markers[1].longitude#" style="border: 1px solid black"></iframe>');
-    if(ss.displayMapLink){
-        echo('<br/><small><a href="https://www.openstreetmap.org/?mlat=29.22350&amp;mlon=-81.09727##map=19/29.22350/-81.09727">View Larger Map</a></small>');
-    }
+ 	minMeters=application.zcore.functions.zCoordinateDegreesToMeters(minLatitudeFinal, minLongitudeFinal);
+ 	maxMeters=application.zcore.functions.zCoordinateDegreesToMeters(maxLatitudeFinal, maxLongitudeFinal);
     </cfscript>
+    <cfif arrayLen(ss.markers) EQ 1>
+    	<iframe width="#ss.width#" height="#ss.height#" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=#minLongitudeFinal#%2C#minLatitudeFinal#%2C#maxLongitudeFinal#%2C#maxLatitudeFinal#&amp;layer=mapnik&amp;marker=#ss.markers[1].latitude#%2C#ss.markers[1].longitude#" style="border: 1px solid black"></iframe>
+    <cfelse>
+    	<cfscript>
+    	if(not structkeyexists(request.zos, 'openLayerMapIndex')){
+    		request.zos.openLayerMapIndex=1;
+    	}else{
+    		request.zos.openLayerMapIndex++;
+    	}
+    	latitudeCenter=(maxLatitudeFinal+minLatitudeFinal)/2;
+    	longitudeCenter=(maxLongitudeFinal+minLongitudeFinal)/2;
+		// multiple marker code
+		// zDisplayMapWithMultipleMarkers(ss);
+		application.zcore.skin.includeJS("https://openlayers.org/en/v4.6.5/build/ol.js");
+		application.zcore.skin.includeCSS("https://openlayers.org/en/v4.6.5/css/ol.css");
+	    </cfscript> 
+	    <div id="zOpenLayerMap#request.zos.openLayerMapIndex#" style="width:#ss.width#; height:#ss.height#;"></div>
+		<script>
+		zArrDeferredFunctions.push(function(){
+			var map;
+			var mapLat = #latitudeCenter#;
+				var mapLng = #longitudeCenter#;
+			var mapDefaultZoom = 1; 
+			function initialize_map() {
+				map = new ol.Map({
+					target: "zOpenLayerMap#request.zos.openLayerMapIndex#",
+					layers: [
+						new ol.layer.Tile({
+							source: new ol.source.OSM({
+								url: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+							})
+						})
+					],
+					view: new ol.View({
+						center: ol.proj.fromLonLat([mapLng, mapLat]),
+						zoom: mapDefaultZoom
+					})
+				}); 
+			}
+			function add_map_point(lat, lng) {
+				var vectorLayer = new ol.layer.Vector({
+					source:new ol.source.Vector({
+						features: [new ol.Feature({
+							geometry: new ol.geom.Point(ol.proj.transform([parseFloat(lng), parseFloat(lat)], 'EPSG:4326', 'EPSG:3857')),
+						})]
+					}),
+					style: new ol.style.Style({
+						image: new ol.style.Icon({
+							anchor: [0.5, 0.5],
+							anchorXUnits: "fraction",
+							anchorYUnits: "fraction",
+							src: "/z/images/marker-icon.png"
+						})
+					})
+				});
+				map.addLayer(vectorLayer); 
+			}
+			function fitMarkers() {
+				var extent = ol.extent.boundingExtent([[#minMeters.latitude#,#minMeters.longitude#],[#maxMeters.latitude#,#maxMeters.longitude#]]); 
+				map.getView().fit(extent);
+			}
+			initialize_map(); 
+			<cfloop from="1" to="#arrayLen(ss.markers)#" index="i">
+				add_map_point(#ss.markers[i].latitude#, #ss.markers[i].longitude#);
+			</cfloop>
+			fitMarkers();
+		});
+		</script>
+  </cfif>
 </cffunction>
 
+<cffunction name="zCoordinateDegreesToMeters" localmode="modern" access="public">
+	<cfargument name="latitude" type="string" required="yes">
+	<cfargument name="longitude" type="string" required="yes">
+	<cfscript>
+	lon=arguments.longitude;
+	lat=arguments.latitude;
+    x = lon * 20037508.34 / 180;
+    y = log(tan((90 + lat) * PI() / 360)) / (PI() / 180);
+    y = y * 20037508.34 / 180;
+    return {latitude:x, longitude:y};
+	</cfscript>
+</cffunction> 
 </cfoutput>
 </cfcomponent>

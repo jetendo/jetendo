@@ -2,6 +2,8 @@
 // this is executed from cfml-tasks.php once per hour on the test server only.
 // php /var/jetendo-server/jetendo/scripts/git-status.php
 
+echo "i disabled this so we don't need password in configuration";
+exit;
 $debug=false; // set to true to only check 3 git repos and var_dump the result
 set_time_limit(1000);
 $sshKey=get_cfg_var("jetendo_git_ssh_key_path");

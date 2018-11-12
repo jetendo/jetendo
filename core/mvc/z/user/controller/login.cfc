@@ -8,6 +8,9 @@
 	var rs=0;
 	var inputStruct=0;
 	var jsonText=0;
+
+
+
 	//local.debugSQL="";
 	request.znotemplate=1;
     application.zcore.functions.zNoCache();
@@ -16,7 +19,7 @@
 		application.zcore.functions.zabort();
 	}
 	form.zusername=form.z_tmpusername2;
-	form.zpassword=form.z_tmppassword2;
+	form.zpassword=form.z_tmppassword2; 
 	inputStruct = StructNew();
 	if(application.zcore.functions.zso(form, 'zIsMemberArea') EQ 1){
 		inputStruct.user_group_name = "member";

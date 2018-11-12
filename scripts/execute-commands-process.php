@@ -1093,10 +1093,11 @@ function getNewerCoreMVCFiles(){
 	return `$cmd`;
 }
 function getScryptEncrypt($a){
+	global $javaPath;
 	set_time_limit(100);
 	$pw=implode("", $a);
 	$p=get_cfg_var("jetendo_root_path");
-	$cmd='/usr/bin/java -jar '.$p.'scripts/jetendo-scrypt.jar "encrypt" '.escapeshellarg($pw);
+	$cmd=$javaPath.'java -jar '.$p.'scripts/jetendo-scrypt.jar "encrypt" '.escapeshellarg($pw);
 	$r=`$cmd`;
 	return $r;
 }
@@ -1304,6 +1305,7 @@ function publishNginxSiteConfig($a){
 }
 
 function getScryptCheck($a){
+	global $javaPath;
 	set_time_limit(100);
 	if(count($a) != 2){
 		return "0";
@@ -1311,7 +1313,7 @@ function getScryptCheck($a){
 	$pw=$a[0];
 	$hash=$a[1];
 	$p=get_cfg_var("jetendo_root_path");
-	$cmd='/usr/bin/java -jar '.$p.'scripts/jetendo-scrypt.jar "check" '.escapeshellarg($pw).' '.escapeshellarg($hash);
+	$cmd=$javaPath.'java -jar '.$p.'scripts/jetendo-scrypt.jar "check" '.escapeshellarg($pw).' '.escapeshellarg($hash);
 	$r=`$cmd`;
 	return $r;
 }
@@ -2606,6 +2608,11 @@ function runCommand($argv){
 		usleep(30000);
 	}
 			
+}
+if(zIsTestServer()){
+	$javaPath=get_cfg_var("jetendo_test_java_path");
+}else{
+	$javaPath=get_cfg_var("jetendo_java_path");
 }
 runCommand($argv);
 

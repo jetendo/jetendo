@@ -302,6 +302,9 @@
 			structdelete(application,'onInternalApplicationStartRunning');
 		}
  
+		if(not structkeyexists(request.zos, 'originalURL')){
+			return;
+		}
 		if(request.zos.originalURL EQ "/z/server-manager/tasks/sync-sessions/index"){
 			// no site can take longer then 30 seconds to load - loading must have stopped
 			if(structcount(application.zcoreSitesLoaded) NEQ structcount(application.zcoreSiteDataStruct)){
