@@ -24,6 +24,8 @@ h3 a:link, h3 a:visited{ text-decoration:none; color:inherit;}
 h4 a:link, h4 a:visited{ text-decoration:none; color:inherit;}
 h5 a:link, h5 a:visited{ text-decoration:none; color:inherit;}
 
+.zOpenLayerMapPopup{position:absolute; left:0px; top:0px; z-index:2; background-color:#FFF; color:#000; border-radius:5px; min-width:180px; padding:10px; display:none; }
+
 /* fix search field on safari mac */
 input[type="search"] {
   -webkit-appearance: textfield;

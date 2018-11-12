@@ -1444,21 +1444,28 @@ if(rs.success){
     </cfscript>
 </cffunction> --->
 
+<!--- application.zcore.functions.zRequireOpenLayers(); --->
+<cffunction name="zRequireOpenLayers" localmode="modern" access="public">
+	<cfscript>
+	application.zcore.skin.includeJS("https://openlayers.org/en/v4.6.5/build/ol.js");
+	application.zcore.skin.includeCSS("https://openlayers.org/en/v4.6.5/css/ol.css");
+	</cfscript> 
+</cffunction> 
 <!--- 
 
 ts={
     marginRadiusInMiles:1, // can be decimal
     markers:[{
         latitude:29.223495746432107,
-        longitude:-81.09727218747139
+        longitude:-81.09727218747139,
+        popupHTML:""
     }],
     width:"100%",
     height:"350"
 };
 application.zcore.functions.zDisplayMapWithMarker(ts);
- --->
-
-<cffunction name="zDisplayMapWithMarker" localmode="modern" access="remote">
+ ---> 
+<cffunction name="zDisplayMapWithMarker" localmode="modern" access="public">
     <cfargument name="ss" type="struct" required="yes">
     <cfscript>
     ss=arguments.ss;
@@ -1512,9 +1519,9 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
  	minMeters=application.zcore.functions.zCoordinateDegreesToMeters(minLatitudeFinal, minLongitudeFinal);
  	maxMeters=application.zcore.functions.zCoordinateDegreesToMeters(maxLatitudeFinal, maxLongitudeFinal);
     </cfscript>
-    <cfif arrayLen(ss.markers) EQ 1>
+    <!--- <cfif arrayLen(ss.markers) EQ 1>
     	<iframe width="#ss.width#" height="#ss.height#" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=#minLongitudeFinal#%2C#minLatitudeFinal#%2C#maxLongitudeFinal#%2C#maxLatitudeFinal#&amp;layer=mapnik&amp;marker=#ss.markers[1].latitude#%2C#ss.markers[1].longitude#" style="border: 1px solid black"></iframe>
-    <cfelse>
+    <cfelse> --->
     	<cfscript>
     	if(not structkeyexists(request.zos, 'openLayerMapIndex')){
     		request.zos.openLayerMapIndex=1;
@@ -1528,59 +1535,123 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 		application.zcore.skin.includeJS("https://openlayers.org/en/v4.6.5/build/ol.js");
 		application.zcore.skin.includeCSS("https://openlayers.org/en/v4.6.5/css/ol.css");
 	    </cfscript> 
-	    <div id="zOpenLayerMap#request.zos.openLayerMapIndex#" style="width:#ss.width#; height:#ss.height#;"></div>
+	    <!--- <div id="zOpenLayerMapPopup#request.zos.openLayerMapIndex#" style="background-color:##FFF; color:##000;   ">Popup</div> --->
+	    <div class="z-float" style="position:relative; z-index:1;">
+
+		    <div id="zOpenLayerMapPopup#request.zos.openLayerMapIndex#" class="zOpenLayerMapPopup" style="">Popup</div>
+		    <div id="zOpenLayerMap#request.zos.openLayerMapIndex#" style="width:#ss.width#; height:#ss.height#; position:relative; float:left; left:0px; top:0px; z-index:1;"></div>
+		</div>
 		<script>
-		zArrDeferredFunctions.push(function(){
-			var map;
-			var mapLat = #latitudeCenter#;
-				var mapLng = #longitudeCenter#;
-			var mapDefaultZoom = 1; 
-			function initialize_map() {
-				map = new ol.Map({
-					target: "zOpenLayerMap#request.zos.openLayerMapIndex#",
-					layers: [
-						new ol.layer.Tile({
-							source: new ol.source.OSM({
-								url: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+		(function(){
+			function loadMap(){
+				var map;
+				var mapLat = #latitudeCenter#;
+					var mapLng = #longitudeCenter#;
+				var mapDefaultZoom = 1; 
+				function initialize_map() {
+					map = new ol.Map({
+						target: "zOpenLayerMap#request.zos.openLayerMapIndex#",
+						layers: [
+							new ol.layer.Tile({
+								source: new ol.source.OSM({
+									url: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+								})
+							})
+						],
+						view: new ol.View({
+							center: ol.proj.fromLonLat([mapLng, mapLat]),
+							zoom: mapDefaultZoom
+						})
+					});  
+					$mapContainer=$("##zOpenLayerMap#request.zos.openLayerMapIndex#");
+					$popup=$('##zOpenLayerMapPopup#request.zos.openLayerMapIndex#')
+					$mapContainer.on('mousedown', function(evt) {
+						$popup.hide();
+					});
+					console.log("mapload", map);
+					map.on('movestart', function(evt) { 
+						$popup.hide();
+					});
+					map.on('click', function(evt) { 
+	  					var pos=zGetAbsPosition($mapContainer[0]);  
+						var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { 
+							return feature;
+						});
+
+						if (feature) {
+							var coord = feature.getGeometry().getCoordinates();
+							var props = feature.getProperties(); 
+							var h=feature.get("popupHTML"); 
+							if(h==""){
+								return;
+							}
+							var x=evt.pixel[0];
+							var y=evt.pixel[1];
+		  					$popup.css({
+		  						"left":x+"px", 
+		  						"top":y+"px"
+		  					}).html(h).show(); 
+							var popupPos=zGetAbsPosition($popup[0]); 
+							var xNew=x;
+							var yNew=y;
+							if(x > pos.width-popupPos.width){
+								xNew=pos.width-popupPos.width;
+							}
+							if(y > pos.height-popupPos.height){
+								yNew=pos.height-popupPos.height;
+							}  
+							if(xNew != x || yNew != y){
+			  					$popup.css({
+			  						"left":xNew+"px", 
+			  						"top":yNew+"px"
+			  					});
+			  				} 
+						}else{
+							$popup.hide();
+							console.log('no feature at click position');
+						}
+					});
+				}
+				function add_map_point(lat, lng, popupHTML) { 
+					var f=new ol.Feature({
+								geometry: new ol.geom.Point(ol.proj.transform([parseFloat(lng), parseFloat(lat)], 'EPSG:4326', 'EPSG:3857')),
+							});
+					f.setProperties({'popupHTML': popupHTML});
+					var vectorLayer = new ol.layer.Vector({
+						source:new ol.source.Vector({
+							features: [f]
+						}),
+						style: new ol.style.Style({
+							image: new ol.style.Icon({
+								anchor: [0.5, 0.5],
+								anchorXUnits: "fraction",
+								anchorYUnits: "fraction",
+								src: "/z/images/marker-icon.png"
 							})
 						})
-					],
-					view: new ol.View({
-						center: ol.proj.fromLonLat([mapLng, mapLat]),
-						zoom: mapDefaultZoom
-					})
-				}); 
+					});
+					map.addLayer(vectorLayer); 
+				}
+				function fitMarkers() {
+					var extent = ol.extent.boundingExtent([[#minMeters.latitude#,#minMeters.longitude#],[#maxMeters.latitude#,#maxMeters.longitude#]]); 
+					map.getView().fit(extent);
+				}
+				initialize_map(); 
+				<cfloop from="1" to="#arrayLen(ss.markers)#" index="i">
+					add_map_point(#ss.markers[i].latitude#, #ss.markers[i].longitude#, "#jsstringformat(application.zcore.functions.zso(ss.markers[i], 'popupHTML'))#");
+				</cfloop>
+				fitMarkers();
 			}
-			function add_map_point(lat, lng) {
-				var vectorLayer = new ol.layer.Vector({
-					source:new ol.source.Vector({
-						features: [new ol.Feature({
-							geometry: new ol.geom.Point(ol.proj.transform([parseFloat(lng), parseFloat(lat)], 'EPSG:4326', 'EPSG:3857')),
-						})]
-					}),
-					style: new ol.style.Style({
-						image: new ol.style.Icon({
-							anchor: [0.5, 0.5],
-							anchorXUnits: "fraction",
-							anchorYUnits: "fraction",
-							src: "/z/images/marker-icon.png"
-						})
-					})
-				});
-				map.addLayer(vectorLayer); 
+			if(typeof zJetendoLoadedRan == "undefined" || !zJetendoLoadedRan){
+				zArrDeferredFunctions.push(loadMap);
+				console.log('pushfunction');
+			}else{
+				console.log('runfunction');
+				loadMap();
 			}
-			function fitMarkers() {
-				var extent = ol.extent.boundingExtent([[#minMeters.latitude#,#minMeters.longitude#],[#maxMeters.latitude#,#maxMeters.longitude#]]); 
-				map.getView().fit(extent);
-			}
-			initialize_map(); 
-			<cfloop from="1" to="#arrayLen(ss.markers)#" index="i">
-				add_map_point(#ss.markers[i].latitude#, #ss.markers[i].longitude#);
-			</cfloop>
-			fitMarkers();
-		});
+		})();
 		</script>
-  </cfif>
+  <!--- </cfif> --->
 </cffunction>
 
 <cffunction name="zCoordinateDegreesToMeters" localmode="modern" access="public">
