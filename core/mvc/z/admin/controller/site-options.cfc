@@ -3262,6 +3262,7 @@ Define this function in another CFC to override the default email format
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript> 
 	application.zcore.skin.includeCSS("/z/a/stylesheets/style.css");
+	echo('<p><a href="/z/user/home/index">Back to User Dashboard</a></p>');
 	validateUserGroupAccess();
 	manageGroup(arguments.struct);
 	</cfscript>
@@ -5232,7 +5233,14 @@ Define this function in another CFC to override the default email format
 	</cfscript>
 </cffunction>
 
-	
+<cffunction name="userDeleteGroup" localmode="modern" access="remote" roles="user">
+	<cfargument name="struct" type="struct" required="no" default="#{}#">
+	<cfscript> 
+	validateUserGroupAccess();
+	application.zcore.skin.includeCSS("/z/a/stylesheets/style.css"); 
+	deleteGroup(arguments.struct);
+	</cfscript>
+</cffunction>
 
 <cffunction name="deleteGroup" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">

@@ -2640,6 +2640,20 @@ if(not rs.success){
 		if(row.site_option_group_parent_id NEQ 0){
 			continue;
 		}
+		if(row.site_option_group_user_group_id_list EQ ""){
+			continue;
+		}
+		arrGroup=listToArray(row.site_option_group_user_group_id_list, ",");
+		hasAccess=false;
+		for(groupId in arrGroup){
+			if(application.zcore.user.checkGroupIdAccess(groupId)){
+				hasAccess=true;
+				break;
+			}
+		}
+		if(not hasAccess){
+			continue;
+		}
 		if(row.site_option_group_subgroup_alternate_admin EQ 1){
 			if(row.site_option_group_user_child_limit EQ 1){
 				currentUserIdValue=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
