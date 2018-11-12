@@ -1,35 +1,12 @@
 <?php
 
 //
-// From http://non-diligent.com/articles/yelp-apiv2-php-example/
+// From https://www.yelp.com/developers/documentation/v3/business_search
 //
 
 /*
 COMMUNITY INFORMATION
-list: http://www.yelp.com/developers/documentation/category_list
-Schools - Education (education)
-Groceries/Shopping - Grocery (grocery)
-Hospitals - Hospitals (hospitals)
-Pharmacies - Drugstores (drugstores)
-Places of Worship - Religious Organizations (religiousorgs)
-Police Station - Police Departments (policedepartments)
-Fire Station - not in yelp
-Banks - Banks & Credit Unions (banks)
-Gyms & Rec. Centers - Fitness & Instruction (fitness)
-Movie Theaters - Cinema (movietheaters)
-Museums - Museums (museums)
-
-$yq=array();
-$yq["term"]="";
-$yq["category_filter"]="";
-
-$yq["cc"]="US";
-// bounds might be better due to google maps display being non-circular.
-$yq["bounds"]="sw_latitude,sw_longitude|ne_latitude,ne_longitude";
-
-
-
-http://api.yelp.com/v2/search?term=&location=San+Francisco
+list: https://www.yelp.com/developers/documentation/v3/all_category_list
 
 Business Name
 Address
@@ -37,116 +14,64 @@ Address2
 Phone
 
 */
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 header("x_ajax_id: z_yelp_api_ajax_id");
 $debug=false;
 if(isset($_GET["cat"])){
-	$cat=$_GET["cat"];
-}else{
-	$cat="";
-}
-if(isset($_GET["cat"])){
-	$yq["category_filter"]=$_GET["cat"];
+	$cat = $_GET["cat"];
 }else if(isset($_GET["category"])){
-	$yq["category_filter"]=$_GET["category"];
+	$cat = $_GET["category"];
 }else if(isset($_GET["term"])){
-	$yq["term"]=$_GET["term"];
+	$cat = $_GET["term"];
 }else{
-	// Can't have both category AND term, must be one or the other?
 	echo "Invalid Request.";
 	exit;
 }
-
-if ( isset( $_GET['bounds'] ) ) {
-	$yq['bounds'] = $_GET['bounds'];
+$location = "";
+if ( isset( $_GET['location'] ) ) {
+	$location = $_GET['location'];
 }
-
-if ( isset( $_GET['lat'] ) ) {
-	$latitude = $_GET['lat'];
+else {
+	if ( isset( $_GET['lat'] ) ) {
+		$latitude = $_GET['lat'];
+	}
+	if ( isset( $_GET['latitude'] ) ) {
+		$latitude = $_GET['latitude'];
+	}
+	if ( isset( $_GET['long'] ) ) {
+		$longitude = $_GET['longitude'];
+	}
+	if ( isset( $_GET['longitude'] ) ) {
+		$longitude = $_GET['longitude'];
+	}
+	if($latitude == "undefined" || $longitude == "undefined"){
+		echo "Invalid Request..";
+		exit;
+	}
+	$location = $latitude ."," .$longitude;
 }
-if ( isset( $_GET['latitude'] ) ) {
-	$latitude = $_GET['latitude'];
-}
-if ( isset( $_GET['long'] ) ) {
-	$longitude = $_GET['longitude'];
-}
-if ( isset( $_GET['longitude'] ) ) {
-	$longitude = $_GET['longitude'];
-}
-if($cat=="undefined" || $latitude == "undefined" || $longitude == "undefined"){
-	echo "Invalid Request..";
-	exit;
-}
-
-if ( isset( $latitude ) && isset( $longitude ) ) {
-	$yq['ll'] = $latitude . ',' . $longitude;
-}
-
 if ( isset( $_GET['radius'] ) ) {
-	$yq['radius_filter'] = $_GET['radius'] * 1600; // converted miles to square meters
+	$radius = $_GET['radius'] * 1600; // converted miles to square meters
+} else{
+	$radius = 1000;
 }
-
 
 if(isset($_GET["limit"])){
-	$yq["limit"]=$_GET["limit"];
+	$limit = $_GET["limit"];
 }else{
-	$yq["limit"]=10;
+	$limit = 10;
 }
-if(isset($_GET["offset"])){
-	$yq["offset"]=$_GET["offset"];
-}else{
-	$yq["offset"]=0;
-}
-
-$arr1=array();
-foreach($yq as $key => $val){
-	array_push($arr1,$key."=".urlencode($val));
-}
-// Enter the path that the oauth library is in relation to the php file
-$unsigned_url="https://api.yelp.com/v2/search?".implode("&",$arr1);
-//echo $unsigned_url."<br /><br />";
-
 require_once ('oauth.php');
 
-// For example, request business with id 'the-waterboy-sacramento'
-//$unsigned_url = "http://api.yelp.com/v2/business/the-waterboy-sacramento";
-
-// For examaple, search for 'tacos' in 'sf'
-//$unsigned_url = "http://api.yelp.com/v2/search?term=tacos&location=sf";
-
-//$unsigned_url="http://api.yelp.com/v2/search?term=food&bounds=37.900000,-122.500000|37.788022,-122.399797&limit=3";
-
-// Set your keys here	
-$consumer_key = get_cfg_var("jetendo_yelp_consumer_key");
-$consumer_secret = get_cfg_var("jetendo_yelp_consumer_secret");
-$token = get_cfg_var("jetendo_yelp_token");
-$token_secret = get_cfg_var("jetendo_yelp_token_secret");
-
-// Token object built using the OAuth library
-$token = new OAuthToken($token, $token_secret);
-
-// Consumer object built using the OAuth library
-$consumer = new OAuthConsumer($consumer_key, $consumer_secret);
-
-// Yelp uses HMAC SHA1 encoding
-$signature_method = new OAuthSignatureMethod_HMAC_SHA1();
-
-// Build OAuth Request using the OAuth PHP library. Uses the consumer and token object created above.
-$oauthrequest = OAuthRequest::from_consumer_and_token($consumer, $token, 'GET', $unsigned_url);
-
-// Sign the request
-$oauthrequest->sign_request($signature_method, $consumer, $token);
-
-// Get the signed URL
-$signed_url = $oauthrequest->to_url();
- 
+$token_secret = get_cfg_var("jetendo_yelp3_api_key");
 if(!$debug){
-	// Send Yelp API Call
-	$ch = curl_init($signed_url);
+	$ch = curl_init("https://api.yelp.com/v3/businesses/search?location=" .$location ."&term=" .$cat ."&radius=" .$radius ."&limit=" .$limit);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , "Authorization: Bearer " .$token_secret));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch,CURLOPT_TIMEOUT,5000);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	$data = curl_exec($ch); // Yelp response
+ 	$data = curl_exec($ch); // Yelp response
 	curl_close($ch);
 	if($data === FALSE){
 		echo "Request failed";
@@ -161,106 +86,27 @@ $error=json_last_error();
 if($error != JSON_ERROR_NONE){
 	throw new Exception("Yelp didn't return valid json: ".$error);
 }
+if(strpos($_SERVER['HTTP_HOST'], ".".get_cfg_var("jetendo_test_domain")) !== FALSE){
+	$testserver=true;
+}else{
+	$testserver=false;
+}
 
+if($testserver){ 
+     $domain=get_cfg_var("jetendo_test_admin_domain"); 
+}else{ 
+     $domain=get_cfg_var("jetendo_admin_domain"); 
+} 
 for($i=0;$i<count($a->businesses);$i++){
 	$c=$a->businesses[$i];
- 
-	if(isset($c->rating_img_url)){
-		$c->rating_img_url=str_replace('http://', 'https://', $c->rating_img_url);
+	if(isset($c->rating)){
+		$c->rating_img_url = $domain."/z/images/stars/stars".$c->rating.".png";
+	}else{
+		$c->rating_img_url=$domain."/z/a/s.gif";
 	}
-	if(isset($c->image_url)){
-		$c->image_url=str_replace('http://', 'https://', $c->image_url);
-	}
-	if(isset($c->rating_img_url_small)){
-		$c->rating_img_url_small=str_replace('http://', 'https://', $c->rating_img_url_small);
-	}
-	if(isset($c->rating_img_url_large)){
-		$c->rating_img_url_large=str_replace('http://', 'https://', $c->rating_img_url_large);
-	} 
 	$a->businesses[$i]=$c;
 }
 $data=json_encode($a);
 echo $data;
 exit;
-// Handle Yelp response data
-$response = json_decode($data);
-
-// Print it for debugging
-print_r($response);
-
-
-/*
-
-
-
-parse and disply this json object:
-
-{
-  "businesses": [
-    {
-      "categories": [
-        [
-          "Local Flavor",
-          "localflavor"
-        ],
-        [
-          "Mass Media",
-          "massmedia"
-        ]
-      ],
-      "display_phone": "+1-415-908-3801",
-      "id": "yelp-san-francisco",
-      "is_claimed": true,
-      "is_closed": false,
-      "image_url": "http://s3-media2.ak.yelpcdn.com/bphoto/7DIHu8a0AHhw-BffrDIxPA/ms.jpg",
-      "location": {
-        "address": [
-          "706 Mission St"
-        ],
-        "city": "San Francisco",
-        "coordinate": {
-          "latitude": 37.786138600000001,
-          "longitude": -122.40262130000001
-        },
-        "country_code": "US",
-        "cross_streets": "3rd St & Opera Aly",
-        "display_address": [
-          "706 Mission St",
-          "(b/t 3rd St & Opera Aly)",
-          "SOMA",
-          "San Francisco, CA 94103"
-        ],
-        "geo_accuracy": 8,
-        "neighborhoods": [
-          "SOMA"
-        ],
-        "postal_code": "94103",
-        "state_code": "CA"
-      },
-      "mobile_url": "http://m.yelp.com/biz/4kMBvIEWPxWkWKFN__8SxQ",
-      "name": "Yelp",
-      "phone": "4159083801",
-      "rating_img_url": "http://media1.ak.yelpcdn.com/static/201012161694360749/img/ico/stars/stars_3.png",
-      "rating_img_url_large": "http://media3.ak.yelpcdn.com/static/201012161053250406/img/ico/stars/stars_large_3.png",
-      "rating_img_url_small": "http://media1.ak.yelpcdn.com/static/201012162337205794/img/ico/stars/stars_small_3.png",
-      "review_count": 3347,
-      "snippet_image_url": "http://s3-media2.ak.yelpcdn.com/photo/LjzacUeK_71tm2zPALcj1Q/ms.jpg",
-      "snippet_text": "Sometimes we ask questions without reading an email thoroughly as many of us did for the last event.  In honor of Yelp, the many questions they kindly...",
-      "url": "http://www.yelp.com/biz/yelp-san-francisco"
-    }
-  ],
-  "region": {
-    "center": {
-      "latitude": 37.786138600000001,
-      "longitude": -122.40262130000001
-    },
-    "span": {
-      "latitude_delta": 0.0,
-      "longitude_delta": 0.0
-    }
-  },
-  "total": 10651
-}
-
-*/
 ?>

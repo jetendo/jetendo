@@ -2,6 +2,9 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
 	<cfscript>
+	if(not application.zcore.app.siteHasApp("listing")){
+		application.zcore.functions.z404("Site doesn't have listing app");
+	}
 request.zos.currentURLISAListingPage=true;
 	var theMeta=0;
 	var primaryCityId=0;
