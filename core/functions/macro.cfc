@@ -1478,7 +1478,7 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
     structappend(ss, ts, false);
 
     if(arrayLen(ss.markers) EQ 0){
-        throw("ss.markers is required with this structure: {latitude:0, longitude:0}");
+    	return;
     }
 
     // get min and max lat/long from markers
@@ -1567,8 +1567,7 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 					$popup=$('##zOpenLayerMapPopup#request.zos.openLayerMapIndex#')
 					$mapContainer.on('mousedown', function(evt) {
 						$popup.hide();
-					});
-					console.log("mapload", map);
+					}); 
 					map.on('movestart', function(evt) { 
 						$popup.hide();
 					});
@@ -1644,9 +1643,7 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 			}
 			if(typeof zJetendoLoadedRan == "undefined" || !zJetendoLoadedRan){
 				zArrDeferredFunctions.push(loadMap);
-				console.log('pushfunction');
 			}else{
-				console.log('runfunction');
 				loadMap();
 			}
 		})();
