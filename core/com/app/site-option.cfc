@@ -614,7 +614,7 @@ application.zcore.siteOptionCom.searchOptionGroup("groupName", ts, 0, false);
 		if(arguments.orderByDataType EQ ""){
 			arguments.orderByDataType="text";
 		}
-		if(arguments.orderByDataType NEQ "text" and arguments.orderByDataType NEQ "numeric"){
+		if(arguments.orderByDataType NEQ "date" and arguments.orderByDataType NEQ "text" and arguments.orderByDataType NEQ "numeric"){
 			throw("Invalid value for arguments.orderByDataType, ""#arguments.orderByDataType#"".");
 		}
 		if(arguments.orderByDirection EQ ""){
@@ -623,7 +623,7 @@ application.zcore.siteOptionCom.searchOptionGroup("groupName", ts, 0, false);
 		if(arguments.orderByDirection NEQ "asc" and arguments.orderByDirection NEQ "desc"){
 			throw("Invalid value for arguments.orderByDirection, ""#arguments.orderByDirection#"".");
 		}
-	}
+	} 
 	if(structkeyexists(t9, "optionGroupIdLookup") and structkeyexists(t9.optionGroupIdLookup, arguments.parentGroupId&chr(9)&arguments.groupName)){
 		optionGroupId=t9.optionGroupIdLookup[arguments.parentGroupId&chr(9)&arguments.groupName];
 		var groupStruct=t9.optionGroupLookup[optionGroupId];
@@ -634,14 +634,25 @@ application.zcore.siteOptionCom.searchOptionGroup("groupName", ts, 0, false);
 				for(i=1;i LTE arrayLen(arrGroup);i++){
 					if(arguments.orderByDataType EQ "numeric" and not isnumeric(arrGroup[i][arguments.orderBy])){
 						continue;
-					}
+					} 
+					if(arguments.orderByDataType EQ "date"){
+						if(not isdate(arrGroup[i][arguments.orderBy])){
+							continue;
+						}
+						value=dateformat(arrGroup[i][arguments.orderBy], "yyyymmdd")&timeformat(arrGroup[i][arguments.orderBy], "HHmmss");
+					}else{
+						value=arrGroup[i][arguments.orderBy];
+					} 
 					tempStruct[i]={
-						sortKey: arrGroup[i][arguments.orderBy],
+						sortKey: value,
 						data:arrGroup[i]
 					};
 				}
-
-				arrTempKey=structsort(tempStruct, arguments.orderByDataType, arguments.orderByDirection, "sortKey");
+				if(arguments.orderByDataType EQ "date"){
+					arrTempKey=structsort(tempStruct, "numeric", arguments.orderByDirection, "sortKey");
+				}else{
+					arrTempKey=structsort(tempStruct, arguments.orderByDataType, arguments.orderByDirection, "sortKey");
+				}  
 				arrGroup2=[];
 				for(i=1;i LTE arrayLen(arrTempKey);i++){
 					arrayAppend(arrGroup2, tempStruct[arrTempKey[i]].data);
