@@ -794,7 +794,7 @@ used to do search for a list of values
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes"> 
 	<cfscript>
-	variables.deleteOptionGroupSetIdCacheInternal(arguments.site_id, arguments.setId, false);
+	deleteOptionGroupSetIdCacheInternal(arguments.site_id, arguments.setId, false);
 	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
 	</cfscript>
 </cffunction>
@@ -820,7 +820,7 @@ used to do search for a list of values
 		var arrChild=t9.optionGroupSetId[parentId&"_childGroup"][groupId]; 
 		for(var i=1;i LTE arrayLen(arrChild);i++){
 			if(arguments.setId EQ arrChild[i]){
-				deleteIndex=1;
+				deleteIndex=i;
 				break;
 			}
 		}
@@ -842,10 +842,10 @@ used to do search for a list of values
 	for(var n in t9.optionGroupFieldLookup[groupId]){ 
 		structdelete(t9.optionGroupSetId, arguments.setId&"_f"&n);
 	}
-	if(deleteIndex){
+	if(deleteIndex GT 0){
 		arrayDeleteAt(arrChild, deleteIndex);
 	}
-	if(deleteIndex2){
+	if(deleteIndex2 GT 0){
 		arrayDeleteAt(arrChild2, deleteIndex2);
 	} 
 	structdelete(t9.optionGroupSet, arguments.setId);

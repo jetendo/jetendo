@@ -3,6 +3,9 @@
 <cffunction name="init" localmode="modern" access="private" returntype="any">
 	<cfscript>
 	request.zsession.zPopinquiryPopCompleted=true;
+	if(application.zcore.app.siteHasApp("listing") EQ false){
+		application.zcore.functions.z404('listing app not enabled');	
+	}
 	if(application.zcore.app.siteHasApp("content") EQ false){
 		application.zcore.functions.z301redirect('/');	
 	}
@@ -124,7 +127,7 @@
 	var r1=0;
 	var ts=0;
 	var db=request.zos.queryObject;
-	variables.init();
+	init();
 	inquiryTextMissing=false;
 	ts=structnew();
 	ts.content_unique_name='/z/listing/inquiry-pop/index';
