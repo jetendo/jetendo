@@ -587,7 +587,7 @@
 				arrayAppend(arrCSS, v);
 			} 
 			if(structkeyexists(breakExtraStruct, breakpoint)){
-				arrayAppend(arrCSS, replace(breakTemp, ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
+				arrayAppend(arrCSSLast, replace(breakTemp, ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
 			}
 			headingEnabled=0; 
 			if(i EQ "36"){
@@ -630,6 +630,7 @@
 			dataStruct=breakStruct.data[breakpoint];
 			multiplier=0;
 			arrCSS2=[];
+			arrCSSLast2=[];
 		 	for(g=0;g<=15;g++){
 		 		if(g EQ 1){
 		 			multiplier=0.8;
@@ -739,10 +740,13 @@
 					arrayAppend(arrCSS2, v);
 				} 
 				if(structkeyexists(breakExtraStruct, breakpoint)){
-					arrayAppend(arrCSS2, replace(arrayToList(arrTemp, chr(10)), ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
+					arrayAppend(arrCSSLast2, replace(arrayToList(arrTemp, chr(10)), ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
 				}
  
 				multiplier+=0.8; 
+			}
+			if(arrayLen(arrCSSLast2) GT 0){
+				arrayAppend(arrCSS2, arrayToList(arrCSSLast2, chr(10)));
 			}
 			if(breakpoint NEQ 'Default'){
 				if(arrayLen(arrCSS2) NEQ 0){

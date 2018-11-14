@@ -1218,15 +1218,24 @@ function publishNginxSiteConfig($a){
 			array_push($arrSite, "www.".$host);
 		}
 
+		$serverName="server_name  ".implode(" ", $arrSite).";\n";
+		if(strstr($row["site_nginx_config"], "server_name") !== FALSE){
+			$serverName="";
+		}
+		$sslServerName="server_name ".implode(" ", $arrSSLSite).";\n";
+		if(strstr($row["site_nginx_ssl_config"], "server_name") !== FALSE){
+			$sslServerName="";
+		}
+
 		array_push($arrConfig, "server { 
 			listen ".$row["site_ip_address"].":80;\n". 
-			"server_name  ".implode(" ", $arrSite).";\n".
+			$serverName.
 			$row["site_nginx_config"]."\n".
 			"rewrite ^/(.*)$ ".$row["site_domain"]."/$1 permanent;\n".
 		"}\n".
 		"server {".
 			"listen ".$row["site_ip_address"].":443 ssl http2;\n".
-			"server_name ".implode(" ", $arrSSLSite).";\n".
+			$sslServerName.
 			$row["site_nginx_ssl_config"]."\n".
 			"ssl_certificate ".$nginxSSLPath.$sslRow["ssl_hash"]."/".$row["site_id"].".crt;\n".
 			"ssl_certificate_key ".$nginxSSLPath.$sslRow["ssl_hash"]."/".$row["site_id"].".key;\n");
