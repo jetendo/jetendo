@@ -47,6 +47,7 @@
 .z-index-2{position:relative; z-index:2;}
 .z-index-3{position:relative; z-index:3;}
 
+.z-row{ float:left; width:100%; }
 .z-float{ float:left; width:100%; }
 .z-float-left{ float:left; }
 .z-float-right{ float:right; }
