@@ -459,7 +459,7 @@
 			for(group in qGroup2){
 				currentGroup=group;
 				for(i=1;i<=50;i++){
-					if(currentGroup.site_option_group_parent_id NEQ 0){
+					if(currentGroup.site_option_group_parent_id NEQ 0 and structkeyexists(gs, currentGroup.site_option_group_parent_id)){
 						arrayPrepend(gs[group.site_option_group_id].arrParentID, gs[currentGroup.site_option_group_parent_id].row.site_option_group_id);
 						arrayPrepend(gs[group.site_option_group_id].arrParent, gs[currentGroup.site_option_group_parent_id].row.site_option_group_display_name);
 						currentGroup=gs[currentGroup.site_option_group_parent_id].row;
