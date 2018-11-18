@@ -454,18 +454,10 @@
 	var templateTagFunction="prependTag";
 	var checkPath=arguments.file_path;
 	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
-		if(not request.zos.isTestServer and structkeyexists(application.siteStruct[request.zos.globals.id], 'zcompiledDeployed')){
-			if(left(checkPath,3) NEQ "/z/" and left(checkPath,9) NEQ "/zupload/" and left(checkPath,8) NEQ "/zcache/"){
-				//checkPath="/zcompiled"&checkPath;
-			}
-		}
-		/*if(left(checkPath,3) NEQ "/z/" and left(checkPath,9) NEQ "/zupload/" and left(checkPath,8) NEQ "/zcache/"){
-			checkPath="/zcompiled/"&checkPath;
-		}*/
 		checkPath=getVersionURL(checkPath);
 	} 
 	if(structkeyexists(request.zos.cssIncludeUniqueStruct, checkPath)){
-		return "";
+		return;
 	}
 	request.zos.cssIncludeUniqueStruct[checkPath]=true;
 	if(arguments.forcePosition EQ "first"){
@@ -480,7 +472,7 @@
 		s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; 
 	}
 	application.zcore.template[templateTagFunction](templateTagName, s&chr(10), forceFirst);
-	return ""; 
+	return; 
 </cfscript>
 </cffunction>
 
@@ -524,23 +516,14 @@
 	var s="";
 	var checkPath=arguments.file_path;
 	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
-		if(not request.zos.isTestServer and structkeyexists(application.siteStruct[request.zos.globals.id], 'zcompiledDeployed')){
-			if(left(checkPath,3) NEQ "/z/" and left(checkPath,9) NEQ "/zupload/" and left(checkPath,8) NEQ "/zcache/"){
-				//checkPath="/zcompiled"&checkPath;
-			}
-		}
-		/*if(left(checkPath,3) NEQ "/z/" and left(checkPath,9) NEQ "/zupload/" and left(checkPath,8) NEQ "/zcache/"){
-			checkPath="/zcompiled/"&checkPath;
-		}*/
 		checkPath=getVersionURL(checkPath);
 	} 
 	if(structkeyexists(request.zos.jsIncludeUniqueStruct, checkPath)){
-		return "";
+		return;
 	}
 	request.zos.jsIncludeUniqueStruct[checkPath]=true;
 	arrayappend(request.zos.arrScriptIncludeLevel, arguments.loadLevel);
-	arrayappend(request.zos.arrScriptInclude, checkPath); // TODO: might want to bring this back later request.zos.staticFileDomain& 
-	return ""; 
+	arrayappend(request.zos.arrScriptInclude, checkPath);
 	</cfscript>
 </cffunction>
 

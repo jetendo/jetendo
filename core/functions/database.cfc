@@ -575,15 +575,19 @@ if(table_id EQ false){
 	}
 
 	</cfscript>
-	<cfif ss.enableTableFieldCache or structkeyexists(request.zos.tableFieldsCache, ss.datasource&" "&ss.table) EQ false>
+	<cfif ss.enableTableFieldCache>
+		<cfif structkeyexists(request.zos.tableFieldsCache, ss.datasource&" "&ss.table) EQ false>
+			<cfquery name="fields" datasource="#ss.datasource#">
+			SHOW FIELDS FROM `#ss.table#`
+			</cfquery>
+			<cfset request.zos.tableFieldsCache[ss.datasource&" "&ss.table]=fields> 
+		<cfelse>
+			<cfset fields=request.zos.tableFieldsCache[ss.datasource&" "&ss.table]>
+		</cfif> 
+	<cfelse>
 		<cfquery name="fields" datasource="#ss.datasource#">
 		SHOW FIELDS FROM `#ss.table#`
 		</cfquery>
-	<cfif ss.enableTableFieldCache>
-			<cfset request.zos.tableFieldsCache[ss.datasource&" "&ss.table]=fields>
-	</cfif>
-	<cfelse>
-		<cfset fields=request.zos.tableFieldsCache[ss.datasource&" "&ss.table]>
 	</cfif>
 	<cfset arrInsert = ArrayNew(1)>
 	<cfset i = 1>

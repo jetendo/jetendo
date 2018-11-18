@@ -483,7 +483,7 @@
 	if(request.zos.whiteSpaceEnabled EQ false){
 		_zcoretemplatelocalvars.result=rereplace(_zcoretemplatelocalvars.result, "\n(\s+)",chr(10),"all");
 	}
-	application.zcore.cache.setTemplateContent(_zcoretemplatelocalvars.result);');
+	/*application.zcore.cache.setTemplateContent(_zcoretemplatelocalvars.result);*/');
 			
 	for(i=1;i LTE arraylen(request.zos.templateData.tags);i++){
 		if(request.zos.templateData.tags[i].tag NEQ ""){
@@ -492,7 +492,7 @@
 			}
 			arrayAppend(arrT, '
 			_zcoretemplatelocalvars.finalTagContent=application.zcore.template.getFinalTagContent("'&request.zos.templateData.tags[i].tag&'");
-			application.zcore.cache.setTag("'&request.zos.templateData.tags[i].tag&'", "####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);
+			/*application.zcore.cache.setTag("'&request.zos.templateData.tags[i].tag&'", "####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);*/
 			_zcoretemplatelocalvars.result=replace(_zcoretemplatelocalvars.result,"####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);');
 			arrayAppend(arrT2, request.zos.templateData.tags[i].string&'####_zcoretemplatelocalvars.ts.section'&i&'####');
 		}else{

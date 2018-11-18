@@ -16,13 +16,27 @@
 		if(structkeyexists(form, request.zos.urlRoutingParameter) EQ false){
 			include template="#arguments.targetpage#";
 			return;
-		}
+		} 
 		if(request.zos.routingIsCFC EQ false){
-			if(right(request.zos.scriptNameTemplate,4) EQ ".cfc"){ 
+			if(right(request.zos.scriptNameTemplate,4) EQ ".cfc" or right(request.zos.scriptNameTemplate,4) EQ ".lucee" or right(request.zos.scriptNameTemplate,4) EQ ".lc"){ 
 				if(left(request.zos.scriptNameTemplate, 16) EQ "/jetendo-themes/"){
 					local.tempCom9999=application.zcore.functions.zcreateobject("component",replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-5), "/",".","all"));
 				}else{
 					local.tempCom9999=application.zcore.functions.zcreateobject("component",request.zRootCFCPath&replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-5), "/",".","all"));
+				}
+				local.tempCom9999[form.method]();
+			}else if(right(request.zos.scriptNameTemplate,6) EQ ".lucee"){  
+				if(left(request.zos.scriptNameTemplate, 16) EQ "/jetendo-themes/"){
+					local.tempCom9999=application.zcore.functions.zcreateobject("component",replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-7), "/",".","all"));
+				}else{
+					local.tempCom9999=application.zcore.functions.zcreateobject("component",request.zRootCFCPath&replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-7), "/",".","all"));
+				}
+				local.tempCom9999[form.method]();
+			}else if(right(request.zos.scriptNameTemplate,3) EQ ".lc"){ 
+				if(left(request.zos.scriptNameTemplate, 16) EQ "/jetendo-themes/"){
+					local.tempCom9999=application.zcore.functions.zcreateobject("component",replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-4), "/",".","all"));
+				}else{
+					local.tempCom9999=application.zcore.functions.zcreateobject("component",request.zRootCFCPath&replace(mid(request.zos.cgi.SCRIPT_NAME, 2, len(request.zos.cgi.SCRIPT_NAME)-4), "/",".","all"));
 				}
 				local.tempCom9999[form.method]();
 			}else{

@@ -1028,13 +1028,14 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	if(isDefined('application.zcore.runningScriptStruct') and structkeyexists(request.zos,'trackingRunningScriptIndex')){
 		structdelete(application.zcore.runningScriptStruct,'r'&request.zos.trackingRunningScriptIndex);
 	}
-	if(structkeyexists(request, 'zsession') and structkeyexists(application.zcore,'user') and application.zcore.user.checkGroupAccess("user") EQ false){
-		if(structkeyexists(form, 'zajaxdownloadcontent')){
-			application.zcore.cache.storeJsonCache();
-		}else{
-			application.zcore.cache.storeCache();	
-		}
-	}
+	// not in use yet
+	// if(structkeyexists(request, 'zsession') and structkeyexists(application.zcore,'user') and application.zcore.user.checkGroupAccess("user") EQ false){
+	// 	if(structkeyexists(form, 'zajaxdownloadcontent')){
+	// 		application.zcore.cache.storeJsonCache();
+	// 	}else{
+	// 		application.zcore.cache.storeCache();	
+	// 	}
+	// }
 	</cfscript>
 </cffunction>
 
@@ -1063,20 +1064,11 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 
 
 <cffunction name="zThrowIfImplicitVariableAccessDetected" localmode="modern" output="no">
-	<cfscript>
-	var q=0;
-	var row=0;
-	var count=0;
-	var jsoutput=0;
-	var output=0;
-	var uniqueStruct={};
-	var ts=0;
-	var i=0;
-	var i2=0;
-	var i3=0;
-	if(structkeyexists(form, 'zab') or not isdebugmode() or not request.zos.isImplicitScopeCheckEnabled or left(request.zos.originalURL, 8) EQ "/z/test/" or structkeyexists(request.zos, 'isImplicitScopeCheckRun')){
+	<cfscript> 
+	if(request.zos.enableSiteTemplateCache or not isdebugmode() or structkeyexists(form, 'zab') or not request.zos.isImplicitScopeCheckEnabled or left(request.zos.originalURL, 8) EQ "/z/test/" or structkeyexists(request.zos, 'isImplicitScopeCheckRun')){
 		return;
 	}
+	var uniqueStruct={}; 
 	request.zos.isImplicitScopeCheckRun=true;
 	savecontent variable="output"{
 		if(request.zOS.cfmlAdminReadEnabled){
@@ -1112,11 +1104,11 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	if(not count){
 		return;
 	}
-	if(structkeyexists(request, 'zos') and structkeyexists(request.zos, 'inOnErrorFunction')){
-		writeoutput("Implicit Variable Access Detected. "&output);
-	}else{
+	// if(structkeyexists(request, 'zos') and structkeyexists(request.zos, 'inOnErrorFunction')){
+	// 	writeoutput("Implicit Variable Access Detected. "&output);
+	// }else{
 		throw("Implicit Variable Access Detected. "&output, "custom");
-	}
+	//}
 	</cfscript>
 </cffunction>
 

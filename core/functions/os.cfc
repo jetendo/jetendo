@@ -605,7 +605,7 @@ if(not rs.success){
 			curPath=replace(expandpath('/'&replace(arrMvcPaths[i],'.','/','all')),"\","/","all");
 		}
 		</cfscript>
-		<cfdirectory action="list" recurse="yes" directory="#curPath#" name="qD" filter="*.cfc|*.html">
+		<cfdirectory action="list" recurse="yes" directory="#curPath#" name="qD" filter="*.cfc"><!--- |*.html --->
 		<!--- <cfif qd.recordcount>
 			<cfdump var="#qD#"><cfabort>
 		</cfif> --->
@@ -665,25 +665,7 @@ if(not rs.success){
 					if(curExt EQ "cfc"){
 						comPath=arrMvcPaths[i]&"."&curPath3&"."&curName;
 						ts.modelDataCache.modelComponentCache[replace(comPath, arrMvcPaths[i], "root")]=application.zcore.functions.zcreateobject("component", comPath, true);
-					}
-					// old method
-				/*}else if(lastFolderName EQ "model"){
-					if(curExt EQ "cfc"){
-						comPath=arrMvcPaths[i]&"."&curPath3&"."&curName;
-						if(structkeyexists(form,  'zregeneratemodelcache') EQ false and structkeyexists(application, 'zcore') and structkeyexists(application.sitestruct[request.zos.globals.id],'modelDataCache') and structkeyexists(application.sitestruct[request.zos.globals.id].modelDataCache.modelComponentCache, comPath)){
-							ts.modelDataCache.modelComponentCache[comPath]=application.sitestruct[request.zos.globals.id].modelDataCache.modelComponentCache[comPath];
-							//writeoutput('#curName#: use existing<br />');
-						}else{
-							arrayappend(arrNewComPath, comPath);
-							//ts.modelDataCache.modelComponentCache[comPath]=application.zcore.functions.zcreateobject("component", comPath, true);
-							//writeoutput('#curName#: use new<br />');
-						}
-					}
-				}else if(lastFolderName EQ "view"){
-					if(curExt EQ "html"){
-						//writeoutput('application.zcore.skin.loadView("'&curPath3&"."&curName&'", "'&arrMvcPaths[i]&'");<br />');
-						// application.zcore.skin.loadView("/"&curPath2&"/"&curName, arrMvcPaths[i]);
-					}*/
+					} 
 				}
 			}
 			</cfscript>
@@ -2140,10 +2122,11 @@ User's IP: #request.zos.cgi.remote_addr#
 	mvcFilesChanged=false;
 	arrLocalFile=[];
 	
-	if(request.zos.isExecuteEnabled){
+	//if(request.zos.isExecuteEnabled){
+
 		if(directoryexists(request.zos.installPath&"core/mvc/")){
 			if(fileexists("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc")){
-				output=application.zcore.functions.zSecureCommand("getNewerCoreMVCFiles", 50);
+				output=application.zcore.functions.zSecureCommand("getNewerCoreMVCFiles", 50); 
 			}else{
 				output=1;
 			}
@@ -2219,15 +2202,15 @@ User's IP: #request.zos.cgi.remote_addr#
 		if(not request.zos.isTestServer or structkeyexists(form, 'zforce')){
 			mvcFilesChanged=true;
 		}
-	}else{
-		// always true when execute is disabled
-		directory action="list" recurse="yes" directory="#request.zos.installPath#core/mvc" name="qD" filter="*.cfc";
-		arrFile=[];
-		for(row in qD){
-			arrayappend(arrFile, {"type":row.type, "directory":replace(row.directory, "#request.zos.installPath#core/", "/"), name:row.name, lastModified:row.dateLastModified});
-		}
-		mvcFilesChanged=true; 
-	}
+	// }else{
+	// 	// always true when execute is disabled
+	// 	directory action="list" recurse="yes" directory="#request.zos.installPath#core/mvc" name="qD" filter="*.cfc";
+	// 	arrFile=[];
+	// 	for(row in qD){
+	// 		arrayappend(arrFile, {"type":row.type, "directory":replace(row.directory, "#request.zos.installPath#core/", "/"), name:row.name, lastModified:row.dateLastModified});
+	// 	}
+	// 	mvcFilesChanged=true; 
+	// }
 	if(mvcFilesChanged or (not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'controllerComponentCache') or structcount(application.zcore.hookAppCom) EQ 0)){
 		for(i2=1;i2 LTE arraylen(arrFile);i2++){
 			qD=arrFile[i2];

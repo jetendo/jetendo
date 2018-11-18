@@ -245,6 +245,7 @@
 </cffunction>
 
 <cffunction name="getDatasources" localmode="modern" access="public" returntype="struct">
+    <cfargument name="isTestServer" type="boolean" required="yes">
 	<cfscript>
 	ts={
 		datasources:{}

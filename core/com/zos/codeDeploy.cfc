@@ -31,8 +31,8 @@
 	tFunctions.loadNextListingSite=loadNextListingSite; 
 	tFunctions.checkDomainRedirect=checkDomainRedirect; 
 	tFunctions.onApplicationStart=onApplicationStart;
-	tFunctions.onRequestStart=onRequestStart;
-	tFunctions.onRequestStart1=onRequestStart1;
+	tFunctions.onRequestStart=onRequestStart; 
+	tFunctions.onRequestStart1=onRequestStart1; 
 	tFunctions.onRequestStart12=onRequestStart12;
 	tFunctions.onRequestStart2=onRequestStart2;
 	tFunctions.onRequestStart3=onRequestStart3;
@@ -58,23 +58,25 @@
 <cffunction name="onCodeDeploy" access="public" localmode="modern">
 	<cfscript>
 	application.codeDeployModeEnabled=true;
+	zos=request.zos;
+	zcore=application.zcore;
 	try{
-		request.zos.requestLogEntry('onCodeDeploy1');
+		zos.requestLogEntry('onCodeDeploy1');
 		if(structkeyexists(application.zcore, 'allcomponentcache')){
-			structclear(application.zcore.allcomponentcache);
+			structclear(zcore.allcomponentcache);
 		}
 		if(structkeyexists(application.zcore, 'templateCFCCache')){
-			for(i in application.zcore.templateCFCCache){
-				structclear(application.zcore.templateCFCCache[i]);
+			for(i in zcore.templateCFCCache){
+				structclear(zcore.templateCFCCache[i]);
 			}
 		}
 
 		configCom=createobject("component", "zcorerootmapping.config-default");
-		defaultStruct=configCom.getConfig(request.zos.cgi, true);
+		defaultStruct=configCom.getConfig(zos.cgi, true);
 		structdelete(defaultStruct.zos, 'serverStruct');
 
 		configCom=createobject("component", "zcorerootmapping.config");
-		ts=configCom.getConfig(request.zos.cgi, false);
+		ts=configCom.getConfig(zos.cgi, false);
 
 		structappend(ts.zos, defaultStruct.zos, false);
 		structappend(request.zos, ts.zos, true);
@@ -85,10 +87,10 @@
 		
 		tempVar=createobject("component","zcorerootmapping.functionInclude");
 		functions=tempVar.init();
-		request.zos.functions=functions;
-		application.zcore.functions=functions; 
+		zos.functions=functions;
+		zcore.functions=functions; 
 		
-		request.zos.requestLogEntry('onCodeDeploy2');
+		zos.requestLogEntry('onCodeDeploy2');
 		
 		componentObjectCache=structnew();
 		componentObjectCache.cloudFile=CreateObject("component","zcorerootmapping.com.zos.cloudFile");
@@ -115,59 +117,59 @@
 
 		componentObjectCache.siteOptionCom.init("site", "site");
  
- 		application.zcore.cloudVendor=componentObjectCache.cloudFile.getCloudVendors();
+ 		zcore.cloudVendor=componentObjectCache.cloudFile.getCloudVendors();
 
-		if(request.zos.isdeveloper and structkeyexists(request.zsession, 'verifyQueries') and request.zsession.verifyQueries){
+		if(zos.isdeveloper and structkeyexists(request.zsession, 'verifyQueries') and request.zsession.verifyQueries){
 			local.verifyQueriesEnabled=true;
 		}else{
 			local.verifyQueriesEnabled=false;
 		}
 		dbInitConfigStruct={
 			insertIdSQL:"select @zLastInsertId id2, last_insert_id() id",
-			datasource:request.zos.globals.serverdatasource,
-			parseSQLFunctionStruct:{checkSiteId:application.zcore.functions.zVerifySiteIdsInDBCFCQuery},
+			datasource:zos.globals.serverdatasource,
+			parseSQLFunctionStruct:{checkSiteId:functions.zVerifySiteIdsInDBCFCQuery},
 			verifyQueriesEnabled:local.verifyQueriesEnabled,
-			cacheStructKey:'application.zcore.queryCache'
+			cacheStructKey:'zcore.queryCache'
 		}
 		componentObjectCache.db.init(dbInitConfigStruct);
 		
-		application.zcore.componentObjectCache=componentObjectCache;
-		structappend(application.zcore, application.zcore.componentObjectCache);
+		zcore.componentObjectCache=componentObjectCache;
+		structappend(application.zcore, zcore.componentObjectCache);
 		soGroupData={
 			optionTypeStruct:componentObjectCache.siteOptionCom.getOptionTypes()
 		};
 		soGroupData.arrCustomDelete=componentObjectCache.siteOptionCom.getTypeCustomDeleteArray(soGroupData);
-		application.zcore.soGroupData=soGroupData;
+		zcore.soGroupData=soGroupData;
 		themeTypeData={
 			optionTypeStruct:{}
 		};
-		application.zcore.themeTypeData=themeTypeData;
+		zcore.themeTypeData=themeTypeData;
 		widgetTypeData={
 			optionTypeStruct:{}
 		};
-		application.zcore.widgetTypeData=widgetTypeData;
-		if(request.zos.allowRequestCFC){
-			structappend(request.zos, application.zcore.componentObjectCache, true);
+		zcore.widgetTypeData=widgetTypeData;
+		if(zos.allowRequestCFC){
+			structappend(request.zos, zcore.componentObjectCache, true);
 		}
 		
-		request.zos.requestLogEntry('onCodeDeploy3');
+		zos.requestLogEntry('onCodeDeploy3');
 		
 		
-		application.zcore.skin.onCodeDeploy();//application.zcore.skinObj);
-		request.zos.requestLogEntry('onCodeDeploy4');
-		application.zcore.listingCom=createobject("component","zcorerootmapping.mvc.z.listing.controller.listing");
-		application.zcore.listingStruct.configCom=application.zcore.listingCom;
+		zcore.skin.onCodeDeploy();//zcore.skinObj);
+		zos.requestLogEntry('onCodeDeploy4');
+		zcore.listingCom=createobject("component","zcorerootmapping.mvc.z.listing.controller.listing");
+		zcore.listingStruct.configCom=zcore.listingCom;
 		// loop all app CFCs
-		for(i in application.zcore.appComPathStruct){
-			currentCom=createobject("component", application.zcore.appComPathStruct[i].cfcPath);
+		for(i in zcore.appComPathStruct){
+			currentCom=createobject("component", zcore.appComPathStruct[i].cfcPath);
 			if(structkeyexists(currentCom, 'onCodeDeploy')){
 				currentCom.onCodeDeploy(application.zcore);
 			}
 		}
-		request.zos.requestLogEntry('onCodeDeploy5');
+		zos.requestLogEntry('onCodeDeploy5');
 		
 
-		request.zos.functions.zUpdateGlobalMVCData(application.zcore, true);
+		zos.functions.zUpdateGlobalMVCData(application.zcore, true);
 		
 		backupStruct={
 			zRootPath:request.zRootPath,
@@ -183,63 +185,72 @@
 			siteCodeDeployThread3:[]
 		};
 
+		reloadEnabled=false;
+		if(request.zos.customCFMLVersion EQ server.lucee.version){
+			reloadEnabled=true;
+		}
+
 		for(n in application.siteStruct){
-			application.sitestruct[n].comCache={};
-			application.sitestruct[n].fileExistsCache={};
-			if(not structkeyexists(application.sitestruct[n], 'globals')){
+			ss=application.siteStruct[n];
+			ss.comCache={};
+			ss.fileExistsCache={};
+			if(not structkeyexists(ss, 'globals')){
 				continue;
 			}
-			request.zRootDomain=replace(replace(application.sitestruct[n].globals.shortDomain,'www.',''),"."&request.zos.testDomain,"");
+			request.zRootDomain=replace(replace(ss.globals.shortDomain,'www.',''),"."&zos.testDomain,"");
 			request.zRootPath="/"&replace(request.zRootDomain, ".","_","all")&"/"; 
 			request.zRootSecureCfcPath="jetendo-sites.writable."&replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";
 			request.zRootCfcPath=replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";
 
-			application.zcore.functions.zUpdateSiteMVCData(application.sitestruct[n]);
-				if(structkeyexists(application.sitestruct[n], 'app')){
-				for(i in application.sitestruct[n].app.appCache){
-					currentCom=createObject("component", application.zcore.appComPathStruct[i].cfcPath);
-					if(i NEQ 11 and i NEQ 13){ // rental and listing apps are not thread-safe yet due to cfinclude (listing detail includes) and var scoping
-						currentCom=createObject("component", application.zcore.appComPathStruct[i].cfcPath);
-						application.sitestruct[n].app.appCache[i].cfcCached=currentCom;
+			functions.zUpdateSiteMVCData(ss);
+			if(structkeyexists(ss, 'app')){
+				for(i in ss.app.appCache){
+					currentCache=ss.app.appCache[i];
+					if(reloadEnabled and structkeyexists(currentCache, 'cfcCached')){ 
+						currentCom=reloadComponent(currentCache.cfcCached, true);
+					}else{ 
+						currentCom=createObject("component", zcore.appComPathStruct[i].cfcPath);
 					}
-					currentCom.site_id=request.zos.globals.id;
+					if(i NEQ 11 and i NEQ 13){ // rental and listing apps are not thread-safe yet due to cfinclude (listing detail includes) and var scoping
+						currentCache.cfcCached=currentCom;
+					}
+					currentCom.site_id=zos.globals.id;
 					if(structkeyexists(currentCom, 'onSiteCodeDeploy')){
-						currentCom.onSiteCodeDeploy(application.sitestruct[n].app.appCache[i]);
+						currentCom.onSiteCodeDeploy(currentCache);
 					}
 				}	
 			}
-			application.siteStruct[n].dbComponents=application.zcore.functions.getSiteDBObjects(application.sitestruct[n].globals);
-			ts={site_id:n, globals:application.sitestruct[n].globals};
-			application.zcore.functions.zUpdateCustomSiteFunctions(ts);
-			structappend(application.siteStruct[n], ts, true);
+			ss.dbComponents=functions.getSiteDBObjects(ss.globals);
+			ts={site_id:n, globals:ss.globals};
+			functions.zUpdateCustomSiteFunctions(ts);
+			structappend(ss, ts, true);
 					
 		}
 
 		structappend(request, backupStruct, true);
-		request.zos.requestLogEntry('onCodeDeploy6');
+		zos.requestLogEntry('onCodeDeploy6');
 
 		versionCom=createobject("component", "zcorerootmapping.version");
 	    ts2=versionCom.getVersion();
 
-
-		request.zos.requestLogEntry('onCodeDeploy7');
+		zos.requestLogEntry('onCodeDeploy7');
 		runDatabaseUpgrade=false;
-	    if(not structkeyexists(application.zcore, 'databaseVersion') or application.zcore.databaseVersion NEQ ts2.databaseVersion){
+	    if(not structkeyexists(zcore, 'databaseVersion') or zcore.databaseVersion NEQ ts2.databaseVersion){
 	    	// do database upgrade
 	    	runDatabaseUpgrade=true;
 		}else{
-			db=request.zos.queryObject;
-			db.sql="select * from #db.table("jetendo_setup", request.zos.zcoreDatasource)# 
+			db=zos.queryObject;
+			db.sql="select * from #db.table("jetendo_setup", zos.zcoreDatasource)# 
 			WHERE jetendo_setup_deleted = #db.param(0)# 
 			LIMIT #db.param(0)#, #db.param(1)#";
 			qSetup=db.execute("qSetup");
 		}
-	    application.zcore.databaseVersion=ts2.databaseVersion;
-	    application.zcore.sourceVersion=ts2.sourceVersion;
-		if(runDatabaseUpgrade or qSetup.recordcount EQ 0 or qSetup.jetendo_setup_database_version NEQ application.zcore.databaseVersion){
+	    zcore.databaseVersion=ts2.databaseVersion;
+	    zcore.sourceVersion=ts2.sourceVersion;
+		if(runDatabaseUpgrade or qSetup.recordcount EQ 0 or qSetup.jetendo_setup_database_version NEQ zcore.databaseVersion){
 			dbUpgradeCom=createobject("component", "zcorerootmapping.mvc.z.server-manager.admin.controller.db-upgrade");
 			if(not dbUpgradeCom.checkVersion()){
-				if(request.zos.isTestServer or request.zos.isDeveloper){
+				if(zos.isTestServer or zos.isDeveloper){
 					echo('Database upgrade failed');
 					abort;
 				}
@@ -249,7 +260,7 @@
 		structdelete(application, 'codeDeployModeEnabled');
 		rethrow;
 	}
-	structdelete(application, 'codeDeployModeEnabled');
+	structdelete(application, 'codeDeployModeEnabled'); 
 	</cfscript>
 </cffunction>
 </cfoutput>

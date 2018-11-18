@@ -29,22 +29,23 @@
 		if(arguments.theURL EQ ""){
 			application.zcore.functions.z404("Path doesn't exist or is a directory.");
 		}else if((not structkeyexists(form,'__zcoreinternalroutingpath') or trim(form.__zcoreinternalroutingpath) EQ "")){
-			notCFC=false;
-			if(find(".cfc", arguments.theURL) EQ 0){
-				notCFC=true;
-			}
+			// notCFC=false;
+			// if(find(".cfc", arguments.theURL) EQ 0 and find(".lucee", arguments.theURL) EQ 0 and find(".lc", arguments.theURL) EQ 0){
+			// 	notCFC=true;
+			// }
+			siteStruct=application.sitestruct[request.zos.globals.id];
 			ctemp1=request.zos.globals.homedir&removechars(arguments.theURL,1,1);
-			if(not structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, ctemp1)){
-				application.sitestruct[request.zos.globals.id].fileExistsCache[ctemp1]=fileexists(ctemp1);
+			if(not structkeyexists(siteStruct.fileExistsCache, ctemp1)){
+				siteStruct.fileExistsCache[ctemp1]=fileexists(ctemp1);
 			}
 			/*
 			// this code was unnecessary
-			if(not structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, arguments.theURL)){
-				application.sitestruct[request.zos.globals.id].fileExistsCache[arguments.theURL]=fileexists(arguments.theURL);
+			if(not structkeyexists(siteStruct.fileExistsCache, arguments.theURL)){
+				siteStruct.fileExistsCache[arguments.theURL]=fileexists(arguments.theURL);
 			}*/
 			request.zos.routingDisableComponentInvoke=true;
-			if(not notCFC and (application.sitestruct[request.zos.globals.id].fileExistsCache[ctemp1])){// or application.sitestruct[request.zos.globals.id].fileExistsCache[arguments.theURL]
-				if(right(arguments.theURL,4) EQ ".cfc"){
+			if(siteStruct.fileExistsCache[ctemp1]){// or siteStruct.fileExistsCache[arguments.theURL]
+				if(right(arguments.theURL,4) EQ ".cfc" or right(arguments.theURL,6) EQ ".lucee" or right(arguments.theURL,3) EQ ".lc"){
 					request.zos.routingIsCFC=true;
 					if(structkeyexists(form,'method') EQ false){
 						form.method="index";	
@@ -74,20 +75,20 @@
 						if(zdebugurl2){
 								writeoutput('curdata:'&curURLData&'<br />');
 						}
-					if(structkeyexists(application.sitestruct[request.zos.globals.id].registeredControllerStruct, "/controller"&curURLData)){
+					if(structkeyexists(siteStruct.registeredControllerStruct, "/controller"&curURLData)){
 						if(zdebugurl2){
 							writeoutput("Found controller in application scope: "&"/controller"&curURLData&".cfc<br />");
 						}
 						break;
-					}else if(structkeyexists(application.sitestruct[request.zos.globals.id].registeredControllerPathStruct, curURLData) EQ false){
+					}else if(structkeyexists(siteStruct.registeredControllerPathStruct, curURLData) EQ false){
 						
 						cfcLookupName=lastURLData&"/controller/"&curURLPath;
 						cfcURLName=lastURLData&"/"&curURLPath;
 						
-						if(isUsingMVCAppScope and structkeyexists(application.sitestruct[request.zos.globals.id].registeredControllerStruct, cfcLookupName)){
+						if(isUsingMVCAppScope and structkeyexists(siteStruct.registeredControllerStruct, cfcLookupName)){
 							routingISMVC=true;
 							request.zos.routingIsCFC=true;
-							request.zos.scriptNameTemplate=application.sitestruct[request.zos.globals.id].registeredControllerStruct[cfcLookupName];
+							request.zos.scriptNameTemplate=siteStruct.registeredControllerStruct[cfcLookupName];
 							if(zdebugurl2){
 								writeoutput("Found controller in site struct: "&curURLData&"<br />");
 							}
@@ -138,16 +139,16 @@
 					writedump(application.zcore.registeredControllerPathStruct);
 					writeoutput('application.zcore.registeredControllerStruct<br />');
 					writedump(application.zcore.registeredControllerStruct);
-					writeoutput('Application MVC Cache<br />application.sitestruct[request.zos.globals.id].registeredControllerPathStruct<br />');
-					writedump(application.sitestruct[request.zos.globals.id].registeredControllerPathStruct);
-					writeoutput('application.sitestruct[request.zos.globals.id].registeredControllerStruct<br />');
-					writedump(application.sitestruct[request.zos.globals.id].registeredControllerStruct);
+					writeoutput('Application MVC Cache<br />siteStruct.registeredControllerPathStruct<br />');
+					writedump(siteStruct.registeredControllerPathStruct);
+					writeoutput('siteStruct.registeredControllerStruct<br />');
+					writedump(siteStruct.registeredControllerStruct);
 				}
 				routingISMVC=false;
-				if(isUsingMVCAppScope and structkeyexists(application.sitestruct[request.zos.globals.id].registeredControllerStruct, cfcLookupName)){
+				if(isUsingMVCAppScope and structkeyexists(siteStruct.registeredControllerStruct, cfcLookupName)){
 					routingISMVC=true;
 					request.zos.routingIsCFC=true;
-					request.zos.scriptNameTemplate=application.sitestruct[request.zos.globals.id].registeredControllerStruct[cfcLookupName];
+					request.zos.scriptNameTemplate=siteStruct.registeredControllerStruct[cfcLookupName];
 				}else{
 					if(structkeyexists(application.zcore.registeredControllerStruct, cfcLookupName)){
 						routingISMVC=true;
@@ -304,17 +305,9 @@
     <cffunction name="checkCFCSecurity" localmode="modern" output="no" returntype="any">
     	<cfargument name="scriptName" type="string" required="yes">
     	<cfargument name="method" type="string" required="yes">
-    	<cfscript>
-		var t=0;
-		var inputStruct=0;
-		var arrLoginRoles=0;
-		var i=0;
-		var curRole=0;
-		var tempLoginSkip=0;
-		var comPath="";
+    	<cfscript> 
 		var isTestCFC=false;
-		var isServerCFC=false;
-		var tempcommeta=0;
+		var isServerCFC=false; 
 		var comTempPath=arguments.scriptName;
 		rs={};
 		arguments.method=arguments.method;
@@ -333,29 +326,31 @@
 		if(comPath CONTAINS ".test."){
 			isTestCFC=true;
 			if(request.zos.istestserver EQ false){
-				application.zcore.template.fail("Running tests in production is not allowed.");	
+				throw("Running tests in production is not allowed.");	
 			}
 			request.znotemplate=true;
 		}
+		siteStruct=application.sitestruct[request.zos.globals.id];
 		notFound=true;
-		if(not request.zos.isTestServer){
-			if(isServerCFC EQ false and structkeyexists(application.sitestruct[request.zos.globals.id].controllerComponentCache, comPath)){
-				rs.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].controllerComponentCache[comPath]);
+		if(not request.zos.isTestServer or request.zos.enableSiteTemplateCache){
+			if(isServerCFC EQ false and structkeyexists(siteStruct.controllerComponentCache, comPath)){
+				rs.routingCurrentComponentObject=duplicate(siteStruct.controllerComponentCache[comPath]);
 				notFound=false;
 			}else if(structkeyexists(application.zcore.controllerComponentCache, comPath)){
 				rs.routingCurrentComponentObject=duplicate(application.zcore.controllerComponentCache[comPath]);
 				notFound=false;
-			}else if(Structkeyexists(application.sitestruct[request.zos.globals.id].comCache, comPath)){
-				rs.routingCurrentComponentObject=duplicate(application.sitestruct[request.zos.globals.id].comCache[comPath]);
+			}else if(Structkeyexists(siteStruct.comCache, comPath)){
+				rs.routingCurrentComponentObject=duplicate(siteStruct.comCache[comPath]);
 				notFound=false;
 			}
 		}
 		if(notFound){
-			if(request.zos.isTestServer){
+			if(request.zos.isTestServer and not request.zos.enableSiteTemplateCache){
+				// doesn't happen when debugging or load testing
 				rs.routingCurrentComponentObject=createobject("component",comPath);
 			}else{
 				rs.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath, true);
-				application.sitestruct[request.zos.globals.id].comCache[comPath]=rs.routingCurrentComponentObject;
+				siteStruct.comCache[comPath]=rs.routingCurrentComponentObject;
 			}
 		}
 		if(structkeyexists(rs.routingCurrentComponentObject,arguments.method) EQ false){
@@ -364,15 +359,15 @@
 		if(isServerCFC){
 			cacheStruct=application.zcore.cfcMetaDataCache;
 		}else{
-			cacheStruct=application.sitestruct[request.zos.globals.id].cfcMetaDataCache;
+			cacheStruct=siteStruct.cfcMetaDataCache;
 		}
-		if(request.zos.isTestServer or structkeyexists(cacheStruct, comPath) EQ false){
+		if((request.zos.isTestServer and not request.zos.enableSiteTemplateCache) or structkeyexists(cacheStruct, comPath) EQ false){
 			commeta=GetMetaData(rs.routingCurrentComponentObject);
 			cacheStruct[comPath]=commeta;
 		}else{
 			commeta=cacheStruct[comPath];
 		}
-		if(request.zos.isTestServer or structkeyexists(cacheStruct,comPath&":"&arguments.method) EQ false){
+		if((request.zos.isTestServer and not request.zos.enableSiteTemplateCache) or structkeyexists(cacheStruct,comPath&":"&arguments.method) EQ false){
 			tempcommeta=GetMetaData(rs.routingCurrentComponentObject[arguments.method]);
 			cacheStruct[comPath&":"&arguments.method]=tempcommeta;
 		}else{
@@ -398,8 +393,8 @@
 					property=comMeta.properties[i];
 					if(right(property.name, 5) EQ "Model" and find(".model.", property.type) NEQ false){
 						if(left(property.type, 5) EQ "root."){
-							if(not request.zos.istestserver and structkeyexists(application.siteStruct[request.zos.globals.id].modelDataCache.modelComponentCache, property.type)){
-								ds[property.name]=application.siteStruct[request.zos.globals.id].modelDataCache.modelComponentCache[property.type];
+							if(not request.zos.istestserver and structkeyexists(siteStruct.modelDataCache.modelComponentCache, property.type)){
+								ds[property.name]=siteStruct.modelDataCache.modelComponentCache[property.type];
 							}else{
 								ds[property.name]=application.zcore.functions.zcreateobject("component", replace(property.type, "root.", request.zRootCFCPath), true);
 							}
@@ -1563,16 +1558,16 @@
 					application.zcore.functions.zabort();
 				}else{
 					
-					if(request.zos.themePath NEQ ""){
-						newScriptName=request.zos.themePath&"index.cfc";
-						request.zos.scriptNameTemplate=request.zos.themePath&removechars(newScriptName,1,1);
-						form.__zcoreinternalroutingpath="";
-						if(structkeyexists(form,'method') EQ false){
-							form.method="index";
-						}
-					}else{
+					// if(request.zos.themePath NEQ ""){
+					// 	newScriptName=request.zos.themePath&"index.cfc";
+					// 	request.zos.scriptNameTemplate=request.zos.themePath&removechars(newScriptName,1,1);
+					// 	form.__zcoreinternalroutingpath="";
+					// 	if(structkeyexists(form,'method') EQ false){
+					// 		form.method="index";
+					// 	}
+					// }else{
 						isDir=true;
-					}
+					// }
 				}
 				if(zdebugurl) writeoutput('got in4:'&entireURL&"<br />");
 			}else if(ext EQ "cfm" or ext EQ "cfc"){

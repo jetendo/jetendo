@@ -57,136 +57,155 @@ if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "Ah
 	<cfargument name="message" type="string" required="yes">
 	<cfscript>
 	time=gettickcount('nano');
-	arrayappend(request.zos.arrRunTime, {time:time, name:arguments.message});
+	zos=request.zos;
+	arrayappend(zos.arrRunTime, {time:time, name:arguments.message});
 	if(not structkeyexists(request, 'lastTickCount')){
-		request.lastTickCount=request.zos.startTime;
+		request.lastTickCount=zos.startTime;
 	}
 	timeOut=((time-request.lastTickCount)/1000000000)&' seconds';
 	request.lastTickCount=time;
 	</cfscript>
 	<cfif not structkeyexists(application, 'zcoreIsInit')>
-		<cffile action="append" file="#request.zos.zcoreRootCachePath#jetendo-start-log.txt" output="#dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "h:mm tt")# | #timeOut# | #arguments.message#" addNewLine="true" charset="utf-8" mode="770">
+		<cffile action="append" file="#zos.zcoreRootCachePath#jetendo-start-log.txt" output="#dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "h:mm tt")# | #timeOut# | #arguments.message#" addNewLine="true" charset="utf-8" mode="770">
 	</cfif>
 </cffunction> 
 
 <cffunction name="setupGlobals" localmode="modern" output="no">
 	<cfargument name="tempCGI" type="struct" required="yes">
-	<cfscript>
+	<cfscript> 
+	if(structkeyexists(server, "zcore_configCacheStruct") and not structkeyexists(form, 'zreset')){
+		ts=server["zcore_configCacheStruct"];
+		ds=server["zcore_configCacheDatasourceStruct"];
+	}else{
+		if(not structkeyexists(server, "zcore_configcache") or not structkeyexists(form, 'zreset')){
+			server["zcore_configcache"]={
+				defaultConfigCom:createobject("component", "zcorerootmapping.config-default"),
+				configCom:createobject("component", "zcorerootmapping.config")
+			}
+		}
+		configCache=server["zcore_configcache"];
+		defaultStruct=configCache.defaultConfigCom.getConfig(arguments.tempCGI, true);
+		structdelete(defaultStruct.zos, 'serverStruct');
 
-	configCom=createobject("component", "zcorerootmapping.config-default");
-	defaultStruct=configCom.getConfig(arguments.tempCGI, true);
-	structdelete(defaultStruct.zos, 'serverStruct');
+		ts=configCache.configCom.getConfig(arguments.tempCGI, false);
+		if(not structkeyexists(ts.zos, 'enableSiteOptionGroupCache')){
+	        ts.zos.enableSiteOptionGroupCache=true;
+	    }
+		if(structkeyexists(ts, 'timezone')){
+			this.timezone=ts.timezone;
+		}
+		if(structkeyexists(ts, 'locale')){
+			this.locale=ts.locale;
+		}
+		structappend(ts, defaultStruct, false);
+		structappend(ts.zos, defaultStruct.zos, false);
+	    ts.zos.databaseVersion=1; // increment manually when database structure changes
 
-	configCom=createobject("component", "zcorerootmapping.config");
-	ts=configCom.getConfig(arguments.tempCGI, false);
-	if(not structkeyexists(ts.zos, 'enableSiteOptionGroupCache')){
-        ts.zos.enableSiteOptionGroupCache=true;
-    }
-    if(not structkeyexists(ts.zos,'enableSiteTemplateCache')){
-    	ts.zos.enableSiteTemplateCache=true;
-    }
-	if(structkeyexists(ts, 'timezone')){
-		this.timezone=ts.timezone;
+		ts.zos.isServer=false;
+		ts.zos.isDeveloper=false;
+
+		// mail server options are here only for legacy sites at the moment
+		ts.zmailserver="mailserver";
+		ts.zmailserverusername="username";
+		ts.zmailserverpassword="password";
+		ts.httpCompressionType="deflate;q=0.5";
+		ts.inMemberArea=false;
+		 
+		ts.zos.httpCompressionType="deflate;q=0.5";  
+		ts.zos.disableSystemCaching=false;
+		ts.zos.trackingspider=false;
+		ts.zos.arrScriptInclude=arraynew(1);
+		ts.zos.jsIncludeUniqueStruct={};
+		ts.zos.cssIncludeUniqueStruct={};
+		ts.zos.arrScriptIncludeLevel=arraynew(1);
+		ts.zos.newMetaTags=false;
+		ts.zos.arrQueryQueue=arraynew(1);
+		ts.zos.queryQueueThreadIndex=1;
+		ts.zos.includePackageStruct=structnew();
+		ts.zos.arrJSIncludes=arraynew(1);
+		ts.zos.arrCSSIncludes=arraynew(1);
+		ts.zos.tempObj=structnew();
+		ts.zos.tableFieldsCache=structnew();
+		ts.zos.arrQueryLog=arraynew(1);
+		ts.zos.tempRequestCom=structnew();
+		ts.zos.importMlsStruct={};
+		ts.zos.widgetInstanceOffset=0;
+		ts.zos.widgetInstanceLoadCache={};
+		// new ones
+		ts.zos.deployResetEnabled=false;
+		ts.zos.debuggerEnabled = true;
+		ts.zos.autoresponderImagePath="/zupload/autoresponder/";
+		ts.zos.memberImagePath="/zupload/member/";
+		
+		ds=configCache.configCom.getDatasources(ts.zos.isTestServer);
+		server["zcore_configCacheDatasourceStruct"]=ds;
+		server["zcore_configCacheStruct"]=ts;
 	}
-	if(structkeyexists(ts, 'locale')){
-		this.locale=ts.locale;
-	}
-	structappend(ts, defaultStruct, false);
-	structappend(ts.zos, defaultStruct.zos, false);
-    ts.zos.databaseVersion=1; // increment manually when database structure changes
-
-	ts.zos.isServer=false;
-	ts.zos.isDeveloper=false;
-
-	// mail server options are here only for legacy sites at the moment
-	ts.zmailserver="mailserver";
-	ts.zmailserverusername="username";
-	ts.zmailserverpassword="password";
-	ts.httpCompressionType="deflate;q=0.5";
-	ts.inMemberArea=false;
-	
-	ts.searchServerCollectionName="entiresite_verity";
-	ts.zos.disableSystemCaching=false;
-	ts.zos.trackingspider=false;
-	ts.zos.arrScriptInclude=arraynew(1);
-	ts.zos.jsIncludeUniqueStruct={};
-	ts.zos.cssIncludeUniqueStruct={};
-	ts.zos.arrScriptIncludeLevel=arraynew(1);
-	ts.zos.newMetaTags=false;
-	ts.zos.arrQueryQueue=arraynew(1);
-	ts.zos.queryQueueThreadIndex=1;
-	ts.zos.includePackageStruct=structnew();
-	ts.zos.arrJSIncludes=arraynew(1);
-	ts.zos.arrCSSIncludes=arraynew(1);
-	ts.zos.tempObj=structnew();
-	ts.zos.tableFieldsCache=structnew();
-	ts.zos.arrQueryLog=arraynew(1);
-	ts.zos.tempRequestCom=structnew();
-	ts.zos.importMlsStruct={};
-	ts.zos.widgetInstanceOffset=0;
-	ts.zos.widgetInstanceLoadCache={};
-	
-	structappend(request, duplicate(ts));
-    structappend(this, configCom.getDatasources(arguments.tempCGI));
+	structappend(request, duplicate(ts, true));
+    if(not structkeyexists(request.zos,'enableSiteTemplateCache') or structkeyexists(form, 'luceedebug') or cgi.http_user_agent CONTAINS "ApacheBench"){
+    	request.zos.enableSiteTemplateCache=true;
+    }
+    structappend(this, ds);
 	</cfscript>
 </cffunction>
 	 
 <cfscript>
-local.tempCGI=duplicate(CGI);
+tempCGI=duplicate(CGI);
 requestData=getHTTPRequestData();
 
 if(structkeyexists(requestData.headers,'x-forwarded-for')){
 	if(requestData.headers["x-forwarded-for"] CONTAINS ","){
-		local.tempCGI.remote_addr=listGetAt(requestData.headers["x-forwarded-for"], 1, ",");
+		tempCGI.remote_addr=listGetAt(requestData.headers["x-forwarded-for"], 1, ",");
 	}else{
-		local.tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
+		tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
 	}
 }else if(structkeyexists(requestData.headers,'remote_addr')){
-	local.tempCGI.remote_addr=requestData.headers.remote_addr;
+	tempCGI.remote_addr=requestData.headers.remote_addr;
 }
 if(structkeyexists(requestData.headers,'http_host')){
-	local.tempCGI.http_host=requestData.headers.http_host;
+	tempCGI.http_host=requestData.headers.http_host;
 } 
-setupGlobals(local.tempCGI);
+setupGlobals(tempCGI);
 request.zos.requestLogEntry=requestLogEntry;
 request.zos.requestData=requestData;
-request.zos.cgi=local.tempCGI;
+request.zos.cgi=tempCGI;
 </cfscript>
 
 <cffunction name="onCoreRequest" localmode="modern" returntype="any" output="yes">
     <cfscript>
     var local=structnew();
-	request.zos.arrRunTime=arraynew(1);
-    request.zos.startTime=gettickcount('nano');
-	request.zos.isDeveloperIpMatch=false;
-    if(structkeyexists(request.zos.adminIpStruct,request.zos.cgi.remote_addr)){
-		request.zos.isDeveloperIpMatch=true;
-        if(request.zos.adminIpStruct[request.zos.cgi.remote_addr] EQ false){
-			if(request.zos.isTestServer){
-				request.zos.isDeveloper=true;
-				request.zos.isDeveloperIpMatch=true;
+    zos=request.zos;
+	zos.arrRunTime=arraynew(1);
+    zos.startTime=gettickcount('nano');
+	zos.isDeveloperIpMatch=false;
+    if(structkeyexists(zos.adminIpStruct,zos.cgi.remote_addr)){
+		zos.isDeveloperIpMatch=true;
+        if(zos.adminIpStruct[zos.cgi.remote_addr] EQ false){
+			if(zos.isTestServer){
+				zos.isDeveloper=true;
+				zos.isDeveloperIpMatch=true;
 			}else{
 				if(structkeyexists(cookie, 'zdeveloper') and cookie.zdeveloper EQ 1){
-					request.zos.isDeveloper=true;
+					zos.isDeveloper=true;
 				}else{
-					request.zos.isDeveloper=false;  
+					zos.isDeveloper=false;  
 				}
 			}
-			request.zos.isServer=false;
+			zos.isServer=false;
         }else{
-            request.zos.isDeveloper=false;
-            request.zos.isServer=true;	
+            zos.isDeveloper=false;
+            zos.isServer=true;	
         } 
     }
-	if(request.zos.isTestServer and request.zos.cgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and request.zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){
-        request.zos.isDeveloper=true;
-        request.zos.isServer=false;	
+	if(zos.isTestServer and zos.cgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){
+        zos.isDeveloper=true;
+        zos.isServer=false;	
 	} 
     structappend(form, url, false);
     if(structkeyexists(form,'zreset') EQ false){
-        request.zos.zreset="";
+        zos.zreset="";
     }else{
-        request.zos.zreset=form.zreset;
+        zos.zreset=form.zreset;
     }
     </cfscript>
     <cfif structkeyexists(form,'zab')>
@@ -195,75 +214,75 @@ request.zos.cgi=local.tempCGI;
     </cfif>
     <!--- 
     disable abusive blocks until i'm sure it doesn't block important users.
-    <cfif isDefined('server.#request.zos.zcoremapping#.abusiveBlockedIpStruct') and structkeyexists(server[request.zos.zcoremapping].abusiveBlockedIpStruct, request.zos.cgi.remote_addr)>
+    <cfif isDefined('server.#zos.zcoremapping#.abusiveBlockedIpStruct') and structkeyexists(server[zos.zcoremapping].abusiveBlockedIpStruct, zos.cgi.remote_addr)>
         <cfheader statuscode="403" statustext="Forbidden"><cfabort>
     </cfif> --->
             
     <cfscript>
-    zreset=request.zos.zreset;
+    zreset=zos.zreset;
     </cfscript>
-    <cfif structkeyexists(server, "zcore_"&request.zos.installPath&"_functionscache") EQ false or zreset EQ "code" or zreset EQ 'app' or zreset EQ 'all'>
-		<cfinclude template="/#request.zos.zcoremapping#/init/onCFCRequest.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onApplicationStart.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onRequestStart.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onRequestEnd.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onError.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onMissingTemplate.cfm">
-		<cfinclude template="/#request.zos.zcoremapping#/init/onRequest.cfm">
+    <cfif structkeyexists(server, "zcore_"&zos.installPath&"_functionscache") EQ false or zreset EQ "code" or zreset EQ 'app' or zreset EQ 'all'>
+		<cfinclude template="/#zos.zcoremapping#/init/onCFCRequest.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onApplicationStart.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onRequestStart.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onRequestEnd.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onError.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onMissingTemplate.cfm">
+		<cfinclude template="/#zos.zcoremapping#/init/onRequest.cfm">
 		<cfscript>
-		local.tfunctions=structnew();
-		local.tfunctions.loadDbCFC=loadDbCFC;
-		local.tfunctions.loadSite=loadSite;
-		local.tfunctions.getSiteId=getSiteId;
-		local.tfunctions.setSiteRequestGlobals=setSiteRequestGlobals;
-		local.tFunctions.showInitStatus=showInitStatus;
-		local.tFunctions.OnInternalApplicationStart=OnInternalApplicationStart;
-		local.tFunctions.loadNextSite=loadNextSite;
-		local.tFunctions.OnApplicationListingStart=OnApplicationListingStart;
-		local.tFunctions.loadNextListingSite=loadNextListingSite; 
-		local.tFunctions.checkDomainRedirect=checkDomainRedirect; 
-		local.tFunctions.onApplicationStart=onApplicationStart;
-		local.tFunctions.onApplicationStart=onApplicationStart;
-		local.tFunctions.onExecuteCacheReset=onExecuteCacheReset;
-		local.tFunctions.onRequestStart=onRequestStart;
-		local.tFunctions.onRequestStart1=onRequestStart1;
-		local.tFunctions.onRequestStart12=onRequestStart12;
-		local.tFunctions.onRequestStart2=onRequestStart2;
-		local.tFunctions.onRequestStart3=onRequestStart3;
-		local.tFunctions.onRequestStart4=onRequestStart4;
-		local.tFunctions.unloadSitesByAccessDate=unloadSitesByAccessDate;
-		local.tFunctions.onCodeDeploy=onCodeDeploy;
-		local.tFunctions.onRequestEnd=onRequestEnd;
-		local.tFunctions.onRequest=onRequest;
-		local.tFunctions.onError=onError;
-		local.tFunctions._zTempEscape=_zTempEscape;
-		local.tFunctions._zTempErrorHandlerDump=_zTempErrorHandlerDump;
-		local.tFunctions._handleError=_handleError;
+		tfunctions=structnew();
+		tfunctions.loadDbCFC=loadDbCFC;
+		tfunctions.loadSite=loadSite;
+		tfunctions.getSiteId=getSiteId;
+		tfunctions.setSiteRequestGlobals=setSiteRequestGlobals;
+		tFunctions.showInitStatus=showInitStatus;
+		tFunctions.OnInternalApplicationStart=OnInternalApplicationStart;
+		tFunctions.loadNextSite=loadNextSite;
+		tFunctions.OnApplicationListingStart=OnApplicationListingStart;
+		tFunctions.loadNextListingSite=loadNextListingSite; 
+		tFunctions.checkDomainRedirect=checkDomainRedirect; 
+		tFunctions.onApplicationStart=onApplicationStart;
+		tFunctions.onApplicationStart=onApplicationStart;
+		tFunctions.onExecuteCacheReset=onExecuteCacheReset;
+		tFunctions.onRequestStart=onRequestStart; 
+		tFunctions.onRequestStart1=onRequestStart1; 
+		tFunctions.onRequestStart12=onRequestStart12;
+		tFunctions.onRequestStart2=onRequestStart2;
+		tFunctions.onRequestStart3=onRequestStart3;
+		tFunctions.onRequestStart4=onRequestStart4;
+		tFunctions.unloadSitesByAccessDate=unloadSitesByAccessDate;
+		tFunctions.onCodeDeploy=onCodeDeploy;
+		tFunctions.onRequestEnd=onRequestEnd;
+		tFunctions.onRequest=onRequest;
+		tFunctions.onError=onError;
+		tFunctions._zTempEscape=_zTempEscape;
+		tFunctions._zTempErrorHandlerDump=_zTempErrorHandlerDump;
+		tFunctions._handleError=_handleError;
 		
-		local.tFunctions.onMissingTemplate=onMissingTemplate;
+		tFunctions.onMissingTemplate=onMissingTemplate;
 		
-		local.tFunctions.setupAppGlobals1=setupAppGlobals1;
-		local.tFunctions.setupAppGlobals2=setupAppGlobals2;
-		server["zcore_"&request.zos.installPath&"_functionscache"]=local.tFunctions; 
+		tFunctions.setupAppGlobals1=setupAppGlobals1;
+		tFunctions.setupAppGlobals2=setupAppGlobals2;
+		server["zcore_"&zos.installPath&"_functionscache"]=tFunctions; 
 		</cfscript>
 			
     <cfelse>
         <cfscript>
-        structappend(variables,server["zcore_"&request.zos.installPath&"_functionscache"],true); 
+        structappend(variables,server["zcore_"&zos.installPath&"_functionscache"],true); 
         </cfscript>
     </cfif>
     <cfscript>
-    if(structkeyexists(form,request.zos.urlRoutingParameter)){
-        form[request.zos.urlRoutingParameter]=listtoarray(form[request.zos.urlRoutingParameter],",", true);
-        form[request.zos.urlRoutingParameter]=form[request.zos.urlRoutingParameter][1];
-		request.zos.originalURL=form[request.zos.urlRoutingParameter];
+    if(structkeyexists(form,zos.urlRoutingParameter)){
+        form[zos.urlRoutingParameter]=listtoarray(form[zos.urlRoutingParameter],",", true);
+        form[zos.urlRoutingParameter]=form[zos.urlRoutingParameter][1];
+		zos.originalURL=form[zos.urlRoutingParameter];
         this.SessionManagement = false;
-		/*if(request.zos.isTestServer){
+		/*if(zos.isTestServer){
         }else{
         	this.SessionManagement = true;
         }*/
     }else{
-        this.Name = request.zos.cgi.http_host;
+        this.Name = zos.cgi.http_host;
         this.ApplicationTimeout = CreateTimeSpan( 30, 0, 0, 0 );
         this.SessionTimeout=CreateTimeSpan(0,0,30,0); 
         this.SessionManagement = true;
@@ -272,38 +291,38 @@ request.zos.cgi=local.tempCGI;
     
        
         
-    if(request.zos.cgi.http_host CONTAINS ":"){
-        request.zos.cgi.http_host=listgetat(request.zos.cgi.http_host,1,":");
+    if(zos.cgi.http_host CONTAINS ":"){
+        zos.cgi.http_host=listgetat(zos.cgi.http_host,1,":");
     }
-    request.zos.currentHostName=request.zos.cgi.http_host;
+    zos.currentHostName=zos.cgi.http_host;
     if(structkeyexists(cgi, 'server_port_secure') and cgi.server_port_secure EQ 1){
-        request.zos.cgi.server_port="443";
+        zos.cgi.server_port="443";
     }
-    local.zOSTempVar=replace(replacenocase(replacenocase(request.zos.cgi.http_host,'www.',''),'.'&request.zos.testDomain,''),".","_","all");
-    Request.zOSHomeDir = request.zos.sitesPath&local.zOSTempVar&"/";
-    Request.zOSPrivateHomeDir = request.zos.sitesWritablePath&local.zOSTempVar&"/";
+    zOSTempVar=replace(replacenocase(replacenocase(zos.cgi.http_host,'www.',''),'.'&zos.testDomain,''),".","_","all");
+    Request.zOSHomeDir = zos.sitesPath&zOSTempVar&"/";
+    Request.zOSPrivateHomeDir = zos.sitesWritablePath&zOSTempVar&"/";
     
     setEncoding("form","UTF-8");
     setEncoding("url","UTF-8");
 
-    request.zRootDomain=replace(replace(lcase(request.zOS.CGI.http_host),"www.",""),"."&request.zos.testDomain,"");
-    request.zCookieDomain=replace(lcase(request.zOS.CGI.http_host),"www.","");
+    request.zRootDomain=replace(replace(lcase(zos.CGI.http_host),"www.",""),"."&zos.testDomain,"");
+    request.zCookieDomain=replace(lcase(zos.CGI.http_host),"www.","");
     request.zRootPath="/"&replace(request.zRootDomain,".","_","all")&"/"; 
     request.zRootSecureCfcPath="jetendo-sites-writable."&replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";
     request.zRootCfcPath=replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&"."; 
     request.cgi_script_name=replacenocase(cgi.script_name,request.zRootPath,"/");  
-    for(local.i in form){
-        if(isSimpleValue(form[local.i])){
-            form[local.i]=trim(form[local.i]);  
+    for(i in form){
+        if(isSimpleValue(form[i])){
+            form[i]=trim(form[i]);  
         }
     }
-    request.zos.lastTime=request.zos.startTime;
-    request.zOS.now=now();
-    Request.zOS.modes.time.begin = request.zos.startTime;
-    request.zOS.mysqlnow=DateFormat(request.zos.now,'yyyy-mm-dd')&' '&TimeFormat(request.zos.now,'HH:mm:ss');
+    zos.lastTime=zos.startTime;
+    zos.now=now();
+    zos.modes.time.begin = zos.startTime;
+    zos.mysqlnow=DateFormat(zos.now,'yyyy-mm-dd')&' '&TimeFormat(zos.now,'HH:mm:ss');
      
-	request.zos.queryCount=0;
-	request.zos.queryRowCount=0; 
+	zos.queryCount=0;
+	zos.queryRowCount=0; 
     variables.getApplicationConfig(); 
     </cfscript>
 </cffunction>
@@ -312,17 +331,18 @@ request.zos.cgi=local.tempCGI;
     <cfscript>
     var ts=structnew();
     var local=structnew();
-    if(structkeyexists(server, "zcore_"&request.zos.installPath&"_cache") and request.zos.zreset NEQ 'app' and request.zos.zreset NEQ 'all'){
-        structappend(this, server["zcore_"&request.zos.installPath&"_cache"], true);
+    zos=request.zos;
+    if(structkeyexists(server, "zcore_"&zos.installPath&"_cache") and zos.zreset NEQ 'app' and zos.zreset NEQ 'all'){
+        structappend(this, server["zcore_"&zos.installPath&"_cache"], true);
         return;
     }
 
     // lookup the app name.
-    ts.Name = "zcore_"&request.zos.installPath;
+    ts.Name = "zcore_"&zos.installPath;
     ts.ApplicationTimeout = CreateTimeSpan( 30, 0, 0, 0 );
-    ts.SessionTimeout=CreateTimeSpan(0,0,request.zos.sessionExpirationInMinutes,0); 
+    ts.SessionTimeout=CreateTimeSpan(0,0,zos.sessionExpirationInMinutes,0); 
 	
-    server["zcore_"&request.zos.installPath&"_cache"]=ts;
+    server["zcore_"&zos.installPath&"_cache"]=ts;
     structappend(this, ts, true);
 	
     </cfscript>

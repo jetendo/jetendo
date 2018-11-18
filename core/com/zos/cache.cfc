@@ -95,6 +95,7 @@ urlHash=hash(url,'SHA');
 
 <cffunction name="init" localmode="modern" access="public" returntype="any">
 	<cfscript>
+    return;
 	var local=structnew();
 	var db=request.zos.queryObject;
 	var db2=0;
@@ -175,6 +176,7 @@ this allows you to delete cache on both sides. --->
 
 <cffunction name="enableCache" localmode="modern" output="no" access="public" returntype="any">
     <cfscript>
+    return;
 	if(application.zcore.user.checkGroupAccess("user") EQ false and request.zos.cacheData.preventEnablingCache EQ false){
 		request.zos.cacheData.enabled=true;
 	}
@@ -184,6 +186,7 @@ this allows you to delete cache on both sides. --->
 <cffunction name="setTemplateContent" localmode="modern" output="no" access="public" returntype="any">
 	<cfargument name="content" type="string" required="yes">
     <cfscript>
+    return;
 	if(request.zos.cacheData.enabled EQ false){
 		if(request.zos.cacheData.preventEnablingCache EQ false){
 			this.disableCache();
@@ -201,6 +204,7 @@ this allows you to delete cache on both sides. --->
 	<cfargument name="templateToken" type="string" required="yes">
     <cfargument name="content" type="string" required="yes">
     <cfscript>
+    return;
 	var local=structnew();
 	var hashValue="";
 	var arrEcho=[];
@@ -246,6 +250,7 @@ this allows you to delete cache on both sides. --->
 
 <cffunction name="disableCache" localmode="modern" output="no" access="public" returntype="any">
     <cfscript>
+    return;
 	//application.zcore.functions.zcookie({name:'znocache',value:'1',expires='now'});
 	//this was live previously: application.zcore.functions.zheader("zdisableproxycache","1");
 	request.zos.cacheData.preventEnablingCache=true;
@@ -266,6 +271,7 @@ this allows you to delete cache on both sides. --->
 	<cfargument name="table" type="string" required="true">
 	<cfargument name="table_id" type="string" required="true">
     <cfscript>
+    return;
 	var key=arguments.database&"."&arguments.table&"."&arguments.table_id;
 	if(request.zos.cacheData.enabled EQ false) return;
 	application.zcore.cacheData.databaseURLCache[key][request.zos.cacheData.url]=true;
@@ -276,6 +282,7 @@ this allows you to delete cache on both sides. --->
 <cffunction name="setExpiration" localmode="modern" output="no" access="public" returntype="any">
 	<cfargument name="seconds" type="numeric" required="yes" hint="Number of seconds until cache expires.">
     <cfscript>
+    return;
 	request.zos.cacheData.expiration=min(request.zos.cacheData.expiration, arguments.seconds);
 	</cfscript>
 	<!--- // number of second until cache expires.  Used for http max-age header.  If not used, browser will use if-modified-since to determine if cache is valid.
@@ -285,6 +292,7 @@ this allows you to delete cache on both sides. --->
 
 <cffunction name="storeJsonCache" localmode="modern" output="yes" access="public" returntype="any">
 	<cfscript>
+    return;
 	var hashValue=0;
 	if(request.zos.cacheData.enabled EQ false){
 		return;
@@ -311,6 +319,7 @@ this allows you to delete cache on both sides. --->
 
 <cffunction name="storeCache" localmode="modern" output="yes" access="public" returntype="any">
 	<cfscript>
+    return;
 	if(structkeyexists(request.zos, 'cacheData') EQ false or request.zos.cacheData.enabled EQ false){
 		return;
 	}else{
@@ -339,6 +348,7 @@ this allows you to delete cache on both sides. --->
 <cffunction name="getLinkCachePath" localmode="modern" access="public">
 	<cfargument name="link" type="string" required="yes">
 	<cfscript>
+    return;
 	hashValue=hash(arguments.link);
 	hashPath=lcase(right(hashValue, 1)&"/"&mid(hashValue, len(hashValue)-2,2)&"/"&hashValue);
 	return hashPath;
