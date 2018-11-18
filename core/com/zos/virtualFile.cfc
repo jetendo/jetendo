@@ -85,9 +85,13 @@ virtualFileCom.init(ts);
 	if(ss.storageMethod EQ "localFilesystem"){
 		if(ss.publicRootAbsolutePath EQ ""){ 
 			throw("ss.publicRootAbsolutePath must be defined and exist: Current value: ""#ss.publicRootAbsolutePath#"".");
-		}else if(not directoryexists(ss.publicRootAbsolutePath)){
-			application.zcore.functions.zCreateDirectory(ss.publicRootAbsolutePath);
+		// prevent io on every request.
+		}else if(not structkeyexists(application, 'virtualFileDirectoryCreated')){
+			if(not directoryexists(ss.publicRootAbsolutePath)){
+				application.zcore.functions.zCreateDirectory(ss.publicRootAbsolutePath);
+			}
 		}
+		application.virtualFileDirectoryCreated=true;
 		if(ss.publicRootRelativePath EQ ""){
 			throw("ss.publicRootRelativePath must be defined and exist: Current value: ""#ss.publicRootRelativePath#"".");
 		}

@@ -2844,21 +2844,30 @@ zCreateMemoryTable(ts);
 				if(notNumberField){
 					arrayAppend(arrF2, qFields.field);
 			    	//arrayappend(arrF22,'max(length(`'&qFields.field&'`)) as `'&qFields.field&'`');
+			    	defaultValue="";
 			    	if(qFields.type EQ "date"){
-			    		defaultValue="0000-00-00";
+			    		defaultValue="DEFAULT '0000-00-00'";
 			    	}else if(qFields.type EQ "datetime"){
-			    		defaultValue="0000-00-00 00:00:00";
+			    		defaultValue="DEFAULT '0000-00-00 00:00:00'";
 			    	}else if(qFields.type EQ "time"){
-			    		defaultValue="00:00:00";
-			    	}else{
-			    		defaultValue=qFields.default;
+			    		defaultValue="DEFAULT '00:00:00'";
+			    	}else if(qFields.default NEQ ""){
+			    		if(left(qFields.default, 8) NEQ "DEFAULT "){
+				    		defaultValue="DEFAULT '"&qFields.default&"'";
+				    	}else{
+				    		defaultValue=qFields.default;
+				    	}
 			    	}
-					arrayappend(arrCreate,' `#qFields.field#` #qFields.type# DEFAULT ''#defaultValue#'' #theNull# #collation2# ');
-					//arrayappend(arrAlter,' change `#qFields.field#` #qFields.type#  DEFAULT ''#defaultValue#'' #theNull# #collation2# '); // `#qFields.field#` varchar (1z_count)
+					arrayappend(arrCreate,' `#qFields.field#` #qFields.type# #defaultValue# #theNull# #collation2# ');
+					//arrayappend(arrAlter,' change `#qFields.field#` #qFields.type#  #defaultValue# #theNull# #collation2# '); // `#qFields.field#` varchar (1z_count)
 				}else{
 					defaultValue="";
 					if(qFields.default NEQ ""){
-						defaultValue="DEFAULT '"&qFields.default&"'";
+						if(left(qFields.default, 8) NEQ "DEFAULT "){
+				    		defaultValue="DEFAULT '"&qFields.default&"'";
+				    	}else{
+							defaultValue=qFields.default;
+						}
 					}
 					arrayappend(arrCreate,'`#qFields.field#` #qFields.type# #defaultValue# #theNull# #qFields.extra# ');
 

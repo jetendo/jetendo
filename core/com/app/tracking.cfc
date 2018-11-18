@@ -578,7 +578,7 @@ USER WAS PERMANENTLY BLOCKED.');
 		// disable slow script detection for ab.exe benchmarking
 		this.detectSlowScript();
 		try{
-		application.zcore.arrRequestcache[request.zos.trackingRequestCacheIndex].runtime=(gettickcount('nano')-request.zos.startTime)/1000000000;
+			application.zcore.arrRequestcache[request.zos.trackingRequestCacheIndex].runtime=(gettickcount('nano')-request.zos.startTime)/1000000000;
 		}catch(Any excpt){	
 				
 		}

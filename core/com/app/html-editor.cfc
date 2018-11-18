@@ -229,7 +229,7 @@ zArrDeferredFunctions.push(function(){
 	    'insertdatetime media nonbreaking save directionality', // contextmenu table
 	    'emoticons paste textcolor colorpicker textpattern' // imagetools
 	  ], // template 
-	  fontsize_formats: '12px 14px 18px 24px 36px 42px 48px',
+	  fontsize_formats: '8pt 10pt 12pt 14pt 16pt 18pt 21pt 24pt 30pt 36pt 48pt',
 	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	zsawidget fullscreen',
 	  toolbar2: 'print preview media | forecolor backcolor emoticons',
 	  image_advtab: true, 

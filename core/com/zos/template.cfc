@@ -21,14 +21,13 @@
 </cffunction>
 
 <cffunction name="init2" localmode="modern" output="no" returntype="any">
-	<cfscript>
-	var local=structnew();
+	<cfscript> 
 	if(CGI.SERVER_PORT EQ '443'){
-		local.dateDisabled=true;
+		dateDisabled=true;
 	}else{
-		local.dateDisabled=false;
+		dateDisabled=false;
 	}
-	local.kitHTML="";
+	kitHTML="";
 
 	</cfscript>
 
@@ -36,17 +35,17 @@
 		<cfif structkeyexists(request.zos.globals,'fontscomurl') and request.zos.globals.fontscomurl NEQ "">
 			<cfset request.zos.zFontsComIncluded=true>
 			<cfscript>
-			local.kitURL=replace(replace(request.zos.globals.fontscomurl, "http://","//"),"https://","//");
+			kitURL=replace(replace(request.zos.globals.fontscomurl, "http://","//"),"https://","//");
 			</cfscript>
-			<cfsavecontent variable="local.kitHTML">
-				<cfif right(local.kitURL, 3) EQ ".js">
+			<cfsavecontent variable="kitHTML">
+				<cfif right(kitURL, 3) EQ ".js">
 					<cfif structkeyexists(request.zos,'zFontsComIncluded') EQ false>
-						<script type="text/javascript">/* <![CDATA[ */ (function() {var tk = document.createElement('script');tk.src = "#jsstringformat(local.kitURL)#";tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs !== 4) return;};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
+						<script type="text/javascript">/* <![CDATA[ */ (function() {var tk = document.createElement('script');tk.src = "#jsstringformat(kitURL)#";tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs !== 4) return;};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
 					<cfelse>
-						<script type="text/javascript" src="#local.kitURL#"></script>
+						<script type="text/javascript" src="#kitURL#"></script>
 					</cfif>
 				<cfelse>
-					<link rel="stylesheet" type="text/css" href="#local.kitURL#" />
+					<link rel="stylesheet" type="text/css" href="#kitURL#" />
 				</cfif>
 			</cfsavecontent>
 			<cfscript>
@@ -59,15 +58,15 @@
 		<cfif structkeyexists(request.zos.globals,'typekiturl') and request.zos.globals.typekiturl NEQ "">
 			<cfscript>
 			request.zos.zTypeKitIncluded=true;
-			local.arrT=listtoarray(request.zos.globals.typekiturl, "/" );
-			local.kitId=local.arrT[arraylen(local.arrT)];
-			local.kitId=mid(local.kitId,1,len(local.kitId)-3);
+			arrT=listtoarray(request.zos.globals.typekiturl, "/" );
+			kitId=arrT[arraylen(arrT)];
+			kitId=mid(kitId,1,len(kitId)-3);
 			</cfscript>
-			<cfsavecontent variable="local.kitHTML">
+			<cfsavecontent variable="kitHTML">
 				<cfif structkeyexists(request.zos,'zTypeKitIncluded') EQ false>
-					<script type="text/javascript">/* <![CDATA[ */ TypekitConfig = {kitId: '<cfscript>writeoutput(local.kitId);</cfscript>'};(function() {var tk = document.createElement('script');tk.src = '//use.typekit.com/' + TypekitConfig.kitId + '.js';tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs != 'complete' && rs != 'loaded') return;try { Typekit.load(TypekitConfig); } catch (e) {}};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
+					<script type="text/javascript">/* <![CDATA[ */ TypekitConfig = {kitId: '<cfscript>writeoutput(kitId);</cfscript>'};(function() {var tk = document.createElement('script');tk.src = '//use.typekit.com/' + TypekitConfig.kitId + '.js';tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs != 'complete' && rs != 'loaded') return;try { Typekit.load(TypekitConfig); } catch (e) {}};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
 				<cfelse>
-					<script type="text/javascript" src="//use.typekit.com/<cfscript>writeoutput(local.kitId);</cfscript>.js"></script>
+					<script type="text/javascript" src="//use.typekit.com/<cfscript>writeoutput(kitId);</cfscript>.js"></script>
 					<script type="text/javascript">/* <![CDATA[ */ try { Typekit.load(); } catch (e) {} /* ]]> */</script>
 				</cfif>
 			</cfsavecontent>
@@ -77,29 +76,29 @@
 			</cfif>
 		</cfif>
 	<cfscript> 
-	local.ts44="";
+	ts44="";
 	if(application.zcore.user.checkGroupAccess("user")){
 		// if site_id doesn't match, the parent or global token was used
 		if(structkeyexists(cookie, 'ztoken')){
-			local.ts44&="var zTokenLogin=true;"; 
+			ts44&="var zTokenLogin=true;"; 
 		}else{
-			local.ts44&="var zTokenLogin=false;";
+			ts44&="var zTokenLogin=false;";
 		}
 	}else{
-		local.ts44&="var zTokenLogin=false;";
+		ts44&="var zTokenLogin=false;";
 	}
 	if(request.zos.istestserver){
-		local.ts44&="var zThisIsTestServer=true;";
+		ts44&="var zThisIsTestServer=true;";
 	}else{
-		local.ts44&="var zThisIsTestServer=false;";
+		ts44&="var zThisIsTestServer=false;";
 	}
 	if(request.zos.isdeveloper){
-		local.ts44&="var zThisIsDeveloper=true;";
+		ts44&="var zThisIsDeveloper=true;";
 	}else{
-		local.ts44&="var zThisIsDeveloper=false;";
+		ts44&="var zThisIsDeveloper=false;";
 	}
 	if(application.zcore.functions.zso(request.zos.globals, "disableUpgradeMessage", true, 0) EQ 1){
-		local.ts44&="var zDisableUpgradeMessage=true;"; 
+		ts44&="var zDisableUpgradeMessage=true;"; 
 	}
 
 	ss=application.siteStruct[request.zos.globals.id];
@@ -108,7 +107,7 @@
 		iconMeta=getIconMetaTags();
 	}
 	request.zos.templateData={
-		dateDisabled:local.dateDisabled,
+		dateDisabled:dateDisabled,
 		notemplate:false,
 		primary:true,
 		uniqueTagStruct:{
@@ -124,7 +123,7 @@
 		templateForced:false,
 		contentStruct : StructNew(),
 		tagContent : StructNew(),
-		prependTagContent : { meta:{ arrContent:[variables.javascriptHeadCode(local.ts44)&local.kitHTML&iconMeta]} },
+		prependTagContent : { meta:{ arrContent:[variables.javascriptHeadCode(ts44)&kitHTML&iconMeta]} },
 		appendTagContent : { } ,
 		tagAssoc : StructNew(),
 		tags : ArrayNew(1),
@@ -533,19 +532,18 @@
 </cffunction>
 
 <cffunction name="deleteAllTemplates" localmode="modern" returntype="any" output="no">
-<cfscript>
-var local=structnew();
+<cfscript> 
 var db=request.zos.queryObject;
 db.sql="select * FROM #request.zos.queryObject.table("site", request.zos.zcoreDatasource)# site 
 where site_active = #db.param('1')# and 
 site_deleted = #db.param(0)#";
-local.qSite=db.execute("qSite");
-for(local.row in local.qSite){
-	local.sphd=application.zcore.functions.zGetDomainWritableInstallPath(local.row.site_short_domain);
-	local.qDir=directoryList("#local.sphd#_cache/scripts/templates/", false, 'query');
-	for(local.row2 in local.qDir){
-		if(local.row2.name NEQ "." and local.row2.name NEQ ".." and local.row2.type EQ "file" and right(local.row2.name, 4) EQ ".cfc"){
-			filedelete("#local.sphd#_cache/scripts/templates/#local.row2.name#");
+qSite=db.execute("qSite");
+for(row in qSite){
+	sphd=application.zcore.functions.zGetDomainWritableInstallPath(row.site_short_domain);
+	qDir=directoryList("#sphd#_cache/scripts/templates/", false, 'query');
+	for(row2 in qDir){
+		if(row2.name NEQ "." and row2.name NEQ ".." and row2.type EQ "file" and right(row2.name, 4) EQ ".cfc"){
+			filedelete("#sphd#_cache/scripts/templates/#row2.name#");
 		}
 	}
 }
@@ -557,13 +555,7 @@ for(local.row in local.qSite){
     <cfargument name="c" type="string" required="yes">
     <cfargument name="cpath" type="string" required="yes">
     <cfargument name="forceNew" type="boolean" required="no" default="#false#">
-    <cfscript>
-    var c=0;
-	var i=0;
-	var t9=0;
-	var t7=0;
-	var e=0;
-	var e2=0;
+    <cfscript> 
     if(structkeyexists(application.zcore,'templateCFCCache') EQ false){
         application.zcore.templateCFCCache=structnew();
     }
@@ -575,14 +567,14 @@ for(local.row in local.qSite){
 		try{
 			t9=createobject("component",arguments.cpath);
 		}catch(Any e){
-			savecontent variable="local.e2"{
+			savecontent variable="e2"{
 				if(application.zcore.functions.zso(e, 'message') CONTAINS '-railo-dump' or application.zcore.functions.zso(e, 'message') CONTAINS '-lucee-dump'){
 					echo(e.message);
 				}
 				writedump(e);	
 			}
 			if(not fileexists(expandpath(replace(arguments.cpath, ".","/","all")&".cfc"))){
-				application.zcore.functions.z404("createTemplateObject() c:"&arguments.c&"<br />cpath:"&arguments.cpath&"<br />forceNew:"&arguments.forceNew&"<br />request.zos.cgi.SCRIPT_NAME:"&request.zos.cgi.SCRIPT_NAME&"<br />catch error:"&local.e2);
+				application.zcore.functions.z404("createTemplateObject() c:"&arguments.c&"<br />cpath:"&arguments.cpath&"<br />forceNew:"&arguments.forceNew&"<br />request.zos.cgi.SCRIPT_NAME:"&request.zos.cgi.SCRIPT_NAME&"<br />catch error:"&e2);
 			}else{
 				rethrow;
 			}
@@ -602,8 +594,7 @@ for(local.row in local.qSite){
 </cffunction>
 
 <cffunction name="build" localmode="modern" returntype="string" output="no"><cfscript>
-	var i=1;
-	var local=structnew();
+	var i=1; 
 	var finalString = "";
 	var arrFinal=ArrayNew(1);
 	var currentTag = "";
@@ -712,7 +703,7 @@ for(local.row in local.qSite){
 			application.zcore.debugger.init();
 		} 
 	}
-	local.retrytemplatecompile=false;
+	retrytemplatecompile=false;
 	if(runCFCTemplate){
 		if(structkeyexists(tempIO, 'init')){
 			tempIO.init();
@@ -808,8 +799,7 @@ for(local.row in local.qSite){
 
 <cffunction name="getFinalTagContent" localmode="modern" returntype="any" output="false">
 	<cfargument name="name" required="yes" type="string">
-	<cfscript>
-	var local=structnew();
+	<cfscript> 
 	var prepend="";
 	var append="";
 	var append2="";
@@ -821,34 +811,34 @@ for(local.row in local.qSite){
 	}
 	if(arguments.name EQ "scripts" and not structkeyexists(request.zos, 'disableOldZLoader')){
 		if(arraylen(request.zos.arrScriptInclude) neq 0){
-			local.lastScript=request.zos.arrScriptInclude[arraylen(request.zos.arrScriptInclude)];
-			local.jqueryIncludeLength=len("/z/javascript/jquery/jquery-1.10.2.min.js");
-			local.scriptIncludeStruct={"1":{},"2":{},"3":{},"4":{},"5":{},"6":{},"7":{},"8":{}, "9":{}, "10":{}, "11":{}, "12":{}, "13":{}, "14":{}, "15":{}, "16":{}, "17":{}, "18":{}, "19":{}, "20":{} };
-			for(local.i=1;local.i LTE arraylen(request.zos.arrScriptInclude);local.i++){
-				if(left(request.zos.arrScriptInclude[local.i], local.jqueryIncludeLength) NEQ "/z/javascript/jquery/jquery-1.10.2.min.js"){
-					if(left(request.zos.arrScriptInclude[local.i], 1) EQ '/' and left(request.zos.arrScriptInclude[local.i], 2) NEQ "//"){
+			lastScript=request.zos.arrScriptInclude[arraylen(request.zos.arrScriptInclude)];
+			jqueryIncludeLength=len("/z/javascript/jquery/jquery-1.10.2.min.js");
+			scriptIncludeStruct={"1":{},"2":{},"3":{},"4":{},"5":{},"6":{},"7":{},"8":{}, "9":{}, "10":{}, "11":{}, "12":{}, "13":{}, "14":{}, "15":{}, "16":{}, "17":{}, "18":{}, "19":{}, "20":{} };
+			for(i=1;i LTE arraylen(request.zos.arrScriptInclude);i++){
+				if(left(request.zos.arrScriptInclude[i], jqueryIncludeLength) NEQ "/z/javascript/jquery/jquery-1.10.2.min.js"){
+					if(left(request.zos.arrScriptInclude[i], 1) EQ '/' and left(request.zos.arrScriptInclude[i], 2) NEQ "//"){
 						// required for domains that use http proxy connection
-						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.currentHostName&request.zos.arrScriptInclude[local.i]]=true;
+						scriptIncludeStruct[request.zos.arrScriptIncludeLevel[i]][request.zos.currentHostName&request.zos.arrScriptInclude[i]]=true;
 					}else{
-						local.scriptIncludeStruct[request.zos.arrScriptIncludeLevel[local.i]][request.zos.arrScriptInclude[local.i]]=true;
+						scriptIncludeStruct[request.zos.arrScriptIncludeLevel[i]][request.zos.arrScriptInclude[i]]=true;
 					}
 				}
 			}
-			local.scriptCount=structcount(local.scriptIncludeStruct); 
-			local.arrBeginFunction=[];
-			local.arrEndFunction=[];
-			for(local.i=1;local.i LTE 20;local.i++){
-				if(structcount(local.scriptIncludeStruct[local.i])){
-					arrayappend(local.arrBeginFunction, ', function(a){ var t=new zLoader();t.loadScripts(["'&structkeylist(local.scriptIncludeStruct[local.i],'", "')&'"]');
-					arrayappend(local.arrEndFunction, ");}");
+			scriptCount=structcount(scriptIncludeStruct); 
+			arrBeginFunction=[];
+			arrEndFunction=[];
+			for(i=1;i LTE 20;i++){
+				if(structcount(scriptIncludeStruct[i])){
+					arrayappend(arrBeginFunction, ', function(a){ var t=new zLoader();t.loadScripts(["'&structkeylist(scriptIncludeStruct[i],'", "')&'"]');
+					arrayappend(arrEndFunction, ");}");
 				}
 			}
-			local.scriptOutput=arraytolist(local.arrBeginFunction, "")&arrayToList(local.arrEndFunction,"");
+			scriptOutput=arraytolist(arrBeginFunction, "")&arrayToList(arrEndFunction,"");
 
 			append2='<script type="text/javascript">/* <![CDATA[ */  
 				setTimeout(function(){
 					var tempM=new zLoader();tempM.loadScripts(["#request.zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
-					'&local.scriptOutput&'
+					'&scriptOutput&'
 					);
 				},0); /* ]]> */</script>'; 
 		}
@@ -856,18 +846,18 @@ for(local.row in local.qSite){
 	
 	if(structkeyexists(request.zos.templateData.tagContent, arguments.name) and structkeyexists(request.zos.templateData.tagContent[arguments.name],'content')){
 		if(arguments.name EQ "title" or arguments.name EQ "pagetitle"){
-			local.finalContent=prepend&replacenocase(htmleditformat(request.zos.templateData.tagContent[arguments.name].content),"&amp;amp;","&amp;","ALL")&append&append2;
+			return prepend&replacenocase(htmleditformat(request.zos.templateData.tagContent[arguments.name].content),"&amp;amp;","&amp;","ALL")&append&append2;
 		}else{
-			local.finalContent=prepend&request.zos.templateData.tagContent[arguments.name].content&append&append2;
+			return prepend&request.zos.templateData.tagContent[arguments.name].content&append&append2;
 		}
 	}else{
-		local.finalContent=prepend&append&append2;
+		return prepend&append&append2;
 	}
-	return trim(local.finalContent);
+	//return trim(finalContent);
 	/*if(request.zos.whiteSpaceEnabled){
-		return trim(local.finalContent);
+		return trim(finalContent);
 	}else{
-		return trim(rereplace(local.finalContent, "\n(\s+)",chr(10),"all"));
+		return trim(rereplace(finalContent, "\n(\s+)",chr(10),"all"));
 	}*/
 	</cfscript>
 </cffunction>

@@ -1088,8 +1088,10 @@ function installThemeToSite($a){
 	return "1";
 }
 function getNewerCoreMVCFiles(){
-	$p=get_cfg_var("jetendo_root_path");
-	$cmd="/usr/bin/find ".$p."core/mvc -type f -newer ".$p."core/mvc-cache.cfc";
+	$p=get_cfg_var("jetendo_root_path"); 
+	$pp=get_cfg_var("jetendo_root_private_path"); 
+	
+	$cmd="/usr/bin/find ".$p."core/mvc -type f -newer ".$pp."_cache/mvc-cache.cfc";
 	return `$cmd`;
 }
 function getScryptEncrypt($a){

@@ -4,11 +4,9 @@
 <cfscript> 
 request.zos.currentURLISAListingPage=true;
 var temp=structnew();  
-application.zcore.template.setTag("title","Property Detail");
-//request.zos.page.setDefaultAction('list');
+application.zcore.template.setTag("title","Property Detail"); 
 ts=StructNew();
-ts.list='';
-//request.zos.page.setActions(ts);
+ts.list=''; 
 if(structkeyexists(form, 'searchId') EQ false and isDefined('request.zsession.tempVars.zListingSearchId')){
 	form.searchId=request.zsession.tempVars.zListingSearchId;
 }

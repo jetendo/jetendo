@@ -14,7 +14,7 @@
 	var e2=0;
 
     if(structkeyexists(application, 'codeDeployModeEnabled')){
-        lock type="exclusive" name="#request.zos.installPath#-#arguments.cpath#" timeout="10" throwOnTimeout="yes"{
+        //lock type="exclusive" name="#request.zos.installPath#-#arguments.cpath#" timeout="10" throwOnTimeout="yes"{
             try{
                 t7=createobject("component",arguments.cpath);
             }catch(Any e){
@@ -27,7 +27,7 @@
                     rethrow;
                 }
             }
-        }
+        //}
     }else{
         if(structkeyexists(application.zcore,'allcomponentcache') EQ false){
             application.zcore.allcomponentcache=structnew();
