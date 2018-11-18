@@ -200,6 +200,7 @@
 <cffunction name="crawl" localmode="modern" access="remote">
 	<cfscript>
 	init();
+		echo("disabled");abort;
 	setting requesttimeout="5000";
 	request.ignoreSlowScript=true;
 
@@ -216,7 +217,7 @@
 		link=arrCache[i];
 		//echo(link&"<br>"); 
 
-		linkCachePath=application.zcore.cache.getLinkCachePath(link);
+		// linkCachePath=application.zcore.cache.getLinkCachePath(link);
 		destinationPath=cachePath&getDirectoryFromPath(linkCachePath);
 		application.zcore.functions.zCreateDirectory(destinationPath);
 		try{

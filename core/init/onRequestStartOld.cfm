@@ -717,7 +717,7 @@
 		request.zos.themePath="";
 		request.zos.themeCFCPath="";
 	}
-	application.zcore.cache.init();
+	// application.zcore.cache.init();
 	
 	if(structkeyexists(application.zcore,'resetApplicationTrackerStruct') and structkeyexists(application.zcore.resetApplicationTrackerStruct, variables.site_id)){
 		structdelete(application.zcore.resetApplicationTrackerStruct, variables.site_id);

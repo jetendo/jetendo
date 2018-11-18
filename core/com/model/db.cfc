@@ -115,7 +115,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	var queryStruct={
 		lazy=arguments.configStruct.lazy,
 		datasource=arguments.configStruct.datasource
-	};
+	}; 
 	var cfquery=0;
 	var cfcatch=0;
 	var db=structnew();

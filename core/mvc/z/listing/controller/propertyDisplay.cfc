@@ -151,6 +151,7 @@ propertyDisplayCom.init(ts);
 		idx.mls_id=listgetat(row.listing_id,1,"-");
  
 		request.lastPhotoId=row.listing_id;
+		photo1="";
 		if(this.optionStruct.getDetails){
 			structappend(idx, request.zos.listingMlsComObjects[idx.mls_id].getDetails(row,currentrow), true);
 		}else{
