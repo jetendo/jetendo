@@ -1106,7 +1106,8 @@
 		var id=application.zcore.appComName[arguments.app_name];
 		if(structkeyexists(application.sitestruct[request.zos.globals.id].app.appCache, id)){
 			// return application.sitestruct[request.zos.globals.id].app.appCache[id].cfcCached;
-
+ 			
+ 			// if i attempt to reuse these objects on multiple requests, it is able to cause horrible performance or crash.  too much contention probably.
 			if(not structkeyexists(request.zos.tempRequestCom, id)){
 				request.zos.tempRequestCom[id]=application.zcore.functions.zcreateobject("component", application.zcore.appComPathStruct[id].cfcPath);
 			}
