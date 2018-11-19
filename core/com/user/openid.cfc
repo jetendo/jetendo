@@ -58,7 +58,7 @@ WHERE site_id <>'16'
     	<cfargument name="user_id" type="string" required="yes">
     	<cfargument name="site_id" type="string" required="yes">
 		<cfscript>
-		var local=structnew();
+		
 		var theOutput="";
 		var ts=structnew();
 		var i=0;
@@ -116,7 +116,7 @@ WHERE site_id <>'16'
 	<cffunction name="displayProviderLinks" localmode="modern" access="public" returntype="string">
     	<cfargument name="returnToURL" type="string" required="yes">
 		<cfscript>
-		var local=structnew();
+		
 		var theOutput="";
 		var ts=structnew();
 		var i=0;
@@ -232,7 +232,7 @@ WHERE site_id <>'16'
     
     <cffunction name="verifyOpenIdLogin" localmode="modern" access="public" output="no" returntype="any">
     	<cfscript>
-		var local=structnew();
+		
 		var theOutput="";
 		var inputStruct=0;
 		var rs=0;
@@ -517,7 +517,7 @@ WHERE site_id <>'16'
     	<cfargument name="user_id" type="string" required="yes">
     	<cfargument name="site_id" type="string" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		var theOutput="";
 		var db=request.zos.queryObject;
 		var cfhttp="";
@@ -617,7 +617,7 @@ WHERE site_id <>'16'
     	<cfargument name="user_id" type="string" required="yes">
     	<cfargument name="site_id" type="string" required="yes">
         <cfscript>
-		var local=structnew();
+		
 		var selectStruct=0;
 		var db=request.zos.queryObject;
 		</cfscript>

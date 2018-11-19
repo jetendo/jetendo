@@ -12,7 +12,7 @@
  
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
-	var local=structnew();
+	
 	this.init();
 	</cfscript>
 	<cfif application.zcore.app.siteHasApp("content")>
@@ -169,7 +169,7 @@
 
 <cffunction name="thankyou" localmode="modern" access="remote">
 	<cfscript>
-	var local=structnew();
+	
 	this.init();
 	</cfscript>
 	<cfif application.zcore.app.siteHasApp("content")>

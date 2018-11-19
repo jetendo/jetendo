@@ -100,7 +100,7 @@
 	<cfargument name="s" type="string" required="yes">
 	<cfargument name="debug" type="boolean" required="no" default="#false#">
 	<cfscript>
-    var local=structnew();
+    
 	local.d=application.zcore.functions.zreadfile(arguments.s);
     // extract image urls
     local.arrR=rematchnocase("url([^\(]*)\(([^\)]*)\)",local.d);
@@ -179,7 +179,7 @@
 	<cfargument name="filepath" type="string" required="yes">
     <cfargument name="mimetype" type="string" required="no" default="">
     <cfscript>
-	var local=structnew();
+	
 	if(arguments.mimetype EQ ""){
 		// autodetect from file extension
 		local.ext=application.zcore.functions.zGetFileExt(arguments.filepath);
@@ -567,7 +567,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	<cfargument name="datasource" required="false" type="string" default="#request.zos.globals.datasource#">
 	<cfargument name="fieldNameOverride" required="false" type="string" default="">
 	<cfscript>
-	var local=structnew();
+	
 	var qImage = "";
 	var fileNewName = "";
 	var db=request.zos.queryObject;
@@ -640,7 +640,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 	<cfargument name="site_id" required="no" type="string" default="#request.zos.globals.id#">
 	<cfargument name="deleteOriginal" required="no" type="boolean" default="#true#">
 	<cfscript>
-	var local=structnew();
+	
 	var arrFiles = ArrayNew(1);
 	var qimage="";
 	var i=0;
@@ -1481,7 +1481,7 @@ application.zcore.functions.zSplitFile(path,kblength,line);
 	<cfargument name="destDir" type="string" required="yes">
 	<cfargument name="overwrite" type="boolean" required="no" default="#true#">
 	<cfscript>
-	var local=structnew();
+	
 	var qdir=0;
 	arguments.sourceDir=replace(trim(arguments.sourceDir),"\","/","all");
 	arguments.destDir=replace(trim(arguments.destDir),"\","/","all");

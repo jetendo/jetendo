@@ -5,7 +5,7 @@
 	var qa=0;
 	var db=request.zos.queryObject;
 	var pagenav=0;
-	var local=structnew();
+	
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
 	</cfscript> 
 	<cfsavecontent variable="db.sql">
@@ -50,7 +50,7 @@
 	<cfargument name="sharedStruct" type="struct" required="no" default="#structnew()#">
 	<cfscript>
 	var qI=0;
-	var local=structnew();
+	
 	var ts=0;
 	var i=0;
 	var configCom=0;
@@ -523,7 +523,7 @@
 	var rCom=0;
 	var db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
-	var local=structnew();
+	
 	db.sql="SELECT * FROM #db.table("app", request.zos.zcoreDatasource)# app,
 	#db.table("app_x_site", request.zos.zcoreDatasource)# app_x_site 
 	WHERE app.app_id=app_x_site.app_id and 
@@ -572,7 +572,7 @@
 	var pagenav=0;
 	var qapps=0;
 	var selectstruct=0;
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var ___zr=0;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
@@ -669,7 +669,7 @@
 	var selectstruct=0;
 	var db=request.zos.queryObject;
 	var ___zr=0;
-	var local=structnew();
+	
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8.2.2"); 
@@ -817,7 +817,7 @@
 	var qa=0;
 	var qdata=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var pagenav=0;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8.2.2.1"); 
@@ -1013,7 +1013,7 @@
 	var selectStruct=0;
 	var qsites=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8.2"); 
@@ -1105,6 +1105,8 @@
 	if(structkeyexists(application.zcore.appComName, arguments.app_name)){
 		var id=application.zcore.appComName[arguments.app_name];
 		if(structkeyexists(application.sitestruct[request.zos.globals.id].app.appCache, id)){
+			// return application.sitestruct[request.zos.globals.id].app.appCache[id].cfcCached;
+
 			if(not structkeyexists(request.zos.tempRequestCom, id)){
 				request.zos.tempRequestCom[id]=application.zcore.functions.zcreateobject("component", application.zcore.appComPathStruct[id].cfcPath);
 			}
@@ -1144,8 +1146,11 @@
 <cffunction name="getAppData" localmode="modern"  returntype="struct" output="no">
 	<cfargument name="app_name" type="string" required="yes">
 	<cfscript>
-	if(structkeyexists(application.zcore.appComName,arguments.app_name) and structkeyexists(application.sitestruct[request.zos.globals.id].app.appCache, application.zcore.appComName[arguments.app_name])){
-		return application.sitestruct[request.zos.globals.id].app.appCache[application.zcore.appComName[arguments.app_name]];
+	// structkeyexists(application.zcore.appComName,arguments.app_name) and 
+	appCache=application.sitestruct[request.zos.globals.id].app.appCache;
+	name=application.zcore.appComName[arguments.app_name];
+	if(structkeyexists(appCache, name)){
+		return appCache[name];
 	}else{
 		return structnew();
 	}
@@ -1214,7 +1219,7 @@
 <cffunction name="appConfirmDelete" localmode="modern" access="remote" roles="serveradministrator"  returntype="void" hint="display confirmation dialog before deleting application.">
 	<cfscript>
 	var qa=0;
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
@@ -1257,7 +1262,7 @@
 	<cfscript>
 	var qa=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
 	db.sql="SELECT *, count(app_x_site_id) count 
@@ -1328,7 +1333,7 @@
 
 <cffunction name="appForm" localmode="modern" access="remote" roles="serveradministrator"  returntype="void" hint="displays a form to add/edit applications.">
 	<cfscript>
-	var local=structnew();
+	
 	var qdata=0;
 	var pagenav=0;
 	var db=request.zos.queryObject;
@@ -1387,18 +1392,9 @@
 
 <cffunction name="appUpdateCache" localmode="modern" output="yes" access="public" returntype="struct" hint="publish the application cache">
 	<cfargument name="site_id" type="string" required="no" default="0">
-	<cfscript>
-	var qdata=0;
-	var qa=0;
-	var sitestruct=0;
-	var namestruct=0;
-	var g=0;
-	var arrout=0;
-	var db=request.zos.queryObject;
-	var n=0;
-	var output=0;
-	var configCom=0;
-	var local=structnew();
+	<cfscript> 
+	var db=request.zos.queryObject; 
+	
 	var ts=StructNew();
 	db.sql="SELECT app.app_id
 	FROM #db.table("site", request.zos.zcoreDatasource)# site, 
@@ -1421,7 +1417,7 @@
 		local.tempPath=application.zcore.functions.zGetDomainWritableInstallPath(application.zcore.functions.zvar("shortDomain", arguments.site_id));
 		application.zcore.functions.zcreatedirectory(local.tempPath&"_cache");
 		application.zcore.functions.zcreatedirectory(local.tempPath&"_cache/scripts");
-		objectsave(siteStruct, local.tempPath&'_cache/scripts/appsettings.bin');
+		objectsave(siteStruct, local.tempPath&'_cache/scripts/appcache.bin');
 		application.zcore.functions.zClearCFMLTemplateCache();
 		return siteStruct;
 	}
@@ -1442,7 +1438,7 @@
 		local.tempPath=application.zcore.functions.zGetDomainWritableInstallPath(application.zcore.functions.zvar("shortDomain", arguments.site_id));
 		application.zcore.functions.zcreatedirectory(local.tempPath&'_cache');
 		application.zcore.functions.zcreatedirectory(local.tempPath&'_cache/scripts');
-		objectsave(siteStruct, local.tempPath&'_cache/scripts/appsettings.bin');
+		objectsave(siteStruct, local.tempPath&'_cache/scripts/appcache.bin');
 		application.zcore.functions.zClearCFMLTemplateCache();
 	}
 	application.zcore.resetApplicationTrackerStruct[arguments.site_id]=true;
@@ -1457,7 +1453,7 @@
 	<cfargument name="count" type="numeric" required="no" default="#1#">
 	<cfscript>
 	var countIndex=0;
-	var local=structnew();
+	
 	var qcheck=0;
 	var siteList="";
 	var lists="";
@@ -1518,7 +1514,7 @@ if(rCom.isOK() EQ false){
 	var qCheck="";
 	var ts=StructNew();
 	var rs=structnew();
-	var local=structnew();
+	
 	var fail=0;
 	var n=0;
 	var db=request.zos.queryObject;
@@ -1592,7 +1588,7 @@ if(rCom.isOK() EQ false){
 	<cfargument name="excludeList" type="string" required="no" default="">
 	<cfscript>
 	var qD="";
-	var local=structnew();
+	
 	var i=0;
 	var out="";
 	var arrid=0;
@@ -1720,9 +1716,13 @@ if(rCom.isOK() EQ false){
 	var n=0;
 	var e=0;
 	var loaded=false;
-	var fileAbsPath=request.zos.globals.privatehomedir&'_cache/scripts/appsettings.bin';
-		ts=StructNew();			
-		if(fileexists(fileAbsPath)){
+	var fileOldAbsPath=request.zos.globals.privatehomedir&'_cache/scripts/appsettings.bin';
+	var fileAbsPath=request.zos.globals.privatehomedir&'_cache/scripts/appcache.bin';
+	ts=StructNew();			
+	if(fileexists(fileOldAbsPath)){
+		application.zcore.functions.zDeleteFile(fileOldAbsPath);
+	}
+	if(fileexists(fileAbsPath)){
 		try{
 			ts=objectload(fileAbsPath);
 			loaded=true;

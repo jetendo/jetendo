@@ -677,7 +677,7 @@
 
 <cffunction name="deployCore" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
-	var local=structnew();
+	
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	form.deploy_server_group =application.zcore.functions.zso(form, 'deploy_server_group');

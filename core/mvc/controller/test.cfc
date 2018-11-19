@@ -21,7 +21,7 @@
 	<cffunction name="edit" localmode="modern" access="remote" output="yes" returntype="any">
     	<cfargument name="id" type="string" required="no" default="0">
 		<cfscript>
-		var local=structnew();
+		
 		// arguments._zExtraArguments is also available if more fields were in the url then there were arguments for.
 		
 		</cfscript>

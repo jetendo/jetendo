@@ -54,7 +54,7 @@ eCom.search(ts);
 <cffunction name="search" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="no" default="#structnew()#">
 	<cfscript>
-	var local=structnew();
+	
 	var rs=StructNew();
 	var ns=StructNew();
 	var db=request.zos.queryObject;
@@ -117,7 +117,7 @@ eCom.delete(zemail_id);
 <cffunction name="delete" localmode="modern" returntype="any" output="yes">
 	<cfargument name="id" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var newFileName=0;
 	var qd=0;
@@ -198,7 +198,7 @@ eCom.getEmail(query,queryRowNumber,original);
 	<cfargument name="original" type="boolean" required="no" default="#false#">
 	<cfscript>
 	var arrA='';
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var i='';
 	var ext='';
@@ -256,7 +256,7 @@ eCom.pop(ts);
 <cffunction localmode="modern" name = "pop" returnType = "struct" output="yes" displayName = "pop" >
 	<cfargument name="ss" type="struct" required="no" default="#structnew()#">
 	<cfscript>		
-	var local=structnew();
+	
 	var checkList='';
 	var tmpPath='';
 	var messageCount='';
@@ -695,7 +695,7 @@ eCom.getFolder("inbox");
 	<cfargument name="folderName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var ts=StructNew();
 	var qf="";
 	if(structkeyexists(application.sitestruct[request.zos.globals.id],'email') EQ false){
@@ -739,7 +739,7 @@ eCom.setAccount(zemail_account_id, site_id);
 	<cfargument name="zemail_account_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	var local=structnew();
+	
 	var qAccount="";
 	var db=request.zos.queryObject;
 	var qsite=0;

@@ -25,7 +25,7 @@
     	<cfargument name="resource" type="string" required="yes">
         <cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		super.initImport(arguments.resource, arguments.sharedStruct);
 		arguments.sharedStruct.lookupStruct.cityRenameStruct=structnew();
 		</cfscript>
@@ -523,7 +523,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
         <!--- <cfargument name="sysid" type="numeric" required="no" default="0"> --->
     	<cfscript>
 		var qId=0;
-		var local=structnew();
+		
 		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		local.fNameTemp1=arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));

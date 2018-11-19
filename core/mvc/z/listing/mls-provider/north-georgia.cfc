@@ -28,7 +28,7 @@
         <cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		var qz=0;
 		var i=0;
 		if(arguments.resource NEQ "property"){
@@ -92,7 +92,7 @@
 		var dataCom=0;
 		var cityName=0;
 		var rs=0;
-		var local=structnew();
+		
 		for(i=1;i LTE arraylen(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns);i++){
 			if(arguments.ss.arrData[i] EQ '0'){
 				arguments.ss.arrData[i]="";	

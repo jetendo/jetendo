@@ -226,7 +226,7 @@
 <cffunction name="zStructToCacheString" localmode="modern" access="public" output="no" returntype="string">
     <cfargument name="struct" type="struct" required="yes">
     <cfscript>
-    var local=structnew();
+    
     local.arrKey=structkeyarray(arguments.struct);
     arraysort(local.arrKey, "text", "asc");
     local.cacheString=arraynew(1);

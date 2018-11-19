@@ -40,7 +40,7 @@ I should improve this by adding the ability to create all of the CFCs (without d
 		<cfargument name="argumentsCollection" type="struct" required="no" default="#structnew()#" hint="Each key is a class name with a nested structure with named parameters for the init function.">
 		<cfargument name="uniqueInjectStruct" type="struct" required="no" default="#structnew()#" hint="we don't want to repeat injection if the constructor already has done it!">
         <cfscript>
-		var local=structnew();
+		
 		//local.actemp=structcount(arguments.uniqueInjectStruct);
 		if(structkeyexists(variables.serverScope.metadataCacheStruct, arguments.class)){
 			local.md=variables.serverScope.metadataCacheStruct[arguments.class];
@@ -127,7 +127,7 @@ I should improve this by adding the ability to create all of the CFCs (without d
 		<cfargument name="argumentsCollection" type="struct" required="no" default="#structnew()#" hint="Each key is a class name with a nested structure with named parameters for the init function.">
 		<cfargument name="uniqueInjectStruct" type="struct" required="no" default="#structnew()#" hint="we don't want to repeat injection if the constructor already has done it!">
         <cfscript>
-		var local=structnew();
+		
 		local.md=arguments.baseComponentMetaData;
 		local.newObject=arguments.baseComponentObject;
 		//writedump(local.md.extends.properties);

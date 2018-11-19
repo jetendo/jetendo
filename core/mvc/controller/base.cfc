@@ -3,7 +3,7 @@
     	<cfargument name="modelName" type="string" required="yes">
     	<cfargument name="mvcPath" type="string" required="no" default="#request.zos.zcorerootmapping#.mvc">
     	<cfscript>
-		var local=structnew();
+		
 		local.path=arguments.mvcPath&".model."&arguments.modelName;
 		if(structkeyexists(application.sitestruct[request.zos.globals.id].modelDataCache.modelComponentCache, local.path)){
 			local.rs=duplicate(application.sitestruct[request.zos.globals.id].modelDataCache.modelComponentCache[local.path]);

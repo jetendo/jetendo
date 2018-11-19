@@ -25,7 +25,7 @@ qResult=zMLSGroupSearch(ts);
     <cfscript>
     var c2=0;
 		var db=request.zos.queryObject;
-    var local=structnew();
+    
 	var ts=0;
 	var rs=0;
 	var propertyDataCom=0;

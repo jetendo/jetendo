@@ -577,7 +577,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
     	<cfscript>
 		var qId=0;
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));

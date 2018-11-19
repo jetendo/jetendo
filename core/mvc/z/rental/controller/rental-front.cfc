@@ -1584,7 +1584,7 @@ if(rental_display_regular EQ 0){
 		var qProp=0;
 		var db=request.zos.queryObject;
 		var ts=structnew();
-		var local=structnew();
+		
 		var rs=0;
 		ts.email=false;
 		structappend(arguments.ss,ts,false);
@@ -1636,7 +1636,7 @@ if(rental_display_regular EQ 0){
 		var qProp=0;
 		var db=request.zos.queryObject;
 		var ts=0;
-		var local=structnew();
+		
 		var rs=0;
 		var rentalFrontCom=0;
 		this.includeRentalListHeader();

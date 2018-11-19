@@ -1,15 +1,15 @@
 <cfcomponent>
 <cffunction name="insert" localmode="modern" access="remote">
 	<cfscript>
-	local.soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
-	local.soCom.publicInsertGroup();
+	soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
+	soCom.publicInsertGroup();
 	</cfscript>
 </cffunction>
 
 <cffunction name="insertAndReturn" localmode="modern" access="remote">
 	<cfscript>
-	local.soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
-	rs=local.soCom.publicAjaxInsertGroup();
+	soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
+	rs=soCom.publicAjaxInsertGroup();
 	return rs;
 	</cfscript>
 </cffunction>
@@ -17,8 +17,8 @@
 
 <cffunction name="ajaxInsert" localmode="modern" access="remote">
 	<cfscript>
-	local.soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
-	rs=local.soCom.publicAjaxInsertGroup();
+	soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
+	rs=soCom.publicAjaxInsertGroup();
     if(not rs.success){
     	arrError=application.zcore.status.getErrors(rs.zsid);
     	rs.errorMessage=arrayToList(arrError, chr(10));
@@ -31,8 +31,8 @@
 <cffunction name="add" localmode="modern" access="remote">
 	<cfscript>
 	form.site_option_group_id=application.zcore.functions.zso(form, 'site_option_group_id', true);
-	local.soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
-	local.soCom.publicAddGroup();
+	soCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
+	soCom.publicAddGroup();
 	</cfscript>
 </cffunction>
 
@@ -85,30 +85,31 @@
 		application.zcore.template.setTag("title", setStruct.site_x_option_group_set_title);
 	}
 	if(structkeyexists(form, 'zURLName')){
-		local.encodedTitle=application.zcore.functions.zURLEncode(setStruct.site_x_option_group_set_title, '-');
+		encodedTitle=application.zcore.functions.zURLEncode(setStruct.site_x_option_group_set_title, '-');
 		if(setStruct.site_x_option_group_set_override_url NEQ ""){
 			if(compare(setStruct.site_x_option_group_set_override_url, request.zos.originalURL) NEQ 0){
 				application.zcore.functions.z301Redirect(setStruct.site_x_option_group_set_override_url);
 			}
 		}else{
-			if(compare(form.zURLName, local.encodedTitle) NEQ 0){
-				application.zcore.functions.z301Redirect("/#local.encodedTitle#-#request.zos.globals.optionGroupURLID#-#setStruct.site_x_option_group_set_id#.html");
+			if(compare(form.zURLName, encodedTitle) NEQ 0){
+				application.zcore.functions.z301Redirect("/#encodedTitle#-#request.zos.globals.optionGroupURLID#-#setStruct.site_x_option_group_set_id#.html");
 			}
 		}
 	}
 	if(setStruct.site_option_group_view_cfc_path NEQ ""){
 		if(left(setStruct.site_option_group_view_cfc_path, 5) EQ "root."){
-			local.cfcpath=replace(setStruct.site_option_group_view_cfc_path, 'root.',  request.zRootCfcPath);
+			cfcpath=replace(setStruct.site_option_group_view_cfc_path, 'root.',  request.zRootCfcPath);
 		}else{
-			local.cfcpath=setStruct.site_option_group_view_cfc_path;
+			cfcpath=setStruct.site_option_group_view_cfc_path;
 		}
-		if(application.zcore.functions.zso(form, 'zreset') EQ "site" or request.zos.isTestServer){
+		if(request.zos.zreset EQ "site" or not request.zos.enableSiteTemplateCache){
 			forceNew=true;
 		}else{
 			forceNew=false;
 		}
-		local.groupCom=application.zcore.functions.zcreateobject("component", local.cfcpath, forceNew); 
-		qSet = QueryNew( "" );
+		groupCom=application.zcore.functions.zcreateobject("component", cfcpath, forceNew); 
+		 qSet = QueryNew("");//QueryNew(  "site_x_option_group_set_id" , "numeric" , { site_x_option_group_set_id: [setStruct.site_x_option_group_set_id] } );
+		// QueryAddColumn(qSet, "site_x_option_group_set_id", "VARCHAR", [setStruct.site_x_option_group_set_id]);
 		for(i in setStruct){ 
 			if(isnull(setStruct[i])){
 		    	QueryAddColumn(qSet, i, "VARCHAR", [""]); 
@@ -119,7 +120,7 @@
 		if(not structkeyexists(setStruct, 'recordcount')){
 			QueryAddColumn(qSet, "recordcount", "VARCHAR", [1]);
 		}
-		local.groupCom[setStruct.site_option_group_view_cfc_method](qSet);
+		groupCom[setStruct.site_option_group_view_cfc_method](qSet);
 	}else{
 		application.zcore.functions.z404("site_option_group_view_cfc_path and site_option_group_view_cfc_method must be set when editing the site option group to allow rendering of the group.");
 	}

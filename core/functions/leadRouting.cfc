@@ -705,7 +705,7 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 <cffunction name="zFindLeadRouteForInquiryId" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var rs=structnew();
 	var i=0;
 	var c=0;
@@ -874,7 +874,7 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 <cffunction name="zProcessLeadRouteForInquiryId" localmode="modern" output="no" returntype="struct">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var rs=structnew();
 	var db=request.zos.queryObject;
 	var qI=arguments.ss.qInquiry;
@@ -1086,7 +1086,7 @@ rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 <cffunction name="zProcessLeadRoute" localmode="modern" output="yes" returntype="struct">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var rs=structnew();
 	var qUser=0;
 	var arrCCType=0;
@@ -1464,7 +1464,7 @@ application.zcore.functions.zLeadRecordLog(ts);
 
 <cffunction name="zLeadRouteReminderScheduledTask" localmode="modern" output="no" returntype="any">
     <cfscript>
-	var local=structnew();
+	
 	var c=0;
 	var qRoute=0;
 	var qI=0;
@@ -1729,7 +1729,7 @@ inquiries_updated_datetime --->
 <cffunction name="zGetLeadRoutesStruct" localmode="modern" output="no" returntype="any">
     <cfscript>
 	var db.sql="";
-	var local=structnew();
+	
 	var ts=structnew();
 	var rs=structnew();
 	var arrC=arraynew(1);

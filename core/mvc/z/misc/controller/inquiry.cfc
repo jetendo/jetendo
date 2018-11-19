@@ -3,7 +3,7 @@
 <cffunction name="submit" localmode="modern" access="remote">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	structappend(form, url, false);
 	
 	form.inquiries_spam=0;

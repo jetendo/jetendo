@@ -104,7 +104,7 @@
 		var primaryCount=0;
 		var selectedCityCount=0;
 		var primaryCityId=0;
-		var local=structnew();
+		
 		primaryCount=1;
 		primaryCityId=application.zcore.app.getAppData("listing").sharedStruct.mls_primary_city_id;
 		selectedCityCount=1;
@@ -210,7 +210,7 @@
 		<cfscript>
 		var db=request.zos.queryObject;
 		var sortType="numeric";
-		var local=structnew();
+		
 		db.sql="SELECT cast(group_concat(distinct #arguments.fieldName# SEPARATOR #db.param(',')#) AS CHAR) idlist 
 		from #db.table("listing_memory", request.zos.zcoreDatasource)# listing 
 		WHERE 
@@ -400,7 +400,7 @@
 		<cfargument name="valueList" type="string" required="yes">
 		<cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		db.sql="SELECT #arguments.fieldName# value 
 		from #db.table("listing_memory", request.zos.zcoreDatasource)# listing 
 		WHERE 
@@ -437,7 +437,7 @@
         <cfscript>
 		var db=request.zos.queryObject;
 		var rs=structnew();
-		var local=structnew();
+		
 		var searchFormHideCriteria={};
 		var nowyears="";
 		var i=0;
@@ -638,7 +638,7 @@
 	<cffunction name="queryStringSearchToStruct" localmode="modern" access="public" returntype="any" output="no">
     	<cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		local.i=0;
 		for(local.i in form){
 			if(structkeyexists(this.searchCriteria2, local.i) and isSimpleValue(form[local.i]) and form[local.i] NEQ "" and form[local.i] NEQ 0){
@@ -650,7 +650,7 @@
 	<cffunction name="formVarsToURL" localmode="modern" access="public" returntype="any" output="yes">
     	<cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		local.i=0;
 		local.arrURL=arraynew(1);
 		for(local.i in arguments.sharedStruct){
@@ -979,7 +979,7 @@
 <cffunction name="getSearchFormTemplate" localmode="modern" output="yes" returntype="any">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var ts=0;
 	var q2=0;
 	var myOwnStruct=0;

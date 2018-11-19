@@ -182,7 +182,7 @@ application.zcore.functions.zGetDataById("insert", request.zos.zcoreDatasource, 
 <cffunction name="zViewQueryError" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	if(arguments.ss.cfcatch.message CONTAINS "No value specified for parameter"){
 		writeoutput('<div style="border:1px solid ##CCC; background-color:##EFEFEF; padding:20px; color:##000; font-size:18px;"><p style="color:##000;font-weight:bold; font-size:24px; line-height:30px;">Jetendo CMS Database Error Help</p><p style="font-size:18px; line-height:24px; color:##000;">This error occurs when the data type for one of the parameters doesn''t match the cfsqltype value in the &lt;cfqueryparam&gt; tag.</p>');
 		local.pos=listgetat(arguments.ss.cfcatch.message,listlen(arguments.ss.cfcatch.message," ")," ");
@@ -884,7 +884,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 <cffunction name="zVerifySiteIdsInDBCFCQuery" localmode="modern" access="public" returntype="struct">
 	<cfargument name="parsedSQLStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var ps=arguments.parsedSQLStruct;
 	for(local.i2=1;local.i2 LTE arraylen(ps.arrLeftJoin);local.i2++){
 		hasSiteId=false;
@@ -959,7 +959,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 <cffunction name="zVerifyDeletedInDBCFCQuery" localmode="modern" access="public" returntype="struct">
 	<cfargument name="parsedSQLStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var ps=arguments.parsedSQLStruct; 
 	if(not structkeyexists(application, 'zcore')){
 		return ps;

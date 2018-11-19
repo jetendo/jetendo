@@ -379,7 +379,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 <cffunction name="getData" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="no" default="#structnew()#">
 	<cfscript>
-	var local=structnew(); 
+	 
 	var arr1=arraynew(1);
 	var arr2=arraynew(1);
 	var arr3=arraynew(1);

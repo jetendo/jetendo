@@ -60,7 +60,7 @@
 
 <cffunction name="beginTabMenu" localmode="modern" output="no" returntype="string">
 	<cfscript>
-	var local=structnew();
+	
 	variables.tabMenuOpen=true;
 	if(structkeyexists(variables,'arrTab') EQ false){
 		application.zcore.functions.zError("tab-menu.cfc error: You must call setTabs() first.");	

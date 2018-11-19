@@ -1,6 +1,6 @@
 <cffunction name="OnRequest" localmode="classic" access="public" returntype="void" output="true" hint="Fires after pre page processing is complete."><cfargument name="TargetPage" type="string" required="true" />
  	<cfscript>
-	var local=structnew();
+	
 	var template=0;
 	var e=0; 
 	var cfcatch=0;

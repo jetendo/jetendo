@@ -1557,16 +1557,16 @@ this.app_id=10;
 		structappend(request.zos.tempObj.blogInstance, application.sitestruct[request.zos.globals.id].app.appCache[this.app_id]);
 		request.zos.tempObj.blogInstance.configCom=this;
 	}
-	
+	optionStruct=application.zcore.app.getAppData("blog").optionStruct;
 	if(form[request.zos.urlRoutingParameter] EQ "/"){
-		if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_feedburner_url') NEQ ''){
-			curLink=application.zcore.app.getAppData("blog").optionStruct.blog_config_feedburner_url;
-		}else if(application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_url EQ '{default}'){
-			curLink=request.zos.currentHostName&"/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name,'-')#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-0.xml";
+		if(optionStruct.blog_config_feedburner_url NEQ ''){
+			curLink=optionStruct.blog_config_feedburner_url;
+		}else if(optionStruct.blog_config_recent_url EQ '{default}'){
+			curLink=request.zos.currentHostName&"/#application.zcore.functions.zURLEncode(optionStruct.blog_config_recent_name,'-')#-#optionStruct.blog_config_url_misc_id#-0.xml";
 		}else{
-			curLink=request.zos.currentHostName&application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_url;
+			curLink=request.zos.currentHostName&optionStruct.blog_config_recent_url;
 		}
-		application.zcore.template.prependTag("meta", '<link rel="alternate" type="application/rss+xml" title="'&htmleditformat(application.zcore.app.getAppData("blog").optionStruct.blog_config_title)&'" href="'&curLink&'" />');
+		application.zcore.template.prependTag("meta", '<link rel="alternate" type="application/rss+xml" title="'&htmleditformat(optionStruct.blog_config_title)&'" href="'&curLink&'" />');
 	}
 	</cfscript>
 </cffunction>
@@ -1852,6 +1852,8 @@ this.app_id=10;
 		}
 		structdelete(form, 'preview');
 	} 
+
+	optionStruct=application.zcore.app.getAppData("blog").optionStruct;
 	//previewEnabled=false;
 	</cfscript>
 	<script type="text/javascript">
@@ -1913,7 +1915,7 @@ this.app_id=10;
 				// don't stay on preview URL if we don't need to
 				if(structkeyexists(form, 'preview')){
 					if(qArticle.blog_unique_name EQ ""){
-						curLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
+						curLink=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
 						application.zcore.functions.z301Redirect(curLink);
 					}else{
 						application.zcore.functions.z301Redirect(qArticle.blog_unique_name);
@@ -1953,8 +1955,8 @@ this.app_id=10;
 	
 	if(structkeyexists(form, 'zUrlName')){
 		if(qArticle.blog_unique_name EQ ""){
-			curLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
-			actualLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",form.zUrlName); 
+			curLink=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
+			actualLink=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",form.zUrlName); 
 			if(compare(curLink, actualLink) neq 0){
 				application.zcore.functions.z301Redirect(curLink);
 			}
@@ -1965,7 +1967,7 @@ this.app_id=10;
 		}
 	}
 	if(qArticle.blog_unique_name EQ ""){
-		currentBlogURL=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
+		currentBlogURL=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_article_id,qarticle.blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
 	}else{
 		currentBlogURL=qArticle.blog_unique_name;
 	}
@@ -1983,7 +1985,7 @@ this.app_id=10;
 		</cfsavecontent><cfscript>qupdate=db.execute("qupdate");</cfscript>
 		</cfif>
 		<cfsavecontent variable="tempPageNav">
-		<a href="#application.zcore.app.getAppData("blog").optionStruct.blog_config_home_url#">#htmleditformat(application.zcore.functions.zvar("homelinktext"))#</a> / <cfif application.zcore.app.getAppData("blog").optionStruct.blog_config_root_url EQ "{default}"><a class="#application.zcore.functions.zGetLinkClasses()#" href="/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_title,"-")#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-3.html" class="#application.zcore.functions.zGetLinkClasses()#">#htmleditformat(application.zcore.app.getAppData("blog").optionStruct.blog_config_title)#</a><cfelse><a href="#application.zcore.app.getAppData("blog").optionStruct.blog_config_root_url#">#htmleditformat(application.zcore.app.getAppData("blog").optionStruct.blog_config_title)#</a></cfif> / <a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qArticle.blog_category_unique_name NEQ ''>#qArticle.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,qArticle.blog_category_id,"html",qArticle.blog_category_name)#</cfif>">#htmleditformat(qArticle.blog_category_name)#</a> / 
+		<a href="#optionStruct.blog_config_home_url#">#htmleditformat(application.zcore.functions.zvar("homelinktext"))#</a> / <cfif optionStruct.blog_config_root_url EQ "{default}"><a class="#application.zcore.functions.zGetLinkClasses()#" href="/#application.zcore.functions.zURLEncode(optionStruct.blog_config_title,"-")#-#optionStruct.blog_config_url_misc_id#-3.html" class="#application.zcore.functions.zGetLinkClasses()#">#htmleditformat(optionStruct.blog_config_title)#</a><cfelse><a href="#optionStruct.blog_config_root_url#">#htmleditformat(optionStruct.blog_config_title)#</a></cfif> / <a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qArticle.blog_category_unique_name NEQ ''>#qArticle.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_category_id,qArticle.blog_category_id,"html",qArticle.blog_category_name)#</cfif>">#htmleditformat(qArticle.blog_category_name)#</a> / 
 		</cfsavecontent>
 		<cfsavecontent variable="tempMenu"> 
 		</cfsavecontent>
@@ -2038,7 +2040,7 @@ this.app_id=10;
 		if(qArticle.blog_unique_name NEQ ""){
 			tempCurrentBlogUrl=qArticle.blog_unique_name;
 		}else{
-			tempCurrentBlogUrl=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
+			tempCurrentBlogUrl=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_article_id,blog_id,"html",qArticle.blog_title,qArticle.blog_datetime);
 		}
 		writeoutput('<h2><a href="#tempCurrentBlogUrl#">'  & htmleditformat(qArticle.blog_title) & '</a></h2><br />');
 	} else {
@@ -2140,10 +2142,10 @@ this.app_id=10;
 	</cfscript>
 	
 
-	<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0>
+	<cfif application.zcore.functions.zso(optionStruct, 'blog_config_disable_author', true, 0) EQ 0>
 		<div class="zblog-author" style="font-size:100%; font-weight:700; clear:both; ">
 
-			<cfif qArticle.user_username NEQ "" and application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id', true) NEQ 0> 
+			<cfif qArticle.user_username NEQ "" and application.zcore.functions.zso(optionStruct, 'blog_config_url_author_id', true) NEQ 0> 
 				<cfscript>
 				userStruct={};
 				structAppend(userStruct, qArticle); 
@@ -2162,7 +2164,7 @@ this.app_id=10;
 				}
 				</cfscript> 
 			</cfif>
-		<cfset curFeedLink=application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_feedburner_url')> 
+		<cfset curFeedLink=application.zcore.functions.zso(optionStruct, 'blog_config_feedburner_url')> 
 		<cfif qArticle.user_googleplus_url NEQ "" or qArticle.user_twitter_url NEQ "" or qArticle.user_facebook_url NEQ "">
 			&nbsp; Follow me: 
 		</cfif>
@@ -2181,7 +2183,7 @@ this.app_id=10;
 		</cfif>
 		</div>
 	</cfif>
-	<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_hide_date', true, 0) EQ 0>
+	<cfif application.zcore.functions.zso(optionStruct, 'blog_config_hide_date', true, 0) EQ 0>
 		<div class="zblog-date" style="width:100%; float:left;">
 			<span style="font-weight:normal; font-style:italic;">
 				#dateformat(qArticle.blog_datetime, 'ddd, mmm dd, yyyy')#
@@ -2191,7 +2193,7 @@ this.app_id=10;
 		</div>
 	</cfif>
 
-	<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_show_categories_on_articles', true, 0) EQ 1>
+	<cfif application.zcore.functions.zso(optionStruct, 'blog_config_show_categories_on_articles', true, 0) EQ 1>
 		<div class="zblog-category" style="font-size:100%; clear:both; ">
 			Categories: 
 			<cfscript>
@@ -2209,7 +2211,7 @@ this.app_id=10;
 			//arrCategory=[];
 			first=true;
 			for(category in qCategories){
-				link=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id, category.blog_category_id, "html", category.blog_category_name);
+				link=application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_category_id, category.blog_category_id, "html", category.blog_category_name);
 				//arrayAppend(arrCategory, { name:category.blog_category_name , id:category.blog_category_id, link: link });
 				if(not first){
 					echo(', ');
@@ -2291,9 +2293,9 @@ this.app_id=10;
 			<cfif application.zcore.functions.zIsExternalCommentsEnabled()>
 			<cfscript>
 			// display external comments
-			writeoutput(application.zcore.functions.zDisplayExternalComments(application.zcore.app.getAppData("blog").optionstruct.app_x_site_id&"-"&qArticle.blog_id, qArticle.blog_title, request.zos.globals.domain&currentBlogURL));
+			writeoutput(application.zcore.functions.zDisplayExternalComments(optionstruct.app_x_site_id&"-"&qArticle.blog_id, qArticle.blog_title, request.zos.globals.domain&currentBlogURL));
 			</cfscript>
-			<cfelseif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionstruct,'blog_config_disable_comments',false,0) EQ 0>
+			<cfelseif application.zcore.functions.zso(optionstruct,'blog_config_disable_comments',false,0) EQ 0>
 			
 			<h2><a id="comment"></a>User Comments</h2>
 			<cfset noComments=true>
@@ -3491,311 +3493,12 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	</cfif> 
 	#application.zcore.app.getAppCFC("blog").getPopularTags()#
 </cffunction>
-
-
-
-<!--- 
-<cffunction name="categoryTemplateViewRewrite" localmode="modern" access="remote" output="yes" returntype="any">
-	<cfscript>
-	db=request.zos.queryObject;
-	init();
-
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true, 0);
-
-	request.month=CreateDate(year(now()),month(now()),1);
-	if(application.zcore.functions.zso(form, 'ListID') EQ ''){ 
-		form.ListId = application.zcore.status.getNewId(); 
-	} 
-	if(structkeyexists(form, 'zIndex')){ 
-		application.zcore.status.setField(form.ListID,'zIndex',form.zIndex); 
-	}
-	if(application.zcore.functions.zso(form, 'zIndex') GT 100 or structkeyexists(form,'blog_category_id') EQ false){
-		application.zcore.functions.z404("form.blog_category_id was not defined or zIndex was greater then 100.");//301redirect('/'); 
-	}
-	// required 
-	searchStruct = StructNew(); 
-	// optional 
-	searchStruct.showString = "Articles "; 
-	// allows custom url formatting 
-	//searchStruct.parseURLVariables = true; 
-	searchStruct.indexName = 'zIndex'; 
-	searchStruct.buttons = 5; 
-	// set from query string or default value 
-	searchStruct.parseURLVariables=true;
-	searchStruct.firstPageHack=true;
-	searchStruct.perpage = 10;	
-	//searchNav = application.zcore.functions.zSearchResultsNav(searchStruct);
-	searchStruct.index = application.zcore.status.getField(form.listId, "zIndex",1); 
-	start = searchStruct.perpage * max(1,searchStruct.index) - 10;
-	
-	db.sql="select * 
-	from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
-	where blog_category.blog_category_id = #db.param(form.blog_category_id)# and 
-	blog_category.site_id=#db.param(request.zos.globals.id)#";
-	qCategory=db.execute("qCategory"); 
-	if(qCategory.recordcount eq 0){
-		application.zcore.functions.z404("qCategory record was missing in categoryTemplate().");//301Redirect('/');
-	}
-	
-	ts=structnew();
-	ts.image_library_id_field="blog.blog_image_library_id";
-	ts.count = 1; // how many images to get
-	rs2=application.zcore.imageLibraryCom.getImageSQL(ts);
-	db.sql="select * 
-	#db.trustedsql(rs2.select)# 
-	from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category
-	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
-	blog_x_category.blog_category_id = blog_category.blog_category_id  and 
-	blog_x_category.site_id = blog_category.site_id and 
-	blog_x_category_deleted = #db.param(0)#
-	left join #db.table("blog", request.zos.zcoreDatasource)# blog on 
-	blog_x_category.blog_id = blog.blog_id and 
-	blog_deleted = #db.param(0)# and 
-	blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
-	blog_status <> #db.param(2)#  and 
-	blog_category.site_id = blog.site_id
-	#db.trustedsql(rs2.leftJoin)# 
-	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
-	blog.user_id = user.user_id  and 
-	user_deleted = #db.param(0)# and 
-	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))#
-	where blog_category.blog_category_id = #db.param(form.blog_category_id)# and 
-	blog_category.site_id=#db.param(request.zos.globals.id)# and 
-	blog_category_deleted = #db.param(0)# ";
-
-	if(form.site_x_option_group_set_id NEQ 0){
-        db.sql&="and (blog.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# 
-        	or blog.blog_show_all_sections=#db.param(1)# 
-        ) ";
-	}else if(structkeyexists(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_always_show_section_articles') and application.zcore.app.getAppData("blog").optionStruct.blog_config_always_show_section_articles EQ 0){
-		db.sql&="and blog.site_x_option_group_set_id = #db.param(0)# ";
-	}
-	db.sql&=" group by blog.blog_id
-	order by blog_sticky desc, blog_datetime desc
-	LIMIT #db.param(start)#, #db.param(searchStruct.perpage)#";
-	qArticles=db.execute("qArticles"); 
-	if(form.method EQ "categoryTemplate"){
-		if(structkeyexists(form, 'zUrlName')){
-			if(qcategory.blog_category_unique_name EQ ""){
-				curLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id, form.blog_category_id,"html",qCategory.blog_category_name);
-				actualLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id, form.blog_category_id,"html",form.zUrlName);
-				if(compare(curLink,actualLink) neq 0){
-					application.zcore.functions.z301Redirect(curLink);
-				}
-			}else{
-				if(compare(qcategory.blog_category_unique_name, request.zos.originalURL) NEQ 0){
-					application.zcore.functions.z301Redirect(qcategory.blog_category_unique_name);
-				}
-			}
-		}
-	}
-	application.zcore.siteOptionCom.setCurrentOptionAppId(qcategory.blog_category_site_option_app_id);
-	db.sql="select count(*) as count from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
-	left join #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category on 
-	blog_x_category.blog_category_id = blog_category.blog_category_id and 
-	blog_x_category.site_id = blog_category.site_id and 
-	blog_x_category_deleted = #db.param(0)#
-	left join #db.table("blog", request.zos.zcoreDatasource)# blog on 
-	blog_x_category.blog_id = blog.blog_id and 
-	blog_deleted = #db.param(0)# and 
-	blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
-	blog_status <> #db.param(2)# and 
-	blog.site_id = blog_category.site_id 
-	where blog_category.site_id=#db.param(request.zos.globals.id)# and 
-	blog_category.blog_category_id = #db.param(form.blog_category_id)#  and 
-	blog_category_deleted = #db.param(0)# and 
-	blog.blog_id IS NOT NULL";
-	qCount=db.execute("qCount");
-	searchStruct.url = application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id, form.blog_category_id&'_##zIndex##',"html",qcategory.blog_category_name);
-	if(qcategory.blog_category_unique_name NEQ ""){
-		searchStruct.firstpageurl=qcategory.blog_category_unique_name;
-	}else{
-		searchStruct.firstpageurl=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id, form.blog_category_id,"html",qcategory.blog_category_name);
-	}
-	searchStruct.count = qCount.count;
-	searchNav = application.zcore.functions.zSearchResultsNav(searchStruct);
-
-	viewStruct={};
-
-	viewStruct.homeURL=application.zcore.app.getAppData("blog").optionStruct.blog_config_home_url;
-	viewStruct.homeLinkText=application.zcore.functions.zvar("homelinktext");
-	if(application.zcore.app.getAppData("blog").optionStruct.blog_config_root_url EQ "{default}"){
-		viewStruct.blogURL="/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_title,"-")#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-3.html";
-		viewStruct.blogLinkText=application.zcore.app.getAppData("blog").optionStruct.blog_config_title;
-	}else{
-		viewStruct.blogURL=application.zcore.app.getAppData("blog").optionStruct.blog_config_root_url;
-		viewStruct.blogLinkText=application.zcore.app.getAppData("blog").optionStruct.blog_config_title;
-	}
-	viewStruct.qCategory=qCategory;
-	</cfscript>
-	<cfsavecontent variable="tempPageNav">
-	<a href="#viewStruct.homeURL#">#viewStruct.homeLinkText#</a> / <a href="#viewStruct.blogURL#">#viewStruct.blogLinkText#</a> /
-	</cfsavecontent>
-	<cfsavecontent variable="tempMenu">
-	<cfset content = '#content#'>
-	<cfset blog_category_name = '#qCategory.blog_category_name#'>
-	#this.menuTemplate()#
-	</cfsavecontent>
-	<cfsavecontent variable="tempMeta">
-	<cfif qCategory.blog_category_metakey NEQ ""><meta name="keywords" content="#htmleditformat(qCategory.blog_category_metakey)#" /></cfif>
-	<meta name="description" content="<cfif qCategory.blog_category_metadesc NEQ "">#htmleditformat(qCategory.blog_category_metadesc)#<cfelse>#htmleditformat(application.zcore.functions.zLimitStringLength(application.zcore.functions.zStripHTMLTags(qCategory.blog_category_description), 100)#</cfif>" />
-	</cfsavecontent>
-	<cfscript>
-	application.zcore.template.setTag("title","#qCategory.blog_category_name#");
-	application.zcore.template.setTag("pagetitle","#qCategory.blog_category_name#");
-	application.zcore.template.setTag("pagenav",tempPageNav);
-	application.zcore.template.setTag("menu",tempMenu);
-	application.zcore.template.setTag("meta",tempMeta);
-    
-	//if(structkeyexists(request.zos.userSession.groupAccess, "administrator") or structkeyexists(request.zos.userSession.groupAccess, "content_manager")){
-		writeoutput('<div id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/blog/admin/blog-admin/categoryEdit?blog_category_id=#form.blog_category_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
-		application.zcore.template.prependTag('pagetitle','<span id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/blog/admin/blog-admin/categoryEdit?blog_category_id=#form.blog_category_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
-		application.zcore.template.appendTag('pagetitle','</span>');
-	//}
-	</cfscript>
-	#qcategory.blog_category_description# <br style="clear:both;" />
-	
-	<cfscript>
-	//if(structkeyexists(request.zos.userSession.groupAccess, "administrator") or structkeyexists(request.zos.userSession.groupAccess, "content_manager")){
-		writeoutput('</div>');
-	//}
-	</cfscript>
-	<cfif application.zcore.app.getAppData("blog").optionStruct.blog_config_show_detail EQ 1> 
-		<cfsavecontent variable="db.sql">
-		select blog_id from #db.table("blog", request.zos.zcoreDatasource)# blog where 
-		site_id=#db.param(request.zos.globals.id)# and 
-		blog_category_id = #db.param(qCategory.blog_category_id)# and 
-		blog_deleted = #db.param(0)#
-		</cfsavecontent><cfscript>rssFeedID=db.execute("rssFeedID");</cfscript>
-		<cfif rssFeedId.recordcount NEQ 0>
-			<cfset form.blog_id=rssFeedID.blog_id>
-			<cfset request.zos.supressBlogArticleDetails = 1>
-			
-			#this.articleTemplate()#
-		</cfif> 
-	</cfif>	
-	
-	
-	<cfsavecontent variable="db.sql">
-	SELECT *,repeat(#db.param("&nbsp;")#,blog_category_level*#db.param(3)#) catpad, count(blog_x_category.blog_id) count 
-	from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
-	LEFT JOIN #db.table("blog_x_category", request.zos.zcoreDatasource)# blog_x_category ON 
-	blog_x_category.blog_category_id = blog_category.blog_category_id AND 
-	blog_x_category.site_id = blog_category.site_id and 
-	blog_x_category_deleted = #db.param(0)#
-	where blog_category.site_id=#db.param(request.zos.globals.id)# and 
-	blog_category.blog_category_parent_id = #db.param(qCategory.blog_category_id)# and 
-	blog_category_deleted = #db.param(0)#
-	group by blog_category.blog_category_id 
-	having(count >#db.param(0)#)
-	order by blog_category_sort ASC
-	</cfsavecontent><cfscript>qMenu=db.execute("qMenu");</cfscript>
-	<cfif qmenu.recordcount NEQ 0>
-		<strong style="font-size:14px;">Additional Categories in #qCategory.blog_category_name#</strong><br />
-		<br />
-		 
-		<div style="float:left; width:100%; padding-bottom:10px;">
-		<cfscript>	
-		inputStruct = StructNew();
-		inputStruct.colspan = 3;
-		inputStruct.rowspan = qmenu.recordcount;
-		inputStruct.vertical = true;
-		inputStruct.minWidth=150;
-		inputStruct.divoutput=true;
-		myColumnOutput = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.loopOutput");
-		myColumnOutput.init(inputStruct);
-		</cfscript>
-		<cfloop query="qMenu">
-			#myColumnOutput.check(qMenu.currentRow)#
-			<a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qmenu.blog_category_unique_name NEQ ''>#qmenu.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,qmenu.blog_category_id,"html",qmenu.blog_category_name)#</cfif>" <cfif qmenu.catpad neq ''>style="font-weight:normal;"</cfif>>#qmenu.blog_category_name#</a> (#qmenu.count#)<br />
-			#myColumnOutput.ifLastRow(qMenu.currentRow)#
-		</cfloop>
-		</div>
-		<br />
-	
-	</cfif>  
-
-
-	<cfif qArticles.recordcount NEQ 0>
-		<strong style="font-size:14px;">Articles in this category:</strong><br />
-		<br />
-		
-		<cfif qArticles.blog_title neq ''>
-			<cfif searchStruct.count gt searchStruct.perpage>
-				#searchNAV#
-			</cfif>
-			<cfloop query="qArticles">
-				<cfif qArticles.blog_title NEQ ''>
-				#this.summaryTemplate(qArticles)#
-				</cfif>
-			</cfloop>
-			<cfif searchStruct.count gt searchStruct.perpage>
-			#searchNAV#
-			</cfif>
-		<cfelse>
-			<cfsavecontent variable="db.sql">
-			select * 
-			from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category
-			where blog_category.blog_category_id = #db.param(form.blog_category_id)# and 
-			blog_category.site_id=#db.param(request.zos.globals.id)# and 
-			blog_category_deleted = #db.param(0)#
-			limit #db.param(0)#, #db.param(5)#
-			</cfsavecontent><cfscript>qCategory=db.execute("qCategory");</cfscript> 
-			There are no articles in this category yet.<br /><br />
-		</cfif>
-
-		<cfif qCategory.blog_category_parent_id NEQ 0> 
-		
-			<cfsavecontent variable="db.sql">
-			SELECT *,repeat(#db.param("&nbsp;")#,blog_category_level*#db.param(3)#) catpad
-			from #db.table("blog_category", request.zos.zcoreDatasource)# blog_category 
-			where blog_category.site_id=#db.param(request.zos.globals.id)# and 
-			blog_category_deleted = #db.param(0)# and 
-			blog_category.blog_category_id = #db.param(qCategory.blog_category_parent_id)# 
-			</cfsavecontent><cfscript>qMenu=db.execute("qMenu");</cfscript>
-			<cfif qmenu.recordcount NEQ 0>
-				<cfloop query="qMenu">
-					<strong style="font-size:14px;">Read more about: <a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qMenu.blog_category_unique_name NEQ ''>#htmleditformat(qMenu.blog_category_unique_name)#<cfelse>#htmleditformat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,qMenu.blog_category_id,"html",qMenu.blog_category_name))#</cfif>" <cfif qmenu.catpad neq ''>style="font-weight:normal;"</cfif>>#htmleditformat(qMenu.blog_category_name)#</a></strong><br />
-				</cfloop>
-			</cfif>  
-		</cfif>
-	</cfif>
-	<cfif application.zcore.app.siteHasApp("listing") and qcategory.blog_category_search_mls EQ 1>
-		<hr />
-		<cfscript>
-		application.zcore.listingStruct.functions.zListingDisplaySavedSearch(qCategory.blog_category_saved_search_id); 
-		</cfscript>
-	</cfif> 
-	#application.zcore.app.getAppCFC("blog").getPopularTags()#
-</cffunction>
- --->
+ 
 
 <cffunction name="feedCategoryTemplate" localmode="modern" access="remote" output="yes" returntype="any">
-	<cfscript> 
-	var feedDescription='';
-	var curLink='';
-	var actualLink='';
-	var title='';
-	var blog_title='';
-	var blog_author='';
-	
-	var blog_summary='';
-	var blog_story='';
-	var blog_sources='';
-	var user_username='';
-	var date='';
-	var time='';
-	var db=request.zos.queryObject;
-	var tempLink='';
-	var tempText='';
-	var ts=0;
-	var ts2=0;
-	var rs2=0;
-	var count='';
-	var feedLink=0;
-	var q_blog_feed='';
-	var blog_feed='';
-	variables.init();
+	<cfscript>  
+	var db=request.zos.queryObject; 
+	init();
 	form.offset=application.zcore.functions.zso(form, 'offset', true, 0); 
 	form.count=application.zcore.functions.zso(form, 'count', true, 25);
 	form.blog_category_id=application.zcore.functions.zso(form, 'blog_category_id', true, 0);
@@ -3861,110 +3564,112 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	order by blog_sticky desc, blog_datetime desc
 	LIMIT #db.param(form.offset)#, #db.param(form.count)# ";
 	q_blog_feed=db.execute("q_blog_feed");
-	</cfscript>
-	<cfif q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')>
-		<cfscript>
-			application.zcore.functions.z301Redirect('/');
-		</cfscript>
-	</cfif>
-	<cfscript>
+	if(q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')){
+		application.zcore.functions.z301Redirect('/');
+	}
 	curLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,form.blog_category_id,"xml",q_blog_feed.blog_category_name);
 	actualLink=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,form.blog_category_id,"xml",form.zUrlName);
 	if(compare(curLink,actualLink) neq 0){
 		application.zcore.functions.z301Redirect(curLink);
 	}
 	title = replace(q_blog_feed.blog_category_name, "&", "&amp;", "ALL");
-	</cfscript>
-	<cfsavecontent variable="feedLink">#request.zOS.currentHostName#<cfif q_blog_feed.blog_category_unique_name NEQ ''>#q_blog_feed.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,q_blog_feed.blog_category_id,"html",q_blog_feed.blog_category_name)#</cfif></cfsavecontent>
-
-	<cfsavecontent variable="blog_feed">
-	<rss  version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-	<channel>
-<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
-	<title>#title# From #request.zos.globals.shortdomain#</title>
-	<link>#feedLink#</link>
-	<cfset feedDescription=application.zcore.functions.zXmlFormat('This feed is a list of stories from #request.zOS.currentHostName# in the "#q_blog_feed.blog_category_name#" category.')>
-	<description>Get the latest #application.zcore.functions.zXmlFormat(q_blog_feed.blog_category_name)# from #request.zos.globals.shortdomain#</description>
-	<language>en-us</language>
-	<copyright>#year(now())#</copyright>
-	<lastBuildDate>#gethttptimestring()#</lastBuildDate>
-	<cfloop from="1" to="#q_blog_feed.recordcount#" index="count">
-		<cfif q_blog_feed.blog_id[count] NEQ ''>
-			<cfscript>	
-			blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
-			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
-				blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
-			}else{
-				blog_author="";
-			}
-			blog_summary = q_blog_feed.blog_summary[count];
-			blog_story = q_blog_feed.blog_story[count];
-			blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
-			user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
-			date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
-			time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
-			if(q_blog_feed.blog_unique_name[count] NEQ ""){
-				tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
-			}else{
-				tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
-			} 
-			thumbnailStruct=variables.getThumbnailSizeStruct();
-			ts2=structnew();
-			ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
-			ts2.output=false;
-			ts2.query=q_blog_feed;
-			ts2.row=count;
-			ts2.size="960x4000";//thumbnailStruct.width&"x"&thumbnailStruct.height;
-			ts2.crop=thumbnailStruct.crop;
-			ts2.count = 1;  
-			arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
-			image="";
-			if(arraylen(arrImages) NEQ 0){
-				image=arrImages[1].link;
-			}  
-			</cfscript>
-			<item>
-				<title>#blog_title#</title>
-				<link>#tempLink#</link>
-				<cfif image NEQ ""> 
-					<enclosure url="#request.zos.currentHostName&image#" type="image/*"/>
-				</cfif>
-				<cfscript>
+	savecontent variable="feedLink"{
+		echo(request.zOS.currentHostName);
+		if(q_blog_feed.blog_category_unique_name NEQ ''){
+			echo(q_blog_feed.blog_category_unique_name);
+		}else{
+			echo(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,q_blog_feed.blog_category_id,"html",q_blog_feed.blog_category_name));
+		}
+	} 
+	feedDescription=application.zcore.functions.zXmlFormat('This feed is a list of stories from #request.zOS.currentHostName# in the "#q_blog_feed.blog_category_name#" category.');
+	savecontent variable="blog_feed"{
+		echo('<rss  version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+		<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
+		<title>#title# From #request.zos.globals.shortdomain#</title>
+		<link>#feedLink#</link> 
+		<description>Get the latest #application.zcore.functions.zXmlFormat(q_blog_feed.blog_category_name)# from #request.zos.globals.shortdomain#</description>
+		<language>en-us</language>
+		<copyright>#year(now())#</copyright>
+		<lastBuildDate>#gethttptimestring()#</lastBuildDate>');
+		for(count=1;count<=q_blog_feed.recordcount;count++){
+			if(q_blog_feed.blog_id[count] NEQ ''){
+				blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
+				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
+					blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+				}else{
+					blog_author="";
+				}
+				blog_summary = q_blog_feed.blog_summary[count];
+				blog_story = q_blog_feed.blog_story[count];
+				blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
+				user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
+				date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
+				time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
+				if(q_blog_feed.blog_unique_name[count] NEQ ""){
+					tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
+				}else{
+					tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
+				} 
+				thumbnailStruct=variables.getThumbnailSizeStruct();
+				ts2=structnew();
+				ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
+				ts2.output=false;
+				ts2.query=q_blog_feed;
+				ts2.row=count;
+				ts2.size="960x4000";//thumbnailStruct.width&"x"&thumbnailStruct.height;
+				ts2.crop=thumbnailStruct.crop;
+				ts2.count = 1;  
+				arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+				image1="";
+				if(arraylen(arrImages) NEQ 0){
+					image1=arrImages[1].link;
+				}  
 				if(blog_summary EQ ''){
 					tempText = blog_story;
-				/*	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
-					if(len(tempText) GT 1000){
-						tempText=left(tempText,1000)&'...';
-					}*/
 				}else{
 					tempText = blog_summary;
-				//	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
+				} 
+				tempText=application.zcore.email.cleanHTML(tempText); 
+				enclosure1="";
+				if(image1 NEQ ""){
+					enclosure1='<enclosure url="#request.zos.currentHostName&image1#" type="image/*"/>';
 				}
-				//tempText = application.zcore.functions.zXMLFormat(tempText);
-				</cfscript><!--- 
-				<description>#tempText#</description> --->
-				<description><![CDATA[ <cfif image NEQ ""><p><img src="#image#" /></p></cfif> #tempText# ]]></description>
-				<pubDate>#date# #time#</pubDate>
-				<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0> 
-					<author><cfif user_username EQ "">#application.zcore.functions.zvarso("zofficeemail")#<cfelse>#user_username#<cfif blog_author NEQ ""> (#blog_author#)</cfif></cfif></author>
-				</cfif>
-				<comments>#tempLink###comments</comments>
-		    <guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
-			</item>
-		</cfif>
-	</cfloop>
-	</channel>
-	</rss>
-	</cfsavecontent>
-	<cfscript>
+				echo('<item>
+					<title>#blog_title#</title>
+					<link>#tempLink#</link>
+					#enclosure1#
+					<description><![CDATA[ ');
+					if(image1 NEQ ""){
+						echo('<p><img src="#image1#" /></p>');
+					}
+					echo(' #tempText# ]]></description>
+					<pubDate>#date# #time#</pubDate>');
+					if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
+						echo('<author>');
+						if(user_username EQ ""){
+							echo(application.zcore.functions.zvarso("zofficeemail"));
+						}else{
+							echo(user_username);
+							if(blog_author NEQ ""){
+								echo(' (#blog_author#)');
+							}
+						}
+						echo('</author>');
+					}
+					echo('<comments>#tempLink###comments</comments>
+			    <guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
+				</item>');
+			}
+		} 
+		echo('</channel>
+		</rss>');
+	}
 	blog_feed=replace(blog_feed, ' href="/', ' href="#request.zos.currentHostName#/', 'all');
 	blog_feed=replace(blog_feed, ' src="/', ' src="#request.zos.currentHostName#/', 'all');
-	</cfscript>
-	<!--- <cfcontent type="text/xml"> --->
-	<cfcontent type="text/xml; utf-8">
-	#blog_feed#
-	<cfscript>
-	application.zcore.functions.zabort();
+	content type="text/xml; utf-8";
+	echo(blog_feed);
+	abort;
 	</cfscript>
 </cffunction>
 
@@ -4056,98 +3761,101 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		application.zcore.functions.z301Redirect(curLink);
 	}
 	title = replace("Blog Articles by "&userStruct.user_first_name&" "&userStruct.user_last_name, "&", "&amp;", "ALL");
-	
-	</cfscript>
-	<cfsavecontent variable="feedLink">#request.zOS.currentHostName#<cfif q_blog_feed.blog_category_unique_name NEQ ''>#q_blog_feed.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,q_blog_feed.blog_category_id,"html",q_blog_feed.blog_category_name)#</cfif></cfsavecontent>
-
-	<cfsavecontent variable="blog_feed">
-	<rss  version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-	<channel>
-<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
-	<title>#xmlformat(title)# From #request.zos.globals.shortdomain#</title>
-	<link>#feedLink#</link>
-	<cfset feedDescription=application.zcore.functions.zXmlFormat('This feed is a list of stories from #request.zOS.currentHostName# by this author.')>
-	<description>Get the latest #application.zcore.functions.zXmlFormat(q_blog_feed.blog_category_name)# from #request.zos.globals.shortdomain#</description>
-	<language>en-us</language>
-	<copyright>#year(now())#</copyright>
-	<lastBuildDate>#gethttptimestring()#</lastBuildDate>
-	<cfloop from="1" to="#q_blog_feed.recordcount#" index="count">
-		<cfif q_blog_feed.blog_id[count] NEQ ''>
-			<cfscript>	
-			blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
-			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
-				blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
-			}else{
-				blog_author="";
-			}
-			blog_summary = q_blog_feed.blog_summary[count];
-			blog_story = q_blog_feed.blog_story[count];
-			blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
-			user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
-			date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
-			time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
-			if(q_blog_feed.blog_unique_name[count] NEQ ""){
-				tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
-			}else{
-				tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
-			} 
-			thumbnailStruct=variables.getThumbnailSizeStruct();
-			ts2=structnew();
-			ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
-			ts2.output=false;
-			ts2.query=q_blog_feed;
-			ts2.row=count;
-			ts2.size="960x4000";//thumbnailStruct.width&"x"&thumbnailStruct.height;
-			ts2.crop=thumbnailStruct.crop;
-			ts2.count = 1;  
-			arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
-			image="";
-			if(arraylen(arrImages) NEQ 0){
-				image=arrImages[1].link;
-			}  
-			</cfscript>
-			<item>
-				<title>#blog_title#</title>
-				<link>#tempLink#</link>
-				<cfif image NEQ ""> 
-					<enclosure url="#request.zos.currentHostName&image#" type="image/*"/>
-				</cfif>
-				<cfscript>
-				if(blog_summary EQ ''){
-					tempText = blog_story;
-				/*	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
-					if(len(tempText) GT 1000){
-						tempText=left(tempText,1000)&'...';
-					}*/
+	feedDescription=application.zcore.functions.zXmlFormat('This feed is a list of stories from #request.zOS.currentHostName# by this author.');
+	savecontent variable="feedLink"{
+		echo(request.zOS.currentHostName);
+		if(q_blog_feed.blog_category_unique_name NEQ ''){
+			echo(q_blog_feed.blog_category_unique_name);
+		}else{
+			echo(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_category_id,q_blog_feed.blog_category_id,"html",q_blog_feed.blog_category_name));
+		}
+	} 
+	savecontent variable="blog_feed"{
+		echo('<rss  version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+		<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
+		<title>#xmlformat(title)# From #request.zos.globals.shortdomain#</title>
+		<link>#feedLink#</link> 
+		<description>Get the latest #application.zcore.functions.zXmlFormat(q_blog_feed.blog_category_name)# from #request.zos.globals.shortdomain#</description>
+		<language>en-us</language>
+		<copyright>#year(now())#</copyright>
+		<lastBuildDate>#gethttptimestring()#</lastBuildDate>');
+		for(count=1;count<=q_blog_feed.recordcount;count++){
+			if(q_blog_feed.blog_id[count] NEQ ''){
+				blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
+				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
+					blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
 				}else{
-					tempText = blog_summary;
-				//	tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
+					blog_author="";
 				}
-				//tempText = application.zcore.functions.zXMLFormat(tempText);
-				</cfscript><!--- 
-				<description>#tempText#</description> --->
-				<description><![CDATA[ <cfif image NEQ ""><p><img src="#image#" /></p></cfif> #tempText# ]]></description>
-				<pubDate>#date# #time#</pubDate>
-				<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0> 
-					<author><cfif user_username EQ "">#application.zcore.functions.zvarso("zofficeemail")#<cfelse>#user_username#<cfif blog_author NEQ ""> (#blog_author#)</cfif></cfif></author>
-				</cfif>
-				<comments>#tempLink###comments</comments>
-		    <guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
-			</item>
-		</cfif>
-	</cfloop>
-	</channel>
-	</rss>
-	</cfsavecontent>
-	<cfscript>
+				blog_summary = q_blog_feed.blog_summary[count];
+				blog_story = q_blog_feed.blog_story[count];
+				blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
+				user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
+				date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
+				time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
+				if(q_blog_feed.blog_unique_name[count] NEQ ""){
+					tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
+				}else{
+					tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
+				} 
+				thumbnailStruct=variables.getThumbnailSizeStruct();
+				ts2=structnew();
+				ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
+				ts2.output=false;
+				ts2.query=q_blog_feed;
+				ts2.row=count;
+				ts2.size="960x4000";//thumbnailStruct.width&"x"&thumbnailStruct.height;
+				ts2.crop=thumbnailStruct.crop;
+				ts2.count = 1;  
+				arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+				image1="";
+				if(arraylen(arrImages) NEQ 0){
+					image1=arrImages[1].link;
+				}  
+				echo('<item>
+				<title>#blog_title#</title>
+				<link>#tempLink#</link>');
+				if(image1 NEQ ""){
+					echo('<enclosure url="#request.zos.currentHostName&image1#" type="image/*"/>');
+				}
+				if(blog_summary EQ ''){
+					tempText = blog_story; 
+				}else{
+					tempText = blog_summary; 
+				}
+				tempText=application.zcore.email.cleanHTML(tempText);
+				echo('<description><![CDATA[ ');
+				if(image1 NEQ ""){
+					echo('<p><img src="#image1#" /></p>');
+				}
+				echo(' #tempText# ]]></description>
+				<pubDate>#date# #time#</pubDate>');
+				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
+					echo('<author>');
+					if(user_username EQ ""){
+						echo(application.zcore.functions.zvarso("zofficeemail"));
+					}else{
+						echo(user_username);
+					}
+					if(blog_author NEQ ""){
+						echo(' (#blog_author#)');
+					}
+					echo('</author>');
+				} 
+				echo('<comments>#tempLink###comments</comments>
+			    <guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
+				</item>');
+			}
+		}
+		echo('</channel>
+		</rss>');
+	}
 	blog_feed=replace(blog_feed, ' href="/', ' href="#request.zos.currentHostName#/', 'all');
 	blog_feed=replace(blog_feed, ' src="/', ' src="#request.zos.currentHostName#/', 'all');
-	</cfscript>
-	<!--- <cfcontent type="text/xml"> --->
-	<cfcontent type="text/xml; utf-8">
-	#blog_feed#
-	<cfscript>
-	application.zcore.functions.zabort();
+	content type="text/xml; utf-8";
+	echo(blog_feed);
+	abort;
 	</cfscript>
 </cffunction>
 <!--- 
@@ -4216,82 +3924,90 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	}else{
 		curLink=application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_url;
 	}
-	</cfscript>
+	savecontent variable="feedLink"{
+		echo(request.zOS.currentHostName&curLink);
+	}
+	savecontent variable="blog_feed"{
+		echo('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+		<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
+		<title>#application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name# From #request.zos.globals.shortdomain#</title>
+		<link>#feedLink#</link>
+		<description>This feed contains recent stories from #request.zOS.currentHostName#.</description>
+		<language>en-us</language>
+		<copyright>#year(now())#</copyright>
+		<lastBuildDate>#gethttptimestring()#</lastBuildDate>');
+		for(count=1;count<=q_blog_feed.recordcount;count++){
 
-	<cfsavecontent variable="feedLink">#request.zOS.currentHostName##curLink#</cfsavecontent>
-	<cfsavecontent variable="blog_feed">
-	<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-	<channel>
-	<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
-	<title>#application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name# From #request.zos.globals.shortdomain#</title>
-	<link>#feedLink#</link>
-	<description>This feed contains recent stories from #request.zOS.currentHostName#.</description>
-	<language>en-us</language>
-	<copyright>#year(now())#</copyright>
-	<lastBuildDate>#gethttptimestring()#</lastBuildDate><cfloop from="1" to="#q_blog_feed.recordcount#" index="count"><cfscript>
-	blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
-	blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
-	blog_summary = q_blog_feed.blog_summary[count];
-	blog_story = q_blog_feed.blog_story[count];
-	blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
-	user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
-	date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
-	time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
-	if(q_blog_feed.blog_unique_name[count] NEQ ""){
-		tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
-	}else{
-		tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
+			blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
+			blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+			blog_summary = q_blog_feed.blog_summary[count];
+			blog_story = q_blog_feed.blog_story[count];
+			blog_sources = application.zcore.functions.zXMLFormat(q_blog_feed.blog_sources[count]);
+			user_username = application.zcore.functions.zXMLFormat(q_blog_feed.user_username[count]);
+			date = dateformat(q_blog_feed.blog_datetime[count], "ddd, dd mmm yyyy");
+			time = timeformat(q_blog_feed.blog_datetime[count], "HH:mm:ss") & " EST";
+			if(q_blog_feed.blog_unique_name[count] NEQ ""){
+				tempLink=request.zOS.currentHostName&application.zcore.functions.zXMLFormat(q_blog_feed.blog_unique_name[count]);
+			}else{
+				tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_article_id,q_blog_feed.blog_id[count],"html",q_blog_feed.blog_title[count],q_blog_feed.blog_datetime[count]));
+			}
+			thumbnailStruct=variables.getThumbnailSizeStruct();
+			ts2=structnew();
+			ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
+			ts2.output=false;
+			ts2.query=q_blog_feed;
+			ts2.row=count;
+			ts2.size=thumbnailStruct.width&"x"&thumbnailStruct.height;//request.zos.globals.maximagewidth&"x2000";//
+			ts2.crop=thumbnailStruct.crop;
+			ts2.count = 1;   
+			arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+			image1="";
+			if(arraylen(arrImages) NEQ 0){
+				image1=arrImages[1].link;
+			}   
+			if(blog_summary EQ ''){
+				tempText = blog_story; 
+			}else{
+				tempText = blog_summary; 
+			}  
+			tempText=application.zcore.email.cleanHTML(tempText);
+			echo('<item>
+			<title>#blog_title#</title>
+			<link>#tempLink#</link>');
+			if(image1 NEQ ""){
+				echo('<enclosure url="#request.zos.currentHostName&image1#" type="image/*"/>');
+			}
+			if(structkeyexists(form, 'noContentImage')){
+				echo('<description><![CDATA[ #tempText# ]]></description>');
+			}else{
+				echo('<description><![CDATA[ <cfif image1 NEQ ""><p><img src="#image1#" /></p></cfif> #tempText# ]]></description>');
+			}
+			echo('<pubDate>#date# #time#</pubDate>');
+			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
+				echo('<author>');
+				if(user_username EQ ""){
+					echo(application.zcore.functions.zvarso("zofficeemail"));
+				}else{
+					echo(user_username);
+					if(blog_author NEQ ""){
+						echo(' (#blog_author#)');
+					}
+				}
+				echo('</author>');
+			}
+			echo('<comments>#tempLink###comments</comments>
+			<guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
+			</item>');
+		}
+		echo('</channel></rss>');
 	}
-	thumbnailStruct=variables.getThumbnailSizeStruct();
-	ts2=structnew();
-	ts2.image_library_id=q_blog_feed.blog_image_library_id[count];
-	ts2.output=false;
-	ts2.query=q_blog_feed;
-	ts2.row=count;
-	ts2.size=thumbnailStruct.width&"x"&thumbnailStruct.height;//request.zos.globals.maximagewidth&"x2000";//
-	ts2.crop=thumbnailStruct.crop;
-	ts2.count = 1;   
-	arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
-	image="";
-	if(arraylen(arrImages) NEQ 0){
-		image=arrImages[1].link;
-	}  
-	</cfscript><item>
-	<title>#blog_title#</title>
-	<link>#tempLink#</link>
-	<cfif image NEQ ""> 
-		<enclosure url="#request.zos.currentHostName&image#" type="image/*"/>
-	</cfif>
-	<cfscript>
-	if(blog_summary EQ ''){
-		tempText = blog_story;
-		/*tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
-		if(len(tempText) GT 1000){
-			tempText=left(tempText,1000)&'...';
-		}*/
-	}else{
-		tempText = blog_summary;
-		//tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
-	}
-	//tempText = application.zcore.functions.zXMLFormat(tempText);
-	</cfscript>
-	<cfif structkeyexists(form, 'noContentImage')>
-		<description><![CDATA[ #tempText# ]]></description>
-	<cfelse>
-		<description><![CDATA[ <cfif image NEQ ""><p><img src="#image#" /></p></cfif> #tempText# ]]></description>
-	</cfif>
-	
-	<pubDate>#date# #time#</pubDate>
-	<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0> 
-		<author><cfif user_username EQ "">#application.zcore.functions.zvarso("zofficeemail")#<cfelse>#user_username#<cfif blog_author NEQ ""> (#blog_author#)</cfif></cfif></author>
-	</cfif>
-	<comments>#tempLink###comments</comments>
-	<guid isPermaLink="false">#q_blog_feed.blog_guid[count]#</guid>
-	</item></cfloop></channel></rss></cfsavecontent><cfcontent type="text/xml; utf-8">
-	<cfscript>
+	content type="text/xml; utf-8";
 	blog_feed=replace(blog_feed, ' href="/', ' href="#request.zos.currentHostName#/', 'all');
 	blog_feed=replace(blog_feed, ' src="/', ' src="#request.zos.currentHostName#/', 'all');
-	</cfscript>#blog_feed#<cfscript>application.zcore.functions.zabort();</cfscript>
+	echo(blog_feed);
+	abort;
+	</cfscript>
 </cffunction>
 
 
@@ -5410,13 +5126,9 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 
 <cffunction name="summaryTemplate" localmode="modern" output="yes" returntype="any">
 	<cfargument name="query" type="query" required="yes">
-	<cfscript>
-	var tempText=0;
-	var n2=0;
-	var ts2=0;
-	var pos=0;
+	<cfscript> 
 	thumbnailStruct=variables.getThumbnailSizeStruct();
-	ts2=structnew();
+	ts2=structnew("sync");
 	ts2.image_library_id=arguments.query.blog_image_library_id;
 	ts2.output=false;
 	ts2.query=arguments.query;
@@ -5425,9 +5137,9 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 	ts2.crop=thumbnailStruct.crop;
 	ts2.count = 1;  
 	arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
-	image="";
+	image1="";
 	if(arraylen(arrImages) NEQ 0){
-		image=request.zos.currentHostName&arrImages[1].link;
+		image1=request.zos.currentHostName&arrImages[1].link;
 	} 
 	if(arguments.query.blog_unique_name NEQ ''){
 		currentLink=arguments.query.blog_unique_name;
@@ -5440,18 +5152,19 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 		if(pos NEQ 0){ n2=trim(left(n2,pos-1)); }
 		arrayappend(request.arrSearchSiteLinks,'<a href="#currentLink#">#htmleditformat(n2)#</a>');
 	} 
+	optionStruct=application.zcore.app.getAppData("blog").optionStruct;
 	</cfscript>
 	<div style="display:inline;width:100%;" id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/blog/admin/blog-admin/articleEdit?blog_id=#arguments.query.blog_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#&amp;site_x_option_group_set_id=#arguments.query.site_x_option_group_set_id#">
 		<div class="rss-summary-d <cfif application.zcore.functions.zvar("enableCSSFramework") EQ 1>rss-summary-modern</cfif>" style="margin-bottom:20px; ">
-			<cfif image NEQ "">
-				<div class="rss-summary-thumbnail" <cfif application.zcore.functions.zvar("enableCSSFramework") NEQ 1>style="width:#thumbnailStruct.width#px;"</cfif>><span><a href="#currentLink#"><img src="#image#" alt="#htmleditformat(arguments.query.blog_title)#" class="z-fluid" /></a></span></div>
+			<cfif image1 NEQ "">
+				<div class="rss-summary-thumbnail" <cfif application.zcore.functions.zvar("enableCSSFramework") NEQ 1>style="width:#thumbnailStruct.width#px;"</cfif>><span><a href="#currentLink#"><img src="#image1#" alt="#htmleditformat(arguments.query.blog_title)#" class="z-fluid" /></a></span></div>
 				<div class="rss-summary-ds rss-summary-ds-2"  <cfif application.zcore.functions.zvar("enableCSSFramework") NEQ 1>style="max-width:#request.zos.globals.maximagewidth-62-thumbnailStruct.width#px;" </cfif>>
 			<cfelse>
 				<div class="rss-summary-ds">
 			</cfif>
 			<a href="#currentLink#" class="rss-summary-title #application.zcore.functions.zGetLinkClasses()#">#htmleditformat(arguments.query.blog_title)#</a>
 
-			<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_hide_date', true, 0) EQ 0>
+			<cfif optionStruct.blog_config_hide_date EQ 0>
 				<span class="rss-summary-date"> 
 	    			#dateformat(arguments.query.blog_datetime, 'ddd, mmm dd, yyyy')#   
 				</span>
@@ -5469,11 +5182,11 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 				</cfscript>
 				#left(tempText, 250)#<cfif len(tempText) GT 250>...</cfif> <a href="#currentLink#" class="rss-summary-readmore">Read More</a></span> <br />
 			
-				<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0>
+				<cfif optionStruct.blog_config_disable_author  EQ 0>
 			
 					<div class="rss-summary-box">
 						<div>
-							<cfif arguments.query.user_username NEQ "" and application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id', true) NEQ 0> 
+							<cfif arguments.query.user_username NEQ "" and optionStruct.blog_config_url_author_id  NEQ 0> 
 								<cfscript>
 								userStruct={};
 								structAppend(userStruct, arguments.query);
@@ -5493,8 +5206,8 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 								</cfscript> 
 							</cfif>
 
-							<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_show_categories_on_articles', true, 0) EQ 1>
-								<cfif arguments.query.user_username NEQ "" and application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_url_author_id', true) NEQ 0>
+							<cfif optionStruct.blog_config_show_categories_on_articles EQ 1>
+								<cfif arguments.query.user_username NEQ "" and optionStruct.blog_config_url_author_id  NEQ 0>
 									in
 								</cfif>
 
@@ -5516,7 +5229,7 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 					</div>
 				<cfelse>
 
-					<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_show_categories_on_articles', true, 0) EQ 1>
+					<cfif optionStruct.blog_config_show_categories_on_articles EQ 1>
 						<div class="rss-summary-category" style="padding-top:5px;">
 							Categories: 
 							<cfscript>

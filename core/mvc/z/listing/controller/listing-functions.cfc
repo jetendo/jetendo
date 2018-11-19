@@ -82,7 +82,7 @@
 <cffunction name="zMLSSearchForm" localmode="modern" returntype="any" output="true">
 	<cfscript>
 	var theMeta=0;
-	var local=structnew();
+	
 	var ssaction=0;
 	if(structkeyexists(form,'action')){
         ssaction=form.action;
@@ -943,7 +943,7 @@ zGetLatLong(ts);
        <!---  <cfargument name="useOnlyStruct" type="boolean" required="no" default="#false#"> --->
 	<cfscript>
 		var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var	SearchCri=ArrayNew(1);
 	var qtab=0;
 	var qCity=0;
@@ -1191,7 +1191,7 @@ zGetLatLong(ts);
 	<cfargument name="currentrow" type="numeric" required="yes"> 
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var i="";
 	var searchStr=StructNew(); 
         application.zcore.functions.zQueryToStruct(arguments.qSearch, searchStr, "", arguments.currentrow);

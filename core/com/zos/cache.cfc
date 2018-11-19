@@ -96,7 +96,7 @@ urlHash=hash(url,'SHA');
 <cffunction name="init" localmode="modern" access="public" returntype="any">
 	<cfscript>
     return;
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var db2=0;
 	request.zos.cacheData={
@@ -158,7 +158,7 @@ this allows you to delete cache on both sides. --->
 	<cfargument name="table" type="string" required="true">
 	<cfargument name="table_id" type="string" required="true">
     not tested<cfscript>application.zcore.functions.zabort();
-	var local=structnew();
+	
 	key=arguments.database&"."&arguments.table&"."&arguments.table_id;
 	// I should use named lock with key in the name here
 	if(structkeyexists(application.zcore.cacheData.databaseURLCache, key)){
@@ -205,7 +205,7 @@ this allows you to delete cache on both sides. --->
     <cfargument name="content" type="string" required="yes">
     <cfscript>
     return;
-	var local=structnew();
+	
 	var hashValue="";
 	var arrEcho=[];
 	if(request.zos.cacheData.enabled EQ false) return;
@@ -426,7 +426,7 @@ proxy_cache_valid  404      1m;
 <cffunction name="storeCache" localmode="modern" access="public" returntype="any">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	curExpiration=max(60, request.zos.cacheData.expiration);
 	// places all the SSI includes and published a static file.
 	</cfscript>
@@ -454,7 +454,7 @@ proxy_cache_valid  404      1m;
 
 <cffunction name="purgeExpiredCache" localmode="modern" access="public" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	todayDate=dateformat(now(),'yyyymmdd');
 	nowDate=dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(),'HH:mm:ss')
 	</cfscript>

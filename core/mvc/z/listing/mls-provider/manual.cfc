@@ -30,7 +30,7 @@
         <cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		var qz=0;
 		var i=0;
 		if(arguments.resource NEQ "property"){
@@ -95,7 +95,7 @@
 		var curLong=0;
 		var values=0;
 		var dataCom=0;
-		var local=structnew();
+		
 		var rs=structnew();
 		var ts=arguments.ss;
 		ts.manual_listing_address=application.zcore.functions.zfirstlettercaps(ts.manual_listing_address);

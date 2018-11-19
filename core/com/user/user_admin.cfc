@@ -172,7 +172,7 @@
 		var ls = "";
 		var qUser = "";
 		var tempStruct = StructNew();
-		var local=structnew();
+		
 		var str = "";
 		var inputStruct2= StructNew();
 		var nowDate=now();
@@ -532,7 +532,7 @@ Thank you from #request.zos.globals.shortdomain#
 	<cffunction name="resetConfirmOptIn" localmode="modern" output="no" returntype="any"> 
     	<cfargument name="ss" type="struct" required="yes">
         <cfscript>
-		var local=structnew();
+		
 		var ts=StructNew();
 		var qCheck=0;
 		var qUpdate=0;
@@ -620,7 +620,7 @@ Thank you from #request.zos.globals.shortdomain#
 		var inputStruct2 = StructNew();
 		var ts=0;
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		tempStruct.site_id = request.zos.globals.id;
 		tempStruct.user_updated_datetime = request.zos.mysqlnow;
 		tempStruct.user_updated_ip = request.zos.cgi.remote_addr;
@@ -788,7 +788,7 @@ Thank you from #request.zos.globals.shortdomain#
 		<cfargument name="unblockip" type="boolean" required="no" default="#false#">
 		<cfscript>
 		var qActive = "";
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		</cfscript>
 		<cfsavecontent variable="db.sql">
@@ -813,7 +813,7 @@ Thank you from #request.zos.globals.shortdomain#
 		<cfargument name="blockip" type="boolean" required="no" default="#false#">
 		<cfscript>
 		var qInactive = "";
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		</cfscript>
 		<cfsavecontent variable="db.sql">
@@ -869,7 +869,7 @@ Thank you from #request.zos.globals.shortdomain#
 		<cfscript>
 		var qDelete = "";
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		</cfscript>
 		<cfsavecontent variable="db.sql">
 		DELETE FROM #db.table("user", request.zos.zcoreDatasource)#  

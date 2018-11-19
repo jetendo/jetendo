@@ -159,7 +159,7 @@
 	<cfargument name="ss" type="struct" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfscript>
-	var local=structnew(); 
+	 
 	var rs={
 		success:true,
 		arrErrors:[],
@@ -251,7 +251,7 @@
 
 <cffunction name="compilePackage" localmode="modern" access="public" output="yes" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	var newHash=0;
 	var start3=gettickcount();
 	debug=false;
@@ -446,19 +446,16 @@
 	<cfargument name="file_path" type="string" required="yes">
 	<cfargument name="forcePosition" required="no" type="string" default="" hint="This can be set to first or last or empty string.">
 	<cfscript>
-	var zSkinHTMLContents99="";
-	var sa=false;
-	var s="";
-	var forceFirst=false;
-	var templateTagName="stylesheets";
-	var templateTagFunction="prependTag";
 	var checkPath=arguments.file_path;
-	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
-		checkPath=getVersionURL(checkPath);
-	} 
 	if(structkeyexists(request.zos.cssIncludeUniqueStruct, checkPath)){
 		return;
 	}
+	var forceFirst=false;
+	var templateTagName="stylesheets";
+	var templateTagFunction="prependTag";
+	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
+		checkPath=getVersionURL(checkPath);
+	} 
 	request.zos.cssIncludeUniqueStruct[checkPath]=true;
 	if(arguments.forcePosition EQ "first"){
 		forceFirst=true;
@@ -511,16 +508,13 @@
 	<cfargument name="forcePosition" required="no" type="string" default="" hint="This can be set to first or last or empty string.">
 	<cfargument name="loadLevel" type="string" required="no" default="1">
 	<cfscript>
-	var zSkinHTMLContents99="";
-	var sa=false;
-	var s="";
 	var checkPath=arguments.file_path;
-	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
-		checkPath=getVersionURL(checkPath);
-	} 
 	if(structkeyexists(request.zos.jsIncludeUniqueStruct, checkPath)){
 		return;
 	}
+	if(left(checkPath,1) EQ "/" and left(checkPath,3) NEQ "/zv"){
+		checkPath=getVersionURL(checkPath);
+	} 
 	request.zos.jsIncludeUniqueStruct[checkPath]=true;
 	arrayappend(request.zos.arrScriptIncludeLevel, arguments.loadLevel);
 	arrayappend(request.zos.arrScriptInclude, checkPath);
@@ -551,7 +545,7 @@
 /z/_com/display/skin?method=deleteOldCache --->
 <cffunction name="deleteOldCache" localmode="modern" access="remote" output="yes" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	var i=0;
 	var db=request.zos.queryObject;
 	var fs={}

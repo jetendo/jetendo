@@ -996,7 +996,7 @@
 <cffunction name="iCalParseDateTime" localmode="modern" returnType="date" access="public" output="false" hint="Takes a date/time string in the format YYYYMMDDTHHMMSS or YYYYMMDD and returns a date.">
 	<cfargument name="str" type="string" required="true">
 	<cfscript>
-	var local=structnew();
+	
 	var str=arguments.str;
 	var dateStr = "";
 	var timeStr = "";

@@ -6,7 +6,7 @@
     <cffunction name="init" localmode="modern" output="no" returntype="any">
     	<cfargument name="sharedStruct" type="struct" required="yes">
         <cfscript>
-		var local=structnew();
+		
 		var qfeatures=0;
 		var ts=0; 
 		db=request.zos.queryObject;
@@ -93,7 +93,7 @@
     <cffunction name="parseRawData" localmode="modern" output="yes" returntype="any">
     	<cfargument name="ss" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		var ts=structnew();
 		var columnIndex=structnew();
 		 var i=0;
@@ -352,7 +352,7 @@
         <cfargument name="row" type="numeric" required="no" default="#1#">
         <cfargument name="fulldetails" type="boolean" required="no" default="#false#">
     	<cfscript>
-		var local=structnew();
+		
 		var i=0;
 		var column=0;
 		var features=0; 

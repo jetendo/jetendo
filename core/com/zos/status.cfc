@@ -132,7 +132,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfargument name="varStruct" type="any" required="no" default="#StructNew()#">
 		<cfargument name="error" type="boolean" required="no" default="#false#">
         <cfscript>
-		var local=structnew();
+		
 		var statusStruct=0;
 		if(not structkeyexists(variables, 'initRun') or not structkeyexists(request.zsession, variables.sessionKey)) variables.initSession();
 		</cfscript>

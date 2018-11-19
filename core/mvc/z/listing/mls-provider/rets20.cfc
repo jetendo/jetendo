@@ -341,7 +341,7 @@ unlimited between 7pm and 5am hawaii time
         <cfargument name="fulldetails" type="boolean" required="no" default="#false#">
     	<cfscript> 
 		var db=request.zos.queryObject; 
-		var local=structnew();
+		
 		var idx=this.baseGetDetails(arguments.ss, arguments.row, arguments.fulldetails);
 		idx["features"]="";
 		request.lastPhotoId=idx.listing_id;
@@ -408,7 +408,7 @@ unlimited between 7pm and 5am hawaii time
     	<cfargument name="mls_pid" type="string" required="yes">
         <cfargument name="num" type="numeric" required="no" default="#1#">
     	<cfscript>
-		var local=structnew();
+		
 		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));

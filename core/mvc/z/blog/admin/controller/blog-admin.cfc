@@ -50,7 +50,7 @@
 	<cfargument name="cur" type="numeric" required="no" default="0">
 	<cfargument name="level" type="numeric" required="no" default="0">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject; 
 	</cfscript>
 	<cfsavecontent variable="db.sql">
@@ -977,7 +977,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 
 <cffunction name="categoryUpdate" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var tempURL=0;
 	var qT9=0;
 	var ts=0;
@@ -1290,7 +1290,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 
 <cffunction name="commentUpdate" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var inputStruct=0;
 	var blogform=0;
 	var result=0;
@@ -1864,7 +1864,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 
 <cffunction name="blogDelete" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var qlist=0;
 	var db=request.zos.queryObject;
 	var qdelete=0;
@@ -3259,7 +3259,7 @@ tabCom.enableSaveButtons();
 
 <cffunction name="commentList" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var qc=0;
 	var qCount=0;
 	var viewlink=0;
@@ -3416,7 +3416,7 @@ local.blogIdBackup=form.blog_id;
 
 <cffunction name="categoryList" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qlist=0;
 	this.init();
@@ -3478,7 +3478,7 @@ local.blogIdBackup=form.blog_id;
 
 <cffunction name="categoryEdit" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var ts=0;
 	var currentMethod=form.method;
 	var selectStruct=0;
@@ -3659,7 +3659,7 @@ tabCom.enableSaveButtons();
 
 <cffunction name="commentReview" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var local=structnew();
+	
 	var searchStruct=0;
 	var qComments=0;
 	var db=request.zos.queryObject;

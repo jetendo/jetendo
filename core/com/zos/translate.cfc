@@ -84,7 +84,7 @@
 		var i=0;
 		var c=0;
 		var ts2=structnew();
-		var local=structnew();
+		
 		var ts3=structnew();
         application.zcore.template.setTag("title","Translate");
         application.zcore.template.setTag("pagetitle","Translate");

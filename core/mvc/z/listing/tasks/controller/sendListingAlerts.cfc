@@ -2,7 +2,7 @@
 <cfoutput>
 <cffunction name="send" localmode="modern" access="remote" returntype="any">
         <cfscript>
-	var local=structnew();
+	
 	var alertsPerLoop=10;
 	var qM=0;
 	var qM2=0;
@@ -221,7 +221,7 @@
 
 <cffunction name="index" localmode="modern" access="remote" returntype="any">
         <cfscript>
-        var local=structnew();
+        
 	var db=request.zos.queryObject;
         var cfhttp=0;
 	var row=0;

@@ -2,7 +2,7 @@
  <cfoutput>
  <cffunction name="process" localmode="modern" access="remote" output="yes">
  	<cfscript>
-	var local=structnew();
+	
 	var errorMessage="";
 	var success=false;
 	var rs=0;
@@ -69,7 +69,7 @@
 
 <cffunction name="index" localmode="modern" access="remote" output="yes">
  	<cfscript>
-	var local=structnew();
+	
 	application.zcore.tracking.backOneHit();
 	application.zcore.functions.zModalCancel();
 	request.disablesharethis=true;

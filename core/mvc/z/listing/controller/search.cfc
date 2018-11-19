@@ -85,7 +85,7 @@
         <cfscript>
 		var db=request.zos.queryObject;
 		var rs=structnew();
-		var local=structnew();
+		
 		var primaryCityId=0;
 		var label=0;
 		var arrLabels=0;
@@ -1149,7 +1149,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
 	<cffunction name="queryStringSearchToStruct" localmode="modern" access="public" returntype="any" output="no">
     	<cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		
 		local.i=0;
 		for(local.i in form){
@@ -1162,7 +1162,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
 	<cffunction name="formVarsToURL" localmode="modern" access="public" returntype="any" output="yes">
     	<cfargument name="sharedStruct" type="struct" required="yes">
     	<cfscript>
-		var local=structnew();
+		
 		local.i=0;
 		local.arrURL=arraynew(1);
 		for(local.i in arguments.sharedStruct){
@@ -1311,7 +1311,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
         
         <cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		application.zcore.functions.zDisbleEndFormCheck();
 		if(application.zcore.functions.zFakeFormFieldsNotEmpty()){
 			writeoutput('.<!-- stop spamming -->');

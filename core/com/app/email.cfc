@@ -867,7 +867,7 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#" hint="global templates and types are always site_id = 0">
 	<!--- get the default one first --->
 	<cfscript>
-	var local=structnew();
+	
 	var qD=0;
 	var db=request.zos.queryObject;
 	</cfscript>
@@ -891,7 +891,7 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#" hint="global templates are always site_id = 0">
 	<!--- get the default one first --->
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qD=0;
 	</cfscript>
@@ -918,7 +918,7 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
 	<cfargument name="zemail_template_type_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qD=0;
 	</cfscript>
@@ -946,7 +946,7 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
 	<cfargument name="zemail_template_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	var local=structnew();
+	
 	var qD=0;
 	var db=request.zos.queryObject;
 	</cfscript>
@@ -1156,7 +1156,7 @@ if(rCom.isOK() EQ false){
 	var textContent='';
 	var allowLongUrls='';
 	var sid=0;
-	var local=structnew();
+	
 	var qE=0;
 	var ts=StructNew();
 	var ts2=StructNew();

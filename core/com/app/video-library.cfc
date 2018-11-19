@@ -124,7 +124,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
     
 <cffunction name="videoencodeprogress" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Video Library");
 	local.arrQueue=listtoarray(application.zcore.functions.zescape(form.queue_id_list),",",false);
@@ -160,7 +160,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
     
 <cffunction name="videoencodecancel" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	local.arrQueue=listtoarray(application.zcore.functions.zescape(form.queue_id_list),",",false);
 	local.arrQueue2=arraynew(1);
@@ -198,7 +198,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
         
 <cffunction name="saveQueueToVideo" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qR=0;
 	var q=0;
@@ -255,7 +255,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
     
 <cffunction name="deleteVideo" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var qd=0;
 	var db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Video Library", true);
@@ -300,7 +300,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 <cffunction name="videoform" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
 	var qVideos=0;
-	var local=structnew();
+	
 	var theMeta=0;
 	var vname=0;
 	var embedCode=0;

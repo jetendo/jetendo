@@ -11,7 +11,7 @@ this.app_id=11;
 <cfargument name="idxMap" type="struct" required="yes">
 <cfargument name="allFields" type="struct" required="yes">
 <cfscript>
-	var local=structnew();
+	
 	local.idxTemp3=structnew();
 	local.idxTemp32=structnew();
 	local.n1=1;
@@ -105,7 +105,7 @@ this.app_id=11;
 	var qm=0;
 	var common="";
 	var db=0;
-	var local=structnew();
+	
 	local.c=application.zcore.db.getConfig();
 	local.c.cacheForSeconds=3600;
 	db=application.zcore.db.newQuery(local.c);
@@ -147,7 +147,7 @@ this.app_id=11;
 <cfargument name="height" type="numeric" required="no" default="#165#">
 <cfargument name="autocrop" type="numeric" required="no" default="#0#">
 <cfscript>
-var local=structnew();
+
 // check for same domain or domainalias
 local.c=replace(arguments.photourl, request.zos.currentHostName&"/", "/");
 if(arguments.photourl contains "/z/index.php?method=size"){
@@ -183,7 +183,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	</cfscript>
 	 <cfsavecontent variable="db.sql">
 	SELECT listing_condoname as condoName, count(listing_id) count 
@@ -215,7 +215,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 <cffunction name="getSiteMap" localmode="modern" output="no" access="public" returntype="array" hint="add links to sitemap array">
 <cfargument name="arrUrl" type="array" required="yes">
 <cfscript>
-	var local=structnew();
+	
 	var t2=0;
 	var returnText=0;
 	var ts=application.zcore.app.getInstance(this.app_id);
@@ -308,7 +308,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 <cfscript>
 	var qdata=0;
 	var ts=StructNew();
-	var local=structnew();
+	
 	return ts;
 	</cfscript>
 </cffunction>
@@ -322,7 +322,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 	var theText="";
 	var qconfig=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qconfig2=0;
 	var qF=0;
 	var qc=0;
@@ -403,7 +403,7 @@ arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qc.mls_option_site_map
 
 <cffunction name="configDelete" localmode="modern" output="no" access="public" returntype="any" hint="delete the record from config table.">
 <cfscript>
-	var local=structnew();
+	
 	var rCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.zos.return");
 	</cfscript>
 <cfreturn rCom>
@@ -568,7 +568,7 @@ arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qc.mls_option_site_map
 
 <cffunction name="configForm" localmode="modern" output="no" access="remote" returntype="any" hint="displays a form to add/edit applications.">
 <cfscript>
-	var local=structnew();
+	
 	var qM=0;
 	var qMLS=0;
 	var selectStruct=0;
@@ -1186,7 +1186,7 @@ Enter the maximum distance from the center of the primary city that you want the
 	var arrA1=0;
 	var qtypes=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var i=0;
 	var x="";
 	var ts=structnew();
@@ -1423,7 +1423,7 @@ Enter the maximum distance from the center of the primary city that you want the
 	var db=request.zos.queryObject;
 	var arrI=0;
 	var arrA1=0;
-	var local=structnew();
+	
 	var qtypes=0;
 	var i=0;
 	var ts=structnew();
@@ -2338,7 +2338,7 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 
 <cffunction name="onRequestStart" localmode="modern" output="yes" returntype="void">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var i=0;
 	var qMapCheck=0;
@@ -2655,7 +2655,7 @@ if(right(form[request.zos.urlRoutingParameter],4) NEQ ".xml" and right(request.c
 	var qzip=0;
 	var qclosezips=0;
 	var i=0;
-	var local=structnew();
+	
 	var qcity=0;
 	var qinsert=0;
 	var cs=0;
@@ -2749,7 +2749,7 @@ zCreateMemoryTable(ts);
 	var qmls="";
 	var db=request.zos.queryObject;
 	var qCheck="";
-	var local=structnew();
+	
 	var keyString="";
 	var i=0;
 	var arrF=[];

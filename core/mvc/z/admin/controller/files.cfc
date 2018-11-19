@@ -315,7 +315,7 @@
 
 <cffunction name="update" localmode="modern" access="remote" roles="member">
 <cfscript>
-	var local=structnew();
+	
 	var photoResize=0;
 	var overwrite=0;
 	var fileName=0;

@@ -22,7 +22,7 @@
 	var tempMetaBing=0;
 	var i=0;
 	var mapStageStruct=application.zcore.functions.zso(arguments.mapStruct, 'mapStageStruct', false, structnew());
-	var local=structnew();
+	
 	structappend(local, arguments.mapStruct, true); 
 	if(structkeyexists(mapStageStruct, 'height') EQ false){
 		if(request.cgi_script_name NEQ '/z/listing/property/detail/index' and request.cgi_script_name NEQ '/z/listing/property/detail-new/index'){

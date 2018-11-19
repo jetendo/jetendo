@@ -203,7 +203,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 <cffunction name="zLoadAndCropImage" localmode="modern" output="no" returntype="string" access="public">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var ts={
 		id="",
 		url="",
@@ -390,7 +390,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 <cffunction name="zEncodeDreamweaverPassword" localmode="modern" output="no" returntype="any">
 	<cfargument name="s" type="string" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	local.output="";
 	local.top=0;
 	
@@ -1040,7 +1040,7 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 </cffunction>
 
 <cffunction name="zAbort" localmode="modern" output="yes" returntype="void"><cfargument name="skipBack" type="boolean" required="no" default="#false#"><cfscript>
-	var local=structnew();
+	
 	var r=0; 
 	var n=0;
 	var i=0;
@@ -1123,7 +1123,7 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	<cfargument name="url" type="string" required="yes">
 	<cfargument name="jsonly" type="boolean" required="no" default="#false#">
 	<cfscript>
-	var local=structnew();
+	
 	var qU="";
 	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
 		throw(arguments.url);
@@ -1158,7 +1158,7 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 <cffunction name="zRedirect" localmode="modern" returntype="any" output="true">
 	<cfargument name="url" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var qU="";
 	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
 		throw(arguments.url);

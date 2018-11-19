@@ -1043,6 +1043,9 @@ used to do search for a list of values
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfargument name="showUnapproved" type="boolean" required="no" default="#false#"> 
 	<cfscript> 
+	// if(structkeyexists(application.siteStruct[arguments.site_id].globals.soGroupData.optionGroupSet, arguments.option_group_set_id)){
+	// 	groupStruct=application.siteStruct[arguments.site_id].globals.soGroupData.optionGroupSet[arguments.option_group_set_id];
+	// }
 	typeStruct=getTypeData(arguments.site_id);
 	t9=getSiteData(arguments.site_id);
 
@@ -1054,7 +1057,7 @@ used to do search for a list of values
 			if(groupStruct.__groupID NEQ groupID){
 				application.zcore.functions.z404("#arrayToList(arguments.arrGroupName, ", ")# is not the right group for #variables.type#_option_group_set_id: #arguments.option_group_set_id#");
 			} 
-			appendOptionGroupDefaults(groupStruct, groupStruct.__groupId);
+			// appendOptionGroupDefaults(groupStruct, groupStruct.__groupId);
 			return groupStruct;
 		}else{ 
 			if(arguments.option_group_set_id EQ ""){
@@ -1064,10 +1067,10 @@ used to do search for a list of values
 			return optionGroupSetFromDatabaseBySetId(groupId, arguments.option_group_set_id, arguments.site_id, arguments.showUnapproved);
 		}
 	}else{
-		if(structkeyexists(t9, "optionGroupSet") and structkeyexists(t9.optionGroupSet, arguments.option_group_set_id)){
-			var groupStruct=t9.optionGroupSet[arguments.option_group_set_id];
-			appendOptionGroupDefaults(groupStruct, groupStruct.__groupId);
-			return groupStruct;
+		if(structkeyexists(t9.optionGroupSet, arguments.option_group_set_id)){
+			return t9.optionGroupSet[arguments.option_group_set_id];
+			// appendOptionGroupDefaults(groupStruct, groupStruct.__groupId);
+			// return groupStruct;
 		}
 	} 
 	return {};
@@ -1094,27 +1097,17 @@ used to do search for a list of values
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
-	<cfscript> 
-	t9=getSiteData(arguments.site_id);
-	typeStruct=getTypeData(arguments.site_id);
-	var optionGroupId=0;
-	var i=0;
-	var arrGroup=0;
-	if(structkeyexists(typeStruct, "optionGroupIdLookup") and structkeyexists(typeStruct.optionGroupIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
+	<cfscript>  
+	t9=application.siteStruct[arguments.site_id].globals[variables.siteStorageKey];
+	typeStruct=t9;
+	// t9=getSiteData(arguments.site_id);
+	// typeStruct=getTypeData(arguments.site_id); 
+	if(structkeyexists(typeStruct, 'optionGroupIdLookup') and structkeyexists(typeStruct.optionGroupIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
 		optionGroupId=typeStruct.optionGroupIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
-		
-		var groupStruct=typeStruct.optionGroupLookup[optionGroupId];
+		groupStruct=typeStruct.optionGroupLookup[optionGroupId];
 		if(request.zos.enableSiteOptionGroupCache and groupStruct["#variables.type#_option_group_enable_cache"] EQ 1){
 			if(structkeyexists(t9.optionGroupSetArrays, arguments.option_app_id&chr(9)&optionGroupId&chr(9)&arguments.parentStruct.__setId)){
-				arrGroup=t9.optionGroupSetArrays[arguments.option_app_id&chr(9)&optionGroupId&chr(9)&arguments.parentStruct.__setId]; 
-				arrGroup2=[];
-				for(i=1;i LTE arraylen(arrGroup);i++){
-					if(not isNull(arrGroup[i])){
-						appendOptionGroupDefaults(arrGroup[i], optionGroupId);
-						arrayAppend(arrGroup2, arrGroup[i]);
-					}
-				}
-				return arrGroup2;
+				return t9.optionGroupSetArrays[arguments.option_app_id&chr(9)&optionGroupId&chr(9)&arguments.parentStruct.__setId]; 
 			}
 		}else{
 			return optionGroupSetFromDatabaseByGroupId(optionGroupId, arguments.option_app_id, arguments.site_id, arguments.parentStruct, arguments.fieldList);
@@ -1250,8 +1243,6 @@ application.zcore.siteOptionCom.getOptionForm(ts); --->
 
 <cffunction name="optionappform" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
 	<cfscript>
-	var local=structnew();
-	var c=0;
 	application.zcore.template.setTemplate("zcorerootmapping.templates.blank",true,true);
 	c=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.#variables.type#-options");
 	c.index();

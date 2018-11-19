@@ -402,7 +402,7 @@ if(not rs.success){
 <cffunction name="zGetSite" localmode="modern">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db2=0;
 	var template=0;
 	var ts=structnew();
@@ -725,49 +725,49 @@ if(not rs.success){
 
 <!--- application.zcore.functions.zExecuteCSSJSIncludes(); --->
 <cffunction name="zExecuteCSSJSIncludes" localmode="modern" output="yes" returntype="any">
-	<cfscript>
-	var local=structnew();
+	<cfscript> 
 	tout=""; 
-	if(structkeyexists(request.zos, 'includeManagerStylesheet') or request.zos.inMemberArea){ 
+	zos=request.zos;
+	if(zos.inMemberArea or structkeyexists(zos, 'includeManagerStylesheet')){ 
 		ts={
 			type:"zIncludeZOSFORMS",
 			url:"/z/a/stylesheets/style.css",
 			package:"",
 			forcePosition:""
 		};
-		if(arraylen(request.zos.arrCSSIncludes) GT 2){
-			arrayInsertAt(request.zos.arrCSSIncludes, 3, ts);
+		if(arraylen(zos.arrCSSIncludes) GT 2){
+			arrayInsertAt(zos.arrCSSIncludes, 3, ts);
 		
 		}else{
-			arrayappend(request.zos.arrCSSIncludes, ts);
+			arrayappend(zos.arrCSSIncludes, ts);
 		}
 	}
 	
-	jsLength=arraylen(request.zos.arrJSIncludes);
-	cssLength=arraylen(request.zos.arrCSSIncludes);
+	jsLength=arraylen(zos.arrJSIncludes);
+	cssLength=arraylen(zos.arrCSSIncludes);
 	
-	if(not structkeyexists(request, 'disableGlobalHTMLHeadCode') and request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
-		if(structkeyexists(request.zos,'inMemberArea') and request.zos.inMemberArea EQ false and structkeyexists(application.sitestruct[request.zos.globals.id], 'globalHTMLHeadSourceArrCSS')){
-			for(i=1;i LTE arraylen(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrCSS);i++){
-				tout&=application.zcore.skin.includeCSS(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrCSS[i],'last');
+	if(not structkeyexists(request, 'disableGlobalHTMLHeadCode') and zos.globals.enableMinCat EQ 0 or structkeyexists(zos.tempObj,'disableMinCat')){
+		if(structkeyexists(zos,'inMemberArea') and zos.inMemberArea EQ false and structkeyexists(application.sitestruct[zos.globals.id], 'globalHTMLHeadSourceArrCSS')){
+			for(i=1;i LTE arraylen(application.sitestruct[zos.globals.id].globalHTMLHeadSourceArrCSS);i++){
+				tout&=application.zcore.skin.includeCSS(application.sitestruct[zos.globals.id].globalHTMLHeadSourceArrCSS[i],'last');
 			}
-			for(i=1;i LTE arraylen(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrJS);i++){
-				tout&=application.zcore.skin.includeJS(application.sitestruct[request.zos.globals.id].globalHTMLHeadSourceArrJS[i],'last');
+			for(i=1;i LTE arraylen(application.sitestruct[zos.globals.id].globalHTMLHeadSourceArrJS);i++){
+				tout&=application.zcore.skin.includeJS(application.sitestruct[zos.globals.id].globalHTMLHeadSourceArrJS[i],'last');
 			}
 		}
 	}
 	/*
 	// determine if files in package have changed
-	if(structkeyexists(application.sitestruct[request.zos.globals.id],'packageJSCacheStruct') EQ false){
-		application.sitestruct[request.zos.globals.id].packageJSCacheStruct=StructNew();
-		application.sitestruct[request.zos.globals.id].packageCSSCacheStruct=StructNew();
+	if(structkeyexists(application.sitestruct[zos.globals.id],'packageJSCacheStruct') EQ false){
+		application.sitestruct[zos.globals.id].packageJSCacheStruct=StructNew();
+		application.sitestruct[zos.globals.id].packageCSSCacheStruct=StructNew();
 		// rebuild from disk the packages.
-		for(i in request.zos.includePackageStruct){
+		for(i in zos.includePackageStruct){
 			if(jsLength NEQ 0){ 
-				application.sitestruct[request.zos.globals.id].packageJSCacheStruct[i]=false; 
+				application.sitestruct[zos.globals.id].packageJSCacheStruct[i]=false; 
 			}
 			if(cssLength NEQ 0){
-				application.sitestruct[request.zos.globals.id].packageCSSCacheStruct[i]=false;
+				application.sitestruct[zos.globals.id].packageCSSCacheStruct[i]=false;
 			}
 		}
 	}
@@ -777,43 +777,54 @@ if(not rs.success){
 	pStructJSChanged=structnew();
 	pStructJS=structnew();
 	for(i=1;i LTE jsLength;i++){
-		p=request.zos.arrJSIncludes[i].package;
-		if(structkeyexists(pStructJSChanged, p) EQ false and request.zos.arrJSIncludes[i].package NEQ ""){
+		p=zos.arrJSIncludes[i].package;
+		if(structkeyexists(pStructJSChanged, p) EQ false and zos.arrJSIncludes[i].package NEQ ""){
 			pStructJSChanged[p]=false;
 			pStructJS[p]=structnew();
 			pStructJS[p].arr1=arraynew(1);
 			pStructJS[p].arr2=arraynew(1);
 			pStructJS[p].arr3=arraynew(1);
-			if(jsLength NEQ 0 and structkeyexists(application.sitestruct[request.zos.globals.id].packageJSCacheStruct,p) EQ false){
-				application.sitestruct[request.zos.globals.id].packageJSCacheStruct[p]=false;
+			if(jsLength NEQ 0 and structkeyexists(application.sitestruct[zos.globals.id].packageJSCacheStruct,p) EQ false){
+				application.sitestruct[zos.globals.id].packageJSCacheStruct[p]=false;
 			}
 		}
 	}
 	for(i=1;i LTE cssLength;i++){
-		p=request.zos.arrCSSIncludes[i].package;
-		if(structkeyexists(pStructCSSChanged, p) EQ false and request.zos.arrCSSIncludes[i].package NEQ ""){
+		p=zos.arrCSSIncludes[i].package;
+		if(structkeyexists(pStructCSSChanged, p) EQ false and zos.arrCSSIncludes[i].package NEQ ""){
 			pStructCSSChanged[p]=false;
 			pStructCSS[p]=structnew();
 			pStructCSS[p].arr1=arraynew(1);
 			pStructCSS[p].arr2=arraynew(1);
 			pStructCSS[p].arr3=arraynew(1);
-			if(cssLength NEQ 0 and structkeyexists(application.sitestruct[request.zos.globals.id].packageCSSCacheStruct,p) EQ false){
-				application.sitestruct[request.zos.globals.id].packageCSSCacheStruct[p]=false;
+			if(cssLength NEQ 0 and structkeyexists(application.sitestruct[zos.globals.id].packageCSSCacheStruct,p) EQ false){
+				application.sitestruct[zos.globals.id].packageCSSCacheStruct[p]=false;
 			}
 		}
 	} */
-	request.zos.arrJSIncludes=arrayreverse(request.zos.arrJSIncludes);
-	request.zos.arrCSSIncludes=arrayreverse(request.zos.arrCSSIncludes);
+	zos.arrJSIncludes=arrayreverse(zos.arrJSIncludes);
+	zos.arrCSSIncludes=arrayreverse(zos.arrCSSIncludes);
 	for(i=1;i LTE jsLength;i++){
-		if(request.zos.arrJSIncludes[i].package EQ ""){
-			application.zcore.template.prependTag("scripts",application.zcore.skin.includeJS(request.zos.arrJSIncludes[i].url, 'first'));//request.zos.arrJSIncludes[i].forcePosition));
+		if(zos.arrJSIncludes[i].package EQ ""){ 
+            application.zcore.template.prependTag("scripts",application.zcore.skin.includeJS(request.zos.arrJSIncludes[i].url, 'first'));//request.zos.arrJSIncludes[i].forcePosition));
+			// arrayappend(request.zos.arrScriptIncludeLevel, 1);
+			// arrayprepend(request.zos.arrScriptInclude, zos.arrJSIncludes[i].url);
 		}
 	}
+	arrCSS=[];
 	for(i=1;i LTE cssLength;i++){
-		if(request.zos.arrCSSIncludes[i].package EQ ""){
-			application.zcore.template.prependTag("stylesheets",application.zcore.skin.includeCSS(request.zos.arrCSSIncludes[i].url, 'first'));//request.zos.arrCSSIncludes[i].forcePosition));
+		if(zos.arrCSSIncludes[i].package EQ ""){ 
+		    application.zcore.template.prependTag("stylesheets",application.zcore.skin.includeCSS(request.zos.arrCSSIncludes[i].url, 'first'));//request.zos.arrCSSIncludes[i].forcePosition));
+
+			// checkPath=zos.arrCSSIncludes[i].url;
+			// if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
+			// 	arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#request.zos.currentHostName##checkPath#" />'); 
+			// }else{
+			// 	arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#checkPath#" />'); 
+			// }
 		}
 	} 
+	// application.zcore.template.prependTag("meta", arrayToList(arrCSS, chr(10)), true);
 	</cfscript>
 </cffunction>
 
@@ -822,16 +833,17 @@ if(not rs.success){
     <cfargument name="package" type="string" required="no" default="">
 	<cfscript>
 	var i=1;
+	zos=request.zos;
 	if(arguments.package NEQ ""){
-		request.zos.includePackageStruct[arguments.package]=true;
-		for(i=1;i LTE arraylen(request.zos.arrJSIncludes);i++){
-			if(request.zos.arrJSIncludes[i].type EQ arguments.type){
-				request.zos.arrJSIncludes[i].package=arguments.package;	
+		zos.includePackageStruct[arguments.package]=true;
+		for(i=1;i LTE arraylen(zos.arrJSIncludes);i++){
+			if(zos.arrJSIncludes[i].type EQ arguments.type){
+				zos.arrJSIncludes[i].package=arguments.package;	
 			}
 		}
-		for(i=1;i LTE arraylen(request.zos.arrCSSIncludes);i++){
-			if(request.zos.arrCSSIncludes[i].type EQ arguments.type){
-				request.zos.arrCSSIncludes[i].package=arguments.package;	
+		for(i=1;i LTE arraylen(zos.arrCSSIncludes);i++){
+			if(zos.arrCSSIncludes[i].type EQ arguments.type){
+				zos.arrCSSIncludes[i].package=arguments.package;	
 			}
 		}
 	}
@@ -845,13 +857,14 @@ if(not rs.success){
 	<cfscript>
 	var theMeta="";
 	var ts=structnew();
-	if(structkeyexists(request.zos,'JavascriptRequiredGoogleMaps') EQ false){
-		if(request.zos.globals.googleMapsApiKey NEQ ""){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#request.zos.globals.googleMapsApiKey#";
-		}else if(right(request.zos.globals.domain, len(request.zos.productionTestDomain)) EQ request.zos.productionTestDomain){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#request.zos.googleMapsApiServerKeyTestDomain#"; 
-		}else if(right(request.zos.globals.domain, len(request.zos.testDomain)) EQ request.zos.testDomain){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#request.zos.googleMapsApiServerKeyTestDomain#";   
+	zos=request.zos;
+	if(structkeyexists(zos,'JavascriptRequiredGoogleMaps') EQ false){
+		if(zos.globals.googleMapsApiKey NEQ ""){
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.globals.googleMapsApiKey#";
+		}else if(right(zos.globals.domain, len(zos.productionTestDomain)) EQ zos.productionTestDomain){
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#"; 
+		}else if(right(zos.globals.domain, len(zos.testDomain)) EQ zos.testDomain){
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#";   
 		}else{
 			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit";
 		}
@@ -859,7 +872,7 @@ if(not rs.success){
 
 		geocodeCom=application.zcore.functions.zCreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
 		geocodeCom.processGeocodeQueue();
-		request.zos.JavascriptRequiredGoogleMaps=true;
+		zos.JavascriptRequiredGoogleMaps=true;
 	}
 	</cfscript>
 </cffunction>
@@ -868,9 +881,8 @@ if(not rs.success){
 <cffunction name="zRequireJquery" localmode="modern" output="no" returntype="any">
     <cfargument name="package" type="string" required="no" default="">
 	<cfscript>
-	var theMeta="";
-	var ts=structnew();
-	if(request.zos.globals.enableMinCat EQ 1 and request.zos.inMemberArea EQ false and structkeyexists(request.zos.tempObj,'disableMinCat') EQ false){
+	zos=request.zos;
+	if(zos.globals.enableMinCat EQ 1 and zos.inMemberArea EQ false and structkeyexists(zos.tempObj,'disableMinCat') EQ false){
 		return;
 	}
     application.zcore.functions.zForceIncludePackage("zRequireJquery", arguments.package);
@@ -882,25 +894,20 @@ if(not rs.success){
 <cffunction name="zRequireJqueryCookie" localmode="modern" output="no" returntype="any">
     <cfargument name="package" type="string" required="no" default="">
 	<cfscript>
-	var theMeta="";
-	var ts=structnew();
 	if(request.zos.globals.enableMinCat EQ 1 and request.zos.inMemberArea EQ false and structkeyexists(request.zos.tempObj,'disableMinCat') EQ false){
 		return;
 	}
     application.zcore.functions.zForceIncludePackage("zRequireJqueryCookie", arguments.package);
-	</cfscript>
-    <cfif structkeyexists(request.zos,'JavascriptRequiredJqueryCookie') EQ false>
-	<cfsavecontent variable="theMeta"><cfscript>
+    if(structkeyexists(request.zos,'JavascriptRequiredJqueryCookie') EQ false){
+		ts=structnew("sync");
 		ts.type="zRequireJqueryCookie";
 		ts.url="/z/javascript/jquery/jquery.cookie.js";
 		ts.package=arguments.package;
 		ts.forcePosition="";
 		arrayappend(request.zos.arrJSIncludes, ts);
-	</cfscript></cfsavecontent>
-    <cfscript>
-    request.zos.JavascriptRequiredJqueryCookie=true;
+	    request.zos.JavascriptRequiredJqueryCookie=true;
+	}
     </cfscript>
-    </cfif>
 </cffunction>
 
 
@@ -908,11 +915,11 @@ if(not rs.success){
 <cffunction name="zRequireJqueryMobile" localmode="modern" output="no" returntype="any">
 	<cfargument name="package" type="string" required="no" default="">
 	<cfscript>
-	var theMeta="";
-	var ts=structnew();
 	if(request.zos.globals.enableMinCat EQ 1 and request.zos.inMemberArea EQ false and structkeyexists(request.zos.tempObj,'disableMinCat') EQ false){
 		return;
 	}
+	var theMeta="";
+	var ts=structnew();
 	application.zcore.functions.zForceIncludePackage("zRequireJqueryMobile", arguments.package);
 	if(structkeyexists(request.zos,'JavascriptRequiredJqueryMobile') EQ false){
 		savecontent variable="theMeta"{
@@ -958,16 +965,14 @@ if(not rs.success){
 <cffunction name="zRequireJqueryUI" localmode="modern" output="no" returntype="any">
     <cfargument name="package" type="string" required="no" default="">
 	<cfscript>
-	var theMeta="";
-	var ts=structnew();
 	if(request.zos.globals.enableMinCat EQ 1 and request.zos.inMemberArea EQ false and structkeyexists(request.zos.tempObj,'disableMinCat') EQ false){
 		return;
-	}
+	} 
     application.zcore.functions.zForceIncludePackage("zRequireJqueryUI", arguments.package);
     if(structkeyexists(request.zos,'JavascriptRequiredJqueryUI') EQ false){
 		application.zcore.functions.zRequireJquery();
 	    if(request.zos.istestserver){
-			ts={};
+			ts=structnew("sync");
 			ts.type="zRequireJqueryUI";
 			ts.url="/z/javascript/jquery/jquery-ui/jquery-ui-1.10.3.min.js";
 			ts.package=arguments.package;
@@ -981,6 +986,7 @@ if(not rs.success){
 			arrayappend(request.zos.arrCSSIncludes, ts);
 			
 		}else{
+			ts=structnew("sync");
 			ts.type="zRequireJqueryUI";
 			ts.url="/z/javascript/jquery/jquery-ui/jquery-ui-1.10.3.min.js";
 			//ts.url="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js";
@@ -1114,11 +1120,13 @@ application.zcore.functions.zLogError(ts);
 	<!--- <cfargument name="output" type="boolean" required="no" default="#false#"> --->
     <cfargument name="package" type="string" required="no" default="">
 	<cfscript>
-	var ts=structnew();
-	var rs=structnew();
-	if(request.zos.globals.enableMinCat EQ 1 and request.zos.inMemberArea EQ false and structkeyexists(request.zos.tempObj,'disableMinCat') EQ false){
-		//return;
-	}
+	zos=request.zos;
+    if(structkeyexists(request.zos,"zOSFORMSIncluded")){
+    	return;
+    }  
+	// if(zos.globals.enableMinCat EQ 1 and zos.inMemberArea EQ false and structkeyexists(zos.tempObj,'disableMinCat') EQ false){
+	// 	//return;
+	// }
 	application.zcore.functions.zRequireJquery(arguments.package);
 	
 	allowJs=true;
@@ -1126,59 +1134,57 @@ application.zcore.functions.zLogError(ts);
 		allowJs=false;
 	}
 	/*var c3="";
-	if(request.zos.istestserver){
+	if(zos.istestserver){
 		c3="-src";	
 	}*/
 	//c3="-src";	
     application.zcore.functions.zForceIncludePackage("zIncludeZOSFORMS", arguments.package);
-    if(structkeyexists(request.zos,"zOSFORMSIncluded") EQ false){
-		request.zos.zOSFORMSIncluded=true;
-		ts={
+	zos.zOSFORMSIncluded=true;
+	ts={
+		type:"zIncludeZOSFORMS",
+		url:"/z/stylesheets/zOS.css",
+		package:arguments.package,
+		forcePosition:"first"
+	};
+	arrayappend(zos.arrCSSIncludes, ts);
+	ts={
+		type:"zCSSFramework",
+		url:"/z/stylesheets/css-framework.css",
+		package:"",
+		forcePosition:""
+	};
+	arrayappend(zos.arrCSSIncludes, ts);
+	if(allowJs){
+		/*ts={
 			type:"zIncludeZOSFORMS",
-			url:"/z/stylesheets/zOS.css",
+			url:"/z/javascript/jquery/balupton-history/scripts/uncompressed/json2.js",
 			package:arguments.package,
-			forcePosition:"first"
-		};
-		arrayappend(request.zos.arrCSSIncludes, ts);
-		ts={
-			type:"zCSSFramework",
-			url:"/z/stylesheets/css-framework.css",
-			package:"",
 			forcePosition:""
-		};
-		arrayappend(request.zos.arrCSSIncludes, ts);
-		if(allowJs){
-			/*ts={
+		}
+		arrayappend(zos.arrJSIncludes, ts);*/
+		c=arraylen(application.zcore.arrJsFiles);
+		for(i=1;i LTE c;i++){
+			ts={
 				type:"zIncludeZOSFORMS",
-				url:"/z/javascript/jquery/balupton-history/scripts/uncompressed/json2.js",
+				url:application.zcore.arrJsFiles[i],
 				package:arguments.package,
 				forcePosition:""
-			}
-			arrayappend(request.zos.arrJSIncludes, ts);*/
-			c=arraylen(application.zcore.arrJsFiles);
-			for(i=1;i LTE c;i++){
-				ts={
-					type:"zIncludeZOSFORMS",
-					url:application.zcore.arrJsFiles[i],
-					package:arguments.package,
-					forcePosition:""
-				};
-				arrayappend(request.zos.arrJSIncludes, ts);
-			}
+			};
+			arrayappend(zos.arrJSIncludes, ts);
 		}
+	}
 
-		tempFile=request.zos.globals.privatehomedir&"zcache/zsystem.css";
-		if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, tempFile) EQ false){
-			application.sitestruct[request.zos.globals.id].fileExistsCache[tempFile]=fileexists(tempFile);
-		}
-		if(application.sitestruct[request.zos.globals.id].fileExistsCache[tempFile]){
-			ts=structnew();
-			ts.type="zIncludeZOSFORMS";
-			ts.url="/zcache/zsystem.css";
-			ts.package=arguments.package;
-			ts.forcePosition="";
-			arrayappend(request.zos.arrCSSIncludes, ts);
-		}
+	tempFile=zos.globals.privatehomedir&"zcache/zsystem.css";
+	if(structkeyexists(application.sitestruct[zos.globals.id].fileExistsCache, tempFile) EQ false){
+		application.sitestruct[zos.globals.id].fileExistsCache[tempFile]=fileexists(tempFile);
+	}
+	if(application.sitestruct[zos.globals.id].fileExistsCache[tempFile]){
+		ts=structnew("sync");
+		ts.type="zIncludeZOSFORMS";
+		ts.url="/zcache/zsystem.css";
+		ts.package=arguments.package;
+		ts.forcePosition="";
+		arrayappend(zos.arrCSSIncludes, ts);
 	}
 	</cfscript>
 </cffunction>
@@ -1897,7 +1903,8 @@ User's IP: #request.zos.cgi.remote_addr#
 					addStruct.parent = removeChars(arguments.dirPathRoot, 1, len(arguments.siteRoot)-1);
 					addStruct.parent = removeChars(addStruct.parent, len(addStruct.parent), 1);
 					addStruct.coldfusionRoot = arguments.dirPathRoot&qDir["name"][i];
-					addStruct.siteRoot = addStruct.parent&"/"&qDir["name"][i];					if(addStruct.parent EQ ""){
+					addStruct.siteRoot = addStruct.parent&"/"&qDir["name"][i];					
+					if(addStruct.parent EQ ""){
 						addStruct.parent = "/";
 					}
 
@@ -1912,14 +1919,16 @@ User's IP: #request.zos.cgi.remote_addr#
 	</cfscript>
 </cffunction>
 
-<!---  application.zcore.functions.zAppendSiteOptionGroupDefaults(dataStruct, site_option_group_id); --->
-<cffunction name="zAppendSiteOptionGroupDefaults" localmode="modern" output="false" returntype="any">
+<!--- 
+not used
+ application.zcore.functions.zAppendSiteOptionGroupDefaults(dataStruct, site_option_group_id); --->
+<!--- <cffunction name="zAppendSiteOptionGroupDefaults" localmode="modern" output="false" returntype="any">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="site_option_group_id" type="string" required="yes">
 	<cfscript> 
 	return application.zcore.siteOptionCom.appendOptionGroupDefaults(arguments.dataStruct, arguments.site_option_group_id); 
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
 <!--- re-create the site globals and user group cache --->
 <cffunction name="zOS_cacheSiteAndUserGroups" localmode="modern" output="false" returntype="any">
@@ -1928,7 +1937,7 @@ User's IP: #request.zos.cgi.remote_addr#
 	var tempStruct='';
 	var curSetNumber='';
 	var curSetNumber1='';
-	var local=structnew();
+	
 	var qSite=0;
 	var qgroup=0;
 	var qgroupx=0;
@@ -2050,9 +2059,10 @@ User's IP: #request.zos.cgi.remote_addr#
 			curPrivatePath=tempPrivatePath;
 		}
 	}
-	lock name="#request.zos.installPath#-zCacheJsonSiteAndUserGroup-serialize" type="exclusive" timeout="10"{
-		a=serializeJson(tempStruct);
-	}
+	// don't need a lock for a temporary object
+	//lock name="#request.zos.installPath#-zCacheJsonSiteAndUserGroup-serialize" type="exclusive" timeout="10"{
+	a=serializeJson(tempStruct);
+	//}
 	application.zcore.functions.zWriteFile(curPrivatePath&'_cache/scripts/global.json', a);
 	curSiteId=tempStruct.id;
 	request.zos.globals=duplicate(application.zcore.serverglobals);
@@ -2106,12 +2116,12 @@ User's IP: #request.zos.cgi.remote_addr#
 	<cfscript>
 	ts={};
 	ts.controllerComponentCache={};
-	ts.modelDataCache=structnew();
-	ts.modelDataCache.modelComponentCache=structnew();
-	
+	ts.modelDataCache={
+		modelComponentCache:{}
+	};
 	ts.cfcMetaDataCache=structnew();
 	ts.modelDataCache={
-		modelComponentCache={}
+		modelComponentCache:{}
 	};
 	arrNewComPath=arraynew(1);
 	ts.registeredControllerStruct=structnew();
@@ -2120,171 +2130,175 @@ User's IP: #request.zos.cgi.remote_addr#
 	ts.hookAppCom=structnew();
 	
 	mvcFilesChanged=false;
-	arrLocalFile=[];
-	
-	//if(request.zos.isExecuteEnabled){
-
-		if(directoryexists(request.zos.installPath&"core/mvc/")){
-			if(fileexists("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc")){
-				output=application.zcore.functions.zSecureCommand("getNewerCoreMVCFiles", 50); 
-			}else{
-				output=1;
-			}
-			request.zos.requestLogEntry('Application.cfc onApplicationStart 3-4-2');
-			if(output NEQ ""){
-				directory action="list" recurse="yes" directory="#request.zos.installPath#core/mvc" name="qD" filter="*.cfc";//,*.html";
-				ts434=structnew();
-				arrFunction=['arrFile=variables.get1(arrFile);'];
-				ts434.arrFile=['
-					<cffunction name="get#arrayLen(arrFunction)#" localmode="modern" access="private">
-						<cfargument name="arrFile" type="array" required="yes">
-						<cfscript>
-						arrFile=arguments.arrFile;
-				'];
-				if(qD.recordcount GT 1){
-					arrLocalFile=[];
-					tempCount=1;
-					loop query="qD"{
-						//if(qD.directory DOES NOT CONTAIN "#arguments.ss.serverglobals.serverhomedir#mvc/z/test"){
-							arrayAppend(ts434.arrFile, 'arrayAppend(arrFile, { type:"#qD.type#", directory:"#replace(qD.directory, "#request.zos.installPath#core/", "/")#", name:"#qD.name#", lastModified:"#qD.dateLastModified#"});');
-							arrayappend(arrLocalFile, {"type":qD.type, "directory":replace(qD.directory, "#request.zos.installPath#core/", "/"), name:qD.name, lastModified:qD.dateLastModified});
-							tempCount++;
-							if(tempCount GTE 100){
-								arrayAppend(arrFunction, 'arrFile=variables.get'&(arrayLen(arrFunction)+1)&'(arrFile);');
-								arrayappend(ts434.arrFile, '
-								return arrFile;
-								</cfscript>
-								</cffunction>
-								<cffunction name="get#arrayLen(arrFunction)#" localmode="modern" access="private">
-									<cfargument name="arrFile" type="array" required="yes">
-									<cfscript>
-									arrFile=arguments.arrFile;
-								');	
-								tempCount=1;
-							}
-						//}
-					}
-					arrayappend(ts434.arrFile, '
+	arrLocalFile=[]; 
+	if(directoryexists(request.zos.installPath&"core/mvc/")){
+		if(fileexists("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc")){
+			output1=application.zcore.functions.zSecureCommand("getNewerCoreMVCFiles", 50); 
+		}else{
+			output1=1;
+		}
+		request.zos.requestLogEntry('Application.cfc onApplicationStart 3-4-2');
+		if(output1 NEQ ""){
+			directory action="list" recurse="yes" directory="#request.zos.installPath#core/mvc" name="qD" filter="*.cfc"; 
+			ts434=structnew();
+			arrFunction=['arrFile=variables.get1(arrFile);'];
+			ts434.arrFile=['
+				<cffunction name="get#arrayLen(arrFunction)#" localmode="modern" access="private">
+					<cfargument name="arrFile" type="array" required="yes">
+					<cfscript>
+					arrFile=arguments.arrFile;
+			'];
+			if(qD.recordcount GT 1){
+				arrLocalFile=[];
+				tempCount=1;
+				loop query="qD"{ 
+					arrayAppend(ts434.arrFile, 'arrayAppend(arrFile, { type:"#qD.type#", directory:"#replace(qD.directory, "#request.zos.installPath#core/", "/")#", name:"#qD.name#", lastModified:"#qD.dateLastModified#"});');
+					arrayappend(arrLocalFile, {"type":qD.type, "directory":replace(qD.directory, "#request.zos.installPath#core/", "/"), name:qD.name, lastModified:qD.dateLastModified});
+					tempCount++;
+					if(tempCount GTE 100){
+						arrayAppend(arrFunction, 'arrFile=variables.get'&(arrayLen(arrFunction)+1)&'(arrFile);');
+						arrayappend(ts434.arrFile, '
 						return arrFile;
 						</cfscript>
-						</cffunction>');
-					//tempStructString=application.zcore.functions.zStructToString("local", ts434);
-					tempComponentString='<cfcomponent>
-					<cffunction name="get" localmode="modern" access="public" hint="DO NOT EDIT THIS FILE. It is automatically regenerated when the /zcorerootmapping/mvc directory has new or removed CFC files.  This is done so that we can automatically cache CFC metadata when the application is deployed to the production server without the CFML source.   "  returntype="array">
-					<cfscript>
-					var local=structnew();
-					arrFile=arraynew(1);
-					'&arrayToList(arrFunction, '')&'
+						</cffunction>
+						<cffunction name="get#arrayLen(arrFunction)#" localmode="modern" access="private">
+							<cfargument name="arrFile" type="array" required="yes">
+							<cfscript>
+							arrFile=arguments.arrFile;
+						');	
+						tempCount=1;
+					} 
+				}
+				arrayappend(ts434.arrFile, '
 					return arrFile;
 					</cfscript>
-					</cffunction>
-					'&arrayToList(ts434.arrFile, '')&'
-					</cfcomponent>';  
-					if(1 or request.zos.isExecuteEnabled){
-						if(hash(tempComponentString) NEQ hash(application.zcore.functions.zreadfile("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc"))){
-							application.zcore.functions.zwritefile(arguments.ss.serverglobals.serverprivatehomedir&"_cache/mvc-cache.cfc", tempComponentString);
-							application.zcore.functions.zClearCFMLTemplateCache();
-							mvcFilesChanged=true;
-						}
-					}
-				}
-				request.zos.requestLogEntry('Application.cfc onApplicationStart 3-5');
-			}
-		}
-		if(arrayLen(arrLocalFile)){
-			arrFile=arrLocalFile;
-		}else if(1 or request.zos.isExecuteEnabled){
-			mvcCacheCom=application.zcore.functions.zcreateobject("component","zcorecachemapping.mvc-cache", true);
-			arrFile=mvcCacheCom.get();
-		}else{
-			throw("request.zos.isExecuteEnabled must be set to true in a sourceless deployment.");
-		}
-		if(not request.zos.isTestServer or structkeyexists(form, 'zforce')){
-			mvcFilesChanged=true;
-		}
-	// }else{
-	// 	// always true when execute is disabled
-	// 	directory action="list" recurse="yes" directory="#request.zos.installPath#core/mvc" name="qD" filter="*.cfc";
-	// 	arrFile=[];
-	// 	for(row in qD){
-	// 		arrayappend(arrFile, {"type":row.type, "directory":replace(row.directory, "#request.zos.installPath#core/", "/"), name:row.name, lastModified:row.dateLastModified});
-	// 	}
-	// 	mvcFilesChanged=true; 
-	// }
-	if(mvcFilesChanged or (not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'controllerComponentCache') or structcount(application.zcore.hookAppCom) EQ 0)){
-		for(i2=1;i2 LTE arraylen(arrFile);i2++){
-			qD=arrFile[i2];
-			if(left(qD.directory, 12) EQ '/mvc/z/test/'){
-				continue;
-			}
-			
-			i=i2;
-			curPath=arguments.ss.serverglobals.serverhomedir&removechars(qD.directory,1,1)&"/"&qD.name;
-			curPath2="/zcorerootmapping"&qD.directory&"/"&qD.name;
-			curPath22="/zcorerootmapping"&qD.directory&"/"&qD.name;
-			if(qD.name EQ "hook.cfc"){
-				ts.hookAppCom[qD.name]=application.zcore.functions.zcreateobject("component","zcorerootmapping."&replace(replace(qD.directory, arguments.ss.serverglobals.serverhomedir, ""),"/",".","all")&"."&left(qD.name, len(qD.name)-4), true);
-				ts.hookAppCom[qD.name].registerHooks(arguments.ss.componentObjectCache.hook);
-				continue;
-			}
-			if(qD.type EQ "file"){ 
-				curPath2=removechars(replace(replace(replace(arguments.ss.serverglobals.serverhomedir&removechars(qD.directory,1,1),"\","/","all"),curPath,""), arguments.ss.serverglobals.serverhomedir&"mvc/",""),1,0);
-				arrPath2=listtoarray(curPath2,"/",false);
-				fileType=listgetat(curPath2,1,"/");
-				curPath3=replace(curPath2,"/",".","all");
-				curPath4=listdeleteat(curPath3,1,".");
-				curName=listgetat(qD.name,1,".");
-				curExt=listgetat(qD.name,2,".");
-				lastFolderName=listgetat(curPath2,listlen(curPath2, "/", true),"/");
-				if(curName CONTAINS "."){
-					application.zcore.functions.zerror(qD.directory&"/"&qD.name&" - A CFC file name can't have a period after the "".cfc"" is removed from the end.  Please remove the periods in the name, ""."", leave the "".cfc"" at the end and try again.");	
-				}
+					</cffunction>');
+				//tempStructString=application.zcore.functions.zStructToString("local", ts434);
+				tempComponentString='<cfcomponent>
+				<cffunction name="get" localmode="modern" access="public" hint="DO NOT EDIT THIS FILE. It is automatically regenerated when the /zcorerootmapping/mvc directory has new or removed CFC files.  This is done so that we can automatically cache CFC metadata when the application is deployed to the production server without the CFML source.   "  returntype="array">
+				<cfscript>
 				
-				if(lastFolderName EQ "controller"){
-					if(curExt EQ "cfc"){
-						comPath=replace(mid(curPath22,2,len(curPath22)-5),"/",".","all");
-						tempCom=application.zcore.functions.zcreateobject("component", comPath, true);
-						tempcommeta=GetMetaData(tempCom);
-						ts.controllerComponentCache[comPath]=tempCom;
-						ts.cfcMetaDataCache[comPath]=tempcommeta;
-						if(structkeyexists(tempcommeta,'functions')){
-							for(i3=1;i3 LTE arraylen(tempcommeta.functions);i3++){
-								c=tempcommeta.functions[i3];
-								if(structkeyexists(c,"access") and c.access EQ "remote"){
-									ts.cfcMetaDataCache[comPath&":"&c.name]=c;
-									if(structkeyexists(c,"jetendo-landing-page") and c["jetendo-landing-page"]){
-										arrayAppend(ts.arrLandingPage, replace("/"&curPath3&"/"&left(qD.name, len(qD.name)-4)&"/"&c.name, "/controller", ""));
-									}
-								}
-							}
-						}
-						if(structkeyexists(tempCom,'mvcName')){
-							curMvcName="/"&curpath2&"/"&tempCom.mvcName;
-						}else{
-							curMvcName="/"&curpath2&"/"&curName;
-						}
-						curMvcName=replace(curMvcName, arguments.ss.serverglobals.serverhomedir&"mvc/", "");
-						t42="";
-						for(i4=1;i4 LTE arraylen(arrPath2);i4++){
-							t42&="/"&arrPath2[i4];
-							ts.registeredControllerPathStruct[t42]=true;
-						}
-						ts.registeredControllerStruct[curMvcName]=replace(curPath, arguments.ss.serverglobals.serverhomedir, "/zcorerootmapping/");
+				arrFile=arraynew(1);
+				'&arrayToList(arrFunction, '')&'
+				return arrFile;
+				</cfscript>
+				</cffunction>
+				'&arrayToList(ts434.arrFile, '')&'
+				</cfcomponent>';   
+				if(hash(tempComponentString) NEQ hash(application.zcore.functions.zreadfile("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc"))){
+					application.zcore.functions.zwritefile(arguments.ss.serverglobals.serverprivatehomedir&"_cache/mvc-cache.cfc", tempComponentString);
+					application.zcore.functions.zClearCFMLTemplateCache();
+					mvcFilesChanged=true;
+				} 
+			}
+			request.zos.requestLogEntry('Application.cfc onApplicationStart 3-5');
+		}
+	}
+	if(arrayLen(arrLocalFile)){
+		arrFile=arrLocalFile;
+	}else{
+		mvcCacheCom=application.zcore.functions.zcreateobject("component","zcorecachemapping.mvc-cache", true); 
+		arrFile=mvcCacheCom.get();
+	}
+	if(structkeyexists(form, 'zforce')){//not request.zos.isTestServer or 
+		mvcFilesChanged=true;
+	} 
+	// mvcFilesChanged=true; // TODO: temporary need to remove!
+	if(mvcFilesChanged or (not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'controllerComponentCache') or structcount(application.zcore.hookAppCom) EQ 0)){ 
+		threadCount=4;
+		loopCount=ceiling(arrayLen(arrFile)/threadCount);
+		loopOffset=1; 
+		arrThread=[];
+		for(n=1;n LTE threadCount;n++){
+	        arrayAppend(arrThread, "mvcGlobalUpdateThread#n#");
+	        thread name = "mvcGlobalUpdateThread#n#" timeout = "10000" componentObjectCache="#arguments.ss.componentObjectCache#" serverGlobals="#arguments.ss.serverGlobals#" arrFile="#arrFile#" ts="#ts#" startIndex="#loopOffset#" endIndex="#loopOffset+loopCount#"{
+	        	endIndex=min(endIndex, arraylen(arrFile));
+				for(i2=startIndex;i2 LTE endIndex;i2++){
+					qD=arrFile[i2];
+					if(left(qD.directory, 12) EQ '/mvc/z/test/'){
+						continue;
 					}
 					
-				}else if(lastFolderName EQ "model"){
-					if(curExt EQ "cfc"){
-						comPath=replace(mid(curPath22,2,len(curPath22)-5),"/",".","all");
-						ts.modelDataCache.modelComponentCache[comPath]=application.zcore.functions.zcreateobject("component", comPath, true);
-					}/*
-				}else if(lastFolderName EQ "view"){
-					if(curExt EQ "html"){
-						//writeoutput('application.zcore.skin.loadView("'&curPath3&"."&curName&'", "'&arrMvcPaths[i]&'");<br />');
-						// application.zcore.skin.loadView("/"&curPath2&"/"&curName, arrMvcPaths[i]);
-					}*/
+					i=i2;
+					curPath=serverglobals.serverhomedir&removechars(qD.directory,1,1)&"/"&qD.name;
+					curPath2="/zcorerootmapping"&qD.directory&"/"&qD.name;
+					curPath22="/zcorerootmapping"&qD.directory&"/"&qD.name;
+					if(qD.name EQ "hook.cfc"){
+						ts.hookAppCom[qD.name]=application.zcore.functions.zcreateobject("component","zcorerootmapping."&replace(replace(qD.directory, serverglobals.serverhomedir, ""),"/",".","all")&"."&left(qD.name, len(qD.name)-4), true);
+						ts.hookAppCom[qD.name].registerHooks(componentObjectCache.hook);
+						continue;
+					}
+					if(qD.type EQ "file"){ 
+						curPath2=removechars(replace(replace(replace(serverglobals.serverhomedir&removechars(qD.directory,1,1),"\","/","all"),curPath,""), serverglobals.serverhomedir&"mvc/",""),1,0);
+						arrPath2=listtoarray(curPath2,"/",false);
+						fileType=listgetat(curPath2,1,"/");
+						curPath3=replace(curPath2,"/",".","all");
+						curPath4=listdeleteat(curPath3,1,".");
+						curName=listgetat(qD.name,1,".");
+						curExt=listgetat(qD.name,2,".");
+						lastFolderName=listgetat(curPath2,listlen(curPath2, "/", true),"/");
+						if(curName CONTAINS "."){
+							application.zcore.functions.zerror(qD.directory&"/"&qD.name&" - A CFC file name can't have a period after the "".cfc"" is removed from the end.  Please remove the periods in the name, ""."", leave the "".cfc"" at the end and try again.");	
+						}
+						
+						if(lastFolderName EQ "controller"){
+							if(curExt EQ "cfc"){
+								comPath=replace(mid(curPath22,2,len(curPath22)-5),"/",".","all");
+								tempCom=application.zcore.functions.zcreateobject("component", comPath, true);
+								tempcommeta=GetMetaData(tempCom);
+								ts.controllerComponentCache[comPath]=tempCom;
+								ts.cfcMetaDataCache[comPath]=tempcommeta;
+								if(structkeyexists(tempcommeta,'functions')){
+									for(i3=1;i3 LTE arraylen(tempcommeta.functions);i3++){
+										c=tempcommeta.functions[i3];
+										if(structkeyexists(c,"access") and c.access EQ "remote"){
+											ts.cfcMetaDataCache[comPath&":"&c.name]=c;
+											if(structkeyexists(c,"jetendo-landing-page") and c["jetendo-landing-page"]){
+												arrayAppend(ts.arrLandingPage, replace("/"&curPath3&"/"&left(qD.name, len(qD.name)-4)&"/"&c.name, "/controller", ""));
+											}
+										}
+									}
+								}
+								if(structkeyexists(tempCom,'mvcName')){
+									curMvcName="/"&curpath2&"/"&tempCom.mvcName;
+								}else{
+									curMvcName="/"&curpath2&"/"&curName;
+								}
+								curMvcName=replace(curMvcName, serverglobals.serverhomedir&"mvc/", "");
+								t42="";
+								for(i4=1;i4 LTE arraylen(arrPath2);i4++){
+									t42&="/"&arrPath2[i4];
+									ts.registeredControllerPathStruct[t42]=true;
+								}
+								ts.registeredControllerStruct[curMvcName]=replace(curPath, serverglobals.serverhomedir, "/zcorerootmapping/");
+							}
+							
+						}else if(lastFolderName EQ "model"){
+							if(curExt EQ "cfc"){
+								comPath=replace(mid(curPath22,2,len(curPath22)-5),"/",".","all");
+								ts.modelDataCache.modelComponentCache[comPath]=application.zcore.functions.zcreateobject("component", comPath, true);
+							}/*
+						}else if(lastFolderName EQ "view"){
+							if(curExt EQ "html"){
+								//writeoutput('application.zcore.skin.loadView("'&curPath3&"."&curName&'", "'&arrMvcPaths[i]&'");<br />');
+								// application.zcore.skin.loadView("/"&curPath2&"/"&curName, arrMvcPaths[i]);
+							}*/
+						}
+					}
 				}
 			}
+			loopOffset+=loopCount+1;
 		}
+        thread action="join" name="#arraytolist(arrThread, ",")#" timeout="100000";
+        for(t in arrThread){
+        	if(cfthread[t].status NEQ "completed"){
+	        	savecontent variable="out"{
+		        	echo("<h2>Failed to Create MVC Objects</h2>");
+		        	writedump(cfthread);
+	        	}
+        		throw(out);
+        	}
+	    } 
 		structappend(arguments.ss, ts, true);
 	}else{
 		ts.hookAppCom=application.zcore.hookAppCom;
@@ -2299,7 +2313,7 @@ User's IP: #request.zos.cgi.remote_addr#
 
 <cffunction name="zOS_rebuildCache" localmode="modern" output="no" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qSite=0;
 	application.zcore.functions.zOS_cacheSitePaths();
@@ -2317,7 +2331,7 @@ User's IP: #request.zos.cgi.remote_addr#
 <!--- re-create the server wide caching of site paths. --->
 <cffunction name="zOS_cacheSitePaths" localmode="modern" output="no" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	var qSites = "";
 	var output = "";
 	var result = "";
@@ -2422,7 +2436,7 @@ User's IP: #request.zos.cgi.remote_addr#
 <cffunction name="zOS_getSiteNav" localmode="modern" returntype="any" output="false" hint="displays server admin site navigation">
 	<cfargument name="zid" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var selectStruct='';
 	var qSites='';
 	var qSite='';
@@ -2553,7 +2567,7 @@ User's IP: #request.zos.cgi.remote_addr#
 <cffunction name="zMenuClearCache" localmode="modern" returntype="any" output="no">
 	<cfargument name="affectedStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	for(i IN application.sitestruct[request.zos.globals.id].menuIdCacheStruct){
 		for(n IN arguments.affectedStruct){
 			if(n EQ "all"){
@@ -2649,7 +2663,7 @@ if(linkCount){
 <cffunction name="zGetSiteSelect" localmode="modern" output="yes" returntype="any">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	</cfscript>
 	<cfsavecontent variable="db.sql">

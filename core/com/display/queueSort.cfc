@@ -189,7 +189,7 @@ queueSortCom.init(inputStruct);
 	var db=request.zos.queryObject;
 	var qSelect = "";
 	var newsort = 2;
-	var local=structnew();
+	
 	db.sql="UPDATE #db.table(this.tableName, this.datasource)# #this.tablename#
 	SET `#this.sortFieldName#` = #db.param(1)#
 	WHERE `#this.primaryKeyName#` = #db.param(arguments.id)#";
@@ -230,7 +230,7 @@ queueSortCom.init(inputStruct);
 	var qLock = "";
 	var qUpdate = "";
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qSelect = "";
 	db.sql="SELECT count(`#this.primaryKeyName#`) as count 
 	FROM #db.table(this.tableName, this.datasource)# #this.tablename#";
@@ -274,7 +274,7 @@ queueSortCom.init(inputStruct);
 	<cfscript>
 	var qLock = "";
 	var qUpdate = "";
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var qSelect = "";
 	var qCurrent = "";
@@ -359,7 +359,7 @@ queueSortCom.init(inputStruct);
 <cffunction name="moveDown" localmode="modern" returntype="any" output="false">
 	<cfargument name="id" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var qLock = "";
 	var qUpdate = "";
 	var qSelect = "";
@@ -417,7 +417,7 @@ queueSortCom.init(inputStruct);
 	<cfargument name="id" type="string" required="yes">
 	<cfargument name="position" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var qLock = "";
 	var qUpdate = "";
 	var qSelect = "";
@@ -477,7 +477,7 @@ queueSortCom.init(inputStruct);
 <!--- on delete queueSortCom.sortAll(); --->
 <cffunction name="sortAll" localmode="modern" returntype="any" output="false">
 	<cfscript>
-	var local=structnew();
+	
 	var qLock = "";
 	var db=request.zos.queryObject;
 	var qSelect = "";

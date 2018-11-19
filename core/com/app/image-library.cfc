@@ -1416,7 +1416,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	var newSize='';
 	var newHeight='';
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var theJS='';
 	var qImages=0;
 	var thumbnailCrop=0;
@@ -1903,7 +1903,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 <cffunction name="imageform" localmode="modern" access="remote" returntype="any" output="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qImages=0;
 	var r=0;
 	var theMeta=0;
@@ -2143,7 +2143,7 @@ application.zcore.imageLibraryCom.getViewOriginalImagesURL(image_library_id, ima
 <cffunction name="downloadOriginalImages" localmode="modern" access="remote" returntype="any" output="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qImages=0;
 	var r=0;
 	var theMeta=0;
@@ -2206,7 +2206,7 @@ application.zcore.imageLibraryCom.getViewOriginalImagesURL(image_library_id, ima
 <cffunction name="viewOriginalImages" localmode="modern" access="remote" returntype="any" output="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qImages=0;
 	var r=0;
 	var theMeta=0;

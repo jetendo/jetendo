@@ -242,31 +242,32 @@ ssl session - lost on browser close - lost on server reboot
 	if(not isSessionEnabled()){
 		return;
 	}
-	if(not structkeyexists(request, request.zos.serverSessionVariable)){
+	zos=request.zos;
+	if(not structkeyexists(request, zos.serverSessionVariable)){
 		getSessionId();
 	}
-	if((structkeyexists(request.zos, 'trackingspider') and request.zos.trackingspider) or structcount(arguments.struct) EQ 0){
-		structdelete(application.customSessionStruct, request[request.zos.serverSessionVariable]);
-		structdelete(cookie, request.zos.serverSessionVariable);
+	if(zos.trackingspider or structcount(arguments.struct) EQ 0){
+		structdelete(application.customSessionStruct, request[zos.serverSessionVariable]);
+		structdelete(cookie, zos.serverSessionVariable);
 		return;
 	}
-	if(request.zos.isTestServer){
+	if(not request.zos.enableSiteTemplateCache and zos.isTestServer){
 		// verify recursively all data being put is array, struct, string, boolean, numeric.  No complex types or java allowed
 		checkStruct(arguments.struct);
 	}
 	ts={
 		date: now(),
-		userAgent: request.zos.cgi.http_user_agent,
-		ip: request.zos.cgi.remote_addr,
+		userAgent: zos.cgi.http_user_agent,
+		ip: zos.cgi.remote_addr,
 		data: arguments.struct
 		//,		sslSessionId:''
 	};
 	/*
-	if(structkeyexists(request.zos.requestData.headers, 'ssl_session_id')){
-		ts.sslSessionId=request.zos.requestData.headers.ssl_session_id;
+	if(structkeyexists(zos.requestData.headers, 'ssl_session_id')){
+		ts.sslSessionId=zos.requestData.headers.ssl_session_id;
 	}*/
 	request.zsession=ts.data;
-	application.customSessionStruct[request[request.zos.serverSessionVariable]]=ts;
+	application.customSessionStruct[request[zos.serverSessionVariable]]=ts;
 	</cfscript>
 </cffunction>
 

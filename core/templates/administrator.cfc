@@ -4,7 +4,7 @@
 	<cfscript>
 	application.zcore.skin.includeCSS("/z/font-awesome/css/font-awesome.min.css");
 	request.zos.includeManagerStylesheet=true;
-	application.zcore.functions.zIncludeZOSFORMS();
+	// application.zcore.functions.zIncludeZOSFORMS();
 	application.zcore.skin.includeCSS("/z/fonts/stylesheet.css");
 	application.zcore.functions.zDisableContentTransition(); 
 	request.managerMobileHeaderCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.mobileHeader");

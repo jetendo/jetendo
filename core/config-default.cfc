@@ -6,11 +6,11 @@
 	<cfargument name="defaultConfig" type="boolean" required="yes">
 	<cfscript>
 	
-	var ts=structnew();
+	var ts=structnew("sync");
     ts.timezone="America/New_York";
 	ts.locale = "en_US"; 
 	// install path of this Application.cfc - It must end with a forward slash.
-	ts.zOS = StructNew();
+	ts.zOS = structnew("sync");
 	// domain to append to ALL of your test domains.
 	ts.zos.testDomain="127.0.0.2.xip.io";
     ts.zos.productionTestDomain="zsite.info"; // configure to be a valid domain you own with wildcard dns record (*) to ease setting up new sites with working dns.
@@ -156,7 +156,7 @@
 	ts.zos.googleMapsApiServerKey=""; // Used for server-side geocoding | create a google maps api key that is restricted by the server & office ip addresses that need access
         
 		
-    ts.zos.adminIpStruct=structnew();
+    ts.zos.adminIpStruct=structnew("sync");
     // developer ips - always set to false;  define one key for each developer
     ts.zos.adminIpStruct["10.0.3.2"]=false;
     ts.zos.adminIpStruct["192.168.56.1"]=false;

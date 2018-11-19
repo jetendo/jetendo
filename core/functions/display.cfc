@@ -168,7 +168,7 @@ application.zcore.functions.zEnableContentTransition(); --->
 	<cfscript>
 	return;
 	/*
-	var local=structnew();
+	
 	skipUrl=structnew(); 
 
 
@@ -263,7 +263,7 @@ application.zcore.functions.zEnableContentTransition(); --->
     <cfargument name="slideshow_id" type="any" required="yes">
 	<cfscript>
 	var qs="";
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	</cfscript>
     <cfsavecontent variable="db.sql">
@@ -288,7 +288,7 @@ zSlideShow(ts);
 <cffunction name="zSlideShow" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var g="";
 	var rs=0;
 	var db=request.zos.queryObject;

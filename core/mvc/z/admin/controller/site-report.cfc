@@ -18,7 +18,7 @@ more?
 	<cfargument name="theHTML" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	local.arrR=arraynew(1);
 	local.links=rereplacenocase(rereplacenocase(replace(replace(arguments.theHTML,chr(9),' ','ALL'),chr(10),'','ALL'),'<script [^>]*>.*?</script>',' ','all'),'<style [^>]*>.*?</style>',' ','all');
@@ -73,7 +73,7 @@ more?
 <cffunction name="zStoreLinkStatus" localmode="modern" output="yes" access="private" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	local.dt=request.zos.mysqlnow;
 	</cfscript>
@@ -771,7 +771,7 @@ more?
 <cffunction name="zIsLinkHashAlreadyChecked" localmode="modern" output="yes" access="private" returntype="any">
 	<cfargument name="link" type="any" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	
 	local.p=find("/", arguments.link, 10);
@@ -808,7 +808,7 @@ more?
 	<cfargument name="link" type="any" required="yes">
 	<cfargument name="status" type="any" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	local.hashLink=hash(arguments.link);
 	</cfscript>

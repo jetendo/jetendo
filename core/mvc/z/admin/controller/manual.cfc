@@ -2,7 +2,7 @@
 <cfoutput>
 <cffunction name="init" access="public" localmode="modern" output="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var s=0;
 	ts={parentIdStruct:{}, idStruct:{}};
 	showAll=application.zcore.functions.zso(form, 'showAllJetendoDocumentation', false, false);
@@ -667,7 +667,7 @@ zdoc css style documentation
 <cffunction name="getContentsBox" access="private" output="yes" localmode="modern">
 	<cfargument name="manualStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	childCount=arraylen(arguments.manualStruct.arrChild);
 	</cfscript>
     <cfif childCount>
@@ -727,7 +727,7 @@ zdoc css style documentation
 <cffunction name="getSectionBox" access="private" output="yes" localmode="modern">
 	<cfargument name="manualStruct" type="struct" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	</cfscript>
     <div class="zdoc-section-box">
         <h3>Full Documentation</h3>
@@ -786,7 +786,7 @@ zdoc css style documentation
  	<cfargument name="arrColumn" type="array" required="yes">
  	<cfargument name="arrRow" type="array" required="yes">
     <cfscript>
-	var local=structnew();
+	
 	rowCount=arraylen(arguments.arrRow);
 	columnCount=arraylen(arguments.arrColumn);
 	writeoutput('<table class="zdoc-table">');

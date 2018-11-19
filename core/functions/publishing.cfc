@@ -125,7 +125,7 @@ result=zHTTPtoFile(source, destinationFile, timeout, throwOnError, useSecureComm
 <cffunction name="zPublishQuery" localmode="modern" output="true" returntype="any">
 	<cfargument name="publishStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var g=0;
 	var ps = arguments.publishStruct;
 	var tempStruct = StructNew();

@@ -3,7 +3,7 @@
     <!--- <cffunction name="edit" localmode="modern" access="remote" returntype="any">
         <cfscript>
 		var db=request.zos.queryObject;
-        var local=structnew();
+        
         this.init();
 	writeoutput('disabled');
 	abort;
@@ -38,7 +38,7 @@
     <cffunction name="view" localmode="modern" access="remote" returntype="any">
         <cfscript>
 		var db=request.zos.queryObject;
-        var local=structnew();
+        
         this.init();
         form.mls_saved_search_id=application.zcore.functions.zso(form, 'mls_saved_search_id', false, '-1');
 	 

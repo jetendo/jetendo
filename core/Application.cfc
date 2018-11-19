@@ -50,7 +50,27 @@ if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "Ah
 	abort;
 }
 // END override cfml admin settings
+ 
+tempCGI=duplicate(CGI);
+requestData=getHTTPRequestData();
 
+if(structkeyexists(requestData.headers,'x-forwarded-for')){
+	if(requestData.headers["x-forwarded-for"] CONTAINS ","){
+		tempCGI.remote_addr=listGetAt(requestData.headers["x-forwarded-for"], 1, ",");
+	}else{
+		tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
+	}
+}else if(structkeyexists(requestData.headers,'remote_addr')){
+	tempCGI.remote_addr=requestData.headers.remote_addr;
+}
+if(structkeyexists(requestData.headers,'http_host')){
+	tempCGI.http_host=requestData.headers.http_host;
+} 
+setupGlobals(tempCGI);
+request.zos.requestLogEntry=requestLogEntry;
+request.zos.requestData=requestData;
+request.zos.cgi=tempCGI; 
+this.onCoreRequest(); 
 </cfscript>
 
 <cffunction name="requestLogEntry" localmode="modern" output="no">
@@ -121,13 +141,13 @@ if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "Ah
 		ts.zos.newMetaTags=false;
 		ts.zos.arrQueryQueue=arraynew(1);
 		ts.zos.queryQueueThreadIndex=1;
-		ts.zos.includePackageStruct=structnew();
+		ts.zos.includePackageStruct=structnew("sync");
 		ts.zos.arrJSIncludes=arraynew(1);
 		ts.zos.arrCSSIncludes=arraynew(1);
-		ts.zos.tempObj=structnew();
-		ts.zos.tableFieldsCache=structnew();
+		ts.zos.tempObj=structnew("sync");
+		ts.zos.tableFieldsCache=structnew("sync");
 		ts.zos.arrQueryLog=arraynew(1);
-		ts.zos.tempRequestCom=structnew();
+		ts.zos.tempRequestCom=structnew("sync");
 		ts.zos.importMlsStruct={};
 		ts.zos.widgetInstanceOffset=0;
 		ts.zos.widgetInstanceLoadCache={};
@@ -148,39 +168,17 @@ if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "Ah
     structappend(this, ds);
 	</cfscript>
 </cffunction>
-	 
-<cfscript>
-tempCGI=duplicate(CGI);
-requestData=getHTTPRequestData();
-
-if(structkeyexists(requestData.headers,'x-forwarded-for')){
-	if(requestData.headers["x-forwarded-for"] CONTAINS ","){
-		tempCGI.remote_addr=listGetAt(requestData.headers["x-forwarded-for"], 1, ",");
-	}else{
-		tempCGI.remote_addr=requestData.headers["x-forwarded-for"];
-	}
-}else if(structkeyexists(requestData.headers,'remote_addr')){
-	tempCGI.remote_addr=requestData.headers.remote_addr;
-}
-if(structkeyexists(requestData.headers,'http_host')){
-	tempCGI.http_host=requestData.headers.http_host;
-} 
-setupGlobals(tempCGI);
-request.zos.requestLogEntry=requestLogEntry;
-request.zos.requestData=requestData;
-request.zos.cgi=tempCGI;
-</cfscript>
 
 <cffunction name="onCoreRequest" localmode="modern" returntype="any" output="yes">
-    <cfscript>
-    var local=structnew();
+    <cfscript> 
     zos=request.zos;
+    zcgi=zos.cgi;
 	zos.arrRunTime=arraynew(1);
     zos.startTime=gettickcount('nano');
 	zos.isDeveloperIpMatch=false;
-    if(structkeyexists(zos.adminIpStruct,zos.cgi.remote_addr)){
+    if(structkeyexists(zos.adminIpStruct,zcgi.remote_addr)){
 		zos.isDeveloperIpMatch=true;
-        if(zos.adminIpStruct[zos.cgi.remote_addr] EQ false){
+        if(zos.adminIpStruct[zcgi.remote_addr] EQ false){
 			if(zos.isTestServer){
 				zos.isDeveloper=true;
 				zos.isDeveloperIpMatch=true;
@@ -197,7 +195,7 @@ request.zos.cgi=tempCGI;
             zos.isServer=true;	
         } 
     }
-	if(zos.isTestServer and zos.cgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){
+	if(zos.isTestServer and zcgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and zcgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){
         zos.isDeveloper=true;
         zos.isServer=false;	
 	} 
@@ -214,7 +212,7 @@ request.zos.cgi=tempCGI;
     </cfif>
     <!--- 
     disable abusive blocks until i'm sure it doesn't block important users.
-    <cfif isDefined('server.#zos.zcoremapping#.abusiveBlockedIpStruct') and structkeyexists(server[zos.zcoremapping].abusiveBlockedIpStruct, zos.cgi.remote_addr)>
+    <cfif isDefined('server.#zos.zcoremapping#.abusiveBlockedIpStruct') and structkeyexists(server[zos.zcoremapping].abusiveBlockedIpStruct, zcgi.remote_addr)>
         <cfheader statuscode="403" statustext="Forbidden"><cfabort>
     </cfif> --->
             
@@ -282,7 +280,7 @@ request.zos.cgi=tempCGI;
         	this.SessionManagement = true;
         }*/
     }else{
-        this.Name = zos.cgi.http_host;
+        this.Name = zcgi.http_host;
         this.ApplicationTimeout = CreateTimeSpan( 30, 0, 0, 0 );
         this.SessionTimeout=CreateTimeSpan(0,0,30,0); 
         this.SessionManagement = true;
@@ -291,22 +289,22 @@ request.zos.cgi=tempCGI;
     
        
         
-    if(zos.cgi.http_host CONTAINS ":"){
-        zos.cgi.http_host=listgetat(zos.cgi.http_host,1,":");
+    if(zcgi.http_host CONTAINS ":"){
+        zcgi.http_host=listgetat(zcgi.http_host,1,":");
     }
-    zos.currentHostName=zos.cgi.http_host;
+    zos.currentHostName=zcgi.http_host;
     if(structkeyexists(cgi, 'server_port_secure') and cgi.server_port_secure EQ 1){
-        zos.cgi.server_port="443";
+        zcgi.server_port="443";
     }
-    zOSTempVar=replace(replacenocase(replacenocase(zos.cgi.http_host,'www.',''),'.'&zos.testDomain,''),".","_","all");
+    zOSTempVar=replace(replacenocase(replacenocase(zcgi.http_host,'www.',''),'.'&zos.testDomain,''),".","_","all");
     Request.zOSHomeDir = zos.sitesPath&zOSTempVar&"/";
     Request.zOSPrivateHomeDir = zos.sitesWritablePath&zOSTempVar&"/";
     
     setEncoding("form","UTF-8");
     setEncoding("url","UTF-8");
 
-    request.zRootDomain=replace(replace(lcase(zos.CGI.http_host),"www.",""),"."&zos.testDomain,"");
-    request.zCookieDomain=replace(lcase(zos.CGI.http_host),"www.","");
+    request.zRootDomain=replace(replace(lcase(zcgi.http_host),"www.",""),"."&zos.testDomain,"");
+    request.zCookieDomain=replace(lcase(zcgi.http_host),"www.","");
     request.zRootPath="/"&replace(request.zRootDomain,".","_","all")&"/"; 
     request.zRootSecureCfcPath="jetendo-sites-writable."&replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&".";
     request.zRootCfcPath=replace(replace(request.zRootDomain,".","_","all"),"/",".","ALL")&"."; 
@@ -330,7 +328,7 @@ request.zos.cgi=tempCGI;
 <cffunction name="getApplicationConfig" localmode="modern" output="no">
     <cfscript>
     var ts=structnew();
-    var local=structnew();
+    
     zos=request.zos;
     if(structkeyexists(server, "zcore_"&zos.installPath&"_cache") and zos.zreset NEQ 'app' and zos.zreset NEQ 'all'){
         structappend(this, server["zcore_"&zos.installPath&"_cache"], true);
@@ -347,9 +345,6 @@ request.zos.cgi=tempCGI;
 	
     </cfscript>
 </cffunction> 
-<cfscript> 
-this.onCoreRequest(); 
-</cfscript>
 	
 <cffunction name="onAbort" localmode="modern" access="public" output="yes">
 	<cfargument name="template" type="string" required="yes" />
@@ -359,4 +354,5 @@ this.onCoreRequest();
 	}
 	</cfscript>
 </cffunction>
+
 </cfcomponent>

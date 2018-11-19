@@ -216,7 +216,7 @@
 	<cfscript>
 	var inputStruct=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qcheckemail10=0;
 	this.init();
 	form.submitPref=application.zcore.functions.zso(form, 'submitPref',false,'Update Communication Preferences');
@@ -1118,7 +1118,7 @@ If the link does not work, please copy and paste the entire link in your browser
 
 <cffunction name="newMemberWelcome" localmode="modern" access="remote">
 	<cfscript>
-	var local=structnew();
+	
 	application.zcore.template.setTag("title","Registration Successful.");
 	application.zcore.template.setTag("pagetitle","Registration Successful.");
 	</cfscript>
@@ -1140,7 +1140,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	<cfscript>
 	var theMeta=0;
 	var c2=0;
-	var local=structnew();
+	
 
 	customURL=application.zcore.functions.zso(request.zos.globals, 'customCreateAccountURL');
 	if(customURL NEQ ""){

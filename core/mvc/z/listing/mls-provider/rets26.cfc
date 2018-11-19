@@ -43,7 +43,7 @@ variables.tableLookup["G"]="G";
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var qZ=0;
 	super.initImport(arguments.resource, arguments.sharedStruct);
 	

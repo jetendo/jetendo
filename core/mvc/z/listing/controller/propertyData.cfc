@@ -1661,7 +1661,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 <cffunction name="getSearchFilter" localmode="modern" output="yes" returntype="any">
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	var flen=0;
 	var db=request.zos.queryObject;
 	var arrcurrentsort=0;

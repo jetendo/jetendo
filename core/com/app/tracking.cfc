@@ -298,7 +298,7 @@ USER WAS PERMANENTLY BLOCKED.');
 		<cfargument name="track_user_id" type="string" required="no" default="#application.zcore.functions.zso(request.zsession, 'track_user_id')#">
 		<cfscript>
 		var qUser="";
-		var local=structnew();
+		
 		return false;
 		</cfscript>
 	</cffunction>
@@ -323,7 +323,7 @@ USER WAS PERMANENTLY BLOCKED.');
 		<cfargument name="track_user_email" type="string" required="yes">
 		<cfscript>
 		var quser=0;
-		var local=structnew();
+		
 		var qupdate=0;
 		var db=request.zos.queryObject;
 		if(structkeyexists(request.zos,'trackingDisabled')) return;
@@ -354,7 +354,7 @@ USER WAS PERMANENTLY BLOCKED.');
 	var track_convert_id=0;
 	var track_page_id='';
 	var i='';
-	var local=structnew();
+	
 	var qInsert='';
 	var qId='';
 	var qConvert='';

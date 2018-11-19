@@ -6,7 +6,7 @@
 		var cfcMethodForced=false;
 		var arrURL="";
 		var inputStruct=""; 
-		var local=structnew();  
+		  
 		request.zos.currentController="";
 		request.zos.routingIsCFC=false; 
 		request.zos.routingArrArguments=arraynew(1);
@@ -311,10 +311,13 @@
 		var comTempPath=arguments.scriptName;
 		rs={};
 		arguments.method=arguments.method;
+		siteStruct=application.sitestruct[request.zos.globals.id];
+		cacheStruct=siteStruct.cfcMetaDataCache;
 		comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-5),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
 		if(left(comPath, 17) EQ "zcorerootmapping."){
 			isServerCFC=true;
-		}else if(len(request.zRootCFCPath) and left(comPath, len(request.zRootCFCPath)) NEQ request.zRootCFCPath){//request.zRootCFCPath){
+			cacheStruct=application.zcore.cfcMetaDataCache;
+		}else if(len(request.zRootCFCPath) and left(comPath, len(request.zRootCFCPath)) NEQ request.zRootCFCPath){ 
 			if(compare(request.zos.globals.id, request.zos.globals.serverid) EQ 0){
 				comPath="zcorerootmapping."&comPath;
 			}else{
@@ -330,9 +333,8 @@
 			}
 			request.znotemplate=true;
 		}
-		siteStruct=application.sitestruct[request.zos.globals.id];
-		notFound=true;
-		if(not request.zos.isTestServer or request.zos.enableSiteTemplateCache){
+		notFound=true; 
+		if(request.zos.enableSiteTemplateCache){
 			if(isServerCFC EQ false and structkeyexists(siteStruct.controllerComponentCache, comPath)){
 				rs.routingCurrentComponentObject=duplicate(siteStruct.controllerComponentCache[comPath]);
 				notFound=false;
@@ -343,34 +345,23 @@
 				rs.routingCurrentComponentObject=duplicate(siteStruct.comCache[comPath]);
 				notFound=false;
 			}
-		}
-		if(notFound){
-			if(request.zos.isTestServer and not request.zos.enableSiteTemplateCache){
-				// doesn't happen when debugging or load testing
-				rs.routingCurrentComponentObject=createobject("component",comPath);
-			}else{
-				rs.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath, true);
+			if(notFound){
+				rs.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath);
 				siteStruct.comCache[comPath]=rs.routingCurrentComponentObject;
 			}
-		}
+		}else{
+			rs.routingCurrentComponentObject=createobject("component",comPath);
+		} 
 		if(structkeyexists(rs.routingCurrentComponentObject,arguments.method) EQ false){
 			application.zcore.functions.z404("Component method doesn't exist. Method = ""#arguments.method#""");
-		}
-		if(isServerCFC){
-			cacheStruct=application.zcore.cfcMetaDataCache;
-		}else{
-			cacheStruct=siteStruct.cfcMetaDataCache;
-		}
-		if((request.zos.isTestServer and not request.zos.enableSiteTemplateCache) or structkeyexists(cacheStruct, comPath) EQ false){
+		} 
+		if(not request.zos.enableSiteTemplateCache or structkeyexists(cacheStruct, comPath) EQ false){
 			commeta=GetMetaData(rs.routingCurrentComponentObject);
-			cacheStruct[comPath]=commeta;
-		}else{
-			commeta=cacheStruct[comPath];
-		}
-		if((request.zos.isTestServer and not request.zos.enableSiteTemplateCache) or structkeyexists(cacheStruct,comPath&":"&arguments.method) EQ false){
+			cacheStruct[comPath]=commeta; 
 			tempcommeta=GetMetaData(rs.routingCurrentComponentObject[arguments.method]);
 			cacheStruct[comPath&":"&arguments.method]=tempcommeta;
 		}else{
+			commeta=cacheStruct[comPath];
 			tempcommeta=cacheStruct[comPath&":"&arguments.method];
 		}
 		if(tempcommeta.access NEQ 'remote'){
@@ -1225,7 +1216,7 @@
 	<cfargument name="theC" type="string" required="yes">
 	<cfargument name="proxyURL" type="string" required="yes">
 	<cfscript>
-    var local=structnew();
+    
     arguments.theC=replace(arguments.theC,chr(13),"","all");
     arguments.theC=replace(arguments.theC,chr(9)," ","all");
     arguments.theC=replace(arguments.theC,chr(10)&chr(10),chr(10),"all");
@@ -1301,7 +1292,7 @@
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var ts=arguments.ss;
 	var row=0;
 	t9=structnew();
@@ -1400,7 +1391,7 @@
 <cffunction name="processInternalURLRewrite" localmode="modern" output="yes" returntype="any">
 	<cfargument name="theURL" type="string" required="yes">
 	<cfscript>
-	var local=structnew();
+	
 	newScriptName="";
 	isDir=false;
 	entireURL=trim(arguments.theURL);
@@ -1826,7 +1817,7 @@
 
 
 <cffunction name="convertRewriteToStruct" localmode="modern" output="no" returntype="any"><cfargument name="sharedStruct" type="struct" required="yes"><cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	 db.sql="SELECT site.site_domain, rewrite_rule.* FROM #db.table("site", request.zos.zcoreDatasource)# site, 
 	 #db.table("rewrite_rule", request.zos.zcoreDatasource)# rewrite_rule 

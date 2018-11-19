@@ -205,7 +205,7 @@
 	var i=0;
 	var g=0;
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 	var qChildren="";
 	var rs=StructNew();
 	var spaces="";
@@ -329,7 +329,7 @@
 		var db=request.zos.queryObject;
 	var returnText='';
 	var i=0;
-		var local=structnew();
+		
 	var qrental=0;
 	var qrentalcat=0;
 	var t2=0;
@@ -487,7 +487,7 @@
     	<cfargument name="site_id" type="numeric" required="yes" hint="site_id that need to be cached.">
     	<cfscript>
 		var i=0;
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		var arrColumns=0;
 		var qdata=0;
@@ -525,7 +525,7 @@
 		<cfargument name="sharedStruct" type="struct" required="yes">
     	
     	<cfscript>
-		var local=structnew();
+		
 		var t9=0;
 		var qrentalcat=0;
 		var db=request.zos.queryObject;
@@ -679,7 +679,7 @@
     	<cfscript>
 		var qConfig=0;
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		var rCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.zos.return");
 		</cfscript>
     	<!--- delete all rental and rental_group and images? --->
@@ -785,7 +785,7 @@
 		var thetext=0;
 		var db=request.zos.queryObject;
 		var qconfig="";
-		var local=structnew();
+		
 		var ts=0;
 		var rs=structnew();
 		var rCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.zos.return");

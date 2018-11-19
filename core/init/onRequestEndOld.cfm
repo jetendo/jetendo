@@ -1,5 +1,5 @@
 <cffunction name="OnRequestEnd" localmode="modern" access="public" returntype="void" output="true" hint="Fires after the page processing is complete."><cfscript>
-	var local=structnew();
+	
 	var template=0;
 	var db=request.zos.queryObject;
 	notemplate=false; 

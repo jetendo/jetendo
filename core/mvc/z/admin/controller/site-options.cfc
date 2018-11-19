@@ -372,7 +372,7 @@
 	<cfargument name="parent_id" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	if(arguments.set_id EQ false){
 		setSQL="";	
 	}else{

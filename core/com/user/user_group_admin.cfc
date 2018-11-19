@@ -123,7 +123,7 @@
 		<cfargument name="user_group_id" type="string" required="yes">
 		<cfargument name="site_id" type="string" required="yes">
 		<cfscript>
-		var local=structnew();
+		
 		var qAdmin=0;
 		var db=request.zos.queryObject;
 		var qDelete = "";
@@ -168,7 +168,7 @@
 	<cffunction name="getPrimary" localmode="modern" output="false" returntype="any">
 		<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
         <cfscript>
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		</cfscript>
 		<cfsavecontent variable="db.sql">
@@ -190,7 +190,7 @@
 		<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
         <cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		</cfscript>
 			<cfsavecontent variable="db.sql">
 			UPDATE #db.table("user", request.zos.zcoreDatasource)# user_group 
@@ -216,7 +216,7 @@
 		<cfargument name="site_id" type="string" required="yes">
         <cfscript>
 		var db=request.zos.queryObject;
-		var local=structnew();
+		
 		</cfscript>
 		<!--- option: all sites or current site only! --->
 		<cfsavecontent variable="db.sql">
@@ -251,7 +251,7 @@
 		var current=0;
 		var shareUser=0;
 		var i=0;
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		</cfscript>
 		<cfsavecontent variable="db.sql">
@@ -389,7 +389,7 @@
 		var db=request.zos.queryObject;
 		var qGroup=0;
 		var cfcatch=0;
-		var local=structnew();
+		
 		db.sql="SELECT * FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
 		WHERE user_group_id = #db.param(arguments.user_group_id)# and 
 		site_id = #db.param(arguments.site_id)# and 
@@ -438,7 +438,7 @@
 		<cfargument name="user_group_id" type="string" required="yes">
 		<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
         <cfscript>
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		if(request.zos.globals.id NEQ arguments.site_id){
 			db.sql="SELECT user_group_name FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
@@ -466,7 +466,7 @@
 		<cfargument name="user_group_id" type="string" required="yes">
 		<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
         <cfscript>
-		var local=structnew();
+		
 		var db=request.zos.queryObject;
 		</cfscript>
 		<cfif request.zos.globals.id NEQ arguments.site_id>
@@ -509,7 +509,7 @@
 	var excpt=0;
 	var cfcatch=0;
 	var qSite=0;
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	</cfscript>
 	<cfif request.zos.globals.id NEQ arguments.site_id>

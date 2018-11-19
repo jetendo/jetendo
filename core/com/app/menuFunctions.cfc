@@ -64,7 +64,7 @@ zMenu#variables.qView.menu_id#Vertical=true;/* ]]> */</script>');
 	<cfargument name="menu_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
     <cfscript>
-	var local=structnew();
+	
 	var qview2=0;
 	var ts=structnew();
 	var theCSS=0;

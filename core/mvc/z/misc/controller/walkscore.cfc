@@ -1,6 +1,6 @@
 <cfcomponent>
     <cffunction name="index" localmode="modern" access="remote" output="yes" returntype="any">
-        <cfoutput><cfscript>var local=structnew();
+        <cfoutput><cfscript>
         application.zcore.functions.zNoCache();
         request.znotemplate=1;
         local.jsonText="";

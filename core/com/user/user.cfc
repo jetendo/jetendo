@@ -25,7 +25,7 @@ this.customStruct = StructNew();
 	<cfscript> 
 	var qmember=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 	var user_group_id = userGroupCom.getGroupId('agent',request.zos.globals.id);
 	var user_group_id2 = userGroupCom.getGroupId('broker',request.zos.globals.id);
@@ -133,7 +133,7 @@ this.customStruct = StructNew();
 	<cfscript>
 	var qLog=0;
 	var db=request.zos.queryObject;
-	var local=structnew();
+	
 	/* definition of status numbers:
 	0 - failed login attempt
 	1 - successful login
@@ -217,7 +217,7 @@ userCom.checkLogin(inputStruct);
 	var qUserCheck = "";
 	var i = "";
 	var sql = "";
-	var local=structnew();
+	
 	var oldDate=0;
 	var arrG=0;
 	var ss = arguments.inputStruct;
@@ -810,7 +810,7 @@ userCom.checkLogin(inputStruct);
 	var qUser = "";
 	var i=0;
 	var ts=StructNew();
-	var local=structnew();
+	
 	var userSiteId='user';
 	var qCustom=0;
 	var db=request.zos.queryObject;
@@ -1133,7 +1133,7 @@ formString = userCom.loginForm(inputStruct);
 	<cfscript>
 	var ss = StructNew();
 	var i = 0;
-	var local=structnew();
+	
 	var ts=structnew(); 
 	var returnStruct = application.zcore.functions.zGetRepostStruct();
 	var returnString = "";
@@ -1354,7 +1354,7 @@ formString = userCom.loginForm(inputStruct);
 
 <cffunction name="displayTokenScripts" localmode="modern" access="public">
 	<cfscript>
-	var local=structnew();
+	
 	if(structkeyexists(request.zos, 'displayTokenScriptsRan')){
 		return;
 	}
@@ -1406,7 +1406,7 @@ formString = userCom.loginForm(inputStruct);
 
 <cffunction name="verifyToken" localmode="modern" output="yes" returntype="any">
 	<cfscript>
-	var local=structnew();
+	
 	var db=request.zos.queryObject;
 	var inputStruct=0;
 	var local.debug=false;

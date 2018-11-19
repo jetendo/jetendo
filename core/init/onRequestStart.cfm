@@ -44,7 +44,7 @@
 		OnApplicationListingStart();
 	}
 	if(request.zos.zreset EQ "site" or request.zos.zreset EQ "all"){
-		temp34=structnew();
+		temp34=structnew("sync");
 		temp34.site_id=request.zos.globals.id;
 		temp34.globals=application.zcore.siteGlobals[request.zos.globals.id];//request.zos.globals;  
 		temp34=application.zcore.functions.zGetSite(temp34);
@@ -138,7 +138,7 @@
 	<cfscript>
 	id=arguments.site_id;
 	siteStartTickCount=getTickCount();
-	ts=structnew();
+	ts=structnew("sync");
 	timeLimit=0; 
 	sleepTime=500;
 	while(not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'serverglobals')){
@@ -522,7 +522,7 @@
 		}
 		
 		if(zos.disableSystemCaching or structkeyexists(application,'sitestruct') EQ false or structkeyexists(application.sitestruct, site_id) EQ false or  not structkeyexists(application.sitestruct[site_id], 'getSiteRan') or zos.zreset EQ "site" or zos.zreset EQ "all"){
-			temp34=structnew();
+			temp34=structnew("sync");
 			temp34.site_id=site_id;
 			temp34.globals=application.zcore.siteGlobals[site_id];//zos.globals;  
 			temp34=application.zcore.functions.zGetSite(temp34);
@@ -637,7 +637,7 @@
 		}
 		if(structkeyexists(application.zcore.resetApplicationTrackerStruct, variables.site_id)){
 			structdelete(application.zcore.resetApplicationTrackerStruct, variables.site_id);
-			temp34=structnew();
+			temp34=structnew("sync");
 			temp34.site_id=variables.site_id;
 			temp34.globals=zos.globals;
 			temp34=application.zcore.functions.zGetSite(temp34);
@@ -768,27 +768,27 @@
 		}
 	}
 	if(structkeyexists(request.zsession, 'user')){
-		ts=structnew();
+		ts=structnew("sync");
 		ts.name="zLoggedIn";
 		zos.userSession=duplicate(request.zsession.user);
 		ts.value="1";
 		ts.expires=this.sessiontimeout;
 		application.zcore.functions.zCookie(ts); 
 
-		ts=structnew();
+		ts=structnew("sync");
 		ts.name="zSessionExpireDate";
 		ts.value=getHttpTimeString(now()+this.sessiontimeout);
 		ts.expires=this.sessiontimeout;
 		application.zcore.functions.zCookie(ts); 
 
 		if(structkeyexists(request.zsession, 'user') and structkeyexists(request.zsession.user.groupAccess, "administrator")){
-			ts=structnew();
+			ts=structnew("sync");
 			ts.name="zIsAdmin";
 			ts.value="1";
 			ts.expires=this.sessiontimeout;
 			application.zcore.functions.zCookie(ts); 
 		}else{
-			ts=structnew();
+			ts=structnew("sync");
 			ts.name="zIsAdmin";
 			ts.value="";
 			ts.expires=this.sessiontimeout;
@@ -917,7 +917,7 @@
 			}
 		}
 	}
-	zos.templateData=structnew();
+	zos.templateData=structnew("sync");
 	application.zcore.template.init2(); 
 	if(structkeyexists(form,zos.urlRoutingParameter) and form[zos.urlRoutingParameter] NEQ ""){
 		 request.cgi_script_name=application.zcore.routing.processInternalURLRewrite(form[zos.urlRoutingParameter]);
@@ -986,7 +986,7 @@
 	
 	if(left(zos.originalURL, len("/z/server-manager/api/")) EQ "/z/server-manager/api/"){
 		
-		ts = StructNew();
+		ts = structnew("sync");
 		ts.secureLogin=true;
 		ts.noRedirect=true;
 		ts.noLoginForm=true;
@@ -1070,7 +1070,7 @@
 			request.disablesharethis=true;
 			// don't try to login again when already logged in
 			if(not application.zcore.user.checkGroupAccess("user")){
-				inputStruct = StructNew();
+				inputStruct = structnew("sync");
 				if(globals.requireSecureLogin EQ 1){
 					inputStruct.secureLogin=true;
 				}else{
@@ -1204,7 +1204,7 @@
 			}
 			if(not runningTask){
 				if(not application.zcore.user.checkServerAccess()){
-					ts = StructNew();
+					ts = structnew("sync");
 					ts.secureLogin=true;
 					ts.noRedirect=true;
 					ts.noLoginForm=true;
@@ -1261,7 +1261,7 @@
 		if(structkeyexists(application.sitestruct[zos.globals.id],'onSiteRequestStartEnabled') and application.sitestruct[zos.globals.id].onSiteRequestStartEnabled){
 			application.sitestruct[zos.globals.id].zcorecustomfunctions.onSiteRequestStart(variables);
 		}
-		application.zcore.functions.zIncludeZOSFORMS();
+		// application.zcore.functions.zIncludeZOSFORMS();
 		try{
 			login applicationtoken="#application.applicationname#"{
 			}

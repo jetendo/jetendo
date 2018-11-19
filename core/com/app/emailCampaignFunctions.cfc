@@ -213,7 +213,7 @@ emailCom.setEmailCampaignStatus(zemail_campaign_id, zemail_campaign_status, site
 	<cfargument name="zemail_campaign_status" type="numeric" required="yes">
 	<cfargument name="site_id" type="numeric" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	var local=structnew();
+	
 	var qcheck='';
 	var db=request.zos.queryObject;
 	</cfscript>

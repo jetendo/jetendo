@@ -24,7 +24,7 @@
 
 <cffunction name="deployCfmlArchive" localmode="modern" access="private" output="no">
 	<cfscript>
-	var local=structnew();
+	
 	var qDir=0;
 	var r1=0; 
 	variables.init();
