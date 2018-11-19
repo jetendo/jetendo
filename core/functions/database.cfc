@@ -1263,7 +1263,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 				if(arguments.currentRow GT arguments.queryName.recordcount){
 					struct[columnName&arguments.currentRow]="";
 				}else{
-					struct[columnName&arguments.currentRow]=arguments.queryName[columnName][arguments.currentRow];
+					struct[columnName&arguments.currentRow]=isNull(arguments.queryName[columnName][arguments.currentRow])?"":arguments.queryName[columnName][arguments.currentRow];
 				}
 			}
 		}
@@ -1274,7 +1274,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 				if(arguments.currentRow GT arguments.queryName.recordcount){
 					struct[columnName]="";
 				}else{
-					struct[columnName]=arguments.queryName[columnName];
+					struct[columnName]=isNull(arguments.queryName[columnName][currentRow])?"":arguments.queryName[columnName][currentRow];
 				}
 			}
 		} 

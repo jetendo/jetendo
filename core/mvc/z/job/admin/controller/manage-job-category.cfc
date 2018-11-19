@@ -382,11 +382,15 @@
 		echo('<a href="/z/job/admin/manage-job-category/edit?job_category_id=#row.job_category_id#&amp;modalpopforced=1"  onclick="zTableRecordEdit(this);  return false;">Edit</a>');
 
 		echo(' | ');
+		if(row.count GT 0){
+			echo('<a title="You must remove the jobs from this category before deleting it.">Delete disabled</a>');
+		}else{
 
-		if ( not application.zcore.functions.zIsForceDeleteEnabled(row.job_category_unique_url) ) {
-			echo( 'Locked' );
-		} else {
-			echo( '<a href="##" onclick="zDeleteTableRecordRow(this, ''/z/job/admin/manage-job-category/delete?job_category_id=#row.job_category_id#&amp;returnJson=1&amp;confirm=1''); return false;">Delete</a>');
+			if ( not application.zcore.functions.zIsForceDeleteEnabled(row.job_category_unique_url) ) {
+				echo( 'Locked' );
+			} else {
+				echo( '<a href="##" onclick="zDeleteTableRecordRow(this, ''/z/job/admin/manage-job-category/delete?job_category_id=#row.job_category_id#&amp;returnJson=1&amp;confirm=1''); return false;">Delete</a>');
+			}
 		}
 
 		echo( '</td>' );

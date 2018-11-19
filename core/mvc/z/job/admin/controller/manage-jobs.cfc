@@ -509,7 +509,7 @@
 			if(jobStartDate EQ ""){
 				jobStartDate=application.zcore.functions.zso(form, 'job_posted_datetime_date');
 				jobStartTime=application.zcore.functions.zso(form, 'job_posted_datetime_time');
-			}
+			}  
 			jobEndDate=form.job_closed_datetime;
 			jobEndTime=form.job_closed_datetime;
 			if(jobEndDate EQ ""){
