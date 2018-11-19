@@ -40,8 +40,7 @@ if(isDefined('zCampaignIndex')){
 form.sid = application.zcore.status.getField(form.zid, 'site_id');
 if(form.sid EQ '1'){
 	application.zcore.functions.zRedirect(request.cgi_script_name);
-}
-//request.zos.page.setActions(structnew());
+} 
 request.zscriptname=request.cgi_script_name&"?zid=#form.zid#&sid=#form.sid#";
 
 	application.zcore.functions.zstatushandler(request.zsid);

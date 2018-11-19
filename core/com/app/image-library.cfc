@@ -1293,7 +1293,7 @@ application.zcore.imageLibraryCom.getImageSQL(ts);
 	if(arguments.ss.image_library_id_field EQ ""){
 		application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - displayImages() failed because arguments.ss.image_library_id_field is required.");	
 	}
-	rs.leftJoin="LEFT JOIN "&db.table("image", request.zos.zcoreDatasource)&" image#i# ON 
+	rs.leftJoin="LEFT JOIN "&db.table("image", request.zos.zcoreDatasource)&" image#i# FORCE INDEX(`newIndex3`) ON 
 	"&arguments.ss.image_library_id_field&" = image#i#.image_library_id and ";
 	if(arguments.ss.count){
 		rs.leftJoin&=" image#i#.image_sort <= '#application.zcore.functions.zescape(arguments.ss.count)#' and ";

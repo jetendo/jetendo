@@ -175,13 +175,7 @@
 <cffunction name="setScriptDate" localmode="modern" output="false" returntype="any">
 	<cfargument name="path" type="string" required="yes">
 	<cfscript>
-	return false;
-	/*if(request.zos.templateData.dateDisabled) return;
-	arguments.path=replaceNoCase(replaceNoCase(arguments.path,'\','/','ALL'),request.zos.globals.homedir, '/');
-	request.zos.templateData.dateSet=true;
-	this.setDate(request.zos.page.getFileDate(arguments.path));	
-	return 	request.zos.page.getFileDate(arguments.path);
-	*/
+	return false; 
 	</cfscript>
 </cffunction>
 

@@ -56,7 +56,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfargument name="configStruct" type="struct" required="yes">
 		<cfscript>
 		var processedSQL=0;
-		if(arguments.configStruct.verifyQueriesEnabled){
+		if(arguments.configStruct.verifyQueriesEnabled and not structkeyexists(form, 'zab')){
 			if(compare(arguments.configStruct.sql, variables.lastSQL) NEQ 0){
 				variables.lastSQL=arguments.configStruct.sql;
 				variables.verifySQLParamsAreSecure(arguments.configStruct);
@@ -297,31 +297,31 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			throw("The sql statement must be set before executing the query;", "database");
 		}
 		
-		local.processedSQL=variables.processSQL(arguments.configStruct);
-		if(arguments.configStruct.cacheEnabled and arguments.configStruct.cacheForSeconds and left(local.processedSQL, 7) EQ "SELECT "){
-			local.tempCacheEnabled=true;
+		processedSQL=variables.processSQL(arguments.configStruct);
+		if(arguments.configStruct.cacheEnabled and arguments.configStruct.cacheForSeconds and left(processedSQL, 7) EQ "SELECT "){
+			tempCacheEnabled=true;
 		}else{
-			local.tempCacheEnabled=false;
+			tempCacheEnabled=false;
 		}
-		if(local.tempCacheEnabled){
-			local.nowDate=now();
-			local.cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, local.processedSQL, local.nowDate);
-			if(local.cacheResult.success){
-				return {success:true, result:local.cacheResult.result};
+		if(tempCacheEnabled){
+			nowDate=now();
+			cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, processedSQL, nowDate);
+			if(cacheResult.success){
+				return {success:true, result:cacheResult.result};
 			}
 		}
 		try{
-			local.result=variables.runQuery(arguments.configStruct, arguments.name, local.processedSQL, arguments.timeout);
+			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout);
 		}catch(database errorStruct){
 			arguments.configStruct.dbQuery.reset();
 			rethrow;
 		}
 		arguments.configStruct.dbQuery.reset();
-		if(isQuery(local.result)){
-			if(local.tempCacheEnabled){
-				cacheStruct[local.cacheResult.hashCode]={date:local.nowDate, result:local.result};
+		if(isQuery(result)){
+			if(tempCacheEnabled){
+				cacheStruct[cacheResult.hashCode]={date:nowDate, result:result};
 			}
-			return {success:true, result:local.result};
+			return {success:true, result:result};
 		}else{
 		  	  return {success:true, result: true};
 		}
@@ -449,11 +449,11 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			parseStruct.whereStatement="";
 		}
 		parseStruct.arrLeftJoin=arraynew(1);
-		local.matching=true;
-		local.curPos=1;
-		while(local.matching){
+		matching=true;
+		curPos=1;
+		while(matching){
 			tableStruct=structnew();
-			tableStruct.leftJoinPos=findnocase(" left join ",tempSQL, local.curPos);
+			tableStruct.leftJoinPos=findnocase(" left join ",tempSQL, curPos);
 			if(tableStruct.leftJoinPos EQ 0) break;
 			tableStruct.onPos=findnocase(" on ",tempSQL, tableStruct.leftJoinPos+1);
 			if(tableStruct.onPos EQ 0 or tableStruct.onPos GT parseStruct.firstWHEREPos){
@@ -464,13 +464,13 @@ Copyright (c) 2013 Far Beyond Code LLC.
 				tableStruct.table=trim(replace(tableStruct.table, arguments.configStruct.identifierQuoteCharacter,"","all"));
 			}
 			if(tableStruct.table CONTAINS " as "){
-				local.stringPosition=findnocase(" as ",tableStruct.table);
-				tableStruct.tableAlias=trim(mid(tableStruct.table, local.stringPosition+4, len(tableStruct.table)-(local.stringPosition+3)));
-				tableStruct.table=trim(left(tableStruct.table,local.stringPosition-1));
+				stringPosition=findnocase(" as ",tableStruct.table);
+				tableStruct.tableAlias=trim(mid(tableStruct.table, stringPosition+4, len(tableStruct.table)-(stringPosition+3)));
+				tableStruct.table=trim(left(tableStruct.table,stringPosition-1));
 			}else if(tableStruct.table CONTAINS " "){
-				local.stringPosition=findnocase(" ",tableStruct.table);
-				tableStruct.tableAlias=trim(mid(tableStruct.table, local.stringPosition+1, len(tableStruct.table)-(local.stringPosition)));
-				tableStruct.table=trim(left(tableStruct.table,local.stringPosition-1));
+				stringPosition=findnocase(" ",tableStruct.table);
+				tableStruct.tableAlias=trim(mid(tableStruct.table, stringPosition+1, len(tableStruct.table)-(stringPosition)));
+				tableStruct.table=trim(left(tableStruct.table,stringPosition-1));
 			}else{
 				tableStruct.table=trim(tableStruct.table);
 				tableStruct.tableAlias=trim(tableStruct.table);
@@ -495,7 +495,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 					tableStruct.tableAlias=trim(listgetat(tableStruct.tableAlias,2,"."));
 				}
 			}
-			local.curPos=tableStruct.onPos+1;
+			curPos=tableStruct.onPos+1;
 			arrayappend(parseStruct.arrLeftJoin, tableStruct);
 		}
 		
@@ -566,44 +566,50 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			}
 		}
 		if(parseStruct.fromPos){
-			local.c2=mid(tempSQL, parseStruct.fromPos+5, parseStruct.endOfFromPos-(parseStruct.fromPos+5));
-			local.c2=replacenocase(replacenocase(replacenocase(replacenocase(replace(replace(local.c2,")"," ","all"),"("," ","all"), " STRAIGHT_JOIN ", " , ","all"), " CROSS JOIN ", " , ","all"), " INNER JOIN ", " , ","all"), " JOIN ", " , ","all");
-			local.arrT2=listtoarray(local.c2, ","); 
-			for(i=1;i LTE arraylen(local.arrT2);i++){
-				local.arrT2[i]=trim(local.arrT2[i]);
-				if(local.arrT2[i] EQ "''"){
+			c2=mid(tempSQL, parseStruct.fromPos+5, parseStruct.endOfFromPos-(parseStruct.fromPos+5));
+			c2=replacenocase(replacenocase(replacenocase(replacenocase(replace(replace(c2,")"," ","all"),"("," ","all"), " STRAIGHT_JOIN ", " , ","all"), " CROSS JOIN ", " , ","all"), " INNER JOIN ", " , ","all"), " JOIN ", " , ","all");
+			arrT2=listtoarray(c2, ","); 
+			for(i=1;i LTE arraylen(arrT2);i++){
+				arrT2[i]=trim(arrT2[i]);
+				if(arrT2[i] EQ "''"){
 					continue;
 				}
 				tableStruct=structnew();
 				tableStruct.type=fromType;
 		
-				if(local.arrT2[i] CONTAINS " as "){
-					local.stringPosition=findnocase(" as ", local.arrT2[i]);
-					tableStruct.tableAlias=trim(mid(local.arrT2[i], local.stringPosition+4, len(local.arrT2[i])-(local.stringPosition+3)));
-					tableStruct.table=trim(left(local.arrT2[i],local.stringPosition-1));
-				/*}else if(local.arrT2[i] CONTAINS " on "){
-					local.stringPosition=findnocase(" ", local.arrT2[i]);
-					tableStruct.tableAlias=trim(mid(local.arrT2[i], local.stringPosition+1, len(local.arrT2[i])-(local.stringPosition)));
-					tableStruct.table=trim(left(local.arrT2[i],local.stringPosition-1));*/
-				}else if(local.arrT2[i] CONTAINS " "){
-					local.stringPosition=findnocase(" ", local.arrT2[i]);
-					tableStruct.tableAlias=trim(mid(local.arrT2[i], local.stringPosition+1, len(local.arrT2[i])-(local.stringPosition)));
-					tableStruct.table=trim(left(local.arrT2[i],local.stringPosition-1));
+				if(arrT2[i] CONTAINS " as "){
+					stringPosition=findnocase(" as ", arrT2[i]);
+					tableStruct.tableAlias=trim(mid(arrT2[i], stringPosition+4, len(arrT2[i])-(stringPosition+3)));
+					tableStruct.table=trim(left(arrT2[i],stringPosition-1));
+				/*}else if(arrT2[i] CONTAINS " on "){
+					stringPosition=findnocase(" ", arrT2[i]);
+					tableStruct.tableAlias=trim(mid(arrT2[i], stringPosition+1, len(arrT2[i])-(stringPosition)));
+					tableStruct.table=trim(left(arrT2[i],stringPosition-1));*/
+				}else if(arrT2[i] CONTAINS " "){
+					stringPosition=findnocase(" ", arrT2[i]);
+					tableStruct.tableAlias=trim(mid(arrT2[i], stringPosition+1, len(arrT2[i])-(stringPosition)));
+					tableStruct.table=trim(left(arrT2[i],stringPosition-1));
 				}else{
-					tableStruct.table=trim(local.arrT2[i]);
-					tableStruct.tableAlias=trim(local.arrT2[i]);
+					tableStruct.table=trim(arrT2[i]);
+					tableStruct.tableAlias=trim(arrT2[i]);
 				}
-				local.onPos2=findNoCase(" on ", tableStruct.tableAlias);
+				onPos2=findNoCase(" on ", tableStruct.tableAlias);
 				
-				if(local.onPos2){
-					parseStruct.whereStatement&=" and "&mid(tableStruct.tableAlias, local.onPos2+4, (len(tableStruct.tableAlias)-local.onPos2)+5);
-					tableStruct.tableAlias=left(tableStruct.tableAlias, local.onPos2-1);
+				if(onPos2){
+					parseStruct.whereStatement&=" and "&mid(tableStruct.tableAlias, onPos2+4, (len(tableStruct.tableAlias)-onPos2)+5);
+					tableStruct.tableAlias=left(tableStruct.tableAlias, onPos2-1);
 				}
 				if(findnocase(variables.tableSQLString,tableStruct.table) EQ 0){
 					arrayappend(parseStruct.arrError, "All tables in queries must be generated with dbQuery.table(table, datasource); function. This table wasn't: "&tableStruct.table);
 				}else{
 					tableStruct.table=replacenocase(tableStruct.table,variables.tableSQLString, "");//arguments.configStruct.identifierQuoteCharacter);
 					tableStruct.tableAlias=replacenocase(tableStruct.tableAlias,variables.tableSQLString, "");//arguments.configStruct.identifierQuoteCharacter);
+				}
+				if(tableStruct.tableAlias CONTAINS "FORCE " or tableStruct.tableAlias CONTAINS "USE "){ 
+					tableStruct.tableAlias=trim(listgetat(tableStruct.tableAlias, 1, " "));
+					if(tableStruct.tableAlias EQ "FORCE" or tableStruct.tableAlias EQ "USE"){
+						tableStruct.tableAlias=tableStruct.table;
+					}
 				}
 				arrayappend(parseStruct.arrTable, tableStruct);
 			}
@@ -612,12 +618,12 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		
 		for(i=1;i LTE arraylen(parseStruct.arrLeftJoin);i++){
 			if(i EQ arraylen(parseStruct.arrLeftJoin)){
-				local.np=parseStruct.firstWHEREPos;
+				np=parseStruct.firstWHEREPos;
 			}else{
-				local.np=parseStruct.arrLeftJoin[i+1].leftJoinPos;
+				np=parseStruct.arrLeftJoin[i+1].leftJoinPos;
 			}
-			if(local.np NEQ parseStruct.arrLeftJoin[i].onPos){
-				parseStruct.arrLeftJoin[i].onstatement=mid(tempSQL, parseStruct.arrLeftJoin[i].onPos+4, local.np-(parseStruct.arrLeftJoin[i].onPos+4));
+			if(np NEQ parseStruct.arrLeftJoin[i].onPos){
+				parseStruct.arrLeftJoin[i].onstatement=mid(tempSQL, parseStruct.arrLeftJoin[i].onPos+4, np-(parseStruct.arrLeftJoin[i].onPos+4));
 			}
 		}
 		for(i=1;i LTE arraylen(parseStruct.arrTable);i++){
@@ -636,9 +642,8 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		parseStruct.defaultDatabaseName=arguments.defaultDatabaseName;
 		parseStruct.sql=replace(arguments.sqlString, variables.tableSQLString,"","all");
 
-		for(local.functionIndex in arguments.configStruct.parseSQLFunctionStruct){
-			local.parseFunction=arguments.configStruct.parseSQLFunctionStruct[local.functionIndex];
-			parseStruct=local.parseFunction(parseStruct);
+		for(functionIndex in arguments.configStruct.parseSQLFunctionStruct){
+			parseStruct=arguments.configStruct.parseSQLFunctionStruct[functionIndex](parseStruct); 
 		}
 		if(arraylen(parseStruct.arrError) NEQ 0){
 			throw(arraytolist(parseStruct.arrError, "<br />")&"<br /><br />SQL Statement<br />"&parseStruct.sql, "database");

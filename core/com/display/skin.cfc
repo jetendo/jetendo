@@ -468,8 +468,7 @@
 	}else{
 		s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; 
 	}
-	application.zcore.template[templateTagFunction](templateTagName, s&chr(10), forceFirst);
-	return; 
+	application.zcore.template[templateTagFunction](templateTagName, s&chr(10), forceFirst); 
 </cfscript>
 </cffunction>
 

@@ -1014,8 +1014,7 @@
 		structdelete(application.zcore, 'runOnCodeDeploy');
 		variables.onCodeDeploy();
 	} 
-	
-	//zos.page.forceSynchronization = true;
+	 
 	
 	if(variables.site_id EQ globals.serverid){
 		if(structkeyexists(form,'zOpenIdDomain')){

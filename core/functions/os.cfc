@@ -806,25 +806,24 @@ if(not rs.success){
 	zos.arrCSSIncludes=arrayreverse(zos.arrCSSIncludes);
 	for(i=1;i LTE jsLength;i++){
 		if(zos.arrJSIncludes[i].package EQ ""){ 
-            application.zcore.template.prependTag("scripts",application.zcore.skin.includeJS(request.zos.arrJSIncludes[i].url, 'first'));//request.zos.arrJSIncludes[i].forcePosition));
-			// arrayappend(request.zos.arrScriptIncludeLevel, 1);
-			// arrayprepend(request.zos.arrScriptInclude, zos.arrJSIncludes[i].url);
+            // application.zcore.template.prependTag("scripts",application.zcore.skin.includeJS(request.zos.arrJSIncludes[i].url, 'first'));//request.zos.arrJSIncludes[i].forcePosition));
+			arrayappend(request.zos.arrScriptIncludeLevel, 1);
+			arrayprepend(request.zos.arrScriptInclude, zos.arrJSIncludes[i].url);
 		}
 	}
 	arrCSS=[];
 	for(i=1;i LTE cssLength;i++){
 		if(zos.arrCSSIncludes[i].package EQ ""){ 
-		    application.zcore.template.prependTag("stylesheets",application.zcore.skin.includeCSS(request.zos.arrCSSIncludes[i].url, 'first'));//request.zos.arrCSSIncludes[i].forcePosition));
-
-			// checkPath=zos.arrCSSIncludes[i].url;
-			// if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
-			// 	arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#request.zos.currentHostName##checkPath#" />'); 
-			// }else{
-			// 	arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#checkPath#" />'); 
-			// }
+		    // application.zcore.template.prependTag("stylesheets",application.zcore.skin.includeCSS(request.zos.arrCSSIncludes[i].url, 'first'));//request.zos.arrCSSIncludes[i].forcePosition)); 
+			checkPath=zos.arrCSSIncludes[i].url;
+			if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
+				arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#request.zos.currentHostName##checkPath#" />'); 
+			}else{
+				arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#checkPath#" />'); 
+			}
 		}
 	} 
-	// application.zcore.template.prependTag("meta", arrayToList(arrCSS, chr(10)), true);
+	application.zcore.template.prependTag("stylesheets", arrayToList(arrCSS, chr(10)), true);
 	</cfscript>
 </cffunction>
 

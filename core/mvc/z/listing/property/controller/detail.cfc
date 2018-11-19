@@ -31,8 +31,7 @@ if(application.zcore.functions.zso(os, 'mls_option_detail_layout') EQ 2 and not 
 
 application.zcore.template.setTag("title","Property Detail");
 ts=StructNew();
-ts.list='';
-//request.zos.page.setActions(ts);
+ts.list=''; 
 if(structkeyexists(form, 'searchId') EQ false and isDefined('request.zsession.tempVars.zListingSearchId')){
 	form.searchId=request.zsession.tempVars.zListingSearchId;
 }

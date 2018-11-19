@@ -58,7 +58,7 @@
     	<cfargument name="datasource" type="string" required="no" default="#variables.config.datasource#">
         <cfscript>
 		var zt="";
-		if(variables.config.verifyQueriesEnabled){
+		if(variables.config.verifyQueriesEnabled and not structkeyexists(form, 'zab')){
 			zt=variables.tableSQLString;
 		}
 		if(len(arguments.datasource)){
@@ -73,7 +73,7 @@
 	<cffunction name="trustedSQL" localmode="modern" access="public" returntype="string" output="no">
     	<cfargument name="value" type="string" required="yes">
         <cfscript>
-		if(variables.config.verifyQueriesEnabled){
+		if(variables.config.verifyQueriesEnabled and not structkeyexists(form, 'zab')){
 			return variables.trustSQLString&arguments.value&variables.trustSQLString;
 		}else{
 			return arguments.value;

@@ -1829,47 +1829,9 @@ qXAmenity=db.execute("qXAmenity");
     
     <cffunction name="categoryTemplate" localmode="modern" access="remote" returntype="any">
     	
-<cfscript>
-var ct1948=0;
-var search_rate_high=0;
-var categoryUnique=0;
-var searchaction=0;
-var i=0;
-var qC2=0;
-var search_bathrooms=0;
-var qC=0;
-var arrNav=0;
-var hasInquiryLink=0;
-var qpar=0;
-var selectStruct=0;
-var search_rate_low=0;
-var search_bedrooms=0;
-var search_rental_sort=0;
-var tempRentalHTML=0;
-var parentChildGroupId=0;
-var inquiries_children=0;
-var arrName=0;
-var search_city=0;
-var arrImages=0;
-var temppagenav=0;
-var rs=0;
-var search_max_guest=0;
-var inquiries_adults=0;
-var qrental=0;
-var qchild=0;
-var g=0;
-var site_id=0;
-var parentparentid=0;
-var cpi=0;
-var inquiries_coupon=0;
-var therentalHTMLSection=0;
-var t99=0;
-var search_rental_category_id=0;
-var tempMeta=0;
-var ts=0;
+<cfscript> 
 		var db=request.zos.queryObject;
-application.zcore.app.getAppCFC("rental").onRentalPage();
-//request.zos.page.setActions(structnew());
+application.zcore.app.getAppCFC("rental").onRentalPage(); 
   
 	if(structkeyexists(form, 'rental_category_id') EQ false){
 		application.zcore.functions.z301Redirect('/');
