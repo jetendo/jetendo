@@ -362,7 +362,12 @@
 			cacheStruct[comPath&":"&arguments.method]=tempcommeta;
 		}else{
 			commeta=cacheStruct[comPath];
-			tempcommeta=cacheStruct[comPath&":"&arguments.method];
+			if(structkeyexists(cacheStruct, comPath&":"&arguments.method)){
+				tempcommeta=cacheStruct[comPath&":"&arguments.method];
+			}else{
+				tempcommeta=GetMetaData(rs.routingCurrentComponentObject[arguments.method]);
+				cacheStruct[comPath&":"&arguments.method]=tempcommeta;
+			}
 		}
 		if(tempcommeta.access NEQ 'remote'){
 			application.zcore.functions.z404("The component method must have access=""remote"" to be called directly via the URL. Please change access to remote for Method, ""#arguments.method#"", in #arguments.scriptName# if you need this function to be access remotely.");

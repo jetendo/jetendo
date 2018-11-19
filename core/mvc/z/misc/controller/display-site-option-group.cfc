@@ -108,18 +108,21 @@
 			forceNew=false;
 		}
 		groupCom=application.zcore.functions.zcreateobject("component", cfcpath, forceNew); 
-		 qSet = QueryNew("");//QueryNew(  "site_x_option_group_set_id" , "numeric" , { site_x_option_group_set_id: [setStruct.site_x_option_group_set_id] } );
+		// faster
+		qSet=QueryNew(  "site_x_option_group_set_id" , "numeric" , { site_x_option_group_set_id: [setStruct.site_x_option_group_set_id] } );
+		// old method sent too much
 		// QueryAddColumn(qSet, "site_x_option_group_set_id", "VARCHAR", [setStruct.site_x_option_group_set_id]);
-		for(i in setStruct){ 
-			if(isnull(setStruct[i])){
-		    	QueryAddColumn(qSet, i, "VARCHAR", [""]); 
-			}else{
-		    	QueryAddColumn(qSet, i, "VARCHAR", [setStruct[i]]); 
-		    }
-		}
-		if(not structkeyexists(setStruct, 'recordcount')){
-			QueryAddColumn(qSet, "recordcount", "VARCHAR", [1]);
-		}
+		//  qSet = QueryNew("");
+		// for(i in setStruct){ 
+		// 	if(isnull(setStruct[i])){
+		//     	QueryAddColumn(qSet, i, "VARCHAR", [""]); 
+		// 	}else{
+		//     	QueryAddColumn(qSet, i, "VARCHAR", [setStruct[i]]); 
+		//     }
+		// }
+		// if(not structkeyexists(setStruct, 'recordcount')){
+		// 	QueryAddColumn(qSet, "recordcount", "VARCHAR", [1]);
+		// }
 		groupCom[setStruct.site_option_group_view_cfc_method](qSet);
 	}else{
 		application.zcore.functions.z404("site_option_group_view_cfc_path and site_option_group_view_cfc_method must be set when editing the site option group to allow rendering of the group.");
