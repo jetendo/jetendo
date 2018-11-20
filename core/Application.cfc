@@ -90,19 +90,19 @@ this.onCoreRequest();
 	</cfif>
 </cffunction> 
 
-<cffunction name="setupGlobals" localmode="modern" output="no">
+<cffunction name="setupGlobals" localmode="modern" output="yes">
 	<cfargument name="tempCGI" type="struct" required="yes">
 	<cfscript> 
 	if(structkeyexists(server, "zcore_configCacheStruct") and not structkeyexists(form, 'zreset')){
 		ts=server["zcore_configCacheStruct"];
 		ds=server["zcore_configCacheDatasourceStruct"];
-	}else{
-		if(not structkeyexists(server, "zcore_configcache") or not structkeyexists(form, 'zreset')){
+	}else{ 
+		if(not structkeyexists(server, "zcore_configcache") or structkeyexists(form, 'zreset')){ 
 			server["zcore_configcache"]={
 				defaultConfigCom:createobject("component", "zcorerootmapping.config-default"),
 				configCom:createobject("component", "zcorerootmapping.config")
 			}
-		}
+		} 
 		configCache=server["zcore_configcache"];
 		defaultStruct=configCache.defaultConfigCom.getConfig(arguments.tempCGI, true);
 		structdelete(defaultStruct.zos, 'serverStruct');

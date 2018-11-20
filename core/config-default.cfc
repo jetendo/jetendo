@@ -51,7 +51,7 @@
 		};
 		ts.zos.arrAdditionalLocalIp=["127.0.0.2","127.0.0.3"];
 		ts.zos.defaultSSLManagerDomain="";
-		ts.zos.defaultPasswordVersion=2; // Valid values are 0 - no hash,1 - hash with many iterations or 2 scrypt java.
+		ts.zos.defaultPasswordVersion=3; // Valid values are 0 - no hash,1 - hash with many iterations or 2 scrypt java.
 		ts.zos.passwordExpirationTimeSpan=createtimespan(180, 0, 0, 0); // 180 days is the default
 		ts.zos.isJavaEnabled=false;
 		ts.zos.isImplicitScopeCheckEnabled=true;
@@ -99,7 +99,7 @@
 			}*/
 		};
 		ts.zos.defaultSSLManagerDomain=""; // leave blank until you install a wildcard ssl certificate on this domain's ip.
-		ts.zos.defaultPasswordVersion=2; // Valid values are 0 - no hash,1 - hash with many iterations or 2 scrypt java.
+		ts.zos.defaultPasswordVersion=3; // Valid values are 0 - no hash,1 - hash with many iterations or 2 scrypt java.
 		ts.zos.passwordExpirationTimeSpan=createtimespan(180, 0, 0, 0); // 180 days is the default
 		ts.zos.allowRequestCFC=true;
 		ts.zos.isImplicitScopeCheckEnabled=false;
