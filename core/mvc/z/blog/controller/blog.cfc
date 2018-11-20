@@ -2479,7 +2479,7 @@ this.app_id=10;
 			<hr />
 			</div> 
 			<cfscript> 
-			thread name="blogCommentThread,blogViewPopularThread,blogViewRelatedThread" action="join" timeout="2000";
+			thread name="blogCommentThread,blogViewPopularThread,blogViewRelatedThread" action="join" timeout="10000";
 			echo(cfthread.blogViewRelatedThread.output&cfthread.blogViewPopularThread.output&cfthread.blogCommentThread.output); 
 			</cfscript>
 

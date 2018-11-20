@@ -1612,7 +1612,7 @@ Enter the maximum distance from the center of the primary city that you want the
 		    </cfscript>
 		</cfthread>
 	    </cfloop>
-	    <cfthread action="join" name="#arraytolist(local.arrThread2,',')#" timeout="500"></cfthread>
+	    <cfthread action="join" name="#arraytolist(local.arrThread2,',')#" timeout="50000"></cfthread>
 	    <cfscript>
 	    for(local.i2=1;local.i2 LTE arraylen(local.arrThread);local.i2++){
 		local.ct=cfthread[local.arrThread[local.i2]];

@@ -11,7 +11,7 @@
 	
 	ts.robotThatHitSpamTrap=structnew();
 	
-	ts.mysqlSelectReservedNames=structnew("sync");
+	ts.mysqlSelectReservedNames=structnew();
 	ts.mysqlSelectReservedNames.ALL=true;
 	ts.mysqlSelectReservedNames.DISTINCT=true;
 	ts.mysqlSelectReservedNames.DISTINCTROW=true;
@@ -25,7 +25,7 @@
 	ts.mysqlSelectReservedNames.SQL_CACHE=true;
 	ts.mysqlSelectReservedNames.SQL_CALC_FOUND_ROWS=true; 
 	
-	ts.mysqlDataTypeStruct=structnew("sync");
+	ts.mysqlDataTypeStruct=structnew();
 	ts.mysqlDataTypeStruct["bigint_unsigned"]="cf_sql_char";
 	ts.mysqlDataTypeStruct["bigint"]="cf_sql_char";
 	ts.mysqlDataTypeStruct["mediumint"]="cf_sql_integer";
@@ -145,7 +145,7 @@
 	};
 	
 	
-	t9=structnew("sync");
+	t9=structnew();
 	t9[request.zos.urlRoutingParameter]=true;
 	t9.__zcoreinternalroutingpath=true;
 	t9.zld=true;
@@ -164,7 +164,7 @@
 	t9.zPassword=true;
 	ts.repostVarsIgnoreStruct=t9;
 	
-	t9=structnew("sync");
+	t9=structnew();
 	t9.disableContentMeta=false;
 	t9.arrContentReplaceKeywords=arraynew(1);
 	t9.searchincludebars=false;
@@ -181,7 +181,7 @@
 	t9.contentEmailFormat=false;
 	ts.contentDefaultConfigStruct=t9;
 	// server globals
-	ts.serverGlobals=structnew("sync"); 
+	ts.serverGlobals=structnew(); 
 	
 
 
@@ -194,7 +194,7 @@
 	}
 	ts.referrerlistReplace=arrayToList(arrList, ",");
 
-	t3=structnew("sync");
+	t3=structnew();
 	t3["/z/misc/system/ext"]="";
 	t3["/z/listing/inquiry/index"]="";
 	t3["/z/listing/inquiry-pop/index"]="";
@@ -202,7 +202,7 @@
 	ts.spiderList="social_buttons,simple_share_buttons,bot,spider,scrape,purebot,mrsputnik,jikespider,voilabot,yandexbot,lycosa.se,facebookfeedparser,sogou_web_spider,ezooms,mj12bot,bingbot,sistrix_crawler,abachobot,abcdatos_botlink_,accoona_ai_agent,ace_explorer,acoon,aesop_com_spiderman,ah_ha_com_crawler,aipbot,aitcsrobot_,alkalinebot,almaden,answerbus_,anthillv_,aolserver_tcl,appie,arachnoidea,arachnophilia,araneo_,araybot_,architextspider,arks_,aspider_,atlocalbot,atn_worldwide,atomz,auditbot,auresys_,autolinkspro_link_checker_,awapclient,backrub_,baiduspider_,bayspider,bbot_,bigcliquebot,big_brother,bjaaland_,blackberry,blackwidow,blogslive_,blogssay_blog_search_crawler_,boitho_com_dc,borg_bot_,botswana_v_,boxseabot_,bravobrian_bstop_bravobrian_it,bruinbot_,bspider_libwww_perl_,bumblebee_relevare_com,buscaplus_robi,butch_,cactvs_chemistry_spider,calif_,cehmgnkabgxpet_tksgsybnlkj_h_qeteeyp,cfetch,checkbot_x_xx_lwp_x,cienciaficcion_net_spider,cipinetbot,cjnetworkquality_,clever_components_downloader,cmc_,combine,computingsite_robi_,confuzzledbot_x_x,contactbot,converacrawler,converamultimediacrawler,coolbot,cosmixcrawler,cosmos_,crawlconvera_,crawlpaper_n_n_n,curl,cusco_,cyberspyder_,cydralspider,cydralspider_x_x,cyveillance,datacha_s,deepak_usc,deepindex,desertrealm_com_j_,deweb_,diamond,diamondbot,dienstspider_,die_blinde_kuh,digger_jdk_,digimarc_cgireader_,digimarc_webreader_,diibot,dlw_robot_x_y,dnabot_,dnsyu_gedsariwq_nwdfrpmu_gscpoywyn_,dpeoorctnm_ryvitlkrr,dragonbot_libwww_,dtsearch,dumbot,duppies,dwcp_,ebiness_a,eit_link_verifier_robot_,elfinbot,emacs_w_v_,emailsiphon,emc_spider,emeraldshield_com_webbot,esculapio_,esirover_v_,esismartspider,esther,evliya_celebi,experibot,expired_domain_sleuth,explorersearch,extreme_picture_finder,ezresult,fastcrawler_x,fast_crawler_v_x,fast_enterprise_crawler_used_by_fast_,fast_partnersite_crawler,fast_webcrawler,fdm_x,feedfetcher_google_,feedfinder,feedster_crawler,feedvalidator,felixide_,fetch_libfetch,fido,fido_harvest_pl_,findexa_crawler_,findimbot,findlinks,fish_search_robot,fluffy_the_spider,freecrawl,funnelweb_,gaisbot,gammaspider_xxxxxxx_,gazz_,gcreep_,geniebot_,geniebot_wgao_genieknows_com,gestalticonoclast_libwww_fm_,gethtmlcontents_,geturl_rexx_v_,gigabot,gigabotsitesearch,girafa_com,golem_,googlebot,googlebot_image,googlebot_x,grabber,griffon_,gromit_,grub_crawler,gulliver,gulper,gulper_web_bot_,harvest,havindex_x_xx_bxx_,henrythemiragorobot,hl_ftien_spider,holmes,hometown_spider_pro,htdig_b_,htmlgobble_v_,http_www_sygol_com,hämähäkki_,iajabot_,ia_archiver,ichiro,iltrovatore_setaccio,imac_,image_kapsi_net_,incywincy_b_,indy_library,ineturl,informant,infoseek_robot_,infoseek_sidewinder,infospiders_,ingrid_,innerprisebot,inspectorwww_,internet_cruiser_robot_,ip_works_v_http,irlbot,israelisearch_,i_robot_,jakarta_commons_httpclient,javabee,jayde_crawler_http_,jbot,jcrawler_,jetbot,jobo,jobot_alpha_libwww_perl_,jubiirobot_version_,jumpstation,katipo_,kdd_explorer_,kit_fireball_,ko_yappo_robot_,labelgrab_,larbin,libwww_perl,linkidator_,linkscan_server_linkscan_workstation_,linksmanager_com_,linkwalker,lmqueuebot,lnspiderguy,localcombot,lockon_xxxxx,logo_gif_crawler,lotus_notes,lwp,lycos_spider_,lycos_spider_t_rex_,lycos_x_x,magpie_,mantraagent,markwatch,marvin_infoseek,mediafox_x_y,mediapartners_google,merzscope,metaspinner,metatagrobot,mfc_tear_sample,microsoft_data_access_internet_publishing_provider_cache_manager,microsoft_data_access_internet_publishing_provider_dav_,microsoft_data_access_internet_publishing_provider_protocol_discovery,microsoft_url_control__,microsoft_webdav_miniredir,mindcrawler,minirank,missigua_locator_,mister_pix_ii_,mj_bot,mnogosearch,moget_,momspider_libwww_perl_,monster_vx_x_x_type,motor_,mouse_house_,mozdex,msfrontpage,mshelp,msnbot,msnbot_,msnptc,msproxy,muninn_libwww_perl_,muscatferret_,mwdsearch_,nameprotect,nationaldirectory_superspider,naverbot_,nazilla,ndspider_,nec_meshexplorer,nederland_zoek,netcarta_cyberpilot_pro,netmechanic,netmechanic_v_,netscoop_libwww_a,newscan_online_,nhsewalker_,nicebot,nomad_v_x,northstar,npbot,nutch,nutchcvs,objectssearch,occam_,ocelli,ocp_hrs_,omnifind_sanantonio_,ontospider_libwww_perl_,openbot,orbsearch_,os_heritrix,packrat_,pageboy_,parasite_,patric_a,peregrinator_mathematics_,perlcrawler_xavatoria_,pgp_ka_,phpdig_x_x_x,piltdownman_profitnet_myezmail_com,ping_blo_gs,pioneer,pipeliner,plumtreewebaccessor_,pmafind,poirot,pompos,poppi_,portalbspider_,portaljuice_com_,program_shareware_,psbot,psbot_x,puresight,python_urllib,p_p_validator,raven_v_,reciprocal_links_checker_,redcarpet,resume_robot,rhcs_a,riroikrcjrx_grefrxtwo,rixbot,road_runner_imagescape_robot,robbie_,robocrawl,robofox_v_,robot_du_crim_a,robozilla,robozilla_,roffle,root_,rora_ibm_test_crawler_rhlas_,roverbot,rpt_httpclient,rufusbot_,rules_libwww_,sbider,schmozilla,scooter,scooter_g_r_a_b_v_,scrubby,scspider,searchprocess_,seekbot,semanticdiscovery,senrigan_xxxxxx,sensis_web_crawler_,sg_scout,shagseeker_at_http_www_shagseek_com_,shai_hulud,sherlock,shopwiki,simbot_,sitetech_rover,site_valet,slcrawler,slurp,snap_com_beta_crawler_v_,snooper_b_,solbot_lwp_,speedy_spider,spiderbot_,spiderline_,spiderman_,ssearcher_,straight_flash_getterroboplus_,suntek_,surf,surveybot,tamu_cs_irl_crawler,tarantula,tarka,tarspider,techbot,templeton_version_for_platform_,teoma_agent_,teradex_mapper,titan_,titin_,tlspider_,tracerlock,travelbot,travellazerbot,turnitinbot,turnpike_emporium_linkchecker,tutorgigbot,tutorial_crawler_,twiceler_www_cuill_com,ucsd_crawler,udmsearch,uk_searcher_spider,ultraseek,unchaos_crawler_,uoftdb_experiment_,uptimebot,urcpbfyyfh_qxsaxtoscm,urlck_,url_spider_pro,valkyrie_libwww_perl_,versus_,verticrawl,victoria_,vision_search_,void_bot_,voyager,voyager_,vwbot_k_,waol_exe,wdg_validator,webbandit_,webcatcher_,webcollage,webcollage_perl,webcopy_,webcrawler,webindexer,weblayers_,weblinker_libwww_perl_,webmoose__,webquest_,webreaper_webreaper_otway_com_,webs_recruit_co_jp,webtrends,webvac_,webwalk,webwalker_,webwatch,web_robot,web_robot_pegasus,wget,wget_,whatuseek_winona_,winona,wintools,wired_digital_newsbot_,wlm_,wolp_mda_,wotbox,wume_crawler,wwwc_,wwwwanderer_v_,www_mechanize,w_crobot,w_c_validator,w_index,w_mir,w_m_x_xxx,w_pspider_xxx_by_wap_com,xenu_link_sleuth,xget_,yacy_,yahoofeedseeker,yahoofeedseeker_testing,yahooseeker,yahoo_blogs,yahoo_mmcrawler,yahoo_verticalcrawler_formerwebcrawler,ydr_ecjghfxwuxxljqauwpgcgwdkmwnwn,y_oasis,zao_crawler,zealbot,zeus,zeusbot,zipppbot,zyborg,_ahoy_the_homepage_finder_,_hazel_s_ferret_web_hopper_,_hku_www_robot_,_iagent_,_ibm_planetwide_,_joebot_x_x_,_openfind_data_gatherer_openbot_,_openfind_piranha_shark_,_safetynet_robot_,_webfetcher_";
 	ts.spiderListReplace="_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_";
 
-	t3=structnew("sync");
+	t3=structnew();
 	t3["/z/misc/system/ext"]=true;
 	t3["/z/listing/sl/index"]=true;
 	t3["/z/misc/slideshow/index"]=true;
@@ -426,7 +426,7 @@
 	}*/
 	ts=arguments.ss;
 	if(not structkeyexists(request.zos, 'globals')){
-		request.zos.globals=structnew("sync");
+		request.zos.globals=structnew();
 		structappend(request.zos.globals,duplicate(ts.serverGlobals));
 	}
 	if(request.zos.isdeveloper and isDefined('request.zsession.verifyQueries') and request.zsession.verifyQueries){
@@ -477,7 +477,7 @@
 	ts.compiledTemplatePathCache=structnew();
 	ts.forceUserUpdateSession={};
 	
-	ts.appComPathStruct=structnew("sync");
+	ts.appComPathStruct=structnew();
 	// 9 is a placeholder for documentation search.  It is not a full featured plugin yet.
 	//ts.appComPathStruct[9]={name:"help", cfcPath:"zcorerootmapping.mvc.z.admin.controller.help", cache:true};
 	ts.appComPathStruct[10]={name:"blog", cfcPath:"zcorerootmapping.mvc.z.blog.controller.blog", cache:true};
@@ -516,7 +516,7 @@
 	} 
 	
 	// default environment variables
-	// es=structnew("sync");
+	// es=structnew();
 	// es.live=true;
 	// es.databaseprefix="";
 	// es.shortdomain="";
@@ -649,7 +649,7 @@
 	} */
 	
 	request.zos.requestLogEntry('Application.cfc onApplicationStart 3-1');
-	ts.componentObjectCache=structnew("sync");
+	ts.componentObjectCache=structnew();
 	ts.componentObjectCache.cloudFile=CreateObject("component","zcorerootmapping.com.zos.cloudFile");
 	ts.componentObjectCache.context=CreateObject("component","zcorerootmapping.com.zos.context");
 	ts.componentObjectCache.cache=CreateObject("component","zcorerootmapping.com.zos.cache");
@@ -707,7 +707,7 @@
 
 	loadDbCFC(ts);
 	/*
-	request.zos.globals=structnew("sync");
+	request.zos.globals=structnew();
 	structappend(request.zos.globals,duplicate(ts.serverGlobals));
 	if(request.zos.isdeveloper and isDefined('request.zsession.verifyQueries') and request.zsession.verifyQueries){
 		verifyQueriesEnabled=true;
@@ -775,12 +775,12 @@
 	ts.primaryKeyMapStruct={};
 	//ts.primaryKeyMapStruct[request.zos.zcoreDatasource&".special_rate"]="rate_id";
 	
-	ts.helpStruct=structnew("sync");
-	datasourceUniqueStruct=structnew("sync");
+	ts.helpStruct=structnew();
+	datasourceUniqueStruct=structnew();
 	datasourceUniqueStruct[request.zos.zcoredatasource]=true;
 	ts.arrGlobalDatasources=structkeyarray(datasourceUniqueStruct);
-	ts.tableColumns=structnew("sync");
-	ts.tablesWithSiteIdStruct=structnew("sync");
+	ts.tableColumns=structnew();
+	ts.tablesWithSiteIdStruct=structnew();
 
 
 	request.zos.requestLogEntry('Application.cfc onApplicationStart 3-3');
@@ -946,8 +946,8 @@
 	if(isDefined('request.zsession.user')){
 		request.zos.userSession=duplicate(request.zsession.user);
 	}else{
-		request.zos.userSession=structnew("sync");
-		request.zos.userSession.groupAccess=structnew("sync");	
+		request.zos.userSession=structnew();
+		request.zos.userSession.groupAccess=structnew();	
 	} 
 	if(request.zos.zreset EQ "all"){
 		setting requesttimeout="12000";

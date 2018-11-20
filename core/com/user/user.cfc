@@ -246,7 +246,7 @@ userCom.checkLogin(inputStruct);
 	
 	rs.arrDebugLog=[];
 	request.zos.requestLogEntry('user.cfc checkLogin start');
-	local.failedLogin=false;
+	failedLogin=false;
 	StructAppend(ss, ts, false);
 	if(ss.site_id NEQ request.zos.globals.id){
 		userSiteId='user'&ss.site_id;			
@@ -259,11 +259,11 @@ userCom.checkLogin(inputStruct);
 		throw("Error: COMPONENT: user.cfc: checkLogin: arguments.inputStruct.user_group_name is required.", "exception");
 	}
 	if(structkeyexists(form,'zLogOut')){
-		this.logOut();
+		logOut();
 		// set login form options
 		arguments.inputStruct = ss;
 		arguments.inputStruct.loginMessage = "You've been logged out.";
-		overrideContent = this.loginForm(arguments.inputStruct);
+		overrideContent = loginForm(arguments.inputStruct);
 		if(structkeyexists(ss,'template')){
 			if(ss.template EQ false){
 				application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
@@ -292,22 +292,22 @@ userCom.checkLogin(inputStruct);
 		arrLogOut=arrayNew(1);
 		failCount=0;
 		emailSent=false;
-		for(local.row in qCheck){
-			tmpFail=DateFormat(local.row.login_log_datetime,'yyyy-mm-dd')&' '&TimeFormat(local.row.login_log_datetime,'HH:mm:ss')&" | ";
-			if(local.row.login_log_status EQ 0){
+		for(row in qCheck){
+			tmpFail=DateFormat(row.login_log_datetime,'yyyy-mm-dd')&' '&TimeFormat(row.login_log_datetime,'HH:mm:ss')&" | ";
+			if(row.login_log_status EQ 0){
 				tmpFail&="failed login attempt";
-			}else if(local.row.login_log_status EQ 1){
+			}else if(row.login_log_status EQ 1){
 				tmpFail&="successful login";
-			}else if(local.row.login_log_status EQ 2){
+			}else if(row.login_log_status EQ 2){
 				tmpFail&="user account data and login is no longer valid";
-			}else if(local.row.login_log_status EQ 3){
+			}else if(row.login_log_status EQ 3){
 				tmpFail&="manually logged out";
 			}
 			arrayappend(arrLogOut, tmpFail);
-			if(local.row.login_log_status NEQ 1){
+			if(row.login_log_status NEQ 1){
 				failCount++;
 			}
-			if(local.row.login_log_email_sent EQ 1){
+			if(row.login_log_email_sent EQ 1){
 				emailSent=true;
 			}
 		}
@@ -341,8 +341,8 @@ userCom.checkLogin(inputStruct);
 				rs.success=false;
 				return rs;
 			}else{
-				this.logOut(true); // log out and skip logging
-				overrideContent = "<strong>Your account has been temporarily disabled</strong> due to repeated login failures.<br />Your IP address and other information have been logged and the administrator has been notified.";//this.loginForm(arguments.inputStruct);
+				logOut(true); // log out and skip logging
+				overrideContent = "<strong>Your account has been temporarily disabled</strong> due to repeated login failures.<br />Your IP address and other information have been logged and the administrator has been notified.";//loginForm(arguments.inputStruct);
 				if(structkeyexists(ss, 'template')){
 					if(ss.template EQ false){
 						application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
@@ -424,6 +424,9 @@ userCom.checkLogin(inputStruct);
 		if(not failedLogin){
 			if(qUserCheck.recordcount NEQ 0){
 				if(arguments.inputStruct.secureLogin){
+					if((structkeyexists(form,'zautologin') and compare(form.zautologin,"1") EQ 0) or (structkeyexists(cookie,'zautologin') and compare(cookie.zautologin,"1") EQ 0)){
+						generateToken(form.zUsername); // start making the token before we know if we need it 
+					}
 					if(arguments.inputStruct.disableSecurePassword EQ false){
 						passwordVerificationResult=application.zcore.user.verifySecurePassword(form.zPassword, qUserCheck.user_salt, qUserCheck.user_password, qUserCheck.user_password_version);
 						
@@ -486,13 +489,13 @@ userCom.checkLogin(inputStruct);
 			}
 			application.zcore.session.forceEnable();
 			request.zsession.member_id = qUserCheck.member_id;
-			local.config=application.zcore.db.getConfig();
-			local.config.cacheEnabled=false;
-			application.zcore.db.init(local.config);	// disable query caching for logged in users.
+			config=application.zcore.db.getConfig();
+			config.cacheEnabled=false;
+			application.zcore.db.init(config);	// disable query caching for logged in users.
 			request.zsession.secureLogin=arguments.inputStruct.secureLogin;
 			if(structkeyexists(request.zos, 'tracking')){
 				application.zcore.tracking.setUserId(qUserCheck.user_id);
-			}
+			} 
 			request.zsession[userSiteId]=StructNew();
 			request.zsession[userSiteId].id = qUserCheck.user_id;
 			request.zsession[userSiteId].email = qUserCheck.user_username;
@@ -507,13 +510,11 @@ userCom.checkLogin(inputStruct);
 			site_id = #db.param(qUserCheck.site_id)#";
 			db.execute("q"); 
 			application.zcore.tracking.setUserEmail(qUserCheck.user_username);
-			this.setLoginLog(1);
+			setLoginLog(1);
 			request.zos.requestLogEntry('user.cfc checkLogin before createToken');
 			
-			if(structkeyexists(form,'zautologin') and compare(form.zautologin,"1") EQ 0){
-				this.createToken(); // set permanent login cookie
-			}else if(structkeyexists(cookie,'zautologin') and compare(cookie.zautologin,"1") EQ 0){
-				this.createToken(); // set permanent login cookie
+			if((structkeyexists(form,'zautologin') and compare(form.zautologin,"1") EQ 0) or (structkeyexists(cookie,'zautologin') and compare(cookie.zautologin,"1") EQ 0)){
+				createToken(); // set permanent login cookie
 			}
 			request.zos.requestLogEntry('user.cfc checkLogin after createToken');
 			
@@ -561,13 +562,13 @@ userCom.checkLogin(inputStruct);
 			if(ss.noLoginForm){
 				rs.error=1;
 				rs.success=false;
-				this.setLoginLog(0);
+				setLoginLog(0);
 				return rs;
 			}else{
 				// set login form options
 				inputStruct = ss;
 				inputStruct.loginMessage = "Invalid Login.";
-				overrideContent = this.loginForm(inputStruct);
+				overrideContent = loginForm(inputStruct);
 				if(isDefined('ss.template')){
 					if(ss.template EQ false){
 						application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
@@ -575,7 +576,7 @@ userCom.checkLogin(inputStruct);
 						application.zcore.template.setTemplate(ss.template,true,true);
 					}
 				}
-				this.setLoginLog(0);
+				setLoginLog(0);
 				// abort with login form
 				application.zcore.template.abort(overrideContent);
 			}
@@ -585,7 +586,7 @@ userCom.checkLogin(inputStruct);
 			rs.success=true;
 			return rs;
 		}
-		if(ss.checkServerAdministrator and request.zos.isServer EQ false and this.checkServerAccess() EQ false){
+		if(ss.checkServerAdministrator and request.zos.isServer EQ false and checkServerAccess() EQ false){
 			// no access
 		}else{
 			if(isDefined('request.zsession.secureLogin') and request.zsession.secureLogin EQ false and arguments.inputStruct.secureLogin and isDefined('request.zsession.user.email')){
@@ -594,8 +595,8 @@ userCom.checkLogin(inputStruct);
 			}else{
 				arrG=listtoarray(ss.user_group_name);
 				for(i=1;i lte arraylen(arrg);i++){
-					if(this.checkGroupAccess(arrg[i], ss.site_id)){
-						this.updateSession(arguments.inputStruct);
+					if(checkGroupAccess(arrg[i], ss.site_id)){
+						updateSession(arguments.inputStruct);
 						rs.success=true;
 						return rs;
 					}
@@ -603,10 +604,10 @@ userCom.checkLogin(inputStruct);
 			}
 		}
 		if(isDefined('request.zsession.user.id')){
-			this.setLoginLog(2); // user account data and login is no longer valid
+			setLoginLog(2); // user account data and login is no longer valid
 		}
 		// set login form options
-		overrideContent = this.loginForm(ss);
+		overrideContent = loginForm(ss);
 		if(isDefined('ss.template')){
 			if(ss.template EQ false){
 				application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
@@ -655,7 +656,7 @@ userCom.checkLogin(inputStruct);
 		}
 		thread.storedPasswordValue=storedPasswordValue;
 	}
-	thread action="join" name="#threadName#" timeout="2000"  { }
+	thread action="join" name="#threadName#" timeout="20000"  { }
 	myThread=cfthread[threadName];
 	var storedPasswordValue=""; 
 	if(myThread.status EQ "COMPLETED"){
@@ -688,11 +689,19 @@ userCom.checkLogin(inputStruct);
 	</cfscript>
 </cffunction>
 
+<cffunction name="createSecurePasswordVersion3" localmode="modern" access="private" output="no" returntype="string">
+	<cfargument name="password" type="string" required="yes">
+	<cfscript>
+	return ScryptEncrypt(arguments.password, 16384, 8, 1);
+	// return application.zcore.functions.zSecureCommand("getScryptEncrypt#chr(9)##replace(arguments.password, chr(9), "", "all")#", 20); 
+	</cfscript>
+</cffunction>
 
 <cffunction name="createSecurePasswordVersion2" localmode="modern" access="private" output="no" returntype="string">
 	<cfargument name="password" type="string" required="yes">
 	<cfscript>
-	return application.zcore.functions.zSecureCommand("getScryptEncrypt#chr(9)##replace(arguments.password, chr(9), "", "all")#", 20); 
+	return ScryptEncrypt(arguments.password);
+	// return application.zcore.functions.zSecureCommand("getScryptEncrypt#chr(9)##replace(arguments.password, chr(9), "", "all")#", 20); 
 	</cfscript>
 </cffunction>
 
@@ -718,13 +727,14 @@ userCom.checkLogin(inputStruct);
 		}else{
 			return false;
 		}
-	}else if(arguments.version EQ 2){
-		result=application.zcore.functions.zSecureCommand("getScryptCheck"&chr(9)&replace(arguments.password, chr(9), "", "all")&chr(9)&arguments.hashedPassword, 20);
-		if(result EQ ""){
-			return false;
-		}else{
-			return result;
-		}
+	}else if(arguments.version EQ 3 or arguments.version EQ 2){ 
+		return ScryptCheck(arguments.password, arguments.hashedPassword);
+		//result=application.zcore.functions.zSecureCommand("getScryptCheck"&chr(9)&replace(arguments.password, chr(9), "", "all")&chr(9)&arguments.hashedPassword, 20);
+		// if(result EQ ""){
+		// 	return false;
+		// }else{
+		// 	return result;
+		// }
 	}else{
 		throw("convertPlainTextToSecurePassword() error: Invalid arguments.version. Supported values are: 0,1 or 2. 2 is recommended if Java is enabled.");	
 	}
@@ -738,9 +748,11 @@ userCom.checkLogin(inputStruct);
 	<cfargument name="allowFailure" type="boolean" required="no" default="#false#">
 	<cfscript> 
 	if(arguments.version EQ 1){
-		storedPasswordValue=variables.createSecurePasswordVersion1(arguments.password, arguments.salt, arguments.allowFailure);
+		storedPasswordValue=createSecurePasswordVersion1(arguments.password, arguments.salt, arguments.allowFailure);
 	}else if(arguments.version EQ 2){
-		storedPasswordValue=variables.createSecurePasswordVersion2(arguments.password);
+		storedPasswordValue=createSecurePasswordVersion2(arguments.password);
+	}else if(arguments.version EQ 3){
+		storedPasswordValue=createSecurePasswordVersion3(arguments.password);
 	}else if(arguments.version EQ 0){
 		storedPasswordValue=arguments.password;
 	}else{
@@ -766,7 +778,7 @@ userCom.checkLogin(inputStruct);
 		}
 	}
 	if(arguments.skipLog EQ false){
-		this.setLoginLog(3);
+		setLoginLog(3);
 	}
 	StructDelete(request.zsession, "user");
 	StructDelete(request.zsession,'secureLogin');
@@ -825,7 +837,7 @@ userCom.checkLogin(inputStruct);
 		userSiteId='user'&ss.site_id;			
 	}
 	if(isDefined('request.zsession.#userSiteId#.id') EQ false){
-		this.logOut(true);
+		logOut(true);
 		return;
 	}
 	db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
@@ -842,15 +854,15 @@ userCom.checkLogin(inputStruct);
 	db.sql&=" )";
 	qUser=db.execute("qUser");
 	if(qUser.recordcount EQ 0 or qUser.user_group_id EQ 0){
-		this.logOut(true);
+		logOut(true);
 		if(isDefined('request.zsession')){
 			StructDelete(request.zsession, "user");
 		}
-		this.setLoginLog(2); // user account data and login is no longer valid
+		setLoginLog(2); // user account data and login is no longer valid
 		// set login form options
 		//inputStruct = ss;
 		//inputStruct.loginMessage = "Your account has been disabled.";
-		overrideContent = "Your account has been disabled.";//this.loginForm(inputStruct);
+		overrideContent = "Your account has been disabled.";//loginForm(inputStruct);
 		if(isDefined('ss.template')){
 			application.zcore.template.setTemplate(ss.template,true,true);
 		}
@@ -992,14 +1004,14 @@ userCom.checkLogin(inputStruct);
 			request.zos.userSession.groupAccess=structnew();	
 		}
 	}
-	local.isDeveloper=0;
+	isDeveloper=0;
 	if(request.zos.userSession.site_id EQ request.zos.globals.serverID and application.zcore.user.checkServerAccess()){
-		local.isDeveloper="1";
-		local.ts9=structnew();
-		local.ts9.name="zdeveloper";
-		local.ts9.value=local.isDeveloper;
-		local.ts9.expires="never";
-		application.zcore.functions.zcookie(local.ts9);
+		isDeveloper="1";
+		ts9=structnew();
+		ts9.name="zdeveloper";
+		ts9.value=isDeveloper;
+		ts9.expires="never";
+		application.zcore.functions.zcookie(ts9);
 	}else{
 		structdelete(cookie, 'zdeveloper');
 	}
@@ -1149,7 +1161,7 @@ formString = userCom.loginForm(inputStruct);
 	StructAppend(arguments.inputStruct, tempStruct, false);
 	ss = arguments.inputStruct;
 	if(not ss.disableGlobalLogin){
-		this.displayTokenScripts();
+		displayTokenScripts();
 	}
 	
 	request.zos.inMemberArea=true;
@@ -1262,42 +1274,42 @@ formString = userCom.loginForm(inputStruct);
 	<div style="float:left;width:100%;">
 		<div style="float:left;margin-bottom:20px;  margin-right:20px;  width:180px;">
 			<cfscript>
-			local.actionVar="";
+			actionVar="";
 			if(structkeyexists(form,  request.zos.urlRoutingParameter)){
-				local.actionVar&=form[request.zos.urlRoutingParameter];
+				actionVar&=form[request.zos.urlRoutingParameter];
 			}else{
-				local.actionVar&=request.cgi_script_name;
+				actionVar&=request.cgi_script_name;
 			}
 			if(returnStruct.urlString NEQ "" or returnStruct.cgiFormString NEQ ""){
-				local.actionVar&="?";
+				actionVar&="?";
 			}
 			if(returnStruct.urlString NEQ ""){
-				local.actionVar&=returnStruct.urlString&"&";
+				actionVar&=returnStruct.urlString&"&";
 			}
 			if(returnStruct.urlString NEQ ""){
-				local.actionVar&=returnStruct.urlString;
+				actionVar&=returnStruct.urlString;
 			}
 			</cfscript>
 			<cfif structkeyexists(form, 'returnURL')>
 				<form name="zRepostForm" id="zRepostForm" method="get" action="#htmleditformat(form.returnURL)#">
 				<cfelse>
-				<form name="zRepostForm" id="zRepostForm" method="post" action="#htmleditformat(local.actionVar)#">
+				<form name="zRepostForm" id="zRepostForm" method="post" action="#htmleditformat(actionVar)#">
 #returnStruct.formString#
 			</cfif>
 			</form>
 			<cfscript>
-			local.loginCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.user.controller.login");
+			loginCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.user.controller.login");
 			</cfscript>
 			<cfif request.zos.globals.loginIframeEnabled EQ 1>
 				<iframe src="/z/user/login/index?zIsMemberArea=<cfif request.zos.inMemberArea>1<cfelse>0</cfif>" height="375" width="100%" style="margin:0px; border:none; overflow:auto;" seamless="seamless"></iframe>
 			<cfelse>
 				<cfscript>   
-				local.loginCom.index();
+				loginCom.index();
 				</cfscript>
 			</cfif>
 		</div>
 		<cfscript>
-			writeoutput(local.loginCom.displayOpenIdLoginForm(request.zos.currentHostName&local.actionVar&returnStruct.cgiFormString));
+			writeoutput(loginCom.displayOpenIdLoginForm(request.zos.currentHostName&actionVar&returnStruct.cgiFormString));
 			</cfscript>
 	</div> 
 	<cfif request.zos.globals.parentID EQ 0 or application.zcore.functions.zvar("disableGlobalLoginMessage", request.zos.globals.parentID) NEQ 1>
@@ -1373,34 +1385,53 @@ formString = userCom.loginForm(inputStruct);
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="generateToken" localmode="modern" access="public">
+	<cfargument name="username" type="string" required="yes">
+	<cfscript>
+	thread name="zUserGenerateToken" username="#arguments.username#" action="run" timeout="25"{ 
+		// user logs in first time, with no valid cookie in existence
+		// system creates new user_token record
+		thread.uniqueTokenTemp=hash(application.zcore.functions.zGenerateStrongPassword(156,256), 'sha-256');
+		ts=structnew("sync");
+		ts.table="user_token";
+		ts.datasource=request.zos.zcoredatasource;
+		ts.struct=structnew("sync");
+		ts.struct.user_token_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
+		ts.struct.user_token_key=application.zcore.user.convertPlainTextToSecurePassword(thread.uniqueTokenTemp, ts.struct.user_token_salt, request.zos.defaultPasswordVersion, false);
+		ts.struct.user_token_user_agent=request.zos.cgi.http_user_agent;
+		ts.struct.site_id=request.zos.globals.id;
+		ts.struct.user_token_username=username; // prevents abuve
+		ts.struct.user_token_version=request.zos.defaultPasswordVersion; // hardcoded until we make a new token handling system
+		ts.struct.user_token_datetime=request.zos.mysqlnow; // we only allow accept tokens for login if they are less then 30 days old.
+		ts.forcePrimaryInsert.user_token_username=true;
+
+		thread.tokenStruct=ts;
+	}
+	</cfscript>
+</cffunction>
+
 <cffunction name="createToken" localmode="modern" output="yes" returntype="any">
 	<cfscript>
-	var ts=0;
-	// user logs in first time, with no valid cookie in existence
-	// system creates new user_token record
-	local.uniqueTokenTemp=hash(application.zcore.functions.zGenerateStrongPassword(156,256), 'sha-256');
-	ts=structnew();
-	ts.table="user_token";
-	ts.datasource=request.zos.zcoredatasource;
-	ts.struct=structnew();
-	ts.struct.user_token_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
-	ts.struct.user_token_key=application.zcore.user.convertPlainTextToSecurePassword(local.uniqueTokenTemp, ts.struct.user_token_salt, request.zos.defaultPasswordVersion, false);
-	ts.struct.user_token_user_agent=request.zos.cgi.http_user_agent;
-	ts.struct.site_id=request.zos.globals.id;
-	ts.struct.user_token_username=form.zUsername; // prevents abuve
-	ts.struct.user_token_version=request.zos.defaultPasswordVersion; // hardcoded until we make a new token handling system
-	ts.struct.user_token_datetime=request.zos.mysqlnow; // we only allow accept tokens for login if they are less then 30 days old.
-	ts.forcePrimaryInsert.user_token_username=true;
-	local.user_token_id=application.zcore.functions.zInsert(ts);
+	thread action="join" name="zUserGenerateToken" timeout="30000";
+	if(cfthread.zUserGenerateToken.status NEQ "completed"){
+		savecontent variable="out"{
+			echo('<h2>Failed to generate token</h2>');
+			writedump(cfthread.zUserGenerateToken);
+		}
+		throw(out);
+	} 
+	ts=cfthread.zUserGenerateToken.tokenStruct;
+	user_token_id=application.zcore.functions.zInsert(ts);
 	
-	request.zsession.ztoken="#ts.struct.user_token_version#|#local.user_token_id#|#ts.struct.user_token_username#|#local.uniqueTokenTemp#";
+	request.zsession.ztoken="#ts.struct.user_token_version#|#user_token_id#|#ts.struct.user_token_username#|#cfthread.zUserGenerateToken.uniqueTokenTemp#";;
 	//new permanent token cookie is set
-	local.ts9=structnew();
-	local.ts9.name="ztoken";
-	local.ts9.httponly=true;
-	local.ts9.value=request.zsession.ztoken;
-	local.ts9.expires="never";
-	application.zcore.functions.zcookie(local.ts9);
+	ts9=structnew();
+	ts9.name="ztoken";
+	ts9.httponly=true;
+	ts9.value=request.zsession.ztoken;
+	ts9.expires="never";
+	application.zcore.functions.zcookie(ts9);
 	</cfscript>
 </cffunction>
 
@@ -1409,40 +1440,40 @@ formString = userCom.loginForm(inputStruct);
 	
 	var db=request.zos.queryObject;
 	var inputStruct=0;
-	var local.debug=false;
+	var debug=false;
 	var ts=0;
 	if(request.zos.isdeveloper){
 		if(structkeyexists(form, 'zdebugVerifyToken')){
-			local.debug=true;
+			debug=true;
 		}
 	}
 	
 	if(not structkeyexists(cookie, 'ztoken') or len(cookie.ztoken) EQ 0){
-		if(local.debug){ 
+		if(debug){ 
 			writeoutput('cookie.ztoken is not defined.<br />'); 
 			abort;
 		}
 		return false;
 	}else{
-		if(local.debug){ 
+		if(debug){ 
 			writeoutput('Verifying cookie.ztoken: #cookie.ztoken#<br />'); 
 		}
 	}
 	if(structkeyexists(request.zsession, 'ztoken') and structkeyexists(request.zsession, 'user')){
 		if(compare(request.zsession.ztoken, cookie.ztoken) NEQ 0){
-			if(local.debug){ 
+			if(debug){ 
 				writeoutput('current login doesn''t match the cookie, override it<br />'); 
 				abort;
 			}
-			local.ts9=structnew();
-			local.ts9.name="ztoken";
-			local.ts9.httponly=true;
-			local.ts9.value=request.zsession.ztoken;
-			local.ts9.expires="never";
-			application.zcore.functions.zcookie(local.ts9);
+			ts9=structnew();
+			ts9.name="ztoken";
+			ts9.httponly=true;
+			ts9.value=request.zsession.ztoken;
+			ts9.expires="never";
+			application.zcore.functions.zcookie(ts9);
 			return false;
 		}else{
-			if(local.debug){ 
+			if(debug){ 
 				writeoutput('user is logged in and ztoken matches - do no further work.<br />Dumping session:'); 
 				writedump(request.zsession);
 				abort;
@@ -1450,63 +1481,65 @@ formString = userCom.loginForm(inputStruct);
 			return true;
 		}
 	}
-	if(local.debug){ 
+	if(debug){ 
 		//writedump(application.zcore.session.isSessionEnabled());
 		//writedump(request.zsession);
 		writeoutput('user not logged in, check if cookie.ztoken is still valid<br />'); 
 	}
-	local.arrToken=listtoarray(cookie.ztoken,"|");
+	arrToken=listtoarray(cookie.ztoken,"|");
 	db.sql="select * from #db.table("user_token", request.zos.zcoreDatasource)# user_token 
 	WHERE 
-	user_token_version=#db.param(local.arrToken[1])# and 
+	user_token_version=#db.param(arrToken[1])# and 
 	user_token_deleted = #db.param(0)# and 
-	user_token_id=#db.param(local.arrToken[2])# and 
-	user_token_username=#db.param(local.arrToken[3])# and 
+	user_token_id=#db.param(arrToken[2])# and 
+	user_token_username=#db.param(arrToken[3])# and 
 	user_token_datetime>=#db.param(dateformat(dateadd("d",-30,now()),"yyyy-mm-dd")&" 00:00:00")# and 
 	site_id=#db.param(request.zos.globals.id)# 
 	";
-	local.qUserToken=db.execute("qUserToken"); 
-	if(local.qUserToken.recordcount EQ 0){
-		if(local.debug){ 
+	qUserToken=db.execute("qUserToken"); 
+	if(qUserToken.recordcount EQ 0){
+		if(debug){ 
 			writedump(request.zos.arrQueryLog);
 			writeoutput('no token exists<br />');
 			abort; 
 		}
-		local.ts9=structnew();
-		local.ts9.name="ztoken";
-		local.ts9.value="";
-		local.ts9.httponly=true;
-		local.ts9.expires="now";
-		application.zcore.functions.zcookie(local.ts9);
+		ts9=structnew();
+		ts9.name="ztoken";
+		ts9.value="";
+		ts9.httponly=true;
+		ts9.expires="now";
+		application.zcore.functions.zcookie(ts9);
 		return false;
 	}
-	form.zusername=local.qUserToken.user_token_username;
+	form.zusername=qUserToken.user_token_username;
 	/*
 	removed user agent validation until it can be made more specific so constant browser upgrades don't invalidate request.zsession.
-	if(local.qUserToken.user_token_user_agent NEQ request.zos.cgi.http_user_agent){
-		if(local.debug){ 
+	if(qUserToken.user_token_user_agent NEQ request.zos.cgi.http_user_agent){
+		if(debug){ 
 			writeoutput('token is valid, but user agent changed.  Removing ztoken for this id and clearing cookie. User will have to login again.<br />'); 
 		}
 		db.sql="delete from #db.table("user_token", request.zos.zcoreDatasource)#  
 		WHERE 
-		user_token_version=#db.param(local.arrToken[1])# and 
-		user_token_id=#db.param(local.arrToken[2])# and 
+		user_token_version=#db.param(arrToken[1])# and 
+		user_token_id=#db.param(arrToken[2])# and 
 		user_token_deleted = #db.param(0)# and 
-		user_token_username=#db.param(local.arrToken[3])# and 
+		user_token_username=#db.param(arrToken[3])# and 
 		site_id=#db.param(request.zos.globals.id)# 
 		";
 		db.execute("q"); 
-		local.ts9=structnew();
-		local.ts9.name="ztoken";
-		local.ts9.value="";
-		local.ts9.httponly=true;
-		local.ts9.expires="now";
-		application.zcore.functions.zcookie(local.ts9);
-		this.setLoginLog(0);
+		ts9=structnew();
+		ts9.name="ztoken";
+		ts9.value="";
+		ts9.httponly=true;
+		ts9.expires="now";
+		application.zcore.functions.zcookie(ts9);
+		setLoginLog(0);
 	}*/
-	keyIsValid=application.zcore.user.verifySecurePassword(local.arrToken[4], local.qUserToken.user_token_salt, local.qUserToken.user_token_key, local.arrToken[1]);
+
+	generateToken(qUserToken.user_token_username);
+	keyIsValid=application.zcore.user.verifySecurePassword(arrToken[4], qUserToken.user_token_salt, qUserToken.user_token_key, arrToken[1]);
 	if(keyIsValid){
-		if(local.debug){ 
+		if(debug){ 
 			writeoutput('token is valid, perform an secure user login<br />'); 
 		}
 		form.zpassword="password";
@@ -1522,75 +1555,83 @@ formString = userCom.loginForm(inputStruct);
 		if(application.zcore.user.checkGroupAccess("user")){ 
 			structdelete(form,'zpassword');
 			structdelete(form,'zusername');
-			if(local.debug){ 
+			if(debug){ 
 				writeoutput('token secure login was successful.  issuing new token.<br />');
 				writedump(request.zsession.user);
 			}
-			local.uniqueTokenTemp=hash(application.zcore.functions.zGenerateStrongPassword(156,256), 'sha-256');
-			local.user_token_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
-			local.user_token_key=application.zcore.user.convertPlainTextToSecurePassword(local.uniqueTokenTemp, local.user_token_salt, request.zos.defaultPasswordVersion, false);
+			thread action="join" name="zUserGenerateToken" timeout="30000";
+			if(cfthread.zUserGenerateToken.status NEQ "completed"){
+				savecontent variable="out"{
+					echo('<h2>Failed to generate token</h2>');
+					writedump(cfthread.zUserGenerateToken);
+				}
+				throw(out);
+			} 
+			ts=cfthread.zUserGenerateToken.tokenStruct;
+			//user_token_id=application.zcore.functions.zInsert(ts);
+			
+			request.zsession.ztoken="#ts.struct.user_token_version#|#qUserToken.user_token_id#|#ts.struct.user_token_username#|#cfthread.zUserGenerateToken.uniqueTokenTemp#";
 			db.sql="update #db.table("user_token", request.zos.zcoreDatasource)# user_token 
-			set user_token_key=#db.param(local.user_token_key)#, 
-			user_token_salt=#db.param(local.user_token_salt)#, 
+			set user_token_key=#db.param(ts.struct.user_token_key)#, 
+			user_token_salt=#db.param(ts.struct.user_token_salt)#, 
 			user_token_datetime=#db.param(request.zos.mysqlnow)#,
 			user_token_updated_datetime=#db.param(request.zos.mysqlnow)# 
 			WHERE 
-			user_token_version=#db.param(local.arrToken[1])# and 
+			user_token_version=#db.param(arrToken[1])# and 
 			user_token_deleted = #db.param(0)# and
-			user_token_id=#db.param(local.arrToken[2])# and 
-			user_token_username=#db.param(local.arrToken[3])# and 
+			user_token_id=#db.param(arrToken[2])# and 
+			user_token_username=#db.param(arrToken[3])# and 
 			site_id=#db.param(request.zos.globals.id)# 
 			";
-			db.execute("q"); 
-			request.zsession.ztoken="#local.qUserToken.user_token_version#|#local.qUserToken.user_token_id#|#local.qUserToken.user_token_username#|#local.uniqueTokenTemp#";
-			if(local.debug){ 
+			db.execute("q");  
+			if(debug){ 
 				writeoutput('token updated:'&request.zsession.ztoken&'<br />'); 
 			}
 			//new permanent token cookie is set
-			local.ts9=structnew();
-			local.ts9.name="ztoken";
-			local.ts9.value=request.zsession.ztoken;
-			local.ts9.expires="never";
-			local.ts9.httponly=true;
-			application.zcore.functions.zcookie(local.ts9);
-			if(local.debug){
+			ts9=structnew();
+			ts9.name="ztoken";
+			ts9.value=request.zsession.ztoken;
+			ts9.expires="never";
+			ts9.httponly=true;
+			application.zcore.functions.zcookie(ts9);
+			if(debug){
 				abort;	
 			}
 			return true;
 		}else{
-			local.ts9=structnew();
-			local.ts9.name="ztoken";
-			local.ts9.value="";
-			local.ts9.httponly=true;
-			local.ts9.expires="now";
-			application.zcore.functions.zcookie(local.ts9);
-			if(local.debug){ 
+			ts9=structnew();
+			ts9.name="ztoken";
+			ts9.value="";
+			ts9.httponly=true;
+			ts9.expires="now";
+			application.zcore.functions.zcookie(ts9);
+			if(debug){ 
 				writeoutput('invalid login - account may be throttled or inactive.<br />'); 
 				abort;
 			}
 			return false;
 		}
 	}
-	if(local.debug){ 
-		writeoutput(local.qUserToken.user_token_key&'<br />'&local.tempTokenKey&'<br />invalid token key - should log and throttle these. for now, just delete and clear cookie<br />'); 
+	if(debug){ 
+		writeoutput(qUserToken.user_token_key&'<br />'&tempTokenKey&'<br />invalid token key - should log and throttle these. for now, just delete and clear cookie<br />'); 
 	}
-	this.setLoginLog(0);
+	setLoginLog(0);
 	db.sql="delete from #db.table("user_token", request.zos.zcoreDatasource)#  
 	WHERE 
-	user_token_version=#db.param(local.arrToken[1])# and 
-	user_token_id=#db.param(local.arrToken[2])# and 
+	user_token_version=#db.param(arrToken[1])# and 
+	user_token_id=#db.param(arrToken[2])# and 
 	user_token_deleted = #db.param(0)# and 
-	user_token_username=#db.param(local.arrToken[3])# and 
+	user_token_username=#db.param(arrToken[3])# and 
 	site_id=#db.param(request.zos.globals.id)# 
 	";
 	db.execute("q"); 
-	local.ts9=structnew();
-	local.ts9.name="ztoken";
-	local.ts9.value="";
-	local.ts9.httponly=true;
-	local.ts9.expires="now";
-	application.zcore.functions.zcookie(local.ts9);
-	if(local.debug){
+	ts9=structnew();
+	ts9.name="ztoken";
+	ts9.value="";
+	ts9.httponly=true;
+	ts9.expires="now";
+	application.zcore.functions.zcookie(ts9);
+	if(debug){
 		abort;
 	}
 	return false;
