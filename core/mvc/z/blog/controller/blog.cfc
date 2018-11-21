@@ -1833,7 +1833,7 @@ this.app_id=10;
 
 
 <cffunction name="articleTemplate" localmode="modern" access="remote" output="yes" returntype="any">
-	<cfscript> 
+	<cfscript>  
 	var db=request.zos.queryObject; 
 	variables.init();
 	if(structkeyexists(form, 'rss_id')){
@@ -1959,32 +1959,36 @@ this.app_id=10;
 		}
 	} 
 	request.thumbnailStruct=variables.getThumbnailSizeStruct();
-	db1=duplicate(request.zos.queryObject);
-	db2=duplicate(request.zos.queryObject); 
-	db3=duplicate(request.zos.queryObject); 
+	db1=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
+	db2=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
+	db3=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
+	// db1=duplicate(request.zos.queryObject);
+	// db2=duplicate(request.zos.queryObject); 
+	// db3=duplicate(request.zos.queryObject); 
 	curDate=dateformat(qArticle.blog_datetime,'yyyy-mm-01 00:00:00');
 	</cfscript>
-	<cfthread name="blogViewPopularThread" action="run" db="#db1#" qArticle="#qArticle#" timeout="1000">
+	<cfthread name="blogViewPopularThread" action="run" db1="#db1#" qArticle="#qArticle#" timeout="1000">
 		<cfscript> 
 		ts=structnew("sync");
 		ts.image_library_id_field="blog.blog_image_library_id";
 		ts.count = 0; // how many images to get
+		ts.db=db1;
 		rs2=application.zcore.imageLibraryCom.getImageSQL(ts);    
-		db.sql="select * 
-		#db.trustedsql(rs2.select)# 
-		from #db.table("blog", request.zos.zcoreDatasource)# 
-		#db.trustedsql(rs2.leftJoin)#
-		where blog.blog_id <> #db.param(qArticle.blog_id)# and  
-		blog.site_id=#db.param(request.zos.globals.id)# and 
-		blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))#  and 
-		blog_status <> #db.param(2)# and 
-		blog_views <> #db.param(0)# and
-		blog_deleted = #db.param(0)# 
+		db1.sql="select * 
+		#db1.trustedsql(rs2.select)# 
+		from #db1.table("blog", request.zos.zcoreDatasource)# 
+		#db1.trustedsql(rs2.leftJoin)#
+		where blog.blog_id <> #db1.param(qArticle.blog_id)# and  
+		blog.site_id=#db1.param(request.zos.globals.id)# and 
+		blog_datetime<=#db1.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))#  and 
+		blog_status <> #db1.param(2)# and 
+		blog_views <> #db1.param(0)# and
+		blog_deleted = #db1.param(0)# 
 		GROUP BY blog.blog_id 
 		order by 
-		blog_views-((DATE_FORMAT(NOW(), #db.param('%Y%m%d')#)-DATE_FORMAT(blog_datetime, #db.param('%Y%m%d')#))*#db.param(randrange(5,30)/100)#) DESC  
-		LIMIT #db.param(0)#,#db.param(8)# ";
-		qPopular=db.execute("qPopular");
+		blog_views-((DATE_FORMAT(NOW(), #db1.param('%Y%m%d')#)-DATE_FORMAT(blog_datetime, #db1.param('%Y%m%d')#))*#db1.param(randrange(5,30)/100)#) DESC  
+		LIMIT #db1.param(0)#,#db1.param(8)# ";
+		qPopular=db1.execute("qPopular");
 		</cfscript>
 		<cfif qPopular.recordcount NEQ 0>  
 			<div class="zblog-populararticles">
@@ -1994,30 +1998,30 @@ this.app_id=10;
 		</cfif>
 	</cfthread>
 
-	<cfthread name="blogViewRelatedThread" action="run" db="#db2#" rs2="#rs2#" qArticle="#qArticle#" timeout="1000">
+	<cfthread name="blogViewRelatedThread" action="run" db2="#db2#" rs2="#rs2#" qArticle="#qArticle#" timeout="1000">
 		<cfscript> 
-		db.sql="select * ";
+		db2.sql="select * ";
 		if(application.zcore.enableFullTextIndex){
-			db.sql&=" , MATCH(blog.blog_search) AGAINST (#db.param(qArticle.blog_title)# ) c ";// WITH QUERY EXPANSION 
+			db2.sql&=" , MATCH(blog.blog_search) AGAINST (#db2.param(qArticle.blog_title)# ) c ";// WITH QUERY EXPANSION 
 		}
-		db.sql&="
-		#db.trustedsql(rs2.select)#
-		from (#db.table("blog", request.zos.zcoreDatasource)# blog, 
-		#db.table("blog_x_category", request.zos.zcoreDatasource)#) ";
+		db2.sql&="
+		#db2.trustedsql(rs2.select)#
+		from (#db2.table("blog", request.zos.zcoreDatasource)# blog, 
+		#db2.table("blog_x_category", request.zos.zcoreDatasource)#) ";
 		if(application.zcore.enableFullTextIndex){
-			//db.sql&=" FORCE INDEX(`search`) ";
+			//db2.sql&=" FORCE INDEX(`search`) ";
 		} 
-		// blog_search like '%#db.param(replace(qArticle.blog_title,' ','%','ALL'))#%'  and
-		db.sql&="
+		// blog_search like '%#db2.param(replace(qArticle.blog_title,' ','%','ALL'))#%'  and
+		db2.sql&="
 		
-		#db.trustedsql(rs2.leftJoin)#
+		#db2.trustedsql(rs2.leftJoin)#
 		where 
-		blog_deleted = #db.param(0)# and  
+		blog_deleted = #db2.param(0)# and  
 		blog_x_category.blog_id = blog.blog_id and 
 		blog_x_category.site_id = blog.site_id and 
 		blog_x_category.blog_category_id = blog.blog_category_id and 
 		blog_x_category.site_id = blog.site_id  and  
-		blog_x_category_deleted = #db.param(0)# and ";
+		blog_x_category_deleted = #db2.param(0)# and ";
 		if(qArticle.blog_category_id_list EQ ""){
 			arrCategory=[qArticle.blog_category_id];
 		}else{
@@ -2026,25 +2030,25 @@ this.app_id=10;
 		if(arraylen(arrCategory) EQ 0){
 			arrayAppend(arrCategory, -1);
 		}
-		db.sql&=" blog_x_category.blog_category_id IN (";
+		db2.sql&=" blog_x_category.blog_category_id IN (";
 		for(i=1;i<=arraylen(arrCategory);i++){
 			categoryId=arrCategory[i];
 			if(i NEQ 1){
-				db.sql&=", ";
+				db2.sql&=", ";
 			}
-			db.sql&="#db.param(categoryId)# ";
+			db2.sql&="#db2.param(categoryId)# ";
 		} 
-		db.sql&=") and blog.blog_id <> #db.param(qArticle.blog_id)# and 
-		blog.site_id=#db.param(request.zos.globals.id)# and 
-		blog.blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
-		blog.blog_status <> #db.param(2)# 
+		db2.sql&=") and blog.blog_id <> #db2.param(qArticle.blog_id)# and 
+		blog.site_id=#db2.param(request.zos.globals.id)# and 
+		blog.blog_datetime<=#db2.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
+		blog.blog_status <> #db2.param(2)# 
 		GROUP BY blog.blog_id";
 		if(application.zcore.enableFullTextIndex){
-			db.sql&=" order by c desc, blog_sticky desc, blog_datetime desc";
+			db2.sql&=" order by c desc, blog_sticky desc, blog_datetime desc";
 		}
-		db.sql&="
-		LIMIT #db.param(0)#,#db.param(4)#";
-		qRelated=db.execute("qRelated");  
+		db2.sql&="
+		LIMIT #db2.param(0)#,#db2.param(4)#";
+		qRelated=db2.execute("qRelated");  
 		</cfscript>
 		<cfif qArticle.blog_category_name NEQ "" or qRelated.recordcount NEQ 0>
 			<div class="zblog-relatedarticles">
@@ -2054,7 +2058,7 @@ this.app_id=10;
 		</cfif>
 	</cfthread>
 
-	<cfthread name="blogCommentThread" curDate="#curDate#" currentBlogURL="#currentBlogURL#" optionStruct="#optionStruct#" action="run" db="#db3#" qArticle="#qArticle#" timeout="1000">
+	<cfthread name="blogCommentThread" curDate="#curDate#" currentBlogURL="#currentBlogURL#" optionStruct="#optionStruct#" action="run" db3="#db3#" qArticle="#qArticle#" timeout="1000">
 
 		<cfif application.zcore.functions.zIsExternalCommentsEnabled()>
 			<cfscript>  
@@ -2062,13 +2066,13 @@ this.app_id=10;
 			</cfscript>
 		<cfelseif application.zcore.functions.zso(optionstruct,'blog_config_disable_comments',false,0) EQ 0>
 			<cfscript>  
-			db.sql="select * from #db.table("blog_comment", request.zos.zcoreDatasource)# where
-			blog_comment_approved=#db.param(1)#  and  
-			blog_comment_deleted = #db.param(0)# and
-			blog_id = #db.param(form.blog_id)# and 
-			site_id=#db.param(request.zos.globals.id)# 
+			db3.sql="select * from #db3.table("blog_comment", request.zos.zcoreDatasource)# where
+			blog_comment_approved=#db3.param(1)#  and  
+			blog_comment_deleted = #db3.param(0)# and
+			blog_id = #db3.param(form.blog_id)# and 
+			site_id=#db3.param(request.zos.globals.id)# 
 			ORDER BY blog_comment_datetime ";
-			qComments=db.execute("qComments");
+			qComments=db3.execute("qComments");
 			</cfscript> 
 			<h2><a id="comment"></a>User Comments</h2>
 			<cfset noComments=true>
@@ -2154,40 +2158,42 @@ this.app_id=10;
 		ts=structnew("sync");
 		ts.image_library_id_field="blog.blog_image_library_id";
 		ts.count = 0; // how many images to get
+		ts.db=db3;
 		rs2=application.zcore.imageLibraryCom.getImageSQL(ts);    
-		db.sql="select * 
-		#db.trustedsql(rs2.select)# 
-		from #db.table("blog", request.zos.zcoreDatasource)# 
-		#db.trustedsql(rs2.leftJoin)# 
+		db3.sql="select * 
+		#db3.trustedsql(rs2.select)# 
+		from #db3.table("blog", request.zos.zcoreDatasource)# 
+		#db3.trustedsql(rs2.leftJoin)# 
 		where 
-		blog_deleted = #db.param(0)# and 
-		blog.site_id=#db.param(request.zos.globals.id)# and 
-		blog_id <> #db.param(form.blog_id)# and  
-		blog_datetime < #db.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# and 
-		blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
-		blog_status <> #db.param(2)#  
+		blog_deleted = #db3.param(0)# and 
+		blog.site_id=#db3.param(request.zos.globals.id)# and 
+		blog_id <> #db3.param(form.blog_id)# and  
+		blog_datetime < #db3.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# and 
+		blog_datetime<=#db3.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
+		blog_status <> #db3.param(2)#  
 		GROUP BY blog.blog_id 
 		ORDER BY blog_sticky desc, blog_datetime DESC 
-		LIMIT #db.param(0)#,#db.param(1)# ";
-		qImagePrevious=db.execute("qImagePrevious");
+		LIMIT #db3.param(0)#,#db3.param(1)# ";
+		qImagePrevious=db3.execute("qImagePrevious");
 
 		ts=structnew("sync");
 		ts.image_library_id_field="blog.blog_image_library_id";
 		ts.count = 0; // how many images to get
+		ts.db=db3;
 		rs2=application.zcore.imageLibraryCom.getImageSQL(ts);    
-		db.sql="select * 
-		#db.trustedsql(rs2.select)# 
-		from #db.table("blog", request.zos.zcoreDatasource)# 
-		#db.trustedsql(rs2.leftJoin)#
+		db3.sql="select * 
+		#db3.trustedsql(rs2.select)# 
+		from #db3.table("blog", request.zos.zcoreDatasource)# 
+		#db3.trustedsql(rs2.leftJoin)#
 		 where 
-		blog_deleted = #db.param(0)# and
-		blog.site_id=#db.param(request.zos.globals.id)# and 
-		blog_id <> #db.param(form.blog_id)# and  
-		blog_datetime > #db.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# 
+		blog_deleted = #db3.param(0)# and
+		blog.site_id=#db3.param(request.zos.globals.id)# and 
+		blog_id <> #db3.param(form.blog_id)# and  
+		blog_datetime > #db3.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# 
 		GROUP BY blog.blog_id
 		ORDER BY blog_sticky asc, blog_datetime ASC 
-		LIMIT #db.param(0)#,#db.param(1)# ";
-		qImageNext=db.execute("qImageNext");
+		LIMIT #db3.param(0)#,#db3.param(1)# ";
+		qImageNext=db3.execute("qImageNext");
 		</cfscript>
 
 		<cfif qImagePrevious.recordcount+qImageNext.recordcount GT 0> 
@@ -2213,7 +2219,7 @@ this.app_id=10;
 				</cfif> 
 			</div>
 		</cfif>
-		#application.zcore.app.getAppCFC("blog").getPopularTags()#
+		#application.zcore.app.getAppCFC("blog").getPopularTags(db3)#
 	</cfthread>
 	<cfscript>
 	if(isdate(qArticle.blog_datetime) EQ false or datecompare(qArticle.blog_datetime,now()) EQ 1 or qArticle.blog_status EQ '2'){
@@ -2487,6 +2493,7 @@ this.app_id=10;
 			<cfscript> 
 			arrThread=["blogCommentThread","blogViewPopularThread","blogViewRelatedThread"];
 			thread name="#arrayToList(arrThread, ",")#" action="join" timeout="10000";
+			// writedump(cfthread);
 			for(i=1;i<=arraylen(arrThread);i++){
 				if(cfthread[arrThread[i]].status NEQ "COMPLETED"){
 					savecontent variable="out"{
@@ -3521,7 +3528,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		application.zcore.listingStruct.functions.zListingDisplaySavedSearch(qCategory.blog_category_saved_search_id); 
 		</cfscript>
 	</cfif> 
-	#application.zcore.app.getAppCFC("blog").getPopularTags()#
+	#application.zcore.app.getAppCFC("blog").getPopularTags(db)#
 </cffunction>
  
 
@@ -4436,7 +4443,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		#searchNAV#<br />
 	</cfif>
 	
-	#application.zcore.app.getAppCFC("blog").getPopularTags()#
+	#application.zcore.app.getAppCFC("blog").getPopularTags(db)#
 </cffunction>
 
 
@@ -4743,7 +4750,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		application.zcore.listingStruct.functions.zListingDisplaySavedSearch(qtagdata.blog_tag_saved_search_id);
 		</cfscript>
 	</cfif> 
-	#application.zcore.app.getAppCFC("blog").getPopularTags()#
+	#application.zcore.app.getAppCFC("blog").getPopularTags(db)#
 </cffunction>
 
 
@@ -4856,7 +4863,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		</cfif>
 	</cfif>
 	
-	#application.zcore.app.getAppCFC("blog").getPopularTags()#
+	#application.zcore.app.getAppCFC("blog").getPopularTags(db)#
 </cffunction>
 
 
@@ -5029,13 +5036,14 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 
 
 <cffunction name="getPopularTags" localmode="modern" output="yes" returntype="any">
+	<cfargument name="db" type="component" required="yes">
 	<cfscript>
 	var qTag=0;
 	var arrStyle=0;
 	
 	var styleIndex=0;
 	var arrQueryParam=arraynew(1);
-	var db=request.zos.queryObject;
+	var db=arguments.db;
 	</cfscript> 
 	
 	<cfsavecontent variable="db.sql">

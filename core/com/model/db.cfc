@@ -240,10 +240,11 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	<cffunction name="newQuery" localmode="modern" access="public">
 		<cfargument name="config" type="struct" required="no">
 		<cfscript>
-		var queryCopy=duplicate(variables.cachedQueryObject);
-		arguments.config.dbQuery=queryCopy;
+		var queryCopy=duplicate(variables.cachedQueryObject, true);
 		if(structkeyexists(arguments, 'config')){
-			queryCopy.init(this, arguments.config);
+			config=duplicate(arguments.config);
+			config.dbQuery=queryCopy;
+			queryCopy.init(this, config);
 		}else{
 			queryCopy.init(this);
 		}

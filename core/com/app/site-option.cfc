@@ -2254,11 +2254,17 @@ application.zcore.siteOptionCom.getImageSQL(ts);
 	var rs=structnew();
 	ts.site_option_app_id_field="";
 	ts.count=1;
-	structappend(arguments.ss,ts,false);
-	if(arguments.ss.site_option_app_id_field EQ ""){
-		application.zcore.template.fail("Error: zcorerootmapping.com.app.site-option.cfc - displayImages() failed because arguments.ss.site_option_app_id_field is required.");	
+	ss=arguments.ss;
+	structappend(ss,ts,false);
+	if(structkeyexists(ss, 'db')){
+		db=ss.db;
+	}else{
+		db=request.zos.queryObject;
 	}
-	rs.leftJoin="LEFT JOIN `"&request.zos.zcoreDatasource&"`.image ON "&arguments.ss.site_option_app_id_field&" = image.site_option_app_id and image_sort <= #db.param(arguments.ss.count)# and image.site_id = #db.param(request.zos.globals.id)#";
+	if(ss.site_option_app_id_field EQ ""){
+		application.zcore.template.fail("Error: zcorerootmapping.com.app.site-option.cfc - displayImages() failed because ss.site_option_app_id_field is required.");	
+	}
+	rs.leftJoin="LEFT JOIN `"&request.zos.zcoreDatasource&"`.image ON "&ss.site_option_app_id_field&" = image.site_option_app_id and image_sort <= #db.param(ss.count)# and image.site_id = #db.param(request.zos.globals.id)#";
 	rs.select=", cast(GROUP_CONCAT(image_id ORDER BY image_sort SEPARATOR '\t') as char) imageIdList, 
 	cast(GROUP_CONCAT(image_caption ORDER BY image_sort SEPARATOR '\t') as char) imageCaptionList, 
 	cast(GROUP_CONCAT(image_file ORDER BY image_sort SEPARATOR '\t') as char) imageFileList, 

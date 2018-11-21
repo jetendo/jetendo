@@ -1275,28 +1275,31 @@ application.zcore.imageLibraryCom.getImageSQL(ts);
  --->
 <cffunction name="getImageSQL" localmode="modern" returntype="any" output="yes">
 	<cfargument name="ss" type="struct" required="yes">
-	<cfscript>
-	var qImages=0;
+	<cfscript> 
 	var arrOutput=arraynew(1);
 	var ts=structnew();
-	var rs=structnew();
-	var i=0;
-	var db=request.zos.queryObject;
+	var rs=structnew(); 
 	ts.image_library_id_field="";
 	ts.count=1;
 	structappend(arguments.ss,ts,false);
+	ss=arguments.ss;
+	if(structkeyexists(ss, 'db')){
+		db=ss.db;
+	}else{
+		db=request.zos.queryObject;
+	}
 	if(not structkeyexists(request.zos, 'imageLibraryGetImageSQLIndex')){
 		request.zos.imageLibraryGetImageSQLIndex=0;
 	}
 	request.zos.imageLibraryGetImageSQLIndex++;
 	i=request.zos.imageLibraryGetImageSQLIndex;
-	if(arguments.ss.image_library_id_field EQ ""){
-		application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - displayImages() failed because arguments.ss.image_library_id_field is required.");	
+	if(ss.image_library_id_field EQ ""){
+		application.zcore.template.fail("Error: zcorerootmapping.com.app.image-library.cfc - displayImages() failed because ss.image_library_id_field is required.");	
 	}
 	rs.leftJoin="LEFT JOIN "&db.table("image", request.zos.zcoreDatasource)&" image#i# FORCE INDEX(`newIndex3`) ON 
-	"&arguments.ss.image_library_id_field&" = image#i#.image_library_id and ";
-	if(arguments.ss.count){
-		rs.leftJoin&=" image#i#.image_sort <= '#application.zcore.functions.zescape(arguments.ss.count)#' and ";
+	"&ss.image_library_id_field&" = image#i#.image_library_id and ";
+	if(ss.count){
+		rs.leftJoin&=" image#i#.image_sort <= '#application.zcore.functions.zescape(ss.count)#' and ";
 	}
 	rs.leftJoin&=" image#i#.site_id = '#application.zcore.functions.zescape(request.zos.globals.id)#' and 
 	image#i#.image_deleted = 0 ";
