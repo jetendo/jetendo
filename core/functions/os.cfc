@@ -1968,10 +1968,13 @@ not used
 	tempPath=application.zcore.functions.zGetDomainInstallPath(qSite.site_short_domain);
 	if(directoryExists(tempPath) EQ false){
 		if(qSite.site_active EQ 1){
-			application.zcore.template.fail("Site home directory is missing: "&tempPath);
-		}else{
-			return;
+			// disable sites that are missing their source code.
+			db.sql="UPDATE #db.table("site", request.zos.zcoreDatasource)# SET site_active=#db.param(0)#  
+			WHERE site_id = #db.param(arguments.site_id)# and 
+			site_deleted = #db.param(0)#";
+			qSite=db.execute("qSite");
 		}
+		return;
 	}
 	// re-cache the site paths, this function is defined at top of page
 	tempStruct = StructNew();

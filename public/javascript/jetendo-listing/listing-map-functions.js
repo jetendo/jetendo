@@ -479,16 +479,21 @@ function zGeocodeAddress() {
 		var debugurlstring="";
 		if(debugajaxgeocoder){
 			debugurlstring="&debugajaxgeocoder=1";
-		}
-		$.ajax({
-			type: "post",
-			url: "/z/listing/ajax-geocoder/save?"+debugurlstring,
-			data:{ results: r, listing_id: arrListingId[curIndex], address: arrAddress[curIndex], zip: arrAddressZip[curIndex], status: curStatus },
-			dataType:"text",
-			success: function(data){
-				if(debugajaxgeocoder) f1.value+="Data saved with status="+data+"\n";
-			}
-		}); 
+		} 
+		var tempObj={};
+		tempObj.id="zMapListing";
+		tempObj.method="post";
+		tempObj.postObj={
+			results: r, listing_id: arrListingId[curIndex], address: arrAddress[curIndex], zip: arrAddressZip[curIndex], status: curStatus
+		};
+		tempObj.url="/z/listing/ajax-geocoder/save?"+debugurlstring;
+		tempObj.callback=function(r){
+			var r=JSON.parse(r);
+			if(debugajaxgeocoder) f1.value+="geocode save status="+r.success+"\n";
+		};
+		tempObj.errorCallback=function(){ /*ignore*/ };
+		tempObj.cache=false;
+		zAjax(tempObj); 
 		curIndex++;
 		if(curIndex<arrAddress.length && !stopGeocoding){
 			setTimeout('zTimeoutGeocode();',1500);

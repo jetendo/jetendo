@@ -1,6 +1,7 @@
- <cfcomponent>
+<cfcomponent>
 <cfoutput>
-<cffunction name="save" localmode="modern" access="remote" returntype="any"><cfscript>
+<cffunction name="save" localmode="modern" access="remote">
+	<cfscript>
 	var db=request.zos.queryObject;
 	if(request.zos.isdeveloper EQ false and request.zos.istestserver EQ false){
 		structdelete(form,'debugajaxgeocoder');
@@ -10,12 +11,10 @@
 		structkeyexists(form, 'listing_id') EQ false or 
 		structkeyexists(form, 'address') EQ false or 
 		structkeyexists(form, 'zip') EQ false){
-		writeoutput('Access Denied');
-		application.zcore.functions.zabort();	
+		application.zcore.functions.zReturnJson('{"success":false}');
 	}
 	if(form.status EQ ""){
-		writeoutput('0');
-		application.zcore.functions.zabort();
+		application.zcore.functions.zReturnJson('{"success":false}');
 	}
 	if(form.status NEQ "OK" or trim(form.results) EQ ""){
 		arrR=arraynew(1);
@@ -72,12 +71,10 @@
 					writeoutput(chr(10)&request.zos.arrQueryLog[g]&chr(10));
 				}
 			}
-			writeoutput('1');
-			application.zcore.functions.zabort();
+			application.zcore.functions.zReturnJson('{"success":true}');
 		}
 	}
-	writeoutput('0');
-	application.zcore.functions.zabort();	
+	application.zcore.functions.zReturnJson('{"success":false}');
 	</cfscript>
 </cffunction>
 

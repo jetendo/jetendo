@@ -692,7 +692,7 @@ var zLastAjaxVarName=""; */
 						}
 						if(zAjaxLastRequestId !== false){
 							id=zAjaxLastRequestId; 
-							var continueExecution=req.showRequestError();
+							var continueExecution=req.showRequestError("");
 							if(continueExecution){
 								zAjaxData[id].errorCallback(req);
 							}
@@ -737,6 +737,7 @@ var zLastAjaxVarName=""; */
 							zAjaxLastRequestId=false;*/
 						}
 					}
+					
 				}
 				zAjaxLastRequestId=false;
 			} 

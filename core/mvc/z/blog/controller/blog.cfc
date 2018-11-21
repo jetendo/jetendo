@@ -2054,6 +2054,7 @@ this.app_id=10;
 	</cfthread>
 
 	<cfthread name="blogCommentThread" optionStruct="#optionStruct#" action="run" db="#db3#" qArticle="#qArticle#" timeout="1000">
+
 		<cfif application.zcore.functions.zIsExternalCommentsEnabled()>
 			<cfscript>  
 			echo(application.zcore.functions.zDisplayExternalComments(optionstruct.app_x_site_id&"-"&qArticle.blog_id, qArticle.blog_title, request.zos.globals.domain&currentBlogURL));
@@ -2074,17 +2075,18 @@ this.app_id=10;
 				<cfif qComments.blog_comment_approved eq 1>
 					<cfset noComments=false>
 					<div class="rss-comments-box">
-					<div class="rss-comments-subject">#htmleditformat(qComments.blog_comment_title)#</div>
-					<div class="rss-comments-text">
-					#htmleditformat(qComments.blog_comment_text)#
-					</div>
-					<div class="rss-comments-posted">
-						<cfif qComments.blog_comment_author_email NEQ "">
-							Author: #application.zcore.functions.zEncodeEmail(qComments.blog_comment_author_email,true,qComments.blog_comment_author,true,false)# / 
-						</cfif>
+						<div class="rss-comments-subject">#htmleditformat(qComments.blog_comment_title)#</div>
+						<div class="rss-comments-text">
+							#htmleditformat(qComments.blog_comment_text)#
+						</div>
+						<div class="rss-comments-posted">
+							<cfif qComments.blog_comment_author_email NEQ "">
+								Author: #application.zcore.functions.zEncodeEmail(qComments.blog_comment_author_email,true,qComments.blog_comment_author,true,false)# / 
+							</cfif>
 
-						 #dateformat(qComments.blog_comment_datetime, 'ddd, mmm dd, yyyy')# at #timeformat(qComments.blog_comment_datetime, 'h:mmtt')#  
-					</div></div>
+							 #dateformat(qComments.blog_comment_datetime, 'ddd, mmm dd, yyyy')# at #timeformat(qComments.blog_comment_datetime, 'h:mmtt')#  
+						</div>
+					</div>
 				</cfif>
 			</cfloop>
     
@@ -2098,50 +2100,50 @@ this.app_id=10;
 			application.zcore.functions.zStatusHandler(request.zsid,true);
 			</cfscript>
 			<div style="width:100%; float:left "> 
-			<cfscript>
-			form.set9=application.zcore.functions.zGetHumanFieldIndex();
-			</cfscript> 
-			<div style="width:100%; float:left; line-height:130%; padding-bottom:10px;font-size:130%;"><a href="##" class="z-button" onclick="document.getElementById('blogCommentForm').style.display='block'; return false;">Add A Comment</a></div>
-			<div style="width:100%; float:left; display:none;" id="blogCommentForm">
-			<form class="zFormCheckDirty" action="/z/blog/blog/addComment?blog_id=#qArticle.blog_id#" method="post" onsubmit="zSet9('zset9_#form.set9#');" name="myForm99">
-			<input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
-			#application.zcore.functions.zFakeFormFields()#
-			<table style="width:100%;"> 
-			<tr>
-			<td style="white-space: nowrap;">Your Name: <span style="color:##FF0000; font-weight:bold"> *</span></td>
-			<td style="width:90%;"><input type="text" name="blog_comment_author" value="<cfif isDefined('request.zsession.blog_comment_author')>#htmleditformat(request.zsession.blog_comment_author)#<cfelse>#htmleditformat(application.zcore.functions.zso(form,'blog_comment_author'))#</cfif>"  style="width:96%;" /></td>
-			</tr>
-			<tr>
-			<td style="white-space: nowrap;">Your Email: <span style="color:##FF0000; font-weight:bold"> *</span></td>
-			<td style="width:90%;"><input type="text" name="blog_comment_author_email" value="<cfif isDefined('request.zsession.blog_comment_author_email')>#htmleditformat(request.zsession.blog_comment_author_email)#<cfelse>#htmleditformat(application.zcore.functions.zso(form,'blog_comment_author_email'))#</cfif>" style="width:96%;" maxlength="50" /></td>
-			</tr>
-			<tr>
-			<td style="white-space: nowrap;">Subject: </td>
-			<td style="width:90%;"><input type="text" name="blog_comment_title" value="#htmleditformat(application.zcore.functions.zso(form,'blog_comment_title'))#" style="width:96%;" maxlength="100" /></td>
-			</tr>
-			<tr>
-			<td style="white-space: nowrap;vertical-align:top; ">Comments: <span style="color:##FF0000; font-weight:bold"> *</span></td>
-			<td style="width:90%;">
-			<textarea name="blog_comment_text"  style="width:97%; height:200px;" onkeydown="textCounter(document.myForm99.blog_comment_text,document.myForm99.remLen2,1000)" 
-			onkeyup="textCounter(document.myForm99.blog_comment_text,document.myForm99.remLen2,1000)">#htmleditformat(application.zcore.functions.zso(form,'blog_comment_text'))#</textarea><br />
-			<input readonly="readonly" type="text" name="remLen2" size="3" maxlength="3" value="1000" /> characters left
-			</td>
-			</tr>
+				<cfscript>
+				form.set9=application.zcore.functions.zGetHumanFieldIndex();
+				</cfscript> 
+				<div style="width:100%; float:left; line-height:130%; padding-bottom:10px;font-size:130%;"><a href="##" class="z-button" onclick="document.getElementById('blogCommentForm').style.display='block'; return false;">Add A Comment</a></div>
+				<div style="width:100%; float:left; display:none;" id="blogCommentForm">
+					<form class="zFormCheckDirty" action="/z/blog/blog/addComment?blog_id=#qArticle.blog_id#" method="post" onsubmit="zSet9('zset9_#form.set9#');" name="myForm99">
+						<input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
+						#application.zcore.functions.zFakeFormFields()#
+						<table style="width:100%;"> 
+						<tr>
+						<td style="white-space: nowrap;">Your Name: <span style="color:##FF0000; font-weight:bold"> *</span></td>
+						<td style="width:90%;"><input type="text" name="blog_comment_author" value="<cfif isDefined('request.zsession.blog_comment_author')>#htmleditformat(request.zsession.blog_comment_author)#<cfelse>#htmleditformat(application.zcore.functions.zso(form,'blog_comment_author'))#</cfif>"  style="width:96%;" /></td>
+						</tr>
+						<tr>
+						<td style="white-space: nowrap;">Your Email: <span style="color:##FF0000; font-weight:bold"> *</span></td>
+						<td style="width:90%;"><input type="text" name="blog_comment_author_email" value="<cfif isDefined('request.zsession.blog_comment_author_email')>#htmleditformat(request.zsession.blog_comment_author_email)#<cfelse>#htmleditformat(application.zcore.functions.zso(form,'blog_comment_author_email'))#</cfif>" style="width:96%;" maxlength="50" /></td>
+						</tr>
+						<tr>
+						<td style="white-space: nowrap;">Subject: </td>
+						<td style="width:90%;"><input type="text" name="blog_comment_title" value="#htmleditformat(application.zcore.functions.zso(form,'blog_comment_title'))#" style="width:96%;" maxlength="100" /></td>
+						</tr>
+						<tr>
+						<td style="white-space: nowrap;vertical-align:top; ">Comments: <span style="color:##FF0000; font-weight:bold"> *</span></td>
+						<td style="width:90%;">
+						<textarea name="blog_comment_text"  style="width:97%; height:200px;" onkeydown="textCounter(document.myForm99.blog_comment_text,document.myForm99.remLen2,1000)" 
+						onkeyup="textCounter(document.myForm99.blog_comment_text,document.myForm99.remLen2,1000)">#htmleditformat(application.zcore.functions.zso(form,'blog_comment_text'))#</textarea><br />
+						<input readonly="readonly" type="text" name="remLen2" size="3" maxlength="3" value="1000" /> characters left
+						</td>
+						</tr>
 
-			<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
-			
-				<tr>
-					<td style="vertical-align:top; ">&nbsp;</td>
-					<td>#application.zcore.functions.zDisplayRecaptcha()#</td>
-				</tr>
-			</cfif>
-			<tr>
-			<td style="white-space: nowrap;">&nbsp;<input type="hidden" name="blog_id" value="#htmleditformat(form.blog_id)#" /></td>
-			<td style="width:90%;"><input type="submit" value="Add Comment" /></td>
-			</tr>
-			</table>
-			</form>
-			</div>
+						<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
+						
+							<tr>
+								<td style="vertical-align:top; ">&nbsp;</td>
+								<td>#application.zcore.functions.zDisplayRecaptcha()#</td>
+							</tr>
+						</cfif>
+						<tr>
+						<td style="white-space: nowrap;">&nbsp;<input type="hidden" name="blog_id" value="#htmleditformat(form.blog_id)#" /></td>
+						<td style="width:90%;"><input type="submit" value="Add Comment" /></td>
+						</tr>
+						</table>
+					</form>
+				</div>
 			</div>
 			<br style="clear:both;" />
 
@@ -2167,42 +2169,49 @@ this.app_id=10;
 		ORDER BY blog_sticky desc, blog_datetime DESC 
 		LIMIT #db.param(0)#,#db.param(1)# ";
 		qImagePrevious=db.execute("qImagePrevious");
+
+		ts=structnew("sync");
+		ts.image_library_id_field="blog.blog_image_library_id";
+		ts.count = 0; // how many images to get
+		rs2=application.zcore.imageLibraryCom.getImageSQL(ts);    
+		db.sql="select * 
+		#db.trustedsql(rs2.select)# 
+		from #db.table("blog", request.zos.zcoreDatasource)# 
+		#db.trustedsql(rs2.leftJoin)#
+		 where 
+		blog_deleted = #db.param(0)# and
+		blog.site_id=#db.param(request.zos.globals.id)# and 
+		blog_id <> #db.param(form.blog_id)# and  
+		blog_datetime > #db.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# 
+		GROUP BY blog.blog_id
+		ORDER BY blog_sticky asc, blog_datetime ASC 
+		LIMIT #db.param(0)#,#db.param(1)# ";
+		qImageNext=db.execute("qImageNext");
 		</cfscript>
 
-		<div class="zblog-articlepagenav z-equal-heights">
-			<cfif qImagePrevious.recordcount NEQ 0 and isdate(qImagePrevious.blog_datetime)>
-				<div class="zblog-articlepagenav-left">
-					<p>Previous Article</p>
-					#renderBlogAfterThumbnail(qImagePrevious, "zblog-image-box-single")#
-				</div> 
-			</cfif>
-			<cfscript>
-			nextMonth=dateformat(dateadd("m",1,curDate),'yyyy-mm-01')&' 00:00:00';
-			ts=structnew("sync");
-			ts.image_library_id_field="blog.blog_image_library_id";
-			ts.count = 0; // how many images to get
-			rs2=application.zcore.imageLibraryCom.getImageSQL(ts);    
-			db.sql="select * 
-			#db.trustedsql(rs2.select)# 
-			from #db.table("blog", request.zos.zcoreDatasource)# 
-			#db.trustedsql(rs2.leftJoin)#
-			 where 
-			blog_deleted = #db.param(0)# and
-			blog.site_id=#db.param(request.zos.globals.id)# and 
-			blog_id <> #db.param(form.blog_id)# and  
-			blog_datetime > #db.param(dateformat(qarticle.blog_datetime,'yyyy-mm-dd')&' '&Timeformat(qarticle.blog_datetime,'HH:mm:ss'))# 
-			GROUP BY blog.blog_id
-			ORDER BY blog_sticky asc, blog_datetime ASC 
-			LIMIT #db.param(0)#,#db.param(1)# ";
-			qImageNext=db.execute("qImageNext");
-			</cfscript>
-			<cfif qImageNext.recordcount NEQ 0>
-				<div class="zblog-articlepagenav-right">
-					<p>Next Article</p>
-					#renderBlogAfterThumbnail(qImageNext, "zblog-image-box-single")#
-				</div> 
-			</cfif>
-		</div>
+		<cfif qImagePrevious.recordcount+qImageNext.recordcount GT 0>
+			<div class="zblog-articlepagenav z-equal-heights">
+				<cfif qImagePrevious.recordcount NEQ 0>
+					<div class="zblog-articlepagenav-left">
+						<p>Previous Article</p>
+						<cfscript>
+						renderBlogAfterThumbnail(qImagePrevious, "zblog-image-box-single");
+						</cfscript>
+					</div> 
+				</cfif>
+				<cfscript>
+				nextMonth=dateformat(dateadd("m",1,curDate),'yyyy-mm-01')&' 00:00:00';
+				</cfscript>
+				<cfif qImageNext.recordcount NEQ 0>
+					<div class="zblog-articlepagenav-right">
+						<p>Next Article</p>
+						<cfscript>
+						renderBlogAfterThumbnail(qImageNext, "zblog-image-box-single");
+						</cfscript>
+					</div> 
+				</cfif>
+			</div>
+		</cfif>
 		#application.zcore.app.getAppCFC("blog").getPopularTags()#
 	</cfthread>
 	<cfscript>
@@ -2214,23 +2223,21 @@ this.app_id=10;
 	
 	<cfif request.zos.trackingSpider EQ false>
 		
-			<cfthread name="blogViewUpdateThread" action="run" timeout="1000">
-				<cfscript>
-				db=duplicate(request.zos.queryObject);
-				db.sql="UPDATE #db.table("blog", request.zos.zcoreDatasource)#  
-				SET blog_views=blog_views+#db.param(1)# 
-				where blog_id = #db.param(form.blog_id)# and 
-				site_id = #db.param(request.zos.globals.id)# and 
-				blog_deleted = #db.param(0)#";
-				qupdate=db.execute("qupdate");
-				</cfscript>
-			</cfthread>
-		</cfif>
-		<cfsavecontent variable="tempPageNav">
-		<a href="#optionStruct.blog_config_home_url#">#htmleditformat(application.zcore.functions.zvar("homelinktext"))#</a> / <cfif optionStruct.blog_config_root_url EQ "{default}"><a class="#application.zcore.functions.zGetLinkClasses()#" href="/#application.zcore.functions.zURLEncode(optionStruct.blog_config_title,"-")#-#optionStruct.blog_config_url_misc_id#-3.html" class="#application.zcore.functions.zGetLinkClasses()#">#htmleditformat(optionStruct.blog_config_title)#</a><cfelse><a href="#optionStruct.blog_config_root_url#">#htmleditformat(optionStruct.blog_config_title)#</a></cfif> / <a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qArticle.blog_category_unique_name NEQ ''>#qArticle.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_category_id,qArticle.blog_category_id,"html",qArticle.blog_category_name)#</cfif>">#htmleditformat(qArticle.blog_category_name)#</a> / 
-		</cfsavecontent>
-		<cfsavecontent variable="tempMenu"> 
-		</cfsavecontent>
+		<cfthread name="blogViewUpdateThread" action="run" timeout="1000">
+			<cfscript>
+			db=duplicate(request.zos.queryObject);
+			db.sql="UPDATE #db.table("blog", request.zos.zcoreDatasource)#  
+			SET blog_views=blog_views+#db.param(1)# 
+			where blog_id = #db.param(form.blog_id)# and 
+			site_id = #db.param(request.zos.globals.id)# and 
+			blog_deleted = #db.param(0)#";
+			qupdate=db.execute("qupdate");
+			</cfscript>
+		</cfthread>
+	</cfif>
+	<cfsavecontent variable="tempPageNav">
+	<a href="#optionStruct.blog_config_home_url#">#htmleditformat(application.zcore.functions.zvar("homelinktext"))#</a> / <cfif optionStruct.blog_config_root_url EQ "{default}"><a class="#application.zcore.functions.zGetLinkClasses()#" href="/#application.zcore.functions.zURLEncode(optionStruct.blog_config_title,"-")#-#optionStruct.blog_config_url_misc_id#-3.html" class="#application.zcore.functions.zGetLinkClasses()#">#htmleditformat(optionStruct.blog_config_title)#</a><cfelse><a href="#optionStruct.blog_config_root_url#">#htmleditformat(optionStruct.blog_config_title)#</a></cfif> / <a class="#application.zcore.functions.zGetLinkClasses()#" href="<cfif qArticle.blog_category_unique_name NEQ ''>#qArticle.blog_category_unique_name#<cfelse>#application.zcore.app.getAppCFC("blog").getBlogLink(optionStruct.blog_config_url_category_id,qArticle.blog_category_id,"html",qArticle.blog_category_name)#</cfif>">#htmleditformat(qArticle.blog_category_name)#</a> / 
+	</cfsavecontent> 
 			<cfscript>
 			blog_title = '#qArticle.blog_title#';
 			blog_datetime = '#qArticle.blog_datetime#';
@@ -2288,8 +2295,7 @@ this.app_id=10;
 	} else {
 		application.zcore.template.setTag("title","#qArticle.blog_title#");
 		application.zcore.template.setTag("pagetitle","#qArticle.blog_title#");
-		application.zcore.template.setTag("pagenav",tempPageNav);
-		application.zcore.template.setTag("menu",tempMenu);
+		application.zcore.template.setTag("pagenav",tempPageNav); 
 		application.zcore.template.setTag("meta",tempMeta);
 	}
 	
@@ -2305,18 +2311,18 @@ this.app_id=10;
 	// or run a query to object view mapping function which has all tables predefined
 	// or define the available fields right here.
 	
-	viewdata.article.story="";
-	viewdata.article.story&=('<div id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/blog/admin/blog-admin/articleEdit?blog_id=#form.blog_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
-	application.zcore.template.prependTag('pagetitle','<span id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/blog/admin/blog-admin/articleEdit?blog_id=#form.blog_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
-	application.zcore.template.appendTag('pagetitle','</span>');
-	if(isDefined('request.zos.supressBlogArticleDetails')){
-		tempText=qArticle.blog_story;
-		viewdata.article.story&=(replace(tempText,"##zbeginlistings","#tempCurrentBlogUrl###zbeginlistings","ALL"));
+	// viewdata.article.story="";
+	// viewdata.article.story&=('<div id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/blog/admin/blog-admin/articleEdit?blog_id=#form.blog_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
+	// application.zcore.template.prependTag('pagetitle','<span id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/blog/admin/blog-admin/articleEdit?blog_id=#form.blog_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">');
+	// application.zcore.template.appendTag('pagetitle','</span>');
+	// if(isDefined('request.zos.supressBlogArticleDetails')){
+	// 	tempText=qArticle.blog_story;
+	// 	viewdata.article.story&=(replace(tempText,"##zbeginlistings","#tempCurrentBlogUrl###zbeginlistings","ALL"));
 		
-	}else{
-		viewdata.article.story&=qArticle.blog_story;
-	} 
-	viewdata.article.story&=('</div>'); 
+	// }else{
+	// 	viewdata.article.story&=qArticle.blog_story;
+	// } 
+	// viewdata.article.story&=('</div>'); 
 	// might need to support this in the skin language instead
 	//viewdata.article.secureEmailURL=application.zcore.functions.zEncodeEmail(qArticle.user_username);
 	//viewdata.article.secureEmailAddress=application.zcore.functions.zEncodeEmail(qArticle.user_username); 
@@ -2352,23 +2358,23 @@ this.app_id=10;
 				}
 				</cfscript> 
 			</cfif>
-		<cfset curFeedLink=application.zcore.functions.zso(optionStruct, 'blog_config_feedburner_url')> 
-		<cfif qArticle.user_googleplus_url NEQ "" or qArticle.user_twitter_url NEQ "" or qArticle.user_facebook_url NEQ "">
-			&nbsp; Follow me: 
-		</cfif>
-		<cfif curFeedLink NEQ "">
-		<a href="#curFeedLink#" target="_blank" title="Follow us by email subscription"><img src="/z/images/icons/rss.png" alt="Follow #qArticle.user_first_name&" "&qArticle.user_last_name# by email subscription" width="16" height="16" /></a>
-		</cfif>
-		<cfif qArticle.user_googleplus_url NEQ ""><a href="#qArticle.user_googleplus_url#?rel=author" rel="author" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+"><img src="/z/images/icons/googleplusv2.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+" width="16" height="16" /></a></cfif> 
-		<cfif qArticle.user_twitter_url NEQ ""><a href="#qArticle.user_twitter_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter"><img src="/z/images/icons/twitter.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter" width="16" height="16" /></a></cfif>
-		<cfif qArticle.user_facebook_url NEQ ""><a href="#qArticle.user_facebook_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook"><img src="/z/images/icons/facebook.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook" width="16" height="16" /></a></cfif>
+			<cfset curFeedLink=application.zcore.functions.zso(optionStruct, 'blog_config_feedburner_url')> 
+			<cfif qArticle.user_googleplus_url NEQ "" or qArticle.user_twitter_url NEQ "" or qArticle.user_facebook_url NEQ "">
+				&nbsp; Follow me: 
+			</cfif>
+			<cfif curFeedLink NEQ "">
+			<a href="#curFeedLink#" target="_blank" title="Follow us by email subscription"><img src="/z/images/icons/rss.png" alt="Follow #qArticle.user_first_name&" "&qArticle.user_last_name# by email subscription" width="16" height="16" /></a>
+			</cfif>
+			<cfif qArticle.user_googleplus_url NEQ ""><a href="#qArticle.user_googleplus_url#?rel=author" rel="author" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+"><img src="/z/images/icons/googleplusv2.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+" width="16" height="16" /></a></cfif> 
+			<cfif qArticle.user_twitter_url NEQ ""><a href="#qArticle.user_twitter_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter"><img src="/z/images/icons/twitter.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter" width="16" height="16" /></a></cfif>
+			<cfif qArticle.user_facebook_url NEQ ""><a href="#qArticle.user_facebook_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook"><img src="/z/images/icons/facebook.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook" width="16" height="16" /></a></cfif>
 
-		<cfif qArticle.user_instagram_url NEQ ''>
-			<a href="#qArticle.user_instagram_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram"><img src="/z/images/icons/instagram.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram" width="16" height="16" /></a>
-		</cfif>
-		<cfif qArticle.user_linkedin_url NEQ ''>
-			<a href="#qArticle.user_linkedin_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn"><img src="/z/images/icons/linkedin.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn" width="16" height="16" /></a>
-		</cfif>
+			<cfif qArticle.user_instagram_url NEQ ''>
+				<a href="#qArticle.user_instagram_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram"><img src="/z/images/icons/instagram.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram" width="16" height="16" /></a>
+			</cfif>
+			<cfif qArticle.user_linkedin_url NEQ ''>
+				<a href="#qArticle.user_linkedin_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn"><img src="/z/images/icons/linkedin.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn" width="16" height="16" /></a>
+			</cfif>
 		</div>
 	</cfif>
 	<cfif application.zcore.functions.zso(optionStruct, 'blog_config_hide_date', true, 0) EQ 0>
@@ -2414,19 +2420,19 @@ this.app_id=10;
 	
 	
 	<cfsavecontent variable="theImageOutputHTML">
-	<cfscript> 
-	ts =structnew();
-	ts.image_library_id=qArticle.blog_image_library_id;
-	ts.size="960x4000";
-	ts.crop=0; 
-	ts.offset=0;  
-	ts.top=true;
-	if(qArticle.blog_image_library_layout EQ 7 or qArticle.blog_image_library_layout EQ 9){
-		ts.limit=1;
-	}
-	ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(qArticle.blog_image_library_layout); 
-	application.zcore.imageLibraryCom.displayImages(ts); 
-	</cfscript>
+		<cfscript> 
+		ts =structnew();
+		ts.image_library_id=qArticle.blog_image_library_id;
+		ts.size="960x4000";
+		ts.crop=0; 
+		ts.offset=0;  
+		ts.top=true;
+		if(qArticle.blog_image_library_layout EQ 7 or qArticle.blog_image_library_layout EQ 9){
+			ts.limit=1;
+		}
+		ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(qArticle.blog_image_library_layout); 
+		application.zcore.imageLibraryCom.displayImages(ts); 
+		</cfscript>
 	</cfsavecontent>
 	<div class="zblog-story">
 		<cfscript> 
@@ -2472,11 +2478,11 @@ this.app_id=10;
 			<hr />
 		<cfelse>
 			<div class="zblog-bookmarkshare">
-			<hr />
-			<h3>Bookmark &amp; Share</h3>
-			#application.zcore.template.getShareButton("font-size:100%;",true)#<br style="clear:both;" />
-			
-			<hr />
+				<hr />
+				<h3>Bookmark &amp; Share</h3>
+				#application.zcore.template.getShareButton("font-size:100%;",true)#<br style="clear:both;" />
+				
+				<hr />
 			</div> 
 			<cfscript> 
 			thread name="blogCommentThread,blogViewPopularThread,blogViewRelatedThread" action="join" timeout="10000";
@@ -5070,7 +5076,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 			}else{
 				link=application.zcore.app.getAppCFC("blog").getBlogLink(application.zcore.app.getAppData("blog").optionStruct.blog_config_url_tag_id, row.blog_tag_id,"html",row.blog_tag_name);
 			}
-			echo('<a class="#application.zcore.functions.zGetLinkClasses()#" href="#link#" style="#arrStyle[styleIndex]#">#row.blog_tag_name#</a> | ');
+			echo('<a class="#application.zcore.functions.zGetLinkClasses()#" href="#link#" style="#arrStyle[styleIndex]#">#htmleditformat(row.blog_tag_name)#</a> | ');
 		}
 		</cfscript> 
 	</cfif>
