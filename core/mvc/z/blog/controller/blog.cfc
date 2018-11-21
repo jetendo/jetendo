@@ -1962,6 +1962,7 @@ this.app_id=10;
 	db1=duplicate(request.zos.queryObject);
 	db2=duplicate(request.zos.queryObject); 
 	db3=duplicate(request.zos.queryObject); 
+	curDate=dateformat(qArticle.blog_datetime,'yyyy-mm-01 00:00:00');
 	</cfscript>
 	<cfthread name="blogViewPopularThread" action="run" db="#db1#" qArticle="#qArticle#" timeout="1000">
 		<cfscript> 
@@ -2053,14 +2054,14 @@ this.app_id=10;
 		</cfif>
 	</cfthread>
 
-	<cfthread name="blogCommentThread" optionStruct="#optionStruct#" action="run" db="#db3#" qArticle="#qArticle#" timeout="1000">
+	<cfthread name="blogCommentThread" curDate="#curDate#" currentBlogURL="#currentBlogURL#" optionStruct="#optionStruct#" action="run" db="#db3#" qArticle="#qArticle#" timeout="1000">
 
 		<cfif application.zcore.functions.zIsExternalCommentsEnabled()>
 			<cfscript>  
 			echo(application.zcore.functions.zDisplayExternalComments(optionstruct.app_x_site_id&"-"&qArticle.blog_id, qArticle.blog_title, request.zos.globals.domain&currentBlogURL));
 			</cfscript>
 		<cfelseif application.zcore.functions.zso(optionstruct,'blog_config_disable_comments',false,0) EQ 0>
-			<cfscript> 
+			<cfscript>  
 			db.sql="select * from #db.table("blog_comment", request.zos.zcoreDatasource)# where
 			blog_comment_approved=#db.param(1)#  and  
 			blog_comment_deleted = #db.param(0)# and
@@ -2189,7 +2190,7 @@ this.app_id=10;
 		qImageNext=db.execute("qImageNext");
 		</cfscript>
 
-		<cfif qImagePrevious.recordcount+qImageNext.recordcount GT 0>
+		<cfif qImagePrevious.recordcount+qImageNext.recordcount GT 0> 
 			<div class="zblog-articlepagenav z-equal-heights">
 				<cfif qImagePrevious.recordcount NEQ 0>
 					<div class="zblog-articlepagenav-left">
@@ -2209,7 +2210,7 @@ this.app_id=10;
 						renderBlogAfterThumbnail(qImageNext, "zblog-image-box-single");
 						</cfscript>
 					</div> 
-				</cfif>
+				</cfif> 
 			</div>
 		</cfif>
 		#application.zcore.app.getAppCFC("blog").getPopularTags()#
@@ -2299,12 +2300,11 @@ this.app_id=10;
 		application.zcore.template.setTag("meta",tempMeta);
 	}
 	
-	viewdata=structnew();
-	viewdata.qArticle=qArticle;
-	viewdata.article=structnew();
-	application.zcore.functions.zQueryToStruct(qArticle, viewdata.article);
+	// viewdata=structnew();
+	// viewdata.qArticle=qArticle;
+	// viewdata.article=structnew();
+	// application.zcore.functions.zQueryToStruct(qArticle, viewdata.article);
 	
-	curDate=dateformat(blog_datetime,'yyyy-mm-01 00:00:00');
 	
 	// run a security filter
 	// application.zcore.functions.zViewDataSecurityFilter("secureField,List,Here");
@@ -2485,8 +2485,18 @@ this.app_id=10;
 				<hr />
 			</div> 
 			<cfscript> 
-			thread name="blogCommentThread,blogViewPopularThread,blogViewRelatedThread" action="join" timeout="10000";
-			echo(cfthread.blogViewRelatedThread.output&cfthread.blogViewPopularThread.output&cfthread.blogCommentThread.output); 
+			arrThread=["blogCommentThread","blogViewPopularThread","blogViewRelatedThread"];
+			thread name="#arrayToList(arrThread, ",")#" action="join" timeout="10000";
+			for(i=1;i<=arraylen(arrThread);i++){
+				if(cfthread[arrThread[i]].status NEQ "COMPLETED"){
+					savecontent variable="out"{
+						echo('<h2>#arrThread[i]# had an error</h2>');
+						writedump(cfthread[arrThread[i]]);
+					}
+					throw(out);
+				}
+				echo(cfthread[arrThread[i]].output);
+			}
 			</cfscript>
 
 		</cfif> 
