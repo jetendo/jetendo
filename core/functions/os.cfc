@@ -2402,12 +2402,13 @@ not used
 
 <cffunction name="zClearCFMLTemplateCache" localmode="modern">
 	<cfscript>
-	componentCacheClear();
-	pagePoolClear();
-	// ctCacheClear(); // custom tag cache
+	if(not structkeyexists(application,'onInternalApplicationStartRunning')){
+		componentCacheClear();
+		pagePoolClear();
+		// ctCacheClear(); // custom tag cache
+		//objectcache action="clear"; // query cache
+	}
 	</cfscript>
-    <!--- query cache --->
-    <!--- <cfobjectcache action="clear"> --->
 </cffunction>
 
 <cffunction name="zGetDomainInstallPath" localmode="modern" access="public" returntype="string">

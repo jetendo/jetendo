@@ -64,7 +64,7 @@
 	form.fileGalleryMode=application.zcore.functions.zso(form, 'fileGalleryMode',false,false);
 	form.galleryMode=application.zcore.functions.zso(form, 'galleryMode',false,false);
 	if(form.fileGalleryMode EQ false and form.galleryMode EQ false){
-		application.zcore.template.setTag("title","Files &amp; Images Manager");
+		application.zcore.template.setTag("title","Files & Images Manager");
 	}  
 	// default image upload resize sizes can be overriden for each site in zcoreCustomFunctions onRequestStart
 	if(structkeyexists(request,'imageSizes') EQ false){
@@ -328,12 +328,8 @@
 	var oldFilePath=0;
 	var image_file=0;
 	var arrList=0;
-	init();
-	if(request.zos.isTestServer){
-		setting requesttimeout="5";
-	}else{
-		setting requesttimeout="300";
-	}
+	init(); 
+	setting requesttimeout="300";
     application.zcore.adminSecurityFilter.requireFeatureAccess("Files & Images", true); 
 	if(form.method EQ "update"){
 		successMethod="edit";
