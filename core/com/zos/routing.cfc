@@ -9,6 +9,8 @@
 		  
 		request.zos.currentController="";
 		request.zos.routingIsCFC=false; 
+		request.zos.routingIsLucee=false;
+		request.zos.routingIsLC=false;
 		request.zos.routingArrArguments=arraynew(1);
 		request.zos.routingArgumentsStruct=structnew();
 		request.zos.routingDisableComponentInvoke=false;
@@ -45,7 +47,7 @@
 			}*/
 			request.zos.routingDisableComponentInvoke=true;
 			if(siteStruct.fileExistsCache[ctemp1]){// or siteStruct.fileExistsCache[arguments.theURL]
-				if(right(arguments.theURL,4) EQ ".cfc" or right(arguments.theURL,6) EQ ".lucee" or right(arguments.theURL,3) EQ ".lc"){
+				if(right(arguments.theURL,4) EQ ".cfc"){
 					request.zos.routingIsCFC=true;
 					if(structkeyexists(form,'method') EQ false){
 						form.method="index";	
@@ -54,6 +56,28 @@
 					request.zos.routingDisableComponentInvoke=false;
 					if(zdebugurl2){
 						writeoutput('url was a cfc :'&arguments.theURL&'<br />');
+					}
+				}else if(right(arguments.theURL,6) EQ ".lucee"){
+					request.zos.routingIsCFC=true;
+					request.zos.routingIsLucee=true;
+					if(structkeyexists(form,'method') EQ false){
+						form.method="index";	
+						request.zos.routingCfcMethodWasMissing=true;
+					}
+					request.zos.routingDisableComponentInvoke=false;
+					if(zdebugurl2){
+						writeoutput('url was a lucee cfc :'&arguments.theURL&'<br />');
+					}
+				}else if(right(arguments.theURL,3) EQ ".lc"){
+					request.zos.routingIsCFC=true;
+					request.zos.routingIsLC=true;
+					if(structkeyexists(form,'method') EQ false){
+						form.method="index";	
+						request.zos.routingCfcMethodWasMissing=true;
+					}
+					request.zos.routingDisableComponentInvoke=false;
+					if(zdebugurl2){
+						writeoutput('url was a lc cfc :'&arguments.theURL&'<br />');
 					}
 				}
 			}else{
@@ -276,7 +300,7 @@
 			}
 		}
 		if(request.zos.routingIsCFC and structkeyexists(form,'method')){
-			rs=this.checkCFCSecurity(request.zos.scriptNameTemplate, form.method);
+			rs=this.checkCFCSecurity(request.zos.scriptNameTemplate, form.method); 
 			request.zos.requestLogEntry('routing.cfc after checkCFCSecurity');
 			request.zos.currentController=request.zos.scriptNameTemplate;
 			//writeoutput('in isCFC'&request.zos.routingDisableComponentInvoke);
@@ -313,7 +337,13 @@
 		arguments.method=arguments.method;
 		siteStruct=application.sitestruct[request.zos.globals.id];
 		cacheStruct=siteStruct.cfcMetaDataCache;
-		comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-5),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
+		if(request.zos.routingIsLucee){
+			comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-7),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
+		}else if(request.zos.routingIsLC){
+			comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-4),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
+		}else{
+			comPath=replace(replace(replace(mid(comTempPath,2,len(comTempPath)-5),"\",".","ALL"),"/",".","ALL"), request.zRootDomain&".", request.zRootCFCPath);
+		}
 		if(left(comPath, 17) EQ "zcorerootmapping."){
 			isServerCFC=true;
 			cacheStruct=application.zcore.cfcMetaDataCache;
@@ -349,7 +379,7 @@
 				rs.routingCurrentComponentObject=application.zcore.functions.zcreateobject("component",comPath);
 				siteStruct.comCache[comPath]=rs.routingCurrentComponentObject;
 			}
-		}else{
+		}else{ 
 			rs.routingCurrentComponentObject=createobject("component",comPath);
 		} 
 		if(structkeyexists(rs.routingCurrentComponentObject,arguments.method) EQ false){
