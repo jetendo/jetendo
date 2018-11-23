@@ -64,7 +64,7 @@ queueSortCom.init(inputStruct);
 	}else if(structkeyexists(form, this.sortVarName) and structkeyexists(form, this.primaryKeyName)){
 		ts = StructNew();
 		ts.id = form[this.primaryKeyName];
-		application.zcore.functions.zInvoke(this, form[this.sortVarName], ts);
+		this[form[this.sortVarName]](ts);
 		if(this.disableRedirect EQ false){
 			application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,this.sortVarName&"=","ztv=","all"));
 		}

@@ -912,6 +912,8 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	</cfscript>
 </cffunction>
 
+<!--- 
+not needed
 <cffunction name="zInvoke" localmode="modern" output="true" returntype="any">
 	<cfargument name="component" type="any" required="yes">
 	<cfargument name="method" type="string" required="yes">
@@ -919,7 +921,7 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 	<cfscript>
 	var returnVar = "";
 	</cfscript><cfinvoke component="#arguments.component#" method="#arguments.method#" argumentcollection="#arguments.inputStruct#" returnvariable="returnVar"><cfif isDefined('returnVar')><cfreturn returnVar><cfelse><cfreturn false></cfif>
-</cffunction>
+</cffunction> --->
 
 <!--- zExecute(app, args, timeout); --->
 <cffunction name="zExecute" localmode="modern" returntype="any" output="true">
