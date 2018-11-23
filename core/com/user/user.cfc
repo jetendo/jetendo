@@ -628,64 +628,65 @@ userCom.checkLogin(inputStruct);
 	<cfargument name="salt" type="string" required="no" default="">
 	<cfargument name="allowFailure" type="boolean" required="yes">
 	<cfscript>
-	if(structkeyexists(request.zos,'convertPlainTextToSecurePasswordIndex1') EQ false){
-		request.zos.convertPlainTextToSecurePasswordIndex1=1;
-	}else{
-		request.zos.convertPlainTextToSecurePasswordIndex1++;
-	}
-	var threadName="#request.zos.installPath#-convertPlainTextToSecurePassword#request.zos.convertPlainTextToSecurePasswordIndex1#";
-	thread action="run" name="#threadName#" args="#arguments#" { 
-		var hashStruct={
-			passwordPlusSalt=insert(attributes.args.password,attributes.args.salt, 128),
-			algorithms=[{
-				encoding:'utf-8',
-				algorithm:'MD5'
-			},
-			{
-				encoding:'utf-8',
-				algorithm:'SHA'
-			},
-			{
-				encoding:'utf-8',
-				algorithm:'SHA-256'
-			}]
-		}	
-		var storedPasswordValue=""; 
-		for(var i=1;i LTE arraylen(hashStruct.algorithms);i++){
-			storedPasswordValue&=hash40(hashStruct.passwordPlusSalt, hashStruct.algorithms[i].algorithm, hashStruct.algorithms[i].encoding, 50000);
-		}
-		thread.storedPasswordValue=storedPasswordValue;
-	}
-	thread action="join" name="#threadName#" timeout="20000"  { }
-	myThread=cfthread[threadName];
-	var storedPasswordValue=""; 
-	if(myThread.status EQ "COMPLETED"){
-		storedPasswordValue=myThread.storedPasswordValue;
-	}else{
-		thread name="#threadName#" action="terminate" { }
-		savecontent variable="dumpResult"{
-			writedump(myThread);
-		}
-		if(arguments.allowFailure EQ false){
-			throw("Failed to convert a password to a secure hash in under two seconds. Thread terminated with this dump result.<br /><br />#dumpResult#");
+	throw("createSecurePasswordVersion1 not in use anymore");
+	// if(structkeyexists(request.zos,'convertPlainTextToSecurePasswordIndex1') EQ false){
+	// 	request.zos.convertPlainTextToSecurePasswordIndex1=1;
+	// }else{
+	// 	request.zos.convertPlainTextToSecurePasswordIndex1++;
+	// }
+	// var threadName="#request.zos.installPath#-convertPlainTextToSecurePassword#request.zos.convertPlainTextToSecurePasswordIndex1#";
+	// thread action="run" name="#threadName#" args="#arguments#" { 
+	// 	var hashStruct={
+	// 		passwordPlusSalt=insert(attributes.args.password,attributes.args.salt, 128),
+	// 		algorithms=[{
+	// 			encoding:'utf-8',
+	// 			algorithm:'MD5'
+	// 		},
+	// 		{
+	// 			encoding:'utf-8',
+	// 			algorithm:'SHA'
+	// 		},
+	// 		{
+	// 			encoding:'utf-8',
+	// 			algorithm:'SHA-256'
+	// 		}]
+	// 	}	
+	// 	var storedPasswordValue=""; 
+	// 	for(var i=1;i LTE arraylen(hashStruct.algorithms);i++){
+	// 		storedPasswordValue&=hash40(hashStruct.passwordPlusSalt, hashStruct.algorithms[i].algorithm, hashStruct.algorithms[i].encoding, 50000);
+	// 	}
+	// 	thread.storedPasswordValue=storedPasswordValue;
+	// }
+	// thread action="join" name="#threadName#" timeout="20000"  { }
+	// myThread=cfthread[threadName];
+	// var storedPasswordValue=""; 
+	// if(myThread.status EQ "COMPLETED"){
+	// 	storedPasswordValue=myThread.storedPasswordValue;
+	// }else{
+	// 	thread name="#threadName#" action="terminate" { }
+	// 	savecontent variable="dumpResult"{
+	// 		writedump(myThread);
+	// 	}
+	// 	if(arguments.allowFailure EQ false){
+	// 		throw("Failed to convert a password to a secure hash in under two seconds. Thread terminated with this dump result.<br /><br />#dumpResult#");
 			
-		}
-		mail to="#request.zos.developerEmailFrom#" from="#request.zos.developerEmailTo#" subject="Secure password conversion timeout occurred" type="html"{
-			writeoutput('#application.zcore.functions.zHTMLDoctype()#
-			<head>
-			<meta charset="utf-8" />
-			<title>Error</title>
-			</head>
+	// 	}
+	// 	mail to="#request.zos.developerEmailFrom#" from="#request.zos.developerEmailTo#" subject="Secure password conversion timeout occurred" type="html"{
+	// 		writeoutput('#application.zcore.functions.zHTMLDoctype()#
+	// 		<head>
+	// 		<meta charset="utf-8" />
+	// 		<title>Error</title>
+	// 		</head>
 			
-			<body>
-			Failed to convert a password to a secure hash in under two seconds. Thread terminated with this dump result: <br /><br />
-			#dumpResult#
-			</body>
-			</html>');
-		}
-		request.hashThreadDeathOccurred=true;
-	}
-	return storedPasswordValue;
+	// 		<body>
+	// 		Failed to convert a password to a secure hash in under two seconds. Thread terminated with this dump result: <br /><br />
+	// 		#dumpResult#
+	// 		</body>
+	// 		</html>');
+	// 	}
+	// 	request.hashThreadDeathOccurred=true;
+	// }
+	// return storedPasswordValue;
 	</cfscript>
 </cffunction>
 
