@@ -1779,7 +1779,7 @@ function saveFaviconSet($a){
 	@unlink($destinationPath.'/apple-touch-icon-72x72-precomposed.png');
 	@unlink($destinationPath.'/apple-touch-icon-57x57-precomposed.png');
 	@unlink($destinationPath.'/apple-touch-icon.png');
-	$cmd='/usr/bin/convert '.escapeshellarg($sourceFilePath).' -alpha off -resize 48x48 -define icon:auto-resize="48,32,16" '.escapeshellarg($destinationPath.'/favicon.ico'); //256,128,96,64,48,
+	$cmd='/usr/bin/convert '.escapeshellarg($sourceFilePath).' -resize 48x48 -define icon:auto-resize="48,32,16" '.escapeshellarg($destinationPath.'/favicon.ico'); //256,128,96,64,48,
 	//echo $cmd."\n";
 	$r=`$cmd`; 
 	$cmd='/usr/bin/convert '.escapeshellarg($sourceFilePath).' -resize 192x192 '.escapeshellarg($destinationPath.'/apple-icon-precomposed.png'); 

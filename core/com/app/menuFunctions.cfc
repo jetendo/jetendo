@@ -37,12 +37,31 @@ menuCom.init(ts);
 			qView:variables.qView
 		};
 	} 
-	if(arrayLen(variables.qView) GT 0){  
+	if(isArray(variables.qView) and arrayLen(variables.qView) GT 0){  
 		variables.viewRow=variables.qView[1]; 
 		savecontent variable="theMenuMeta"{
 			if(variables.viewRow.menu_vertical EQ 1){
 				echo('<script type="text/javascript">/* <![CDATA[ */
 zMenu#row.menu_id#Vertical=true;/* ]]> */</script>');
+			}
+			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){
+				request.zMenuMetaIncluded=true;
+				echo('<!--[if lte IE 7]>
+				<style>.zMenuBarDiv ul a {height: 1%;}</style>
+				<![endif]-->
+				<!--[if lte IE 6]>
+				<style>.zMenuBarDiv li ul{width:1% !important; white-space:nowrap !important;}</style>
+				<![endif]-->');
+			}
+		}
+		application.zcore.template.appendTag("meta",trim(theMenuMeta));
+		// need this because the array feature was not live yet.
+	}else if(isQuery(variables.qView) and variables.qView.recordcount GT 0){  
+		variables.viewRow=variables.qView; 
+		savecontent variable="theMenuMeta"{
+			if(variables.viewRow.menu_vertical EQ 1){
+				echo('<script type="text/javascript">/* <![CDATA[ */
+zMenu#variables.viewRow.menu_id#Vertical=true;/* ]]> */</script>');
 			}
 			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){
 				request.zMenuMetaIncluded=true;
