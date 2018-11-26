@@ -1828,7 +1828,7 @@ if(rCom.isOK() EQ false){
 	//arguments.arrURL=getMVCLandingPages(arguments.arrURL);
 	
 	for(i in application.sitestruct[request.zos.globals.id].app.appCache){
-		configCom=createObject("component", application.zcore.appComPathStruct[i].cfcPath, true);
+		configCom=createObject("component", application.zcore.appComPathStruct[i].cfcPath);
 		configCom.site_id=request.zos.globals.id;
 		arguments.arrURL=configCom.getSiteMap(arguments.arrUrl);
 	}
@@ -1862,7 +1862,7 @@ if(rCom.isOK() EQ false){
 		if(structkeyexists(application.zcore,'runMemoryDatabaseStart')){
 			structdelete(application.zcore, 'runMemoryDatabaseStart');
 			for(i in application.zcore.appComPathStruct){
-				currentCom=createobject("component", application.zcore.appComPathStruct[i].cfcPath, true);
+				currentCom=createobject("component", application.zcore.appComPathStruct[i].cfcPath);
 				if(structkeyexists(currentCom, 'onMemoryDatabaseStart')){
 					currentCom.onMemoryDatabaseStart();
 				}
@@ -1873,10 +1873,10 @@ if(rCom.isOK() EQ false){
 		}
 		for(i in application.sitestruct[request.zos.globals.id].app.appCache){
 			if(i EQ 11 or i EQ 13){ // rental and listing apps are not thread-safe yet due to cfinclude and var scoping
-				request.zos.tempRequestCom[i]=createObject("component", application.zcore.appComPathStruct[i].cfcPath, true);
+				request.zos.tempRequestCom[i]=createObject("component", application.zcore.appComPathStruct[i].cfcPath);
 			}else{
 				if(structkeyexists(application.sitestruct[request.zos.globals.id].app.appCache[i], 'cfcCached') EQ false){
-					request.zos.tempRequestCom[i]=createObject("component", application.zcore.appComPathStruct[i].cfcPath, true);
+					request.zos.tempRequestCom[i]=createObject("component", application.zcore.appComPathStruct[i].cfcPath);
 				}else{
 					request.zos.tempRequestCom[i]=application.sitestruct[request.zos.globals.id].app.appCache[i].cfcCached;
 				}

@@ -825,8 +825,10 @@ for(row in qSite){
 	if(structkeyexists(templateData.tagContent, name)){
 		if(name EQ "title" or name EQ "pagetitle"){
 			return prepend&htmleditformat(templateData.tagContent[name].content)&append&append2;
-		}else{
+		}else if(structkeyexists(templateData.tagContent[name], "content")){
 			return prepend&templateData.tagContent[name].content&append&append2;
+		}else{
+			return prepend&append&append2;
 		}
 	}else{
 		return prepend&append&append2;

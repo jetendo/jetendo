@@ -32,16 +32,17 @@ menuCom.init(ts);
 		menu.site_id = #db.param(arguments.ss.site_id)# and 
 		menu_deleted = #db.param(0)# 
 		ORDER BY menu_button_sort";
-		variables.qView=db.execute("qView"); 
+		variables.qView=db.execute("qView", "", 10000, "array"); 
 		application.sitestruct[request.zos.globals.id].menuNameCacheStruct[arguments.ss.idPrefix&variables.menuName]={
 			qView:variables.qView
 		};
-	}
-	if(variables.qView.recordcount NEQ 0){
+	} 
+	if(arrayLen(variables.qView) GT 0){  
+		variables.viewRow=variables.qView[1]; 
 		savecontent variable="theMenuMeta"{
-			if(variables.qView.menu_vertical EQ 1){
+			if(variables.viewRow.menu_vertical EQ 1){
 				echo('<script type="text/javascript">/* <![CDATA[ */
-zMenu#variables.qView.menu_id#Vertical=true;/* ]]> */</script>');
+zMenu#row.menu_id#Vertical=true;/* ]]> */</script>');
 			}
 			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){
 				request.zMenuMetaIncluded=true;
@@ -419,7 +420,7 @@ application.zcore.functions.zPublishCss(ts);
 		linkCount=arrayLen(arrLink);
 		if(linkCount){
 			subOpen=false;
-			echo(' <div id="zMobileMenuDiv#variables.qView.menu_id#" data-role="panel" class="zMobileMenuDiv jqm-nav-panel jqm-navmenu-panel" data-position="left" data-display="reveal" data-theme="d">');
+			echo(' <div id="zMobileMenuDiv#variables.viewRow.menu_id#" data-role="panel" class="zMobileMenuDiv jqm-nav-panel jqm-navmenu-panel" data-position="left" data-display="reveal" data-theme="d">');
 			for(i=1;i LTE linkCount;i++){
 				c=arrLink[i];
 				subCount=arrayLen(c.arrChildren);
@@ -476,19 +477,19 @@ application.zcore.functions.zPublishCss(ts);
 		linkCount=arrayLen(arrLink);
 		if(linkCount){
 			echo('<div class="zMenuWrapper');
-			if(variables.qView.menu_enable_responsive EQ 1){
+			if(variables.viewRow.menu_enable_responsive EQ 1){
 						echo(' zMenuEqualDiv');
 			}
-			echo('" data-button-margin="#variables.qView.menu_button_margin#">
-			<ul id="#arguments.idPrefix#zMenuDiv#variables.qView.menu_id#" class="zMenuBarDiv');
-			if(variables.qView.menu_enable_responsive EQ 1){
+			echo('" data-button-margin="#variables.viewRow.menu_button_margin#">
+			<ul id="#arguments.idPrefix#zMenuDiv#variables.viewRow.menu_id#" class="zMenuBarDiv');
+			if(variables.viewRow.menu_enable_responsive EQ 1){
 						echo(' zMenuEqualUL');
 			}
 			echo('">');
 			for(i=1;i LTE linkCount;i++){
 				c=arrLink[i];
 				echo('<li id="#arguments.idPrefix##c.id#_mb" ');
-				if(variables.qView.menu_enable_responsive EQ 1){
+				if(variables.viewRow.menu_enable_responsive EQ 1){
 					echo('class="zMenuEqualLI"');
 				}
 				echo('>');
@@ -499,7 +500,7 @@ application.zcore.functions.zPublishCss(ts);
 					echo(' lasttrigger');
 				}
 				echo(' ');
-				if(variables.qView.menu_enable_responsive EQ 1){
+				if(variables.viewRow.menu_enable_responsive EQ 1){
 					echo('zMenuEqualA');
 				}
 				echo('" href="#c.url#" ');

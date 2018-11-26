@@ -110,6 +110,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	<cfargument name="name" type="variablename" required="yes" hint="A variable name for the query result.  Helps to identify query when debugging.">
 	<cfargument name="sql" type="string" required="yes">
     <cfargument name="timeout" type="numeric" required="no" default="#0#">
+    <cfargument name="returntype" type="string" required="no" default="query">
 	<cfscript>
 	var running=true;
 	var queryStruct={
@@ -134,10 +135,17 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		structdelete(queryStruct, 'datasource');
 	}else if(isBoolean(queryStruct.datasource)){
 		throw("dbQuery.init({datasource:datasource}) must be set before running dbQuery.execute() by either using dbQuery.table() or db.datasource=""myDatasource"";", "database");
-	} 
-	if((left(arguments.sql, 20)) DOES NOT CONTAIN "select "){
+	}
+	if(arguments.returnType NEQ "query"){
 		queryStruct.lazy=false;
-	} 
+		queryStruct.returnType=arguments.returnType;
+	}else{
+		if((left(arguments.sql, 20)) DOES NOT CONTAIN "select "){
+			queryStruct.lazy=false;
+		}else if(request.zos.isTestServer){
+			queryStruct.lazy=true;
+		}
+	}
 	queryStruct.name="db."&arguments.name;
 	retryCount=0;
 	retryLimit=3;
@@ -213,8 +221,10 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			}
 		}
 	}
-	if(structkeyexists(db, arguments.name)){
-		if(structkeyexists(db[arguments.name], 'recordcount')){
+	if(structkeyexists(db, arguments.name)){ 
+		if(isArray(db[arguments.name])){
+			request.zos.queryRowCount+=arrayLen(db[arguments.name]);
+		}else if(structkeyexists(db[arguments.name], 'recordcount')){
 			request.zos.queryRowCount+=db[arguments.name].recordcount;
 		}
 		return db[arguments.name];
@@ -290,6 +300,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfargument name="name" type="variablename" required="yes" hint="A variable name for the query result.  Helps to identify query when debugging.">
 		<cfargument name="configStruct" type="struct" required="yes">
     	<cfargument name="timeout" type="numeric" required="no" default="#0#">
+    	<cfargument name="returnType" type="string" required="no" default="query">
 		<cfscript>
 		var cfcatch=0;
 		var errorStruct=0;
@@ -312,19 +323,19 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			}
 		}
 		try{
-			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout);
+			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout, arguments.returnType);
 		}catch(database errorStruct){
 			arguments.configStruct.dbQuery.reset();
 			rethrow;
 		}
 		arguments.configStruct.dbQuery.reset();
-		if(isQuery(result)){
+		if(isSimpleValue(result)){
+		  	return {success:true, result: true};
+		}else{
 			if(tempCacheEnabled){
 				cacheStruct[cacheResult.hashCode]={date:nowDate, result:result};
 			}
 			return {success:true, result:result};
-		}else{
-		  	  return {success:true, result: true};
 		}
 		</cfscript>
 	</cffunction>

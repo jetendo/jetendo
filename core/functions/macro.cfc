@@ -924,7 +924,7 @@ not needed
 </cffunction> --->
 
 <!--- zExecute(app, args, timeout); --->
-<cffunction name="zExecute" localmode="modern" returntype="any" output="true">
+<!--- <cffunction name="zExecute" localmode="modern" returntype="any" output="true">
 	<cfargument name="app" type="string" required="yes">
 	<cfargument name="args" type="string" required="yes">
 	<cfargument name="timeout" type="numeric" required="yes">
@@ -940,7 +940,7 @@ not needed
 		<cfreturn output>
 		<cfcatch type="any"><cfreturn false></cfcatch>
 	</cftry>
-</cffunction>
+</cffunction> --->
 
 <!--- zo(varName, isNumber, default); // force a default value for undefined variables or return variable --->
 <cffunction name="zo" localmode="modern" returntype="any" output="false">

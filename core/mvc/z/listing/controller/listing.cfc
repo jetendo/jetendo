@@ -122,8 +122,12 @@ this.app_id=11;
 	mls_status = #db.param('1')#
 	</cfsavecontent><cfscript>qM=db.execute("qM");</cfscript>
 	<cfsavecontent variable="common"><div class="zlisting-common-disclaimer">All listing information is deemed reliable but not guaranteed and should be independently verified through personal inspection by appropriate professionals. Listings displayed on this website may be subject to prior sale or removal from sale; availability of any listing should always be independent verified. Listing information is provided for consumer personal, non-commercial use, solely to identify potential properties for potential purchase; all other use is strictly prohibited and may violate relevant federal and state law. 
-	The source of the listing data is as follows: 
-	<cfloop query="qM"><cfif qM.currentrow NEQ 1>, </cfif>#qM.mls_disclaimer_name# (updated #dateformat(qM.mls_update_date,"m/d/yy")#) </cfloop></div>
+	The source of the listing data is as follows:   
+	<cfscript>
+	for(row in qm){
+		echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&') ');
+	}
+	</cfscript></div>
 	</cfsavecontent>
 	<cfscript>
 	return trim(common);
