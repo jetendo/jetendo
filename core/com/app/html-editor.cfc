@@ -184,23 +184,49 @@ zArrDeferredFunctions.push(function(){
 		remove_script_host : 0,
 		relative_urls : 0,
 		forced_root_block : 'p',
-		paste_preprocess: function(plugin, args) {
-			console.log(args.content);
+		/*paste_preprocess: function(plugin, args) {
 			// strip all the classes that start with ze- or z-
 			var c=args.content;
 			c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
 			c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
 			c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
 			c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
-			console.log(c);
 			var d=document.createElement("div");
 			d.innerHTML=c; 
 			removeClasses(d);
+			console.log(this);
+			console.log(plugin);
 			c=d.innerHTML.replace(/<p>\s*<\/p>/g, ""); 
-			console.log(c);
+			console.log(args);
 			args.content=c;
 		},
+		paste_postprocess: function(plugin, args) {
+	        console.log(args);
+	        //args.node.setAttribute('id', '42');
+	    },*/
 		setup : function(ed) {
+			ed.on("paste", function(e) {
+				e.preventDefault();
+				console.log(e);
+				var c=e.clipboardData.getData('text/html');
+				console.log(c);
+				c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+				c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+				c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
+				c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
+				var d=document.createElement("div");
+				d.innerHTML=c; 
+				removeClasses(d); 
+				c=d.innerHTML.replace(/<p>\s*<\/p>/g, "").replace(/<(\w+)(.|[\r\n])*?>/g, '<$1>').replace(/<!--.*?-->/g, "");  
+  				e.clipboardData.setData('text/html', c);
+
+				var currentElement=ed.selection.getNode();  
+				currentElement.parentNode.innerHTML=c;
+  				//ed.execCommand('mceInsertContent', false, c);
+				console.log(c);
+
+				//return tinymce.dom.Event.cancel(e);
+			} );
 			ed.on('blur', function(e) {
 				if(typeof tinyMCE != "undefined"){
 					tinyMCE.triggerSave();
@@ -227,7 +253,7 @@ zArrDeferredFunctions.push(function(){
 	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
 	    'insertdatetime media nonbreaking save directionality', // contextmenu table
-	    'emoticons paste textcolor colorpicker textpattern' // imagetools
+	    'emoticons textcolor colorpicker textpattern' //paste imagetools
 	  ], // template 
 	  fontsize_formats: '8pt 10pt 12pt 14pt 16pt 18pt 21pt 24pt 30pt 36pt 48pt',
 	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	zsawidget fullscreen',
