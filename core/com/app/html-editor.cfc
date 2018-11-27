@@ -172,6 +172,20 @@ zArrDeferredFunctions.push(function(){
 		}
 		$(e).removeAttr("id").removeAttr("class");
 	}
+	function replaceSelectedText(replacementHTML) {
+	    var sel, range;
+	    if (window.getSelection) {
+	        sel = window.getSelection();
+	        if (sel.rangeCount) {
+	            range = sel.getRangeAt(0);
+	            range.deleteContents();
+	            range.insertNode(document.createDocumentFragment(replacementHTML));
+	        }
+	    } else if (document.selection && document.selection.createRange) {
+	        range = document.selection.createRange();
+	        range.pasteHTML(replacementHTML);
+	    }
+	}
 	tinymce.init({ 
 		branding: false,
 		fix_table_elements: 0,  
@@ -184,13 +198,13 @@ zArrDeferredFunctions.push(function(){
 		remove_script_host : 0,
 		relative_urls : 0,
 		forced_root_block : 'p',
-		/*paste_preprocess: function(plugin, args) {
+		paste_preprocess: function(plugin, args) {
 			// strip all the classes that start with ze- or z-
 			var c=args.content;
 			c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
-			c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+			c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<\/p");
 			c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
-			c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
+			c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<\/p"); 
 			var d=document.createElement("div");
 			d.innerHTML=c; 
 			removeClasses(d);
@@ -203,47 +217,88 @@ zArrDeferredFunctions.push(function(){
 		paste_postprocess: function(plugin, args) {
 	        console.log(args);
 	        //args.node.setAttribute('id', '42');
-	    },*/
+	    },
 		setup : function(ed) {
-			ed.on("paste", function(e) { 
-				e.preventDefault();
-				e.stopPropagation(); 
-				if (window.clipboardData && window.clipboardData.getData) {
-					var c=window.clipboardData.getData('Text'); 
-				}else{
-					var c=e.clipboardData.getData('text/html'); 
+		// 	ed.on("paste", function(e) { 
+		// 		var c="";
+		// 		e.preventDefault();
+		// 		e.stopPropagation(); 
+		// 		if (window.clipboardData && window.clipboardData.getData) {
+		// 			c=window.clipboardData.getData('Text'); 
+		// 			c="<p>"+c.split("\r\n").join("</p><p>")+"</p>";
+		// 			c=c.split("\n").join("<br>");
+		// 		}else{
+		// 			c=e.clipboardData.getData('text/html'); 
+		// 			if(c.length == 0){
+		// 				c=e.clipboardData.getData('Text'); 
+		// 				c="<p>"+c.split("\r\n").join("</p><p>")+"</p>";
+		// 				c=c.split("\n").join("<br>");
+		// 			}
+		// 			console.log("content before", c);
 
-					c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
-					c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
-					c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
-					c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
-					var d=document.createElement("div");
-					d.innerHTML=c;  
-					removeClasses(d);  
-					c=d.innerHTML.replace(/<p>\s*<\/p>/g, "").replace(/<(\w+)(.|[\r\n])*?>/g, '<$1>').replace(/<!--.*?-->/g, "");   
-				}
-				var currentElement=ed.selection.getEnd();   
-				// get P tag
-				currentElement=currentElement.parentNode;
-				$(currentElement).append(c); 
-				/*return;
-				while(currentElement){
-					if(currentElement.nodeName == "P"){
-						$(currentElement).parentNode.append(c); 
-						return;
-					}else if(currentElement.nodeName == "DIV"){
-						$(currentElement).append(c); 
-						return;
-					}else if(currentElement.nodeName == "##document"){
-						$(currentElement.body).append(c);
-						return;
-					}else if(currentElement.nodeName == "HTML"){
-						$("BODY", currentElement).append(c);
-						return;
-					}
-					currentElement=currentElement.parentNode;
-				}*/
-			} );
+		// 			c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+		// 			c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+		// 			c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
+		// 			c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
+		// 			var d=document.createElement("div");
+		// 			d.innerHTML=c;  
+		// 			removeClasses(d);  
+		// 			c=d.innerHTML.replace(/<p>\s*<\/p>/g, "").replace(/<(\w+)(.|[\r\n])*?>/g, '<$1>').replace(/<!--.*?-->/g, "");   
+		// 		}
+		// 		replaceSelectedText(c);
+		// 		return;
+		// 		var range=ed.selection.getRng();
+		// 		if(range.startOffset-range.endOffset != 0){
+		// 			// replace content instead of append
+		// 			if (window.getSelection) {
+		// 			    // not IE case
+		// 			    var selObj = window.getSelection();
+		// 			    var selRange = selObj.getRangeAt(0);
+		// 			    selRange.insertNode(d);
+
+		// 			    var newElement = document.createElement("b");
+		// 			    var documentFragment = selRange.extractContents();
+		// 			    newElement.appendChild(documentFragment);
+		// 			    selRange.insertNode(newElement);
+
+		// 			    selObj.removeAllRanges();
+		// 			} else if (document.selection && document.selection.createRange && document.selection.type != "None") {
+		// 			    // IE case
+		// 			    var range = document.selection.createRange();
+		// 			    var selectedText = range.htmlText;
+		// 			    var newText = '<b>' + selectedText + '</b>';
+		// 			    document.selection.createRange().pasteHTML(newText);
+		// 			}
+		// 		}else{
+
+		// 			e.preventDefault();
+		// 			e.stopPropagation(); 
+		// 			console.log('why');
+
+		// 			var currentElement=ed.selection.getNode();   
+		// 			// get P tag 
+		// 			currentElement=currentElement.parentNode;
+		// 			$(currentElement).append(c); 
+		// 		} 
+
+		// 		return;
+		// 		while(currentElement){
+		// 			if(currentElement.nodeName == "P"){
+		// 				$(currentElement).parentNode.append(c); 
+		// 				return;
+		// 			}else if(currentElement.nodeName == "DIV"){
+		// 				$(currentElement).append(c); 
+		// 				return;
+		// 			}else if(currentElement.nodeName == "##document"){
+		// 				$(currentElement.body).append(c);
+		// 				return;
+		// 			}else if(currentElement.nodeName == "HTML"){
+		// 				$("BODY", currentElement).append(c);
+		// 				return;
+		// 			}
+		// 			currentElement=currentElement.parentNode;
+		// 		}
+		// 	} );
 			ed.on('blur', function(e) {
 				if(typeof tinyMCE != "undefined"){
 					tinyMCE.triggerSave();
@@ -259,18 +314,18 @@ zArrDeferredFunctions.push(function(){
 		}
 		</cfscript>
 		#arrayToList(arrExtraCode, " ")#
-	  /*selector: 'textarea', 
-	  height: 500,*/
+	  selector: 'textarea', 
+	  height: 500,
 	  theme: 'modern',
 	  plugins: [
 	  <cfif this.autoResize>
 	  	'autoresize',
 	  	</cfif>
-	  	'zsawidget',
+	  	//'zsawidget',
 	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
 	    'insertdatetime media nonbreaking save directionality', // contextmenu table
-	    'emoticons textcolor colorpicker textpattern' //paste imagetools
+	    'emoticons paste textcolor colorpicker textpattern' //imagetools
 	  ], // template 
 	  fontsize_formats: '8pt 10pt 12pt 14pt 16pt 18pt 21pt 24pt 30pt 36pt 48pt',
 	  toolbar1: 'insertfile undo redo | fontselect fontsizeselect styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link zsaimage zsafile  	zsawidget fullscreen',
