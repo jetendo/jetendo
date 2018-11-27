@@ -7,6 +7,7 @@
 	if(not isSimpleValue(rootRelativeURL) or rootRelativeURL EQ ""){
 		application.zcore.functions.z404("Invalid request");
 	}
+	setting requesttimeout="4000";
 
 	useVirtual=false;
 	if(left(rootRelativeURL, len('/zupload/user/')) EQ '/zupload/user/'){
@@ -39,6 +40,7 @@
 	if(len(form.virtual_file_path) LTE len('/zupload/user/')){
 		application.zcore.functions.z404("Invalid path");
 	}
+	setting requesttimeout="4000";
 	form.virtual_file_path=right(form.virtual_file_path, len(form.virtual_file_path)-len('/zupload/user/'));
 	fileCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.files");
 	fileCom.serveFileByPath(form.virtual_file_path);
@@ -56,6 +58,7 @@
 	if(left(rootRelativeURL, len('/zuploadsecure/user/')) EQ '/zuploadsecure/user/'){
 		rootRelativeURL=removeChars(rootRelativeURL, 1, len('/zuploadsecure/user/'));
 	} 
+	setting requesttimeout="4000";
 	fileCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.files");
 	fileCom.downloadFileByPath(rootRelativeURL);
 	</cfscript>
@@ -90,6 +93,7 @@
 	if(fp EQ "" or ext EQ "" or fp NEQ fp_backup or (left(fp, 9) NEQ "/zupload/" and left(fp, 15) NEQ "/zuploadsecure/")){
 		application.zcore.functions.z404("File location was insecure");
 	}
+	setting requesttimeout="4000";
 
 
 

@@ -37,12 +37,13 @@ menuCom.init(ts);
 			qView:variables.qView
 		};
 	} 
+	
 	if(isArray(variables.qView) and arrayLen(variables.qView) GT 0){  
 		variables.viewRow=variables.qView[1]; 
 		savecontent variable="theMenuMeta"{
 			if(variables.viewRow.menu_vertical EQ 1){
 				echo('<script type="text/javascript">/* <![CDATA[ */
-zMenu#row.menu_id#Vertical=true;/* ]]> */</script>');
+zMenu#variables.viewRow.menu_id#Vertical=true;/* ]]> */</script>');
 			}
 			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){
 				request.zMenuMetaIncluded=true;
