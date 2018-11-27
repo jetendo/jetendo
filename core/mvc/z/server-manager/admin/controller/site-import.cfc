@@ -2,7 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript> 
-	if(not request.zos.isTestServer and (not structkeyexists(request.zos, 'importSiteUserStruct') or not structkeyexists(request.zos.importSiteUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))){
+	if(not request.zos.isTestServer and (not structkeyexists(request.zos, 'sourceAdminUserStruct') or not structkeyexists(request.zos.sourceAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))){
 		echo("You don't have permission to use the import site feature.");
 		abort;
 	}

@@ -103,7 +103,7 @@
 			<table style="border-spacing:0px; width:100%;" class="table-list">
 				<tr class="table-shadow">
 					<td colspan="13" class="tiny"><h2 style="display:inline;">Sites</h2> &nbsp;&nbsp;
-					<cfif request.zos.isTestServer or (not structkeyexists(request.zos, 'importSiteUserStruct') or structkeyexists(request.zos.importSiteUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))> 
+					<cfif request.zos.isTestServer or (not structkeyexists(request.zos, 'sourceAdminUserStruct') or structkeyexists(request.zos.sourceAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))> 
 						<a href="/z/server-manager/admin/site/newDomain" class="z-manager-search-button">Add Site</a> 
 
 						<cfif application.zcore.user.checkAllCompanyAccess()>

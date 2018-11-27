@@ -318,7 +318,7 @@ if(structkeyexists(request.zos, 'idxFileHandle')){
 	</td></tr></table>
 </cfif> 
 
-<cfif structkeyexists(request, 'zArrErrorMessages')> 
+<cfif structkeyexists(request, 'zArrErrorMessages') and arrayLen(request.zArrErrorMessages) GT 0> 
 	<table cellpadding="20" cellspacing="0" border="0" width="100%" class="table-list"><tr><td style="padding:20px;">
 	#arraytolist(request.zArrErrorMessages,"<br />")#
     </td></tr></table>
@@ -360,19 +360,22 @@ if(structkeyexists(request.zos, 'idxFileHandle')){
     <cfif isDefined('newStackTrace') or i NEQ 1>
         <cftry>
 			<cfscript>
+			tempRow=arguments.cferror.rootcause.tagcontext[i];
             funcname="";
-            pos=find("$func",arguments.cferror.rootcause.tagcontext[i].raw_trace);
+            pos=find("$func",tempRow.raw_trace);
             if(pos neq 0){
-                pos2=find(".",arguments.cferror.rootcause.tagcontext[i].raw_trace,pos);
-                funcname=lcase(mid(arguments.cferror.rootcause.tagcontext[i].raw_trace,pos+5,(pos2-pos)-5))&'()';
-            }
+                pos2=find(".",tempRow.raw_trace,pos);
+                funcname=lcase(mid(tempRow.raw_trace,pos+5,(pos2-pos)-5))&'()';
+            } 
             </cfscript>
-            <cfif funcname NEQ 'fail()' or (replace(right(arguments.cferror.rootcause.tagcontext[i].template,len('#request.zos.zcoremapping#\com\zos\template.cfc')),'\','/','all') NEQ '#request.zos.zcoremapping#/com/zos/template.cfc' and replace(right(arguments.cferror.rootcause.tagcontext[i].template,len('#request.zos.zcoremapping#/com/zos/return.cfc')),"\","/","all") NEQ '#request.zos.zcoremapping#/com/zos/return.cfc')>
+            <cfif funcname NEQ 'fail()' or (replace(right(tempRow.template,len('#request.zos.zcoremapping#\com\zos\template.cfc')),'\','/','all') NEQ '#request.zos.zcoremapping#/com/zos/template.cfc' and replace(right(tempRow.template,len('#request.zos.zcoremapping#/com/zos/return.cfc')),"\","/","all") NEQ '#request.zos.zcoremapping#/com/zos/return.cfc')>
             <tr>
-            <td>#arguments.cferror.rootcause.tagcontext[i].line#</td>
-            <td>#arguments.cferror.rootcause.tagcontext[i].template#</td>
-            <td>#funcname#</td>
-            <td>#arguments.cferror.rootcause.tagcontext[i].id#</td></tr>
+            <td style="vertical-align:top;">#tempRow.line#
+            </td>
+            <td style="vertical-align:top;">#tempRow.template#<br>
+            	<pre style="padding:10px; font-size:12px;">#tempRow.codePrintHTML#</pre></td>
+            <td style="vertical-align:top;">#funcname#</td>
+            <td style="vertical-align:top;"><cfif tempRow.id NEQ "??">#tempRow.id#</cfif></td></tr>
             </cfif>
             <cfcatch type="any">
             </cfcatch>

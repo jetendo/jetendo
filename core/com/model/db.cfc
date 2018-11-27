@@ -110,7 +110,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	<cfargument name="name" type="variablename" required="yes" hint="A variable name for the query result.  Helps to identify query when debugging.">
 	<cfargument name="sql" type="string" required="yes">
     <cfargument name="timeout" type="numeric" required="no" default="#0#">
-    <cfargument name="returntype" type="string" required="no" default="query">
+    <cfargument name="returntype" type="string" required="no" default="">
 	<cfscript>
 	var running=true;
 	var queryStruct={
@@ -136,7 +136,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	}else if(isBoolean(queryStruct.datasource)){
 		throw("dbQuery.init({datasource:datasource}) must be set before running dbQuery.execute() by either using dbQuery.table() or db.datasource=""myDatasource"";", "database");
 	}
-	if(arguments.returnType NEQ "query"){
+	if(arguments.returnType NEQ ""){
 		queryStruct.lazy=false;
 		queryStruct.returnType=arguments.returnType;
 	}else{
@@ -300,7 +300,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfargument name="name" type="variablename" required="yes" hint="A variable name for the query result.  Helps to identify query when debugging.">
 		<cfargument name="configStruct" type="struct" required="yes">
     	<cfargument name="timeout" type="numeric" required="no" default="#0#">
-    	<cfargument name="returnType" type="string" required="no" default="query">
+    	<cfargument name="returnType" type="string" required="no" default="">
 		<cfscript>
 		var cfcatch=0;
 		var errorStruct=0;
