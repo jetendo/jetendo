@@ -126,7 +126,7 @@
 		$(".widget-box").on("click", function(e){
 			e.preventDefault();
 			var theHTML = $(".widget-template", this)[0].innerHTML;
-			var allowInline=this.getAttribute("data-allow-inline");
+			var allowInline=$(".widget-template", this).attr("data-allow-inline");
 			if(!allowInline || allowInline=="0"){
 				allowInline=false;
 			}else{

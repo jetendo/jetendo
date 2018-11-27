@@ -205,27 +205,44 @@ zArrDeferredFunctions.push(function(){
 	        //args.node.setAttribute('id', '42');
 	    },*/
 		setup : function(ed) {
-			ed.on("paste", function(e) {
+			ed.on("paste", function(e) { 
 				e.preventDefault();
-				console.log(e);
-				var c=e.clipboardData.getData('text/html');
-				console.log(c);
-				c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
-				c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
-				c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
-				c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
-				var d=document.createElement("div");
-				d.innerHTML=c; 
-				removeClasses(d); 
-				c=d.innerHTML.replace(/<p>\s*<\/p>/g, "").replace(/<(\w+)(.|[\r\n])*?>/g, '<$1>').replace(/<!--.*?-->/g, "");  
-  				e.clipboardData.setData('text/html', c);
+				e.stopPropagation(); 
+				if (window.clipboardData && window.clipboardData.getData) {
+					var c=window.clipboardData.getData('Text'); 
+				}else{
+					var c=e.clipboardData.getData('text/html'); 
 
-				var currentElement=ed.selection.getNode();  
-				currentElement.parentNode.innerHTML=c;
-  				//ed.execCommand('mceInsertContent', false, c);
-				console.log(c);
-
-				//return tinymce.dom.Event.cancel(e);
+					c=c.replace(/<(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+					c=c.replace(/<\/(ADDRESS|ARTICLE|DETAILS|DIALOG|FIELDSET|FIGCAPTION|FIGURE|FOOTER|HEADER|MAIN|NAV|SECTION|DIV|SPAN|TABLE|TR|THEAD|TBODY|TD)/g, "<p");
+					c=c.replace(/<(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p");
+					c=c.replace(/<\/(address|article|details|dialog|fieldset|figcaption|figure|footer|header|main|nav|section|div|span|table|tr|thead|tbody|td)/g, "<p"); 
+					var d=document.createElement("div");
+					d.innerHTML=c;  
+					removeClasses(d);  
+					c=d.innerHTML.replace(/<p>\s*<\/p>/g, "").replace(/<(\w+)(.|[\r\n])*?>/g, '<$1>').replace(/<!--.*?-->/g, "");   
+				}
+				var currentElement=ed.selection.getEnd();   
+				// get P tag
+				currentElement=currentElement.parentNode;
+				$(currentElement).append(c); 
+				/*return;
+				while(currentElement){
+					if(currentElement.nodeName == "P"){
+						$(currentElement).parentNode.append(c); 
+						return;
+					}else if(currentElement.nodeName == "DIV"){
+						$(currentElement).append(c); 
+						return;
+					}else if(currentElement.nodeName == "##document"){
+						$(currentElement.body).append(c);
+						return;
+					}else if(currentElement.nodeName == "HTML"){
+						$("BODY", currentElement).append(c);
+						return;
+					}
+					currentElement=currentElement.parentNode;
+				}*/
 			} );
 			ed.on('blur', function(e) {
 				if(typeof tinyMCE != "undefined"){

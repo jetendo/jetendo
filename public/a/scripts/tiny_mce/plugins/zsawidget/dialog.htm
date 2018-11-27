@@ -7,17 +7,25 @@
 
 function zInsertTinymceWidget(content, allowInline){
 	var editor=parent.tinymce.activeEditor; 
-	var position=10;
-	// get content from the tinymce iframe body
-	// <p>test</p><p><Strong><em>tetest</    replace <p>  with <p id="3423423423">   
+	var position=10; 
 	var bodyContent=editor.getContent(); 
-	var currentElement=editor.selection.getNode();  
-	// columns, etc
+	var currentElement=editor.selection.getNode();   
+	console.log('currentElement', currentElement);
+	var r=editor.selection.getRng();
+	if(r.startOffset-r.endOffset != 0){ 
+		alert("Sorry, you must not have anything selected when inserting a widget, please try again.");
+		editor.selection.collapse();
+		editor.windowManager.close();  
+		return;
+	}
+	// columns, etc 
 	var lastElement=currentElement;
 	while(currentElement){
-		currentElement=currentElement.parentNode;
-		console.log(currentElement);
-		if(allowInline){
+		currentElement=currentElement.parentNode; 
+		if(typeof currentElement.tagName =="undefined"){
+			break;
+		}
+		if(allowInline){ 
 			if(currentElement.tagName=="P" || currentElement.tagName=="DIV"){
 				break;
 			}
@@ -28,14 +36,23 @@ function zInsertTinymceWidget(content, allowInline){
 		}
 		lastElement=currentElement;
 	}
-	var rootElement=lastElement; 
+	if(lastElement.nodeName=="#document"){
+		lastElement=currentElement.body;
+	}else if(lastElement.nodeName=="HTML"){
+		lastElement=parent.$("BODY", currentElement)[0];
+	}
+
+	console.log("lastElement", lastElement.nodeName, lastElement);
+
+	var rootElement=lastElement;   
 	var df = document.createElement('div');
-	df.innerHTML =content;   
+	df.innerHTML =content;    
 	for(var i=df.childNodes.length-1;i>=0;i--){
 		if(df.childNodes[i].nodeName == "#text"){
 			continue;
 		}
 		if(rootElement.tagName=="BODY"){ 
+			console.log('append to body', df.childNodes[i]);
 			rootElement.appendChild(df.childNodes[i]);
 		}else{
 			if (rootElement.nextSibling) {  
@@ -46,7 +63,7 @@ function zInsertTinymceWidget(content, allowInline){
 		}
 	}
 	editor.undoManager.add();
-	editor.windowManager.close(); 
+	editor.windowManager.close();  
 }
 </script>
 <iframe id="iframeGalleryId" src="/z/misc/tinymce-widgets/index" width="99%" height="10" scrolling="auto" marginheight="0" marginwidth="0" frameborder="0" style="border:0px; padding:0px; margin:0px; margin-bottom:0px; "></iframe>
