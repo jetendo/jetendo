@@ -138,6 +138,12 @@
 				ts.link="/z/inquiries/admin/manage-contact/index";
 				arguments.sharedStruct["Leads"].children["Contacts"]=ts;
 			}
+			if(structkeyexists(arguments.sharedStruct["Leads"].children,"Import Leads") EQ false){
+				ts=structnew();
+				ts.featureName="Leads";
+				ts.link="/z/inquiries/admin/import-leads/index";
+				arguments.sharedStruct["Leads"].children["Import Leads"]=ts;
+			}
 		}
 		if(structkeyexists(arguments.sharedStruct["Leads"].children,"Add Lead") EQ false){
 			ts=structnew();

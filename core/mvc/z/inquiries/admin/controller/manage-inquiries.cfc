@@ -19,6 +19,9 @@
 			{ link:"/z/admin/mailing-list-export/index", label:"Mailing List Export" }, 
 			{ link:"/z/inquiries/admin/search-engine-keyword-report/index", label:"Search Engine Keyword Lead Report" }
 		]; 
+		if(request.zos.isTestServer){
+			arrayAppend(links, { link:"z/inquiries/admin/import-leads/index", label:"Import Leads"});
+		}
 	}
 	return links;
 	</cfscript>
