@@ -1,6 +1,7 @@
 <cfcomponent extends="zcorerootmapping.com.zos.controller">
 	<cfproperty name="menuModel" type="zcorerootmapping.mvc.z.admin.model.menuModel">
 <cfoutput>
+
 <cffunction name="init" localmode="modern" access="private" roles="member">
 	<cfscript>
 	form.site_id=request.zos.globals.id;
@@ -845,6 +846,7 @@
 	</div>
 	<br />
 	<br />
+ 
 	<cfif qMenuItemLinks.recordcount NEQ 0>
 		<table id="menuLinkTable" style="border-spacing:0px; width:100%;" class="table-list">
 			<thead>

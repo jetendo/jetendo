@@ -498,20 +498,20 @@ this.app_id=12;
 			arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[t999],t9);
 			
 		}
-	}
 
-	if(qConfig.content_config_url_section_id NEQ 0){
-		t9=structnew();
-		t9.type=1;
-		t9.scriptName="/z/content/content/displayContentSection";
-		t9.ifStruct=structnew();
-		t9.ifStruct.ext="html";
-		t9.urlStruct=structnew();
-		t9.urlStruct[request.zos.urlRoutingParameter]="/z/content/content/displayContentSection";
-		t9.mapStruct=structnew();
-		t9.mapStruct.urlTitle="zURLName";
-		t9.mapStruct.dataId="site_x_option_group_set_id";
-		arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.content_config_url_section_id],t9);
+		if(qConfig.content_config_url_section_id NEQ 0){
+			t9=structnew();
+			t9.type=1;
+			t9.scriptName="/z/content/content/displayContentSection";
+			t9.ifStruct=structnew();
+			t9.ifStruct.ext="html";
+			t9.urlStruct=structnew();
+			t9.urlStruct[request.zos.urlRoutingParameter]="/z/content/content/displayContentSection";
+			t9.mapStruct=structnew();
+			t9.mapStruct.urlTitle="zURLName";
+			t9.mapStruct.dataId="site_x_option_group_set_id";
+			arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.content_config_url_section_id],t9);
+		}
 	}
 	loop query="qContent"{
 		t9=structnew();
