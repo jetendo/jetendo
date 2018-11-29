@@ -314,7 +314,7 @@ zArrDeferredFunctions.push(function(){
 		}
 		</cfscript>
 		#arrayToList(arrExtraCode, " ")#
-	  selector: 'textarea', 
+	  //selector: 'textarea', 
 	  height: 500,
 	  theme: 'modern',
 	  plugins: [

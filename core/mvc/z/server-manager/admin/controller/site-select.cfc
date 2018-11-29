@@ -234,40 +234,43 @@
 	<cfscript>
 	lastCompany="-1";
 	companyCount={};
-	for(row in qSites){
-		if(not structkeyexists(companyCount, row.company_id)){
-			companyCount[row.company_id]=0;
-		}
-		companyCount[row.company_id]++;
-	}
 	styleFix="";
 	if(qSites.recordcount GT 0){
 		if(companyCount[qSites.company_id] LT 3){
 			styleFix=" -moz-column-width: 1920px !important;     -webkit-column-width: 1920px !important;     column-width: 1920px !important;";
 		}
 	} 
+	arrSites=[];
+	for(row in qSites){
+		if(not structkeyexists(companyCount, row.company_id)){
+			companyCount[row.company_id]=0;
+		}
+		companyCount[row.company_id]++;
+		arrayAppend(arrSites, row);
+	}
 	</cfscript>
 	<div class="siteSelectDiv" style="#styleFix#">
-			<cfloop query="qSites">
+			<cfloop from="1" to="#arrayLen(arrSites)#" index="i">
 				<cfscript>
-				if(lastCompany NEQ qSites.company_name){
+				row=arrSites[i];
+				if(lastCompany NEQ row.company_name){
 					styleFix="";
-					if(companyCount[qSites.company_id] LT 3){
+					if(companyCount[row.company_id] LT 3){
 						styleFix=" -moz-column-width: 1920px !important;     -webkit-column-width: 1920px !important;     column-width: 1920px !important;";
 					}
 					echo('</div>
-						<div class="siteSelectCompany" style="clear:both; width:100%; float:left; font-size:200%; line-height:150%;">'&qSites.company_name&'</div>
+						<div class="siteSelectCompany" style="clear:both; width:100%; float:left; font-size:200%; line-height:150%;">'&row.company_name&'</div>
 						<div class="siteSelectDiv" style="#styleFix#">');
-					lastCompany=qSites.company_name;
+					lastCompany=row.company_name;
 				}
 				</cfscript>
 				<div class="siteSelect1">
 					<div class="siteSelect4">
 					<div class="siteSelect2">
-						<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#qSites.site_id#';return false;" style="text-decoration:none; <cfif qSites.site_active EQ 0>color:##900;</cfif>" title="Manage"><cfif qSites.site_domain CONTAINS "https:">https://</cfif>#qSites.site_sitename#</a>
+						<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#row.site_id#';return false;" style="text-decoration:none; <cfif row.site_active EQ 0>color:##900;</cfif>" title="Manage"><cfif row.site_domain CONTAINS "https:">https://</cfif>#row.site_sitename#</a>
 					</div>
-					<div class="site-links siteSelect3"> | <a href="#qSites.site_domain#" target="_blank" style="">View</a> | 
-					<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#qSites.site_id#';return false;">Manage</a></div>
+					<div class="site-links siteSelect3"> | <a href="#row.site_domain#" target="_blank" style="">View</a> | 
+					<a href="##" onclick="window.location.href='#Request.zScriptName#&amp;action=select&amp;sid=#row.site_id#';return false;">Manage</a></div>
 					</div>
 				</div>
 			</cfloop>
