@@ -2498,7 +2498,7 @@ leadchart
 
   
 	db.sql="SELECT 
-	*, track_user_referer, track_user_source, track_user_first_page
+	inquiries.*, track_user_referer, track_user_source, track_user_first_page
 	FROM #db.table("inquiries", request.zos.zcoreDatasource)#  
 	LEFT JOIN #db.table("track_user", request.zos.zcoreDatasource)# ON 
 	track_user.site_id = inquiries.site_id and 
@@ -2781,18 +2781,18 @@ track_user_first_page
 			track_user_referer LIKE #db.param('%google%')# OR 
 			track_user_referer LIKE #db.param('%bing%')# OR 
 			track_user_referer LIKE #db.param('%android%')# )";
-				*/
-				source=row.track_user_source;
-				if(source EQ ""){
-					source="N/A";
-				}
+				*/ 
+				source2=isnull(row.track_user_source)?"":row.track_user_source;
+				if(source2 EQ ""){
+					source2="N/A";
+				} 
 				echo('<tr>
 					<td style="width:1%; white-space:nowrap;">#row.inquiries_first_name# #row.inquiries_last_name#</td>
 					<td>#row.inquiries_phone1#</td>
 					<td>#row.inquiries_email#</td>
 					<td>#dateformat(row.inquiries_datetime, "m/d/yyyy")#</td>
 					<td>#inquiries_type_name#</td>
-					<td>#source#</td>
+					<td>#source2#</td>
 				</tr>');
 				rowCount++;
 			}

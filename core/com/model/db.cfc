@@ -111,6 +111,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	<cfargument name="sql" type="string" required="yes">
     <cfargument name="timeout" type="numeric" required="no" default="#0#">
     <cfargument name="returntype" type="string" required="no" default="">
+    <cfargument name="lazy" type="string" required="no" default="#true#">
 	<cfscript>
 	var running=true;
 	var queryStruct={
@@ -136,8 +137,10 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	}else if(isBoolean(queryStruct.datasource)){
 		throw("dbQuery.init({datasource:datasource}) must be set before running dbQuery.execute() by either using dbQuery.table() or db.datasource=""myDatasource"";", "database");
 	}
-	if(arguments.returnType NEQ ""){
+	if(not arguments.lazy){
 		queryStruct.lazy=false;
+	}
+	if(arguments.returnType NEQ ""){
 		queryStruct.returnType=arguments.returnType;
 	}else{
 		if((left(arguments.sql, 20)) DOES NOT CONTAIN "select "){
@@ -301,6 +304,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfargument name="configStruct" type="struct" required="yes">
     	<cfargument name="timeout" type="numeric" required="no" default="#0#">
     	<cfargument name="returnType" type="string" required="no" default="">
+    	<cfargument name="lazy" type="string" required="no" default="#true#">
 		<cfscript>
 		var cfcatch=0;
 		var errorStruct=0;
@@ -323,7 +327,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			}
 		}
 		try{
-			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout, arguments.returnType);
+			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout, arguments.returnType, arguments.lazy);
 		}catch(database errorStruct){
 			arguments.configStruct.dbQuery.reset();
 			rethrow;

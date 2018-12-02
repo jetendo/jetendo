@@ -41,7 +41,7 @@
 	oldDate=dateadd("h", -2, now());
 	// clear old files in temp
 	tempPath=request.zos.globals.serverPrivateHomeDir&"_cache/temp_files/";
-	qDir=directoryList(tempPath, true, "query");
+	qDir=directoryList(tempPath, true, "query", false);
 	arrDir=[];
 	deleteCount=0;
 	for(row in qDir){

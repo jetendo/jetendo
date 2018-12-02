@@ -327,7 +327,7 @@ TODO: figure out why site backup doesn't get compressed.
 			if(local.curSiteId NEQ 0){
 				db.sql="select #local.tempColumnList# from `"&i2&"`.`"&n&"`"&limitSQL&" 
 				into outfile '#local.sitePathMySQLStruct[local.curSiteId]#database/"&i2&"/"&n&".tsv' #outfileOptions#;";
-				db.execute("qd", "", 1000, "query");
+				db.execute("qd", "", 100000, "query", false);
 				
 				local.sql="truncate table `"&i2&"`.`"&n&"`;";
 				arrayappend(local.siteRestoreStruct[local.curSiteId], local.sql);
@@ -337,7 +337,7 @@ TODO: figure out why site backup doesn't get compressed.
 			}else if(local.backupGlobal EQ 1){
 				db.sql="select #local.tempColumnList# from `"&i2&"`.`"&n&"`"&limitSQL&" 
 				into outfile '#request.zos.mysqlBackupDirectory#database-global-backup/"&i2&"/"&n&".tsv' #outfileOptions#;";
-				db.execute("qd", "", 1000, "query");
+				db.execute("qd", "", 100000, "query", false);
 				
 				local.sql="truncate table `"&i2&"`.`"&n&"`;";
 				arrayappend(d3, local.sql);
@@ -375,7 +375,7 @@ TODO: figure out why site backup doesn't get compressed.
 							application.zcore.functions.zcreatedirectory("#request.zos.backupDirectory#database-global-backup/"&i2&"/");
 							db.sql="select #local.tempColumnList# from `"&i2&"`.`"&n&"` where site_id ='0' "&limitSQL&" 
 							into outfile '#request.zos.mysqlBackupDirectory#database-global-backup/"&i2&"/"&n&".tsv' #outfileOptions#;";
-							qd=db.execute("qd", "", 1000, "query");
+							qd=db.execute("qd", "", 100000, "query", false);
 							local.sql="delete from `"&i2&"`.`"&n&"` WHERE site_id = '0';";
 							arrayappend(d3, local.sql);
 							local.sql="load data local infile '/ZIMPORTPATH/database-global-backup/"&i2&"/"&n&".tsv' into table `"&i2&"`.`"&n&"` #outfileOptions# (#local.tempColumnList#);";
@@ -384,7 +384,7 @@ TODO: figure out why site backup doesn't get compressed.
 					}else{
 						db.sql="select #local.tempColumnList# from `"&i2&"`.`"&n&"` where site_id ='"&qs.site_id[g]&"' "&limitSQL&" 
 						into outfile '#local.sitePathMySQLStruct[qs.site_id[g]]#database/"&i2&"/"&n&".tsv' #outfileOptions#;";
-						qd=db.execute("qd", "", 1000, "query");
+						qd=db.execute("qd", "", 100000, "query", false);
 						local.sql="load data local infile '/ZIMPORTPATH/database/"&i2&"/"&n&".tsv' into table `"&i2&"`.`"&n&"` #outfileOptions# (#local.tempColumnList#);";
 						arrayappend(local.siteRestoreStruct[qs.site_id[g]], local.sql);
 					}

@@ -86,12 +86,13 @@
     	<cfargument name="datasource" type="string" required="no" default="" hint="Optionally change the datasource.  Useful for show, set, etc queries that have no table clause to retain the same mysql connection request.zsession.">
     	<cfargument name="timeout" type="numeric" required="no" default="#0#">
     	<cfargument name="returnType" type="string" required="no" default="">
+    	<cfargument name="lazy" type="string" required="no" default="#true#">
         <cfscript>
 		variables.config.sql=this.sql;
 		if(arguments.datasource NEQ ""){
 			variables.config.datasource=arguments.datasource;
 		}
-		var executeResult=variables.db.execute(arguments.name, variables.config, arguments.timeout, arguments.returnType);
+		var executeResult=variables.db.execute(arguments.name, variables.config, arguments.timeout, arguments.returnType, arguments.lazy);
 		variables.lastSQL=this.sql;
 		variables.lastQueryName=arguments.name;
 		this.reset();

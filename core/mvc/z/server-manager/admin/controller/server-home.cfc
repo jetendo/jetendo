@@ -415,7 +415,8 @@
 			where mls_status=#db.param('1')# and 
 			mls_deleted = #db.param(0)#
 			order by mls_id";
-			local.qm=db.execute("qm");
+			// disable lazy
+			local.qm=db.execute("qm", "", 10000, "query", false);
 			</cfscript>
 			<p>Display fields not output for mls provider:
 			  <cfscript>

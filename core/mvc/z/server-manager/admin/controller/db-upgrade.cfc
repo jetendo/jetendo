@@ -446,7 +446,7 @@
 	if(structkeyexists(application.zcore.tablesWithSiteIdStruct, arguments.datasource&"."&arguments.table)){
 		db.sql&=" WHERE site_id = '0' ";
 	}
-	d=db.execute("qSelect", "", 1000, "query");
+	d=db.execute("qSelect", "", 100000, "query", false);
 	</cfscript>
 	
 </cffunction>

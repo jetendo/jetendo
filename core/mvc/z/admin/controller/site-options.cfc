@@ -5541,7 +5541,9 @@ Define this function in another CFC to override the default email format
 			var currentRowIndex=0;
 			var dataStruct={};
 			var labelStruct={};
-			for(row in qS){
+			arrRow=[];  
+			for(row in qS){ 
+				arrayAppend(arrRow, row);
 				currentRowIndex++;
 				if(form.jumpto EQ "soid_#application.zcore.functions.zurlencode(row.site_option_name,"_")#"){
 					jumptoanchor="soid_#row.site_option_id#";
@@ -5567,8 +5569,8 @@ Define this function in another CFC to override the default email format
 				}
 				labelStruct[row.site_option_name]=value;
 			}
-			currentRowIndex=0;
-			for(row in qS){
+			currentRowIndex=0; 
+			for(row in arrRow){ 
 				currentRowIndex++;
 				if(lastGroup NEQ row.site_option_group_name){
 					lastGroup = row.site_option_group_name;
@@ -5582,6 +5584,7 @@ Define this function in another CFC to override the default email format
 				}else{
 					writeoutput('class="row1"');
 				}
+ 
 				writeoutput('>
 				<td style="vertical-align:top;" colspan="2" style="padding-bottom:10px;"><a id="soid_#row.site_option_id#" style="display:block; float:left;"></a>
 					<div style="padding-bottom:5px;float:left; width:99%;"><a href="##" class="soid_link" title="Click to toggle editing the value of this option." data-id="#row.site_option_id#">#row.site_option_display_name#</a> 

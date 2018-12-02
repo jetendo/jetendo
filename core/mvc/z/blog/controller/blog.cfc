@@ -2885,7 +2885,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	if(structkeyexists(arguments.displayStruct, 'crop')){
 		thumbnailStruct.crop=arguments.displayStruct.crop;
 	}
-	currentrow=1;
+	currentrow1=1;
 	for(row in qList){
 		ts=StructNew();
 		ts.id=row.blog_id;
@@ -2935,8 +2935,8 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		ts2=structnew();
 		ts2.image_library_id=row.blog_image_library_id;
 		ts2.output=false;
-		ts2.query=qList;
-		ts2.row=currentrow;
+		ts2.struct=row;
+		ts2.row=currentrow1;
 		ts2.size=thumbnailStruct.width&"x"&thumbnailStruct.height;
 		ts2.crop=thumbnailStruct.crop;
 		ts2.count = 1;  
@@ -2950,7 +2950,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		}else{
 			ts.imageDate=now();
 		} 
-		arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+		arrImages=application.zcore.imageLibraryCom.displayImageFromStruct(ts2);
 		ts.image=request.zos.currentHostName&"/z/a/images/s.gif";
 		ts.hasImage=false;
 		if(arraylen(arrImages) NEQ 0){
@@ -2958,7 +2958,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 			ts.image=request.zos.currentHostName&arrImages[1].link;
 		} 
 		arrayappend(arguments.displayStruct.arrBlog,ts);
-		currentrow++;
+		currentrow1++;
 	}
 	</cfscript>
 </cffunction>
@@ -4433,6 +4433,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		#searchNAV#<br />
 	</cfif>
 
+
 	<cfloop query="qList">
 		<cfif qList.blog_title NEQ ''>
 			#this.summaryTemplate(qlist)#
@@ -5169,12 +5170,11 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 	ts2=structnew("sync");
 	ts2.image_library_id=arguments.query.blog_image_library_id;
 	ts2.output=false;
-	ts2.query=arguments.query;
-	ts2.row=arguments.query.currentrow;
+	ts2.struct=arguments.query; 
 	ts2.size=round(thumbnailStruct.width*2)&"x"&round(thumbnailStruct.height*2);
 	ts2.crop=thumbnailStruct.crop;
 	ts2.count = 1;  
-	arrImages=application.zcore.imageLibraryCom.displayImageFromSQL(ts2);
+	arrImages=application.zcore.imageLibraryCom.displayImageFromStruct(ts2);
 	image1="";
 	if(arraylen(arrImages) NEQ 0){
 		image1=request.zos.currentHostName&arrImages[1].link;

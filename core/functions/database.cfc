@@ -258,7 +258,7 @@ application.zcore.functions.zGetDataById("insert", request.zos.zcoreDatasource, 
 	2 is parent site
 	3 is admin site
 	4 is zero site
-	*/
+	*/ 
 	if(arguments.checkSiteId EQ arguments.currentSiteId){
 		return 1;
 	}else if(arguments.checkSiteId EQ request.zos.globals.serverid){

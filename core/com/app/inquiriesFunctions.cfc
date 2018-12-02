@@ -270,7 +270,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 		<cfif trim(t.inquiries_email) NEQ ''> 
 			<tr>
 				<th width="130" style="#thstyle# text-align:left;" >Email:</th>
-				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'This message was sent in response to your inquiry on '&DateFormat(t.inquiries_datetime, "mmmm d")&': '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif>" class="z-manager-search-button">#t.inquiries_email#</a>&nbsp;</td>
+				<td style="#tdstyle#"><a href="mailto:#t.inquiries_email#">#t.inquiries_email#</a> <!--- | <a href="mailto:#t.inquiries_email#?subject=#URLEncodedFormat('RE: Your web site inquiry')#&body=#URLEncodedFormat('Dear '&trim(t.inquiries_first_name)&','&chr(10)&chr(10)&chr(9))#<cfif trim(t.inquiries_comments) NEQ ''>#URLEncodedFormat(chr(10)&chr(10)&'------------------------------------------------------'&chr(10)&'This message was sent in response to your inquiry on '&DateFormat(t.inquiries_datetime, "mmmm d")&': '&chr(10)&chr(10)&replacenocase(left(t.inquiries_comments,1200),"<br />",chr(10),"ALL"))#<cfif len(t.inquiries_comments) GT 1200>...</cfif></cfif>" class="z-manager-search-button">Reply</a> --->&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(t.inquiries_phone_time) NEQ ''>
