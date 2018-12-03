@@ -319,9 +319,9 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		}else{
 			tempCacheEnabled=false;
 		}
-		if(tempCacheEnabled){
+		if(tempCacheEnabled){ 
 			nowDate=now();
-			cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, processedSQL, nowDate);
+			cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, processedSQL, nowDate); 
 			if(cacheResult.success){
 				return {success:true, result:cacheResult.result};
 			}
