@@ -447,7 +447,7 @@ idxExclude["rets29_TempOffMarketDate"]="Temp Off Market Date";
 		idxTemp2["rets29_bathsfull"]="Full Baths";
 		idxTemp2["rets29_bathshalf"]="Half Baths";
 		idxTemp2["rets29_bedstotal"]="Bedrooms";
-		idxTemp2["rets29_FireplaceYN"]="Fireplace Yn";
+		idxTemp2["rets29_FireplaceYN"]="Fireplace";
 		idxTemp2["rets29_Heating"]="Heating";
 		idxTemp2["rets29_InteriorFeatures"]="Interior"; 
 		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.idxExclude, idxTemp2, variables.allFields));

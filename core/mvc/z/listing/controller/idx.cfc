@@ -102,6 +102,7 @@ this.inited=false;
 			this.optionstruct.delimiter=row.mls_delimiter;
 			this.optionstruct.csvquote=row.mls_csvquote;
 			this.optionstruct.first_line_columns=row.mls_first_line_columns;
+			this.optionstruct.charset=row.mls_file_charset;
 			this.optionstruct.row=row;
 			this.optionstruct.mlsProviderCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.listing.mls-provider.#row.mls_com#");
 			this.optionstruct.mlsproviderCom.setMLS(this.optionstruct.mls_id);
@@ -134,7 +135,7 @@ this.inited=false;
 	
 	request.zos.listing=application.zcore.listingStruct;
 	if(this.optionstruct.first_line_columns EQ 1){
-		f=fileopen(request.zos.sharedPath&this.optionstruct.filePath,"read", "windows-1252");
+		f=fileopen(request.zos.sharedPath&this.optionstruct.filePath,"read", this.optionstruct.charset);
 		try{
 			firstline=lcase(filereadline(f));
 		}catch(Any excpt){
@@ -209,7 +210,7 @@ this.inited=false;
 		 
 		request.zTempIDXFilePath=request.zos.sharedPath&this.optionstruct.filePath;
 		
-		request.zos.idxFileHandle=fileOpen("#request.zos.sharedPath&this.optionstruct.filePath#", 'read', "windows-1252");
+		request.zos.idxFileHandle=fileOpen("#request.zos.sharedPath&this.optionstruct.filePath#", 'read', this.optionStruct.charset);
 		 
 
 		if(this.optionstruct.skipBytes NEQ 0){

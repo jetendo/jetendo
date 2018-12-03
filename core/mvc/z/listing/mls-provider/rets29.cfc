@@ -115,8 +115,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 				ts[i]=replace(ts[i], ",", ", ", "all");
 			}
 		}
-		//writedump(ts); 		abort;
-		
+		//writedump(ts); 		abort; 
 		
 		ts["List Price"]=replace(ts["List Price"],",","","ALL");
 		
