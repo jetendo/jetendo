@@ -1323,12 +1323,14 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 				}
 			}
 		}
+		arrProperty=[];
         if(structkeyexists(qProperty, 'recordcount') and qProperty.recordcount NEQ 0){
 			mlsStruct=structnew();
 			arrQuery=arraynew(1);
 			orderStruct=structnew();
 			n22=1;
 			for(row in qProperty){
+				arrayAppend(arrProperty, row);
 				if(row.listing_id CONTAINS "-"){
 					mls_id=listgetat(row.listing_id,1,"-");
 				}else{
@@ -1446,11 +1448,11 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 		if(arguments.ss.onlyCount EQ false){
         	// ts.query=qProperty;   don't need this anymore.
 			ts.arrData=[];
-			if(qProperty.recordcount NEQ 0){
+			if(arrayLen(arrProperty) NEQ 0){
 
 				ps={};
 				// store lookup table of qproperty
-        		for(row in qProperty){
+        		for(row in arrProperty){
         			ps[row.listing_id]=row;
         		}
 				tempCount=0;
@@ -1469,7 +1471,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 						ts.arrData[orderStruct[curQuery.listing_id]]=newRow;
 					}
 				}
-				if(tempCount NEQ qProperty.recordcount){
+				if(tempCount NEQ arrayLen(arrProperty)){
 					// rebuild to eliminate gaps in array
 					arrNew=[];
 					for(row in ts.arrData){
@@ -1480,7 +1482,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			}
 		}
 		if(arguments.ss.disableCount){
-			ts.count=qProperty.recordcount;
+			ts.count=arrayLen(arrProperty);
 		}else{
         	ts.count=qPropertyCount.count;
 		}

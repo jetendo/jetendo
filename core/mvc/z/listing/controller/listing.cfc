@@ -101,17 +101,11 @@ this.app_id=11;
 
 <!--- #application.zcore.listingCom.getDisclaimerText()# --->
 <cffunction name="getDisclaimerText" localmode="modern" output="no" returntype="any">
-	<cfscript>
-	var qm=0;
-	var common="";
-	var db=0;
-	
+	<cfscript> 
 	local.c=application.zcore.db.getConfig();
 	local.c.cacheForSeconds=3600;
 	db=application.zcore.db.newQuery(local.c);
-	</cfscript>
-	<cfsavecontent variable="db.sql">
-	SELECT mls_disclaimer_name, mls_update_date FROM 
+	db.sql="SELECT mls_disclaimer_name, mls_update_date FROM 
 	#db.table("mls", request.zos.zcoreDatasource)# mls, 
 	#db.table("app_x_mls", request.zos.zcoreDatasource)# app_x_mls 
 	
@@ -119,15 +113,18 @@ this.app_id=11;
 	mls_deleted = #db.param(0)# and 
 	app_x_mls_deleted = #db.param(0)# and 
 	app_x_mls.site_id = #db.param(request.zos.globals.id)# and 
-	mls_status = #db.param('1')#
-	</cfsavecontent><cfscript>qM=db.execute("qM");</cfscript>
-	<cfsavecontent variable="common"><div class="zlisting-common-disclaimer">All listing information is deemed reliable but not guaranteed and should be independently verified through personal inspection by appropriate professionals. Listings displayed on this website may be subject to prior sale or removal from sale; availability of any listing should always be independent verified. Listing information is provided for consumer personal, non-commercial use, solely to identify potential properties for potential purchase; all other use is strictly prohibited and may violate relevant federal and state law. 
-	The source of the listing data is as follows:   
-	<cfscript>
-	for(row in qm){
-		echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&') ');
-	}
-	</cfscript></div>
+	mls_status = #db.param('1')#";
+	qM=db.execute("qM");
+	</cfscript>
+	<cfsavecontent variable="common">
+		<div class="zlisting-common-disclaimer">All listing information is deemed reliable but not guaranteed and should be independently verified through personal inspection by appropriate professionals. Listings displayed on this website may be subject to prior sale or removal from sale; availability of any listing should always be independent verified. Listing information is provided for consumer personal, non-commercial use, solely to identify potential properties for potential purchase; all other use is strictly prohibited and may violate relevant federal and state law. 
+			The source of the listing data is as follows:   
+			<cfscript>
+			for(row in qm){
+				echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&') ');
+			}
+			</cfscript>
+		</div>
 	</cfsavecontent>
 	<cfscript>
 	return trim(common);

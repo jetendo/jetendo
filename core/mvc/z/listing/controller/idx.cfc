@@ -91,7 +91,7 @@ this.inited=false;
 	WHERE mls_status=#db.param('1')# and 
 	mls_deleted = #db.param(0)#
 	ORDER BY mls_update_date ASC ";
-	qMLS=db.execute("qMLS"); 
+	qMLS=db.execute("qMLS", "", 10000, "query", false);  
 	this.optionstruct.filePath=false;
 
 	arrSold=[false, true];
