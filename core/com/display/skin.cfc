@@ -469,6 +469,7 @@
 		s='<link rel="stylesheet" type="text/css" href="#checkPath#" />'; 
 	}
 	application.zcore.template[templateTagFunction](templateTagName, s&chr(10), forceFirst); 
+	return "";
 </cfscript>
 </cffunction>
 
@@ -517,6 +518,7 @@
 	request.zos.jsIncludeUniqueStruct[checkPath]=true;
 	arrayappend(request.zos.arrScriptIncludeLevel, arguments.loadLevel);
 	arrayappend(request.zos.arrScriptInclude, checkPath);
+	return "";
 	</cfscript>
 </cffunction>
 

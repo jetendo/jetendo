@@ -1835,7 +1835,7 @@ this.app_id=10;
 <cffunction name="articleTemplate" localmode="modern" access="remote" output="yes" returntype="any">
 	<cfscript>  
 	var db=request.zos.queryObject; 
-	variables.init();
+	variables.init(); 
 	if(structkeyexists(form, 'rss_id')){
 		application.zcore.functions.z404("rss_id is not supposed to be defined for articleTemplate()");	
 	}
@@ -1902,6 +1902,12 @@ this.app_id=10;
 	qArticle=db.execute("qArticle"); 
 
  
+	if(isDefined('request.zos.supressBlogArticleDetails') EQ false or request.zos.supressBlogArticleDetails NEQ 1){
+		if(qArticle.recordcount eq 0){
+			application.zcore.functions.z404("articleTemplate() Blog article was missing.");
+		}
+	} 
+
 	// login required to view blog preview url - added to allow sharing blog urls for approval.
 	if(qArticle.recordcount NEQ 0){
 		if(previewEnabled){ 
@@ -1953,11 +1959,6 @@ this.app_id=10;
 	}
 	application.zcore.siteOptionCom.setCurrentOptionAppId(qarticle.blog_site_option_app_id);
 	
-	if(isDefined('request.zos.supressBlogArticleDetails') EQ false or request.zos.supressBlogArticleDetails NEQ 1){
-		if(qArticle.recordcount eq 0){
-			application.zcore.functions.z404("articleTemplate() Blog article was missing.");
-		}
-	} 
 	request.thumbnailStruct=variables.getThumbnailSizeStruct();
 	db1=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
 	db2=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
@@ -3974,6 +3975,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		<language>en-us</language>
 		<copyright>#year(now())#</copyright>
 		<lastBuildDate>#gethttptimestring()#</lastBuildDate>');
+
 		for(count=1;count<=q_blog_feed.recordcount;count++){
 
 			blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);

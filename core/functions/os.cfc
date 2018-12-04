@@ -302,8 +302,8 @@ if(not rs.success){
 	}
 	application.zcore.functions.zRequireJqueryUI();
 	request.zos.timePickerOutput=true;
-	application.zcore.template.prependTag("stylesheets", application.zcore.skin.includeCSS("/z/javascript/jquery/timePicker/timePicker.css"));
-	application.zcore.template.appendTag("scripts", application.zcore.skin.includeJS("/z/javascript/jquery/timePicker/jquery.timePicker.js"));
+	application.zcore.skin.includeCSS("/z/javascript/jquery/timePicker/timePicker.css");
+	application.zcore.skin.includeJS("/z/javascript/jquery/timePicker/jquery.timePicker.js");
 	</cfscript>
 </cffunction>
 

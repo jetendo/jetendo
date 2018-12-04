@@ -981,7 +981,7 @@
 			request.zos.tempObj.rentalInstance.configCom=this;
 		}
 		if(request.zos.globals.enableMinCat EQ 0 or structkeyexists(request.zos.tempObj,'disableMinCat')){
-			application.zcore.template.prependtag("meta",application.zcore.skin.includeCSS("/z/a/rental/stylesheets/global.css"));
+			application.zcore.skin.includeCSS("/z/a/rental/stylesheets/global.css");
 		}
 		if(structkeyexists(application.sitestruct[request.zos.globals.id], 'zRentalRequestStartedOnce') EQ false){
 			this.publishCSS();

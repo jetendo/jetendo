@@ -4547,7 +4547,7 @@ Define this function in another CFC to override the default email format
 		db.sql&=" and site_option_allow_public=#db.param(1)#";
 	}
 	db.sql&=" ORDER BY site_option.site_option_sort asc, site_option.site_option_name ASC";
-	qS=db.execute("qS"); 
+	qS=db.execute("qS", "", 10000, "query", false); 
 	if(qS.recordcount EQ 0){
 		application.zcore.functions.z404("No site_options have been set to allow public form data entry.");	
 	}
