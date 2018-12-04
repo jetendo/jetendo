@@ -2230,16 +2230,18 @@ this.app_id=10;
 	</cfscript>
 	
 	<cfif request.zos.trackingSpider EQ false>
+		<cfscript>
+		db4=application.siteStruct[request.zos.globals.id].dbComponents.cacheEnabledDB.newQuery();
+		</cfscript>
 		
-		<cfthread name="blogViewUpdateThread" action="run" timeout="1000">
-			<cfscript>
-			db=duplicate(request.zos.queryObject);
-			db.sql="UPDATE #db.table("blog", request.zos.zcoreDatasource)#  
-			SET blog_views=blog_views+#db.param(1)# 
-			where blog_id = #db.param(form.blog_id)# and 
-			site_id = #db.param(request.zos.globals.id)# and 
-			blog_deleted = #db.param(0)#";
-			qupdate=db.execute("qupdate");
+		<cfthread name="blogViewUpdateThread" db4="#db4#" action="run" timeout="1000">
+			<cfscript>  
+			db4.sql="UPDATE #db.table("blog", request.zos.zcoreDatasource)#  
+			SET blog_views=blog_views+#db4.param(1)# 
+			where blog_id = #db4.param(form.blog_id)# and 
+			site_id = #db4.param(request.zos.globals.id)# and 
+			blog_deleted = #db4.param(0)#";
+			qupdate=db4.execute("qupdate");
 			</cfscript>
 		</cfthread>
 	</cfif>

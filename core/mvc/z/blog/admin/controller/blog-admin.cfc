@@ -1839,7 +1839,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		<cfscript>
 		if(!application.zcore.functions.zIsExternalCommentsEnabled()){
 			newCount=0;
-			if(row.totalComments-row.approvedComments NEQ 0){
+			if(isnumeric(row.approvedComments) and isnumeric(row.totalComments) and row.totalComments-row.approvedComments NEQ 0){
 				newCount=row.totalComments-row.approvedComments;
 			}
 			echo('<div class="z-manager-button-container"><a href="/z/blog/admin/blog-admin/commentList?blog_id=#row.blog_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#" title="Comments (#row.totalComments-newCount# Approved, #newCount# New)"><i class="fa fa-comment" aria-hidden="true" style="');
