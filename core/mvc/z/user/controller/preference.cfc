@@ -41,75 +41,77 @@
 	}
 	userGroupAdminCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 	ugid=userGroupAdminCom.getGroupId("user");
-	db.sql="select * FROM #db.table("user", request.zos.zcoreDatasource)# user 
-	where user_username = #db.param(form.e)# and 
-	user_deleted = #db.param(0)# and
-	#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# ";
-	variables.qcheckemail=db.execute("qcheckemail");
 	variables.secureLogin=false;
 	if(form.e EQ '' and form.k EQ '' and  structkeyexists(request.zsession, "user") and structkeyexists(request.zos.userSession.groupAccess, "user")){
 		db.sql="select * FROM #db.table("user", request.zos.zcoreDatasource)# user
 		where user_id = #db.param(request.zsession.user.id)# and 
 		site_id=#db.param(request.zsession.user.site_id)# and 
 		user_deleted=#db.param(0)# ";
-		variables.qcheckemail=db.execute("qcheckemail");
+		variables.qcheckemail=db.execute("qcheckemail", "", 10000, "query", false); 
 
 		variables.secureLogin=true;
 		form.e=variables.qcheckemail.user_email;
 		variables.secureLogin=true;
-	}else if(variables.qcheckemail.recordcount NEQ 0 and form.e NEQ ''){
-		if(variables.qcheckemail.user_server_administrator EQ 1){
-			if(structkeyexists(form,"x_ajax_id")){
-				writeoutput('{success:false,errorMessage:"The email address, #form.e#, can''t be updated through this interface because you are a server administrator."}');
-				application.zcore.functions.zabort();		
-			}else{
-				application.zcore.status.setStatus(request.zsid, "The email address, #form.e#, can't be updated through this interface because you are a server administrator.",true);
-				application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
-			}
-		}
-		if(structkeyexists(form, 'user_password') EQ false){
-			form.user_password=variables.qcheckemail.user_password;
-		}
-		if(structkeyexists(form, 'user_username') EQ false){
-			form.user_username=variables.qcheckemail.user_username;
-		}
-		if(trim(variables.qcheckemail.user_key) EQ ''){
-			form.user_key = hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha');
-			db.sql="UPDATE #db.table("user", request.zos.zcoreDatasource)# user 
-			set user_key =#db.param(form.user_key)#,
-			user_updated_datetime=#db.param(request.zos.mysqlnow)# 
-			WHERE user_id = #db.param(variables.qcheckemail.user_id)# and 
-			site_id=#db.param(variables.qcheckemail.site_id)# and 
-			user_deleted=#db.param(0)# ";
-			addKey=db.execute("addKey");
-		}
-		if(structkeyexists(request.zsession, "user") and structkeyexists(request.zos.userSession.groupAccess, "user")){
-			if(form.e NEQ request.zsession.user.email){
-				application.zcore.user.logOut();
-			}else{
-				variables.secureLogin=request.zsession.secureLogin;
-			}
-		}else if(form.k NEQ ''){
-			if(variables.qcheckemail.user_key EQ form.k){
-				variables.secureLogin=false;
-				inputStruct = StructNew();
-				inputStruct.user_group_name = "user";
-				inputStruct.noRedirect=true;
-				inputStruct.noLoginForm=true;
-				inputStruct.disableSecurePassword=true;
-				inputStruct.site_id = request.zos.globals.id;
-				application.zcore.user.checkLogin(inputStruct); 
-				if(structkeyexists(request.zsession, "user") and structkeyexists(request.zos.userSession.groupAccess, "user")){
-				    variables.secureLogin=true;
+	}else{
+		db.sql="select * FROM #db.table("user", request.zos.zcoreDatasource)# user 
+		where user_username = #db.param(form.e)# and 
+		user_deleted = #db.param(0)# and
+		#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# ";
+		variables.qcheckemail=db.execute("qcheckemail", "", 10000, "query", false);  
+		if(variables.qcheckemail.recordcount NEQ 0 and form.e NEQ ''){
+			if(variables.qcheckemail.user_server_administrator EQ 1){
+				if(structkeyexists(form,"x_ajax_id")){
+					writeoutput('{success:false,errorMessage:"The email address, #form.e#, can''t be updated through this interface because you are a server administrator."}');
+					application.zcore.functions.zabort();		
 				}else{
+					application.zcore.status.setStatus(request.zsid, "The email address, #form.e#, can't be updated through this interface because you are a server administrator.",true);
+					application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
+				}
+			}
+			if(structkeyexists(form, 'user_password') EQ false){
+				form.user_password=variables.qcheckemail.user_password;
+			}
+			if(structkeyexists(form, 'user_username') EQ false){
+				form.user_username=variables.qcheckemail.user_username;
+			}
+			if(trim(variables.qcheckemail.user_key) EQ ''){
+				form.user_key = hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha');
+				db.sql="UPDATE #db.table("user", request.zos.zcoreDatasource)# user 
+				set user_key =#db.param(form.user_key)#,
+				user_updated_datetime=#db.param(request.zos.mysqlnow)# 
+				WHERE user_id = #db.param(variables.qcheckemail.user_id)# and 
+				site_id=#db.param(variables.qcheckemail.site_id)# and 
+				user_deleted=#db.param(0)# ";
+				addKey=db.execute("addKey");
+			}
+			if(structkeyexists(request.zsession, "user") and structkeyexists(request.zos.userSession.groupAccess, "user")){
+				if(form.e NEQ request.zsession.user.email){
+					application.zcore.user.logOut();
+				}else{
+					variables.secureLogin=request.zsession.secureLogin;
+				}
+			}else if(form.k NEQ ''){
+				if(variables.qcheckemail.user_key EQ form.k){
+					variables.secureLogin=false;
+					inputStruct = StructNew();
+					inputStruct.user_group_name = "user";
+					inputStruct.noRedirect=true;
+					inputStruct.noLoginForm=true;
+					inputStruct.disableSecurePassword=true;
+					inputStruct.site_id = request.zos.globals.id;
+					application.zcore.user.checkLogin(inputStruct); 
+					if(structkeyexists(request.zsession, "user") and structkeyexists(request.zos.userSession.groupAccess, "user")){
+					    variables.secureLogin=true;
+					}else{
+						structdelete(form, 'user_username');
+						structdelete(form, 'user_password');	
+					}
+				}else{
+					// this prevents login abuse
+					application.zcore.user.setloginlog(0);
 					structdelete(form, 'user_username');
 					structdelete(form, 'user_password');	
 				}
-			}else{
-				// this prevents login abuse
-				application.zcore.user.setloginlog(0);
-				structdelete(form, 'user_username');
-				structdelete(form, 'user_password');	
 			}
 		}
 	}
@@ -873,7 +875,7 @@ If the link does not work, please copy and paste the entire link in your browser
 		}
 		openIdCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.user.openid");
 		</cfscript>
-		<cfif openIdEnabled>
+		<cfif variables.qcheckemail.recordcount NEQ 0 and openIdEnabled>
 			<cfsavecontent variable="local.openIdOutput">
 			<cfscript>
 			writeoutput(openIdCom.displayOpenIdProviderForUser(variables.qcheckemail.user_id, variables.qcheckemail.site_id));

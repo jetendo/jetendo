@@ -2535,7 +2535,7 @@ ts.struct=form;
 		WHERE blog_tag_id = #db.param(form.blog_tag_id)# and 
 		blog_tag_deleted = #db.param(0)# and
 		site_id=#db.param(request.zos.globals.id)#
-		</cfsavecontent><cfscript>qEdit=db.execute("qEdit");</cfscript>
+		</cfsavecontent><cfscript>qEdit=db.execute("qEdit", "", 10000, "query", false); </cfscript>
 		<cfif backupMethod EQ 'tagEdit'>
 			<h2>Edit Tag: "#qEdit.blog_tag_name#"</h2>
 		<cfelse>
@@ -2691,7 +2691,7 @@ tabCom.enableSaveButtons();
 	blog_deleted = #db.param(0)# and
 	site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
 	site_id=#db.param(request.zos.globals.id)#";
-	qEdit=db.execute("qEdit");
+	qEdit=db.execute("qEdit", "", 10000, "query", false); 
 	</cfscript>
 	<cfif currentMethod EQ "articleEdit">
 		<h2>Edit Article</h2>
@@ -3251,9 +3251,11 @@ tabCom.enableSaveButtons();
 		</tr> 
 		
 		</table>
-		#application.zcore.hook.trigger("blog.articleEditCustomFields", {query=qEdit})#
-		#tabCom.endFieldSet()#
-		#tabCom.endTabMenu()#
+		<cfscript> 
+		echo(application.zcore.hook.trigger("blog.articleEditCustomFields", {query=qEdit}));
+		echo(tabCom.endFieldSet());
+		echo(tabCom.endTabMenu());
+		</cfscript>
 		<cfscript>application.zcore.functions.zEndForm();</cfscript>
 </cffunction>
 
@@ -3501,7 +3503,7 @@ local.blogIdBackup=form.blog_id;
 	WHERE blog_category_id = #db.param(form.blog_category_id)# and 
 	blog_category_deleted = #db.param(0)# and
 	site_id=#db.param(request.zos.globals.id)#
-	</cfsavecontent><cfscript>qEdit=db.execute("qEdit"); 
+	</cfsavecontent><cfscript>qEdit=db.execute("qEdit", "", 10000, "query", false); 
 	request.zsession["blogcategory_return"&form.blog_category_id]=application.zcore.functions.zso(form, "returnURL");
 	application.zcore.functions.zquerytostruct(qedit, form);
 	application.zcore.functions.zstatushandler(request.zsid,true, false, form);

@@ -1711,7 +1711,7 @@
 				<td>
 					<strong>MLS Search Options</strong><br />
 					<cfscript>
-					request.zos.listing.functions.zMLSSearchOptions(qContent.content_saved_search_id, "content_search_mls", qContent.content_search_mls);
+					request.zos.listing.functions.zMLSSearchOptions(form.content_saved_search_id, "content_search_mls", form.content_search_mls);
 					</cfscript>
 				</td>
 			</tr>

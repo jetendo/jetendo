@@ -27,7 +27,11 @@
 		<tr> 
 		<td style="vertical-align:top; "><strong>MLS Search Options</strong><br />
 		<cfscript>
-        request.zos.listing.functions.zMLSSearchOptions(arguments.query[arguments.dataStruct.mlsSavedSearchIdField], arguments.dataStruct.fieldName, arguments.query[arguments.dataStruct.fieldName]);
+		if(arguments.query.recordcount EQ 0){
+        	request.zos.listing.functions.zMLSSearchOptions("", arguments.dataStruct.fieldName, "");
+		}else{
+        	request.zos.listing.functions.zMLSSearchOptions(arguments.query[arguments.dataStruct.mlsSavedSearchIdField], arguments.dataStruct.fieldName, arguments.query[arguments.dataStruct.fieldName]);
+        }
         </cfscript>
 		</td>
 		</tr>
