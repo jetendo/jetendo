@@ -463,10 +463,20 @@
 		application.zcore.template.fail("#request.zos.templateData.comName#: build: `#request.zos.templateData.template#`, is not a valid template name. Path: #request.zos.templateData.templatePath#",true);
 	}
 	
-	request.zos.templateData.content='<cfoutput>'&replacenocase(replacenocase(request.zos.templateData.content,'<cfoutput>','','ALL'),'</cfoutput>','','ALL')&'</cfoutput>';
+	request.zos.templateData.content='
+	<cfscript>
+	if(request.zos.zReset EQ "template" or request.zos.zReset EQ "site"){
+		_zForceReloadTemplate=true;
+	}else{
+		_zForceReloadTemplate=false;
+	}
+	</cfscript>
+	<cfoutput>'&replacenocase(replacenocase(request.zos.templateData.content,'<cfoutput>','','ALL'),'</cfoutput>','','ALL')&'</cfoutput>';
 	// fix legacy code to reference the new paths
 	request.zos.templateData.content=replacenocase(request.zos.templateData.content,"/zsa2/","/zcorerootmapping/","all"); 
 	request.zos.templateData.content=replacenocase(replacenocase(replacenocase(request.zos.templateData.content,'<cfinclude template="/','<cfinclude template="#request.zrootpath#','all'),'<cfinclude template="#request.zrootpath#zsa2/','<cfinclude template="/zcorerootmapping/','ALL'),'<cfinclude template="#request.zrootpath#zcorerootmapping/','<cfinclude template="/zcorerootmapping/','ALL');
+	request.zos.templateData.content=replacenocase(request.zos.templateData.content, '<cfinclude ', '<cfinclude forceReload="##_zForceReloadTemplate##" ', "all"); 
+ 
 	
 	
 	this.getTags();
@@ -521,7 +531,10 @@
 		r=application.zcore.functions.zwritefile(cfcPath,result);
 	}
 	
-	application.zcore.functions.zClearCFMLTemplateCache();
+	if(request.zos.zReset EQ ""){
+		request.zos.zReset="template";
+	} 
+	//application.zcore.functions.zClearCFMLTemplateCache();
 </cfscript>
 </cffunction>
 
@@ -545,7 +558,7 @@ for(row in qSite){
 </cffunction>
 
 
-<cffunction name="createTemplateObject" localmode="modern" output="no" returntype="any">
+<cffunction name="createTemplateObject" localmode="modern" output="yes" returntype="any">
     <cfargument name="c" type="string" required="yes">
     <cfargument name="cpath" type="string" required="yes">
     <cfargument name="forceNew" type="boolean" required="no" default="#false#">
@@ -557,10 +570,14 @@ for(row in qSite){
     if(not structkeyexists(t7, request.zos.globals.id)){
         t7[request.zos.globals.id]={};
     } 
-    t9=t7[request.zos.globals.id];
+    t9=t7[request.zos.globals.id]; 
     if(not structkeyexists(t9,arguments.cpath) or arguments.forceNew){
 		try{
-			com=createobject("component",arguments.cpath);
+			if(structkeyexists(t9,arguments.cpath)){
+				com=ReloadComponent(t9[arguments.cpath], true); 
+			}else{
+				com=createobject("component",arguments.cpath);
+			}
 		}catch(Any e){
 			savecontent variable="e2"{
 				if(application.zcore.functions.zso(e, 'message') CONTAINS '-railo-dump' or application.zcore.functions.zso(e, 'message') CONTAINS '-lucee-dump'){
@@ -610,7 +627,7 @@ for(row in qSite){
 				cfcCreatePath=request.zrootcfcpath&removechars(request.zos.templateData.template, 1, 5);
 			}
 			if(request.zos.zreset EQ "template"){
-				structclear(application.zcore.templateCFCCache[request.zos.globals.id]);
+				//structclear(application.zcore.templateCFCCache[request.zos.globals.id]);
 				tempIO=createTemplateObject("component", cfcCreatePath, true);
 			}else{
 				tempIO=createTemplateObject("component", cfcCreatePath);
@@ -635,22 +652,22 @@ for(row in qSite){
 			}
 			if(structkeyexists(application.zcore.compiledTemplatePathCache, sp&'/'&cfcName&".cfc")){
 				application.zcore.compiledTemplatePathCache[sp&'/'&cfcName&".cfc"]=true;
-			}   
+			}    
 			if(not request.zos.enableSiteTemplateCache){  
 				this.compileTemplateCFC(); 
-				tempIO=createTemplateObject("component",cfcCreatePath,true);
+				tempIO=createTemplateObject("component",cfcCreatePath,true); 
 				application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id][sp&'/'&cfcName&".cfc"]=true;
 			}else if(request.zos.zreset EQ "template" or not structkeyexists(application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id], sp&'/'&cfcName&".cfc")){    
 				structclear(application.zcore.templateCFCCache[request.zos.globals.id]);
 				if(fileexists(request.zos.templateData.templatePath)){
 					this.compileTemplateCFC(); 
-					tempIO=createTemplateObject("component",cfcCreatePath,true);
+					tempIO=createTemplateObject("component",cfcCreatePath,true); 
 					application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id][sp&'/'&cfcName&".cfc"]=true;
 				}else{
 					runTemplate=false;
 				}
 			}else if(structkeyexists(application.zcore.compiledTemplatePathCache, sp&'/'&cfcName&".cfc")){ 
-				tempIO=createTemplateObject("component",cfcCreatePath);
+				tempIO=createTemplateObject("component",cfcCreatePath); 
 			}else{ 
 				if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, request.zos.templateData.templatePath) EQ false){
 					application.sitestruct[request.zos.globals.id].fileExistsCache[request.zos.templateData.templatePath]=fileexists(request.zos.templateData.templatePath);
@@ -659,11 +676,13 @@ for(row in qSite){
 					if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, sp&'/'&cfcName&".cfc") EQ false){
 						application.sitestruct[request.zos.globals.id].fileExistsCache[sp&'/'&cfcName&".cfc"]=fileexists(sp&'/'&cfcName&".cfc");
 					}
+					forceReload=false;
 					if(application.sitestruct[request.zos.globals.id].fileExistsCache[sp&'/'&cfcName&".cfc"] EQ false){
-						this.compileTemplateCFC();
+						this.compileTemplateCFC(); 
+						forceReload=true;
 						application.sitestruct[request.zos.globals.id].fileExistsCache[sp&'/'&cfcName&".cfc"]=true;
 					}
-					tempIO=createTemplateObject("component",cfcCreatePath);
+					tempIO=createTemplateObject("component",cfcCreatePath, forceReload); 
 					application.zcore.compiledTemplatePathCache[sp&'/'&cfcName&".cfc"]=true;
 				}else{
 					runTemplate=false;
@@ -673,7 +692,7 @@ for(row in qSite){
 	}else{
 		// don't compile this the same?  or just put the entire template as the struct key maybe.
 		request.zos.templateData.content = request.zos.templateData.template; 
-	} 
+	}  
 	if(structkeyexists(request, 'zValueOffset') and request.zValueOffset NEQ 0){
 		application.zcore.template.appendTag('meta','<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zInitZValues(#request.zValueOffset#);});/* ]]> */</script>');
 	} 
