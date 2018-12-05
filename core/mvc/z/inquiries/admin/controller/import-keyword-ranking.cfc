@@ -530,6 +530,8 @@ objCookies=GetResponseCookies(cfhttp);
 <cffunction name="moz" access="remote" localmode="modern">
 
 	<cfscript>
+		throw("moz doesn't work anymore.");
+		
 	init();
 	setting requesttimeout="5000";
 	db=request.zos.queryobject;
@@ -544,6 +546,11 @@ objCookies=GetResponseCookies(cfhttp);
 	qSite=db.execute("qSite"); 
 
 	// 	https://moz.com/products/api/keys 
+
+	// new login format doesn't work either:
+	js=application.zcore.functions.zHTTPJSONPost("https://moz.com/svc/forge/forms/login", '{redirect: "https://moz.com/products/api", email: "marketing@zgraph.com", password: "haveityerway"}', 10000);
+	writedump(js);
+	abort;
 
 	http url="https://moz.com/login" useragent="#variables.userAgent#" redirect="yes"   method="post" timeout="60"{
 		httpparam type="header" name="referer" value="https://moz.com/login?redirect=/home";
