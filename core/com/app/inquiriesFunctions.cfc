@@ -183,6 +183,9 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 	site_id = #db.param(arguments.site_id)# and 
 	inquiries_deleted=#db.param(0)# ";
 	qInquiry=db.execute("qInquiry");
+	if(qInquiry.recordcount EQ 0){
+		return;
+	}
 
 	db.sql="select * from #db.table("inquiries_feedback", request.zos.zcoreDatasource)# 
 	WHERE inquiries_id = #db.param(arguments.inquiries_id)# and 

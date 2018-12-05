@@ -1477,7 +1477,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		<cfif arguments.ss.limit NEQ 0>, #db.param(arguments.ss.limit)#<cfelse>,#db.param(1000)#</cfif>
 	</cfif>
 	</cfsavecontent><cfscript>
-	qImages=db.execute("qImages");
+	qImages=db.execute("qImages", "", 10000, "query", false);
 	if(qImages.recordcount EQ 0){
 		if(arguments.ss.output){
 			return;

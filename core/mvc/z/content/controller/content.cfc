@@ -2664,7 +2664,7 @@ configCom.includeContentByName(ts);
 	}else{
 		db.sql&=" content_sort ASC, content_datetime DESC, content_created_datetime DESC ";
 	}
-	qContentChild=db.execute("qContentChild");
+	qContentChild=db.execute("qContentChild", "", 10000, "query", false);
 	menuLinkStruct=getSectionDisplayMenuLinks(ts1, contentConfig, curParentSorting, qContentChild, 0, arrOutputStruct);
 	
 
@@ -2976,7 +2976,7 @@ configCom.includeContentByName(ts);
 		returnCountTotal=qContent.recordcount;
 		if(qContent.recordcount EQ 0 and contentConfig.disableContentMeta EQ false){
 			application.zcore.functions.z404("Content record was missing in includeFullContent");
-		}
+		} 
 		ts994824713=structnew();
 		application.zcore.functions.zQueryToStruct(qContent,ts994824713);
 		 
@@ -3472,7 +3472,7 @@ configCom.includeContentByName(ts);
 		if(arguments.count NEQ 0){
 			db.sql&=" LIMIT #db.param(arguments.offset)#, #db.param(arguments.count+1)#";
 		}
-		qContentChild=db.execute("qContentChild");
+		qContentChild=db.execute("qContentChild", "", 10000, "query", false);
 		if((subpageLinkLayoutBackup EQ "11" or subpageLinkLayoutBackup EQ "12") and arguments.bodyText CONTAINS '%child_links%'){
 			savecontent variable="theChildLinkHTML"{
 				if(subpageLinkLayoutBackup EQ "12"){

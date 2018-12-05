@@ -2802,7 +2802,7 @@ Define this function in another CFC to override the default email format
 	site_option_group_map.site_option_id = s2.site_option_id and 
 	site_option_group_map.site_option_group_id =s2.site_option_group_id 
 	ORDER BY s2.site_option_sort asc";
-	qMap=db.execute("qMap");
+	qMap=db.execute("qMap", "", 10000, "query", false);
 	 
 	if(qMap.recordcount EQ 0){
 		throw('site_option_group_id, "#ts.site_option_group_id#", on site_id, "#request.zos.globals.id#" isn''t mapped 

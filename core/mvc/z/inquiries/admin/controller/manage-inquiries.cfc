@@ -803,7 +803,7 @@
 		db.sql&=" and inquiries_lead_template_realestate = #db.param('0')#";
 	}
 	db.sql&=" ORDER BY inquiries_lead_template_sort ASC, inquiries_lead_template_name ASC ";
-	qTemplate=db.execute("qTemplate");
+	qTemplate=db.execute("qTemplate", "", 10000, "query", false);
 	tags=StructNew();
 	db.sql="SELECT * from #db.table("inquiries", request.zos.zcoreDatasource)#  
 	WHERE inquiries_id = #db.param(form.inquiries_id)# and 

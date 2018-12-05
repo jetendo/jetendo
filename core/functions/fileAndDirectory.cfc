@@ -589,7 +589,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 		if(local.qC.recordcount NEQ 0){
 			db.sql&=" and site_id = #db.param(request.zos.globals.id)# ";
 		}
-		qImage=db.execute("qImage");
+		qImage=db.execute("qImage", "", 10000, "query", false);
 		if(structkeyexists(arguments, 'delete') and structkeyexists(form, arguments.delete) and qImage[arguments.fieldNameOverride] NEQ ""){
 			application.zcore.functions.zDeleteFile(arguments.destination & qImage[arguments.fieldNameOverride]);
 			fileNewName = "";
