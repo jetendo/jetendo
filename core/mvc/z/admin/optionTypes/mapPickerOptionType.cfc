@@ -292,7 +292,7 @@
 	#variables.type#_option_deleted = #db.param(0)# and
 	#variables.type#_option_group_id = #db.param(arguments.dataStruct["#variables.type#_option_group_id"])# 	
 	ORDER BY #variables.type#_option_name ASC";
-	qGroup=db.execute("qGroup");
+	qGroup=db.execute("qGroup", "", 10000, "query", false);
 	</cfscript>
 	<cfsavecontent variable="output">
 		<script type="text/javascript">

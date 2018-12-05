@@ -2367,7 +2367,7 @@ not used
 	WHERE site_id <> #db.param(-1)# and 
 	site_deleted = #db.param(0)# and
 	site_active=#db.param(1)#";
-	qSites=db.execute("qSites");
+	qSites=db.execute("qSites", "", 10000, "query", false);
 	tempStruct = StructNew();
 	for(row in qSites){
 		if(trim(row.site_domain) NEQ ''){

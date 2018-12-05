@@ -346,6 +346,7 @@
 		form.site_lock_theme=0;
 	}
 
+	setting requesttimeout="500";
 
 	if(not application.zcore.user.checkAllCompanyAccess()){
 		form.company_id = request.zsession.user.company_id;

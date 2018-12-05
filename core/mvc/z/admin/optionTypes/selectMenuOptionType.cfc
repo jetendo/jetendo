@@ -451,7 +451,7 @@
 			WHERE `#variables.type#_id` = #db.param(request.zos.globals.id)#  and 
 			#variables.type#_option_group_deleted = #db.param(0)# 
 			ORDER BY #variables.type#_option_group_display_name"; 
-			var qGroup2=db.execute("qGroup2");
+			var qGroup2=db.execute("qGroup2", "", 10000, "query", false);
 			gs={};
 			for(group in qGroup2){
 				gs[group.site_option_group_id]={row:group, arrParent:[], arrParentID:[]};
