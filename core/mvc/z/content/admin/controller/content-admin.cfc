@@ -1186,7 +1186,7 @@
 	user_deleted = #db.param(0)# and 
 	#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# 
 	ORDER BY member_first_name ASC, member_last_name ASC";
-	qAgents=db.execute("qAgents");
+	qAgents=db.execute("qAgents", "", 10000, "query", false);
 	</cfscript>
 	<tr><th style="vertical-align:top;">#application.zcore.functions.zOutputHelpToolTip("Listing Agent","member.content.edit content_listing_user_id")#</th>
 		<td>
@@ -1596,7 +1596,7 @@
 					db.sql&=" and user_group_name NOT IN (#db.param('broker')#, #db.param('agent')#)";
 				}
 				db.sql&=" ORDER BY user_group_name ASC";
-				qUserGroups=db.execute("qUserGroups");
+				qUserGroups=db.execute("qUserGroups", "", 10000, "query", false);
 				groupStruct={};
 				for(row in qUserGroups){
 					groupStruct[row.user_group_id]=row.user_group_name;

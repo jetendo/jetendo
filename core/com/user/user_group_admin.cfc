@@ -519,6 +519,9 @@
 		user_group_deleted = #db.param(0)# and 
 		site_id=#db.param(arguments.site_id)#
 		</cfsavecontent><cfscript>qSite=db.execute("qSite");
+		if(qSite.recordcount EQ 0){
+			return "";
+		}
 		try{
 			return qSite.user_group_id;
 		}catch(Any excpt){

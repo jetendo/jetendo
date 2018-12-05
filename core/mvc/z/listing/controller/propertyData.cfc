@@ -1483,8 +1483,10 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 		}
 		if(arguments.ss.disableCount){
 			ts.count=arrayLen(arrProperty);
-		}else{
+		}else if(structkeyexists(local, 'qPropertyCount')){
         	ts.count=qPropertyCount.count;
+        }else{
+        	ts.count=0;
 		}
     }
     return ts;

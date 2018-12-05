@@ -1624,7 +1624,7 @@ function getImageMagickConvertResize($a){
 		echo "destinationFilePath must be in the jetendo install or backup paths. Path:".$destinationFilePath."\n";
 		return "0";
 	}
-	$cmd='/usr/bin/convert -resize "'.$resizeWidth.'x'.$resizeHeight.'>" ';
+	$cmd='/usr/bin/convert -limit memory 100MB -limit map 100MB -resize "'.$resizeWidth.'x'.$resizeHeight.'>" ';
 	if($cropWidth != 0){
 		$cmd.=' -crop '.$cropWidth.'x'.$cropHeight.'+'.$cropXOffset.'+'.$cropYOffset;
 	}
@@ -1638,7 +1638,7 @@ function getImageMagickConvertResize($a){
 	$compressQuality=93;
 
 	if($ext == '.jpg' || $ext == '.jpeg'){
-		$cmd2="/usr/bin/identify -quiet -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$cmd2="/usr/bin/identify -limit memory 100MB -limit map 100MB -quiet -format '%w|%h|%Q|%[exif:orientation]' ".escapeshellarg($sourceFilePath)." 2>&1";
 		$r=`$cmd2`; 
 		$arrR=explode("|", trim($r));
 		$currentWidth=$arrR[0];

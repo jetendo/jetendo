@@ -88,7 +88,7 @@
 				WHERE site_id=#db.param(request.zos.globals.id)# and 
 				user_deleted = #db.param(0)# and
 				user_id =#db.param(-1)#";
-				qAgents=db.execute("qAgents"); 
+				qAgents=db.execute("qAgents", "", 10000, "query", false);
 			}else{
 				// TODO: find only the users this user should have access to 
 				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
@@ -97,7 +97,7 @@
 				user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
 				 and (user_server_administrator=#db.param(0)#)
 				ORDER BY member_first_name ASC, member_last_name ASC";
-				qAgents=db.execute("qAgents"); 
+				qAgents=db.execute("qAgents", "", 10000, "query", false);
 			} 
 		} 
 		</cfscript> 

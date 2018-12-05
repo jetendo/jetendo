@@ -392,7 +392,7 @@
 	user_group.site_id = #db.param(form.sid)# and 
 	user_group_deleted = #db.param(0)#
 	ORDER BY user_group_name ASC ";
-	qUserGroup=db.execute("qUserGroup");
+	qUserGroup=db.execute("qUserGroup", "", 10000, "query", false);
 	application.zcore.functions.zStatusHandler(request.zsid);
 	</cfscript>
 	<h2>Edit Site Permissions</h2>
@@ -751,7 +751,7 @@
 			WHERE site_id = #db.param(form.sid)# and 
 			user_group_deleted = #db.param(0)#
 			ORDER BY user_group_name asc"; //  and 		user_group_id <> #db.param(userGroupId)# 
-			var qGroup2=db.execute("qGroup2");  
+			var qGroup2=db.execute("qGroup2", "", 10000, "query", false);
 			</cfscript>
 			<tr>
 				<th>Enable Full Subuser<br>Management For These User Groups:</th>

@@ -1951,7 +1951,7 @@ zArrDeferredFunctions.push(function(){
 		db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
 	}
 	db.sql&="ORDER BY inquiries_type_sort ASC, inquiries_type_name ASC ";
-	variables.qTypes=db.execute("qTypes");
+	variables.qTypes=db.execute("qTypes", "", 10000, "query", false);
 	loop query="variables.qTypes"{
 		variables.typeNameLookup[variables.qTypes.inquiries_type_id&"|"&variables.qTypes.inquiries_type_id_siteIdType]=variables.qTypes.inquiries_type_name;
 	}
@@ -2350,7 +2350,7 @@ zArrDeferredFunctions.push(function(){
 		 and (user_server_administrator=#db.param(0)# ) and 
 		 user_deleted = #db.param(0)#
 		ORDER BY member_first_name ASC, member_last_name ASC";
-		qAgents=db.execute("qAgents");
+		qAgents=db.execute("qAgents", "", 10000, "query", false);
 		savecontent variable="userField"{
 			echo('<script type="text/javascript">
 			/* <![CDATA[ */

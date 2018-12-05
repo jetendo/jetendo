@@ -1976,15 +1976,13 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	
 	application.zcore.functions.zRequireJquery();
 	application.zcore.functions.zRequireJqueryUI();
-	</cfscript>
-
-	<cfsavecontent variable="db.sql">
-		SELECT * FROM #db.table("image", request.zos.zcoreDatasource)# image 
+	db.sql="SELECT * FROM #db.table("image", request.zos.zcoreDatasource)# image 
 		WHERE image_library_id = #db.param(form.image_library_id)# and 
 		image_deleted = #db.param(0)# and 
 		site_id = #db.param(request.zos.globals.id)# 
-		ORDER BY image_sort, image_caption, image_id
-	</cfsavecontent><cfscript>qImages=db.execute("qImages");</cfscript>
+		ORDER BY image_sort, image_caption, image_id";
+	qImages=db.execute("qImages", "", 10000, "query", false);
+	</cfscript>
 	<cfsavecontent variable="theMeta">
 	#application.zcore.skin.includeCSS("/z/a/stylesheets/style.css")#
 	<script type="text/javascript">
