@@ -1090,14 +1090,14 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 						}
 						local.tempCom.render(ts, {config:row, currentRow:i, recordcount:arraylen(arrImages)}); // must pass a struct to the function which represents current row
 					}
-				}else{
+				}else{ 
 					for(i=1;i LTE arraylen(arrImages);i++){
 						if(left(variables.qslideshow.slideshow_custom_include,18) EQ "/zcorerootmapping/"){
 							include template="#variables.qslideshow.slideshow_custom_include#";
 						}else{
 							include template="#request.zRootPath##removechars(variables.qslideshow.slideshow_custom_include,1,1)#";
 						}
-					}
+					} 
 				}
 			}
 		}

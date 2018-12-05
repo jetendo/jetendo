@@ -308,39 +308,39 @@ zSlideShow(ts);
 	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle2.swipe.min.js", '', 2);
 	application.zcore.skin.includeJS("/z/javascript/jquery/Slides/source/slides.jquery-new.js");
 	// application.zcore.functions.zRequireSlideshowJS();
-	if(structkeyexists(application.sitestruct, arguments.ss.site_id)){
-		if(structkeyexists(arguments.ss,'slideshow_codename')){
-			if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct, arguments.ss.slideshow_codename)){
-				t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct[arguments.ss.slideshow_codename]];
-				if(t9.lastUpdated EQ td22){
-					echo(t9.javascriptOutput);
-					if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
-						request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
-					}
-					writeoutput(t9.output);
-					return t9;
-				}
-			}
-		}else if(structkeyexists(arguments.ss,'slideshow_id')){
-			if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct, arguments.ss.slideshow_id)){
-				t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[arguments.ss.slideshow_id];
-				if(t9.lastUpdated EQ td22){
-					echo(t9.javascriptOutput);
-					if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
-						request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
-					}
-					writeoutput(t9.output);
-					return  t9;
-				}
-			}
-		}
-	}
+	// if(structkeyexists(application.sitestruct, arguments.ss.site_id)){
+	// 	if(structkeyexists(arguments.ss,'slideshow_codename')){
+	// 		if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct, arguments.ss.slideshow_codename)){
+	// 			t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct[arguments.ss.slideshow_codename]];
+	// 			if(t9.lastUpdated EQ td22){
+	// 				echo(t9.javascriptOutput);
+	// 				if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
+	// 					request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
+	// 				}
+	// 				writeoutput(t9.output);
+	// 				return t9;
+	// 			}
+	// 		}
+	// 	}else if(structkeyexists(arguments.ss,'slideshow_id')){
+	// 		if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct, arguments.ss.slideshow_id)){
+	// 			t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[arguments.ss.slideshow_id];
+	// 			if(t9.lastUpdated EQ td22){
+	// 				echo(t9.javascriptOutput);
+	// 				if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
+	// 					request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
+	// 				}
+	// 				writeoutput(t9.output);
+	// 				return  t9;
+	// 			}
+	// 		}
+	// 	}
+	// }
 	if(structkeyexists(arguments.ss,'slideshow_codename')){
 		db.sql="select * from #db.table("slideshow", request.zos.zcoreDatasource)# slideshow 
 		WHERE slideshow_codename=#db.param(arguments.ss.slideshow_codename)# and 
 		slideshow_deleted = #db.param(0)# and
 		site_id =#db.param(arguments.ss.site_id)# ";
-		qss=db.execute("qss");
+		qss=db.execute("qss", "", 10000, "query", false);
 		if(qss.recordcount EQ 0){
 			writeoutput('<p>Slideshow, "#arguments.ss.slideshow_codename#", is missing</p>');
 			return {flashout:{tablinks:"",tabcaptions:""}};
@@ -348,12 +348,13 @@ zSlideShow(ts);
 		arguments.ss.width=qss.slideshow_width;
 		arguments.ss.height=qss.slideshow_height;
 		arguments.ss.dataurl="/z/misc/slideshow/index?action=json&slideshow_id=#URLEncodedFormat(qss.slideshow_id)#";
+
 	}else if(structkeyexists(arguments.ss,'slideshow_id')){
 		db.sql="select * from #db.table("slideshow", request.zos.zcoreDatasource)# slideshow 
 		WHERE slideshow_id=#db.param(arguments.ss.slideshow_id)# and 
 		slideshow_deleted = #db.param(0)# and
 		site_id =#db.param(arguments.ss.site_id)# ";
-		qss=db.execute("qss");
+		qss=db.execute("qss", "", 10000, "query", false);
 		if(qss.recordcount EQ 0){
 			return {flashout:{tablinks:"",tabcaptions:""}};
 		}
@@ -511,7 +512,7 @@ zSlideShow(ts);
 					slideshowCom.getPhoto(local);
 				}
 				echo('</div>
-				</div>');
+				</div>');writedump(qss);abort;
 			}
 		}
 	}

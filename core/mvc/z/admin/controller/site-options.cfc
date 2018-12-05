@@ -3509,6 +3509,10 @@ Define this function in another CFC to override the default email format
 		// qS2=db.execute("qS2");
 		arrMainOption=[];
 		mainOptionStruct={};
+		if(not structkeyexists(sog.optionGroupFieldLookup, form.site_option_group_id)){
+			echo("This group has no options yet.");
+			abort;
+		}
 		for(optionId in sog.optionGroupFieldLookup[form.site_option_group_id]){
 			mainOptionStruct[optionId]={ sort: sog.optionLookup[optionId].site_option_sort, row: sog.optionLookup[optionId]};
 		}

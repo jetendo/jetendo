@@ -96,7 +96,7 @@
 				site_active=#db.param(1)# and
 				site_deleted = #db.param(0)#
 				ORDER BY site_short_domain ASC";
-				qSites=db.execute("qSites");
+				qSites=db.execute("qSites", "", 10000, "query", false);
 				selectStruct = StructNew();
 				selectStruct.name = "sidParent";
 				selectStruct.query = qSites;
