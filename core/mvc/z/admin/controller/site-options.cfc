@@ -1460,7 +1460,7 @@
 	WHERE site_option_group_id = #db.param(form.site_option_group_id)# and 
 	site_id = #db.param(request.zos.globals.id)# and 
 	site_option_group_deleted=#db.param(0)# ";
-	qGroup=db.execute("qGroup");
+	qGroup=db.execute("qGroup", "", 10000, "query", false);
 	queueComStruct=structnew();
 	if(form.site_option_group_id NEQ 0){
 		if(qGroup.recordcount EQ 0){
@@ -1561,7 +1561,7 @@
 			where site_option_group_id = #db.param(curParentId)# and 
 			site_option_group_deleted = #db.param(0)# and
 			site_id = #db.param(request.zos.globals.id)#";
-			q1=db.execute("q1");
+			q1=db.execute("q1", "", 10000, "query", false);
 			loop query="q1"{
 				arrayappend(arrParent, '<a href="/z/admin/site-option-group/index?site_option_group_parent_id=#q1.site_option_group_id#">#application.zcore.functions.zFirstLetterCaps(q1.site_option_group_display_name)#</a> / ');
 				curParentId=q1.site_option_group_parent_id;
@@ -1867,25 +1867,8 @@
 <cffunction name="updateGroup" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var qG2=0;
-	var q=0;
-	var qD=0;
-	var i=0;
-	var nv=0;
-	var nvdate=0;
-	var ts=0;
-	var rCom=0;
-	var nvd=0;
-	var arrList=0;
-	var photoresize=0;
-	var oldnv=0;
-	var qId=0;
-	var row=0;
-	var qD2=0;
-	var queueSortStruct=structnew();
-	var queueSortCom=0;
-	var r1=0;
+	var db=request.zos.queryObject; 
+	var queueSortStruct=structnew(); 
 	var nowDate=request.zos.mysqlnow;
 	var methodBackup=form.method;
  
@@ -2038,7 +2021,7 @@
 		}
 		db.sql&="site_option.site_option_group_id = #db.param(form.site_option_group_id)# and 
 		site_option.site_id = #db.param(request.zos.globals.id)#";
-		qD=db.execute("qD");
+		qD=db.execute("qD", "", 10000, "query", false); 
 		curCache.qD=qD;
 	}else{
 		qD=curCache.qD;
@@ -4735,7 +4718,7 @@ Define this function in another CFC to override the default email format
 			site_option_group_deleted = #db.param(0)# and
 			site_option_group.site_option_group_parent_id = #db.param(form.site_option_group_id)# and 
 			site_option_group.site_id = #db.param(request.zos.globals.id)#";
-			q1=db.execute("q1");
+			q1=db.execute("q1", "", 10000, "query", false); 
 			sortEnabled=true;
 			subgroupRecurseEnabled=false;
 			subgroupStruct={}; 

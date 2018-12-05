@@ -1521,7 +1521,7 @@ displayGroupCom.ajaxInsert();
 			where site_option_group_id = #db.param(curParentId)# and 
 			site_option_group_deleted = #db.param(0)# and
 			site_id = #db.param(request.zos.globals.id)#";
-			q1=db.execute("q1");
+			q1=db.execute("q1", "", 10000, "query", false);
 			loop query="q1"{
 				arrayappend(arrParent, '<a href="/z/admin/site-option-group/index?site_option_app_id=#form.site_option_app_id#&site_option_group_parent_id=#q1.site_option_group_id#">
 				#application.zcore.functions.zFirstLetterCaps(q1.site_option_group_display_name)#</a> / ');
@@ -1861,7 +1861,7 @@ displayGroupCom.ajaxInsert();
 			</cfif> --->
 			ORDER BY site_option_group_display_name </cfsavecontent>
 			<cfscript>
-			qG=db.execute("qG");
+			qG=db.execute("qG", "", 10000, "query", false); 
 			</cfscript>
 			<tr>
 				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Group","member.site-option-group.edit site_option_group_parent_id")#</th>
@@ -2148,7 +2148,7 @@ displayGroupCom.ajaxInsert();
 					WHERE site_id = #db.param(request.zos.globals.id)# and 
 					user_group_deleted = #db.param(0)# 
 					ORDER BY user_group_name asc"; 
-					var qGroup2=db.execute("qGroup2"); 
+					var qGroup2=db.execute("qGroup2", "", 10000, "query", false); 
 					ts = StructNew();
 					ts.name = "site_option_group_user_group_id_list";
 					ts.friendlyName="";
