@@ -231,7 +231,7 @@
 		WHERE content_id = #db.param(form.content_id)# and 
 		content_deleted = #db.param(0)# and 
 		site_id = #db.param(request.zos.globals.id)#";
-		qCheck=db.execute("qCheck");
+		qCheck=db.execute("qCheck", "", 10000, "query", false);
 		if(qCheck.recordcount EQ 0){
 			application.zcore.status.setStatus(request.zsid, 'Invalid page.',form,true);
 			application.zcore.functions.zRedirect('/z/content/admin/content-admin/index?zsid=#request.zsid#');

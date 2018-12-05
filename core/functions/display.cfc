@@ -308,33 +308,33 @@ zSlideShow(ts);
 	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.cycle2.swipe.min.js", '', 2);
 	application.zcore.skin.includeJS("/z/javascript/jquery/Slides/source/slides.jquery-new.js");
 	// application.zcore.functions.zRequireSlideshowJS();
-	// if(structkeyexists(application.sitestruct, arguments.ss.site_id)){
-	// 	if(structkeyexists(arguments.ss,'slideshow_codename')){
-	// 		if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct, arguments.ss.slideshow_codename)){
-	// 			t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct[arguments.ss.slideshow_codename]];
-	// 			if(t9.lastUpdated EQ td22){
-	// 				echo(t9.javascriptOutput);
-	// 				if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
-	// 					request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
-	// 				}
-	// 				writeoutput(t9.output);
-	// 				return t9;
-	// 			}
-	// 		}
-	// 	}else if(structkeyexists(arguments.ss,'slideshow_id')){
-	// 		if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct, arguments.ss.slideshow_id)){
-	// 			t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[arguments.ss.slideshow_id];
-	// 			if(t9.lastUpdated EQ td22){
-	// 				echo(t9.javascriptOutput);
-	// 				if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
-	// 					request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
-	// 				}
-	// 				writeoutput(t9.output);
-	// 				return  t9;
-	// 			}
-	// 		}
-	// 	}
-	// }
+	if(structkeyexists(application.sitestruct, arguments.ss.site_id)){
+		if(structkeyexists(arguments.ss,'slideshow_codename')){
+			if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct, arguments.ss.slideshow_codename)){
+				t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[application.sitestruct[arguments.ss.site_id].slideshowNameCacheStruct[arguments.ss.slideshow_codename]];
+				if(t9.lastUpdated EQ td22){
+					echo(t9.javascriptOutput);
+					if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
+						request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
+					}
+					writeoutput(t9.output);
+					return t9;
+				}
+			}
+		}else if(structkeyexists(arguments.ss,'slideshow_id')){
+			if(structkeyexists(application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct, arguments.ss.slideshow_id)){
+				t9=application.sitestruct[arguments.ss.site_id].slideshowIdCacheStruct[arguments.ss.slideshow_id];
+				if(t9.lastUpdated EQ td22){
+					echo(t9.javascriptOutput);
+					if(structkeyexists(t9,'zMLSSearchOptionsDisplaySearchId')){
+						request.zMLSSearchOptionsDisplaySearchId=t9.zMLSSearchOptionsDisplaySearchId;
+					}
+					writeoutput(t9.output);
+					return  t9;
+				}
+			}
+		}
+	}
 	if(structkeyexists(arguments.ss,'slideshow_codename')){
 		db.sql="select * from #db.table("slideshow", request.zos.zcoreDatasource)# slideshow 
 		WHERE slideshow_codename=#db.param(arguments.ss.slideshow_codename)# and 
