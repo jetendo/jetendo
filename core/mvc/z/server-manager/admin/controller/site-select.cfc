@@ -236,7 +236,7 @@
 	companyCount={};
 	styleFix="";
 	if(qSites.recordcount GT 0){
-		if(companyCount[qSites.company_id] LT 3){
+		if(structkeyexists(companyCount, qSites.company_id) and companyCount[qSites.company_id] LT 3){
 			styleFix=" -moz-column-width: 1920px !important;     -webkit-column-width: 1920px !important;     column-width: 1920px !important;";
 		}
 	} 
@@ -255,7 +255,7 @@
 				row=arrSites[i];
 				if(lastCompany NEQ row.company_name){
 					styleFix="";
-					if(companyCount[row.company_id] LT 3){
+					if(structkeyexists(companyCount, qSites.company_id) and companyCount[row.company_id] LT 3){
 						styleFix=" -moz-column-width: 1920px !important;     -webkit-column-width: 1920px !important;     column-width: 1920px !important;";
 					}
 					echo('</div>

@@ -842,12 +842,13 @@
 					var minValue=100000000;
 					for(var i=0;i<data.length;i++){
 						data[i].date=parseTime(data[i].date);
-						if(data[i].close < minValue){
-							minValue=data[i].close;
+						var v=parseInt(data[i].close);
+						if(v < minValue){
+							minValue=v;
 						}
-					}  
-					x.domain(d3.extent(data, function(d) {  return d.date; }));
-					y.domain([minValue, d3.max(data, function(d) { return d.close; })]);
+					}   
+					x.domain(d3.extent(data, function(d) { return d.date; }));
+					y.domain([minValue, d3.max(data, function(d) { return parseInt(d.close); })]);
 					area.y0(y(minValue));
 
 					g.append("path")
@@ -3270,8 +3271,7 @@ track_user_first_page
 			close: row.facebook_month_reach
 		};
 		arrayAppend(jsReach, ts); 
-	}
-	
+	} 
 	//writedump(qmonthchart);
 	
 	if(request.leadData.disableContentSection["facebookLog"] or (qMonth.recordcount EQ 0 and qN.recordcount EQ 0)){
@@ -3284,7 +3284,7 @@ track_user_first_page
 	</cfscript>	
  
 	<cfif arrayLen(js) NEQ 0> 
-		<h2 style="margin-top:0px;">Facebook Fans</h2>  
+		<h2 style="margin-top:0px;">Facebook Fans</h2>   
 		<div style="float:left; width:100%;">
 		<svg data-json-vertical-label="Facebook Fans" data-chart-area-color="0044af" data-jsondata="#htmleditformat(serializeJson(js))#" width="680" height="230"></svg> 
 		</div>
@@ -3294,7 +3294,7 @@ track_user_first_page
 			<div style="float:left; width:100%;">
 			<svg data-json-vertical-label="Facebook Reach" data-chart-area-color="d6610c" data-jsondata="#htmleditformat(serializeJson(jsReach))#" width="680" height="230"></svg> 
 			</div>
-		</cfif>
+		</cfif> 
 	</cfif>
 	<!--- <div style="float:left; width:100%;">
 	<svg data-json-vertical-label="Facebook Likes" data-jsondata="#htmleditformat(serializeJson(chartData))#" width="680" height="230"></svg>
