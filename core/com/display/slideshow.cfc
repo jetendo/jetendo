@@ -399,7 +399,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 	}
 	if(structkeyexists(form, 'slideshow_id') EQ false){
 		writeoutput('success=0&errorMessage='&urlencodedformat('Slideshow ID not defined.'));
-		application.zcore.functions.zabort();
+		abort;
 	}
 	local.curtab="";
 	if(structkeyexists(form,'tab') EQ false){
@@ -442,7 +442,10 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 	slideshow_deleted = #db.param(0)# and 
 	slideshow_tab_deleted = #db.param(0)# ";
 	variables.qslideshow=db.execute("qslideshow");
-	
+	if(variables.qslideshow.recordcount EQ 0){ 
+		writeoutput('success=0&errorMessage='&urlencodedformat('Slideshow record is missing.'));
+		abort;
+	}
 
 	sqlT="select * from #db.table("slideshow", request.zos.zcoreDatasource)# slideshow 
 	LEFT JOIN #db.table("slideshow_tab", request.zos.zcoreDatasource)# slideshow_tab ON 
