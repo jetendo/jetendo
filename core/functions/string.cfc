@@ -1414,12 +1414,15 @@ zEmailValidateList(addressList, displayFormat);
 	<cfargument name="disableExternal" type="boolean" required="yes">
 	<cfscript>
 	link=arguments.link;
+	if(left(link, 4) EQ 'tel:'){
+		return true;
+	}
 
 	if(arguments.disableSpecialCharacters){
 		link2=link;
-		if(left(link2, '7') EQ 'http://'){
+		if(left(link2, 7) EQ 'http://'){
 			link2=removeChars(link2, 1, 7);
-		}else if(left(link, '8') EQ 'https://'){
+		}else if(left(link, 8) EQ 'https://'){
 			link2=removeChars(link2, 1, 8);
 		} 
 		if(link2 CONTAINS "/./"){

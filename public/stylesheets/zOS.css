@@ -258,6 +258,7 @@ border-left:none !important;
 	.rss-summary-modern .rss-summary-thumbnail{ width:30% !important; padding-right:5%; float:left;}
 	.rss-summary-modern .rss-summary-ds-2{width:70% !important; float:left;}
 }
+
 @media (max-width:767px){
 	.zblog-image-box-image-container{ max-width:180px; }
 	.zblog-image-box{
@@ -283,7 +284,7 @@ border-left:none !important;
 .rss-summary-date {
 	display:block; padding-bottom:5px; color:#666666;
 }
-.rss-summary-box { width:100%; float:left; font-size:115%; line-height:1.6;border-top:1px solid #CCC; padding-top:5px; padding-bottom:3px; margin-top:5px;}
+.rss-summary-box { width:100%; float:left; line-height:1.5;border-top:1px solid #CCC; padding-top:5px; padding-bottom:3px; margin-top:5px;}
 .rss-summary-box33 {
 	width:100%;float:left; padding:10px; padding-top:5px; padding-bottom:5px; background-color:#EEEEEE; border-bottom:1px solid #CCCCCC;  font-weight:bold;
 margin-bottom: -6px;padding-right:20px;

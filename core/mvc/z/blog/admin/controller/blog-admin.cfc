@@ -1395,12 +1395,6 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	application.zcore.siteOptionCom.requireSectionEnabledSetId([""]);
 	blogform = StructNew();
 	blogform.blog_story.html = true;
-
-
-	if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
-		blogform.uid.required=true;
-		blogform.uid.friendlyname="Author";
-	}
 	blogform.blog_title.required=true;
 	blogform.ccid.required=true;
 	blogform.ccid.friendlyname="Category";
@@ -1424,13 +1418,25 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 	}
 
 	if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
-		form.user_id=application.zcore.functions.zso(form, 'uid');
-		arrUser=listToArray(form.user_id, "|");
-		if(arraylen(arrUser) EQ 1){
-			arrayAppend(arrUser, 0);
-		}else if(arrayLen(arrUser) EQ 2){
-			form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(arrUser[2]);
-			form.user_id=arrUser[1];
+		form.blog_other_author=application.zcore.functions.zso(form, 'blog_other_author');
+		if(form.blog_other_author EQ ""){
+			form.user_id=application.zcore.functions.zso(form, 'uid');
+			if(form.user_id EQ ""){
+				error=true;
+				application.zcore.status.setStatus(request.zsid, "You must select an Author or type an author in the Other Author field.", form, true);
+			}else{
+				arrUser=listToArray(form.user_id, "|");
+				if(arraylen(arrUser) EQ 1){
+					arrayAppend(arrUser, 0);
+				}else if(arrayLen(arrUser) EQ 2){
+					form.user_id_siteIDType=application.zcore.functions.zGetSiteIdType(arrUser[2]);
+					form.user_id=arrUser[1];
+				}
+			}
+		}else{
+			form.uid="";
+			form.user_id="";
+			form.user_id_siteidtype="";
 		}
 	}else{
 		form.user_id_siteIDType="1";
@@ -2762,38 +2768,48 @@ tabCom.enableSaveButtons();
 					<input type="text" name="blog_title" value="#htmleditformat(form.blog_title)#" style="width:95%;">
 				</td>
 			</tr>
-			<cfif application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0>
-				<tr>
-					<th style="width:120px;">#application.zcore.functions.zOutputHelpToolTip("Author","member.blog.edit uid")# *</th>
-					<td>
 			<cfscript>
-			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_show_parent_site_authors', true, 1) EQ 0){
-				qUser=application.zcore.user.getUsersWithGroupAccess("member", true);
-			}else{
-				qUser=application.zcore.user.getUsersWithGroupAccess("member", false);
-			}
-			// blog_config_show_parent_site_authors
-			if(application.zcore.functions.zso(form, 'user_id',true) NEQ 0){
-			if(form.user_id_siteIdType EQ 0){
-				form.user_id_siteIdType=1;
-			}
-				form.uid=form.user_id&"|"&application.zcore.functions.zGetSiteIdFromSiteIdType(form.user_id_siteIdType);
-			}else if(application.zcore.functions.zso(form, 'uid') EQ ''){
-			   	form.uid=request.zsession.user.id&'|'&request.zsession.user.site_id;
-			} 
-			selectStruct = StructNew();
-			selectStruct.name = "uid";
-			selectStruct.selectedValues=form.uid;
-			selectStruct.query = qUser;
-			//selectStruct.style="monoMenu";
-			selectStruct.queryParseLabelVars =true;
-			selectStruct.queryParseValueVars =true;
-			selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-			selectStruct.queryValueField = "##user_id##|##site_id##";
-			application.zcore.functions.zInputSelectBox(selectStruct);
+			disableAuthor=application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0);
 			</cfscript>
+			<cfif disableAuthor EQ 0>
+				<tr><th>&nbsp;</th><td>
+				Note: Author is required and can be a user or typed in the "Other Author" field. If you don't want to show authors, contact the web developer.</td></tr>
+				<tr>
+					<th style="width:120px;">#application.zcore.functions.zOutputHelpToolTip("Author","member.blog.edit uid")#</th>
+					<td>
+						<cfscript>
+						if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_show_parent_site_authors', true, 1) EQ 0){
+							qUser=application.zcore.user.getUsersWithGroupAccess("member", true);
+						}else{
+							qUser=application.zcore.user.getUsersWithGroupAccess("member", false);
+						}
+						// blog_config_show_parent_site_authors
+						if(application.zcore.functions.zso(form, 'user_id',true) NEQ 0){
+						if(form.user_id_siteIdType EQ 0){
+							form.user_id_siteIdType=1;
+						}
+							form.uid=form.user_id&"|"&application.zcore.functions.zGetSiteIdFromSiteIdType(form.user_id_siteIdType);
+						}else if(application.zcore.functions.zso(form, 'uid') EQ ''){
+						   	form.uid=request.zsession.user.id&'|'&request.zsession.user.site_id;
+						} 
+						selectStruct = StructNew();
+						selectStruct.name = "uid";
+						selectStruct.selectedValues=form.uid;
+						selectStruct.query = qUser;
+						//selectStruct.style="monoMenu";
+						selectStruct.queryParseLabelVars =true;
+						selectStruct.queryParseValueVars =true;
+						selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
+						selectStruct.queryValueField = "##user_id##|##site_id##";
+						application.zcore.functions.zInputSelectBox(selectStruct);
+						</cfscript>
 					</td>
 				</tr>
+				<tr>
+					<th>or Other Author</th>
+					<td><input type="text" name="blog_other_author" value="#htmleditformat(form.blog_other_author)#"></td>
+				</tr>
+			<cfelse>
 			</cfif>
 	 
 			<tr>

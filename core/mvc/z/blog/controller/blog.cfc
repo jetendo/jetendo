@@ -1899,7 +1899,7 @@ this.app_id=10;
 	}
 	db.sql&=" GROUP BY blog.blog_id
 	order by blog_sticky desc, blog_datetime, blog_comment_datetime";
-	qArticle=db.execute("qArticle"); 
+	qArticle=db.execute("qArticle", "", 10000, "query", false); 
 
  
 	if(isDefined('request.zos.supressBlogArticleDetails') EQ false or request.zos.supressBlogArticleDetails NEQ 1){
@@ -2347,42 +2347,45 @@ this.app_id=10;
 
 	<cfif application.zcore.functions.zso(optionStruct, 'blog_config_disable_author', true, 0) EQ 0>
 		<div class="zblog-author" style="font-size:100%; font-weight:700; clear:both; ">
-
-			<cfif qArticle.user_username NEQ "" and application.zcore.functions.zso(optionStruct, 'blog_config_url_author_id', true) NEQ 0> 
-				<cfscript>
-				userStruct={};
-				structAppend(userStruct, qArticle); 
-				authorLink=getAuthorLink(userStruct);
-				authorLabel=userStruct.user_first_name&" "&userStruct.user_last_name;
-				if(trim(authorLabel) EQ ""){
-					if(trim(userStruct.member_company) EQ ""){
-						echo('By <a href="#authorLink#">');
-						echo(application.zcore.functions.zEncodeEmail(userStruct.user_username));
-						echo('</a>'); 
+			<cfif qArticle.blog_other_author NEQ "">
+				By #qArticle.blog_other_author#
+			<cfelse>
+				<cfif qArticle.user_username NEQ "" and application.zcore.functions.zso(optionStruct, 'blog_config_url_author_id', true) NEQ 0> 
+					<cfscript>
+					userStruct={};
+					structAppend(userStruct, qArticle); 
+					authorLink=getAuthorLink(userStruct);
+					authorLabel=userStruct.user_first_name&" "&userStruct.user_last_name;
+					if(trim(authorLabel) EQ ""){
+						if(trim(userStruct.member_company) EQ ""){
+							echo('By <a href="#authorLink#">');
+							echo(application.zcore.functions.zEncodeEmail(userStruct.user_username));
+							echo('</a>'); 
+						}else{
+							echo('By <a href="#authorLink#">#userStruct.member_company#</a>');
+						} 
 					}else{
-						echo('By <a href="#authorLink#">#userStruct.member_company#</a>');
-					} 
-				}else{
-					echo('By <a href="#authorLink#">#authorLabel#</a>');
-				}
-				</cfscript> 
-			</cfif>
-			<cfset curFeedLink=application.zcore.functions.zso(optionStruct, 'blog_config_feedburner_url')> 
-			<cfif qArticle.user_googleplus_url NEQ "" or qArticle.user_twitter_url NEQ "" or qArticle.user_facebook_url NEQ "">
-				&nbsp; Follow me: 
-			</cfif>
-			<cfif curFeedLink NEQ "">
-			<a href="#curFeedLink#" target="_blank" title="Follow us by email subscription"><img src="/z/images/icons/rss.png" alt="Follow #qArticle.user_first_name&" "&qArticle.user_last_name# by email subscription" width="16" height="16" /></a>
-			</cfif>
-			<cfif qArticle.user_googleplus_url NEQ ""><a href="#qArticle.user_googleplus_url#?rel=author" rel="author" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+"><img src="/z/images/icons/googleplusv2.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+" width="16" height="16" /></a></cfif> 
-			<cfif qArticle.user_twitter_url NEQ ""><a href="#qArticle.user_twitter_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter"><img src="/z/images/icons/twitter.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter" width="16" height="16" /></a></cfif>
-			<cfif qArticle.user_facebook_url NEQ ""><a href="#qArticle.user_facebook_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook"><img src="/z/images/icons/facebook.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook" width="16" height="16" /></a></cfif>
+						echo('By <a href="#authorLink#">#authorLabel#</a>');
+					}
+					</cfscript> 
+				</cfif>
+				<cfset curFeedLink=application.zcore.functions.zso(optionStruct, 'blog_config_feedburner_url')> 
+				<cfif qArticle.user_googleplus_url NEQ "" or qArticle.user_twitter_url NEQ "" or qArticle.user_facebook_url NEQ "">
+					&nbsp; Follow me: 
+				</cfif>
+				<cfif curFeedLink NEQ "">
+				<a href="#curFeedLink#" target="_blank" title="Follow us by email subscription"><img src="/z/images/icons/rss.png" alt="Follow #qArticle.user_first_name&" "&qArticle.user_last_name# by email subscription" width="16" height="16" /></a>
+				</cfif>
+				<cfif qArticle.user_googleplus_url NEQ ""><a href="#qArticle.user_googleplus_url#?rel=author" rel="author" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+"><img src="/z/images/icons/googleplusv2.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Google+" width="16" height="16" /></a></cfif> 
+				<cfif qArticle.user_twitter_url NEQ ""><a href="#qArticle.user_twitter_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter"><img src="/z/images/icons/twitter.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Twitter" width="16" height="16" /></a></cfif>
+				<cfif qArticle.user_facebook_url NEQ ""><a href="#qArticle.user_facebook_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook"><img src="/z/images/icons/facebook.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Facebook" width="16" height="16" /></a></cfif>
 
-			<cfif qArticle.user_instagram_url NEQ ''>
-				<a href="#qArticle.user_instagram_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram"><img src="/z/images/icons/instagram.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram" width="16" height="16" /></a>
-			</cfif>
-			<cfif qArticle.user_linkedin_url NEQ ''>
-				<a href="#qArticle.user_linkedin_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn"><img src="/z/images/icons/linkedin.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn" width="16" height="16" /></a>
+				<cfif qArticle.user_instagram_url NEQ ''>
+					<a href="#qArticle.user_instagram_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram"><img src="/z/images/icons/instagram.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on Instagram" width="16" height="16" /></a>
+				</cfif>
+				<cfif qArticle.user_linkedin_url NEQ ''>
+					<a href="#qArticle.user_linkedin_url#" target="_blank" title="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn"><img src="/z/images/icons/linkedin.png" alt="#qArticle.user_first_name&" "&qArticle.user_last_name# on LinkedIn" width="16" height="16" /></a>
+				</cfif>
 			</cfif>
 		</div>
 	</cfif>
@@ -2922,9 +2925,14 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		}
 		ts.authorLink="";
 		if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
-			ts.author=row.user_first_name&" "&row.user_last_name;
-			ts.authorEmail=row.user_username;
-			ts.authorLink=getAuthorLink(row);
+			if(row.blog_other_author NEQ ""){
+				ts.author=row.blog_other_author;
+				ts.authorEmail="";
+			}else{
+				ts.author=row.user_first_name&" "&row.user_last_name;
+				ts.authorEmail=row.user_username;
+				ts.authorLink=getAuthorLink(row);
+			}
 		}else{
 			ts.author="";
 			ts.authorEmail="";
@@ -3635,10 +3643,14 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		for(count=1;count<=q_blog_feed.recordcount;count++){
 			if(q_blog_feed.blog_id[count] NEQ ''){
 				blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
-				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
-					blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+				if(q_blog_feed.blog_other_author[count] NEQ ""){
+					blog_author=q_blog_feed.blog_other_author[count];
 				}else{
-					blog_author="";
+					if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
+						blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+					}else{
+						blog_author="";
+					}
 				}
 				blog_summary = q_blog_feed.blog_summary[count];
 				blog_story = q_blog_feed.blog_story[count];
@@ -3686,13 +3698,17 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 					echo(' #tempText# ]]></description>
 					<pubDate>#date# #time#</pubDate>');
 					if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
-						echo('<author>');
-						if(user_username EQ ""){
-							echo(application.zcore.functions.zvarso("zofficeemail"));
+						echo('<author>'); 
+						if(q_blog_feed.blog_other_author[count] NEQ ""){
+							echo(q_blog_feed.blog_other_author[count]);
 						}else{
-							echo(user_username);
-							if(blog_author NEQ ""){
-								echo(' (#blog_author#)');
+							if(user_username EQ ""){
+								echo(application.zcore.functions.zvarso("zofficeemail"));
+							}else{
+								echo(user_username);
+								if(blog_author NEQ ""){
+									echo(' (#blog_author#)');
+								}
 							}
 						}
 						echo('</author>');
@@ -3824,7 +3840,15 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 			if(q_blog_feed.blog_id[count] NEQ ''){
 				blog_title = application.zcore.functions.zXMLFormat(q_blog_feed.blog_title[count]);
 				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){ 
-					blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+					if(q_blog_feed.blog_other_author[count] NEQ ""){
+						blog_author=q_blog_feed.blog_other_author[count];
+					}else{
+						if(q_blog_feed.blog_other_author[count] NEQ ""){
+							blog_author=q_blog_feed.blog_other_author[count];
+						}else{
+							blog_author = trim(application.zcore.functions.zXMLFormat(q_blog_feed.user_first_name[count]&" "&q_blog_feed.user_last_name[count]));
+						}
+					}
 				}else{
 					blog_author="";
 				}
@@ -3873,13 +3897,17 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 				<pubDate>#date# #time#</pubDate>');
 				if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
 					echo('<author>');
-					if(user_username EQ ""){
-						echo(application.zcore.functions.zvarso("zofficeemail"));
+					if(q_blog_feed.blog_other_author[count] NEQ ""){
+						echo(q_blog_feed.blog_other_author[count]);
 					}else{
-						echo(user_username);
-					}
-					if(blog_author NEQ ""){
-						echo(' (#blog_author#)');
+						if(user_username EQ ""){
+							echo(application.zcore.functions.zvarso("zofficeemail"));
+						}else{
+							echo(user_username);
+						}
+						if(blog_author NEQ ""){
+							echo(' (#blog_author#)');
+						}
 					}
 					echo('</author>');
 				} 
@@ -4027,12 +4055,16 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 			echo('<pubDate>#date# #time#</pubDate>');
 			if(application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0) EQ 0){
 				echo('<author>');
-				if(user_username EQ ""){
-					echo(application.zcore.functions.zvarso("zofficeemail"));
+				if(q_blog_feed.blog_other_author[count] NEQ ""){
+					echo(q_blog_feed.blog_other_author[count]);
 				}else{
-					echo(user_username);
-					if(blog_author NEQ ""){
-						echo(' (#blog_author#)');
+					if(user_username EQ ""){
+						echo(application.zcore.functions.zvarso("zofficeemail"));
+					}else{
+						echo(user_username);
+						if(blog_author NEQ ""){
+							echo(' (#blog_author#)');
+						}
 					}
 				}
 				echo('</author>');
@@ -5222,30 +5254,33 @@ arrCategory=application.zcore.app.getAppCFC("blog").getCategoriesByIdList(catego
 				}
 				tempText = rereplaceNoCase(tempText,"<.*?>","","ALL");
 				</cfscript>
-				#left(tempText, 250)#<cfif len(tempText) GT 250>...</cfif> <a href="#currentLink#" class="rss-summary-readmore">Read More</a></span> <br />
-			
+				#left(tempText, 250)#<cfif len(tempText) GT 250>...</cfif> <a href="#currentLink#" class="rss-summary-readmore">Read More</a></span> <br /> 
 				<cfif optionStruct.blog_config_disable_author  EQ 0>
 			
 					<div class="rss-summary-box">
 						<div>
-							<cfif arguments.query.user_username NEQ "" and optionStruct.blog_config_url_author_id  NEQ 0> 
-								<cfscript>
-								userStruct={};
-								structAppend(userStruct, arguments.query);
-								authorLink=getAuthorLink(userStruct);
-								authorLabel=userStruct.user_first_name&" "&userStruct.user_last_name;
-								if(trim(authorLabel) EQ ""){
-									if(trim(userStruct.member_company) EQ ""){
-										echo('By <a href="#authorLink#">');
-										echo(application.zcore.functions.zEncodeEmail(userStruct.user_username));
-										echo('</a>');
+							<cfif arguments.query.blog_other_author NEQ "">
+								By #arguments.query.blog_other_author#
+							<cfelse>
+								<cfif arguments.query.user_username NEQ "" and optionStruct.blog_config_url_author_id  NEQ 0> 
+									<cfscript>
+									userStruct={};
+									structAppend(userStruct, arguments.query);
+									authorLink=getAuthorLink(userStruct);
+									authorLabel=userStruct.user_first_name&" "&userStruct.user_last_name;
+									if(trim(authorLabel) EQ ""){
+										if(trim(userStruct.member_company) EQ ""){
+											echo('By <a href="#authorLink#">');
+											echo(application.zcore.functions.zEncodeEmail(userStruct.user_username));
+											echo('</a>');
+										}else{
+											echo('By <a href="#authorLink#">#userStruct.member_company#</a>');
+										} 
 									}else{
-										echo('By <a href="#authorLink#">#userStruct.member_company#</a>');
-									} 
-								}else{
-									echo('By <a href="#authorLink#">#authorLabel#</a>');
-								}
-								</cfscript> 
+										echo('By <a href="#authorLink#">#authorLabel#</a>');
+									}
+									</cfscript> 
+								</cfif>
 							</cfif>
 
 							<cfif optionStruct.blog_config_show_categories_on_articles EQ 1>
