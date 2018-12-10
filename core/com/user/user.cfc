@@ -1390,7 +1390,12 @@ formString = userCom.loginForm(inputStruct);
 <cffunction name="generateToken" localmode="modern" access="public">
 	<cfargument name="username" type="string" required="yes">
 	<cfscript>
-	thread name="zUserGenerateToken" username="#arguments.username#" action="run" timeout="25"{ 
+	if(not structkeyexists(request.zos, 'currentTokenIndex')){
+		request.zos.currentTokenIndex=1;
+	}
+	request.zos.currentTokenIndex++;
+	request.zos.currentTokenName="zUserGenerateToken"&request.zos.currentTokenIndex;
+	thread name="#request.zos.currentTokenName#" username="#arguments.username#" action="run" timeout="25"{ 
 		// user logs in first time, with no valid cookie in existence
 		// system creates new user_token record
 		thread.uniqueTokenTemp=hash(application.zcore.functions.zGenerateStrongPassword(156,256), 'sha-256');
@@ -1414,18 +1419,18 @@ formString = userCom.loginForm(inputStruct);
 
 <cffunction name="createToken" localmode="modern" output="yes" returntype="any">
 	<cfscript>
-	thread action="join" name="zUserGenerateToken" timeout="30000";
-	if(cfthread.zUserGenerateToken.status NEQ "completed"){
+	thread action="join" name="#request.zos.currentTokenName#" timeout="30000";
+	if(cfthread[request.zos.currentTokenName].status NEQ "completed"){
 		savecontent variable="out"{
 			echo('<h2>Failed to generate token</h2>');
-			writedump(cfthread.zUserGenerateToken);
+			writedump(cfthread[request.zos.currentTokenName]);
 		}
 		throw(out);
 	} 
-	ts=cfthread.zUserGenerateToken.tokenStruct;
+	ts=cfthread[request.zos.currentTokenName].tokenStruct;
 	user_token_id=application.zcore.functions.zInsert(ts);
 	
-	request.zsession.ztoken="#ts.struct.user_token_version#|#user_token_id#|#ts.struct.user_token_username#|#cfthread.zUserGenerateToken.uniqueTokenTemp#";;
+	request.zsession.ztoken="#ts.struct.user_token_version#|#user_token_id#|#ts.struct.user_token_username#|#cfthread[request.zos.currentTokenName].uniqueTokenTemp#";;
 	//new permanent token cookie is set
 	ts9=structnew();
 	ts9.name="ztoken";
@@ -1560,18 +1565,18 @@ formString = userCom.loginForm(inputStruct);
 				writeoutput('token secure login was successful.  issuing new token.<br />');
 				writedump(request.zsession.user);
 			}
-			thread action="join" name="zUserGenerateToken" timeout="30000";
-			if(cfthread.zUserGenerateToken.status NEQ "completed"){
+			thread action="join" name="#request.zos.currentTokenName#" timeout="30000";
+			if(cfthread[request.zos.currentTokenName].status NEQ "completed"){
 				savecontent variable="out"{
 					echo('<h2>Failed to generate token</h2>');
-					writedump(cfthread.zUserGenerateToken);
+					writedump(cfthread[request.zos.currentTokenName]);
 				}
 				throw(out);
 			} 
-			ts=cfthread.zUserGenerateToken.tokenStruct;
+			ts=cfthread[request.zos.currentTokenName].tokenStruct;
 			//user_token_id=application.zcore.functions.zInsert(ts);
 			
-			request.zsession.ztoken="#ts.struct.user_token_version#|#qUserToken.user_token_id#|#ts.struct.user_token_username#|#cfthread.zUserGenerateToken.uniqueTokenTemp#";
+			request.zsession.ztoken="#ts.struct.user_token_version#|#qUserToken.user_token_id#|#ts.struct.user_token_username#|#cfthread[request.zos.currentTokenName].uniqueTokenTemp#";
 			db.sql="update #db.table("user_token", request.zos.zcoreDatasource)# user_token 
 			set user_token_key=#db.param(ts.struct.user_token_key)#, 
 			user_token_salt=#db.param(ts.struct.user_token_salt)#, 

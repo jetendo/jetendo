@@ -1871,6 +1871,8 @@
 	var queueSortStruct=structnew(); 
 	var nowDate=request.zos.mysqlnow;
 	var methodBackup=form.method;
+
+	setting requesttimeout="300";
  
 	if(methodBackup NEQ "publicMapInsertGroup"){
 		// bug fix for multiple insert/updates in the same request where map to group is enabled.
