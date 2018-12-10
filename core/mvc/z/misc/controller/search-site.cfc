@@ -198,7 +198,7 @@ search sql generator has to be able to search on child group data for paging to 
 	db.sql&=")
 	ORDER BY relevance DESC 
 	LIMIT #db.param((form.zIndex-1)*10)#, #db.param(11)#";
-	qSearch=db.execute("qSearch");   
+	qSearch=db.execute("qSearch", "", 10000, "query", false);   
 	</cfscript>
 	<cfif qSearch.recordcount EQ 0>
 		<h2>No results matched your criteria.</h2>
