@@ -1872,7 +1872,6 @@
 	var nowDate=request.zos.mysqlnow;
 	var methodBackup=form.method;
 
-	setting requesttimeout="300";
  
 	if(methodBackup NEQ "publicMapInsertGroup"){
 		// bug fix for multiple insert/updates in the same request where map to group is enabled.
@@ -1899,6 +1898,7 @@
 		methodBackup EQ "publicUpdateGroup" or methodBackup EQ "userInsertGroup"){
 		application.zcore.adminSecurityFilter.auditFeatureAccess("Site Options", true);
 	}else{
+		setting requesttimeout="300";
 		// handled in init instead
 		//application.zcore.adminSecurityFilter.requireFeatureAccess("Site Options", true);
 	}
@@ -3839,7 +3839,7 @@ Define this function in another CFC to override the default email format
 				qCountLimit=db.execute("qCountLimit"); 
 			}
 		}else{ 
-			if(arraylen(arrSearchSQL) GT 0 or mainGroupStruct.site_option_group_enable_cache EQ 0){
+			if(arraylen(arrSearchSQL) GT 0 or mainGroupStruct.site_option_group_enable_cache EQ 0 or mainGroupStruct.site_option_group_admin_paging_limit NEQ 0){
 				db.sql="SELECT count(site_option_group.site_option_group_id) count
 				FROM (#db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group, 
 				#db.table("site_x_option_group_set", request.zos.zcoreDatasource)# site_x_option_group_set)  ";
@@ -3882,10 +3882,11 @@ Define this function in another CFC to override the default email format
 				db.sql&=" and site_option_group.site_id =#db.param(request.zos.globals.id)# and 
 				site_option_group.site_option_group_id = #db.param(form.site_option_group_id)# and 
 				site_option_group.site_option_group_type=#db.param('1')# ";
-				qCount=db.execute("qCount"); 
+				qCount=db.execute("qCount");  
 			}else{
 				// get the things
 				qCount={recordcount:1, count: 0 };
+				writedump('no');
 			}
 		} 
 
@@ -3944,7 +3945,7 @@ Define this function in another CFC to override the default email format
 		if(mainGroupStruct.site_option_group_admin_paging_limit NEQ 0){
 			db.sql&=" LIMIT #db.param((form.zIndex-1)*mainGroupStruct.site_option_group_admin_paging_limit)#, #db.param(mainGroupStruct.site_option_group_admin_paging_limit)# ";
 		}
-		qS=db.execute("qS");
+		qS=db.execute("qS"); 
 
 
 		if(mainGroupStruct.site_option_group_limit GT 0){

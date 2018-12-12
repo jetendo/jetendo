@@ -195,10 +195,10 @@
 				per_page: 10,
 				next_page: "https://api.calltrackingmetrics.com/api/v1/accounts/:account_id/calls.json?page=2",
 				previous_page: "https://api.calltrackingmetrics.com/api/v1/accounts/:account_id/calls.json"
-			};
-		}else{ 
+			}; 
+		}else{  
 			application.callTrackingMetricsImportProgress="Downloading #u# | insertCount: #insertCount# | updateCount: #updateCount# | total: #lastTotal#"; 
-			http url="#u#" timeout="30" throwonerror="no" method="get"{ 
+			http url="#u#" timeout="120" throwonerror="no" method="get"{ 
 				httpparam type="header" name="Authorization" value='Basic #ToBase64("#accessKey#:#secretKey#")#';
 			} 
 			if(not structkeyexists(cfhttp, 'statuscode') or left(cfhttp.statuscode,3) NEQ '200'){

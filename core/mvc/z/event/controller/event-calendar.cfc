@@ -29,7 +29,7 @@
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
 	event_calendar_deleted=#db.param(0)# and 
 	event_calendar_id IN (#db.trustedSQL(calendarIdList)#) ";
-	qCalendar=db.execute("qCalendar");
+	qCalendar=db.execute("qCalendar", "", 10000, "query", false);
 	application.zcore.functions.zQueryToStruct(qCalendar, form);
 	if(qCalendar.recordcount EQ 0){
 		application.zcore.functions.z404("form.calendarids doesn't exist.");
