@@ -1,11 +1,22 @@
 <cfcomponent>
 <cfoutput>
+<!--- 
+TODO: validation of uploaded file
+ schedule save not done
+actual import queue not done
+assignment
+sending of autoresponder
+create contacts at same time as create lead (use same function to achieve it?) - avoid duplicates?
+
+/z/inquiries/admin/import-leads/index
+ --->
+
 <cffunction name="init" access="remote" localmode="modern"> 
 	<cfscript>
-	if(application.zcore.user.checkGroupAccess("administrator")){
-		// ignore
-	}else{
-		// same user auth as manage-inquiries userIndex, etc.
+	db=request.zos.queryObject;
+	if(not application.zcore.user.checkGroupAccess("administrator")){
+		// TODO: same user auth as manage-inquiries userIndex, etc.
+		throw("not implemented yet");
 	}
 	request.fieldMap={
 		"First Name":"inquiries_first_name",
@@ -23,81 +34,181 @@
 		"Postal Code":"inquiries_zip",
 		"Interested In Model":"inquiries_interested_in_model",
 		"Interested In Category":"inquiries_interested_in_category"
-	};
+	}; 
+	db.sql="SELECT * from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
+	WHERE  inquiries_type.site_id IN (#db.param(0)#,#db.param(request.zOS.globals.id)#) and 
+	inquiries_type_deleted = #db.param(0)# ";
+	if(not application.zcore.app.siteHasApp("listing")){
+		db.sql&=" and inquiries_type_realestate = #db.param(0)# ";
+	}
+	if(not application.zcore.app.siteHasApp("rental")){
+		db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
+	}
+	db.sql&=" ORDER BY inquiries_type_name ASC ";
+	request.qTypes=db.execute("qTypes");
+	db.sql="SELECT * 
+	from #db.table("inquiries_autoresponder", request.zos.zcoreDatasource)# , 
+	#db.table("inquiries_type", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_type.inquiries_type_id = inquiries_autoresponder.inquiries_type_id and 
+	inquiries_type.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_autoresponder.inquiries_type_id_siteidtype"))# and 
+	inquiries_autoresponder.site_id=#db.param(request.zos.globals.id)# and 
+	inquiries_autoresponder_deleted = #db.param(0)# and 
+	inquiries_type_deleted = #db.param(0)# ";
+	if(not application.zcore.user.checkGroupAccess("administrator")){
+		db.sql&=" and inquiries_autoresponder_allow_user_import=#db.param(1)# ";
+	}
+	db.sql&=" ORDER BY inquiries_type_name ASC ";
+	request.qAutoresponder=db.execute("qAutoresponder", "", 10000, "query", false); 
 	</cfscript>
 </cffunction>
 
 <cffunction name="userIndex" access="remote" localmode="modern" roles="user">  
-	<cfscript>
+	<cfscript> 
 	index();
 	</cfscript>
 </cffunction>
+
+<cffunction name="userSchedule" access="remote" localmode="modern" roles="user">  
+	<cfscript> 
+	schedule();
+	</cfscript>
+</cffunction>
+
 
 <cffunction name="index" access="remote" localmode="modern" roles="administrator">  
 	<cfscript>
 	init();
 	db=request.zos.queryObject;
-	variables.init();
+	db.sql="select * from #db.table("inquiries_import_log", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_import_log_deleted=#db.param(0)# and 
+	site_id = #db.param(request.zos.globals.id)# 
+	";
+	qImport=db.execute("qImport");
+	echo('<h2>Lead Import Log</h2>');
+	echo('<p><a href="/z/inquiries/admin/import-leads/schedule" class="z-manager-search-button">New Import</a></p>');
+
+	if(qImport.recordcount EQ 0){
+		echo('<p>No leads have been imported here before.</p>');
+	}else{
+		echo('<table class="table-list">
+			<tr>
+				<th>Name</th>
+				<th>Filename</th>
+				<th>Status</th>
+				<th>Admin</th>
+			</tr>');
+		for(row in qImport){
+			echo('<tr>');
+			echo('<td>#row.inquiries_import_log_id#</td>');
+			echo('<td>#row.inquiries_import_log_name#</td>');
+			echo('<td>#row.inquiries_import_log_filename#</td>');
+			echo('<td>');
+			if(row.inquiries_import_log_error_status EQ 4){
+				echo("Import cancelled on "&dateformat(row.inquiries_import_log_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_log_completed_datetime, "h:mmtt"));
+			}else if(row.inquiries_import_log_error_status EQ 3){
+				echo("Import completed on "&dateformat(row.inquiries_import_log_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_log_completed_datetime, "h:mmtt"));
+			}else if(row.inquiries_import_log_error_status EQ 2){
+				echo("Import failed on "&dateformat(row.inquiries_import_log_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_log_completed_datetime, "h:mmtt")&" with #row.inquiries_import_log_error_count# errors out of #row.inquiries_import_log_record_count# records.");
+			}else if(row.inquiries_import_log_error_status EQ 1){
+				echo("Import is running");
+			}else if(row.inquiries_import_log_error_status EQ 0){
+				echo("Import is scheduled");
+			}
+			echo('</td>');
+			echo('<td>');
+			if(row.inquiries_import_log_error_status LTE 1){
+				echo('<a href="/z/inquiries/admin/import-leads/cancelImport">Cancel</a>');
+			}
+			echo('</td>');
+			echo('</tr>');
+		}
+		echo('</table>');
+	}
+	</cfscript>
+</cffunction>
+
+<cffunction name="schedule" access="remote" localmode="modern" roles="administrator">  
+	<cfscript>
+	init();
+	db=request.zos.queryObject; 
+
 	application.zcore.template.setTag("title", "Import Leads");
-	// application.zcore.functions.zSetPageHelpId("2.7.1.1"); 
-	// all options except for html separator 
+	// application.zcore.functions.zSetPageHelpId("2.7.1.1");  
 	application.zcore.functions.zStatusHandler(request.zsid);
 	arrRequired=["First Name", "Last Name", "Email", "Phone"];
-	arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"];
-	// a site might need to allow custom json field import, via some callback mechanism.
+	arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
 	</cfscript>
-	<h3>Import Leads</h3>
-	<p>You must follow the instructions below.</h3> 
-	<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish. You must include the required field columns even if they will be empty.  You must save the spreadsheet as a tab delimited .csv format.  Typically an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p>
-	<p>If a value doesn't match the system, it will be left blank when imported.</p> 
-	<p>If you upload an invalid format, it will tell you and not import any data.</p>
-	<p>You can't undo an import once it is submitted. Make sure you are uploading the correct information and not causing duplicates.</p>
-	<p>To protect our system, we import the leads on a first come first served in the background.  You will receive an email when the import is complete.  Please don't submit the same data twice.</p>
+	<p><a href="/z/inquiries/admin/import-leads/index">Import Log</a> / </p>
+	<h2>Import Leads</h2>
+	<p><strong>You must follow the instructions below.</strong></h3> 
+	<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish. You must include the required field columns even if some of them will be empty.  You must save the spreadsheet as a tab delimited .csv format.  Typically, this is an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p> 
+	<p>If you upload an invalid format, the system will show there was an error and not import any data.</p>
+	<p>You can't undo an import once it is submitted. Make sure you are uploading the correct information and not importing duplicate records.</p>
+	<p>To protect our system, we schedule the leads to be imported on a first come first served.  You will receive an email when the import is complete and the status will also be listed in the import log in the manager.  Please don't submit the same data twice.</p>
+	<h3>Required File Format</h3>
+	<p>Copy and paste these field names to the top row of your spreadsheet.  Any file without a correct header will be rejected.  Any extra columns that don't match exactly will not be imported. Any row that doesn't have at least one of the required fields filled in will not be skipped.</p>
 	<p>Required fields:<br /><textarea type="text" cols="100" rows="2" name="a1">#arrayToList(arrRequired, chr(9))#</textarea></p>
 	<p>Optional fields:<br /><textarea type="text" cols="100" rows="2" name="a2">#arrayToList(arrOptional, chr(9))#</textarea></p>
 
-	<!--- make this an ajax form that posts to /z/inquiries/admin/import-leads/import
-	validate with both javascript and server.
-	 --->
+	<h2>Schedule New Import</h2>
+	<p>* denotes required field</p>
 	<form id="importLeadForm" class="zFormCheckDirty" action="" enctype="multipart/form-data" method="post">
-		<h2>Your Notification Email</h2>
+		<h3>Your Notification Email *</h3>
 		<p>We will notify you at this email address when the leads are done importing and only for that purpose.</p>
-		<p>Email: <input type="email name="importEmail" style="width:250px; max-width:100%;" value="#htmleditformat(request.zsession.user.email)#" /></p>
-		<p>&nbsp;</p>
-		<h2>Select Lead Type</h2>
-		<!--- drop down of all lead types --->
-		<p><select name="inquiries_type_id" size="1">
-			<option value="">Inquiry</option>
-		</select></p>
-		<p>&nbsp;</p>
+		<p><input type="email" name="importEmail" style="width:250px; max-width:100%;" value="#htmleditformat(request.zsession.user.email)#" /></p> 
+		<h3>Import Name</h3>
+		<p>Enter a name for the import for future reference</h3>
+		<p><input type="text" style="width:100%; max-width:350px;" name="inquiries_import_log_name" id="inquiries_import_log_name" value=""></p>
+		<h3>Select Lead Type *</h3> 
+		<p>
+			<cfscript> 
+			ts = StructNew();
+			ts.name = "inquiries_type_id"; 
+			ts.query = request.qTypes; // this can be an array of structs or a query
+			ts.queryLabelField = "inquiries_type_name"; 
+			ts.queryValueField = "inquiries_type_id";  
+			application.zcore.functions.zInputSelectBox(ts);
+			</cfscript>
+		</p> 
 
-		<h2>Select Autoresponder</h2>
-		<!--- only the ones that are enabled for user import as regular user, otherwise all of them when administrator --->
-		<p><select name="inquiries_autoresponder_id" size="1">
-			<option value="">No Autoresponder</option>
-		</select></p>
-		<p>&nbsp;</p>
+		<cfif request.qAutoresponder.recordcount NEQ 0>
+			<h3>Select Autoresponder (Optional)</h3>
+			<p>
+			<!--- only the ones that are enabled for user import as regular user, otherwise all of them when administrator ---> 
+			<cfscript> 
+			ts = StructNew();
+			ts.name = "inquiries_autoresponder_id"; 
+			ts.query = request.qAutoresponder; // this can be an array of structs or a query
+			ts.queryLabelField = "inquiries_type_name"; 
+			ts.queryValueField = "inquiries_autoresponder_id";  
+			application.zcore.functions.zInputSelectBox(ts);
+			</cfscript>
+			</p>
+			<p>&nbsp;</p>
+		</cfif>
 
-		<h2>Select Assignment</h2>
+		<h3>Select Assignment</h3>
 		<p>If you need more then one assignment, you must import separate files.</p>
 		<!--- office and user --->
-		<h3>Select Office</h3>
+		<h3>Select Office (Optional)</h3>
 		<p><select name="office_id" size="1">
 			<option value="">No office assignment</option>
 		</select></p>
 		<p>&nbsp;</p>
 		<!--- need javascript method --->
-		<h3>Select User</h3>
+		<h3>Select User (Optional)</h3>
 		<p><select name="uid" size="1">
 			<option value="">No user assignment</option>
 		</select></p>
 		<p>&nbsp;</p>
 
-		<h3>Select Tab Delimited CSV File</h3>
+		<h3>Select Tab Delimited CSV File *</h3>
 
 		<p><input type="file" name="filepath" value="" /></p>
 		<p>&nbsp;</p>
-		<cfif request.zos.isDeveloper>
+		<!--- <cfif request.zos.isDeveloper>
 			<h3>Specify optional CFC filter.</h3>
 			<p>A struct with each column name as a key will be passed as the first argument to your custom function.</p>
 			<p>Code example<br />
@@ -115,15 +226,44 @@
 			<p>Filter CFC CreateObject Path: <input type="text" name="cfcPath" value="" /> (i.e. root.myImportFilter)</p>
 			<p>Filter CFC Method: <input type="text" name="cfcMethod" value="" /> (i.e. functionName)</p>
 		</cfif>
-		<p>&nbsp;</p>
+		<p>&nbsp;</p> --->
 		 <p><input type="submit" name="submit1" value="Import CSV" style="padding:10px; border-radius:5px;" onclick="this.style.display='none';document.getElementById('pleaseWait').style.display='block';" />
 		<div id="pleaseWait" style="display:none;">Please wait...</div></p>
 	</form>
+
+
+	<script>
+	zArrDeferredFunctions.push(function(){
+		$("##importLeadForm").on("submit", function(e){
+			e.preventDefault();
+			// zAjax
+			var postObj=zGetFormDataByFormId("importLeadForm");
+			var tempObj={};
+			tempObj.id="zImportLeads";
+			tempObj.method="POST";
+			tempObj.url="/z/inquiries/admin/import-leads/scheduleImport";
+			tempObj.callback=function(r){
+				r=JSON.parse(r);
+				if(r.success){
+					window.location.href="/z/inquiries/admin/import-leads/log";
+				}else{
+					alert(r.errorMessage);
+				}
+			};
+			tempObj.errorCallback=function(){
+				alert("Sorry, there was a temporary network problem, please try again later.");
+			}
+			tempObj.cache=false;
+			zAjax(tempObj);
+		});
+	});
+	</script>
 </cffunction>
 
 
 <cffunction name="userImport" access="remote" localmode="modern" roles="user">  
 	<cfscript>
+	// TODO: verify user has access
 	import();
 	</cfscript>
 </cffunction>
@@ -132,12 +272,66 @@
 <cffunction name="scheduleImport" access="remote" localmode="modern" roles="administrator"> 
 	<cfscript> 
 	db=request.zos.queryObject;
+	form.inquiries_import_log_name=application.zcore.functions.zso(form, 'inquiries_import_log_name');
+	form.inquiries_type_id=application.zcore.functions.zso(form, 'inquiries_type_id');
+	form.inquiries_autoresponder_id=application.zcore.functions.zso(form, 'inquiries_autoresponder_id');
+	form.office_id=application.zcore.functions.zso(form, 'office_id');
+	form.uid=application.zcore.functions.zso(form, 'uid');
 	form.filename=application.zcore.functions.zso(form, 'filename');
-	form.cfcPath=application.zcore.functions.zso(form, 'cfcPath');
-	form.cfcMethod=application.zcore.functions.zso(form, 'cfcMethod');
+	// form.cfcPath=application.zcore.functions.zso(form, 'cfcPath');
+	// form.cfcMethod=application.zcore.functions.zso(form, 'cfcMethod');
 	// store file reference and initial data in inquiries_import_log and return instantly.
 
+
+	path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
+	form.filename=application.zcore.functions.zUploadFile(form.filename, path);
+	if(form.filename EQ false){
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
+	}
+	ts={
+		table:"inquiries_import_log",
+		datasource:request.zos.zcoreDatasource,
+		struct:{
+			site_id:request.zos.globals.id,
+			user_id:request.zsession.user.id,
+			user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id),
+			inquiries_import_log_filename:form.filename,
+			inquiries_import_log_record_count:0,
+			inquiries_import_log_error_count:0,
+			inquiries_import_log_error_status:0,
+			inquiries_import_log_updated_datetime:request.zos.mysqlnow,
+			inquiries_import_log_completed_datetime:"",
+			inquiries_import_log_deleted:0
+		}
+	};
+	application.zcore.functions.zInsert(ts);
+
 	application.zcore.functions.zReturnJson({success:true});
+	</cfscript>
+</cffunction>
+
+<cffunction name="cancelImport" access="remote" localmode="modern" roles="user">  
+	<cfscript>
+	init();
+	form.inquiries_import_log_id=application.zcore.functions.zso(form, "inquiries_import_log_id", true, 0);
+	if(form.inquiries_import_log_id EQ 0){
+		application.zcore.status.setStatus(request.zsid, "Invalid import id", form, true);
+		application.zcore.functions.zRedirect("/z/inquiries/admin/import-leads/index?zsid=#request.zsid#");
+	}
+	application["inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_log_id]=true;
+	db=request.zos.queryObject;
+	db.sql="update #db.table("inquiries_import_log", request.zos.zcoreDatasource)# SET 
+	inquiries_import_log_error_status=#db.param(4)#, 
+	inquiries_import_log_completed_datetime=#db.param(request.zos.mysqlnow)# 
+	WHERE 
+	inquiries_import_log_id=#db.param(form.inquiries_import_log_id)# and 
+	site_id = #db.param(request.zos.globals.id)# and 
+	inquiries_import_log_deleted=#db.param(0)# 
+	";
+	qUpdate=db.execute("qUpdate");
+
+	application.zcore.status.setStatus(request.zsid, "Cancelling import", form, true);
+	application.zcore.functions.zRedirect("/z/inquiries/admin/import-leads/index?zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
 
@@ -169,6 +363,14 @@
 	// need a table that tracks the imports per user, so we can display a global and user specific log status, and recover from mistakes.
 
 	// need to store the inquiries_import_file_id in this table.
+
+
+	if(structkeyexists(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_log_id)){
+		echo("Import cancelled");
+		structdelete(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_log_id);
+		abort;
+	}
+
   
 	arrDealer=application.zcore.siteOptionCom.optionGroupStruct("Dealer");
 	dealerStateLookup={};
