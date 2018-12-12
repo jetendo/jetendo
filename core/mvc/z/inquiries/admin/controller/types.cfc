@@ -195,19 +195,16 @@
 	var qInquiryCheck=0;
 	variables.init();
 	application.zcore.functions.zSetPageHelpId("4.3");
-	</cfscript>
-	<cfsavecontent variable="db.sql"> 
-	SELECT * from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
+	db.sql="SELECT * from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
 	WHERE  inquiries_type.site_id IN (#db.param(0)#,#db.param(request.zOS.globals.id)#) and 
-	inquiries_type_deleted = #db.param(0)# 
-	<cfif not application.zcore.app.siteHasApp("listing")>
-		and inquiries_type_realestate = #db.param(0)#
-	</cfif>
-	<cfif not application.zcore.app.siteHasApp("rental")>
-		and inquiries_type_rentals = #db.param(0)#
-	</cfif>
-	ORDER BY inquiries_type_name ASC </cfsavecontent>
-	<cfscript>
+	inquiries_type_deleted = #db.param(0)# ";
+	if(not application.zcore.app.siteHasApp("listing")){
+		db.sql&=" and inquiries_type_realestate = #db.param(0)# ";
+	}
+	if(not application.zcore.app.siteHasApp("rental")){
+		db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
+	}
+	db.sql&=" ORDER BY inquiries_type_name ASC ";
 	qTypes=db.execute("qTypes");
 	application.zcore.functions.zStatusHandler(request.zsid);
 	</cfscript>
