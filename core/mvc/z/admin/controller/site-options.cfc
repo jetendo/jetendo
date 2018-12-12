@@ -3885,8 +3885,7 @@ Define this function in another CFC to override the default email format
 				qCount=db.execute("qCount");  
 			}else{
 				// get the things
-				qCount={recordcount:1, count: 0 };
-				writedump('no');
+				qCount={recordcount:1, count: 0 }; 
 			}
 		} 
 
