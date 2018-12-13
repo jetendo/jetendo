@@ -147,6 +147,7 @@
 		return;
 	}
 	loadManageLeadGroupData();
+	checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 	variables.inquiriesInitCalled=true;
 	ts=getInitConfig();
 
@@ -175,6 +176,32 @@
 	</cfscript>
 </cffunction>	 
 
+
+<cffunction name="checkManageLeadAccess" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ts={
+		errorMessage:"Access denied"
+	};
+	structappend(arguments.ss, ts, false);
+	if(not application.zcore.user.checkGroupAccess("member")){
+		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
+			if(not userHasAccessToLead(form.inquiries_id)){
+				found=false;
+			}
+		} 
+		if(not found){  
+			form.userLoginURL=application.zcore.functions.zso(request.zos.globals, 'userLoginURL');
+			application.zcore.status.setStatus(request.zsid, arguments.ss.errorMessage, form, true);
+			if(form.userLoginURL NEQ ""){
+				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(form.userLoginURL, "zsid=#request.zsid#"));
+			}else{
+				application.zcore.functions.zRedirect("/z/user/home/index?zsid=#request.zsid#");
+			}
+		}
+	} 
+	</cfscript>
+</cffunction>
 
 <cffunction name="loadManageLeadGroupData" localmode="modern" access="public">
 	<cfscript>
@@ -231,23 +258,6 @@
 		request.userIdList=rsList.userIdList;
 		request.contactIdList=rsList.contactIdList;
 	}  
-	if(not application.zcore.user.checkGroupAccess("member")){
-		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
-			if(not userHasAccessToLead(form.inquiries_id)){
-				found=false;
-			}
-		} 
-		if(not found){  
-			form.userLoginURL=application.zcore.functions.zso(request.zos.globals, 'userLoginURL');
-			if(form.userLoginURL NEQ ""){
-				application.zcore.status.setStatus(request.zsid, "You don't have access to this lead or need to login.", form, true);
-				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(form.userLoginURL, "zsid=#request.zsid#"));
-			}else{
-				application.zcore.status.setStatus(request.zsid, "You don't have access to this lead or need to login.", form, true);
-				application.zcore.functions.zRedirect("/z/user/home/index?zsid=#request.zsid#");
-			}
-		}
-	} 
 	</cfscript>
 </cffunction>	 
 
@@ -257,6 +267,7 @@
 		return;
 	}
 	loadManageLeadGroupData();
+	checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 	variables.inquiriesInitCalled=true;
 	ts=getInitConfig(); 
 	ts.disableAddButton=true;
@@ -305,6 +316,7 @@ rs=getContactLeadFilterSQL(db);
 	db=arguments.db;
 	if(not structkeyexists(request, 'contactIdList')){
 		loadManageLeadGroupData();
+		checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 	}
 	ts={
 		selectSQL:"",
@@ -385,6 +397,7 @@ rs=getContactLeadFilterSQL(db);
 	db=arguments.db;
 	if(not structkeyexists(request, 'userIdList')){
 		loadManageLeadGroupData();
+		checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 	}
 
 	savecontent variable="out"{

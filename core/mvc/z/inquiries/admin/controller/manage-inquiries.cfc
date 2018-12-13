@@ -151,6 +151,7 @@
 	super.init(ts); 
 
 	loadManageLeadGroupData();
+	checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 
 	if(request.cgi_script_name CONTAINS "/z/inquiries/admin/manage-inquiries/"){
 		hCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
@@ -159,6 +160,31 @@
 	</cfscript>
 </cffunction>	 
 
+<cffunction name="checkManageLeadAccess" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ts={
+		errorMessage:"Access denied"
+	};
+	structappend(arguments.ss, ts, false);
+	if(not application.zcore.user.checkGroupAccess("member")){
+		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
+			if(not userHasAccessToLead(form.inquiries_id)){
+				found=false;
+			}
+		} 
+		if(not found){  
+			form.userLoginURL=application.zcore.functions.zso(request.zos.globals, 'userLoginURL');
+			application.zcore.status.setStatus(request.zsid, arguments.ss.errorMessage, form, true);
+			if(form.userLoginURL NEQ ""){
+				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(form.userLoginURL, "zsid=#request.zsid#"));
+			}else{
+				application.zcore.functions.zRedirect("/z/user/home/index?zsid=#request.zsid#");
+			}
+		}
+	} 
+	</cfscript>
+</cffunction>
 
 <cffunction name="loadManageLeadGroupData" localmode="modern" access="public">
 	<cfscript>
@@ -201,23 +227,6 @@
 		// build a userIdList of user that belong to request.zsession.user.office_id and the user groups this user can manage 
 		request.userIdList=getUserIdListByOfficeIdListAndGroupIdList(request.zsession.user.office_id, groupIdList); 
 	}  
-	if(not application.zcore.user.checkGroupAccess("member")){
-		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
-			if(not userHasAccessToLead(form.inquiries_id)){
-				found=false;
-			}
-		} 
-		if(not found){  
-			form.userLoginURL=application.zcore.functions.zso(request.zos.globals, 'userLoginURL');
-			if(form.userLoginURL NEQ ""){
-				application.zcore.status.setStatus(request.zsid, "You don't have access to this lead or need to login.", form, true);
-				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(form.userLoginURL, "zsid=#request.zsid#"));
-			}else{
-				application.zcore.status.setStatus(request.zsid, "You don't have access to this lead or need to login.", form, true);
-				application.zcore.functions.zRedirect("/z/user/home/index?zsid=#request.zsid#");
-			}
-		}
-	} 
 	</cfscript>
 </cffunction>	 
 
@@ -257,6 +266,7 @@
 
 	
 	loadManageLeadGroupData();
+	checkManageLeadAccess({ errorMessage:"You don't have access to this lead or need to login."});
 
 	</cfscript>
 </cffunction>

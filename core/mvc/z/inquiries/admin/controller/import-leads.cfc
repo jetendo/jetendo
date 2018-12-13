@@ -14,10 +14,13 @@ create contacts at same time as create lead (use same function to achieve it?) -
 <cffunction name="init" access="remote" localmode="modern"> 
 	<cfscript>
 	db=request.zos.queryObject;
+	manageInquiriesCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
 	if(not application.zcore.user.checkGroupAccess("administrator")){
-		// TODO: same user auth as manage-inquiries userIndex, etc.
-		throw("not implemented yet");
+		manageInquiriesCom.checkManageLeadAccess({ errorMessage:"You don't have access or need to login."});
 	}
+
+	request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
+	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
 	request.fieldMap={
 		"First Name":"inquiries_first_name",
 		"Last Name":"inquiries_last_name",
@@ -129,6 +132,36 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	</cfscript>
 </cffunction>
 
+<cffunction name="userInstructions" access="remote" localmode="modern" roles="administrator">  
+	<cfscript>
+	init();
+	</cfscript>
+</cffunction>
+
+<cffunction name="instructions" access="remote" localmode="modern" roles="administrator">  
+	<cfscript>
+	init();
+	</cfscript>
+	<h2>Import Lead Instructions</h2>
+	<div class="z-float z-t-18">
+		<p><strong>You must follow the instructions below.</strong></h3> 
+		<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish from the list of fields below. You must include the required field columns even if some of them will be empty.  You must save the spreadsheet as a tab delimited .csv format.  Typically, this is an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p> 
+		<p>If you upload an invalid format, the system will show there was an error and not import any data.</p>
+		<p>You can't undo an import once it is submitted. Make sure you are uploading the correct information and not importing duplicate records.</p>
+		<p>To protect our system, we schedule the leads to be imported on a first come first served basis.  You will receive an email when the import is complete and the status will also be listed in the import log in the manager.  Please don't submit the same data twice.  Usually the leads will finish importing in a few minutes for a file with less then 100 records.</p>
+		<h3>Required File Format</h3>
+		<p>Copy and paste these field names to the top row of your spreadsheet.  Any file without a correct header will be rejected.  Any extra columns that don't match exactly will not be imported. Any row that doesn't have at least one of the required fields filled in will not be skipped.</p>
+		<h3>Supported Fields</h3>
+		<p>Required fields:<br /><textarea type="text" cols="100" rows="2" name="a1">#arrayToList(request.arrRequired, chr(9))#</textarea></p>
+		<p>Optional fields:<br /><textarea type="text" cols="100" rows="2" name="a2">#arrayToList(request.arrOptional, chr(9))#</textarea></p> 
+
+		<h2>Example Files</h2>
+		<p><a href="/z/a/member/spreadsheet-example.xlsx" target="_blank">Excel Format</a> - must be saved as tab delimited file with no field quotes</p>
+		<p><a href="/z/a/member/spreadsheet-example.csv" target="_blank">Tab Delimited CSV Format</a></p>
+	</div>
+	
+</cffunction>
+
 <cffunction name="schedule" access="remote" localmode="modern" roles="administrator">  
 	<cfscript>
 	init();
@@ -137,22 +170,9 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	application.zcore.template.setTag("title", "Import Leads");
 	// application.zcore.functions.zSetPageHelpId("2.7.1.1");  
 	application.zcore.functions.zStatusHandler(request.zsid);
-	arrRequired=["First Name", "Last Name", "Email", "Phone"];
-	arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
 	</cfscript>
 	<p><a href="/z/inquiries/admin/import-leads/index">Import Log</a> / </p>
-	<h2>Import Leads</h2>
-	<p><strong>You must follow the instructions below.</strong></h3> 
-	<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish. You must include the required field columns even if some of them will be empty.  You must save the spreadsheet as a tab delimited .csv format.  Typically, this is an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p> 
-	<p>If you upload an invalid format, the system will show there was an error and not import any data.</p>
-	<p>You can't undo an import once it is submitted. Make sure you are uploading the correct information and not importing duplicate records.</p>
-	<p>To protect our system, we schedule the leads to be imported on a first come first served.  You will receive an email when the import is complete and the status will also be listed in the import log in the manager.  Please don't submit the same data twice.</p>
-	<h3>Required File Format</h3>
-	<p>Copy and paste these field names to the top row of your spreadsheet.  Any file without a correct header will be rejected.  Any extra columns that don't match exactly will not be imported. Any row that doesn't have at least one of the required fields filled in will not be skipped.</p>
-	<p>Required fields:<br /><textarea type="text" cols="100" rows="2" name="a1">#arrayToList(arrRequired, chr(9))#</textarea></p>
-	<p>Optional fields:<br /><textarea type="text" cols="100" rows="2" name="a2">#arrayToList(arrOptional, chr(9))#</textarea></p>
-
-	<h2>Schedule New Import</h2>
+	<h2>Schedule New Lead Import</h2>
 	<p>* denotes required field</p>
 	<form id="importLeadForm" class="zFormCheckDirty" action="" enctype="multipart/form-data" method="post">
 		<h3>Your Notification Email *</h3>
@@ -205,6 +225,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		<p>&nbsp;</p>
 
 		<h3>Select Tab Delimited CSV File *</h3>
+		<p style="font-size:18px;"><strong>Important: </strong> <a href="/z/inquiries/admin/import-leads/instructions" target="_blank">Read Instructions First (Opens in New Window)</a></p> 
 
 		<p><input type="file" name="filepath" value="" /></p>
 		<p>&nbsp;</p>
@@ -271,6 +292,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 
 <cffunction name="scheduleImport" access="remote" localmode="modern" roles="administrator"> 
 	<cfscript> 
+	init();
 	db=request.zos.queryObject;
 	form.inquiries_import_log_name=application.zcore.functions.zso(form, 'inquiries_import_log_name');
 	form.inquiries_type_id=application.zcore.functions.zso(form, 'inquiries_type_id');
@@ -281,13 +303,42 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	// form.cfcPath=application.zcore.functions.zso(form, 'cfcPath');
 	// form.cfcMethod=application.zcore.functions.zso(form, 'cfcMethod');
 	// store file reference and initial data in inquiries_import_log and return instantly.
-
-
+ 
 	path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
 	form.filename=application.zcore.functions.zUploadFile(form.filename, path);
 	if(form.filename EQ false){
 		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
 	}
+
+	error=false;
+	// verify file format. 
+
+	arrLines=listToArray(replace(application.zcore.functions.zReadFile(form.filename), chr(13), "", "all"), chr(10));
+
+	// first row has required fields? 
+	arrHeader=listToArray(arrLines[1], chr(9), true);
+	for(field in arrHeader){
+		match=false;
+		for(requiredField in request.arrRequired){
+			if(requiredField EQ field){
+				match=true;
+			}
+		}
+		if(not match){
+			error=true;
+			application.zcore.status.setStatus(request.zsid, requiredField&" is required and wasn't in the column headers.", form, true);
+		}
+	}
+
+	if(error){
+		application.zcore.functions.zDeleteFile(path&form.filename);
+		application.zcore.functions.zRedirect("/z/inquiries/admin/import-leads/index?zsid=#request.zsid#");
+	}
+
+	request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
+	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
+
+
 	ts={
 		table:"inquiries_import_log",
 		datasource:request.zos.zcoreDatasource,
@@ -355,6 +406,8 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	application.zcore.functions.zCreateDirectory(path);
 	filepath=path&"import-#dateformat(now(), "yyyy-mm-dd")&"-"&timeformat(now(), "HH-mm-ss")#.txt";
 	debug=false;
+
+
 
 	throw("Mark inquiries record with the file that was used during import to make it easier to remove mistakes.");
 	throw("need to implement inquiries_autoresponder_allow_user_import");
