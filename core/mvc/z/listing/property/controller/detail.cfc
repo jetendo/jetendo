@@ -152,8 +152,8 @@ fullPropertyLink=htmleditformat(fullPropertyLink);
 </cfsavecontent>
 <cfscript>
 application.zcore.template.setTag("title","#replace(titleStruct.title,'<br />','','ALL')#");
-application.zcore.template.setTag("pagetitle","#titleStruct.title#");
-	application.zcore.template.setTag("pagenav",temp.pageNav);
+application.zcore.template.setTag("pagetitle",idx.listing_address);
+application.zcore.template.setTag("pagenav",temp.pageNav);
 	
 
 tempText = application.zcore.functions.zFixAbusiveCaps(variables.listing_data_remarks);
@@ -166,6 +166,7 @@ if(pos NEQ 0){
 	theEnd=removeChars(theEnd, 1, pos);
 }
 </cfscript>
+<h3 class="zls-detail-random-title" style="opacity:0.7;">#titleStruct.title#</h3>
 <cfif hideSearchBar EQ false>
 
 	<cfscript>

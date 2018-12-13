@@ -683,13 +683,13 @@ zGetLatLong(ts);
 	if(arguments.idx.listing_data_remarks NEQ ""){
 		avs.remarks=trim(lcase(rereplace(arguments.idx.listing_data_remarks,"\*\**"," ","ALL")));
 	}
-	if(trim(arguments.idx.listing_address) NEQ ""){
-		avs.address=application.zcore.functions.zFirstLetterCaps(arguments.idx.listing_address);
-	}
+	// if(trim(arguments.idx.listing_address) NEQ ""){
+	// 	avs.address=application.zcore.functions.zFirstLetterCaps(arguments.idx.listing_address);
+	// }
 	arrT=[];
-	if(structkeyexists(avs, 'address') and avs.address NEQ ""){
-		arrayAppend(arrT, avs.address);
-	}
+	// if(structkeyexists(avs, 'address') and avs.address NEQ ""){
+	// 	arrayAppend(arrT, avs.address);
+	// }
 	if(structkeyexists(avs, 'city') and avs.city NEQ ""){
 		arrayAppend(arrT, avs.city);
 	}
