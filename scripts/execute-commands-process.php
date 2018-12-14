@@ -1232,8 +1232,11 @@ function publishNginxSiteConfig($a){
 		array_push($arrConfig, "server { 
 			listen ".$row["site_ip_address"].":80;\n". 
 			$serverName.
+			"rewrite ^/.well-known/(.*)$ /.well-known/$1 last;\n".
 			$row["site_nginx_config"]."\n".
-			"rewrite ^/(.*)$ ".$row["site_domain"]."/$1 permanent;\n".
+			"rewrite ^/(.*)$ ".$row["site_domain"]."/$1 permanent;\n". 
+
+			"location /.well-known/ { ssi off; default_type \"text/plain\"; allow all; alias  /var/jetendo-server/jetendo/sites/\$zmaindomain/.well-known/; autoindex            off; try_files \$uri =404; } \n".
 		"}\n".
 		"server {".
 			"listen ".$row["site_ip_address"].":443 ssl http2;\n".

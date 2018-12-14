@@ -7,6 +7,20 @@
 	}
 	echo("<h2>Let's Renew Status</h2>");
 	echo(application.zcore.functions.zso(application, 'letsRenewRenewStatus'));
+
+	echo('<br><br><a href="/z/server-manager/tasks/renew-lets-encrypt-ssl/cancelRenew" target="_blank">Cancel</a>');
+	</cfscript>
+</cffunction>
+
+<cffunction name="cancelRenew" localmode="modern" access="remote">
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
+	
+	application.cancelLetsRenewRenew=true;
+	echo("Cancelling renew");
+	abort;
 	</cfscript>
 </cffunction>
 
@@ -18,6 +32,7 @@
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	}
 	setting requesttimeout="5000";
+	form.sid=application.zcore.functions.zso(form, 'sid', true);
 	request.ignoreSlowScript=true;
 
 	futureDate=dateadd("d", 35, now());
@@ -38,8 +53,11 @@
 	ssl_letsencrypt=#db.param(1)# AND 
 	ssl_expiration_datetime >=#db.param(request.zos.mysqlnow)# and
 	ssl_expiration_datetime <=#db.param(futureDate)# and
-	ssl_deleted=#db.param('0')# 
-	ORDER BY ssl_expiration_datetime ASC ";
+	ssl_deleted=#db.param('0')# ";
+	if(form.sid NEQ 0){
+		db.sql&=" and site.site_id = #db.param(form.sid)# ";
+	}
+	db.sql&=" ORDER BY ssl_expiration_datetime ASC ";
 	qSSL=db.execute("qSSL");
 
 	//writedump(qSSL);	abort;
@@ -49,6 +67,12 @@
 	arrRenew=[];
 	 try{
 		for(row in qSSL){   
+			if(structkeyexists(application, 'cancelLetsRenewRenew')){
+				structdelete(application, 'letsRenewRenewStatus');
+				structdelete(application, 'cancelLetsRenewRenew');
+				echo("Cancelled");
+				abort;
+			}
 			application.letsRenewRenewStatus="Publishing Nginx Site Config Before New Certificate | Renewing "&row.ssl_common_name;
 			
 			result=application.zcore.functions.zSecureCommand("publishNginxSiteConfig"&chr(9)&row.site_id, 30); 
