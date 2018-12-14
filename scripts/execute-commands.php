@@ -63,6 +63,7 @@ $commandTypeLookup["installThemeToSite"]="serveradministrator";
 $commandTypeLookup["mysqlDumpTable"]="serveradministrator";
 $commandTypeLookup["mysqlRestoreTable"]="serveradministrator";
 $commandTypeLookup["publishNginxSiteConfig"]="serveradministrator";
+$commandTypeLookup["publishNginxAllSitesConfig"]="serveradministrator";
 $commandTypeLookup["renameSite"]="serveradministrator";
 $commandTypeLookup["sslDeleteCertificate"]="serveradministrator";
 $commandTypeLookup["sslGenerateKeyAndCSR"]="serveradministrator";

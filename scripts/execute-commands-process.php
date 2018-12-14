@@ -115,6 +115,8 @@ function processContents($contents){
 		return notifyBindZone($a);
 	}else if($contents =="publishNginxSiteConfig"){
 		return publishNginxSiteConfig($a);
+	}else if($contents =="publishNginxAllSitesConfig"){
+		return publishNginxAllSitesConfig($a);
 	}else if($contents =="saveFaviconSet"){
 		return saveFaviconSet($a);
 	}else if($contents =="convertFileCharsetISO88591toUTF8"){
@@ -1103,6 +1105,53 @@ function getScryptEncrypt($a){
 	$r=`$cmd`;
 	return $r;
 }
+ 
+function publishNginxAllSitesConfig($a){
+	$rs=new stdClass();
+	if(count($a) != 0){
+		$rs->success=false;
+		$rs->errorMessage="No arguments should be sent to this command.";
+		echo($rs->errorMessage."\n");
+		return json_encode($rs);
+	}
+	$arrError=array();
+	$cmysql2=new mysqli(get_cfg_var("jetendo_mysql_default_host"),get_cfg_var("jetendo_mysql_default_user"), get_cfg_var("jetendo_mysql_default_password"), zGetDatasource());
+	if($cmysql2->error != ""){ 
+		$rs->success=false;
+		$rs->errorMessage="db connect error:".$cmysql2->error;
+		echo($rs->errorMessage."\n");
+		return json_encode($rs);
+	}
+	$r=$cmysql2->query("select site_id from site where 
+	site_active = '1' and 
+	site_deleted='0' and 
+	site_securedomain<>'' ");
+	if($cmysql2->error != ""){ 
+		$rs->success=false;
+		$rs->errorMessage="db error:".$cmysql2->error;
+		echo($rs->errorMessage."\n");
+		return json_encode($rs);
+	}
+	if($r->num_rows==0){
+		$rs->success=false;
+		$rs->errorMessage="There are no secure sites.";
+		echo($rs->errorMessage."\n");
+		return json_encode($rs);
+	}
+    while($row = $r->fetch_assoc()){
+		$json=publishNginxSiteConfig(array($row["site_id"]));
+		$rs=json_decode($json);
+		if(!$rs->success){
+			array_push($arrError, $rs->errorMessage);
+		} 
+	}
+	$rs->success=true;
+	if(count($arrError)>0){
+		$rs->success=false;
+		$rs->errorMessage=implode("\n", $arrError);
+	}
+	return json_encode($rs);
+}
 function publishNginxSiteConfig($a){
 
 	$rs=new stdClass();
@@ -1228,6 +1277,11 @@ function publishNginxSiteConfig($a){
 		if(strstr($row["site_nginx_ssl_config"], "server_name") !== FALSE){
 			$sslServerName="";
 		}
+		if(strstr($row["site_nginx_config"], "jetendo-vhost.conf") !== FALSE){
+			$wellKnownLocation="";
+		}else{
+			$wellKnownLocation="location /.well-known/ { ssi off; default_type \"text/plain\"; allow all; alias  /var/jetendo-server/jetendo/sites/\$zmaindomain/.well-known/; autoindex            off; try_files \$uri =404; } \n";
+		}
 
 		array_push($arrConfig, "server { 
 			listen ".$row["site_ip_address"].":80;\n". 
@@ -1235,8 +1289,7 @@ function publishNginxSiteConfig($a){
 			"rewrite ^/.well-known/(.*)$ /.well-known/$1 last;\n".
 			$row["site_nginx_config"]."\n".
 			"rewrite ^/(.*)$ ".$row["site_domain"]."/$1 permanent;\n". 
-
-			"location /.well-known/ { ssi off; default_type \"text/plain\"; allow all; alias  /var/jetendo-server/jetendo/sites/\$zmaindomain/.well-known/; autoindex            off; try_files \$uri =404; } \n".
+			$wellKnownLocation.
 		"}\n".
 		"server {".
 			"listen ".$row["site_ip_address"].":443 ssl http2;\n".

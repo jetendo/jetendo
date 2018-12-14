@@ -1,5 +1,18 @@
 <cfcomponent>
 <cfoutput>
+<cffunction name="publishNginxAllSitesConfig" localmode="modern" access="remote" roles="serveradministrator">
+	<cfscript>
+	setting requesttimeout="10000";
+	result=application.zcore.functions.zSecureCommand("publishNginxAllSitesConfig", 10000); 
+	js=deserializeJson(result);
+	if(!js.success){
+		echo(replace(js.errorMessage, chr(10), "<br>", "all"));
+	}else{
+		echo("All sites published successfully and nginx was reloaded successfully.");
+	}
+	abort;
+	</cfscript>
+</cffunction>
 
 
 <cffunction name="delete" localmode="modern" access="remote" roles="serveradministrator">

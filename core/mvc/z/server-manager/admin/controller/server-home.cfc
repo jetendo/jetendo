@@ -344,6 +344,7 @@
 				<p><a href="/z/server-manager/admin/generate-sublime-project/index" target="_blank">Generate Sublime Text Project Files</a></p>
 				<p><a href="/z/server-manager/admin/db-upgrade/installDatabaseVersion">Install Test Database</a></p>
 			</cfif>
+			<p><a href="/z/server-manager/admin/site/publishNginxAllSitesConfig" target="_blank">Publish Nginx Config For All Sites</a></p>
 			<h3>Scheduled Tasks</h3>
 			<p><a href="/z/server-manager/tasks/password-expiration/index" target="_blank">Delete passwords for inactive accounts</a></p>
 			<p><a href="/z/server-manager/tasks/verify-tables/index" target="_blank">Verify Table Structure</a></p>
