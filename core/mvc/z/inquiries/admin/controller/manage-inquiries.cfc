@@ -168,6 +168,7 @@
 	};
 	structappend(arguments.ss, ts, false);
 	if(not application.zcore.user.checkGroupAccess("member")){
+		found=true;
 		if(application.zcore.functions.zso(form, 'inquiries_id', true) NEQ 0){
 			if(not userHasAccessToLead(form.inquiries_id)){
 				found=false;

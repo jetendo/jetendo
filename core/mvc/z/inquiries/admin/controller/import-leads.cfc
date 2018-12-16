@@ -21,23 +21,39 @@ create contacts at same time as create lead (use same function to achieve it?) -
 
 	request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
 	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
+	// request.fieldMap={
+	// 	"First Name":"inquiries_first_name",
+	// 	"Last Name":"inquiries_last_name",
+	// 	"Email":"inquiries_email",
+	// 	"Phone":"inquiries_phone1",
+	// 	"Cell Phone":"Cell Phone",
+	// 	"Home Phone":"Home Phone",
+	// 	"Company":"inquiries_company",
+	// 	"Address":"inquiries_address",
+	// 	"Address 2":"inquiries_address2",
+	// 	"City":"inquiries_city",
+	// 	"State":"inquiries_state",
+	// 	"Country":"inquiries_country",
+	// 	"Postal Code":"inquiries_zip",
+	// 	"Interested In Model":"inquiries_interested_in_model",
+	// 	"Interested In Category":"inquiries_interested_in_category"
+	// }; 
 	request.fieldMap={
 		"First Name":"inquiries_first_name",
 		"Last Name":"inquiries_last_name",
 		"Email":"inquiries_email",
 		"Phone":"inquiries_phone1",
-		"Cell Phone":"Cell Phone",
-		"Home Phone":"Home Phone",
-		"Company":"inquiries_company",
+		"Cell Phone":"inquiries_custom_json",
+		"Home Phone":"inquiries_custom_json",
 		"Address":"inquiries_address",
 		"Address 2":"inquiries_address2",
 		"City":"inquiries_city",
 		"State":"inquiries_state",
 		"Country":"inquiries_country",
-		"Postal Code":"inquiries_zip",
+		"Postal Code":"inquiries_custom_json",
 		"Interested In Model":"inquiries_interested_in_model",
 		"Interested In Category":"inquiries_interested_in_category"
-	}; 
+	};
 	db.sql="SELECT * from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
 	WHERE  inquiries_type.site_id IN (#db.param(0)#,#db.param(request.zOS.globals.id)#) and 
 	inquiries_type_deleted = #db.param(0)# ";
@@ -288,7 +304,77 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	import();
 	</cfscript>
 </cffunction>
+<cffunction name="getHeader" access="public" localmode="modern"> 
+	<cfargument name="fileName" type="string" required="yes"> 
+	<cfscript> 
+	request.arrLines=listToArray(replace(application.zcore.functions.zReadFile(arguments.filename), chr(13), "", "all"), chr(10));
 
+	// first row has required fields? 
+	arrHeader=listToArray(request.arrLines[1], chr(9), true);
+	request.requiredStruct={};
+	request.optionalStruct={};
+	for(field in request.arrRequired){
+		request.requiredStruct[field]=0;
+	}
+	for(field in request.arrOptional){
+		request.optionalStruct[field]=0;
+	}
+	for(i=1;i<=arrayLen(arrHeader);i++){
+		field=arrHeader[i];
+		match=false;
+		for(requiredField in request.arrRequired){
+			if(requiredField EQ field){
+				request.requiredStruct[field]=i;
+				match=true;
+			}
+		}
+		for(optionalField in request.arrOptional){
+			if(optionalField EQ field){
+				request.optionalStruct[field]=i;
+				match=true;
+			}
+		}
+		if(not match){
+			request.error=true;
+			application.zcore.status.setStatus(request.zsid, requiredField&" is required and wasn't in the column headers.", form, true);
+		}
+	}
+	request.headerCount=arrayLen(arrHeader);
+	</cfscript>
+</cffunction>
+
+<cffunction name="getRow" access="public" localmode="modern"> 
+	<cfscript>
+	request.offset++; 
+	if(request.offset GT arrayLen(request.arrLines)){
+		row={success:false};
+	}else{
+		arrRow=listToArray(request.arrLines[request.offset], chr(9), true);
+		row={ success:true, data:ts};
+	}
+	return row;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getProcessedRow" access="public" localmode="modern"> 
+	<cfscript>
+	request.offset++; 
+	if(request.offset GT arrayLen(request.arrLines)){
+		row={success:false};
+	}else{
+		arrRow=listToArray(request.arrLines[request.offset], chr(9), true); 
+		ts={};
+		for(field in request.requiredStruct){
+			ts[field]=row.data[request.requiredStruct[field]]
+		}
+		for(field in request.optionalStruct){
+			ts[field]=row.data[request.optionalStruct[field]]
+		}
+		row={ success:true, data:ts};
+	}
+	return row;
+	</cfscript>
+</cffunction>
 
 <cffunction name="scheduleImport" access="remote" localmode="modern" roles="administrator"> 
 	<cfscript> 
@@ -309,28 +395,37 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(form.filename EQ false){
 		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
 	}
+	request.offset=1;
+	request.error=false;
+	// verify file format.
+	getHeader(form.filename);
 
-	error=false;
-	// verify file format. 
-
-	arrLines=listToArray(replace(application.zcore.functions.zReadFile(form.filename), chr(13), "", "all"), chr(10));
-
-	// first row has required fields? 
-	arrHeader=listToArray(arrLines[1], chr(9), true);
-	for(field in arrHeader){
-		match=false;
-		for(requiredField in request.arrRequired){
-			if(requiredField EQ field){
-				match=true;
+	if(not request.error){
+		while(true){
+			row=getRow();
+			if(row.success EQ false){
+				break;
+			}
+			requiredEmpty=true;
+			for(field in request.requiredStruct){
+				offset=request.requiredStruct[field];
+				if(row.data[offset] NEQ ""){
+					requiredEmpty=false;
+					break;
+				}
+			}
+			if(requiredEmpty){
+				request.error=true;
+				application.zcore.status.setStatus(request.zsid, "Line ###i# doesn't have required data. All lines must have data for at least 1 of the required fields.", form, true);
+			}
+			if(arrayLen(row.data) NEQ headerCount){
+				request.error=true;
+				application.zcore.status.setStatus(request.zsid, "Every line of data must have the same number of columns as the first header line.  Line ###i# is not the same.", form, true);
+				break;
 			}
 		}
-		if(not match){
-			error=true;
-			application.zcore.status.setStatus(request.zsid, requiredField&" is required and wasn't in the column headers.", form, true);
-		}
 	}
-
-	if(error){
+	if(request.error){
 		application.zcore.functions.zDeleteFile(path&form.filename);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/import-leads/index?zsid=#request.zsid#");
 	}
@@ -402,11 +497,38 @@ create contacts at same time as create lead (use same function to achieve it?) -
 
 	leadAssigned=0;
 	db=request.zos.queryObject; 
-	path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
-	application.zcore.functions.zCreateDirectory(path);
-	filepath=path&"import-#dateformat(now(), "yyyy-mm-dd")&"-"&timeformat(now(), "HH-mm-ss")#.txt";
+	// path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
+	// application.zcore.functions.zCreateDirectory(path);
+	// filepath=path&"import-#dateformat(now(), "yyyy-mm-dd")&"-"&timeformat(now(), "HH-mm-ss")#.txt";
 	debug=false;
+	db.sql="select * from #db.table("inquiries_import_log", request.zos.zcoreDatasource)# 
+	WHERE site_id=#db.param(request.zos.globals.id)# and 
+	inquiries_import_log_deleted=#db.param(0)# and 
+	inquiries_import_log_error_status=#db.param(0)# 
+	ORDER BY inquiries_import_log_id ASC ";
+	qImport=db.execute("qImport");
 
+	for(importRow in qImport){
+
+		request.offset=1;
+		request.error=false;
+		// verify file format.
+		getHeader(importRow.inquiries_import_log_filename);
+
+		if(not request.error){
+			while(true){
+				// TODO: change to use filereadline instead
+				row=getProcessedRow();
+				if(row.success EQ false){
+					break;
+				} 
+				// import each row, use request.fieldMap to determine if custom_json or not
+				writedump(row);
+				break;
+			}
+		}
+	}
+	abort;
 
 
 	throw("Mark inquiries record with the file that was used during import to make it easier to remove mistakes.");
@@ -416,7 +538,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	// need a table that tracks the imports per user, so we can display a global and user specific log status, and recover from mistakes.
 
 	// need to store the inquiries_import_file_id in this table.
-
+// request.fieldMap
 
 	if(structkeyexists(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_log_id)){
 		echo("Import cancelled");

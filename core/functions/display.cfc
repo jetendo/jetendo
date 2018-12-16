@@ -512,7 +512,7 @@ zSlideShow(ts);
 					slideshowCom.getPhoto(local);
 				}
 				echo('</div>
-				</div>');writedump(qss);abort;
+				</div>');
 			}
 		}
 	}
