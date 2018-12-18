@@ -23,7 +23,7 @@ $("#formForward").on("submit", function(){
 	zAjax(tempObj);
 });
  --->
-<cffunction name="submit" localmode="modern" access="remote">
+<!--- <cffunction name="submit" localmode="modern" access="remote">
 	<cfscript>  
 	if(application.zcore.functions.zvar('enableSendToFriend', request.zos.globals.id) NEQ 1){
 		application.zcore.functions.z404("Share with friend disabled because site globals doesn't have ""Enable Send To Friend"" enabled.");
@@ -268,7 +268,7 @@ You can reply to #form.name# by replying to this email.
 		application.zcore.functions.zReturnJson({ success:true });
 	}
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
 <cffunction name="index" localmode="modern" access="remote">
 <cfscript>
@@ -301,8 +301,14 @@ if(structkeyexists(form, 'link') EQ false){
 if(left(form.link, 4) NEQ "http"){
 	form.link=request.zos.currentHostName&form.link;
 }
-</cfscript>
-</head>
+</cfscript>  
+
+  <p>You can share this link with your friends on facebook by clicking the Share button below.</p>
+
+  <iframe src="https://www.facebook.com/plugins/share_button.php?href=#htmleditformat(form.link)#&layout=button_count&size=large&mobile_iframe=true&width=106&height=28" width="106" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
+  <!--- &appId=115495061846681 --->
+
+<!--- 
 	<cfscript>
 	application.zcore.functions.zStatusHandler(request.zsid, true);
 	</cfscript>
@@ -352,7 +358,7 @@ if(left(form.link, 4) NEQ "http"){
 	</table>
 	<input type="hidden" name="js3811" id="js3811" value="" />
 	<input type="hidden" name="js3812" id="js3812" value="#application.zcore.functions.zGetFormHashValue()#" />
-	</form>
+	</form>--->
 
 </cffunction>
 </cfoutput> 

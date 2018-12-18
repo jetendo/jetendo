@@ -775,14 +775,16 @@ function reloadBind($a){
 
 function convertHTMLTOPDF($a){
 	set_time_limit(30);
-	if(count($a) != 4){
-		echo "4 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs and javascriptDelay.\n";
-		return "0|4 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs and javascriptDelay.";
+	if(count($a) != 6){
+		echo "6 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs, javascriptDelay, pageWidthInches and pageHeightInches.\n";
+		return "0|6 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTab, javascriptDelay, pageWidthInches and pageHeightInches.";
 	}
 	$site_short_domain=$a[0];
 	$htmlFile=$a[1];
 	$pdfFile=$a[2];
 	$javascriptDelay=$a[3];
+	$pageWidthInches=$a[4];
+	$pageHeightInches=$a[5];
 	$sitePath=zGetDomainWritableInstallPath($site_short_domain);
 	if(!is_dir($sitePath)){
 		echo "sitePath doesn't exist: ".$sitePath."\n";
@@ -796,6 +798,16 @@ function convertHTMLTOPDF($a){
 		echo "pdfFile is a required argument.\n";
 		return "0|pdfFile is a required argument.";
 	}
+	if(!is_numeric($pageWidthInches) || $pageWidthInches<1){
+		echo "pageWidthInches must be a number 1 or higher.\n";
+		return "0|pageWidthInches must be a number 1 or higher.";
+	}
+	if(!is_numeric($pageHeightInches) || $pageHeightInches<1){
+		echo "pageHeightInches must be a number 1 or higher.\n";
+		return "0|pageHeightInches must be a number 1 or higher.";
+	}
+	$pageWidthInches.="in";
+	$pageHeightInches.="in";
 	$pdfFile=getAbsolutePath($pdfFile);
 	if(substr($pdfFile, 0, strlen($sitePath)) != $sitePath){
 		echo "pdfFile, ".$pdfFile.", must be in the sites-writable directory of the current domain, ".$sitePath.".\n";
@@ -830,7 +842,7 @@ function convertHTMLTOPDF($a){
 	}
 	// Portrait or Landscape
 	// A4 or letter
-    $c=' --orientation Portrait --page-size letter --margin-top "0mm" --margin-bottom "0mm" --margin-left "0mm" --margin-right "0mm" --dpi 96 --zoom ';
+    $c=' --orientation Portrait --page-width '.escapeshellarg($pageWidthInches).' --page-height '.escapeshellarg($pageHeightInches).' --margin-top "0mm" --margin-bottom "0mm" --margin-left "0mm" --margin-right "0mm" --dpi 96 --zoom ';
 
 	if(zIsTestServer()){
 		$c.="2 ";

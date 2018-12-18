@@ -395,6 +395,11 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(form.filename EQ false){
 		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
 	}
+	ext=application.zcore.functions.zGetFileExt(form.filename);
+	if(ext NEQ "csv" and ext NEQ "tsv"){
+		application.zcore.functions.zDeleteFile(path&form.fileName);
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"File must be .csv or .tsv.  Other formats are not accepted."});
+	}
 	request.offset=1;
 	request.error=false;
 	// verify file format.

@@ -5276,7 +5276,7 @@ Define this function in another CFC to override the default email format
 		currentUserIdValue=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
 		db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
 	}
-	qCheck=db.execute("qCheck");
+	qCheck=db.execute("qCheck", "", 10000, "query", false);
 	if(qCheck.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Site Option Group is missing");
 		if(form.method EQ "autoDeleteGroup"){
