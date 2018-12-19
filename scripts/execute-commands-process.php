@@ -1292,7 +1292,7 @@ function publishNginxSiteConfig($a){
 		if(strstr($row["site_nginx_config"], "jetendo-vhost.conf") !== FALSE){
 			$wellKnownLocation="";
 		}else{
-			$wellKnownLocation="location /.well-known/ { ssi off; default_type \"text/plain\"; allow all; alias  /var/jetendo-server/jetendo/sites/\$zmaindomain/.well-known/; autoindex            off; try_files \$uri =404; } \n";
+			$wellKnownLocation="location /.well-known/ { ssi off; default_type \"text/plain\"; allow all; alias  ".zGetDomainInstallPath($row["site_short_domain"]).".well-known/; autoindex            off; try_files \$uri =404; } \n";
 		}
 
 		array_push($arrConfig, "server { 
