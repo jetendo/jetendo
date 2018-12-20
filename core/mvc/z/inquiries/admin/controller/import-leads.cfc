@@ -1,12 +1,10 @@
 <cfcomponent>
 <cfoutput>
 <!--- 
-TODO: validation of uploaded file
- schedule save not done
-actual import queue not done
-assignment
-sending of autoresponder
-create contacts at same time as create lead (use same function to achieve it?) - avoid duplicates?
+TODO:  
+cron job for import - can we combine it with another one to reduce active CFML threads?
+sending of autoresponder - not sure if it works on test server, might work on live
+not important yet: create contacts at same time as create lead (use same function to achieve it?) - avoid duplicates?
 
 /z/inquiries/admin/import-leads/index
  --->
@@ -18,27 +16,11 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(not application.zcore.user.checkGroupAccess("administrator")){
 		manageInquiriesCom.checkManageLeadAccess({ errorMessage:"You don't have access or need to login."});
 	}
+	request.importPath=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
 	request.userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 
 	request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
-	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
-	// request.fieldMap={
-	// 	"First Name":"inquiries_first_name",
-	// 	"Last Name":"inquiries_last_name",
-	// 	"Email":"inquiries_email",
-	// 	"Phone":"inquiries_phone1",
-	// 	"Cell Phone":"Cell Phone",
-	// 	"Home Phone":"Home Phone",
-	// 	"Company":"inquiries_company",
-	// 	"Address":"inquiries_address",
-	// 	"Address 2":"inquiries_address2",
-	// 	"City":"inquiries_city",
-	// 	"State":"inquiries_state",
-	// 	"Country":"inquiries_country",
-	// 	"Postal Code":"inquiries_zip",
-	// 	"Interested In Model":"inquiries_interested_in_model",
-	// 	"Interested In Category":"inquiries_interested_in_category"
-	// }; 
+	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"];  
 	request.fieldMap={
 		"First Name":"inquiries_first_name",
 		"Last Name":"inquiries_last_name",
@@ -92,11 +74,11 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		request.qUser=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 	}else{
 		if(form_type EQ "user"){
-			// only allow assigning to people who belong to the same offices that this user does. 
+			// only allow assigning to themselves
 			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE site_id=#db.param(request.zos.globals.id)# and 
+			WHERE site_id=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
 			user_deleted = #db.param(0)# and
-			user_id =#db.param(-1)#";
+			user_id =#db.param(request.zsession.user.id)#";
 			request.qUser=db.execute("qUser", "", 10000, "query", false);
 		}else{
 			// TODO: find only the users this user should have access to 
@@ -139,16 +121,66 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	</cfscript>
 </cffunction>
 
-
-<cffunction name="index" access="remote" localmode="modern" roles="administrator">  
-	<cfscript>
+<cffunction name="downloadFile" access="remote" localmode="modern" roles="administrator">  
+	<cfscript> 
 	init();
+	form.inquiries_import_file_id=application.zcore.functions.zso(form, 'inquiries_import_file_id', true);
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("inquiries_import_file", request.zos.zcoreDatasource)# 
 	WHERE 
 	inquiries_import_file_deleted=#db.param(0)# and 
 	site_id = #db.param(request.zos.globals.id)# 
 	";
+	getUserLeadFilterSQL(db);
+	qImport=db.execute("qImport");
+	if(qImport.recordcount EQ 0){
+		application.zcore.functions.z404("Invalid file");
+	}
+	application.zcore.functions.zheader( 'Content-Disposition', 'attachment; filename=' & replace(urlencodedformat(replace(qImport.inquiries_import_file_filename, ",", " ", "all")), '%2E', '.', 'all') );
+	content type="application/binary" deletefile="no" file="#request.importPath&qImport.inquiries_import_file_filename#";
+	abort;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getUserLeadFilterSQL" localmode="modern" access="public">
+	<cfargument name="db" type="component" required="yes">
+	<cfscript>
+	db=arguments.db;
+	if(not application.zcore.user.checkGroupAccess("administrator")){
+		// db.sql&=" and  ";
+		//request.userIdList
+		echo(' and ( ');
+
+		if(request.zsession.user.office_id NEQ ""){
+			echo(' (inquiries_import_file_import_user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+		}
+		if(request.userIdList NEQ ""){
+			echo(' (inquiries_import_file_import_user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries_import_file_import_user_id_siteIdType=#db.param(1)#) or ');
+		}
+		// current user 
+		echo(' (inquiries_import_file_import_user_id = #db.param(request.zsession.user.id)# and 
+		inquiries_import_file_import_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
+		) ');
+	}
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="index" access="remote" localmode="modern" roles="administrator">  
+	<cfscript>
+	init();
+	db=request.zos.queryObject;
+	db.sql="select *  from #db.table("inquiries_import_file", request.zos.zcoreDatasource)# 
+	LEFT JOIN #db.table("user", request.zos.zcoreDatasource)# user ON 
+	user.user_id = inquiries_import_file.inquiries_import_file_import_user_id and 
+	user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("inquiries_import_file.inquiries_import_file_import_user_id_siteidtype"))# and 
+	user_deleted = #db.param(0)#
+	WHERE 
+	inquiries_import_file_deleted=#db.param(0)# and 
+	inquiries_import_file.site_id = #db.param(request.zos.globals.id)# 
+	";
+	getUserLeadFilterSQL(db);
 	qImport=db.execute("qImport");
 
 	application.zcore.functions.zStatusHandler(request.zsid);
@@ -162,8 +194,12 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		echo('<table class="table-list">
 			<tr>
 				<th>ID</th>
+				<th>Uploaded By User</th>
 				<th>Name</th>
-				<th>Filename</th>
+				<th>File</th>
+				<th>Leads Imported</th>
+				<th>Leads with Errors</th>
+				<th>Total Leads</th>
 				<th>Status</th> 
 				<th>Last Updated</th> 
 				<th>Admin</th>
@@ -171,13 +207,23 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		for(row in qImport){
 			echo('<tr>');
 			echo('<td>#row.inquiries_import_file_id#</td>');
+			echo('<td>#row.user_first_name&" "&row.user_last_name# (<a href="mailto:#row.user_username#">#row.user_username#</a>)</td>');
 			echo('<td>#row.inquiries_import_file_name#</td>');
-			echo('<td>#row.inquiries_import_file_filename#</td>'); 
+			echo('<td>');
+			if(application.zcore.user.checkGroupAccess("administrator")){
+				echo('<a href="/z/inquiries/admin/import-leads/downloadFile?inquiries_import_file_id=#row.inquiries_import_file_id#" target="_blank">#row.inquiries_import_file_filename#</a>');
+			}else{
+				echo(row.inquiries_import_file_filename);
+			}
+			echo('</td>'); 
+			echo('<td>#row.inquiries_import_file_import_count#</td>');
+			echo('<td>#row.inquiries_import_file_error_count#</td>');
+			echo('<td>#row.inquiries_import_file_record_count#</td>');
 			echo('<td>');
 			if(row.inquiries_import_file_status EQ 4){
-				echo("Import cancelled on "&dateformat(row.inquiries_import_file_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_completed_datetime, "h:mmtt"));
+				echo("Import cancelled");
 			}else if(row.inquiries_import_file_status EQ 3){
-				echo("Import completed on "&dateformat(row.inquiries_import_file_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_completed_datetime, "h:mmtt"));
+				echo("Import completed");
 			}else if(row.inquiries_import_file_status EQ 2){
 				echo("Import failed with #row.inquiries_import_file_error_count# errors out of #row.inquiries_import_file_record_count# records.");
 			}else if(row.inquiries_import_file_status EQ 1){
@@ -511,13 +557,13 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	form.inquiries_import_file_name=application.zcore.functions.zso(form, 'inquiries_import_file_name');
 	form.inquiries_type_id=application.zcore.functions.zso(form, 'inquiries_type_id');
 	form.inquiries_autoresponder_id=application.zcore.functions.zso(form, 'inquiries_autoresponder_id', true);
+	form.inquiries_import_file_email=application.zcore.functions.zso(form, 'inquiries_import_file_email');
 	form.office_id=application.zcore.functions.zso(form, 'office_id', true);
 	form.uid=application.zcore.functions.zso(form, 'uid');
 	form.filepath=application.zcore.functions.zso(form, 'filepath'); 
 	form.importEmail=application.zcore.functions.zso(form, 'importEmail');
 	form.debug=application.zcore.functions.zso(form, 'debug', true, 0);
  
-	path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
 	// /z/inquiries/admin/import-leads/scheduleImport?debug=1
 	if(form.debug EQ 1){
 		form.filepath="monterey-tab-leads.csv";
@@ -526,11 +572,11 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		form.importEmail="skyflare@gmail.com";
 		form.inquiries_type_id="1|0";
 		form.inquiries_autoresponder_id="3";
-		form.inquiries_import_file_name="monterey-tab-leads.csv";
-		form.inquiries_import_name="Import1";
+		form.inquiries_import_file_name="Import1";
+		form.inquiries_import_file_filename="monterey-tab-leads.csv";
 	}else{
-		application.zcore.functions.zCreateDirectory(path); 
-		form.filepath=application.zcore.functions.zUploadFile("filepath", path); 
+		application.zcore.functions.zCreateDirectory(request.importPath); 
+		form.filepath=application.zcore.functions.zUploadFile("filepath", request.importPath); 
 		if(form.filepath EQ false){
 			application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
 		}
@@ -538,7 +584,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	ext=application.zcore.functions.zGetFileExt(form.filepath);
 	if(ext NEQ "csv" and ext NEQ "tsv"){
 		if(form.debug EQ 0){
-			application.zcore.functions.zDeleteFile(path&form.filePath);
+			application.zcore.functions.zDeleteFile(request.importPath&form.filePath);
 		}
 		application.zcore.functions.zReturnJson({success:false, errorMessage:"File must be .csv or .tsv.  Other formats are not accepted."});
 	}
@@ -549,7 +595,12 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		application.zcore.status.setStatus(request.zsid, "Import Name is required", form, true);
 	}
 	// verify file format.
-	getHeader(path&form.filepath); 
+	getHeader(request.importPath&form.filepath); 
+
+	if(form.inquiries_import_file_email EQ "" or application.zcore.functions.zEmailValidate(form.inquiries_import_file_email) EQ false){
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"Notification email is required and must be a valid email address."});
+
+	}
 
 	if(not request.error){
 		while(true){
@@ -651,7 +702,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	}
 	if(request.error){
 		if(form.debug EQ 0){
-			application.zcore.functions.zDeleteFile(path&form.filePath);
+			application.zcore.functions.zDeleteFile(request.importPath&form.filePath);
 		}
 		arrError=application.zcore.status.getErrors(request.zsid);
 		application.zcore.functions.zReturnJson({success:false, errorMessage: arrayToList(arrError, chr(10))});
@@ -677,9 +728,15 @@ create contacts at same time as create lead (use same function to achieve it?) -
 			inquiries_import_file_status:0,
 			inquiries_import_file_updated_datetime:request.zos.mysqlnow,
 			inquiries_import_file_completed_datetime:"",
-			inquiries_import_file_deleted:0
+			inquiries_import_file_deleted:0,
+			inquiries_import_file_is_administrator:0,
+			inquiries_import_file_import_user_id:request.zsession.user.id,
+			inquiries_import_file_import_user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id)
 		}
 	};
+	if(application.zcore.user.checkGroupAccess("administrator")){
+		ts.struct.inquiries_import_file_is_administrator=1;
+	}
 	inquiries_import_file_id=application.zcore.functions.zInsert(ts); 
 
 	application.zcore.functions.zReturnJson({success:true});
@@ -704,6 +761,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_import_file_deleted=#db.param(0)# 
 	";
+	getUserLeadFilterSQL(db);
 	qUpdate=db.execute("qUpdate");
 
 	application.zcore.status.setStatus(request.zsid, "Cancelling import", form, true);
@@ -716,6 +774,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	}
+	init();
 	// must guarantee only one is ever running.  It may need to be able to resume to achieve that, with small 1 to 5 minute runtimes.
 
 	setting requesttimeout="10000";
@@ -732,305 +791,149 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	inquiries_import_file_deleted=#db.param(0)# and 
 	inquiries_import_file_status in (#db.param(1)#, #db.param(0)#)
 	ORDER BY inquiries_import_file_id ASC ";
-	qImport=db.execute("qImport");
+	qImport=db.execute("qImport", "", 10000, "query", false);
 
-writedump(qimport);abort;
 
 	for(importRow in qImport){
 		application.leadImportLastDate=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss");
 
 		request.offset=1;
+		importCount=0;
+		errorCount=0;
+		totalCount=0;
 		request.error=false;
 		// verify file format.
-		getHeader(importRow.inquiries_import_file_filename);
-
+		getHeader(request.importPath&importRow.inquiries_import_file_filename);  
 		if(not request.error){
 			while(true){
-				// TODO: change to use filereadline instead
+				d=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+				if(structkeyexists(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&importRow.inquiries_import_file_id)){
+					db.sql="update #db.table("inquiries_import_file", request.zos.zcoreDatasource)# SET 
+					inquiries_import_file_import_count=#db.param(importCount)#,
+					inquiries_import_file_record_count=#db.param(totalCount)#, 
+					inquiries_import_file_error_count=#db.param(errorCount)#, 
+					inquiries_import_file_updated_datetime=#db.param(d)# , 
+					inquiries_import_file_completed_datetime=#db.param(d)# 
+					WHERE site_id = #db.param(0)# and 
+					inquiries_import_file_id=#db.param(importRow.inquiries_import_file_id)# and 
+					inquiries_import_file_deleted=#db.param(0)# ";
+					db.execute("qLog");
+					echo("Import ###importRow.inquiries_import_file_id# cancelled<br>");
+					structdelete(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&importRow.inquiries_import_file_id);
+					break;
+				} 
 				row=getProcessedRow();
 				if(row.success EQ false){
 					break;
 				} 
+				totalCount++;
 				// import each row, use request.fieldMap to determine if custom_json or not
-				writedump(row);
-				break;
-			}
-		}
-	}
-	abort;
-	// request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
-	// request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
+				// 
+				ts={
+					inquiries_external_id:"lead-import-file-"&importRow.inquiries_import_file_id,
+					inquiries_import_file_id:importRow.inquiries_import_file_id,
+					inquiries_datetime:d, 
+					site_id:request.zos.globals.id,
+					inquiries_primary:1,
+					inquiries_status_id:1,
+					inquiries_type_id:importRow.inquiries_type_id, // this is discoverboating id - better as a function call
+					inquiries_type_id_siteidtype:importRow.inquiries_type_id_siteidtype,
+					inquiries_deleted:0,
+					inquiries_updated_datetime:d,
+					inquiries_session_id:createUUID(),
+					inquiries_optin:1
+				};
+				ts2={};
+				for(field in request.fieldMap){
+					if(request.fieldMap[field] EQ "inquiries_custom_json"){
+						ts2[field]=trim(row.data[field]);
+					}else{
+						ts[request.fieldMap[field]]=trim(row.data[field]);
+					}
+				} 
+				assignStruct=structnew();    
+				office_id="";
+				form.dealer="";
 
-
-
-	throw("Mark inquiries record with the file that was used during import to make it easier to remove mistakes.");
-	throw("need to implement inquiries_autoresponder_allow_user_import");
-	// this was the discover boating import below.  Need to make it a background process instead, and make it general based on the file upload.
-
-	// need a table that tracks the imports per user, so we can display a global and user specific log status, and recover from mistakes.
-
-	// need to store the inquiries_import_file_id in this table.
-// request.fieldMap
-
-	if(structkeyexists(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_file_id)){
-		echo("Import cancelled");
-		structdelete(application, "inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_file_id);
-		abort;
-	}
-
+				// this is probably not possible?
+				request.autoresponderDealerName="";
+				request.autoresponderDealerFullInfo=""; 
+				// request.autoresponderDealerName=struct.name;
+				// request.autoresponderDealerFullInfo="#struct["name"]#<br>#struct["address"]#<br>#struct["city"]# #struct["state/province"]#, #struct["postal code"]#<br/>#struct["phone"]#";
+				
+				if(importRow.office_id NEQ 0){
+					assignStruct.office_id=office_id;
+					assignStruct.forceAssign=true;
+				}
+				if(importRow.user_id NEQ 0){ 
+					assignStruct.assignUserId=importRow.user_id;
+					assignStruct.assignUserIdSiteIDType=importRow.user_id_siteidtype;   
+				}
   
-	arrDealer=application.zcore.siteOptionCom.optionGroupStruct("Dealer");
-	dealerStateLookup={};
-	montereyDealer={};
-	for(dealer in arrDealer){ 
-		if(dealer["state/province"] NEQ ""){
-			if(not structkeyexists(dealerStateLookup, dealer["state/province"])){
-				dealerStateLookup[dealer["state/province"]]=[];
-			}
-			arrayAppend(dealerStateLookup[dealer["state/province"]], dealer);
-		}
-	}
-	dealerGroupId = request.userGroupCom.getGroupId('Dealer_Manager',request.zos.globals.id); 
-
-	dealerCom=createobject("component", request.zRootCFCPath&"mvc.controller.dealer");
-	leadCount=0;
-	if(structkeyexists(x.processsaleslead.dataarea, 'salesLead')){
-		xs=x.processsaleslead.dataarea.salesLead;
-		for(i=1;i<=arraylen(xs);i++){
-			lead=xs[i];
-			d=replace(left(lead.header.documentDateTime.xmltext, len(lead.header.documentDateTime.xmltext)-6), "T", " ");  
-			d=parseDatetime(d);  
-			ps=lead.header.IndividualProspect;
-			
-			ts={
-				inquiries_external_id:"lead-import-"&lead.header.documentId.xmltext,
-				inquiries_datetime:dateformat(d, "yyyy-mm-dd")&" "&timeformat(d, "HH:mm:ss"),
-				inquiries_first_name:ps.personname.givenName.xmltext,
-				inquiries_last_name:ps.personname.familyName.xmltext,
-				site_id:request.zos.globals.id,
-				inquiries_primary:1,
-				inquiries_status_id:1,
-				inquiries_type_id:20, // this is discoverboating id - better as a function call
-				inquiries_type_id_siteidtype:1,
-				inquiries_deleted:0,
-				inquiries_updated_datetime:request.zos.mysqlnow,
-				inquiries_session_id:createUUID()
-			};
-
-			inquiryStruct=application.zcore.functions.zGetInquiryByExternalId(ts.inquiries_external_id);
-			leadExists=false;
-			if(structcount(inquiryStruct) NEQ 0){
-				// skip lead already imported.
-				leadExists=true;
-				continue;
-			} 
-			//throw("test discover boating import");		abort;
-
-			assignStruct=structnew();
-			// assignStruct.assignUserId=481;
-			// assignStruct.assignUserIdSiteIdType=1; 
-			if(ps.marketingMailInd EQ 1){
-				ts["inquiries_optin"]=1;
-			}
-			if(structkeyexists(ps, 'address') and structkeyexists(ps.address, 'addressLine')){
-				if(arraylen(ps.address.addressLine) GTE 1){
-					ts.inquiries_address=ps.address.addressLine[1].xmltext;
-				}
-				arrayDeleteAt(ps.address.addressLine, 1);
-				if(structkeyexists(ps.address, 'addressLine') and arraylen(ps.address.addressLine) GTE 1){
-					arrAddress=[];
-					for(n in ps.address.addressLine){
-						arrayAppend(arrAddress, n.xmltext);
-					}
-					ts.inquiries_address2=arrayToList(arrAddress, ", ");
-				}
-			}
-			if(structkeyexists(ps, 'address') and structkeyexists(ps.address, 'city')){
-				ts.inquiries_city=ps.address.city.xmltext;
-			}
-			ts.inquiries_state="";
-			if(structkeyexists(ps, 'address') and structkeyexists(ps.address, 'StateOrProvince')){
-				ts.inquiries_state=ps.address.StateOrProvince.xmltext;
-			}
-			ts.inquiries_zip="";
-			if(structkeyexists(ps, 'address') and structkeyexists(ps.address, 'PostalCode')){
-				ts.inquiries_zip=ps.address.PostalCode.xmltext;
-			}
-			ts2={};
-			office_id="";
-			form.dealer="";
-			arrOffice=[];
-			findDealer=false;
-
-			request.autoresponderDealerName="";
-			request.autoresponderDealerFullInfo="";
-			if(structkeyexists(ps, 'address') and structkeyexists(ps.address, 'Country')){
-				ts.inquiries_country=ps.address.Country.xmltext;
-				findRandomStateDealer=false;
-				if(ts.inquiries_country EQ "US" or ts.inquiries_country EQ "CA"){
-					if(structkeyexists(ps.address, 'PostalCode')){
-						// find dealer based on zip code distance - server side.
-						findDealer=true;
-						request.international=false;
-						form.query=ts.inquiries_zip;
-						form.lat="";
-						form.lng="";
-						form.country=ts.inquiries_country;
-						form.quote_model=""; 
-					}else{
-						findDealer=true;
-						findRandomStateDealer=true;
-					}
+				ts.inquiries_custom_json=application.zcore.functions.zSetInquiryCustomJsonFromStruct(ts2); 
+				// writedump(assignStruct);
+				// writedump(ts);
+				// abort;
+				form.inquiries_id=application.zcore.functions.zInsertLead(ts);     
+				if(form.inquiries_id EQ false){
+					errorCount++; 
 				}else{
-					request.international=true;
-					findDealer=true;
-					form.query=ts.inquiries_country;
-					form.lat="";
-					form.lng="";
-					form.country=ts.inquiries_country;
-					form.quote_model="";
-				}
-				if(findDealer){
-					if(ts.inquiries_state NEQ "" and findRandomStateDealer and structkeyexists(dealerStateLookup, ts.inquiries_state)){
-						tempDealer=dealerStateLookup[ts.inquiries_state][randrange(1, arraylen(dealerStateLookup[ts.inquiries_state]))];
-						data={dealers:[ { data: tempDealer }] };
-						echo('forced random state dealer<br>');
+					assignStruct.inquiries_id=form.inquiries_id;
+					assignStruct.subject="New Lead on #request.zos.globals.shortdomain#";  
+
+					if(request.zos.isTestServer){
+						ts.inquiries_comments=application.zcore.functions.zso(ts, 'inquiries_comments')&"Test Server Mode: This lead would have been assigned to office_id: #importRow.office_id# and user_id: #importRow.user_id#|#importRow.user_id_siteidtype#";
 					}else{
-						data=dealerCom.getDealerData();
-
-						if(arrayLen(data.dealers) EQ 0 and structcount(montereyDealer) NEQ 0){
-							data={dealers:[ { data: montereyDealer }] };
-							echo('forced monterey dealer<br>');
-						}
-					} 
-					if(arrayLen(data.dealers) GTE 1){
-						form.dealer=data.dealers[1].data.__setId;
-						struct=application.zcore.siteOptionCom.getOptionGroupSetById(["Dealer"],form["Dealer"]); 
-						if(structcount(struct)){
-							ts2["Dealer ID"]=struct.__setID;
-
-							ts2["Dealer Info"]="#struct["name"]#<br/>
-							#struct["address"]#, #struct["city"]# #struct["state/province"]#, #struct["postal code"]#<br/>
-							#struct["phone"]#";
-							request.autoresponderDealerName=struct.name;
-							request.autoresponderDealerFullInfo="#struct["name"]#<br>#struct["address"]#<br>#struct["city"]# #struct["state/province"]#, #struct["postal code"]#<br/>#struct["phone"]#";
-							 
-
-							ts4={
-								"DealerID":{value:form.dealer, listDelimiter:","}
-							};
-							application.zcore.functions.zSetOfficeIdForAutoresponder(form.dealer);
-							arrOffice=application.zcore.user.searchOfficesByStruct(ts4);
-							if(arrayLen(arrOffice) NEQ 0){
-								ts.office_id=arrOffice[1].office_id;
-								office_id=ts.office_id;
-
-								// how to get the user for this dealer?
-								db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# WHERE 
-								concat(#db.param(',')#, office_id, #db.param(',')#) LIKE #db.param("%,"&ts.office_id&",%")# and 
-								user_username=#db.param(struct["ARI Email"])# and 
-								user_active=#db.param(1)# and 
-								site_id = #db.param(request.zos.globals.id)# and 
-								user_deleted=#db.param(0)# and 
-								user_group_id=#db.param(dealerGroupId)# 
-								LIMIT #db.param(0)#, #db.param(1)#";
-								// we are only pulling the first dealer manager.  if there is more then one, it could be a problem, but we are ignoring this problem for now.
-								// we would need a way to set the "primary" user in a group to fix
-								qUser=db.execute("qUser");  
-								if(qUser.recordcount NEQ 0){
-									// assign should be here
-									structdelete(assignStruct, 'assignEmail');
-									assignStruct.assignUserId=qUser.user_id;
-									assignStruct.assignUserIdSiteIDType=1;  
-								} 
-							} 
-							request.autoresponderDealerName=struct.name;
-							request.autoresponderDealerFullInfo="#struct["name"]#<br>#struct["address"]#<br>#struct["city"]# #struct["state/province"]#, #struct["postal code"]#<br/>#struct["phone"]#";
-						}
 					}
-				}
-			}  
-
-
-			if(structkeyexists(ps, 'contact') and structkeyexists(ps.contact, 'telephone')){
-				ts.inquiries_phone1=ps.contact.telephone.xmltext;
-				ts.inquiries_phone1_formatted=application.zcore.functions.zFormatInquiryPhone(ts.inquiries_phone1);
-			}
-			if(structkeyexists(ps, 'contact') and structkeyexists(ps.contact, 'emailAddress')){
-				ts.inquiries_email=ps.contact.emailAddress.xmltext;
-			}
-
-			// convert into custom fields
-			if(structkeyexists(ps, 'purchaseEarliestDate')){
-				ts2["Purchase Earliest Date"]=ps.purchaseEarliestDate.xmltext;
-			}
-			if(structkeyexists(ps, 'ownedVehicle') and structkeyexists(ps.ownedVehicle, 'ownedType')){
-				ts2["Owned Vehicle Type"]=ps.ownedVehicle.ownedType.xmltext;
-			}
-			if(structkeyexists(ps, 'ownedVehicle') and structkeyexists(ps.ownedVehicle, 'ModelDescription')){
-				ts2["Owned Vehicle Description"]=ps.ownedVehicle.ModelDescription.xmltext;
-			} 
-			if(structkeyexists(ps, 'Detail') and structkeyexists(ps.Detail, 'SalesVehicle') and structkeyexists(ps.Detail.SalesVehicle, 'ModelDescription')){
-				ts2["Interested In Category"]=ps.Detail.SalesVehicle.ModelDescription.xmltext;
-			}
-			if(structkeyexists(ps, 'Detail') and structkeyexists(ps.Detail, 'LeadRequestType')){
-				ts2["Lead Request Type"]=ps.Detail.LeadRequestType.xmltext;
-			}
-			if(structkeyexists(ps, 'Detail') and structkeyexists(ps.Detail, 'LeadIndustryType')){
-				ts2["Lead Industry Type"]=ps.Detail.LeadIndustryType.xmltext;
-			}
-
-			ts.inquiries_custom_json=application.zcore.functions.zSetInquiryCustomJsonFromStruct(ts2); 
-			if(findDealer){
-				// TODO: maybe set the customer_id later too
-				if(office_id EQ "" or office_id EQ "0"){
-					savecontent variable="out"{
-						echo('<h2>lead with external id: #ts.inquiries_external_id# will be missing office_id</h2>');
-						writedump("office_id:"&office_id);
-						writedump("leadExists:"&leadExists);
-						writedump("dealer: "&form.dealer);
-						writedump(ts);
-						writedump(arrOffice);
-						writedump(ps);
-					}
-					throw(out);
+					rs=application.zcore.functions.zAssignAndEmailLead(assignStruct);
+			  		application.zcore.functions.zSetOfficeIdForInquiryId(form.inquiries_id, importRow.office_id);
+					importCount++;
 				} 
 			}
-			if(not leadExists){
-				leadCount++;
-				form.inquiries_id=application.zcore.functions.zImportLead(ts);   
+			// notify user the import was completed
+			ts={};
+			ts.subject="Lead import named: #importRow.inquiries_import_file_name# was completed";
+			ts.html='#application.zcore.functions.zHTMLDoctype()#
+				<head>
+				<meta charset="utf-8" />
+				<title></title>
+				</head> 
+				<body>
+				<h2>Lead Import Complete</h2>
+				<p>Import Name: #importRow.inquiries_import_file_name#</p>
+				<p>#importCount# of #totalCount# leads were imported.  There were #errorCount# errors.</p>';
+				if(importRow.inquiries_import_file_is_administrator EQ 1){ 
+					domain=application.zcore.functions.zVar("publicUserManagerDomain", importRow.site_id, application.zcore.functions.zvar("domain", importRow.site_id)); 
+					ts.html&='<p><a href="#domain#/z/inquiries/admin/manage-inquiries/userIndex">Manage Leads</a> | <a href="#domain#/z/inquiries/admin/import-leads/userIndex">Lead Import Log</a></p>';
+				}else{ 
+					ts.html&='<p><a href="#request.zos.globals.domain#/z/inquiries/admin/manage-inquiries/index">Manage Leads</a> | <a href="#request.zos.globals.domain#/z/inquiries/admin/import-leads/index">Lead Import Log</a></p>';
+				}
+				ts.html&'</body>
+			</html>';
+			ts.to=importRow.inquiries_import_file_email; 
+			ts.from=request.officeEmail;
+		 
+			rCom=application.zcore.email.send(ts); 
+
+			if(errorCount GT 0){
+				newStatus=2;
 			}else{
-				form.inquiries_id=inquiryStruct.inquiries_id;
-			}   
-
-			if(findDealer){
-				assignStruct.office_id=office_id;
-				assignStruct.forceAssign=true;
+				newStatus=3;
 			}
-			assignStruct.inquiries_id=form.inquiries_id;
-			assignStruct.subject="New Lead on #request.zos.globals.shortdomain#"; 
-			leadAssigned++;
-			rs=application.zcore.functions.zAssignAndEmailLead(assignStruct);
-			if(findDealer){
-	    		application.zcore.functions.zSetOfficeIdForInquiryId(form.inquiries_id, office_id);
-	    	}
-
-    		db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# where inquiries_id = #db.param(form.inquiries_id)# and site_id =#db.param(request.zos.globals.id)# and inquiries_deleted=#db.param(0)#";
-    		qCheck=db.execute("qCheck");
-    		if(qCheck.recordcount NEQ 0){
-				if(findDealer){
-	    			if(qCheck.office_id EQ 0){
-	    				throw("discoverboating - zAssignAndEmailLead or zSetOfficeIdForInquiryId failed to set office_id to #office_id# for inquiries_id=#form.inquiries_id#");
-	    			}
-	    		}
-    		}
-			if(rs.success EQ false){
-				// failed to assign/email lead
-				//zdump(local.rs);
-			}   
+			db.sql="update #db.table("inquiries_import_file", request.zos.zcoreDatasource)# SET 
+			inquiries_import_file_import_count=#db.param(importCount)#,
+			inquiries_import_file_record_count=#db.param(totalCount)#, 
+			inquiries_import_file_error_count=#db.param(errorCount)#,
+			inquiries_import_file_status=#db.param(newStatus)#,
+			inquiries_import_file_updated_datetime=#db.param(d)#,
+			inquiries_import_file_completed_datetime=#db.param(d)#
+			WHERE site_id = #db.param(importRow.site_id)# and 
+			inquiries_import_file_id=#db.param(importRow.inquiries_import_file_id)# and 
+			inquiries_import_file_deleted=#db.param(0)# ";
+			db.execute("qUpdate");
 		}
 	}
-	echo('Imported #leadCount# leads | assigned #leadAssigned# leads');
+	echo("import complete");
 	abort;
 	</cfscript>
 </cffunction>

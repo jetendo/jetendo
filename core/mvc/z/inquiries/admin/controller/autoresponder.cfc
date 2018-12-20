@@ -625,6 +625,18 @@ if(rs.success){
 
 			</td>
 		</tr>
+		
+		<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>
+			<tr>
+				<th>Import Option</th>
+				<td>
+					<p>Allow non-administrators to import users who can receive this autoresponder?</p>
+
+					<p>#application.zcore.functions.zInput_Boolean("inquiries_autoresponder_allow_user_import")#</p>
+				</td>
+			</tr> 
+		</cfif>
+
 		<!--- <tr>
 			<th>Text Version</th>
 			<td><textarea type="text" cols="50" rows="5" name="inquiries_autoresponder_text" id="inquiries_autoresponder_text">#htmleditformat(form.inquiries_autoresponder_text)#</textarea></td>

@@ -83,11 +83,11 @@
 			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
 			if(arguments.form_type EQ "user"){
-				// only allow assigning to people who belong to the same offices that this user does. 
+				// only allow assigning to themselves
 				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-				WHERE site_id=#db.param(request.zos.globals.id)# and 
+				WHERE site_id=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
 				user_deleted = #db.param(0)# and
-				user_id =#db.param(-1)#";
+				user_id =#db.param(request.zsession.user.id)#";
 				qAgents=db.execute("qAgents", "", 10000, "query", false);
 			}else{
 				// TODO: find only the users this user should have access to 
@@ -675,7 +675,7 @@
 			db.sql="UPDATE #db.table("contact", request.zos.zcoreDatasource)# SET 
 			contact_assigned_user_id=#db.param(form.contact_assigned_user_id)#, 
 			contact_assigned_user_id_siteIdType=#db.param(form.contact_assigned_user_id_siteIdType)# 
-			WHERE contact_id = #db.param(form.contact_id)# and 
+			WHERE contact_id = #db.param(qInquiry.contact_id)# and 
 			contact_deleted=#db.param(0)# and 
 			site_id=#db.param(request.zos.globals.id)#";
 			db.execute("qUpdateContact");
