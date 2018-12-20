@@ -234,7 +234,7 @@ if(rs.success){
 		if(not ss.preview and not ss.forceSend){
 			db.sql&=" and inquiries_autoresponder_active=#db.param(1)# ";
 		}
-		qAutoresponder=db.execute("qAutoresponder"); 
+		qAutoresponder=db.execute("qAutoresponder", "", 10000, "query", false); 
 		if(qAutoresponder.recordcount NEQ 0){
 			hasModelEmail=true;
 		}
@@ -255,7 +255,7 @@ if(rs.success){
 		if(not ss.preview and not ss.forceSend){
 			db.sql&=" and inquiries_autoresponder_active=#db.param(1)# ";
 		}
-		qAutoresponder=db.execute("qAutoresponder"); 
+		qAutoresponder=db.execute("qAutoresponder", "", 10000, "query", false); 
 	} 
 	if(qAutoresponder.recordcount EQ 0){  
 		return {success:false}; 
