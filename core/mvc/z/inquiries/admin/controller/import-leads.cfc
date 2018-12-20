@@ -18,6 +18,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(not application.zcore.user.checkGroupAccess("administrator")){
 		manageInquiriesCom.checkManageLeadAccess({ errorMessage:"You don't have access or need to login."});
 	}
+	request.userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
 
 	request.arrRequired=["First Name", "Last Name", "Email", "Phone"];
 	request.arrOptional=["Cell Phone", "Home Phone", "Address", "Address 2", "City", "State", "Country", "Postal Code", "Interested In Model", "Interested In Category"]; 
@@ -81,6 +82,34 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	request.qAutoresponder=db.execute("qAutoresponder", "", 10000, "query", false); 
 
 	request.arrOffice=[];
+
+	if(form.method EQ "userAssign"){
+		form_type="user";
+	}else{
+		form_type="member";
+	}
+	if(request.zsession.user.office_id NEQ ""){
+		request.qUser=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
+	}else{
+		if(form_type EQ "user"){
+			// only allow assigning to people who belong to the same offices that this user does. 
+			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+			WHERE site_id=#db.param(request.zos.globals.id)# and 
+			user_deleted = #db.param(0)# and
+			user_id =#db.param(-1)#";
+			request.qUser=db.execute("qUser", "", 10000, "query", false);
+		}else{
+			// TODO: find only the users this user should have access to 
+			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+			WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+			user_deleted = #db.param(0)# and
+			user_group_id <> #db.param(request.userGroupCom.getGroupId('user',request.zos.globals.id))# 
+			 and (user_server_administrator=#db.param(0)#)
+			ORDER BY member_first_name ASC, member_last_name ASC";
+			request.qUser=db.execute("qUser", "", 10000, "query", false);
+		} 
+	} 
+
 	if(application.zcore.user.checkGroupAccess("administrator") and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
 		if(application.zcore.user.checkGroupAccess("administrator")){ 
 			ts={
@@ -121,6 +150,9 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	site_id = #db.param(request.zos.globals.id)# 
 	";
 	qImport=db.execute("qImport");
+
+	application.zcore.functions.zStatusHandler(request.zsid);
+
 	echo('<h2>Lead Import Log</h2>');
 	echo('<p><a href="/z/inquiries/admin/import-leads/schedule" class="z-manager-search-button">New Import</a></p>');
 
@@ -129,32 +161,35 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	}else{
 		echo('<table class="table-list">
 			<tr>
+				<th>ID</th>
 				<th>Name</th>
 				<th>Filename</th>
-				<th>Status</th>
+				<th>Status</th> 
+				<th>Last Updated</th> 
 				<th>Admin</th>
 			</tr>');
 		for(row in qImport){
 			echo('<tr>');
 			echo('<td>#row.inquiries_import_file_id#</td>');
 			echo('<td>#row.inquiries_import_file_name#</td>');
-			echo('<td>#row.inquiries_import_file_filename#</td>');
+			echo('<td>#row.inquiries_import_file_filename#</td>'); 
 			echo('<td>');
-			if(row.inquiries_import_file_error_status EQ 4){
+			if(row.inquiries_import_file_status EQ 4){
 				echo("Import cancelled on "&dateformat(row.inquiries_import_file_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_completed_datetime, "h:mmtt"));
-			}else if(row.inquiries_import_file_error_status EQ 3){
+			}else if(row.inquiries_import_file_status EQ 3){
 				echo("Import completed on "&dateformat(row.inquiries_import_file_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_completed_datetime, "h:mmtt"));
-			}else if(row.inquiries_import_file_error_status EQ 2){
-				echo("Import failed on "&dateformat(row.inquiries_import_file_completed_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_completed_datetime, "h:mmtt")&" with #row.inquiries_import_file_error_count# errors out of #row.inquiries_import_file_record_count# records.");
-			}else if(row.inquiries_import_file_error_status EQ 1){
+			}else if(row.inquiries_import_file_status EQ 2){
+				echo("Import failed with #row.inquiries_import_file_error_count# errors out of #row.inquiries_import_file_record_count# records.");
+			}else if(row.inquiries_import_file_status EQ 1){
 				echo("Import is running");
-			}else if(row.inquiries_import_file_error_status EQ 0){
+			}else if(row.inquiries_import_file_status EQ 0){
 				echo("Import is scheduled");
 			}
 			echo('</td>');
+			echo('<td>#dateformat(row.inquiries_import_file_updated_datetime, "m/d/yy")&" at "&timeformat(row.inquiries_import_file_updated_datetime, "h:mmtt")#</td>'); 
 			echo('<td>');
-			if(row.inquiries_import_file_error_status LTE 1){
-				echo('<a href="/z/inquiries/admin/import-leads/cancelImport">Cancel</a>');
+			if(row.inquiries_import_file_status LTE 1){
+				echo('<a href="/z/inquiries/admin/import-leads/cancelImport?inquiries_import_file_id=#row.inquiries_import_file_id#">Cancel</a>');
 			}
 			echo('</td>');
 			echo('</tr>');
@@ -164,7 +199,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	</cfscript>
 </cffunction>
 
-<cffunction name="userInstructions" access="remote" localmode="modern" roles="administrator">  
+<cffunction name="userInstructions" access="remote" localmode="modern" roles="user">  
 	<cfscript>
 	init();
 	</cfscript>
@@ -197,8 +232,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 <cffunction name="schedule" access="remote" localmode="modern" roles="administrator">  
 	<cfscript>
 	init();
-	db=request.zos.queryObject; 
-	var userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin"); 
+	db=request.zos.queryObject;  
 
 	application.zcore.template.setTag("title", "Import Leads");
 	// application.zcore.functions.zSetPageHelpId("2.7.1.1");  
@@ -273,35 +307,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		</cfif>
 		<p>&nbsp;</p> 
 		
-		<h3>Select User (Optional)</h3>
-		<cfscript> 
-		if(form.method EQ "userAssign"){
-			form_type="user";
-		}else{
-			form_type="member";
-		}
-		if(request.zsession.user.office_id NEQ ""){
-			qAgents=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
-		}else{
-			if(form_type EQ "user"){
-				// only allow assigning to people who belong to the same offices that this user does. 
-				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-				WHERE site_id=#db.param(request.zos.globals.id)# and 
-				user_deleted = #db.param(0)# and
-				user_id =#db.param(-1)#";
-				qAgents=db.execute("qAgents", "", 10000, "query", false);
-			}else{
-				// TODO: find only the users this user should have access to 
-				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-				WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-				user_deleted = #db.param(0)# and
-				user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))# 
-				 and (user_server_administrator=#db.param(0)#)
-				ORDER BY member_first_name ASC, member_last_name ASC";
-				qAgents=db.execute("qAgents", "", 10000, "query", false);
-			} 
-		} 
-		</cfscript> 
+		<h3>Select User (Optional)</h3> 
 		<cfif application.zcore.user.checkGroupAccess("administrator") and form.method EQ "index" and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>
 			<!--- do nothing --->
 		<cfelse>
@@ -315,15 +321,13 @@ create contacts at same time as create lead (use same function to achieve it?) -
 
 		<div style="width:100%; margin-bottom:20px;float:left;">
 			<div style="float:left; width:100%;">Select a user:</div>
-			<div style="float:left; width:100%;"> 
-
-
+			<div style="float:left; width:100%;">  
 			<cfscript>  
 			form.user_id = ""; 
 			echo('<select name="user_id" id="user_id" size="1">');
 			echo('<option value="" data-office-id="">-- Select --</option>');
-			for(row in qAgents){
-				userGroupName=userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
+			for(row in request.qUser){
+				userGroupName=request.userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
 				echo('<option value="'&row.user_id&"|"&row.site_id&'" data-office-id=",'&row.office_id&',"');
 				if(form.user_id EQ row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)){
 					echo(' selected="selected" ');
@@ -372,9 +376,9 @@ create contacts at same time as create lead (use same function to achieve it?) -
 			userElement.selectedIndex=0;
 		}
 		var arrAgentPhoto=new Array();
-		<cfif qAgents.recordcount>
-			<cfloop query="qAgents">
-			arrAgentPhoto["#qAgents.user_id#|#qAgents.site_id#"]=<cfif qAgents.member_photo NEQ "">"#jsstringformat('#application.zcore.functions.zvar('domain',qAgents.userSiteId)##request.zos.memberImagePath##qAgents.member_photo#')#"<cfelse>""</cfif>;
+		<cfif request.qUser.recordcount>
+			<cfloop query="request.qUser">
+			arrAgentPhoto["#request.qUser.user_id#|#request.qUser.site_id#"]=<cfif request.qUser.member_photo NEQ "">"#jsstringformat('#application.zcore.functions.zvar('domain',request.qUser.userSiteId)##request.zos.memberImagePath##request.qUser.member_photo#')#"<cfelse>""</cfif>;
 			</cfloop>
 		</cfif>
 		/* ]]> */
@@ -417,14 +421,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	});
 	</script>
 </cffunction>
-
-
-<cffunction name="userImport" access="remote" localmode="modern" roles="user">  
-	<cfscript>
-	// TODO: verify user has access
-	import();
-	</cfscript>
-</cffunction>
+ 
 <cffunction name="getHeader" access="public" localmode="modern"> 
 	<cfargument name="fileName" type="string" required="yes"> 
 	<cfscript> 
@@ -439,26 +436,25 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	}
 	for(field in request.arrOptional){
 		request.optionalStruct[field]=0;
-	}
+	} 
+	matchCount=0;
 	for(i=1;i<=arrayLen(arrHeader);i++){
-		field=arrHeader[i];
-		match=false;
+		field=trim(arrHeader[i]); 
 		for(requiredField in request.arrRequired){
 			if(requiredField EQ field){
 				request.requiredStruct[field]=i;
-				match=true;
+				matchCount++;
 			}
 		}
 		for(optionalField in request.arrOptional){
 			if(optionalField EQ field){
-				request.optionalStruct[field]=i;
-				match=true;
+				request.optionalStruct[field]=i; 
 			}
-		}
-		if(not match){
-			request.error=true;
-			application.zcore.status.setStatus(request.zsid, requiredField&" is required and wasn't in the column headers.", form, true);
-		}
+		} 
+	}
+	if(matchCount NEQ 4){
+		request.error=true;
+		application.zcore.status.setStatus(request.zsid, "All of the required fields must be in the file in the first row: "&arrayToList(request.arrRequired, ", "), form, true);
 	}
 	request.headerCount=arrayLen(arrHeader);
 	</cfscript>
@@ -483,13 +479,23 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(request.offset GT arrayLen(request.arrLines)){
 		row={success:false};
 	}else{
+		if(trim(request.arrLines[request.offset]) EQ ""){
+			row={success:false};
+		}
 		arrRow=listToArray(request.arrLines[request.offset], chr(9), true); 
-		ts={};
+		ts={}; 
+		if(arrayLen(arrRow) NEQ request.headerCount){
+			return { success:true, data:ts};
+		}
 		for(field in request.requiredStruct){
-			ts[field]=row.data[request.requiredStruct[field]]
+			if(request.requiredStruct[field] NEQ 0){
+				ts[field]=arrRow[request.requiredStruct[field]];
+			}
 		}
 		for(field in request.optionalStruct){
-			ts[field]=row.data[request.optionalStruct[field]]
+			if(request.optionalStruct[field] NEQ 0){
+				ts[field]=arrRow[request.optionalStruct[field]];
+			}
 		}
 		row={ success:true, data:ts};
 	}
@@ -509,16 +515,31 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	form.uid=application.zcore.functions.zso(form, 'uid');
 	form.filepath=application.zcore.functions.zso(form, 'filepath'); 
 	form.importEmail=application.zcore.functions.zso(form, 'importEmail');
+	form.debug=application.zcore.functions.zso(form, 'debug', true, 0);
  
 	path=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
-	application.zcore.functions.zCreateDirectory(path); 
-	form.filepath=application.zcore.functions.zUploadFile("filepath", path); 
-	if(form.filepath EQ false){
-		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
+	// /z/inquiries/admin/import-leads/scheduleImport?debug=1
+	if(form.debug EQ 1){
+		form.filepath="monterey-tab-leads.csv";
+		form.office_id=64;
+		form.uid="367|298";
+		form.importEmail="skyflare@gmail.com";
+		form.inquiries_type_id="1|0";
+		form.inquiries_autoresponder_id="3";
+		form.inquiries_import_file_name="monterey-tab-leads.csv";
+		form.inquiries_import_name="Import1";
+	}else{
+		application.zcore.functions.zCreateDirectory(path); 
+		form.filepath=application.zcore.functions.zUploadFile("filepath", path); 
+		if(form.filepath EQ false){
+			application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
+		}
 	}
 	ext=application.zcore.functions.zGetFileExt(form.filepath);
 	if(ext NEQ "csv" and ext NEQ "tsv"){
-		application.zcore.functions.zDeleteFile(path&form.filePath);
+		if(form.debug EQ 0){
+			application.zcore.functions.zDeleteFile(path&form.filePath);
+		}
 		application.zcore.functions.zReturnJson({success:false, errorMessage:"File must be .csv or .tsv.  Other formats are not accepted."});
 	}
 	request.offset=1;
@@ -528,7 +549,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		application.zcore.status.setStatus(request.zsid, "Import Name is required", form, true);
 	}
 	// verify file format.
-	getHeader(path&form.filepath);
+	getHeader(path&form.filepath); 
 
 	if(not request.error){
 		while(true){
@@ -536,22 +557,21 @@ create contacts at same time as create lead (use same function to achieve it?) -
 			if(row.success EQ false){
 				break;
 			}
-			requiredEmpty=true;
+			if(structcount(row.data) NEQ request.headerCount){
+				request.error=true;
+				application.zcore.status.setStatus(request.zsid, "Every line of data must have the same number of columns as the first header line.  Line ###request.offset# is not the same.", form, true);
+				break;
+			}
+			requiredEmpty=true; 
 			for(field in request.requiredStruct){
-				offset=request.requiredStruct[field];
-				if(row.data[offset] NEQ ""){
+				if(row.data[field] NEQ ""){
 					requiredEmpty=false;
 					break;
 				}
 			}
 			if(requiredEmpty){
 				request.error=true;
-				application.zcore.status.setStatus(request.zsid, "Line ###i# doesn't have required data. All lines must have data for at least 1 of the required fields.", form, true);
-			}
-			if(arrayLen(row.data) NEQ headerCount){
-				request.error=true;
-				application.zcore.status.setStatus(request.zsid, "Every line of data must have the same number of columns as the first header line.  Line ###i# is not the same.", form, true);
-				break;
+				application.zcore.status.setStatus(request.zsid, "Line ###request.offset# doesn't have required data. All lines must have data for at least 1 of the required fields.", form, true);
 			}
 		}
 	}
@@ -560,7 +580,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(form.inquiries_autoresponder_id NEQ 0){ 
 		found=false;
 		for(row in request.qAutoresponder){
-			if(row.site_id EQ form.inquiries_autoresponder_id){
+			if(row.inquiries_autoresponder_id EQ form.inquiries_autoresponder_id){
 				found=true;
 				break;
 			}
@@ -596,7 +616,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	if(form.office_id NEQ 0){ 
 		found=false;
 		for(row in request.arrOffice){
-			if(row.site_id EQ form.office_id){
+			if(row.office_id EQ form.office_id){
 				found=true;
 				break;
 			}
@@ -608,27 +628,31 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	}
 
 	// validate user_id
-	arrUser=listToArray(form.uid, "|");
-	if(arraylen(arrUser) NEQ 2){
-		request.error=true;
-		application.zcore.status.setStatus(request.zsid, "Invalid user.", form, true);
-	}else{
-		form.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(arrUser[2]);
-		form.user_id=arrUser[1];
-		found=false;
-		for(row in request.qUser){
-			if(row.site_id EQ arrUser[2] and row.user_id EQ arrUser[1]){
-				found=true;
-				break;
-			}
-		}
-		if(not found){
+	if(form.uid NEQ ""){
+		arrUser=listToArray(form.uid, "|");
+		if(arraylen(arrUser) NEQ 2){
 			request.error=true;
-			application.zcore.status.setStatus(request.zsid, "You don't have access to the selected user.", form, true);
-		}
-	} 
+			application.zcore.status.setStatus(request.zsid, "Invalid user.", form, true);
+		}else{
+			form.user_id_siteidtype=application.zcore.functions.zGetSiteIdType(arrUser[2]);
+			form.user_id=arrUser[1];
+			found=false;
+			for(row in request.qUser){
+				if(row.site_id EQ arrUser[2] and row.user_id EQ arrUser[1]){
+					found=true;
+					break;
+				}
+			}
+			if(not found){
+				request.error=true;
+				application.zcore.status.setStatus(request.zsid, "You don't have access to the selected user.", form, true);
+			}
+		} 
+	}
 	if(request.error){
-		application.zcore.functions.zDeleteFile(path&form.filePath);
+		if(form.debug EQ 0){
+			application.zcore.functions.zDeleteFile(path&form.filePath);
+		}
 		arrError=application.zcore.status.getErrors(request.zsid);
 		application.zcore.functions.zReturnJson({success:false, errorMessage: arrayToList(arrError, chr(10))});
 	} 
@@ -638,6 +662,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 		datasource:request.zos.zcoreDatasource,
 		struct:{
 			site_id:request.zos.globals.id,
+			office_id:form.office_id,
 			user_id:request.zsession.user.id,
 			user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id),
 			inquiries_autoresponder_id:form.inquiries_autoresponder_id,
@@ -649,13 +674,13 @@ create contacts at same time as create lead (use same function to achieve it?) -
 			inquiries_import_file_record_count:0,
 			inquiries_import_file_import_count:0,
 			inquiries_import_file_error_count:0,
-			inquiries_import_file_error_status:0,
+			inquiries_import_file_status:0,
 			inquiries_import_file_updated_datetime:request.zos.mysqlnow,
 			inquiries_import_file_completed_datetime:"",
 			inquiries_import_file_deleted:0
 		}
 	};
-	application.zcore.functions.zInsert(ts);
+	inquiries_import_file_id=application.zcore.functions.zInsert(ts); 
 
 	application.zcore.functions.zReturnJson({success:true});
 	</cfscript>
@@ -672,7 +697,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	application["inquiriesImportLogCancel"&request.zos.globals.id&"-"&form.inquiries_import_file_id]=true;
 	db=request.zos.queryObject;
 	db.sql="update #db.table("inquiries_import_file", request.zos.zcoreDatasource)# SET 
-	inquiries_import_file_error_status=#db.param(4)#, 
+	inquiries_import_file_status=#db.param(4)#, 
 	inquiries_import_file_completed_datetime=#db.param(request.zos.mysqlnow)# 
 	WHERE 
 	inquiries_import_file_id=#db.param(form.inquiries_import_file_id)# and 
@@ -693,8 +718,11 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	}
 	// must guarantee only one is ever running.  It may need to be able to resume to achieve that, with small 1 to 5 minute runtimes.
 
-	setting requesttimeout="5000";
+	setting requesttimeout="10000";
 	db=request.zos.queryObject; 
+	if(structkeyexists(application, 'leadImportLastDate') and application.leadImportLastDate-dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss") LTE 60){
+		echo("Import is already running.");
+	}
 
 	leadAssigned=0;
 	db=request.zos.queryObject;  
@@ -702,11 +730,14 @@ create contacts at same time as create lead (use same function to achieve it?) -
 	db.sql="select * from #db.table("inquiries_import_file", request.zos.zcoreDatasource)# 
 	WHERE site_id=#db.param(request.zos.globals.id)# and 
 	inquiries_import_file_deleted=#db.param(0)# and 
-	inquiries_import_file_error_status=#db.param(0)# 
+	inquiries_import_file_status in (#db.param(1)#, #db.param(0)#)
 	ORDER BY inquiries_import_file_id ASC ";
 	qImport=db.execute("qImport");
 
+writedump(qimport);abort;
+
 	for(importRow in qImport){
+		application.leadImportLastDate=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss");
 
 		request.offset=1;
 		request.error=false;
@@ -759,8 +790,7 @@ create contacts at same time as create lead (use same function to achieve it?) -
 			arrayAppend(dealerStateLookup[dealer["state/province"]], dealer);
 		}
 	}
-	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
-	dealerGroupId = userGroupCom.getGroupId('Dealer_Manager',request.zos.globals.id); 
+	dealerGroupId = request.userGroupCom.getGroupId('Dealer_Manager',request.zos.globals.id); 
 
 	dealerCom=createobject("component", request.zRootCFCPath&"mvc.controller.dealer");
 	leadCount=0;
