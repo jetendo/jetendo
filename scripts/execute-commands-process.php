@@ -847,7 +847,7 @@ function convertHTMLTOPDF($a){
 	if(zIsTestServer()){
 		$c.="2 ";
 	}else{
-		$c.="1 ";
+		$c.="2 ";
 	}
     //$c=' --orientation Portrait --page-size letter ';
 

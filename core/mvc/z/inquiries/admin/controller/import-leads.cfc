@@ -831,7 +831,7 @@ not important yet: create contacts at same time as create lead (use same functio
 		link=row.site_domain&"/z/inquiries/admin/import-leads/import";
 		rs=application.zcore.functions.zdownloadlink(link, 10000, true); 
 		echo("Ran import: "&link&": "&rs.success&"<br>");
-		writedump(rs);
+		echo(rs.filecontent&"<hr>");
 		// ignore failures to avoid flooding logs with double the errors.
 	}
 	echo("done");
@@ -933,19 +933,23 @@ not important yet: create contacts at same time as create lead (use same functio
 				// request.autoresponderDealerFullInfo="#struct["name"]#<br>#struct["address"]#<br>#struct["city"]# #struct["state/province"]#, #struct["postal code"]#<br/>#struct["phone"]#";
 				
 				if(importRow.office_id NEQ 0){
-					assignStruct.office_id=office_id;
+					assignStruct.office_id=importRow.office_id;
 					assignStruct.forceAssign=true;
 				}
 				if(importRow.user_id NEQ 0){ 
 					assignStruct.assignUserId=importRow.user_id;
 					assignStruct.assignUserIdSiteIDType=importRow.user_id_siteidtype;   
+					assignStruct.forceAssign=true;
 				}
   
 				ts.inquiries_custom_json=application.zcore.functions.zSetInquiryCustomJsonFromStruct(ts2); 
 				// writedump(assignStruct);
 				// writedump(ts);
 				// abort;
-				form.inquiries_id=application.zcore.functions.zInsertLead(ts);     
+				if(importRow.inquiries_autoresponder_id NEQ 0){
+					ts.sendAutoresponder=true;
+				}
+				form.inquiries_id=application.zcore.functions.zImportLead(ts);     
 				if(form.inquiries_id EQ false){
 					errorCount++; 
 				}else{
@@ -957,7 +961,7 @@ not important yet: create contacts at same time as create lead (use same functio
 					}else{
 					}
 					rs=application.zcore.functions.zAssignAndEmailLead(assignStruct);
-			  		application.zcore.functions.zSetOfficeIdForInquiryId(form.inquiries_id, importRow.office_id);
+			  		// application.zcore.functions.zSetOfficeIdForInquiryId(form.inquiries_id, importRow.office_id);
 					importCount++;
 				} 
 			}

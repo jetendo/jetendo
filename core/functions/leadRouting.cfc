@@ -216,6 +216,8 @@ application.zcore.functions.zInsertLead();
 ts={
 	inquiries_first_name:"",
 	// other fields
+
+	sendAutoresponder:false
 };
 application.zcore.functions.zImportLead(ts); --->
 <cffunction name="zImportLead" localmode="modern" access="public">
@@ -243,6 +245,32 @@ application.zcore.functions.zImportLead(ts); --->
 
 	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
 	inquiriesCom.indexInquiry(inquiries_id, request.zos.globals.id); 
+
+
+	if(structkeyexists(ss, 'sendAutoresponder') and ss.sendAutoresponder){
+		ds=application.zcore.functions.zGetInquiryById(inquiries_id);
+
+		if(structcount(ds) GT 0 and ds.inquiries_email NEQ ""){
+			// send autoresponder
+			ts={
+				// required
+				inquiries_type_id:ds.inquiries_type_id,
+				inquiries_type_id_siteidtype:ds.inquiries_type_id_siteidtype,
+				to:ds.inquiries_email,
+				from:request.officeEmail,
+				dataStruct:{
+					firstName:ds.inquiries_first_name,
+					email:ds.inquiries_email,
+					interestedInModel:ds.inquiries_interested_in_model,  
+					//officeName:"",
+					//officeFullInfo:"",
+					officeID:application.zcore.functions.zso(request, 'autoresponderOfficeId')
+				} 
+			}; 
+			autoResponderCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.autoresponder");
+			rs=autoResponderCom.sendAutoresponder(ts);  
+		}  
+	}
 	return inquiries_id;
 	</cfscript>
 </cffunction>

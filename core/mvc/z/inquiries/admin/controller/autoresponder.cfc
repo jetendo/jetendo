@@ -630,7 +630,7 @@ if(rs.success){
 			<tr>
 				<th>Import Option</th>
 				<td>
-					<p>Allow non-administrators to import users who can receive this autoresponder?</p>
+					<p>Allow non-administrators to import leads who can receive this autoresponder?</p>
 
 					<p>#application.zcore.functions.zInput_Boolean("inquiries_autoresponder_allow_user_import")#</p>
 				</td>
