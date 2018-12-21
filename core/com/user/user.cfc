@@ -1949,7 +1949,7 @@ application.zcore.user.selectOfficeField(ts);
         db.sql&=" ) ";
     }
     db.sql&=" ORDER BY user_first_name ASC, user_last_name ASC ";
-    qUser=db.execute("qUser"); 
+    qUser=db.execute("qUser", "", 10000, "query", false); 
     return qUser;
     </cfscript>
 </cffunction> 

@@ -11,6 +11,7 @@
 			//{ link:"/z/inquiries/admin/manage-contact/index", label:"Contacts" }, 
 			{ link:"/z/inquiries/admin/autoresponder/index", label:"Lead Autoresponders" }, 
 			{ link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv", label:"Lead Export" }, 
+			{ link:"/z/inquiries/admin/import-leads/index", label:"Import Leads" }, 
 			{ link:"/z/inquiries/admin/routing/index", label:"Lead Routing" }, 
 			{ link:"/z/inquiries/admin/lead-source-report/index", label:"Lead Source Report" }, 
 			{ link:"/z/inquiries/admin/lead-template/index", label:"Lead Template Emails" }, 
@@ -139,6 +140,11 @@
 			link:"/z/inquiries/admin/manage-inquiries/addBulk"
 		}
 	);
+	arrayAppend(ts.titleLinks, { 
+			label:"Import",
+			link:"/z/inquiries/admin/import-leads/index"
+		}
+	);
 	arrayAppend(ts.titleLinks, {
 		label:"Export",
 		link:"/z/inquiries/admin/manage-inquiries/index##exportLeadDiv"
@@ -243,16 +249,32 @@
 		}
 	);
 	arrayAppend(ts.titleLinks, { 
+			label:"Import",
+			link:"/z/inquiries/admin/import-leads/userIndex"
+		}
+	);
+	arrayAppend(ts.titleLinks, { 
 			label:"Bulk Add",
 			link:"/z/inquiries/admin/manage-inquiries/userAddBulk"
 		}
 	); 
  
 	if(request.zsession.user.office_id NEQ ""){
-		if(not structkeyexists(request.zsession, 'selectedOfficeId')){
-			request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+		arrOffice=listToArray(application.zcore.functions.zso(form, 'office_id'), ",");
+		arrOfficeVerified=[];
+		for(officeId in arrOffice){
+			officeId=trim(officeId);
+			if(","&request.zsession.user.office_id&"," CONTAINS ","&officeId&","){
+				arrayAppend(arrOfficeVerified, officeId);
+			}
 		}
-		form["office_id"] = request.zsession.selectedOfficeId;
+		form.office_id=arrayToList(arrOfficeVerified, ",");
+		if(form.office_id EQ ""){
+			if(not structkeyexists(request.zsession, 'selectedOfficeId')){
+				request.zsession.selectedOfficeId=listGetAt(request.zsession.user.office_id, 1, ",");
+			}
+			form["office_id"] = request.zsession.selectedOfficeId;
+		}
 	}
 
 	arrayAppend(ts.titleLinks, {

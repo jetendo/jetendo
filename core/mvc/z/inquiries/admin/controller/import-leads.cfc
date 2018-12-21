@@ -13,7 +13,8 @@ not important yet: create contacts at same time as create lead (use same functio
 	<cfscript>
 	db=request.zos.queryObject;
 	manageInquiriesCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.manage-inquiries");
-	if(not application.zcore.user.checkGroupAccess("administrator")){
+	manageInquiriescom.loadManageLeadGroupData();
+	if(not application.zcore.user.checkGroupAccess("user")){
 		manageInquiriesCom.checkManageLeadAccess({ errorMessage:"You don't have access or need to login."});
 	}
 	request.importPath=request.zos.globals.privateHomeDir&"inquiries-import-backup/";
@@ -70,40 +71,41 @@ not important yet: create contacts at same time as create lead (use same functio
 	}else{
 		form_type="member";
 	}
-	if(request.zsession.user.office_id NEQ ""){
-		request.qUser=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
-	}else{
-		if(form_type EQ "user"){
-			// only allow assigning to themselves
-			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE site_id=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
-			user_deleted = #db.param(0)# and
-			user_id =#db.param(request.zsession.user.id)#";
-			request.qUser=db.execute("qUser", "", 10000, "query", false);
+	if(application.zcore.user.checkGroupAccess("user")){
+		if(request.zsession.user.office_id NEQ ""){
+			request.qUser=application.zcore.user.getUsersByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id);
 		}else{
-			// TODO: find only the users this user should have access to 
-			db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
-			WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
-			user_deleted = #db.param(0)# and
-			user_group_id <> #db.param(request.userGroupCom.getGroupId('user',request.zos.globals.id))# 
-			 and (user_server_administrator=#db.param(0)#)
-			ORDER BY member_first_name ASC, member_last_name ASC";
-			request.qUser=db.execute("qUser", "", 10000, "query", false);
+			if(form_type EQ "user"){
+				// only allow assigning to themselves
+				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+				WHERE site_id=#db.param(application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id))# and 
+				user_deleted = #db.param(0)# and
+				user_id =#db.param(request.zsession.user.id)#";
+				request.qUser=db.execute("qUser", "", 10000, "query", false);
+			}else{
+				// TODO: find only the users this user should have access to 
+				db.sql="SELECT *, user.site_id userSiteId FROM  #db.table("user", request.zos.zcoreDatasource)#
+				WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+				user_deleted = #db.param(0)# and
+				user_group_id <> #db.param(request.userGroupCom.getGroupId('user',request.zos.globals.id))# 
+				 and (user_server_administrator=#db.param(0)#)
+				ORDER BY member_first_name ASC, member_last_name ASC";
+				request.qUser=db.execute("qUser", "", 10000, "query", false);
+			} 
 		} 
-	} 
-
-	if(application.zcore.user.checkGroupAccess("administrator") and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
-		if(application.zcore.user.checkGroupAccess("administrator")){ 
-			ts={
-				sortBy:"name"
-			};
-			request.arrOffice=application.zcore.user.getOffices(ts);
-		}else{
-			ts={
-				ids:listToArray(request.zsession.user.office_id, ","),
-				sortBy:"name"
-			};
-			request.arrOffice=application.zcore.user.getOffices(ts); 
+		if(application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1){
+			if(application.zcore.user.checkGroupAccess("administrator")){ 
+				ts={
+					sortBy:"name"
+				};
+				request.arrOffice=application.zcore.user.getOffices(ts);
+			}else{
+				ts={
+					ids:listToArray(request.zsession.user.office_id, ","),
+					sortBy:"name"
+				};
+				request.arrOffice=application.zcore.user.getOffices(ts);  
+			} 
 		} 
 	}
 	</cfscript>
@@ -118,6 +120,13 @@ not important yet: create contacts at same time as create lead (use same functio
 <cffunction name="userSchedule" access="remote" localmode="modern" roles="user">  
 	<cfscript> 
 	schedule();
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="userDownloadFile" access="remote" localmode="modern" roles="user">  
+	<cfscript> 
+	downloadFile();
 	</cfscript>
 </cffunction>
 
@@ -150,16 +159,16 @@ not important yet: create contacts at same time as create lead (use same functio
 	if(not application.zcore.user.checkGroupAccess("administrator")){
 		// db.sql&=" and  ";
 		//request.userIdList
-		echo(' and ( ');
+		db.sql&=(' and ( ');
 
 		if(request.zsession.user.office_id NEQ ""){
-			echo(' (inquiries_import_file_import_user_id=#db.param(0)# and inquiries.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
+			db.sql&=(' (inquiries_import_file_import_user_id=#db.param(0)# and inquiries_import_file.office_id IN (#db.trustedSQL(request.zsession.user.office_id)#) ) or ');
 		}
 		if(request.userIdList NEQ ""){
-			echo(' (inquiries_import_file_import_user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries_import_file_import_user_id_siteIdType=#db.param(1)#) or ');
+			db.sql&=(' (inquiries_import_file_import_user_id IN (#db.trustedSQL(request.userIdList)#) and inquiries_import_file_import_user_id_siteIdType=#db.param(1)#) or ');
 		}
 		// current user 
-		echo(' (inquiries_import_file_import_user_id = #db.param(request.zsession.user.id)# and 
+		db.sql&=(' (inquiries_import_file_import_user_id = #db.param(request.zsession.user.id)# and 
 		inquiries_import_file_import_user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#)
 		) ');
 	}
@@ -181,12 +190,18 @@ not important yet: create contacts at same time as create lead (use same functio
 	inquiries_import_file.site_id = #db.param(request.zos.globals.id)# 
 	";
 	getUserLeadFilterSQL(db);
-	qImport=db.execute("qImport");
+	qImport=db.execute("qImport");   
 
 	application.zcore.functions.zStatusHandler(request.zsid);
 
 	echo('<h2>Lead Import Log</h2>');
-	echo('<p><a href="/z/inquiries/admin/import-leads/schedule" class="z-manager-search-button">New Import</a></p>');
+	echo('<p><a href="/z/inquiries/admin/import-leads/');
+	if(form.method EQ "index"){
+		echo("schedule");
+	}else{
+		echo("userSchedule");
+	}
+	echo('" class="z-manager-search-button">New Import</a></p>');
 
 	if(qImport.recordcount EQ 0){
 		echo('<p>No leads have been imported here before.</p>');
@@ -210,10 +225,10 @@ not important yet: create contacts at same time as create lead (use same functio
 			echo('<td>#row.user_first_name&" "&row.user_last_name# (<a href="mailto:#row.user_username#">#row.user_username#</a>)</td>');
 			echo('<td>#row.inquiries_import_file_name#</td>');
 			echo('<td>');
-			if(application.zcore.user.checkGroupAccess("administrator")){
-				echo('<a href="/z/inquiries/admin/import-leads/downloadFile?inquiries_import_file_id=#row.inquiries_import_file_id#" target="_blank">#row.inquiries_import_file_filename#</a>');
+			if(form.method EQ "userIndex"){
+				echo('<a href="/z/inquiries/admin/import-leads/userDownloadFile?inquiries_import_file_id=#row.inquiries_import_file_id#" target="_blank">#row.inquiries_import_file_filename#</a>');
 			}else{
-				echo(row.inquiries_import_file_filename);
+				echo('<a href="/z/inquiries/admin/import-leads/downloadFile?inquiries_import_file_id=#row.inquiries_import_file_id#" target="_blank">#row.inquiries_import_file_filename#</a>');
 			}
 			echo('</td>'); 
 			echo('<td>#row.inquiries_import_file_import_count#</td>');
@@ -290,7 +305,7 @@ not important yet: create contacts at same time as create lead (use same functio
 	<form id="importLeadForm" class="zFormCheckDirty" action="" enctype="multipart/form-data" method="post">
 		<h3>Your Notification Email *</h3>
 		<p>We will notify you at this email address when the leads are done importing and only for that purpose.</p>
-		<p><input type="email" name="importEmail" style="width:250px; max-width:100%;" value="#htmleditformat(request.zsession.user.email)#" /></p> 
+		<p><input type="email" name="inquiries_import_file_email" style="width:250px; max-width:100%;" value="#htmleditformat(request.zsession.user.email)#" /></p> 
 		<h3>Import Name</h3>
 		<p>Enter a name for the import for future reference</h3>
 		<p><input type="text" style="width:100%; max-width:350px;" name="inquiries_import_file_name" id="inquiries_import_file_name" value=""></p>
@@ -327,7 +342,7 @@ not important yet: create contacts at same time as create lead (use same functio
 		<h3>Select Assignment</h3>
 		<p>If you need more then one assignment, you must import separate files.</p>
 		<!--- office and user --->
-		<cfif application.zcore.user.checkGroupAccess("administrator") and application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>  
+		<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>  
 			<cfif arrayLen(request.arrOffice) GT 0> 
 				<h3>Select Office (Optional)</h3>
 				<cfscript> 
@@ -368,32 +383,33 @@ not important yet: create contacts at same time as create lead (use same functio
 		<div style="width:100%; margin-bottom:20px;float:left;">
 			<div style="float:left; width:100%;">Select a user:</div>
 			<div style="float:left; width:100%;">  
-			<cfscript>  
-			form.user_id = ""; 
-			echo('<select name="user_id" id="user_id" size="1">');
-			echo('<option value="" data-office-id="">-- Select --</option>');
-			for(row in request.qUser){
-				userGroupName=request.userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
-				echo('<option value="'&row.user_id&"|"&row.site_id&'" data-office-id=",'&row.office_id&',"');
-				if(form.user_id EQ row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)){
-					echo(' selected="selected" ');
+				<cfscript>  
+				form.user_id = ""; 
+				echo('<select name="user_id" id="user_id" size="1">');
+				echo('<option value="" data-office-id="">-- Select --</option>');
+				for(row in request.qUser){
+					userGroupName=request.userGroupCom.getGroupDisplayName(row.user_group_id, row.site_id);
+					echo('<option value="'&row.user_id&"|"&row.site_id&'" data-office-id=",'&row.office_id&',"');
+					if(form.user_id EQ row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)){
+						echo(' selected="selected" ');
+					}
+					arrName=[];
+					if(trim(row.user_first_name&" "&row.user_last_name) NEQ ""){
+						arrayAppend(arrName, row.user_first_name&" "&row.user_last_name);
+					}
+					if(row.user_username NEQ ""){
+						arrayAppend(arrName, row.user_username)
+					}
+					if(row.member_company NEQ ""){
+						arrayAppend(arrName, row.member_company);
+					}
+					echo('>'&arrayToList(arrName, " / ")&' / #userGroupName#</option>');
 				}
-				arrName=[];
-				if(trim(row.user_first_name&" "&row.user_last_name) NEQ ""){
-					arrayAppend(arrName, row.user_first_name&" "&row.user_last_name);
-				}
-				if(row.user_username NEQ ""){
-					arrayAppend(arrName, row.user_username)
-				}
-				if(row.member_company NEQ ""){
-					arrayAppend(arrName, row.member_company);
-				}
-				echo('>'&arrayToList(arrName, " / ")&' / #userGroupName#</option>');
-			}
-			echo('</select>'); 
-			application.zcore.skin.addDeferredScript("  $('##user_id').filterByText($('##assignInputField'), true); ");
+				echo('</select>'); 
+				application.zcore.skin.addDeferredScript("  $('##user_id').filterByText($('##assignInputField'), true); ");
 
-			</cfscript>
+				</cfscript>
+			</div>
 		</div>
 		<p>&nbsp;</p> 
 		<script type="text/javascript">
@@ -449,11 +465,19 @@ not important yet: create contacts at same time as create lead (use same functio
 			tempObj.formId="importLeadForm";
 			tempObj.id="zImportLeads";
 			tempObj.method="POST"; 
-			tempObj.url="/z/inquiries/admin/import-leads/scheduleImport";
+			if(window.location.href.indexOf("import-leads/userSchedule")!=-1){
+				tempObj.url="/z/inquiries/admin/import-leads/userScheduleImport";
+			}else{
+				tempObj.url="/z/inquiries/admin/import-leads/scheduleImport";
+			}
 			tempObj.callback=function(r){
 				r=JSON.parse(r);
 				if(r.success){
-					window.location.href="/z/inquiries/admin/import-leads/index";
+					if(window.location.href.indexOf("import-leads/userSchedule")!=-1){
+						window.location.href="/z/inquiries/admin/import-leads/userIndex";
+					}else{
+						window.location.href="/z/inquiries/admin/import-leads/index";
+					}
 				}else{
 					alert(r.errorMessage);
 				}
@@ -549,6 +573,11 @@ not important yet: create contacts at same time as create lead (use same functio
 	</cfscript>
 </cffunction>
 
+<cffunction name="userScheduleImport" access="remote" localmode="modern" roles="user"> 
+	<cfscript> 
+	scheduleImport();
+	</cfscript>
+</cffunction>
 <cffunction name="scheduleImport" access="remote" localmode="modern" roles="administrator"> 
 	<cfscript> 
 	// this function is meant to validate and store file reference in inquiries_import_file and return instantly.  processing is done later
@@ -560,16 +589,23 @@ not important yet: create contacts at same time as create lead (use same functio
 	form.inquiries_import_file_email=application.zcore.functions.zso(form, 'inquiries_import_file_email');
 	form.office_id=application.zcore.functions.zso(form, 'office_id', true);
 	form.uid=application.zcore.functions.zso(form, 'uid');
-	form.filepath=application.zcore.functions.zso(form, 'filepath'); 
-	form.importEmail=application.zcore.functions.zso(form, 'importEmail');
+	form.filepath=application.zcore.functions.zso(form, 'filepath');  
 	form.debug=application.zcore.functions.zso(form, 'debug', true, 0);
+	
+
+	if(arrayLen(request.arrOffice) EQ 0){
+		form.office_id=0;
+	}
+	if(request.qUser.recordcount EQ 0){
+		form.uid="";
+	}
  
 	// /z/inquiries/admin/import-leads/scheduleImport?debug=1
 	if(form.debug EQ 1){
 		form.filepath="monterey-tab-leads.csv";
 		form.office_id=64;
 		form.uid="367|298";
-		form.importEmail="skyflare@gmail.com";
+		form.inquiries_import_file_email="skyflare@gmail.com";
 		form.inquiries_type_id="1|0";
 		form.inquiries_autoresponder_id="3";
 		form.inquiries_import_file_name="Import1";
@@ -594,12 +630,14 @@ not important yet: create contacts at same time as create lead (use same functio
 		request.error=true;
 		application.zcore.status.setStatus(request.zsid, "Import Name is required", form, true);
 	}
-	// verify file format.
-	getHeader(request.importPath&form.filepath); 
-
 	if(form.inquiries_import_file_email EQ "" or application.zcore.functions.zEmailValidate(form.inquiries_import_file_email) EQ false){
-		application.zcore.functions.zReturnJson({success:false, errorMessage:"Notification email is required and must be a valid email address."});
+		request.error=true;
+		application.zcore.status.setStatus(request.zsid, "Notification email is required and must be a valid email address.", form, true); 
 
+	}
+	// verify file format.
+	if(not request.error){
+		getHeader(request.importPath&form.filepath); 
 	}
 
 	if(not request.error){
@@ -663,6 +701,7 @@ not important yet: create contacts at same time as create lead (use same functio
 		}
 	}
 
+
 	// validate office_id
 	if(form.office_id NEQ 0){ 
 		found=false;
@@ -721,7 +760,7 @@ not important yet: create contacts at same time as create lead (use same functio
 			inquiries_type_id_siteidtype:form.inquiries_type_id_siteidtype,
 			inquiries_import_file_name:form.inquiries_import_file_name,
 			inquiries_import_file_filename:form.filePath,
-			inquiries_import_file_email:form.importEmail,
+			inquiries_import_file_email:form.inquiries_import_file_email,
 			inquiries_import_file_record_count:0,
 			inquiries_import_file_import_count:0,
 			inquiries_import_file_error_count:0,
@@ -737,7 +776,7 @@ not important yet: create contacts at same time as create lead (use same functio
 	if(application.zcore.user.checkGroupAccess("administrator")){
 		ts.struct.inquiries_import_file_is_administrator=1;
 	}
-	inquiries_import_file_id=application.zcore.functions.zInsert(ts); 
+	inquiries_import_file_id=application.zcore.functions.zInsert(ts);  
 
 	application.zcore.functions.zReturnJson({success:true});
 	</cfscript>
@@ -769,11 +808,43 @@ not important yet: create contacts at same time as create lead (use same functio
 	</cfscript>
 </cffunction>
 
+<cffunction name="importAll" access="remote" localmode="modern"> 
+	<cfscript> 
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
+	setting requesttimeout="10000";
+	request.ignoreSlowScript=true;
+	db=request.zos.queryObject;   
+	db.sql="select * from 
+	#db.table("site", request.zos.zcoreDatasource)#, 
+	#db.table("inquiries_import_file", request.zos.zcoreDatasource)# 
+	WHERE inquiries_import_file.site_id<>#db.param(-1)# and 
+	inquiries_import_file_deleted=#db.param(0)# and 
+	inquiries_import_file_status in (#db.param(0)#) and 
+	inquiries_import_file.site_id = site.site_id and 
+	site.site_id <> #db.param(-1)# and 
+	site_active = #db.param(1)# and 
+	site_deleted = #db.param(0)# ";
+	qImport=db.execute("qImport");
+	for(row in qImport){
+		link=row.site_domain&"/z/inquiries/admin/import-leads/import";
+		rs=application.zcore.functions.zdownloadlink(link, 10000, true); 
+		echo("Ran import: "&link&": "&rs.success&"<br>");
+		writedump(rs);
+		// ignore failures to avoid flooding logs with double the errors.
+	}
+	echo("done");
+	abort;
+	</cfscript>
+</cffunction>
+
 <cffunction name="import" access="remote" localmode="modern"> 
 	<cfscript> 
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 	}
+	request.ignoreSlowScript=true;
 	init();
 	// must guarantee only one is ever running.  It may need to be able to resume to achieve that, with small 1 to 5 minute runtimes.
 

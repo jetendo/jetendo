@@ -795,7 +795,7 @@ contactCom.processMessage(ts);
 		user.user_id = #db.param(inquiryStruct.user_id)# and 
 		user_active=#db.param(1)# and  
 		user_deleted=#db.param(0)#"; // write query
-		qUser=db.execute("qUser"); 
+		qUser=db.execute("qUser", "", 10000, "query", false); 
 		for(row in qUser){
 			if(row.user_alternate_email NEQ ""){
 				// tested successfully

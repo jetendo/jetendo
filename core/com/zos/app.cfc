@@ -138,12 +138,6 @@
 				ts.link="/z/inquiries/admin/manage-contact/index";
 				arguments.sharedStruct["Leads"].children["Contacts"]=ts;
 			}
-			if(structkeyexists(arguments.sharedStruct["Leads"].children,"Import Leads") EQ false){
-				ts=structnew();
-				ts.featureName="Leads";
-				ts.link="/z/inquiries/admin/import-leads/index";
-				arguments.sharedStruct["Leads"].children["Import Leads"]=ts;
-			}
 		}
 		if(structkeyexists(arguments.sharedStruct["Leads"].children,"Add Lead") EQ false){
 			ts=structnew();
@@ -158,6 +152,12 @@
 			arguments.sharedStruct["Leads"].children["Lead Export"]=ts;
 		} 
 		if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
+			if(structkeyexists(arguments.sharedStruct["Leads"].children,"Import Leads") EQ false){
+				ts=structnew();
+				ts.featureName="Leads";
+				ts.link="/z/inquiries/admin/import-leads/index";
+				arguments.sharedStruct["Leads"].children["Import Leads"]=ts;
+			}
 			if(structkeyexists(arguments.sharedStruct["Leads"].children,"Search Engine Keyword Lead Report") EQ false){
 				ts=structnew();
 				ts.featureName="Lead Reports";
