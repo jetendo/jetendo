@@ -1,6 +1,5 @@
 <cffunction name="OnRequestEnd" localmode="modern" access="public" returntype="void" output="true" hint="Fires after the page processing is complete."><cfscript>  
-	var db=request.zos.queryObject;
-	notemplate=false;  
+	var db=request.zos.queryObject; 
 	request.zos.requestLogEntry('Application.cfc onRequestEnd begin');
 	if(not structkeyexists(form, request.zos.urlRoutingParameter)){
 		return; 
@@ -31,10 +30,7 @@
 	application.zcore.template.setTag("content", output); 
 	if(structkeyexists(request.zos, 'zFormCurrentName') and structkeyexists(request.zos,'scriptAborted') EQ false and structkeyexists(request.zos,'zDisableEndFormCheckRule') EQ false and request.zos.zFormCurrentName NEQ ""){
 		application.zcore.template.fail("You forgot to close the application.zcore.functions.zForm() with a call to application.zcore.functions.zEndForm().");
-	}
-	if((structkeyexists(request,'znotemplate') and request.znotemplate EQ true) or request.zos.templateData.notemplate EQ true){
-		notemplate=true;
-	}
+	} 
 	if(structkeyexists(form, 'zajaxdownloadcontent')){
 		request.zos.endtime=gettickcount('nano');
 		c=application.zcore.template.getFinalTagContent("content");
@@ -53,7 +49,7 @@
 		// 	application.zcore.functions.zProcessContentTransition(request.zos.enableContentTransitionStruct);
 		// }
 		// check if script turned off template system
-		if(((structkeyexists(request.zos,'scriptAborted') EQ false and request.zos.routingIsCFC) or request.zos.onrequestcompleted) and notemplate EQ false){
+		if(((structkeyexists(request.zos,'scriptAborted') EQ false and request.zos.routingIsCFC) or request.zos.onrequestcompleted) and (not structkeyexists(request,'znotemplate') or request.znotemplate EQ false)){
 			// store reference to variables scope for use with debugger.
 			Request.zOS.debugging.variablesBackup = variables;
 			// load templates, parse the tags, sets tag config, replaces tags with content and outputs final page

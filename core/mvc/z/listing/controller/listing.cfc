@@ -2568,7 +2568,7 @@ if(right(form[request.zos.urlRoutingParameter],4) NEQ ".xml" and right(request.c
 		application.zcore.template.appendTag("content",'<input type="hidden" name="zListingEnableInstantSearch" id="zListingEnableInstantSearch" value="1" />');	
 	}
 	//if(request.zos.cgi.http_referer NEQ "" and 
-	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_inquiry_pop_enabled NEQ 0 and left(request.zos.templateData.template, 3) NEQ "/z/" and request.cgi_script_name NEQ "/z/listing/inquiry-pop/index" and request.cgi_script_name NEQ "/z/user/privacy/index"){
+	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_inquiry_pop_enabled NEQ 0 and left(application.zcore.template.getTemplate(), 3) NEQ "/z/" and request.cgi_script_name NEQ "/z/listing/inquiry-pop/index" and request.cgi_script_name NEQ "/z/user/privacy/index"){
 		if(structkeyexists(request.zsession, 'zlistingpageviewcount') EQ false){
 			request.zsession.zlistingpageviewcount=1;
 		}

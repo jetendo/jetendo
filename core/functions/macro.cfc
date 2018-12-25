@@ -1059,8 +1059,7 @@ not needed
 		application.zcore.tracking.backOneHit();
 	} 
 	application.zcore.functions.zEndOfRunningScript();
-	request.zos.scriptAborted=true; 
-	request.zOS.templateData.notemplate=true;
+	request.zos.scriptAborted=true;  
 	application.zcore.functions.zThrowIfImplicitVariableAccessDetected();
 </cfscript><cfabort></cffunction>
 

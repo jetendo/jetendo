@@ -82,7 +82,7 @@ done: need to define a javascript file that shows all the scripts that were auto
 	done: publish to new build directory with version number in filename.
 	
 	*/
-	request.zos.disableOldZLoader=true;
+	//request.zos.disableOldZLoader=true;
 
 	request.cssStruct={};
 	request.javascriptStruct={};

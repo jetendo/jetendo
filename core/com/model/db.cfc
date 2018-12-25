@@ -149,7 +149,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			queryStruct.lazy=true;
 		}
 	}
-	queryStruct.name="db."&arguments.name;
+	queryStruct.name=arguments.name;
 	retryCount=0;
 	retryLimit=3;
 	retrySleep=500;
@@ -224,13 +224,14 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			}
 		}
 	}
-	if(structkeyexists(db, arguments.name)){ 
-		if(isArray(db[arguments.name])){
-			request.zos.queryRowCount+=arrayLen(db[arguments.name]);
-		}else if(structkeyexists(db[arguments.name], 'recordcount')){
-			request.zos.queryRowCount+=db[arguments.name].recordcount;
+	if(structkeyexists(local, arguments.name)){ 
+		q=local[arguments.name];
+		if(isArray(q)){
+			request.zos.queryRowCount+=arrayLen(q);
+		}else if(structkeyexists(q, 'recordcount')){
+			request.zos.queryRowCount+=q.recordcount;
 		}
-		return db[arguments.name];
+		return q;
 	}else{
 		return true;
 	}

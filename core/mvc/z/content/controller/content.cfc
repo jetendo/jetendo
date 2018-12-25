@@ -1264,7 +1264,7 @@ if(isQuery(qContent)){
 			db.sql&=" LIMIT #db.param(0)#,#db.param(arguments.ss.limit)# ";
 		}
 	}
-	qpar=db.execute("qpar");
+	qpar=db.execute("qpar", "", 10000, "query", false);
 	loop query="qpar"{
 		if(arguments.ss.disablemorelink OR qpar.currentrow NEQ arguments.ss.limit){
 			parseStruct=structnew();

@@ -290,8 +290,7 @@
             matching=false;	
         }
     }
-    //writeoutput("DONE<hr size=""1"">");
-    //request.znotemplate=true;
+    //writeoutput("DONE<hr size=""1"">"); 
     t99=mid(t99,2,len(t99)-2);
     result&='<table style="border:1px solid ##000; color:##000; background-color:##FFF; padding:10px;"><tr><td><strong>The following search terms have been highlighted</strong><br />
 (Click a search term to jump to the first occurrence).<br />';
@@ -1590,7 +1589,51 @@ Example usage:
 	</cfscript>
 </cffunction>
 
+<!--- 
 
+<cfsavecontent variable="out">
+## Vehicles
+$ Discount
+$/sqft
+% Apartments
+12 Text
+About Button Text
+Are you willing to work overtime?
+Column 5 Width %
+!@(*^^(@)$
+</cfsavecontent>
+<cfscript>
+arr=listToArray(trim(out), chr(10));
+for(s in arr){
+	echo(application.zcore.functions.zStringToVariableName(s)&"<br>");
+} 
+abort;
+</cfscript>
+  --->
+<cffunction name="zStringToVariableName" localmode="modern" access="public">
+	<cfargument name="stringName" type="string" required="yes">
+	<cfscript>
+	s=left(arguments.stringName, 100)
+	.replace("##", "Number ", "all")
+	.replace("$", "Price ", "all")
+	.replace("%", "Percent ", "all")
+	.rereplace("[^a-zA-Z0-9 ]*", "", "all")
+	.trim()
+	.replace("  ", " ", "all")
+	.ucFirst(true, true)
+	.replace(" ", "", "all");
+	if(isNumeric(left(s, 2))){
+		s="_"&s;
+	}else if(isNumeric(left(s, 1))){
+		s=replacelist(left(s, 1), "1,2,3,4,5,6,7,8,9,0", "one,two,three,four,five,six,seven,eight,nine,zero")&" "&removeChars(s, 1, 1);
+	}
+	if(len(s) EQ 0){
+		throw(""""&arguments.stringName&""" can't be converted to a valid variable name");
+	}
+	s=lcase(left(s, 1))&removeChars(s, 1, 1);
+	return s;
+	</cfscript>
+</cffunction>
 
 </cfoutput>
 </cfcomponent>

@@ -319,10 +319,7 @@
 				if(isDefined('request.zsession.modes.varDump')){
 					writeoutput('Dumping: '&request.zsession.modes.varDumpName&'<br /><br />');
 					if(find("(", request.zsession.modes.varDumpName) EQ 0){ 
-						if(isDefined(request.zsession.modes.varDumpName)){
-							if(request.zsession.modes.varDumpName EQ 'request.zos.templateData.tagContent'){
-								StructDelete(request.zos.templateData.tagContent, 'content');
-							}
+						if(isDefined(request.zsession.modes.varDumpName)){ 
 							application.zcore.functions.zDump(evaluate(request.zsession.modes.varDumpName),request.zsession.modes.varDumpName,false);
 						
 						}else if(isDefined('Request.zOS.currentScript.variables.#request.zsession.modes.varDumpName#')){

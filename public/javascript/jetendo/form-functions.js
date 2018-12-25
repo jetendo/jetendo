@@ -1681,11 +1681,7 @@ var zLastAjaxVarName=""; */
 	}
 	function zOS_mode_submit(mode, value, value2, value3){
 		var theform=document.getElementById("zOS_mode_form");
-		var theaction=theform.getAttribute("action");
-		if(mode === 'viewMeta'){
-			document.getElementById("zOS_modeVarDumpName").value = 'request.zos.templateData.tagContent';
-			mode = 'varDump';
-		}
+		var theaction=theform.getAttribute("action"); 
 		if(typeof value3 === "undefined"){ value3=""; }
 		document.getElementById("zOS_mode").setAttribute("value", mode);
 		document.getElementById("zOS_modeValue").setAttribute("value", value);

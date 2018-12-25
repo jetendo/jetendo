@@ -734,7 +734,6 @@
 	// not used
 	// if(zos.isServer or zos.isDeveloper or zos.istestserver){
 	// 	if(structkeyexists(form,'znotemplate')){
-	// 		zos.templateData.notemplate=true;
 	// 		request.znotemplate=true;
 	// 	}
 	// 	if(structkeyexists(form, 'zregeneratemodelcache')){
@@ -917,7 +916,6 @@
 			}
 		}
 	}
-	zos.templateData=structnew("sync");
 	application.zcore.template.init2(); 
 	if(structkeyexists(form,zos.urlRoutingParameter) and form[zos.urlRoutingParameter] NEQ ""){
 		 request.cgi_script_name=application.zcore.routing.processInternalURLRewrite(form[zos.urlRoutingParameter]);

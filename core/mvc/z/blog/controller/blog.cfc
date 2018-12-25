@@ -3566,7 +3566,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		blog.site_id = #db.param(request.zos.globals.id)# and 
 		blog.site_id = blog_x_category.site_id and
 		blog_x_category_deleted = #db.param(0)#";
-		q_blog_feed=db.execute("q_blog_feed"); 
+		q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 		echo(q_blog_feed.count);
 		abort;
 	}
@@ -3577,11 +3577,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	if(form.count < 10 or form.count > 100){
 		echo("count must be between 10 and 100 inclusive.");
 		abort;
-	} 
-	application.zcore.template.clearPrependAppendTagData("content");
-	// set default action
-	application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
-	Request.zPageDebugDisabled=true;
+	}  
 	// you must have a group by in your query or it may miss rows
 	ts=structnew();
 	ts.image_library_id_field="blog.blog_image_library_id";
@@ -3611,7 +3607,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	group by blog.blog_id
 	order by blog_sticky desc, blog_datetime desc
 	LIMIT #db.param(form.offset)#, #db.param(form.count)# ";
-	q_blog_feed=db.execute("q_blog_feed");
+	q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 	if(q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')){
 		application.zcore.functions.z301Redirect('/');
 	}
@@ -3766,14 +3762,10 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		blog.user_id = #db.param(form.user_id)# and 
 		blog.user_id_siteidtype=#db.param(form.user_id_siteidtype)# and 
 		user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))# ";
-		q_blog_feed=db.execute("q_blog_feed"); 
+		q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 		echo(q_blog_feed.count);
 		abort;
-	}
-	application.zcore.template.clearPrependAppendTagData("content");
-	// set default action
-	application.zcore.template.setTemplate("zcorerootmapping.templates.nothing",true,true);
-	Request.zPageDebugDisabled=true;
+	} 
 	// you must have a group by in your query or it may miss rows
 	ts=structnew();
 	ts.image_library_id_field="blog.blog_image_library_id";
@@ -3802,7 +3794,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	group by blog.blog_id
 	order by blog_sticky desc, blog_datetime desc 
 	LIMIT #db.param(form.offset)#, #db.param(form.count)# ";
-	q_blog_feed=db.execute("q_blog_feed"); 
+	q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 	if(q_blog_feed.recordcount eq 0 or NOT isDefined('q_blog_feed.blog_STORY')){
 		application.zcore.functions.z301Redirect('/');
 	}
@@ -3933,10 +3925,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 <cffunction name="feedRecentTemplate" localmode="modern" access="remote" output="yes" returntype="any">
 	<cfscript> 
 	var db=request.zos.queryObject; 
-	variables.init();
-	application.zcore.template.clearPrependAppendTagData("content");
-	application.zcore.template.setTemplate("zcorerootmapping.templates.nothing", true,true);
-	Request.zPageDebugDisabled=true;
+	variables.init(); 
 	// you must have a group by in your query or it may miss rows
 	ts=structnew();
 	ts.image_library_id_field="blog.blog_image_library_id";
@@ -3953,7 +3942,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		blog_datetime<=#db.param(dateformat(now(),'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss'))# and 
 		blog_deleted = #db.param(0)# and 
 		blog_status <> #db.param(2)#    ";
-		q_blog_feed=db.execute("q_blog_feed"); 
+		q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 		echo(q_blog_feed.count);
 		abort;
 	}
@@ -3980,7 +3969,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	group by blog.blog_id 
 	order by blog_sticky desc, blog_datetime desc 
 	LIMIT #db.param(form.offset)#,#db.param(form.count)#";
-	q_blog_feed=db.execute("q_blog_feed");
+	q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 	if(structkeyexists(form, 'zURLName') and application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_url EQ '{default}'){
 		curLink="/#application.zcore.functions.zURLEncode(application.zcore.app.getAppData("blog").optionStruct.blog_config_recent_name,'-')#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-0.xml";
 		actualLink="/#form.zURLName#-#application.zcore.app.getAppData("blog").optionStruct.blog_config_url_misc_id#-0.xml";
@@ -4594,7 +4583,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		user.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("blog.user_id_siteIDType"))#
 		group by user.user_id, user.site_id 
 		order by user_first_name asc, user_last_name asc, user_username ";
-		q_blog_feed=db.execute("q_blog_feed"); 
+		q_blog_feed=db.execute("q_blog_feed", "", 10000, "query", false); 
 
 		for(row in q_blog_feed){ 
 			curLink=getAuthorLink(row, 'xml');

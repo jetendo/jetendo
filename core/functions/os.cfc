@@ -608,7 +608,7 @@ if(not rs.success){
 		<cfdirectory action="list" recurse="yes" directory="#curPath#" name="qD" filter="*.cfc"><!--- |*.html --->
 		<!--- <cfif qd.recordcount>
 			<cfdump var="#qD#"><cfabort>
-		</cfif> --->
+		</cfif> ---> 
 		<cfloop query="qD">
 			<cfscript>
 			if(qD.type EQ "file"){
@@ -1295,11 +1295,7 @@ application.zcore.functions.zLogError(ts);
 	} 
 	tempFile=tempCSSPath;
 	application.zcore.functions.zwritefile(tempFile,trim(contents));
-	application.sitestruct[request.zos.globals.id].fileExistsCache[tempFile]=true;
-	if(form[request.zos.urlRoutingParameter] NEQ "/z/server-manager/tasks/publish-system-css/index"){
-		//if(structkeyexists(application.zcore,'skin')) application.zcore.skin.verifyCache(application.sitestruct[request.zos.globals.id].skinObj);
-		if(structkeyexists(application.zcore,'template')) application.zcore.template.findAndReplacePrependTag("meta", "/zcache/zsystem.css?zversion=", "/zcache/zsystem.css?zversion="&gettickcount());
-	}
+	application.sitestruct[request.zos.globals.id].fileExistsCache[tempFile]=true; 
 	</cfscript>
 </cffunction>
 

@@ -1,5 +1,5 @@
 <cfcomponent output="no"><cfoutput>
-<cffunction name="javascriptHeadCode" localmode="modern" returntype="string" output="no">
+<cffunction name="javascriptHeadCode" localmode="modern">
 	<cfargument name="dynamicContent" type="string" required="yes">
 	<cfscript>
 	if(request.zos.originalURL EQ "/z/_com/zos/staticLoader"){
@@ -20,7 +20,7 @@
 	<cfreturn output>
 </cffunction>
 
-<cffunction name="init2" localmode="modern" output="no" returntype="any">
+<cffunction name="init2" localmode="modern">
 	<cfscript> 
 	if(CGI.SERVER_PORT EQ '443'){
 		dateDisabled=true;
@@ -76,39 +76,43 @@
 			</cfif>
 		</cfif>
 	<cfscript> 
-	ts44="";
-	if(application.zcore.user.checkGroupAccess("user")){
-		// if site_id doesn't match, the parent or global token was used
-		if(structkeyexists(cookie, 'ztoken')){
-			ts44&="var zTokenLogin=true;"; 
+	savecontent variable="ts44"{
+		if(application.zcore.user.checkGroupAccess("user")){
+			// if site_id doesn't match, the parent or global token was used
+			if(structkeyexists(cookie, 'ztoken')){
+				echo("var zTokenLogin=true;"); 
+			}else{
+				echo("var zTokenLogin=false;");
+			}
 		}else{
-			ts44&="var zTokenLogin=false;";
+			echo("var zTokenLogin=false;");
 		}
-	}else{
-		ts44&="var zTokenLogin=false;";
+		if(request.zos.istestserver){
+			echo("var zThisIsTestServer=true;");
+		}else{
+			echo("var zThisIsTestServer=false;");
+		}
+		if(request.zos.isdeveloper){
+			echo("var zThisIsDeveloper=true;");
+		}else{
+			echo("var zThisIsDeveloper=false;");
+		}
+		if(application.zcore.functions.zso(request.zos.globals, "disableUpgradeMessage", true, 0) EQ 1){
+			echo("var zDisableUpgradeMessage=true;"); 
+		}
 	}
-	if(request.zos.istestserver){
-		ts44&="var zThisIsTestServer=true;";
-	}else{
-		ts44&="var zThisIsTestServer=false;";
-	}
-	if(request.zos.isdeveloper){
-		ts44&="var zThisIsDeveloper=true;";
-	}else{
-		ts44&="var zThisIsDeveloper=false;";
-	}
-	if(application.zcore.functions.zso(request.zos.globals, "disableUpgradeMessage", true, 0) EQ 1){
-		ts44&="var zDisableUpgradeMessage=true;"; 
-	}
-
 	ss=application.siteStruct[request.zos.globals.id];
 	iconMeta="";
 	if(application.zcore.functions.zso(ss, 'iconLogoExists', false, false)){
 		iconMeta=getIconMetaTags();
 	}
-	request.zos.templateData={
+	request.zosTemplatePrependTagContent={ meta:{ arrContent:[javascriptHeadCode(ts44)&kitHTML&iconMeta]} };
+	request.zosTemplateAppendTagContent=structnew("sync");
+	request.zosTemplateTagContent=structnew("sync");
+	
+
+	request.zosTemplateData={
 		dateDisabled:dateDisabled,
-		notemplate:false,
 		primary:true,
 		uniqueTagStruct:{
 			'content':true,
@@ -122,9 +126,9 @@
 		content : "",
 		templateForced:false,
 		contentStruct : structnew("sync"),
-		tagContent : structnew("sync"),
-		prependTagContent : { meta:{ arrContent:[variables.javascriptHeadCode(ts44)&kitHTML&iconMeta]} },
-		appendTagContent : { } ,
+		// tagContent : structnew("sync"),
+		// prependTagContent : { meta:{ arrContent:[javascriptHeadCode(ts44)&kitHTML&iconMeta]} },
+		// appendTagContent : { } ,
 		tagAssoc : structnew("sync"),
 		tags : ArrayNew(1),
 		requiredTags : structnew("sync"),
@@ -150,58 +154,58 @@
 </cffunction>
 
 
-<cffunction name="disableShareThis" localmode="modern" output="no" returntype="any">
+<cffunction name="disableShareThis" localmode="modern">
 <cfscript>
-	request.zos.templateData.disableShareThisEnabled=true;
+	request.zosTemplateData.disableShareThisEnabled=true;
 	</cfscript>
 </cffunction>
 
-<cffunction name="disableDate" localmode="modern" output="true" returntype="any">
+<cffunction name="disableDate" localmode="modern">
 	<cfscript>
-	request.zos.templateData.dateSet=false;
-	request.zos.templateData.dateDisabled=true;
-	request.zos.templateData.lastModifiedDate='';
+	request.zosTemplateData.dateSet=false;
+	request.zosTemplateData.dateDisabled=true;
+	request.zosTemplateData.lastModifiedDate='';
 	</cfscript>
 </cffunction>
 
 
 
-<cffunction name="setPlainTemplate" localmode="modern" output="false" returntype="any">
+<cffunction name="setPlainTemplate" localmode="modern">
 <cfscript>
 	application.zcore.template.setTemplate("zcorerootmapping.templates.plain",true,true);
 	</cfscript>
 </cffunction>
 
-<cffunction name="setScriptDate" localmode="modern" output="false" returntype="any">
+<cffunction name="setScriptDate" localmode="modern">
 	<cfargument name="path" type="string" required="yes">
 	<cfscript>
 	return false; 
 	</cfscript>
 </cffunction>
 
-<cffunction name="setDate" localmode="modern" output="false" returntype="any">
+<cffunction name="setDate" localmode="modern">
 	<cfargument name="newDate" type="any" required="yes">
 	<cfargument name="parse" type="boolean" required="no" default="#false#">
 	<cfscript>
 	return;
 	/*
-	if(request.zos.templateData.dateDisabled) return;
-	request.zos.templateData.dateSet=true;
+	if(request.zosTemplateData.dateDisabled) return;
+	request.zosTemplateData.dateSet=true;
 	if(arguments.newDate EQ false) return;
 	if(arguments.parse){
 		arguments.newDate=parsedatetime(DateFormat(arguments.newDate,'yyyy-mm-dd')&' '&TimeFormat(arguments.newDate,'HH:mm:ss'));
 	}
-	if(request.zos.templateData.lastModifiedDate EQ false){
-		request.zos.templateData.lastModifiedDate = arguments.newDate;
-	}else if(DateCompare(request.zos.templateData.lastModifiedDate,arguments.newDate) EQ -1){
-		request.zos.templateData.lastModifiedDate = arguments.newDate;
+	if(request.zosTemplateData.lastModifiedDate EQ false){
+		request.zosTemplateData.lastModifiedDate = arguments.newDate;
+	}else if(DateCompare(request.zosTemplateData.lastModifiedDate,arguments.newDate) EQ -1){
+		request.zosTemplateData.lastModifiedDate = arguments.newDate;
 	}
 	
 	this.checkIfModifiedSince();*/
 	</cfscript>	
 </cffunction>
 
-<cffunction name="checkIfModifiedSince" localmode="modern" output="false" returntype="any">		
+<cffunction name="checkIfModifiedSince" localmode="modern">		
 	<cfscript>
 	var expireDays=14;
 	var rd="";
@@ -213,14 +217,14 @@
 	if(request.zos.istestserver EQ false){
 	//	return;
 	}
-	if(request.zos.templateData.lastModifiedDate EQ false or request.zos.templateData.dateSet EQ false or request.zos.templateData.dateDisabled) return; // ignore when no date is set
+	if(request.zosTemplateData.lastModifiedDate EQ false or request.zosTemplateData.dateSet EQ false or request.zosTemplateData.dateDisabled) return; // ignore when no date is set
 	rd=gethttprequestdata();
 	tz=gettimezoneinfo();
 	// must parse: Sun, 06 Nov 1994 08:49:37 GMT    ; RFC 822, updated by RFC 1123
 
-	lastMod=DateAdd("h", tz.utcHourOffset, request.zos.templateData.lastModifiedDate);
+	lastMod=DateAdd("h", tz.utcHourOffset, request.zosTemplateData.lastModifiedDate);
 	lastModCompare=lastMod;
-	expires=DateAdd("h", tz.utcHourOffset, DateAdd("h",1,request.zos.templateData.lastModifiedDate));
+	expires=DateAdd("h", tz.utcHourOffset, DateAdd("h",1,request.zosTemplateData.lastModifiedDate));
 	lastMod=DateFormat(lastMod,'ddd, dd mmm yyyy')&' '&TimeFormat(lastMod,'HH:mm:ss')&' GMT';
 	expires=DateFormat(expires,'ddd, dd mmm yyyy')&' '&TimeFormat(expires,'HH:mm:ss')&' GMT';
 	expireSeconds=60*60; // expires in one hour // used to be expireDays*24*60*60
@@ -264,64 +268,46 @@
 
 
 
-<cffunction name="addPath" localmode="modern" returntype="any" output="false">
+<cffunction name="addPath" localmode="modern">
 	<cfargument name="rootRelativePath" type="string" required="yes">
 	<cfargument name="absPath" type="string" required="yes">
 	<cfscript>
 	initPaths();
-	ArrayAppend(request.zos.templateData.arrRootRelativePath, arguments.rootRelativePath);
-	ArrayAppend(request.zos.templateData.arrAbsPath, arguments.absPath);		
+	ArrayAppend(request.zosTemplateData.arrRootRelativePath, arguments.rootRelativePath);
+	ArrayAppend(request.zosTemplateData.arrAbsPath, arguments.absPath);		
 	</cfscript>
 </cffunction>
-<cffunction name="initPaths" localmode="modern" returntype="any" output="false">
+<cffunction name="initPaths" localmode="modern">
 	<cfscript>
-	if(isDefined('request.zos.templateData.arrAbsPath') EQ false){
-		request.zos.templateData.arrRootRelativePath=ArrayNew(1);
-		request.zos.templateData.arrAbsPath=ArrayNew(1);
+	if(isDefined('request.zosTemplateData.arrAbsPath') EQ false){
+		request.zosTemplateData.arrRootRelativePath=ArrayNew(1);
+		request.zosTemplateData.arrAbsPath=ArrayNew(1);
 		// add default path at last minute
-		ArrayAppend(request.zos.templateData.arrAbsPath, request.zos.globals.homedir&'templates/');
-		ArrayAppend(request.zos.templateData.arrRootRelativePath, request.zos.globals.siteroot&"/templates/");
+		ArrayAppend(request.zosTemplateData.arrAbsPath, request.zos.globals.homedir&'templates/');
+		ArrayAppend(request.zosTemplateData.arrRootRelativePath, request.zos.globals.siteroot&"/templates/");
 	}
 	</cfscript>
 </cffunction>
-
-<cffunction name="init" localmode="modern" returntype="any" output="false">
-	<cfscript>
-	request.zos.templateData.template = "default.cfm";
-	request.zos.templateData.isFile = true;
-	request.zos.templateData.uniqueTagStruct={};
-	request.zos.templateData.primary = false;
-	request.zos.templateData.content = "";
-	request.zos.templateData.contentStruct = structnew("sync");
-	request.zos.templateData.tagContent = structnew("sync");
-	request.zos.templateData.tagAssoc = structnew("sync");
-	request.zos.templateData.tags = ArrayNew(1);
-	request.zos.templateData.requiredTags = structnew("sync");
-	//request.zos.templateData.prependedContent = "";
-	request.zos.templateData.output = "";
-	request.zos.templateData.vars = "";
-	request.zos.templateData.config = structnew("sync");
-	// force content tag configuration
-	StructInsert(request.zos.templateData.tagContent, 'content', structnew("sync"),true);
-	request.zos.templateData.tagContent['content'].required = true;
-	request.zos.templateData.tagContent['content'].isFile = false;
-	request.zos.templateData.tagContent['content'].content = "";
-	</cfscript>
-</cffunction>
-
-<cffunction name="setTemplate" localmode="modern" returntype="boolean" output="false">
+ 
+<cffunction name="setTemplate" localmode="modern">
 	<cfargument name="template" required="yes" type="string">
 	<cfargument name="isFile" required="no" type="boolean" default="#true#">
 	<cfargument name="force" required="no" type="boolean" default="#false#">
 	<cfscript>
-	if(request.zos.templateData.templateForced EQ false or arguments.force){
-		request.zos.templateData.isFile = arguments.isFile;
-		request.zos.templateData.template = arguments.template;
+	if(request.zosTemplateData.templateForced EQ false or arguments.force){
+		request.zosTemplateData.isFile = arguments.isFile;
+		request.zosTemplateData.template = arguments.template;
 	}
 	if(arguments.force){
-		request.zos.templateData.templateForced = true;
+		request.zosTemplateData.templateForced = true;
 	}
 	return true;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getTemplate" localmode="modern">
+	<cfscript>
+	return request.zosTemplateData.template;
 	</cfscript>
 </cffunction>
 
@@ -345,15 +331,15 @@
 	</cfscript>
 </cffunction> --->
 
-<cffunction name="abort" localmode="modern" output="true" returntype="any"><cfargument name="overrideContent" type="string" required="yes"><cfscript>
+<cffunction name="abort" localmode="modern"><cfargument name="overrideContent" type="string" required="yes"><cfscript>
 	var i=0;
 	var finalOut=0;
 	if(structkeyexists(request,'znotemplate') and request.znotemplate){
 		writeoutput(trim(arguments.overrideContent));
 	}else{
 		this.setTag("content", trim(arguments.overrideContent), true,false);
-		for(i in request.zos.templateData.tagContent){
-			request.zos.templateData.tagContent[i].required = false;
+		for(i in request.zosTemplateTagContent){
+			request.zosTemplateTagContent[i].required = false;
 		}
 		finalString=this.build();
 		endBodyHTML="";//this.getEndBodyHTML();
@@ -371,7 +357,7 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="getTags" localmode="modern" output="no" returntype="any">
+<cffunction name="getTags" localmode="modern">
 	<cfargument name="start" type="numeric" required="no" default="#1#">
 	<cfscript>
 	var matching = true;
@@ -387,16 +373,16 @@
 	var resultPos=0;
 	var pos2=0;
 	var pos=0;
-	/*if(findnocase("<z_content>", request.zos.templateData.content) EQ 0){
-		request.zos.templateData.content=replacenocase(request.zos.templateData.content, "</body>", "<z_content></body>");
+	/*if(findnocase("<z_content>", request.zosTemplateData.content) EQ 0){
+		request.zosTemplateData.content=replacenocase(request.zosTemplateData.content, "</body>", "<z_content></body>");
 	}*/
 	while(matching){
 		// ignore attrib="val""ue"
 		i=0;
 		matching = false;
-		pos= findnocase('<z_', request.zos.templateData.content, index);
+		pos= findnocase('<z_', request.zosTemplateData.content, index);
 		if(pos NEQ 0){
-			pos2= findnocase('>', request.zos.templateData.content, pos);
+			pos2= findnocase('>', request.zosTemplateData.content, pos);
 			if(pos2 NEQ 0){
 				resultPos=pos;
 				resultLen=(pos2-pos)+1;
@@ -409,20 +395,20 @@
 				tempStruct = structnew("sync");
 				tempStruct.content = "";
 				tempStruct.isFile = false;
-				tempStruct.string = mid(request.zos.templateData.content, index, resultPos-index);
+				tempStruct.string = mid(request.zosTemplateData.content, index, resultPos-index);
 
-				tempTag = mid(request.zos.templateData.content, resultPos+3, resultLen-4);
+				tempTag = mid(request.zosTemplateData.content, resultPos+3, resultLen-4);
 				tempStruct.tag = listgetat(tempTag,1," ");
-				if(structkeyexists(request.zos.templateData.tagContent, tempStruct.tag) EQ false){
-					StructInsert(request.zos.templateData.tagContent, tempStruct.tag,structnew("sync"),false);
-					request.zos.templateData.tagContent[tempStruct.tag].isFile = false;
-					request.zos.templateData.tagContent[tempStruct.tag].required = false;
+				if(structkeyexists(request.zosTemplateTagContent, tempStruct.tag) EQ false){
+					StructInsert(request.zosTemplateTagContent, tempStruct.tag,structnew("sync"),false);
+					request.zosTemplateTagContent[tempStruct.tag].isFile = false;
+					request.zosTemplateTagContent[tempStruct.tag].required = false;
 				}
-				if(structkeyexists(request.zos.templateData.tagAssoc, tempStruct.tag) EQ false){
-					request.zos.templateData.tagAssoc[tempStruct.tag] = ArrayNew(1);
+				if(structkeyexists(request.zosTemplateData.tagAssoc, tempStruct.tag) EQ false){
+					request.zosTemplateData.tagAssoc[tempStruct.tag] = ArrayNew(1);
 				}
 				ArrayAppend(arrMatches, tempStruct);
-				ArrayAppend(request.zos.templateData.tagAssoc[tempStruct.tag],ArrayLen(arrMatches));
+				ArrayAppend(request.zosTemplateData.tagAssoc[tempStruct.tag],ArrayLen(arrMatches));
 				index = resultPos+resultLen;
 			}else{
 				matching = false;
@@ -432,14 +418,14 @@
 	tempStruct = structnew("sync");
 	tempStruct.content = "";
 	tempStruct.isFile = false;
-	tempStruct.string = mid(request.zos.templateData.content, index, (len(request.zos.templateData.content)-index)+1);
+	tempStruct.string = mid(request.zosTemplateData.content, index, (len(request.zosTemplateData.content)-index)+1);
 	tempStruct.tag = '';
 	ArrayAppend(arrMatches, tempStruct);
-	request.zos.templateData.tags = arrMatches;
+	request.zosTemplateData.tags = arrMatches;
 	</cfscript>
 </cffunction>
 
-<cffunction name="compileTemplateCFC" localmode="modern" returntype="string" output="yes"><cfargument name="returnString" type="boolean" required="no" default="#false#"><cfscript>
+<cffunction name="compileTemplateCFC" localmode="modern"><cfargument name="returnString" type="boolean" required="no" default="#false#"><cfscript>
 	var i=1;
 	var finalString = "";
 	var arrFinal=ArrayNew(1);
@@ -455,15 +441,15 @@
 	var contentTagIndex=0;
 	var cfcPath=0;
 	
-	request.zos.templateData.building=true;
-	request.zos.templateData.content = application.zcore.functions.zreadfile(request.zos.templateData.templatePath);
+	request.zosTemplateData.building=true;
+	request.zosTemplateData.content = application.zcore.functions.zreadfile(request.zosTemplateData.templatePath);
 	// convert to new variables
-	if(request.zos.templateData.content EQ false){
+	if(request.zosTemplateData.content EQ false){
 		// no template exists in any of the paths
-		application.zcore.template.fail("#request.zos.templateData.comName#: build: `#request.zos.templateData.template#`, is not a valid template name. Path: #request.zos.templateData.templatePath#",true);
+		application.zcore.template.fail("#request.zosTemplateData.comName#: build: `#request.zosTemplateData.template#`, is not a valid template name. Path: #request.zosTemplateData.templatePath#",true);
 	}
 	
-	request.zos.templateData.content='
+	request.zosTemplateData.content='
 	<cfscript>
 	if(request.zos.zReset EQ "template" or request.zos.zReset EQ "site"){
 		_zForceReloadTemplate=true;
@@ -471,11 +457,11 @@
 		_zForceReloadTemplate=false;
 	}
 	</cfscript>
-	<cfoutput>'&replacenocase(replacenocase(request.zos.templateData.content,'<cfoutput>','','ALL'),'</cfoutput>','','ALL')&'</cfoutput>';
+	<cfoutput>'&replacenocase(replacenocase(request.zosTemplateData.content,'<cfoutput>','','ALL'),'</cfoutput>','','ALL')&'</cfoutput>';
 	// fix legacy code to reference the new paths
-	request.zos.templateData.content=replacenocase(request.zos.templateData.content,"/zsa2/","/zcorerootmapping/","all"); 
-	request.zos.templateData.content=replacenocase(replacenocase(replacenocase(request.zos.templateData.content,'<cfinclude template="/','<cfinclude template="#request.zrootpath#','all'),'<cfinclude template="#request.zrootpath#zsa2/','<cfinclude template="/zcorerootmapping/','ALL'),'<cfinclude template="#request.zrootpath#zcorerootmapping/','<cfinclude template="/zcorerootmapping/','ALL');
-	request.zos.templateData.content=replacenocase(request.zos.templateData.content, '<cfinclude ', '<cfinclude forceReload="##_zForceReloadTemplate##" ', "all"); 
+	request.zosTemplateData.content=replacenocase(request.zosTemplateData.content,"/zsa2/","/zcorerootmapping/","all"); 
+	request.zosTemplateData.content=replacenocase(replacenocase(replacenocase(request.zosTemplateData.content,'<cfinclude template="/','<cfinclude template="#request.zrootpath#','all'),'<cfinclude template="#request.zrootpath#zsa2/','<cfinclude template="/zcorerootmapping/','ALL'),'<cfinclude template="#request.zrootpath#zcorerootmapping/','<cfinclude template="/zcorerootmapping/','ALL');
+	request.zosTemplateData.content=replacenocase(request.zosTemplateData.content, '<cfinclude ', '<cfinclude forceReload="##_zForceReloadTemplate##" ', "all"); 
  
 	
 	
@@ -489,25 +475,25 @@
 	}
 	/*application.zcore.cache.setTemplateContent(_zcoretemplatelocalvars.result);*/');
 			
-	for(i=1;i LTE arraylen(request.zos.templateData.tags);i++){
-		if(request.zos.templateData.tags[i].tag NEQ ""){
-			if(request.zos.templateData.tags[i].tag EQ "content"){
+	for(i=1;i LTE arraylen(request.zosTemplateData.tags);i++){
+		if(request.zosTemplateData.tags[i].tag NEQ ""){
+			if(request.zosTemplateData.tags[i].tag EQ "content"){
 				contentTagIndex=i;
 			}
 			arrayAppend(arrT, '
-			_zcoretemplatelocalvars.finalTagContent=application.zcore.template.getFinalTagContent("'&request.zos.templateData.tags[i].tag&'");
-			/*application.zcore.cache.setTag("'&request.zos.templateData.tags[i].tag&'", "####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);*/
+			_zcoretemplatelocalvars.finalTagContent=application.zcore.template.getFinalTagContent("'&request.zosTemplateData.tags[i].tag&'");
+			/*application.zcore.cache.setTag("'&request.zosTemplateData.tags[i].tag&'", "####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);*/
 			_zcoretemplatelocalvars.result=replace(_zcoretemplatelocalvars.result,"####_zcoretemplatelocalvars.ts.section'&i&'####", _zcoretemplatelocalvars.finalTagContent);');
-			arrayAppend(arrT2, request.zos.templateData.tags[i].string&'####_zcoretemplatelocalvars.ts.section'&i&'####');
+			arrayAppend(arrT2, request.zosTemplateData.tags[i].string&'####_zcoretemplatelocalvars.ts.section'&i&'####');
 		}else{
-			arrayAppend(arrT2, request.zos.templateData.tags[i].string);
+			arrayAppend(arrT2, request.zosTemplateData.tags[i].string);
 		}
 	}
 	/*if(#contentTagIndex# NEQ 0 and findnocase("####_zcoretemplatelocalvars.ts.section#contentTagIndex#####",_zcoretemplatelocalvars.result) EQ 0){
 		_zcoretemplatelocalvars.result=replacenocase(_zcoretemplatelocalvars.result, "</body>", "####_zcoretemplatelocalvars.ts.section#contentTagIndex#####</body>");	
 	}*/
 	
-	result='<cfcomponent output="yes"><cffunction name="runTemplate" localmode="modern" output="yes" returntype="string"><cfscript>
+	result='<cfcomponent output="yes"><cffunction name="runTemplate" localmode="modern"><cfscript>
 	var _zcoretemplatelocalvars=structnew("sync");
 	_zcoretemplatelocalvars.ts=structnew("sync");
 	</cfscript><cfsavecontent variable="_zcoretemplatelocalvars.result">'&arraytolist(arrT2,'')&'</cfsavecontent><cfscript>
@@ -515,9 +501,9 @@
 	'&arraytolist(arrT,'')&'
 	return _zcoretemplatelocalvars.result;
 	</cfscript></cffunction></cfcomponent>';
-	if(left(request.zos.templateData.templatePath, len(request.zos.globals.serverprivatehomedir&"_cache/")) EQ request.zos.globals.serverprivatehomedir&"_cache/"){
+	if(left(request.zosTemplateData.templatePath, len(request.zos.globals.serverprivatehomedir&"_cache/")) EQ request.zos.globals.serverprivatehomedir&"_cache/"){
 		sp=request.zos.globals.serverprivateHomeDir&"_cache/scripts/templates";
-		cfcName=replace(replace(request.zos.templateData.templatePath,".","$","all"),"/","$","all")&".cfc";
+		cfcName=replace(replace(request.zosTemplateData.templatePath,".","$","all"),"/","$","all")&".cfc";
 		cfcPath=sp&'/'&cfcName;
 		r=application.zcore.functions.zwritefile(cfcPath,result);
 		
@@ -526,7 +512,7 @@
 		if(directoryexists(sp) EQ false){
 			application.zcore.functions.zcreatedirectory(sp);
 		}
-		cfcName=replace(replace(replace(request.zos.templateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all")&".cfc";
+		cfcName=replace(replace(replace(request.zosTemplateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all")&".cfc";
 		cfcPath=sp&'/'&cfcName;
 		r=application.zcore.functions.zwritefile(cfcPath,result);
 	}
@@ -538,7 +524,7 @@
 </cfscript>
 </cffunction>
 
-<cffunction name="deleteAllTemplates" localmode="modern" returntype="any" output="no">
+<cffunction name="deleteAllTemplates" localmode="modern">
 <cfscript> 
 var db=request.zos.queryObject;
 db.sql="select * FROM #request.zos.queryObject.table("site", request.zos.zcoreDatasource)# site 
@@ -555,10 +541,14 @@ for(row in qSite){
 	}
 }
 </cfscript>
+</cffunction> 
+
+<cffunction name="getString" localmode="modern">
+	<cfscript>
+	return "1";
+	</cfscript>
 </cffunction>
-
-
-<cffunction name="createTemplateObject" localmode="modern" output="yes" returntype="any">
+<cffunction name="createTemplateObject" localmode="modern">
     <cfargument name="c" type="string" required="yes">
     <cfargument name="cpath" type="string" required="yes">
     <cfargument name="forceNew" type="boolean" required="no" default="#false#">
@@ -599,32 +589,32 @@ for(row in qSite){
     </cfscript>
 </cffunction>
 
-<cffunction name="build" localmode="modern" returntype="string" output="no"><cfscript> 
+<cffunction name="build" localmode="modern"><cfscript> 
 	var arrFinal=ArrayNew(1); 
 	var runTemplate=true;
 	var runCFCTemplate=false; 
 	var sp=request.zos.globals.privateHomeDir&"_cache/scripts/templates"; 
 	application.zcore.functions.zIncludeZOSFORMS();
 	application.zcore.functions.zRequireCSSFramework(); 
-	request.zos.templateData.building=true;
+	request.zosTemplateData.building=true;
 	if(not structkeyexists(application.zcore, 'templateCFCCache')){
 		application.zcore.templateCFCCache={};
 	}
 	if(not structkeyexists(application.zcore.templateCFCCache, request.zos.globals.id)){
 		application.zcore.templateCFCCache[request.zos.globals.id]={};
 	}
-	if(request.zos.templateData.isFile){
-		request.zos.templateData.templatePath=false; 
-		if(right(request.zos.templateData.template, 4) NEQ ".cfm"){
+	if(request.zosTemplateData.isFile){
+		request.zosTemplateData.templatePath=false; 
+		if(right(request.zosTemplateData.template, 4) NEQ ".cfm"){
 			runCFCTemplate=true;
 			runTemplate=false;
 			// modern cfc templates - all new code should use this more efficient templating.
 			//zcorerootmapping.templates.administrator
 			//zcorerootmapping.mvc.z.server-manager.templates.administrator
 			// root.templates.default
-			var cfcCreatePath=request.zos.templateData.template;
-			if(left(request.zos.templateData.template, 5) EQ "root."){
-				cfcCreatePath=request.zrootcfcpath&removechars(request.zos.templateData.template, 1, 5);
+			var cfcCreatePath=request.zosTemplateData.template;
+			if(left(request.zosTemplateData.template, 5) EQ "root."){
+				cfcCreatePath=request.zrootcfcpath&removechars(request.zosTemplateData.template, 1, 5);
 			}
 			if(request.zos.zreset EQ "template"){
 				//structclear(application.zcore.templateCFCCache[request.zos.globals.id]);
@@ -634,14 +624,14 @@ for(row in qSite){
 			}
 		}else{ 
 			// legacy cfm templates
-			if(left(request.zos.templateData.template,19) EQ "/zcorecachemapping/"){
+			if(left(request.zosTemplateData.template,19) EQ "/zcorecachemapping/"){
 				sp=request.zos.globals.serverprivateHomeDir&"_cache/scripts/templates";
-				request.zos.templateData.templatePath=request.zos.globals.serverprivatehomedir&"_cache/"&removechars(request.zos.templateData.template,1,19);
-				cfcName=replace(replace(replace(request.zos.templateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all");
+				request.zosTemplateData.templatePath=request.zos.globals.serverprivatehomedir&"_cache/"&removechars(request.zosTemplateData.template,1,19);
+				cfcName=replace(replace(replace(request.zosTemplateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all");
 				cfcCreatePath='zcorecachemapping.scripts.templates.'&cfcName;
 			}else{
-				request.zos.templateData.templatePath=request.zos.globals.homedir&"templates/"&request.zos.templateData.template;
-				cfcName=replace(replace(replace(request.zos.templateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all");
+				request.zosTemplateData.templatePath=request.zos.globals.homedir&"templates/"&request.zosTemplateData.template;
+				cfcName=replace(replace(replace(request.zosTemplateData.templatePath, request.zos.globals.homedir, "", "one"),".","$","all"),"/","$","all");
 				cfcCreatePath=request.zRootSecureCFCPath&'_cache.scripts.templates.'&cfcName;
 			}
 			if(not structkeyexists(application.zcore, 'compiledSiteTemplatePathCache')){
@@ -659,7 +649,7 @@ for(row in qSite){
 				application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id][sp&'/'&cfcName&".cfc"]=true;
 			}else if(request.zos.zreset EQ "template" or not structkeyexists(application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id], sp&'/'&cfcName&".cfc")){    
 				structclear(application.zcore.templateCFCCache[request.zos.globals.id]);
-				if(fileexists(request.zos.templateData.templatePath)){
+				if(fileexists(request.zosTemplateData.templatePath)){
 					this.compileTemplateCFC(); 
 					tempIO=createTemplateObject("component",cfcCreatePath,true); 
 					application.zcore.compiledSiteTemplatePathCache[request.zos.globals.id][sp&'/'&cfcName&".cfc"]=true;
@@ -669,10 +659,10 @@ for(row in qSite){
 			}else if(structkeyexists(application.zcore.compiledTemplatePathCache, sp&'/'&cfcName&".cfc")){ 
 				tempIO=createTemplateObject("component",cfcCreatePath); 
 			}else{ 
-				if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, request.zos.templateData.templatePath) EQ false){
-					application.sitestruct[request.zos.globals.id].fileExistsCache[request.zos.templateData.templatePath]=fileexists(request.zos.templateData.templatePath);
+				if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, request.zosTemplateData.templatePath) EQ false){
+					application.sitestruct[request.zos.globals.id].fileExistsCache[request.zosTemplateData.templatePath]=fileexists(request.zosTemplateData.templatePath);
 				}
-				if(application.sitestruct[request.zos.globals.id].fileExistsCache[request.zos.templateData.templatePath]){
+				if(application.sitestruct[request.zos.globals.id].fileExistsCache[request.zosTemplateData.templatePath]){
 					if(structkeyexists(application.sitestruct[request.zos.globals.id].fileExistsCache, sp&'/'&cfcName&".cfc") EQ false){
 						application.sitestruct[request.zos.globals.id].fileExistsCache[sp&'/'&cfcName&".cfc"]=fileexists(sp&'/'&cfcName&".cfc");
 					}
@@ -691,7 +681,7 @@ for(row in qSite){
 		}
 	}else{
 		// don't compile this the same?  or just put the entire template as the struct key maybe.
-		request.zos.templateData.content = request.zos.templateData.template; 
+		request.zosTemplateData.content = request.zosTemplateData.template; 
 	}  
 	if(structkeyexists(request, 'zValueOffset') and request.zValueOffset NEQ 0){
 		application.zcore.template.appendTag('meta','<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zInitZValues(#request.zValueOffset#);});/* ]]> */</script>');
@@ -720,7 +710,7 @@ for(row in qSite){
 		finalString=replace(finalString, '</head>',application.sitestruct[request.zos.globals.id].globalHTMLHeadSource&'</head>');
 	}
 	request.zos.endtime=gettickcount('nano');
-	if(request.zos.templateData.primary and (Request.zOS.isDeveloper or request.zos.istestserver)){
+	if(request.zosTemplateData.primary and (Request.zOS.isDeveloper or request.zos.istestserver)){
 		if(structkeyexists(Request,'zPageDebugDisabled') EQ false and (application.zcore.user.checkAllCompanyAccess() or request.zos.istestserver) and structkeyexists(form, 'zab') EQ false){
 			request.zos.debuggerFinalString=finalString; 
 			request.zos.debugbarStruct=application.zcore.debugger.getForm();
@@ -731,11 +721,11 @@ for(row in qSite){
 		}
 	}
 	
-	request.zos.templateData.output = finalString;
+	request.zosTemplateData.output = finalString;
 	return finalString;
 	</cfscript></cffunction>
 
-<cffunction name="getShareButton" localmode="modern" output="no" returntype="string">
+<cffunction name="getShareButton" localmode="modern">
 <cfargument name="style" type="string" required="no" default="font-size:13px; font-weight:bold;clear:both; width:300px; margin-left:5px; padding-bottom:5px;">
 <cfargument name="nohr" type="boolean" required="no" default="#false#">
 <cfargument name="addthisType" type="string" required="no" default="addthis_default_style">
@@ -759,317 +749,221 @@ for(row in qSite){
 </cffunction>
 
  
-<cffunction name="requireTag" localmode="modern" returntype="boolean" output="false">
+<cffunction name="requireTag" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfscript>
-	if(isDefined('request.zos.templateData.tagContent.#arguments.name#') EQ false){
-		StructInsert(request.zos.templateData.tagContent, arguments.name, structnew("sync"),true);
+	if(isDefined('request.zosTemplateTagContent.#arguments.name#') EQ false){
+		StructInsert(request.zosTemplateTagContent, arguments.name, structnew("sync"),true);
 	}
-	request.zos.templateData.tagContent[arguments.name].required = true;
+	request.zosTemplateTagContent[arguments.name].required = true;
 	return true;
 	</cfscript>
 </cffunction>
 
 <!--- FUNCTION: getTagContent(name); --->
-<cffunction name="getTagContent" localmode="modern" returntype="any" output="false">
+<cffunction name="getTagContent" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfscript>
-	if(structkeyexists(request.zos.templateData.tagContent, arguments.name) and structkeyexists(request.zos.templateData.tagContent[arguments.name],'content')){
-		return request.zos.templateData.tagContent[arguments.name].content;
+	if(structkeyexists(request.zosTemplateTagContent, arguments.name) and structkeyexists(request.zosTemplateTagContent[arguments.name],'content')){
+		return request.zosTemplateTagContent[arguments.name].content;
 	}else{
 		return "";
 	}
 	</cfscript>
 </cffunction>
 
-<cffunction name="getFinalTagStruct" localmode="modern" returntype="struct" output="no">
+<cffunction name="getFinalTagStruct" localmode="modern">
 	<cfscript>
-	var tagStruct={}; 
+	var tagStruct=structnew("sync"); 
 	// you can't enable new meta tags because it breaks old templates and sites that load jquery plugins the old way
 	//application.zcore.functions.zEnableNewMetaTags(); 
 	application.zcore.functions.zExecuteCSSJSIncludes(); 
-	for(var i in request.zos.templateData.uniqueTagStruct){
+	for(var i in request.zosTemplateData.uniqueTagStruct){
 		tagStruct[i]=this.getFinalTagContent(i);
 	}  
 	return tagStruct;
 	</cfscript>
 </cffunction>
 
-<cffunction name="getFinalTagContent" localmode="modern" returntype="any" output="false">
+<cffunction name="getFinalTagContent" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfscript> 
 	var prepend="";
 	var append="";
 	var append2="";
-	zos=request.zos;
-	templateData=zos.templateData;
+	zos=request.zos; 
 	name=arguments.name;
-	if(structkeyexists(templateData.prependTagContent, name)){
-		prepend=arraytolist(templateData.prependTagContent[name].arrContent,"");
-	}
-	if(structkeyexists(templateData.appendTagContent, name)){
-		append=arraytolist(templateData.appendTagContent[name].arrContent,"");
-	}
-	if(name EQ "scripts" and not structkeyexists(zos, 'disableOldZLoader')){
-		if(arraylen(zos.arrScriptInclude)){
-			lastScript=zos.arrScriptInclude[arraylen(zos.arrScriptInclude)]; 
-			scriptIncludeStruct={"1":{},"2":{},"3":{},"4":{},"5":{}};
-			for(i=1;i LTE arraylen(zos.arrScriptInclude);i++){
-				script=zos.arrScriptInclude[i]; 
-				if(left(script, 1) EQ '/' and left(script, 2) NEQ "//"){
-					// required for domains that use http proxy connection
-					scriptIncludeStruct[zos.arrScriptIncludeLevel[i]][zos.currentHostName&script]=true;
+	savecontent variable="out"{
+		if(structkeyexists(request.zosTemplatePrependTagContent, name)){
+			echo(arraytolist(request.zosTemplatePrependTagContent[name].arrContent,""));
+		}
+		if(structkeyexists(request.zosTemplateTagContent, name)){
+			if(structkeyexists(request.zosTemplateTagContent[name], "content")){
+				if(name EQ "title" or name EQ "pagetitle"){
+					echo(htmleditformat(request.zosTemplateTagContent[name].content));
 				}else{
-					scriptIncludeStruct[zos.arrScriptIncludeLevel[i]][script]=true;
-				} 
-			}
-			scriptCount=structcount(scriptIncludeStruct); 
-			arrBeginFunction=[];
-			arrEndFunction=[];
-			for(i=1;i LTE 5;i++){
-				if(structcount(scriptIncludeStruct[i])){
-					arrayappend(arrBeginFunction, ', function(a){ var t=new zLoader();t.loadScripts(["'&structkeylist(scriptIncludeStruct[i],'", "')&'"]');
-					arrayappend(arrEndFunction, ");}");
+					echo(request.zosTemplateTagContent[name].content);
 				}
-			} 
-			append2='<script type="text/javascript">/* <![CDATA[ */  
-				setTimeout(function(){
-					var tempM=new zLoader();tempM.loadScripts(["#zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
-					'&arraytolist(arrBeginFunction, "")&arrayToList(arrEndFunction,"")&'
-					);
-				},0); /* ]]> */</script>'; 
+			}
 		}
-	}
-	
-	if(structkeyexists(templateData.tagContent, name)){
-		if(name EQ "title" or name EQ "pagetitle"){
-			return prepend&htmleditformat(templateData.tagContent[name].content)&append&append2;
-		}else if(structkeyexists(templateData.tagContent[name], "content")){
-			return prepend&templateData.tagContent[name].content&append&append2;
-		}else{
-			return prepend&append&append2;
+		if(structkeyexists(request.zosTemplateAppendTagContent, name)){
+			echo(arraytolist(request.zosTemplateAppendTagContent[name].arrContent,""));
 		}
-	}else{
-		return prepend&append&append2;
+		if(name EQ "scripts"){// and not structkeyexists(zos, 'disableOldZLoader')){
+			if(arraylen(zos.arrScriptInclude)){
+				lastScript=zos.arrScriptInclude[arraylen(zos.arrScriptInclude)]; 
+				scriptIncludeStruct={"1":{},"2":{},"3":{},"4":{},"5":{}};
+				for(i=1;i LTE arraylen(zos.arrScriptInclude);i++){
+					script=zos.arrScriptInclude[i]; 
+					if(left(script, 1) EQ '/' and left(script, 2) NEQ "//"){
+						// required for domains that use http proxy connection
+						scriptIncludeStruct[zos.arrScriptIncludeLevel[i]][zos.currentHostName&script]=true;
+					}else{
+						scriptIncludeStruct[zos.arrScriptIncludeLevel[i]][script]=true;
+					} 
+				}
+				scriptCount=structcount(scriptIncludeStruct); 
+				arrBeginFunction=[];
+				arrEndFunction=[];
+				for(i=1;i LTE 5;i++){
+					if(structcount(scriptIncludeStruct[i])){
+						arrayappend(arrBeginFunction, ', function(a){ var t=new zLoader();t.loadScripts(["'&structkeylist(scriptIncludeStruct[i],'", "')&'"]');
+						arrayappend(arrEndFunction, ");}");
+					}
+				} 
+				echo('<script type="text/javascript">/* <![CDATA[ */  
+					setTimeout(function(){
+						var tempM=new zLoader();tempM.loadScripts(["#zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
+						'&arraytolist(arrBeginFunction, "")&arrayToList(arrEndFunction,"")&'
+						);
+					},0); /* ]]> */</script>'); 
+			}
+		} 
 	}
+	return out;
 	</cfscript>
 </cffunction>
-
-<cffunction name="clearPrependAppendTagData" localmode="modern" returntype="void" output="false">
-	<cfargument name="name" required="yes" type="string">
-<cfscript>
-	if(structkeyexists(request.zos.templateData.prependTagContent, arguments.name)){
-		request.zos.templateData.prependTagContent[arguments.name].arrContent=arraynew(1);
-		request.zos.templateData.prependTagContent[arguments.name].arrFirst=arraynew(1);
-	}
-	if(structkeyexists(request.zos.templateData.appendTagContent, arguments.name)){
-		request.zos.templateData.appendTagContent[arguments.name].arrContent=arraynew(1);
-		request.zos.templateData.appendTagContent[arguments.name].arrFirst=arraynew(1);
-	}
-	</cfscript>
-
-
-</cffunction>
-
-
-<!--- application.zcore.template.findAndReplacePrependTag(name,searchstr, newstr); --->
-<cffunction name="findAndReplacePrependTag" localmode="modern" returntype="void" output="false">
-	<cfargument name="name" required="yes" type="string">
-	<cfargument name="searchstr" required="yes" type="string">
-	<cfargument name="newstr" required="yes" type="string">
-<cfscript>
-	var i=0;
-	if(structkeyexists(request.zos.templateData.prependTagContent, arguments.name)){
-		for(i=1;i LTE arraylen(request.zos.templateData.prependTagContent[arguments.name].arrContent);i++){
-			request.zos.templateData.prependTagContent[arguments.name].arrContent[i]=replace(request.zos.templateData.prependTagContent[arguments.name].arrContent[i], arguments.searchstr, arguments.newstr, 'all');
-		}
-	}
-	</cfscript>
-</cffunction>
-
-<!--- application.zcore.template.findAndReplaceAppendTag(searchstr, newstr); --->
-<cffunction name="findAndReplaceAppendTag" localmode="modern" returntype="void" output="false">
-	<cfargument name="name" required="yes" type="string">
-	<cfargument name="searchstr" required="yes" type="string">
-	<cfargument name="newstr" required="yes" type="string">
-<cfscript>
-	var i=0;
-	if(structkeyexists(request.zos.templateData.appendTagContent, arguments.name)){
-		for(i=1;i LTE arraylen(request.zos.templateData.appendTagContent[arguments.name].arrContent);i++){
-			request.zos.templateData.appendTagContent[arguments.name].arrContent[i]=replace(request.zos.templateData.appendTagContent[arguments.name].arrContent[i], searchstr, newstr, 'all');
-		}
-	}
-	</cfscript>
-</cffunction>
-
+ 
 <!--- FUNCTION: prependTag(name, content, forceFirst); --->
-<cffunction name="prependTag" localmode="modern" returntype="void" output="false">
+<cffunction name="prependTag" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfargument name="content" required="yes" type="string">
 	<cfargument name="forceFirst" required="no" type="boolean" default="#false#">
 <cfscript>
 	if(len(arguments.content) EQ 0) return;
-	if(len(arguments.name) EQ 0){
-		this.fail("Error: COMPONENT: zcorerootmapping.com.zos.template.cfc: prependTag ARGUMENT `name` cannot be an empty string",true);
+	request.zosTemplateData.uniqueTagStruct[arguments.name]=true;
+	if(structkeyexists(request.zosTemplatePrependTagContent, arguments.name) EQ false){
+		request.zosTemplatePrependTagContent[arguments.name]={ arrContent=[arguments.content] };
 	}else{
-		request.zos.templateData.uniqueTagStruct[arguments.name]=true;
-		if(structkeyexists(request.zos.templateData.prependTagContent, arguments.name) EQ false){
-			request.zos.templateData.prependTagContent[arguments.name]={ arrContent=[arguments.content] };
+		if(arguments.forceFirst){
+			arrayprepend(request.zosTemplatePrependTagContent[arguments.name].arrContent,arguments.content);
 		}else{
-			if(arguments.forceFirst){
-				arrayprepend(request.zos.templateData.prependTagContent[arguments.name].arrContent,arguments.content);
-			}else{
-				arrayappend(request.zos.templateData.prependTagContent[arguments.name].arrContent,arguments.content);
-			}
+			arrayappend(request.zosTemplatePrependTagContent[arguments.name].arrContent,arguments.content);
 		}
 	}
 	</cfscript>
 </cffunction>
 
-<cffunction name="prependContent" localmode="modern" returntype="any" output="false">
+<cffunction name="prependContent" localmode="modern">
 	<cfargument name="content" type="string" required="yes">
 	<cfscript>
 	if(len(arguments.content) EQ 0) return;
-	request.zos.templateData.uniqueTagStruct["content"]=true;
-	if(structkeyexists(request.zos.templateData.prependTagContent, "content") EQ false){
-		request.zos.templateData.prependTagContent["content"]={ arrContent=[arguments.content] };
+	request.zosTemplateData.uniqueTagStruct["content"]=true;
+	if(structkeyexists(request.zosTemplatePrependTagContent, "content") EQ false){
+		request.zosTemplatePrependTagContent["content"]={ arrContent=[arguments.content] };
 	}else{
-		arrayappend(request.zos.templateData.prependTagContent["content"].arrContent,arguments.content);
+		arrayappend(request.zosTemplatePrependTagContent["content"].arrContent,arguments.content);
 	}
 	</cfscript>
 </cffunction>
 
 <!--- FUNCTION: appendTag(name, content, forceFirst); --->
-<cffunction name="appendTag" localmode="modern" returntype="void" output="false">
+<cffunction name="appendTag" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfargument name="content" required="yes" type="string">
 	<cfargument name="forceFirst" required="no" type="boolean" default="#false#">
-<cfscript>
-	var i=1;
-	var matched=false;
-	if(len(arguments.content) EQ 0) return;
-	if(len(trim(arguments.name)) EQ 0){
-		request.zos.templateData.fail("Error: COMPONENT: zcorerootmapping.com.zos.template.cfc: appendTag ARGUMENT `name` cannot be an empty string",true);
-	}else{
-		request.zos.templateData.uniqueTagStruct[arguments.name]=true;
-		if(structkeyexists(request.zos.templateData.appendTagContent, arguments.name) EQ false){
-			request.zos.templateData.appendTagContent[arguments.name]={ arrContent=[arguments.content], arrFirst=[arguments.forceFirst] };
-		}else{
-			if(arguments.forceFirst){
-				for(i=1;i LTE arraylen(request.zos.templateData.appendTagContent[arguments.name].arrFirst);i++){
-					if(request.zos.templateData.appendTagContent[arguments.name].arrFirst[i] EQ false){
-						arrayinsertat(request.zos.templateData.appendTagContent[arguments.name].arrContent,i, arguments.content);
-						arrayinsertat(request.zos.templateData.appendTagContent[arguments.name].arrFirst,i,true);
-						matched=true;
-						break;
-					}
-				}
-				if(matched EQ false){
-					arrayprepend(request.zos.templateData.appendTagContent[arguments.name].arrContent, arguments.content);
-					arrayprepend(request.zos.templateData.appendTagContent[arguments.name].arrFirst,true);
-				}
-			}else{
-				arrayappend(request.zos.templateData.appendTagContent[arguments.name].arrContent,arguments.content);
-				arrayappend(request.zos.templateData.appendTagContent[arguments.name].arrFirst,false);
-			}
-		}
-	}
-	</cfscript>
-</cffunction>
-
-<!--- application.zcore.template.getAllPreAndPostData(); --->
-<cffunction name="getAllPreAndPostData" localmode="modern" returntype="string" output="yes">
 	<cfscript>
-	arrOut=arraynew(); 
-	for(n in request.zos.templateData.prependTagContent){
-		c=arraytolist(request.zos.templateData.prependTagContent[n].arrContent,"");
-		if(c DOES NOT CONTAIN '/z/javascript/zForm.js'){
-			arrayappend(arrOut,c);
+	if(len(arguments.content) EQ 0) return;
+	request.zosTemplateData.uniqueTagStruct[arguments.name]=true;
+	if(structkeyexists(request.zosTemplateAppendTagContent, arguments.name) EQ false){
+		request.zosTemplateAppendTagContent[arguments.name]={ arrContent=[arguments.content], arrFirst=[arguments.forceFirst] };
+	}else{
+		if(arguments.forceFirst){
+			matched=false;
+			for(i=1;i LTE arraylen(request.zosTemplateAppendTagContent[arguments.name].arrFirst);i++){
+				if(request.zosTemplateAppendTagContent[arguments.name].arrFirst[i] EQ false){
+					arrayinsertat(request.zosTemplateAppendTagContent[arguments.name].arrContent,i, arguments.content);
+					arrayinsertat(request.zosTemplateAppendTagContent[arguments.name].arrFirst,i,true);
+					matched=true;
+					break;
+				}
+			}
+			if(matched EQ false){
+				arrayprepend(request.zosTemplateAppendTagContent[arguments.name].arrContent, arguments.content);
+				arrayprepend(request.zosTemplateAppendTagContent[arguments.name].arrFirst,true);
+			}
+		}else{
+			arrayappend(request.zosTemplateAppendTagContent[arguments.name].arrContent,arguments.content);
+			arrayappend(request.zosTemplateAppendTagContent[arguments.name].arrFirst,false);
 		}
 	}
-	for(n in request.zos.templateData.appendTagContent){
-		c=arraytolist(request.zos.templateData.appendTagContent[n].arrContent,"");
-		if(c DOES NOT CONTAIN '/z/javascript/zForm.js'){
-			arrayappend(arrOut,c);
-		}
-	}
-	return arraytolist(arrOut,"");
 	</cfscript>
 </cffunction>
 
 <!--- FUNCTION: setTag(name, content, required, isFile); --->
-<cffunction name="setTag" localmode="modern" returntype="boolean" output="no">
+<cffunction name="setTag" localmode="modern">
 	<cfargument name="name" required="yes" type="string">
 	<cfargument name="content" required="yes" type="string">
 	<cfargument name="required" required="no" type="boolean" default="#false#">
 	<cfargument name="isFile" required="no" type="boolean" default="#false#">
 	<cfargument name="append" required="no" type="boolean" default="#false#">
 	<cfscript>
-	if(trim(arguments.name) EQ ''){
-		this.fail("Error: COMPONENT: zcorerootmapping.com.zos.template.cfc: setTag ARGUMENT `name` cannot be an empty string",true);
-	}else{
-		if(not structkeyexists(request.zos.templateData, 'tagContent')){
-			application.zcore.functions.zRedirect("/");
+	request.zosTemplateData.uniqueTagStruct[arguments.name]=true;
+	if(arguments.append){
+		if(structkeyexists(request.zosTemplateTagContent, arguments.name)){
+			arguments.content = request.zosTemplateTagContent[arguments.name].content&arguments.content;
 		}
-		request.zos.templateData.uniqueTagStruct[arguments.name]=true;
-		if(arguments.append){
-			if(structkeyexists(request.zos.templateData.tagContent,arguments.name)){
-				request.zos.templateData.tagContent[arguments.name].content = request.zos.templateData.tagContent[arguments.name].content&arguments.content;
-				return true;
-			}
-		}
-		StructInsert(request.zos.templateData.tagContent, arguments.name, structnew("sync"),true);
-		request.zos.templateData.tagContent[arguments.name].required = arguments.required;
-		request.zos.templateData.tagContent[arguments.name].isFile = arguments.isFile;
-		request.zos.templateData.tagContent[arguments.name].content = arguments.content;
 	}
-	return true;
+	request.zosTemplateTagContent[arguments.name]={
+		required:arguments.required,
+		isFile:arguments.isFile,
+		content:arguments.content
+	};
+	</cfscript>
+</cffunction> 
+
+<cffunction name="getOutput" localmode="modern">
+	<cfscript> 
+	return request.zosTemplateData.output;
 	</cfscript>
 </cffunction>
 
-
-
-
-<cffunction name="getOutput" localmode="modern" output="false" returntype="string">
-	<cfscript>
-	return request.zos.templateData.output;
-	</cfscript>
-</cffunction>
-
-
-
-
-
-
-<cffunction name="fail" localmode="modern" hint="Used when a critical template error occurs and result is aborted with a custom error message." output="true" returntype="any">
+<cffunction name="fail" localmode="modern" hint="Used when a critical template error occurs and result is aborted with a custom error message.">
 	<cfargument name="message" type="string" required="no" default="">
 	<cfargument name="throwError" type="boolean" required="no" default="#true#">
 	<cfargument name="pageOutput" type="boolean" required="no" default="#false#">
-	<cfargument name="templateOutput" type="boolean" required="no" default="#false#">
-	<cfscript>
-	var theError = "";
-	</cfscript>
+	<cfargument name="templateOutput" type="boolean" required="no" default="#false#"> 
 	<cfsavecontent variable="theError">
-	<cfscript>
-	writeoutput('<!-- JetendoCustomError --><h2>Jetendo CMS Custom Error</h2>');
-	writeoutput('<table style=" border-spacing:0px; width:100%;" class="table-list"><tr><td>');
-	if(arguments.message NEQ ''){
-		writeoutput('Reason: '&arguments.message);
-	}else{
-		writeoutput('No reason was given.');
-	}
-	writeoutput('</td></tr></table><table style=" border-spacing:0px; width:100%;" class="table-list"><tr><td>');
-	if(arguments.pageOutput){
-		writeoutput("<br /><br />Partial page output below<br /><textarea style=""width:100%;height:250;"">#HTMLEditFormat(request.zos.templateData.output)#</textarea>");
-	}
-	if(arguments.templateOutput){
-		writeoutput("<br /><br />Template code below<br /><textarea style=""width:100%;height:250;"">#HTMLEditFormat(request.zos.templateData.content)#</textarea>");
-	}
-	writeoutput('</td></tr></table><!-- JetendoCustomErrorEnd -->');
-	if(isDefined('application.zcore.functions.zEndOfRunningScript')){
-		application.zcore.functions.zEndOfRunningScript();
-	}
-	</cfscript>
+		<cfscript>
+		writeoutput('<!-- JetendoCustomError --><h2>Jetendo CMS Custom Error</h2>');
+		writeoutput('<table style=" border-spacing:0px; width:100%;" class="table-list"><tr><td>');
+		if(arguments.message NEQ ''){
+			writeoutput('Reason: '&arguments.message);
+		}else{
+			writeoutput('No reason was given.');
+		}
+		writeoutput('</td></tr></table><table style=" border-spacing:0px; width:100%;" class="table-list"><tr><td>');
+		if(arguments.pageOutput){
+			writeoutput("<br /><br />Partial page output below<br /><textarea style=""width:100%;height:250;"">#HTMLEditFormat(request.zosTemplateData.output)#</textarea>");
+		}
+		if(arguments.templateOutput){
+			writeoutput("<br /><br />Template code below<br /><textarea style=""width:100%;height:250;"">#HTMLEditFormat(request.zosTemplateData.content)#</textarea>");
+		}
+		writeoutput('</td></tr></table><!-- JetendoCustomErrorEnd -->');
+		if(isDefined('application.zcore.functions.zEndOfRunningScript')){
+			application.zcore.functions.zEndOfRunningScript();
+		}
+		</cfscript>
 	</cfsavecontent>		
 	<cfif arguments.throwError>
 		<cfset Request.zOS.customError=true>
@@ -1077,27 +971,24 @@ for(row in qSite){
 	<cfelse>
 		#theError#
 	</cfif>
-	<cfscript>
-	if(isDefined('application.zcore.functions.zabort')){
-		application.zcore.functions.zabort();
-	}
-	</cfscript><cfabort>
+	<cfabort>
 </cffunction>
 
-<cffunction name="replaceErrorContent" localmode="modern" returntype="any" output="false">
+<cffunction name="replaceErrorContent" localmode="modern">
 	<cfargument name="content" type="string" required="yes">
 	<cfscript>
 	request.zos.prependedErrorContent = arguments.content;
 	</cfscript>
 </cffunction>
 
-<cffunction name="prependErrorContent" localmode="modern" returntype="any" output="false">
+<cffunction name="prependErrorContent" localmode="modern">
 	<cfargument name="content" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(request.zos,'prependedErrorContent') eq false){
-		request.zos.prependedErrorContent="";
+		request.zos.prependedErrorContent=arguments.content&'<br /><br />';
+	}else{
+		request.zos.prependedErrorContent&=arguments.content&'<br /><br />';
 	}
-	request.zos.prependedErrorContent = request.zos.prependedErrorContent&arguments.content&'<br /><br />';
 	</cfscript>
 </cffunction>
 
@@ -1106,7 +997,7 @@ for(row in qSite){
 
 
 
-<cffunction name="makeTag" localmode="modern" returntype="string" output="false">
+<cffunction name="makeTag" localmode="modern">
 	<cfargument name="name" type="string" required="yes">
 	<cfscript>
 	return HTMLEditFormat("<z_"&arguments.name&">");
