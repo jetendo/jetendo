@@ -90,7 +90,7 @@
 	if(request.zos.isDeveloper or request.zos.isServer){
 		db.sql="SELECT * FROM #db.table("listing_coordinates", request.zos.zcoreDatasource)# listing_coordinates 
 		WHERE listing_coordinates_status NOT IN (#db.param('OK')#,#db.param('ZERO_RESULTS')#) and 
-		listing_coordinates_deleted = #db.param(0)# ";
+		listing_coordinates_deleted = #db.param(0)# LIMIT #db.param(0)#, #db.param(1)# ";
 		qCheck=db.execute("qCheck");
 		if(qCheck.recordcount NEQ 0){
 			if(structkeyexists(form, 'resetErrors')){

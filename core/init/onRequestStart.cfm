@@ -652,6 +652,8 @@
 		// onRequestStart1();
 		zos.requestLogEntry('Application.cfc onRequestStart before onRequestStart12');
 		//writeoutput(((gettickcount('nano')-s)/1000000000)&' seconds1<br />');	s=gettickcount('nano');
+
+
 		onRequestStart12();
 		zos.requestLogEntry('Application.cfc onRequestStart before onRequestStart2');
 		//writeoutput(((gettickcount('nano')-s)/1000000000)&' seconds12<br />');	s=gettickcount('nano');
@@ -664,6 +666,7 @@
 		onRequestStart4();
 		zos.requestLogEntry('Application.cfc onRequestStart after onRequestStart4');
 		//writeoutput(((gettickcount('nano')-s)/1000000000)&' seconds4<br />');	s=gettickcount('nano');
+
 	}
 	if(zos.isDeveloper and structkeyexists(form, 'displayRunTime')){// or true
 		if(structkeyexists(zos, 'arrRunTime')){
@@ -1186,98 +1189,92 @@
 
 </cffunction>
 
-<cffunction name="onRequestStart4" localmode="modern" output="yes"><cfscript>
-	var local={};
-	var i=0;
-	var template=0;
-	var cfcatch=0;
+<cffunction name="onRequestStart4" localmode="modern"><cfscript>
 	zos=request.zos;
 	// silenced output 
-		if(zos.inServerManager){
-			application.zcore.functions.zNoCache();
-			runningTask=false;
-			if(left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/' and (zos.isServer or zos.cgi.remote_addr EQ "127.0.0.1")){
-				runningTask=true;
-			}
-			if(not runningTask){
-				if(not application.zcore.user.checkServerAccess()){
-					ts = structnew("sync");
-					ts.secureLogin=true;
-					ts.noRedirect=true;
-					ts.noLoginForm=true;
-					ts.usernameLabel = "E-Mail Address";
-					ts.loginMessage = "Please login";
-					ts.template = "zcorerootmapping.templates.blank";
-					ts.user_group_name = "serveradministrator";
-					rs=application.zcore.user.checkLogin(ts);
-				}else{
-					// prevent most developer serveradministrator logins if not using API
-					if(left(zos.originalURL, len("/z/server-manager/api/")) NEQ "/z/server-manager/api/"){
-						if(not application.zcore.user.hasSourceAdminAccess()){ 
-							application.zcore.functions.zRedirect("/z/admin/admin-home/index");
-						}
-					}
-					if((left(request.cgi_script_name, 17) EQ '/z/listing/tasks/' or left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/') and structkeyexists(request.zsession, 'user') and not application.zcore.user.checkAllCompanyAccess()){
-						application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
-						application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index?zsid=#request.zsid#");
-					}
-				}
-			}
-			zos.requestLogEntry('Application.cfc onRequestStart4 after checkLogin');
-			application.zcore.template.setTag("stylesheet","/z/stylesheets/manager.css",false);
-			application.zcore.template.requireTag("title");
-			application.zcore.template.setTag("title","Server Manager");
-			if(not structkeyexists(request.zsession, 'global_zsites_id')){
-				request.zsession.global_zsites_id = ",,,";
-			}
-			if(structkeyexists(form,'global_zsites_id1')){
-				request.zsession.global_zsites_id = form.global_zsites_id1&","&form.global_zsites_id2&","&form.global_zsites_id3;
-			}
-			// init site navbar
-			if(structkeyexists(form,'zid') EQ false){
-				form.zid = application.zcore.status.getNewId();
-			}
-			if(structkeyexists(form,'zIndex')){
-				application.zcore.status.setField(form.zid, "zIndex", form.zIndex);
+	if(zos.inServerManager){
+		application.zcore.functions.zNoCache();
+		runningTask=false;
+		if(left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/' and (zos.isServer or zos.cgi.remote_addr EQ "127.0.0.1")){
+			runningTask=true;
+		}
+		if(not runningTask){
+			if(not application.zcore.user.checkServerAccess()){
+				ts = structnew("sync");
+				ts.secureLogin=true;
+				ts.noRedirect=true;
+				ts.noLoginForm=true;
+				ts.usernameLabel = "E-Mail Address";
+				ts.loginMessage = "Please login";
+				ts.template = "zcorerootmapping.templates.blank";
+				ts.user_group_name = "serveradministrator";
+				rs=application.zcore.user.checkLogin(ts);
 			}else{
-				form.zIndex = application.zcore.status.getField(form.zid, "zIndex");
-				if(form.zIndex EQ ""){
-					form.zIndex = 1;
+				// prevent most developer serveradministrator logins if not using API
+				if(left(zos.originalURL, len("/z/server-manager/api/")) NEQ "/z/server-manager/api/"){
+					if(not application.zcore.user.hasSourceAdminAccess()){ 
+						application.zcore.functions.zRedirect("/z/admin/admin-home/index");
+					}
+				}
+				if((left(request.cgi_script_name, 17) EQ '/z/listing/tasks/' or left(request.cgi_script_name, 24) EQ '/z/server-manager/tasks/') and structkeyexists(request.zsession, 'user') and not application.zcore.user.checkAllCompanyAccess()){
+					application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
+					application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index?zsid=#request.zsid#");
 				}
 			}
-			Request.zScriptName = request.cgi_script_name&"?zid=#form.zid#";
-			if((isDefined('request.zsession.user.id') and not runningTask) and structkeyexists(form, 'zhidetopnav') eq false){
-				application.zcore.template.setTag("secondnav",application.zcore.functions.zOS_getSiteNav(form.zid));
-			}else if(not zos.isServer and not zos.isDeveloperIPMatch){
-				application.zcore.functions.z404("Only logged on developer users or the server itself can access this url.");	
+		}
+		zos.requestLogEntry('Application.cfc onRequestStart4 after checkLogin');
+		application.zcore.template.setTag("stylesheet","/z/stylesheets/manager.css",false);
+		application.zcore.template.requireTag("title");
+		application.zcore.template.setTag("title","Server Manager");
+		if(not structkeyexists(request.zsession, 'global_zsites_id')){
+			request.zsession.global_zsites_id = ",,,";
+		}
+		if(structkeyexists(form,'global_zsites_id1')){
+			request.zsession.global_zsites_id = form.global_zsites_id1&","&form.global_zsites_id2&","&form.global_zsites_id3;
+		}
+		// init site navbar
+		if(structkeyexists(form,'zid') EQ false){
+			form.zid = application.zcore.status.getNewId();
+		}
+		if(structkeyexists(form,'zIndex')){
+			application.zcore.status.setField(form.zid, "zIndex", form.zIndex);
+		}else{
+			form.zIndex = application.zcore.status.getField(form.zid, "zIndex");
+			if(form.zIndex EQ ""){
+				form.zIndex = 1;
 			}
 		}
-		if(structkeyexists(application.sitestruct[zos.globals.id],'zcorecustomfunctions')){
-			structappend(variables, application.sitestruct[zos.globals.id].zcorecustomfunctions, true);
+		Request.zScriptName = request.cgi_script_name&"?zid=#form.zid#";
+		if((isDefined('request.zsession.user.id') and not runningTask) and structkeyexists(form, 'zhidetopnav') eq false){
+			application.zcore.template.setTag("secondnav",application.zcore.functions.zOS_getSiteNav(form.zid));
+		}else if(not zos.isServer and not zos.isDeveloperIPMatch){
+			application.zcore.functions.z404("Only logged on developer users or the server itself can access this url.");	
 		}
-		if(structkeyexists(application.sitestruct[zos.globals.id],'onSiteRequestStartEnabled') and application.sitestruct[zos.globals.id].onSiteRequestStartEnabled){
-			application.sitestruct[zos.globals.id].zcorecustomfunctions.onSiteRequestStart(variables);
-		}
-		// application.zcore.functions.zIncludeZOSFORMS();
-		try{
-			login applicationtoken="#application.applicationname#"{
-			}
-			if(isDefined('request.zsession.user.groupAccess') EQ false or structkeyexists(form,'zLogOut')){
-				logout;
-			}else if(structkeyexists(request.zsession, 'user')){
-				if(request.zsession.secureLogin){
-					roles = structkeylist(request.zsession.user.groupAccess);
-				}else{
-					roles="user";
-				}
-				pass=hash(zos.now&zos.zcoremapping&"+|secureKey");
-				loginuser name="#request.zsession.user.email#" password="#pass#" roles="#roles#";
-			}
-		}catch(Any e){
-			roles="";
-		}
-	savecontent variable="output"{
 	}
+	if(structkeyexists(application.sitestruct[zos.globals.id],'zcorecustomfunctions')){
+		structappend(variables, application.sitestruct[zos.globals.id].zcorecustomfunctions, true);
+	}
+	if(structkeyexists(application.sitestruct[zos.globals.id],'onSiteRequestStartEnabled') and application.sitestruct[zos.globals.id].onSiteRequestStartEnabled){
+		application.sitestruct[zos.globals.id].zcorecustomfunctions.onSiteRequestStart(variables);
+	}
+	// application.zcore.functions.zIncludeZOSFORMS();
+	try{
+		login applicationtoken="#application.applicationname#"{
+		}
+		if(isDefined('request.zsession.user.groupAccess') EQ false or structkeyexists(form,'zLogOut')){
+			logout;
+		}else if(structkeyexists(request.zsession, 'user')){
+			if(request.zsession.secureLogin){
+				roles = structkeylist(request.zsession.user.groupAccess);
+			}else{
+				roles="user";
+			}
+			pass=hash(zos.now&zos.zcoremapping&"+|secureKey");
+			loginuser name="#request.zsession.user.email#" password="#pass#" roles="#roles#";
+		}
+	}catch(Any e){
+		roles="";
+	} 
 	zos.requestLogEntry('Application.cfc onRequestStart4 before processRequestURL');
 	application.zcore.routing.processRequestURL(zos.cgi.SCRIPT_NAME);
 	</cfscript>

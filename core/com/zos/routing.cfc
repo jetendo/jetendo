@@ -1,11 +1,7 @@
 <cfcomponent output="no">
 <cfoutput>
 <cffunction name="processRequestURL" localmode="modern" access="public" output="true" returntype="string"><cfargument name="theURL" type="string" required="yes"><cfscript>
-		var cfcLookupName="";
-		var cfcURLName="";
 		var cfcMethodForced=false;
-		var arrURL="";
-		var inputStruct=""; 
 		  
 		request.zos.currentController="";
 		request.zos.routingIsCFC=false; 
@@ -248,7 +244,7 @@
 					request.zos.routingArrArguments=arrURL;
 				}
 				if(zdebugurl2){
-					application.zcore.functions.zabort();
+					abort;
 				}
 			}
 			structdelete(form,'__zcoreinternalroutingpath');
@@ -325,7 +321,7 @@
 		</cfscript>
 	</cffunction>
 
-    
+     
     <cffunction name="checkCFCSecurity" localmode="modern" output="no" returntype="any">
     	<cfargument name="scriptName" type="string" required="yes">
     	<cfargument name="method" type="string" required="yes">
