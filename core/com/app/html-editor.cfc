@@ -55,6 +55,11 @@ htmlEditor.createSimple();
 			menubar: false,
 			//theme: 'modern',
 			autoresize_min_height: 100,
+			<cfscript>
+			// if(this.height NEQ "" and this.height DOES NOT CONTAIN "%"){
+			//     echo(' height: #max(100, this.height)#, '&chr(10));
+			// }
+			</cfscript>
 			plugins: [
 			'autoresize advlist autolink lists link image charmap print preview anchor textcolor',
 			'searchreplace visualblocks code fullscreen',
@@ -309,20 +314,19 @@ zArrDeferredFunctions.push(function(){
 		if(this.width NEQ "" and this.width DOES NOT CONTAIN "%"){
 		    echo(' width: #max(200, this.width)#, '&chr(10));
 		}
-		if(this.height NEQ "" and this.height DOES NOT CONTAIN "%"){
-		    echo(' height: #max(100, this.height)#, '&chr(10));
-		}
+		// if(this.height NEQ "" and this.height DOES NOT CONTAIN "%"){
+		//     echo(' height: #max(100, this.height)#, '&chr(10));
+		// }
 		</cfscript>
 		#arrayToList(arrExtraCode, " ")#
-	  //selector: 'textarea', 
-	  height: 500,
+	  //selector: 'textarea',  
 	  theme: 'modern',
 	  plugins: [
 	  <cfif this.autoResize>
 	  	'autoresize',
 	  	</cfif>
 	  	//'zsawidget',
-	    'advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
+	    'autoresize advlist autolink lists link zsaimage zsafile charmap print preview hr anchor pagebreak',
 	    'searchreplace wordcount visualblocks visualchars code fullscreen',
 	    'insertdatetime media nonbreaking save directionality', // contextmenu table
 	    'emoticons paste textcolor colorpicker textpattern' //imagetools
