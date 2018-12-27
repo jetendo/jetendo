@@ -1072,7 +1072,7 @@ propertyDisplayCom.init(ts);
 					<cfif request.cgi_script_name NEQ '/z/listing/inquiry/index'>
 						<a href="##" class="zls-saveListingButton" data-listing-id="#arguments.idx.listing_id#" rel="nofollow" class="zNoContentTransition">Save Listing</a>
 					</cfif>
-					<cfif arguments.idx.virtualtoururl neq '' and findnocase("http://",arguments.idx.virtualtoururl) NEQ 0>
+					<cfif arguments.idx.virtualtoururl neq '' and (findnocase("https://", arguments.idx.virtualtoururl) NEQ 0 or findnocase("http://",arguments.idx.virtualtoururl) NEQ 0)>
 						<a href="#application.zcore.functions.zBlockURL(arguments.idx.virtualtoururl)#" rel="nofollow" onclick="window.open(this.href); return false;">Virtual Tour</a>
 					</cfif>
 					<cfif arguments.idx.listingHasMap>

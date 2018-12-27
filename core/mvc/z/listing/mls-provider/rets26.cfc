@@ -187,19 +187,22 @@ variables.tableLookup["G"]="G";
 	
 	local.listing_type_id=this.listingLookupNewId("listing_type",ts['rets26_list_8']);
 
-	ad=ts['street ##'];
+	ad=ts['street ##']; 
 	if(ad NEQ 0){
 		address="#ad# ";
 	}else{
 		address="";	
 	}
 	ts['street suffix']=this.getRetsValue("property", ts["rets26_list_8"], "LIST_37",ts['street suffix']);
-	if(structkeyexists(ts, 'street dir suffix')){
-		ts['street dir']=this.getRetsValue("property", ts["rets26_list_8"], "LIST_33",ts['street dir suffix']);
-	}else{
-		ts['street dir']=this.getRetsValue("property", ts["rets26_list_8"], "LIST_33",ts['street dir']);
+	ts['street dir suffix']="";
+	if(structkeyexists(ts, 'rets26_list_36')){
+		ts['street dir suffix']=this.getRetsValue("property", ts["rets26_list_8"], "LIST_33",ts['rets26_list_36']);
 	}
-	address&=application.zcore.functions.zfirstlettercaps(ts['street dir']&" "&ts['street name']&" "&ts['street suffix']);
+	ts['street dir']="";
+	if(structkeyexists(ts, 'rets26_list_33')){
+		ts['street dir']=this.getRetsValue("property", ts["rets26_list_8"], "LIST_33",ts['rets26_list_33']);
+	}
+	address&=application.zcore.functions.zfirstlettercaps(ts['street dir']&" "&ts['street name']&" "&ts['street dir suffix']&" "&ts['street suffix']);
 	curLat=ts["rets26_list_46"];
 	curLong=ts["rets26_list_47"];
 	if(curLat EQ "" and trim(address) NEQ ""){
