@@ -227,17 +227,10 @@
 </cffunction>
 
 <!--- application.zcore.functions.zOutputHelpToolTip(helpId); --->
-<cffunction name="zOutputHelpToolTip" localmode="modern" returntype="any" output="no">
+<cffunction name="zOutputHelpToolTip" localmode="modern" >
 	<cfargument name="defaultLabel" type="string" required="yes">
 	<cfargument name="helpId" type="string" required="yes">
-    <cfscript>
-	var dbclick='';
-	var a2=0;
-	var qid=0;
-	var defaultLabel=0;
-	var db=request.zos.queryObject;
-	var qid2=0;
-	var ts=structnew();
+    <cfscript>   
 	if(not structkeyexists(application.zcore,'helpStruct')){
 		application.zcore.helpStruct={};
 	}
