@@ -144,8 +144,8 @@
 		qSearch=db.execute("qSearch");
 		
 		echo('<div id="searchAsStringDiv#arguments.row["#variables.type#_option_id"]#" style="">');
-		for(row in qSearch){
-			echo(arrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(row), ", "));
+		for(row2 in qSearch){
+			echo(arrayToList(request.zos.listing.functions.getSearchCriteriaDisplay(row2), ", "));
 		}
 		echo('</div>');
 		</cfscript>
