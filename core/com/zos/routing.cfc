@@ -1927,8 +1927,8 @@
 						}else if(left(dUrl,1) NEQ "/"){
 							dUrl="/"&dUrl;
 						}
-					}else{
-						writeoutput('Broken url:'&cur&'<br />');	
+					// }else{
+					// 	writeoutput('Broken url:'&cur&'<br />');	
 					}
 					if(dUrl EQ "/-"){
 						dUrl="-";
@@ -1937,7 +1937,7 @@
 						aCFML=true;
 					}
 					if(aWildCard2){
-						writeoutput('special rule: '&sUrl&' | '&cur&'<br />');
+						// writeoutput('special rule: '&sUrl&' | '&cur&'<br />');
 						ts.wildcardSpecialStruct[sUrl]=dUrl;
 					}else{
 						if(a301){
@@ -1954,7 +1954,7 @@
 								t9.url=dUrl;
 								t9.cfml=aCFML;
 								ts.requestStruct[sUrl]=t9;
-								writeoutput(' map '&sUrl&' to '&dUrl&'<br />');
+								// writeoutput(' map '&sUrl&' to '&dUrl&'<br />');
 							}else{
 								t9=structnew();
 								t9.url=replacelist(dUrl,"$1,$2,$3,$4,$5,$6",",,,,,");
@@ -1962,7 +1962,7 @@
 								t9.vs=structnew();
 								arrT=listtoarray(t9.url,"?");
 								t9.url=arrT[1];
-								writeoutput(' setup unique '&sUrl&' to '&dUrl&'<br />');
+								//writeoutput(' setup unique '&sUrl&' to '&dUrl&'<br />');
 								if(arraylen(arrT) EQ 2){
 									arrTF=listtoarray(arrT[2], "&");
 									for(i2=1;i2 LTE arraylen(arrTF);i2++){
@@ -1976,10 +1976,10 @@
 							}
 						}
 					}
-				}else if(left(cur, len("RewriteRule")) EQ "RewriteCond"){
-					writeoutput('rewritecond:'&cur&'<br />');
-				}else{
-					writeoutput('unknown url:'& cur&'<br />');	
+				// }else if(left(cur, len("RewriteRule")) EQ "RewriteCond"){
+				// 	writeoutput('rewritecond:'&cur&'<br />');
+				// }else{
+				// 	writeoutput('unknown url:'& cur&'<br />');	
 				}
 				
 			}
