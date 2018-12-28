@@ -724,7 +724,7 @@
 		</div> 
 		<cfif form.mode EQ "sorting" and row.children NEQ 0>
 			<div class="z-manager-button-container">
-				<a class="z-manager-edit" title="Mange #row.children# pages connected to this page" href="/z/section/admin/page-admin/index?page_parent_id=#row.page_id#"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
+				<a class="z-manager-edit" title="Manage #row.children# pages connected to this page" href="/z/section/admin/page-admin/index?page_parent_id=#row.page_id#"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
 			</div>
 		</cfif>
 

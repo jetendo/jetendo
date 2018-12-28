@@ -2756,7 +2756,7 @@
 	</div> 
 	<cfif form.mode EQ "sorting" and row.children NEQ 0>
 		<div class="z-manager-button-container">
-			<a class="z-manager-edit" title="Mange #row.children# pages connected to this page" href="/z/content/admin/content-admin/index?content_parent_id=#row.content_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
+			<a class="z-manager-edit" title="Manage #row.children# pages connected to this page" href="/z/content/admin/content-admin/index?content_parent_id=#row.content_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
 		</div>
 	</cfif>
 
