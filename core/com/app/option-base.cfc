@@ -494,7 +494,7 @@ used to do search for a list of values
 				field='sVal'&optionId;
 				currentCFC=getTypeCFC(t9.optionLookup[optionId].type);
 				fieldName=currentCFC.getSearchFieldName('s1', tableName, t9.optionLookup[optionId].optionStruct);
-				arrayAppend(arrSQL, this.processSearchGroupSQL(c, fieldName, multipleValues, delimiter, concatAppendPrepend));// "`"&tableName&"`.`"&field&"`"));
+				arrayAppend(arrSQL, processSearchGroupSQL(c, fieldName, multipleValues, delimiter, concatAppendPrepend));// "`"&tableName&"`.`"&field&"`"));
 				if(i NEQ length and not isSimpleValue(arguments.arrSearch[i+1])){
 					arrayAppend(arrSQL, ' and ');
 				}

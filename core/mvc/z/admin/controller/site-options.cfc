@@ -699,17 +699,17 @@
 	site_id = #db.param(form.site_id)#";
 	qDF=db.execute("qDF");
 	if(qDF.count NEQ 0){
-		application.zcore.status.setStatus(request.zsid,"Failed to create site option because ""#form.site_option_name#"" already exists. Please make the name unique.",form);
+		application.zcore.status.setStatus(request.zsid,"Site option ""#form.site_option_name#"" already exists. Please make the name unique.",form);
 		application.zcore.functions.zRedirect("/z/admin/site-options/#formaction#?site_option_id=#form.site_option_id#&zsid=#request.zsid#"&returnAppendString);	
 	}
 	ts=structnew();
 	ts.table="site_option";
 	ts.struct=form;
 	ts.datasource=request.zos.zcoreDatasource;
-	if(form.method EQ 'insert'){
-		form.site_option_id=application.zcore.functions.zInsert(ts);
+	if(form.method EQ 'insert'){ 
+		form.site_option_id=application.zcore.functions.zInsert(ts); 
 		if(form.site_option_id EQ false){
-			application.zcore.status.setStatus(request.zsid,"Failed to create site option because ""#form.site_option_name#"" already exists. Please make the name unique.",form);
+			application.zcore.status.setStatus(request.zsid,"Failed to create site option because ""#form.site_option_name#"" already exists or table_increment value is wrong because the insert query failed.",form);
 			application.zcore.functions.zRedirect("/z/admin/site-options/#formaction#?zsid=#request.zsid#"&returnAppendString);
 		}
 	}else{
