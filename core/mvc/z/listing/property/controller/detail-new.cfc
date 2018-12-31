@@ -138,7 +138,7 @@ fullPropertyLink=htmleditformat(fullPropertyLink);
 <cfscript>
 	
 application.zcore.template.setTag("title","#replace(titleStruct.title,'<br />','','ALL')#");
-application.zcore.template.setTag("pagetitle",idx.listing_address);
+application.zcore.template.setTag("pagetitle",idx.listing_address&", "&idx.cityName&", "&idx.listing_state);
 application.zcore.template.setTag("pagenav",temp.pageNav);
 	
  

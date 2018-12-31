@@ -994,10 +994,10 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
         <cfscript>
         qZselect=db2.execute("qZselect");
     	</cfscript>
-		<cfif arguments.ss.debug>
+		<!--- <cfif arguments.ss.debug>
         <span style="border:1px solid ##999999; padding:5px;font-size:10px; line-height:11px; display:block; "><strong>;qZSelect;</strong><br />
             #zselectsql#<br />;Time: #((getTickCount()-start48)/1000)&" seconds"#<br /><br /></span>
-        </cfif> 
+        </cfif>  --->
 
 		<cfscript>
 		if(arguments.ss.zReturnSimpleQuery){
