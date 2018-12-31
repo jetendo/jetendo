@@ -1563,7 +1563,8 @@ User's IP: #request.zos.cgi.remote_addr#
 <cffunction name="zCGI" localmode="modern" output="false" returntype="any">
 	<cfargument name="name" type="string" required="no">
 	<cfscript>
-		return request.zOS.CGI[arguments.name];
+		throw("not implemented anymore");
+		//return request.zOS.CGI[arguments.name];
 	/*try{
 	}catch(Any excpt){ }
 	try{
@@ -2242,7 +2243,15 @@ not used
 						if(lastFolderName EQ "controller"){
 							if(curExt EQ "cfc"){
 								comPath=replace(mid(curPath22,2,len(curPath22)-5),"/",".","all");
-								tempCom=application.zcore.functions.zcreateobject("component", comPath, true);
+								try{
+									tempCom=application.zcore.functions.zcreateobject("component", comPath, true);
+								}catch(Any e){
+									savecontent variable="out"{
+										echo("Failed trying to createobject: #comPath# in zUpdateGlobalMVCData");
+										writedump(e);
+									}
+									throw(out);
+								}
 								tempcommeta=GetMetaData(tempCom);
 								ts.controllerComponentCache[comPath]=tempCom;
 								ts.cfcMetaDataCache[comPath]=tempcommeta;
@@ -2292,9 +2301,15 @@ not used
         	if(cfthread[t].status NEQ "completed"){
 	        	savecontent variable="out"{
 		        	echo("<h2>Failed to Create MVC Objects</h2>");
-		        	writedump(cfthread);
+		        	if(structkeyexists(cfthread[t], 'error')){
+		        		echo(cfthread[t].error.message);
+		        		writedump(cfthread);
+		        	}else{
+		        		writedump(cfthread);
+		        	}
 	        	}
-        		throw(out);
+	        	echo(out);
+	        	abort;
         	}
 	    } 
 		structappend(arguments.ss, ts, true);
