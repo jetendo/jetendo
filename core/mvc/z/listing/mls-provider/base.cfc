@@ -125,7 +125,7 @@
 	<cfscript>
 	idx=arguments.ss;
 	idx["listingHasMap"]=0;
-	if(idx.listing_latitude NEQ '' and idx.listing_longitude NEQ '' and idx.listing_latitude NEQ '0' and idx.listing_longitude NEQ '0' and abs(idx.listing_latitude) LTE 180 and abs(idx.listing_longitude) LTE 180){
+	if(isnumeric(idx.listing_latitude) and isnumeric(idx.listing_longitude) and idx.listing_latitude NEQ '0' and idx.listing_longitude NEQ '0' and abs(idx.listing_latitude) LTE 180 and abs(idx.listing_longitude) LTE 180){
 		idx["listingHasMap"]=1;
 	}
 	if(structkeyexists(request.zos.listing.cityNameStruct,idx.listing_city)){

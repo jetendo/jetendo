@@ -77,10 +77,10 @@
 			}else if(zWindowSize.width <= 992){
 				console.log(j.bp992);
 				zJumpToId("zls-quick-search-mode-input", j.bp992);
-			}else if(zWindowSize.width <= 1362){
-				zJumpToId("zls-quick-search-mode-input", j.bp1362);
-			}else{
-				zJumpToId("zls-quick-search-mode-input", j.default);
+			// }else if(zWindowSize.width <= 1362){
+			// 	zJumpToId("zls-quick-search-mode-input", j.bp1362);
+			// }else{
+			// 	zJumpToId("zls-quick-search-mode-input", j.default);
 			}
 		});
 		var cancelBlur=false;

@@ -433,10 +433,11 @@ function zGeocodeAddress() {
 		var r="";
 		if (status == google.maps.GeocoderStatus.OK) {
 			var a1=new Array();
+			console.log(results);
 			for(var i=0;i<results.length;i++){
 				var a2=new Array();
 				a2[0]=results[i].types.join(",");
-				if(a2[0]=="street_address"){// && arrAddressZipLat[curIndex] != 0 && arrAddressZipLong[curIndex] != 0){
+				if(a2[0]=="street_address" || a2[0]=="premise" || a2[0]=="subpremise"){// && arrAddressZipLat[curIndex] != 0 && arrAddressZipLong[curIndex] != 0){
 					a2[1]=results[i].formatted_address;
 					a2[2]=results[i].geometry.location.lat()
 					a2[3]=results[i].geometry.location.lng();
@@ -496,7 +497,7 @@ function zGeocodeAddress() {
 		zAjax(tempObj); 
 		curIndex++;
 		if(curIndex<arrAddress.length && !stopGeocoding){
-			setTimeout('zTimeoutGeocode();',1500);
+			setTimeout('zTimeoutGeocode();',6000);
 		}
 	});
 }

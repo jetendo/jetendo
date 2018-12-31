@@ -452,55 +452,55 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 </div>
 
 	<cfif form.listingHasMap>
-         <div class="zls-detail-box">
+        <div class="zls-detail-box">
         
-    <a id="googlemap"></a>
-<div class="zls-detail-subheading">Neighborhood Map</div>
-	<cfscript>
-	mapStageStruct=StructNew();
-	mapStageStruct.width=rightColSize-20;
-	mapStageStruct.height=300;
-	mapStageStruct.fullscreen.width=770;
-	mapStageStruct.fullscreen.height=300;
-	mapQuery=returnStruct;
-	hideMapControls=true;
-	</cfscript>
-    <cfsavecontent variable="mapHTML"><table style="width:280px;"><tr><td><cfscript>propertyDisplayCom.mapTemplate(idx, 1);</cfscript></td></tr></table></cfsavecontent>
-    
-    <cfscript>
-	mapStageStruct.arrMapTotalLat=listtoarray(form.listing_latitude);
-	mapStageStruct.arrMapTotalLong=listtoarray(form.listing_longitude);
-	mapStageStruct.arrMapText=arraynew(1);
-	arrayappend(mapStageStruct.arrMapText, "#(mapHTML)#");
-	</cfscript>
-<!---  <script type="text/javascript">
-/* <![CDATA[ */
-zArrDeferredFunctions.push(function(){
- zMapCount++;
-zArrMapTotalLat.push(#form.listing_latitude#);
-zArrMapTotalLong.push(#form.listing_longitude#);
-zArrMapText.push("#jsstringformat(mapHTML)#");
-});
-/* ]]> */
-</script> --->
-        <cfscript>
-		ms={
-			mapQuery=mapQuery,
-			mapStageStruct=mapStageStruct,
-			listing_latitude=form.listing_latitude,
-			listing_longitude=form.listing_longitude,
-			listing_data_address=form.listing_data_address,
-			listing_data_zip=form.listing_data_zip,
-			cityName=form.cityName,
-			hideMapControls=hideMapControls	
-		}
-		tempCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.listing.controller.map");
-		tempCom.index(ms);
-		</cfscript><br style="clear:both;" />
+			<a id="googlemap"></a>
+			<div class="zls-detail-subheading">Neighborhood Map</div>
+				<cfscript>
+				mapStageStruct=StructNew();
+				mapStageStruct.width=rightColSize-20;
+				mapStageStruct.height=300;
+				mapStageStruct.fullscreen.width=770;
+				mapStageStruct.fullscreen.height=300;
+				mapQuery=returnStruct;
+				hideMapControls=true;
+				</cfscript>
+			    <cfsavecontent variable="mapHTML"><table style="width:280px;"><tr><td><cfscript>propertyDisplayCom.mapTemplate(idx, 1);</cfscript></td></tr></table></cfsavecontent>
+			    
+			    <cfscript>
+				mapStageStruct.arrMapTotalLat=listtoarray(form.listing_latitude);
+				mapStageStruct.arrMapTotalLong=listtoarray(form.listing_longitude);
+				mapStageStruct.arrMapText=arraynew(1);
+				arrayappend(mapStageStruct.arrMapText, "#(mapHTML)#");
+				</cfscript>
+				<!---  <script type="text/javascript">
+				/* <![CDATA[ */
+				zArrDeferredFunctions.push(function(){
+				 zMapCount++;
+				zArrMapTotalLat.push(#form.listing_latitude#);
+				zArrMapTotalLong.push(#form.listing_longitude#);
+				zArrMapText.push("#jsstringformat(mapHTML)#");
+				});
+				/* ]]> */
+				</script> --->
+			        <cfscript>
+					ms={
+						mapQuery=mapQuery,
+						mapStageStruct=mapStageStruct,
+						listing_latitude=form.listing_latitude,
+						listing_longitude=form.listing_longitude,
+						listing_data_address=form.listing_data_address,
+						listing_data_zip=form.listing_data_zip,
+						cityName=form.cityName,
+						hideMapControls=hideMapControls	
+					}
+					tempCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.listing.controller.map");
+					tempCom.index(ms);
+					</cfscript><br style="clear:both;" />
 
-         </div>
-	</cfif>
- </div>
+		        </div>
+			</cfif>
+		</div>
      </div>
  
      <div class="zls-detail-box">
@@ -514,7 +514,7 @@ zArrMapText.push("#jsstringformat(mapHTML)#");
 			 nh=round(nw*0.68);
 		 }
 		 </cfscript>
-		 <div class="z-float">
+		 <div class="z-float z-equal-heights" data-column-count="3">
 			<cfloop from="1" to="#form.listing_photocount#" index="i">
 			<cfif structkeyexists(idx,'photo'&i)>
 			<div class="z-preserve-ratio" data-ratio="4:3" style="width:32%; min-width:150px; float:left; overflow:hidden; margin-right:1%; margin-bottom:2%;">

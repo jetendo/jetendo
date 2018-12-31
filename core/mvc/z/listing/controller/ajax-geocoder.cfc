@@ -11,10 +11,10 @@
 		structkeyexists(form, 'listing_id') EQ false or 
 		structkeyexists(form, 'address') EQ false or 
 		structkeyexists(form, 'zip') EQ false){
-		application.zcore.functions.zReturnJson('{"success":false}');
+		application.zcore.functions.zReturnJson({"success":false});
 	}
 	if(form.status EQ ""){
-		application.zcore.functions.zReturnJson('{"success":false}');
+		application.zcore.functions.zReturnJson({"success":false});
 	}
 	if(form.status NEQ "OK" or trim(form.results) EQ ""){
 		arrR=arraynew(1);
@@ -71,10 +71,10 @@
 					writeoutput(chr(10)&request.zos.arrQueryLog[g]&chr(10));
 				}
 			}
-			application.zcore.functions.zReturnJson('{"success":true}');
+			application.zcore.functions.zReturnJson({"success":true});
 		}
 	}
-	application.zcore.functions.zReturnJson('{"success":false}');
+	application.zcore.functions.zReturnJson({"success":false});
 	</cfscript>
 </cffunction>
 
@@ -102,7 +102,7 @@
 				echo("Geocoding Reset.<br />");
 			}else{
 				if(not structkeyexists(application, 'updateLatLongError')){
-					application.updateLatLongError=true;
+					application.updateLatLongError=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmm");
 
 					ts={
 						type:"Custom",
@@ -116,6 +116,9 @@
 						lineNumber:'0'
 					}
 					application.zcore.functions.zLogError(ts);
+				}else if(application.updateLatLongError NEQ dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmm")){
+					// google probably only blocks us for a minute
+					structdelete(application, 'updateLatLongError');
 				}else{
 					return;
 				}
@@ -129,10 +132,14 @@
 		LEFT JOIN #db.table("listing_coordinates", request.zos.zcoreDatasource)# listing_coordinates  ON
 		listing.listing_id = listing_coordinates.listing_id and 
 		listing_coordinates_deleted = #db.param(0)#
-			WHERE
-			listing_deleted = #db.param(0)# and 
-		listing_coordinates.listing_id IS NULL AND 
-		listing.listing_latitude =#db.param(0)# AND 
+		WHERE
+		listing_deleted = #db.param(0)# and ";
+		if(structkeyexists(form, 'forceListingId')){
+			db.sql&=" listing.listing_id =#db.param(form.forceListingId)# and ";
+		}else{
+			db.sql&=" listing_coordinates.listing_id IS NULL AND ";
+		}
+		db.sql&=" listing.listing_latitude =#db.param(0)# AND 
 		listing_address <> #db.param('')# and 
 		listing_zip <> #db.param('')# and 
 		listing_address REGEXP #db.param('[0-9]')# AND 
@@ -148,9 +155,14 @@
 	LEFT JOIN #db.table("listing_coordinates", request.zos.zcoreDatasource)# listing_coordinates ON
 	listing.listing_id = listing_coordinates.listing_id and 
 	listing_coordinates_deleted = #db.param(0)#
-		WHERE
-		listing_deleted = #db.param(0)# and 
-	listing_coordinates.listing_id IS NULL AND 
+	WHERE
+	listing_deleted = #db.param(0)# and  ";
+	if(structkeyexists(form, 'forceListingId')){
+		db.sql&=" listing.listing_id =#db.param(form.forceListingId)# and ";
+	}else{
+		db.sql&=" listing_coordinates.listing_id IS NULL AND ";
+	}
+	db.sql&="
 	listing.listing_latitude =#db.param(0)# AND 
 	listing_address <> #db.param('')# and 
 	listing_zip <> #db.param('')# and 
@@ -242,7 +254,7 @@
 			}
 			if(debugajaxgeocoder) f1.value+="loaded\n";
 		    geocoder = new google.maps.Geocoder();
-			setTimeout(''zTimeoutGeocode();'',1500);
+			setTimeout(''zTimeoutGeocode();'',6000);
 		});
 	});
 	 /* ]]> */
