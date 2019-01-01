@@ -557,7 +557,7 @@
 	db.sql&="
 	GROUP BY DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) 
 	ORDER BY date ";
-	qMonthTotal=db.execute("qMonthTotal");  
+	qMonthTotal=db.execute("qMonthTotal", "", 10000, "query", false);  
 
 	db.sql="SELECT 
 	DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) date, 
@@ -909,11 +909,12 @@
 		}
 	</cfif>
 	*{-webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing:border-box;}
+
 	.topFiveColor{background-color:##e9ea96;}
 	.topTenColor{background-color:##96dcf8;}
 	.topTwentyColor{background-color:##bacde4;}
 	.topHundredColor{background-color:##fbd57f;}
-	.wrapper{  padding:20px; } 
+	/*.wrapper{  padding:20px; } */
 	.print-footer {
 	    text-align:right;
 	    width: 100%;
@@ -935,8 +936,10 @@
 	position:relative;z-index:1; 
 	width:100%; float:left;}
 	<cfif structkeyexists(form, 'print')>
-		.wrapper{padding:0px;max-width:8.5in;}
-		.main-header{ margin-top:23px;margin:23px;  float:left; width:755px; border:1px solid ##000; padding:45px; padding-top:165px; height:985px; clear:both;  page-break-after: always; }
+		/*.wrapper{padding:0px;max-width:8.5in;}*/
+		.main-header{ margin:0px;
+     float:none; 
+    display: block; width:776px; border:1px solid ##000; padding:45px; padding-top:165px; height:1016px; clear:both;  page-break-after: always; }
 		<cfif not request.zos.istestserver and request.zos.marketingBgImageURL NEQ "">
 			.main-header{background-image:url(#request.zos.marketingBgImageURL#); background-repeat:no-repeat; background-size:100% auto;}
 		</cfif>
@@ -953,7 +956,7 @@
 </head>
 <body>
 
-<div class="wrapper">
+<!--- <div class="wrapper"> --->
 	<div class="hide-on-print">
 		<div>
 			<div style="width:50%; float:left;">
@@ -3569,7 +3572,7 @@ track_user_first_page
 		</div>
 
 	</div>
-	</div>
+	<!--- </div> --->
 
 
 	<script type="text/javascript">
@@ -3607,9 +3610,12 @@ track_user_first_page
 	if(structkeyexists(form, 'print')){ 
 		debug=false; 
 		pdfFile=request.zos.globals.privateHomeDir&"#form.selectedMonth#-Lead-Report-#request.zos.globals.shortDomain#.pdf";
-		r=application.zcore.functions.zConvertHTMLTOPDF(htmlOut, pdfFile, 1000);
-		if(r EQ false){
-
+		if(structkeyexists(form, 'debugprint')){
+			echo(htmlOut);
+			abort;
+		}
+		r=application.zcore.functions.zConvertHTMLTOPDF(htmlOut, pdfFile, 1000, 8.5, 11, 20);
+		if(r EQ false){ 
 			ts={
 				type:"Custom",
 				errorHTML:'HTML to PDF Failed.  User saw the raw html instead of a pdf.  Error message: '&request.zos.htmlToPDFErrorMessage&"<br /><br />Full HTML: "&htmlOut,

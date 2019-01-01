@@ -775,9 +775,9 @@ function reloadBind($a){
 
 function convertHTMLTOPDF($a){
 	set_time_limit(30);
-	if(count($a) != 6){
-		echo "6 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs, javascriptDelay, pageWidthInches and pageHeightInches.\n";
-		return "0|6 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTab, javascriptDelay, pageWidthInches and pageHeightInches.";
+	if(count($a) != 7){
+		echo "7 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels.\n";
+		return "0|7 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTab, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels.";
 	}
 	$site_short_domain=$a[0];
 	$htmlFile=$a[1];
@@ -785,6 +785,7 @@ function convertHTMLTOPDF($a){
 	$javascriptDelay=$a[3];
 	$pageWidthInches=$a[4];
 	$pageHeightInches=$a[5];
+	$marginPixels=$a[6];
 	$sitePath=zGetDomainWritableInstallPath($site_short_domain);
 	if(!is_dir($sitePath)){
 		echo "sitePath doesn't exist: ".$sitePath."\n";
@@ -805,6 +806,10 @@ function convertHTMLTOPDF($a){
 	if(!is_numeric($pageHeightInches) || $pageHeightInches<1){
 		echo "pageHeightInches must be a number 1 or higher.\n";
 		return "0|pageHeightInches must be a number 1 or higher.";
+	}
+	if(!is_numeric($marginPixels) || $marginPixels<0){
+		echo "marginPixels must be a number 1 or higher.\n";
+		return "0|marginPixels must be a number 0 or higher.";
 	}
 	$pageWidthInches.="in";
 	$pageHeightInches.="in";
@@ -842,14 +847,12 @@ function convertHTMLTOPDF($a){
 	}
 	// Portrait or Landscape
 	// A4 or letter
-    $c=' --orientation Portrait --page-width '.escapeshellarg($pageWidthInches).' --page-height '.escapeshellarg($pageHeightInches).' --margin-top "0mm" --margin-bottom "0mm" --margin-left "0mm" --margin-right "0mm" --dpi 96 --zoom ';
-
-	if(zIsTestServer()){
-		$c.="2 ";
-	}else{
-		$c.="2 ";
+	$orient="Portrait";
+	if($pageWidthInches > $pageWidthInches){
+		$orient="Landscape";
 	}
-    //$c=' --orientation Portrait --page-size letter ';
+	$marginPixels.="px";
+    $c=' --orientation '.escapeshellarg($orient).'  --print-media-type --page-width '.escapeshellarg($pageWidthInches).' --page-height '.escapeshellarg($pageHeightInches).' --margin-top '.escapeshellarg($marginPixels).' --margin-bottom '.escapeshellarg($marginPixels).' --margin-left '.escapeshellarg($marginPixels).' --margin-right '.escapeshellarg($marginPixels).' --dpi 96 --zoom 2 ';  
 
 	// if we ever allow use to edit the html, we should parse the html for links that don't match site_short_domain.
 	// need javascript now on reporting system
@@ -869,7 +872,7 @@ function convertHTMLTOPDF($a){
 		chmod($pdfFile, 0660);
 		return "1";
 	}else{
-		return "0|PDF file didn't exist after running wkhtmltopdf";
+		return "0|PDF file didn't exist after running wkhtmltopdf ";// add to debug command: .$cmd;
 	}
 }
 
