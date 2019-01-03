@@ -34,8 +34,8 @@ function getTasks(){
 
 	$t=new stdClass();
 	$t->logName="renew-lets-encrypt-ssl.html"; // this also verifies all sites are loaded on init.
-	$t->interval="daily"; 
-	$t->startTimeOffsetSeconds=1000; 
+	$t->interval=7200; 
+	$t->startTimeOffsetSeconds=550; 
 	$t->url=$adminDomain."/z/server-manager/tasks/renew-lets-encrypt-ssl/index";
 	array_push($arrTask, $t); 
 

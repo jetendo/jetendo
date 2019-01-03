@@ -947,7 +947,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 		<tr>
 			<th>IP</th>
 			<th>Active SSL Certificate(s)</th>
-			<th>Expiration Date</th>
+			<th>Expiration Date</th> 
 			<th>Domain(s)</th>
 		</tr>
 		<cfloop query="qIp">
@@ -1022,6 +1022,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 				<th>Expiration Date</th>
 				<th>Status</th>
 				<th>LetsEncrypt.org?</th>
+				<th>Last Updated</th>
 				<th>Admin</th>
 			</tr>
 			<cfloop query="qSSL">
@@ -1049,6 +1050,9 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 						echo("No");
 					}
 					</cfscript>
+					</td>
+					<td style="vertical-align:top;">
+						#dateformat(qSSL.ssl_updated_datetime, "m/d/yyyy")&" "&timeformat(qSSL.ssl_updated_datetime, "h:mm tt")#
 					</td>
 					<td>
 						<cfif qSSL.ssl_letsencrypt EQ 1>
