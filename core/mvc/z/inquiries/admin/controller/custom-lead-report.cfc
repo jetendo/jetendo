@@ -920,13 +920,13 @@
 	    width: 100%;
 	    float:left;
 	    position: relative;
-	    margin-top:-95px;
+	    margin-top:-55px;
 	    z-index:2;
-	    margin-left:23px;
+	    margin-left:0px;
 	    padding:45px;
 	    padding-top:20px; 
 	    padding-bottom:0px;
-	    width:755px;
+	    width:776px;
 	} 
 	.organicTrafficChart td{  font-size:13px; padding:5px;}
 	.leadSummaryTable td{padding-right:50px; white-space:nowrap; }

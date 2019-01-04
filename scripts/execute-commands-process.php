@@ -775,9 +775,9 @@ function reloadBind($a){
 
 function convertHTMLTOPDF($a){
 	set_time_limit(30);
-	if(count($a) != 7){
-		echo "7 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels.\n";
-		return "0|7 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTab, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels.";
+	if(count($a) != 8){
+		echo "8 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTabs, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels, dpi.\n";
+		return "0|7 arguments are required: site_short_domain, absoluteFilePath, htmlWithoutBreaksOrTab, javascriptDelay, pageWidthInches, pageHeightInches, marginPixels, dpi.";
 	}
 	$site_short_domain=$a[0];
 	$htmlFile=$a[1];
@@ -786,6 +786,7 @@ function convertHTMLTOPDF($a){
 	$pageWidthInches=$a[4];
 	$pageHeightInches=$a[5];
 	$marginPixels=$a[6];
+	$dpi=$a[7];
 	$sitePath=zGetDomainWritableInstallPath($site_short_domain);
 	if(!is_dir($sitePath)){
 		echo "sitePath doesn't exist: ".$sitePath."\n";
@@ -852,7 +853,7 @@ function convertHTMLTOPDF($a){
 		$orient="Landscape";
 	}
 	$marginPixels.="px";
-    $c=' --orientation '.escapeshellarg($orient).'  --print-media-type --page-width '.escapeshellarg($pageWidthInches).' --page-height '.escapeshellarg($pageHeightInches).' --margin-top '.escapeshellarg($marginPixels).' --margin-bottom '.escapeshellarg($marginPixels).' --margin-left '.escapeshellarg($marginPixels).' --margin-right '.escapeshellarg($marginPixels).' --dpi 96 --zoom 2 ';  
+    $c=' --orientation '.escapeshellarg($orient).'  --print-media-type --page-width '.escapeshellarg($pageWidthInches).' --page-height '.escapeshellarg($pageHeightInches).' --margin-top '.escapeshellarg($marginPixels).' --margin-bottom '.escapeshellarg($marginPixels).' --margin-left '.escapeshellarg($marginPixels).' --margin-right '.escapeshellarg($marginPixels).' --dpi '.escapeshellarg($dpi).' --zoom 2 ';  
 
 	// if we ever allow use to edit the html, we should parse the html for links that don't match site_short_domain.
 	// need javascript now on reporting system

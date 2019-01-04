@@ -7,12 +7,13 @@
 	<cfargument name="pageWidthInches" type="numeric" required="no" default="8.5">
 	<cfargument name="pageHeightInches" type="numeric" required="no" default="11">
 	<cfargument name="marginPixels" type="numeric" required="no" default="0">
+	<cfargument name="dpi" type="numeric" required="no" default="96">
 	<cfscript>
 	application.zcore.functions.zDeleteFile(arguments.pdfFile);
 	arguments.javascriptDelay=application.zcore.functions.zso(arguments, 'javascriptDelay', true);
 	tempFile=request.zos.globals.privatehomedir&"tempHTMLFile"&gettickcount()&".html";
 	application.zcore.functions.zwritefile(tempFile, trim(arguments.html));
-	secureCommand="convertHTMLTOPDF"&chr(9)&request.zos.globals.shortDomain&chr(9)&tempFile&chr(9)&arguments.pdfFile&chr(9)&arguments.javascriptDelay&chr(9)&arguments.pageWidthInches&chr(9)&arguments.pageHeightInches&chr(9)&arguments.marginPixels;
+	secureCommand="convertHTMLTOPDF"&chr(9)&request.zos.globals.shortDomain&chr(9)&tempFile&chr(9)&arguments.pdfFile&chr(9)&arguments.javascriptDelay&chr(9)&arguments.pageWidthInches&chr(9)&arguments.pageHeightInches&chr(9)&arguments.marginPixels&chr(9)&arguments.dpi;
 	output=application.zcore.functions.zSecureCommand(secureCommand, 15);
 	application.zcore.functions.zDeleteFile(tempFile);
 	returnCode=left(trim(output), 1);

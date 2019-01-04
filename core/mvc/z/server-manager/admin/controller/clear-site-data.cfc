@@ -428,7 +428,7 @@
 		
 		site_x_option_group.site_x_option_group_deleted = #db.param(0)# and
 		site_option.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("site_x_option_group.site_option_id_siteIDType"))# and 
-		site_option_deleted = #db.param(0)#
+		site_option.site_option_deleted = #db.param(0)# 
 		";
 		db.execute("qUpdate");
 		db.sql="UPDATE #db.table("blog", request.zos.zcoreDatasource)#
