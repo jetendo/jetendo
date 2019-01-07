@@ -739,62 +739,62 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 	if(request.zos.isTestServer){
 
 		// product urls
-		db.sql="SELECT * from #db.table("product", request.zos.globals.datasource)#
-		WHERE site_id=#db.param(arguments.site_id)# and 
-		product_override_url<>#db.param('')# and 
-		product_deleted = #db.param(0)#
-		ORDER BY product_override_url DESC";
-		qF=db.execute("qF");
-		loop query="qF"{
-			t9=structnew();
-			t9.scriptName="/product/index";
-			t9.urlStruct=structnew();
-			t9.urlStruct[request.zos.urlRoutingParameter]="/product/index";
-			t9.urlStruct.product_id=qF.product_id;
-			arguments.sharedStruct.uniqueURLStruct[trim(qF.product_override_url)]=t9;
-		}
+		// db.sql="SELECT * from #db.table("product", request.zos.globals.datasource)#
+		// WHERE site_id=#db.param(arguments.site_id)# and 
+		// product_override_url<>#db.param('')# and 
+		// product_deleted = #db.param(0)#
+		// ORDER BY product_override_url DESC";
+		// qF=db.execute("qF");
+		// loop query="qF"{
+		// 	t9=structnew();
+		// 	t9.scriptName="/product/index";
+		// 	t9.urlStruct=structnew();
+		// 	t9.urlStruct[request.zos.urlRoutingParameter]="/product/index";
+		// 	t9.urlStruct.product_id=qF.product_id;
+		// 	arguments.sharedStruct.uniqueURLStruct[trim(qF.product_override_url)]=t9;
+		// }
 
-		// category urls
-		db.sql="SELECT * from #db.table("product_category", request.zos.globals.datasource)#
-		WHERE site_id=#db.param(arguments.site_id)# and 
-		product_category_unique_url<>#db.param('')# and 
-		product_category_deleted = #db.param(0)#
-		ORDER BY product_category_unique_url DESC";
-		qF=db.execute("qF");
-		loop query="qF"{
-			t9=structnew();
-			t9.scriptName="/product-category/index";
-			t9.urlStruct=structnew();
-			t9.urlStruct[request.zos.urlRoutingParameter]="/product-category/index";
-			t9.urlStruct.product_category_id=qF.product_category_id;
-			arguments.sharedStruct.uniqueURLStruct[trim(qF.product_category_unique_url)]=t9;
-		}
-		t9=structnew();
-		t9.type=1;
-		t9.scriptName="/product/view";
-		t9.ifStruct=structnew();
-		t9.ifStruct.ext="html";
-		t9.urlStruct=structnew();
-		t9.urlStruct[request.zos.urlRoutingParameter]="/product/view";
-		t9.urlStruct.method="index";
-		t9.mapStruct=structnew();
-		t9.mapStruct.urlTitle="zURLName";
-		t9.mapStruct.dataId="product_id"; 
-		arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.ecommerce_config_product_url_id],t9);
+		// // category urls
+		// db.sql="SELECT * from #db.table("product_category", request.zos.globals.datasource)#
+		// WHERE site_id=#db.param(arguments.site_id)# and 
+		// product_category_unique_url<>#db.param('')# and 
+		// product_category_deleted = #db.param(0)#
+		// ORDER BY product_category_unique_url DESC";
+		// qF=db.execute("qF");
+		// loop query="qF"{
+		// 	t9=structnew();
+		// 	t9.scriptName="/product-category/index";
+		// 	t9.urlStruct=structnew();
+		// 	t9.urlStruct[request.zos.urlRoutingParameter]="/product-category/index";
+		// 	t9.urlStruct.product_category_id=qF.product_category_id;
+		// 	arguments.sharedStruct.uniqueURLStruct[trim(qF.product_category_unique_url)]=t9;
+		// }
+		// t9=structnew();
+		// t9.type=1;
+		// t9.scriptName="/product/view";
+		// t9.ifStruct=structnew();
+		// t9.ifStruct.ext="html";
+		// t9.urlStruct=structnew();
+		// t9.urlStruct[request.zos.urlRoutingParameter]="/product/view";
+		// t9.urlStruct.method="index";
+		// t9.mapStruct=structnew();
+		// t9.mapStruct.urlTitle="zURLName";
+		// t9.mapStruct.dataId="product_id"; 
+		// arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.ecommerce_config_product_url_id],t9);
 
-		t9=structnew();
-		t9.type=3;
-		t9.scriptName="/product-category/index";
-		t9.ifStruct=structnew();
-		t9.ifStruct.ext="html";
-		t9.urlStruct=structnew();
-		t9.urlStruct[request.zos.urlRoutingParameter]="/product-category/index";
-		t9.urlStruct.method="index";
-		t9.mapStruct=structnew();
-		t9.mapStruct.urlTitle="zURLName";
-		t9.mapStruct.dataId="product_category_id";
-		t9.mapStruct.dataId2="zindex";
-		arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.ecommerce_config_category_url_id],t9);
+		// t9=structnew();
+		// t9.type=3;
+		// t9.scriptName="/product-category/index";
+		// t9.ifStruct=structnew();
+		// t9.ifStruct.ext="html";
+		// t9.urlStruct=structnew();
+		// t9.urlStruct[request.zos.urlRoutingParameter]="/product-category/index";
+		// t9.urlStruct.method="index";
+		// t9.mapStruct=structnew();
+		// t9.mapStruct.urlTitle="zURLName";
+		// t9.mapStruct.dataId="product_category_id";
+		// t9.mapStruct.dataId2="zindex";
+		// arrayappend(arguments.sharedStruct.reservedAppUrlIdStruct[qConfig.ecommerce_config_category_url_id],t9);
 
 		/*
 		loop query="qConfig"{
