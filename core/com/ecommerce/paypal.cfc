@@ -316,6 +316,9 @@ application.zcore.paypal.displayButton(ts);
 		a.href='#checkoutLink#';
 	}, 2000);
 	</script> 
+	<cfscript>
+	result=true;
+	</cfscript>
 </cffunction>
 
 

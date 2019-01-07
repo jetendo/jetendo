@@ -1413,7 +1413,7 @@ zEmailValidateList(addressList, displayFormat);
 	<cfargument name="disableExternal" type="boolean" required="yes">
 	<cfscript>
 	link=arguments.link;
-	if(left(link, 4) EQ 'tel:'){
+	if(left(link, 4) EQ 'tel:' or left(link, 7) EQ 'mailto:'){
 		return true;
 	}
 
