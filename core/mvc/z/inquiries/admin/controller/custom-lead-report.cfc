@@ -2519,7 +2519,7 @@ leadchart
 	filterInquiryTableSQL(db);
 	db.sql&="
 	ORDER BY inquiries_datetime ASC ";
-	request.leadData.qWebLead=db.execute("qWebLead");
+	request.leadData.qWebLead=db.execute("qWebLead", "", 10000, "query", false);
 	request.leadData.phoneGroup={};
 	request.leadData.phoneGroupOffset={};
 	request.leadData.webFormGroup={};
@@ -3643,8 +3643,13 @@ track_user_first_page
 			return {success:true, filePath:pdfFile, html:htmlOut };
 		}else{
 			// if this ever stops working for file download in chrome, we can redirect to a different function and turn off deletefile
-		    header name="Content-Disposition" value="inline; filename=#getfilefrompath(pdfFile)#" charset="utf-8";
-		    content type="application/pdf" deletefile="yes" file="#pdfFile#";
+			// if(structkeyexists(form, 'disableRedirect') or request.zos.isTestServer){
+			//     header name="Content-Disposition" value="inline; filename=#getfilefrompath(pdfFile)#" charset="utf-8";
+			//     content type="application/pdf" deletefile="yes" file="#pdfFile#";
+			// }else{
+
+		    	application.zcore.functions.zredirect("/z/inquiries/admin/custom-lead-report/download?selectedMonth=#form.selectedMonth#");
+		    // }
 		}
 	}else{
 		if(form.returnJSON EQ 1){
@@ -3654,6 +3659,21 @@ track_user_first_page
 		}
 	}
 	abort;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="download" access="remote" localmode="modern" roles="administrator">
+	<cfscript> 
+	var db=request.zos.queryObject;
+	form.selectedMonth=application.zcore.functions.zso(form, 'selectedMonth');
+	fileName="#form.selectedMonth#-Lead-Report-#request.zos.globals.shortDomain#.pdf";
+	pdfFile=request.zos.globals.privateHomeDir&fileName;
+
+    header name="Content-Disposition" value="inline; filename=#fileName#" charset="utf-8"; 
+    header name="Content-Type" value="application/pdf"; 
+    content type="application/pdf" file="#pdfFile#";
+    abort;
 	</cfscript>
 </cffunction>
 </cfoutput>
