@@ -645,8 +645,8 @@ application.zcore.functions.zAssignAndEmailLead(ts);
 	if(structkeyexists(request.zos.debugLeadRoutingSiteIdStruct, request.zos.globals.id)){
 		savecontent variable="debugout"{
 			echo('<html><body>');
-			writedump(rs2, true, 'simple');
-			writedump(request.zos.cgi, true, 'simple');
+			writedump(rs2);//, true, 'simple');
+			writedump(request.zos.cgi);//, true, 'simple');
 			echo('</body></html>');
 		}
 		mail to="#request.zos.developerEmailTo#" from="#request.zos.developerEmaiLFrom#" subject="Assign debugging info for #request.zos.globals.shortDomain#" type="html"{

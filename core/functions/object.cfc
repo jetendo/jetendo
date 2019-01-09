@@ -12,7 +12,7 @@
         }catch(Any e){
             if(not request.zos.istestserver and not fileexists(expandpath(replace(arguments.cpath, ".","/","all")&".cfc"))){
                 savecontent variable="local.e2"{
-                    writedump(e, true, 'simple');   
+                    writedump(e);//, true, 'simple');   
                 }
                 application.zcore.functions.z404("zCreateObject() c:"&arguments.c&"<br />cpath:"&arguments.cpath&"<br />forceNew:"&arguments.forceNew&"<br />request.zos.cgi.SCRIPT_NAME:"&request.zos.cgi.SCRIPT_NAME&"<br />catch error:"&local.e2);
             }else{
@@ -30,7 +30,7 @@
     		}catch(Any e){
     			if(not request.zos.istestserver and not fileexists(expandpath(replace(arguments.cpath, ".","/","all")&".cfc"))){
                     savecontent variable="local.e2"{
-                        writedump(e, true, 'simple');   
+                        writedump(e);//, true, 'simple');   
                     }
     				application.zcore.functions.z404("zCreateObject() c:"&arguments.c&"<br />cpath:"&arguments.cpath&"<br />forceNew:"&arguments.forceNew&"<br />request.zos.cgi.SCRIPT_NAME:"&request.zos.cgi.SCRIPT_NAME&"<br />catch error:"&local.e2);
     			}else{

@@ -107,7 +107,7 @@
 	local.u=structnew();
 	local.arrC=arraynew(1);
 	local.uc=structnew();
-	if(arguments.debug) writedump(local.arrR, true, 'simple');
+	if(arguments.debug) writedump(local.arrR);//, true, 'simple');
     for(local.i=1;local.i LTE arraylen(local.arrR);local.i++){
 		if(structkeyexists(local.u, local.arrR[local.i]) EQ false){
 			local.u[local.arrR[local.i]]=true;	

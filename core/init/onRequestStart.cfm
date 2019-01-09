@@ -1296,7 +1296,7 @@
 		protocol = 'https://';
 	}
 	var theURL=replace(replace(zos.originalURL, "https:/" , ""), "http:/" , "");
-	//writedump(ds, true, 'simple');	abort;
+	//writedump(ds);	abort;
 	if(ds.domain_redirect_type EQ '3'){
 		application.zcore.functions.z404("checkDomainRedirect resulted in 404 by intentional configuration by site_id = #ds.site_id#, domain: #ds.site_domain#."); 
 	}else if(ds.domain_redirect_type EQ '2'){ // force to exact url

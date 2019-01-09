@@ -441,7 +441,7 @@ StructDelete(request, 'cfdumpinited');
 			writeoutput(i&": "&form[i]&"<br />");
 		}else{
 			echo(i&":");
-			writedump(form[i], true, 'simple');
+			writedump(form[i]);//, true, 'simple');
 			echo("<br>");
 		}
 	}
@@ -511,7 +511,7 @@ if(isDefined('application.zcore.abusiveIPStruct')){
 		for(i in application.zcore.abusiveIPStruct){
 			writeoutput(structcount(application.zcore.abusiveIPStruct[i])&' ips in abusiveIPStruct<br />');
 		}
-		//writedump(application.zcore.abusiveIPStruct, true, 'simple');
+		//writedump(application.zcore.abusiveIPStruct);//, true, 'simple');
 	}
 }*/
 if(isDefined('request.zos.arrRunTime')){
@@ -549,7 +549,7 @@ try{
 	echo("<br />");
 }catch(Any e){
 	echo('<h2>Failed to display mysql processlist</h2>');
-	writedump(e, true, 'simple');
+	writedump(e);//, true, 'simple');
 }
 </cfscript>
 

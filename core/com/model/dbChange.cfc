@@ -296,7 +296,7 @@ generating the id is not required if I set the id to version_json_data struct pr
 		n=variables.arrChange[i];
 		if(variables.schema NEQ n.data.schema){
 			savecontent variable="out"{
-				writedump(n, true, 'simple');
+				writedump(n);//, true, 'simple');
 			}
 			throw('All queries must be run against the primary datasource, "#variables.schema#" set with setTable. 
 				The following database change struct schema didn''t match:<br />'&out);
@@ -382,7 +382,7 @@ generating the id is not required if I set the id to version_json_data struct pr
 
 <cffunction name="dump" access="public" localmode="modern">
 	<cfscript>
-	writedump(variables, true, 'simple');
+	writedump(variables);//, true, 'simple');
 	</cfscript>
 </cffunction>
 

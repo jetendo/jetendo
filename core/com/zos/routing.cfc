@@ -1825,8 +1825,8 @@
 	}else{
 		if(request.zos.isDeveloper){
 			if(zdebugurl){
-				writedump(url, true, 'simple');
-				writedump(cgi, true, 'simple');
+				writedump(url);//, true, 'simple');
+				writedump(cgi);//, true, 'simple');
 				
 				writeoutput('going to be this url:'&newScriptName&'<br />');
 				
