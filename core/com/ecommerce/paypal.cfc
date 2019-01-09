@@ -317,7 +317,7 @@ application.zcore.paypal.displayButton(ts);
 	}, 2000);
 	</script> 
 	<cfscript>
-	result=true;
+	return true;
 	</cfscript>
 </cffunction>
 

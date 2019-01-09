@@ -1571,7 +1571,7 @@ displayGroupCom.ajaxInsert();
 	
 						<a href="/z/admin/site-options/manageGroup?site_option_app_id=0&site_option_group_id=#qProp.site_option_group_id#">List/Edit</a> | 
 						<a href="/z/admin/site-options/import?site_option_app_id=0&site_option_group_id=#qProp.site_option_group_id#">Import</a> | 
-						<a href="/z/admin/site-options/manageGroup?site_option_app_id=0&site_option_group_id=#qProp.site_option_group_id#&amp;zManagerAddOnLoad=1">Add</a> | 
+						<!--- <a href="/z/admin/site-options/manageGroup?site_option_app_id=0&site_option_group_id=#qProp.site_option_group_id#&amp;zManagerAddOnLoad=1">Add</a> |  --->
 					</cfif>
 				</cfif>
 			<cfif qProp.site_id NEQ 0 or variables.allowGlobal>

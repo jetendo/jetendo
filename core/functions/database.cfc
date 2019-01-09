@@ -665,6 +665,19 @@ if(table_id EQ false){
 			}else{
 				newId=qId.id;
 			}
+
+			if(newId EQ 0){
+				ts={
+					type:"Custom",
+					errorHTML:'<h2>Insert ID was 0, and shouldn''t be.</h2><p>'&sqlInsert&'</p>',
+					scriptName:request.zos.originalURL,
+					url:request.zos.originalURL,
+					exceptionMessage:'',
+					// optional
+					lineNumber:''
+				}
+				application.zcore.functions.zLogError(ts); 
+			}
 		}catch(database e){
 			transaction action="rollback";
 			if(ss.norequestsql EQ false){

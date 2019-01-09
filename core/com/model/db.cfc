@@ -286,9 +286,22 @@ Copyright (c) 2013 Far Beyond Code LLC.
 						echo(preserveSingleQuotes(arguments.configStruct.insertIDSQL));
 					}
 					transaction action="commit";
-					return {success:true, result:db[arguments.name&"_id"][arguments.idColumn]};
+					id=db[arguments.name&"_id"][arguments.idColumn];
+					if(id EQ 0){
+						ts={
+							type:"Custom",
+							errorHTML:'Insert ID was 0, and shouldn''t be.',
+							scriptName:request.zos.originalURL,
+							url:request.zos.originalURL,
+							exceptionMessage:db.sql,
+							// optional
+							lineNumber:''
+						}
+						application.zcore.functions.zLogError(ts); 
+					}
+					return {success:true, result:id};
 				}else{
-					transaction action="commit";
+					transaction action="rollback";
 					return {success:false, result:result};
 				}
 			}catch(Any e){

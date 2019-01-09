@@ -162,7 +162,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 			inquiries_type_id = #db.param(row.inquiries_type_id)#";
 			qType=db.execute("qType");
 			if(qType.recordcount EQ 0){
-				throw("inquiries_type_id, ""#row.inquiries_type_id#"", doesn't exist, and it is required.");
+				throw("inquiries_type_id, ""#row.inquiries_type_id#"", doesn't exist, and it is required for this group to work:  Parent ID: #row.site_option_group_parent_id# Name: #row.site_option_group_name#.");
 			}
 			row.inquiriesTypeName = qType.inquiries_type_name;
 		}
@@ -710,7 +710,6 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfscript>
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	variables.userGroupCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.user.user_group_admin");
-	header name="Content-Type" value="text/plain" charset="utf-8";
 	if(request.zos.isTestServer){
 		fileName="test-";
 	}else{
@@ -719,9 +718,6 @@ This allows avoiding remaps more easily.  Less code when importing.
 	fileName&="sync-json-";
 	fileName&=application.zcore.functions.zUrlEncode(request.zos.globals.shortDomain)&".txt";
 
-	if(structkeyexists(form, 'download')){
-		header name="Content-Disposition" value="attachment; filename=#fileName#" charset="utf-8";
-	}
 	
 	
 	// later I would load sourceDataStruct from external json.js file instead of database when comparing and importing structure changes.
@@ -741,8 +737,13 @@ This allows avoiding remaps more easily.  Less code when importing.
 	
 	
 	sourceJsonString=serializeJSON(sourceDataStruct);
+
+	if(structkeyexists(form, 'download')){
+		header name="Content-Type" value="text/plain" charset="utf-8";
+		header name="Content-Disposition" value="attachment; filename=#fileName#" charset="utf-8";
+	}
 	echo(sourceJsonString);
-	application.zcore.functions.zabort();
+	abort;
 	</cfscript>
 </cffunction>
 
