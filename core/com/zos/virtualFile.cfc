@@ -1401,37 +1401,35 @@ virtualFileCom.serveVirtualFile();
 
 	downloadLink = getInternalFilePath(rs.data);  
 	ext = application.zcore.functions.zGetFileExt( downloadLink );
-
-	if(not arguments.forceDownload){
-		if ( ext EQ 'jpg' OR ext EQ 'jpeg' ) {
-			type = 'image/jpeg';
-		} else if ( ext EQ 'png' ) {
-			type = 'image/png';
-		} else if ( ext EQ 'gif' ) {
-			type = 'image/gif';
-		}else if(ext EQ 'pdf'){
-			type='application/pdf';
-		}else if(ext EQ 'mp3'){
-			type='audio/mpeg';
-		}else if(ext EQ 'js'){
-			type='text/js';
-		}else if(ext EQ 'css'){
-			type='text/css';
-		}else if(ext EQ 'html' or ext EQ "htm"){
-			type='text/html';
-		}else if(ext EQ 'txt'){
-			type='text/plain';
-		}else if(ext EQ "mp4"){
-			type="video/mp4";
-		}else if(ext EQ "m4v"){
-			type="video/mp4"; 
-		}else{
-			type="application/octet-stream";
-		} 
-		if ( type NEQ '' ) {
-			application.zcore.functions.zheader( 'Content-Type', type );
-		}
+ 
+	if ( ext EQ 'jpg' OR ext EQ 'jpeg' ) {
+		type = 'image/jpeg';
+	} else if ( ext EQ 'png' ) {
+		type = 'image/png';
+	} else if ( ext EQ 'gif' ) {
+		type = 'image/gif';
+	}else if(ext EQ 'pdf'){
+		type='application/pdf';
+	}else if(ext EQ 'mp3'){
+		type='audio/mpeg';
+	}else if(ext EQ 'js'){
+		type='text/js';
+	}else if(ext EQ 'css'){
+		type='text/css';
+	}else if(ext EQ 'html' or ext EQ "htm"){
+		type='text/html';
+	}else if(ext EQ 'txt'){
+		type='text/plain';
+	}else if(ext EQ "mp4"){
+		type="video/mp4";
+	}else if(ext EQ "m4v"){
+		type="video/mp4"; 
+	}else{
+		type="application/octet-stream";
 	} 
+	if ( type NEQ '' ) {
+		application.zcore.functions.zheader( 'Content-Type', type );
+	}
 	if(variables.config.storageMethod EQ "localFilesystem"){
 		if(arguments.forceDownload){
 			application.zcore.functions.zheader( 'Content-Disposition', 'attachment; filename=' & replace(urlencodedformat(replace(rs.data.virtual_file_name, ",", " ", "all")), '%2E', '.', 'all') );
