@@ -244,7 +244,7 @@
 				<cfif ss.hasPhotos and dbHasPhotos>
 					<div class="zEventListPhoto" style="width:220px;">
 						<cfif arrayLen(eventImages[row.event_id])>
-							<img src="#arrImage[1].link#" alt="#htmleditformat(eventImages[row.event_id][1].caption)#" class="z-fluid"> 
+							<img src="#eventImages[row.event_id][1].link#" alt="#htmleditformat(eventImages[row.event_id][1].caption)#" class="z-fluid"> 
 						</cfif>
 					</div>
 					<div class="zEventListText" style="width:#request.zos.globals.maximagewidth-220#px;">
