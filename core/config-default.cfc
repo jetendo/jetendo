@@ -15,7 +15,7 @@
 	ts.zos.testDomain="127.0.0.2.xip.io";
     ts.zos.productionTestDomain="zsite.info"; // configure to be a valid domain you own with wildcard dns record (*) to ease setting up new sites with working dns.
 	ts.zos.testManagerDomain="127.0.0.2.xip.io";  // xip.io is much slower then using your local hosts file or a local dns server, but it works without additional configuration.  Learn more about xip.io: http://xip.io/  - You can also host your own xip daemon using node.js.
-	if(findnocase("."&ts.zos.testDomain, arguments.tempCgi.http_host) NEQ 0 or findnocase("."&ts.zos.testManagerDomain, arguments.tempCgi.http_host) NEQ 0){
+	if(findnocase("."&ts.zos.testDomain, arguments.tempCGI.http_host) NEQ 0 or findnocase("."&ts.zos.testManagerDomain, arguments.tempCGI.http_host) NEQ 0){
 		ts.zos.installPath="/var/jetendo-server/jetendo/";
 		ts.zOS.istestserver=true;
 	}else{

@@ -1406,6 +1406,7 @@ ts.pregenerate=false; // true will force all images to be resized before returni
 ts.disableMouseWheel=false; // set to true to disable mousewheel for contentflow gallery.
 ts.crop=0;
 ts.offset=0;
+ts.reverse=false; // true will sort them in the opposite direction
 ts.limit=0; // zero will return all images
 application.zcore.imageLibraryCom.displayImages(ts);
  --->
@@ -1432,6 +1433,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	ts.forceSize=false;
 	ts.layoutType="";
 	ts.top=false;
+	ts.reverse=false;
 	ts.size="#request.zos.globals.maximagewidth#x2000";
 	ts.crop=0;
 	//ts.thumbSize="110x60";
@@ -1472,7 +1474,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	</cfif> 
 	and site_id = #db.param(request.zos.globals.id)# and 
 	image_deleted = #db.param(0)#
-	ORDER BY image_sort, image_caption, image_id 
+	ORDER BY image_sort <cfif arguments.ss.reverse>DESC</cfif>, image_caption, image_id 
 	<cfif arguments.ss.offset NEQ 0 or arguments.ss.limit NEQ 0>LIMIT #db.param(arguments.ss.offset)# 
 		<cfif arguments.ss.limit NEQ 0>, #db.param(arguments.ss.limit)#<cfelse>,#db.param(1000)#</cfif>
 	</cfif>

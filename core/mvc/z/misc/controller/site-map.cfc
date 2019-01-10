@@ -20,6 +20,7 @@
 	arrayAppend(arrURL2, { groupName: 'Miscellaneous', title:'Privacy Policy & Cookies', url:request.zos.currentHostName&'/z/user/privacy/index'});
 	arrayAppend(arrURL2, { groupName: 'Miscellaneous', title:'Terms of Use', url:request.zos.currentHostName&'/z/user/terms-of-use/index'});
 	arrayAppend(arrURL2, { groupName: 'Miscellaneous', title:'Legal Notices', url:request.zos.currentHostName&'/z/misc/system/legal'});
+	arrayAppend(arrURL2, { groupName: 'Miscellaneous', title:'Accessibility Statement', url:request.zos.currentHostName&'/z/user/accessibility/index'});
 	if(form.method EQ "index"){
 		arrayAppend(arrURL2, { groupName: 'Miscellaneous', title:'XML Site Map', url:request.zos.currentHostName&'/sitemap.xml.gz'});
 	}
