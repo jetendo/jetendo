@@ -58,13 +58,13 @@ weatherHTML=zGetWeather(ts);
 	structdelete(request, 'zLastWeatherLookup');
 	request.zLastWeatherLookup={};
 	request.zLastWeatherLookup.temperature=0;
-	ss=application.sitestruct[request.zos.globals.id];
+	ss2=application.sitestruct[request.zos.globals.id];
 	download=false;
-	if(not structkeyexists(ss, 'weatherset'&arguments.ss.zip&ctemp&'v2')){
+	if(not structkeyexists(ss2, 'weatherset'&arguments.ss.zip&ctemp&'v2')){
 		download=true;
-	}else if(datecompare(ss["weatherset"&arguments.ss.zip&ctemp&'v2'], dateadd("n",-30,now())) EQ -1){
+	}else if(datecompare(ss2["weatherset"&arguments.ss.zip&ctemp&'v2'], dateadd("n",-30,now())) EQ -1){
 		download=true;
-	}else if(not structkeyexists(ss, "weatherset"&arguments.ss.zip&ctemp&'cache-v2')){
+	}else if(not structkeyexists(ss2, "weatherset"&arguments.ss.zip&ctemp&'cache-v2')){
 		if(not fileexists(request.zos.globals.serverprivatehomedir&"_cache/html/weather/#arguments.ss.zip#-#ctemp#v2.html")){
 			download=true;
 		}else{
@@ -75,14 +75,14 @@ weatherHTML=zGetWeather(ts);
 			}
 		}
 	}else{
-		request.zLastWeatherLookup=ss["weatherset"&arguments.ss.zip&ctemp&'cache-v2'];
+		request.zLastWeatherLookup=ss2["weatherset"&arguments.ss.zip&ctemp&'cache-v2'];
 		request.zLastWeatherLookup.temperature=application.zcore.functions.zso(request.zLastWeatherLookup, 'temperature');
 		return request.zLastWeatherLookup.weatherHTML;
 	}
 	
 	if(download){	
 		// consider using weather.com instead: http://wxdata.weather.com/weather/local/32114 | ?cc= at end gives more info | has no image support rain / cloudy, etc
-		ss["weatherset"&arguments.ss.zip&ctemp&'v2']=now();
+		ss2["weatherset"&arguments.ss.zip&ctemp&'v2']=now();
 		try{
 			r=application.zcore.functions.zdownloadlink("https://wxdata.weather.com/weather/local/#arguments.ss.zip#?cc=&unit=F", arguments.ss.timeout);
 		}catch(Any e){ 
@@ -165,17 +165,17 @@ weatherHTML=zGetWeather(ts);
 			return "";
 		}
 		if(structkeyexists(arrWC,d.rss.channel.item["yweather:condition"].xmlattributes.code)){
-			image="http://us.i1.yimg.com/us.yimg.com/i/us/we/52/#d.rss.channel.item["yweather:condition"].xmlattributes.code#.gif";
+			image1="http://us.i1.yimg.com/us.yimg.com/i/us/we/52/#d.rss.channel.item["yweather:condition"].xmlattributes.code#.gif";
 		}else{
-			image=false;
+			image1=false;
 		}
 		*/
-		image=false;
+		image1=false;
 		request.zLastWeatherLookup=structnew();
 		request.zLastWeatherLookup.temperature=d.weather.cc.tmp.xmltext;//rss.channel.item["yweather:condition"].xmlattributes.temp;
 		//request.zLastWeatherLookup.temperature=d.rss.channel.item["yweather:condition"].xmlattributes.temp;
-		if(image NEQ false){
-			request.zLastWeatherLookup.image=image;
+		if(image1 NEQ false){
+			request.zLastWeatherLookup.image=image1;
 		}
 		if(arguments.ss.currentOnly){
 			request.zLastWeatherLookup.weatherHTML="#d.weather.cc.t.xmltext#, #d.weather.cc.tmp.xmltext# F";
@@ -201,7 +201,7 @@ weatherHTML=zGetWeather(ts);
 			<div class="zweather-yahoo">View Full Forecast at Yahoo! Weather</div>');*/
 		}
 		request.zLastWeatherLookup.weatherHTML=weatherHTML;
-		ss["weatherset"&arguments.ss.zip&'cache-v2']=request.zLastWeatherLookup;
+		ss2["weatherset"&arguments.ss.zip&'cache-v2']=request.zLastWeatherLookup;
 		application.zcore.functions.zwritefile(request.zos.globals.serverprivatehomedir&"_cache/html/weather/#arguments.ss.zip#-#ctemp#v2.html",trim(serializeJson(request.zLastWeatherLookup)));
 
 		return weatherHTML;

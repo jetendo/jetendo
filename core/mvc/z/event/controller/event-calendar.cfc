@@ -209,20 +209,29 @@
  	js.link=ss.link;
  	js.success=true;
  	eventCom=application.zcore.app.getAppCFC("event");
+ 	eventImages={};
+ 	dbHasPhotos=false;
+ 	for(i=1;i<=arrayLen(ss.arrData);i++){
+ 		row=ss.arrData[i];
+		ts=structnew();
+		ts.image_library_id=row.event_image_library_id;
+		ts.output=false;
+		ts.struct=row;
+		ts.size="300x240";
+		ts.crop=0;
+		ts.count = 1; // how many images to get
+		arrImage=application.zcore.imageLibraryCom.displayImageFromStruct(ts);
+ 		eventImages[row.event_id]=arrImage;
+ 		if(arrayLen(arrImage) GT 0){
+ 			dbHasPhotos=true;
+ 		}
+ 	}
  	</cfscript>
 	<cfsavecontent variable="js.html">
 		<cfloop from="1" to="#arrayLen(ss.arrData)#" index="i1">
 			<cfscript>row=ss.arrData[i1];
 			dateRangeStruct=eventCom.getDateRangeStruct(row);
 
-			ts=structnew();
-			ts.image_library_id=row.event_image_library_id;
-			ts.output=false;
-			ts.struct=row;
-			ts.size="300x240";
-			ts.crop=0;
-			ts.count = 1; // how many images to get
-			arrImage=application.zcore.imageLibraryCom.displayImageFromStruct(ts);
 
 			if(row.event_summary EQ ""){
 				summary=application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description), 200);
@@ -232,10 +241,10 @@
 			</cfscript>
 
 			<div class="zEventListContainer">
-				<cfif ss.hasPhotos>
+				<cfif ss.hasPhotos and dbHasPhotos>
 					<div class="zEventListPhoto" style="width:220px;">
-						<cfif arrayLen(arrImage)>
-							<img src="#arrImage[1].link#" alt="#htmleditformat(arrImage[1].caption)#" class="z-fluid"> 
+						<cfif arrayLen(eventImages[row.event_id])>
+							<img src="#arrImage[1].link#" alt="#htmleditformat(eventImages[row.event_id][1].caption)#" class="z-fluid"> 
 						</cfif>
 					</div>
 					<div class="zEventListText" style="width:#request.zos.globals.maximagewidth-220#px;">
