@@ -2440,6 +2440,7 @@ this.app_id=10;
 		ts.crop=0; 
 		ts.offset=0;  
 		ts.top=true;
+		ts.defaultAltText=qArticle.blog_title;
 		if(qArticle.blog_image_library_layout EQ 7 or qArticle.blog_image_library_layout EQ 9){
 			ts.limit=1;
 		}
@@ -2471,6 +2472,7 @@ this.app_id=10;
 			ts.size="960x4000";
 			ts.crop=0;  
 			ts.offset=1;
+			ts.defaultAltText=qArticle.blog_title;
 			ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(qArticle.blog_image_library_layout);
 			application.zcore.imageLibraryCom.displayImages(ts);
 		}
