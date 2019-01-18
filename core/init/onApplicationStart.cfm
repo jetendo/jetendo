@@ -512,7 +512,7 @@
 		writeoutput("SHOW DATABASES like '%#request.zos.zcoredatasource#%' ");
 	}
 	if(qA.recordcount EQ 0){
-		throw("zcorerootmapping ERROR: The database and datasource name must be identical. #ts.serverGlobals.datasource# does not exist in database server. Please correct site globals.", "custom");
+		throw("zcorerootmapping ERROR: The database and datasource name must be identical. #ts.serverGlobals.datasource# does not exist in database server. Please correct site globals.");
 	} 
 	
 	// default environment variables

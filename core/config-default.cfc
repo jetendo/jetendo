@@ -6,9 +6,9 @@
 	<cfargument name="defaultConfig" type="boolean" required="yes">
 	<cfscript>
 	
-	var ts=structnew("sync");
+	var ts=structnew("sync");  
     ts.timezone="America/New_York";
-	ts.locale = "en_US"; 
+	ts.locale = "en_US";  
 	// install path of this Application.cfc - It must end with a forward slash.
 	ts.zOS = structnew("sync");
 	// domain to append to ALL of your test domains.

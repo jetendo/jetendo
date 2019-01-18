@@ -1,6 +1,163 @@
+<!--- <cfcomponent displayname="Application" hint="Handle the application.">
+<cfscript>
+	echo('<style>body{background-color:##000; color:##FFFFFF;}</style>');
+ //  var n2="test"; 
+ // echo(n2&"<br>");  
+
+ maGIC="true";
+ echo("eye"&getString2(maGIC));
+//  local.iAmLocal2=3;
+//  var iAmLocal="cool";   
+//  local.isneat=true;      
+// echo(local.iAmLocal); 
+// echo(local.iAmLocal2); 
+// // echo(local.iAmLocal);
+//  echo(isneat);
+ // echo(isneat);
+//    jetendo.myVar=10;
+// for (jetendo.memberDoubleStatic = 1; jetendo.memberDoubleStatic <= jetendo.myVar; jetendo.addOneMemberDouble()) {
+// 	echo("neat:"&jetendo.memberDoubleStatic);
+// }    
+//    jetendo.myVar="1";
+//    jetendo.myVar=[true];
+
+//    writedump(jetendo.myVar);
+
+//    jetendo.myVar=JavaCast("Object", 1);
+//    jetendo.myVar=JavaCast("Object", "1");
+//    jetendo.myVar=JavaCast("Object", [true]);
+
+//    writedump(jetendo.myVar);
+//    jetendo.myVar=JavaCast("Object", {cool:true});
+//    writedump(jetendo.myVar);
+//    jetendo.myVar= [true];
+//    jetendo.myVar= [true, false];
+//    writedump(jetendo.myvar);
+//    abort;
+
+//   echo("test"); 
+// jetendo.cacheFunction=jetendo.getFunction(this, getString2);
+// jetendo.result2=getString2();
+// jetendo.result=jetendo.runFunction(jetendo.cacheFunction, jetendo.result2);
+
+// echo(jetendo.result); 
+// request.test=1;   
+// echo(request.test);
+// echo(cookie._ga);
+// echo(cgi.http_host); 
+    
+// jetendo.struct={test:{test2:true}};
+// jetendo.struct.test.test2=false; 
+// writedump(jetendo.struct);
+// abort; 
+
+// jetendo.newDouble10="newDouble cool";   
+// jetendo.newDouble11=5;  
+// jetendo.reloadComponents();  
+// n3=jetendo.getString();   
+  
+// echo(n3&jetendo.newDouble10&" : "&jetendo.newDouble11&"test"); 
+
+// //echo(n3&jetendo.newDouble10&jetendo.newDouble11&requestLogEntry2(" fine ")&" literal "&jetendo.newDouble10&jetendo.getJavaString()&jetendo.getString());  
+
+
+// server.jetCom=createobject("component", "jet");
+// jetendo.cacheFunction2=jetendo.getFunction(server.jetCom, getString2);
+
+
+// 	jetendo.limitCount=1000;
+// 	stime = getTickCount('nano');
+// 	limitCount=1000;
+// 	for (g = 1; g <=3; g++) {
+			 
+// 		// stime = getTickCount('nano');  
+// 		// varString="a much longer string a much longer string a much longer string a much longer string a much longer string a much longer string ";
+// 		// for (i = 1; i <= limitCount; i++) {
+// 		// 	a=varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString&varString;
+// 		// } 
+// 		// echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for lucee variable string concat<br>");
+			 
+// 		// stime = getTickCount('nano'); 
+// 		// jetendo.varString="a much longer string a much longer string a much longer string a much longer string a much longer string a much longer string ";
+// 		// for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 		// 	a=jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString&jetendo.varString;
+// 		// } 
+// 		// echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for lucee java local variable string concat<br>");
+
+// 		stime = getTickCount('nano'); 
+// 		for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 			jetendo.runFunction(jetendo.cacheFunction, jetendo.result2);
+// 		} 
+// 		echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for java runFunction<br>");
+// 		stime = getTickCount('nano'); 
+// 		for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 			server.jetCom.getString2(jetendo.result2);
+// 		} 
+// 		echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for lucee external runFunction<br>");
+// 		jetendo.jetCom=server.jetCom;
+// 		stime = getTickCount('nano'); 
+// 		for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 			jetendo.jetCom.getString2(jetendo.result2);
+// 		} 
+// 		echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for java local external runFunction<br>");
+
+// 		stime = getTickCount('nano'); 
+// 		for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 			jetendo.runFunction(jetendo.cacheFunction2, jetendo.result2);
+// 		} 
+// 		echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for java external runFunction<br>");
+
+// 		stime = getTickCount('nano'); 
+// 		for (jetendo.i = 1; jetendo.i <= jetendo.limitCount; jetendo.i=jetendo.i+1) {
+// 			getString2(jetendo.result2);
+// 		} 
+// 		echo("<br>" & ((getTickCount('nano') - stime) / 1000000) & "ms for lucee runFunction<br>");
+
+			 
+// 	}  
+
+// abort;
+
+// OpString, LitStringImpl, CastString
+//  jetendo.memberString="cool";   
+//  // storeLocal     
+//  jetendo.newMemberString="cooler"; 
+//  echo(jetendo.memberString&"<br>");
+//  // have to do this as loadLocal when reflection fails
+//  echo(jetendo.newMemberString&"<br>"); 
+//  // echo(newMemberString&"<br>");
+//  jetendo.newMemberStruct={test:"cooler"};  
+// echo(jetendo.newMemberStruct.test&"<br>");
+//  // jetendo.newMemberStruct={sameButNot:"cooler2"}; 
+// // echo(newMemberStruct.test&"<br>");
+// // echo(newMemberStruct.sameButNot&"<br>");
+//  jetendo.newMemberStruct=false; 
+// echo(jetendo.newMemberStruct&"<br>"); 
+// request.newStruct={newOne:3};
+// newStruct2=request.newStruct;
+// echo(newStruct2.newOne);
+// jetendo.mylocal="sweet";
+// jetendo.resultIs=requestLogEntry2("test"); 
+// echo(jetendo.resultIs);
+// jetendo.resultIs2=requestLogEntry2(jetendo.mylocal);
+// echo(jetendo.resultIs2);
+ // abort; 
+</cfscript>    
+<cffunction name="getString2">
+	<cfargument name="magic" type="String" required="yes"> 
+	<cfscript>
+	return "t2"&arguments.magic;
+	</cfscript>
+</cffunction> 
+</cfcomponent> --->
 <cfcomponent displayname="Application" output="no" hint="Handle the application."><cfscript>
 // BEGIN override cfml admin settings
 // regional
+if(structkeyexists(form, 'firstlineabort')){
+	echo(1);//echo(replace(jetendo.showLuceeStartTime(), chr(10), "<br>", "all"));
+	//echo(1);
+	abort;
+}
 // default locale used for formating dates, numbers ...
 this.sessionStorage = "memory";
 

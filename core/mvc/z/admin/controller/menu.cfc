@@ -424,7 +424,8 @@
 	imagePath=request.zos.globals.privatehomedir&'zupload/menu/#form.menu_id#/';
 	image123=structnew();
 	if(getNewImageSize){
-		image source="#imagePath##form.menu_button_url#" action="info" structname="image123";
+		throw("Image is not supported anymore");
+		// image source="#imagePath##form.menu_button_url#" action="info" structname="image123";
 		form.menu_button_width=image123.width;
 		form.menu_button_height=image123.height;
 		db.sql='UPDATE #db.table("menu_button", request.zos.zcoreDatasource)# menu_button 

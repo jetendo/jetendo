@@ -64,7 +64,7 @@
 		<cfif structkeyexists(form, 'zab')>
 			<cfif structkeyexists(arguments.exception, 'message') and arguments.exception.message CONTAINS "timeout">
 				<cfheader statuscode="500" statustext="Internal Server Error">timeout<cfabort></cfif>
-				<cfsavecontent variable="theDump"><cfdump var="#exception#" format="simple"></cfsavecontent>
+				<cfsavecontent variable="theDump"><cfdump var="#exception#"></cfsavecontent>
 				<cffile action="append" file="#request.zos.zcoreRootPrivatePath#_cache/error-log.txt" output="#now()# | #application.applicationname# | #arguments.eventName#: #arguments.exception.message#" addnewline="yes"><!--- #chr(10)##theDump# --->
 				<cfabort>
 			</cfif> 
@@ -79,7 +79,7 @@
 
 			<!--- <cfif structkeyexists(form, request.zos.urlRoutingParameter) EQ false>
 				#cferror.message# 
-				<cfdump var="#cferror#" format="simple">
+				<cfdump var="#cferror#">
 			<cfelse>  --->
 			<cftry>
 				<!--- to force an error to be logged even for a developer set: 
@@ -113,10 +113,10 @@
 					</cfif>
 					<cfsavecontent variable="theError">
 						<h2>Normal error handler failed.</h2>
-						<cfdump var="#cfcatch#" format="simple">
+						<cfdump var="#cfcatch#">
 						
 						<h2>The original error</h2>
-						<cfdump var="#arguments.exception#" format="simple">
+						<cfdump var="#arguments.exception#">
 					</cfsavecontent>
 					#theError# 
 					<cfif request.zos.isDeveloper EQ false>
@@ -131,7 +131,7 @@
 								
 								<body>
 								<h1>Error in Application.cfc event: #arguments.eventName#</h1>
-								<cfdump var="#cgi#" format="simple">
+								<cfdump var="#cgi#">
 								<br />
 								<br />
 								
@@ -158,8 +158,8 @@
 		<!--- </cfif> --->
 		<cfcatch type="any">
 			<cfheader statuscode="500" statustext="Internal Server Error">
-			<cfdump var="#cfcatch#" format="simple">
-			<cfdump var="#arguments#" format="simple">
+			<cfdump var="#cfcatch#">
+			<cfdump var="#arguments#">
 			<cfabort>
 		</cfcatch>
 	</cftry>
@@ -175,7 +175,8 @@
 	<cfargument name="nodumpcode" type="boolean" required="no" default="#false#">
 	<cfargument name="hideKeys" type="string" required="no" default="">
     <cftry>
-	<cfdump var="#arguments.varName#" hide="#arguments.hideKeys#" showudfs="no" format="simple" label="#arguments.label#">
+	<cfdump var="#arguments.varName#" >
+		<!--- hide="#arguments.hideKeys#" showudfs="no" label="#arguments.label#" --->
     <cfcatch type="any"></cfcatch>
     </cftry>
 </cffunction>
@@ -477,7 +478,7 @@ StructDelete(request, 'cfdumpinited');
  
 <cfset testServerFlagged=false>
 <cfif isDefined('request.zos.testDomain') EQ false>
-	<cfdump var="#arguments.cferror#" format="simple">
+	<cfdump var="#arguments.cferror#">
     <cfabort>
 </cfif>
 <cfif request.zOS.CGI.http_host contains '.'&request.zos.testDomain>
@@ -492,7 +493,7 @@ StructDelete(request, 'cfdumpinited');
 
 <cfif isDefined('request.zautoformsql')>
 <h2>Request.zAutoFormSQL</h2>
-<cfdump var="#request.zautoformsql#" format="simple"><br><br>
+<cfdump var="#request.zautoformsql#"><br><br>
 </cfif>
 <cfif isDefined('cookie') and StructCount(cookie) NEQ 0>
 <h2>COOKIE Variables</h2>

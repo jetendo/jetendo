@@ -2263,6 +2263,7 @@ this.app_id=10;
 				ts.size="2048x1070";
 				ts.crop=0; 
 				ts.offset=0; 
+				ts.defaultAltText=qArticle.blog_title;
 				ts.pregenerate=true;
 				ts.output=false; 
 				ts.limit=1; 

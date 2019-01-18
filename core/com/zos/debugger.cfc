@@ -384,11 +384,11 @@
       <br />
       <br />
     </cfif>
-    <cfif StructCount(Request) NEQ 0>
+    <!--- <cfif StructCount(Request) NEQ 0>
       <cfdump var="#request#" showudfs="no" hide="zos,_______mysession" label="REQUEST">
      <br />
       <br />
-    </cfif>
+    </cfif> --->
     <cfscript>
 				writeoutput(request.tempZdump(cgi,'CGI',false));
 				</cfscript>
