@@ -370,8 +370,8 @@
 	}
 	if(application.zcore.functions.zso(form, 'convertLinks') EQ 1){
 		form.content_text=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name, form.content_text);
-		form.content_text2&"_2"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name&"_2", form.content_text2);
-		form.content_text3&"_3"=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name&"_3", form.content_text3);
+		form.content_text2=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name, form.content_text2);
+		form.content_text3=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name, form.content_text3);
 		form.content_summary=application.zcore.functions.zProcessAndStoreLinksInHTML(form.content_name, form.content_summary);
 	}
 	

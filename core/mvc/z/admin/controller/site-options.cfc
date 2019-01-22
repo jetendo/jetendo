@@ -703,7 +703,7 @@
 		application.zcore.functions.zRedirect("/z/admin/site-options/#formaction#?site_option_id=#form.site_option_id#&zsid=#request.zsid#"&returnAppendString);	
 	}
 	ts=structnew();
-	ts.table="site_option";
+	ts.table="site_option"; 
 	ts.struct=form;
 	ts.datasource=request.zos.zcoreDatasource;
 	if(form.method EQ 'insert'){ 
