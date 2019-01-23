@@ -54,6 +54,10 @@
 		}
 		application.zcore.requestCacheIndex++;
 		request.zos.trackingrequestCacheIndex=(application.zcore.requestcacheindex);
+		// force non-zero without a lock because it doesn't really matter about true synchronization here
+		if(request.zos.trackingrequestCacheIndex EQ 0){
+			request.zos.trackingrequestCacheIndex=1;
+		}
 		tempVar=structnew();
 		tempVar.formvars=structnew();//duplicate(form);
 		tempVar.scriptName=request.zos.cgi.SCRIPT_NAME;

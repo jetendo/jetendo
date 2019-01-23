@@ -417,11 +417,11 @@
 	inquiries.inquiries_status_id = inquiries_status.inquiries_status_id and 
 	inquiries_deleted = #db.param(0)# and 
 	inquiries_status_deleted = #db.param(0)# and 
-	inquiries.inquiries_status_id NOT IN (#db.trustedSQL("4,5,0,7")#) and 
+	inquiries.inquiries_status_id NOT IN (#db.trustedSQL("4,5,0")#) and 
 	 inquiries_id = #db.param(form.inquiries_id)#  ";
 	qinquiry=db.execute("qinquiry"); 
-	if(qinquiry.recordcount EQ 0){		
-		request.zsid = application.zcore.status.setStatus(Request.zsid, "This inquiry doesn't exist.", false,true);
+	if(qinquiry.recordcount EQ 0){		 
+		request.zsid = application.zcore.status.setStatus(Request.zsid, "This inquiry doesn't exist or is already closed.", false,true);
 		application.zcore.functions.zRedirect("/z/inquiries/admin/manage-inquiries/index?zPageId=#form.zPageId#&zsid="&request.zsid);
 	}else{
 		application.zcore.functions.zQueryToStruct(qinquiry);
