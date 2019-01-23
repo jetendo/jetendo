@@ -1127,7 +1127,9 @@ not needed
 	
 	var qU="";
 	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
-		throw(arguments.url);
+		if(request.zos.isTestServer or (not request.zos.isTestServer and request.zos.isDeveloper)){
+			throw(arguments.url);
+		}
 	}
 	arguments.url=replace(replace(arguments.url, chr(10), '', 'all'), chr(13), '', 'all');
 	</cfscript>
@@ -1162,7 +1164,9 @@ not needed
 	
 	var qU="";
 	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
-		throw(arguments.url);
+		if(request.zos.isTestServer or (not request.zos.isTestServer and request.zos.isDeveloper)){
+			throw(arguments.url);
+		}
 	}
 	arguments.url=replace(replace(arguments.url, chr(10), '', 'all'), chr(13), '', 'all');
 	if(trim(arguments.url) EQ ""){
@@ -1192,7 +1196,9 @@ not needed
 	<cfargument name="url" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(application, 'zEnableThrowOnRedirect') and application.zEnableThrowOnRedirect){
-		throw(arguments.url);
+		if(request.zos.isTestServer or (not request.zos.isTestServer and request.zos.isDeveloper)){
+			throw(arguments.url);
+		}
 	}
 	application.zcore.functions.zRedirect(arguments.url);
 	</cfscript>
