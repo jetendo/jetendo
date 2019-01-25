@@ -247,7 +247,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 			writedump(arguments.configStruct.arrParam);	
 		}
 		s=arguments.configStruct.dbQuery.getLastSQL();
-		throw(errorMessage&"<br />Current SQL Statement:<br />"&arguments.configStruct.sql&"<br />Parameters:<br />"&paramDump&"<br /><br />Previous SQL Statement:<br />"&s.sql&"<br />Last Query Name:"&s.name, "database");
+		throw("#errorMessage#<br />Current SQL Statement:<br />#arguments.configStruct.sql#<br />Parameters:<br />#paramDump#<br /><br />Previous SQL Statement:<br />#s.sql#<br />Last Query Name:#s.name#");
 		</cfscript>
 	</cffunction>
 	

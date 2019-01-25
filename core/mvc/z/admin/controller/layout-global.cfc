@@ -538,7 +538,7 @@
 					fullmarginTemp=dataStruct.columnGapSidePercent;
 					fullwidth=(fullpercent*n2)-dataStruct.columnGapSidePercent;
 					fullmaxWidth=100;  
-					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#{ float:left; margin-left:#numberformat(fullmargin, '_.___')#%; margin-right:#numberformat(fullmargin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; max-width:#fullmaxWidth#%; width:#numberformat(fullwidth, '_.___')#%; }");
+					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#{ float:left; margin-left:#numberformat(fullmargin, '_.___')#%; margin-right:#numberformat(fullmargin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-width:auto; max-width:#fullmaxWidth#%; width:#numberformat(fullwidth, '_.___')#%; }");
 				}  
 				// offset classes
 				if(isSingleColumn){

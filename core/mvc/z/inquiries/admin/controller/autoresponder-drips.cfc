@@ -1168,7 +1168,7 @@
 				'inquiries_autoresponder_drip_log_status': 'alreadysubscribed'
 			};
 
-			this.logEmailStatus( logStruct );
+			logEmailStatus( logStruct );
 
 			return;
 		}
@@ -1210,7 +1210,7 @@
 			'inquiries_autoresponder_drip_log_status': 'subscribed'
 		};
 
-		this.logEmailStatus( logStruct );
+		logEmailStatus( logStruct );
 	</cfscript>
 </cffunction>
 
@@ -1347,7 +1347,7 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="logEmailStatus" localmode="modern" access="private">
+<cffunction name="logEmailStatus" localmode="modern" access="public">
 	<cfargument name="logStruct" type="struct" required="yes">
 	<cfscript>
 		logStruct = arguments.logStruct;
