@@ -300,8 +300,7 @@
 	var selectStruct=0;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8");
-	application.zcore.functions.zStatusHandler(request.zsid);
-
+	application.zcore.functions.zStatusHandler(request.zsid); 
 	</cfscript>
 	<cfsavecontent variable="local.theMeta"> 
 		<style type="text/css">
@@ -322,6 +321,8 @@
 	<cfelse>
 	
 		  <div class="zdashboard-panel">
+		  	<h3>Debugging</h3>
+		  	<p><a href="/z/server-manager/admin/debug-log/debugger/index">CFML Debugging Logs</a></p>
 			  <h3>Customize</h3>
 			<p><a href="/z/server-manager/admin/white-label/index" target="_blank">White Label Settings</a></p>
 			<p><a href="/z/server-manager/admin/mobile-conversion/index">Mobile Conversion</a></p>
