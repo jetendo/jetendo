@@ -77,16 +77,6 @@
 		</cfif>
 	<cfscript> 
 	savecontent variable="ts44"{
-		if(application.zcore.user.checkGroupAccess("user")){
-			// if site_id doesn't match, the parent or global token was used
-			if(structkeyexists(cookie, 'ztoken')){
-				echo("var zTokenLogin=true;"); 
-			}else{
-				echo("var zTokenLogin=false;");
-			}
-		}else{
-			echo("var zTokenLogin=false;");
-		}
 		if(request.zos.istestserver){
 			echo("var zThisIsTestServer=true;");
 		}else{

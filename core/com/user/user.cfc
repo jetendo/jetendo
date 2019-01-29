@@ -784,21 +784,20 @@ userCom.checkLogin(inputStruct);
 	StructDelete(request.zsession, "user");
 	StructDelete(request.zsession,'secureLogin');
 	structdelete(request.zsession,"ztoken");
+	structdelete(request.zsession, 'ztokenset');
 	structdelete(request.zsession,"inquiries_email");
 	structdelete(request.zsession,"inquiries_first_name");
 	structdelete(request.zsession,"inquiries_last_name");
 	structdelete(request.zsession,"inquiries_phone1");
 	structdelete(request.zsession,"zUserInquiryInfoLoaded");
 	
-	
-	structdelete(cookie, "zLoggedIn");
-	// don't delete so that expiration page can link correctly
-	//structdelete(cookie, "zIsAdmin");
-	structdelete(cookie, "zSessionExpireDate");
-	structdelete(cookie, "zparentlogincheck");
-	structdelete(cookie, "zautologin");
-	structdelete(cookie, "zNoCache");
+	// don't delete zIsAdmin so that expiration page can link correctly
 	</cfscript>
+	<cfcookie name="zLoggedIn" value="" expires="now">
+	<cfcookie name="zSessionExpireDate" value="" expires="now">
+	<cfcookie name="zparentlogincheck" value="" expires="now">
+	<cfcookie name="zautologin" value="" expires="now">
+	<cfcookie name="zNoCache" value="" expires="now"> 
 	<cfcookie name="z_user_id" value="" expires="now">
 	<cfcookie name="z_user_siteIdType" value="" expires="now">
 	<cfcookie name="z_user_key" value="" expires="now">
@@ -806,6 +805,7 @@ userCom.checkLogin(inputStruct);
 	<cfcookie name="z_tmppassword2" value="" expires="now">
 	<cfif not arguments.retainToken>
 		<cfcookie name="ztoken" value="" expires="now" httponly="true">	
+		<cfcookie name="ztokenset" value="" expires="now">
 	</cfif>
 	<cfcookie name="inquiries_email" value="" expires="now">
 	<cfcookie name="inquiries_first_name" value="" expires="now">
@@ -1438,6 +1438,11 @@ formString = userCom.loginForm(inputStruct);
 	ts9.value=request.zsession.ztoken;
 	ts9.expires="never";
 	application.zcore.functions.zcookie(ts9);
+	ts9=structnew();
+	ts9.name="ztokenset";
+	ts9.value="1";
+	ts9.expires="never";
+	application.zcore.functions.zcookie(ts9);
 	</cfscript>
 </cffunction>
 
@@ -1475,6 +1480,11 @@ formString = userCom.loginForm(inputStruct);
 			ts9.name="ztoken";
 			ts9.httponly=true;
 			ts9.value=request.zsession.ztoken;
+			ts9.expires="never";
+			application.zcore.functions.zcookie(ts9);
+			ts9=structnew();
+			ts9.name="ztokenset";
+			ts9.value="1";
 			ts9.expires="never";
 			application.zcore.functions.zcookie(ts9);
 			return false;
@@ -1515,6 +1525,11 @@ formString = userCom.loginForm(inputStruct);
 		ts9.httponly=true;
 		ts9.expires="now";
 		application.zcore.functions.zcookie(ts9);
+		ts9=structnew();
+		ts9.name="ztokenset";
+		ts9.value="";
+		ts9.expires="now";
+		application.zcore.functions.zcookie(ts9);
 		return false;
 	}
 	form.zusername=qUserToken.user_token_username;
@@ -1537,6 +1552,11 @@ formString = userCom.loginForm(inputStruct);
 		ts9.name="ztoken";
 		ts9.value="";
 		ts9.httponly=true;
+		ts9.expires="now";
+		application.zcore.functions.zcookie(ts9);
+		ts9=structnew();
+		ts9.name="ztokenset";
+		ts9.value="";
 		ts9.expires="now";
 		application.zcore.functions.zcookie(ts9);
 		setLoginLog(0);
@@ -1600,6 +1620,11 @@ formString = userCom.loginForm(inputStruct);
 			ts9.expires="never";
 			ts9.httponly=true;
 			application.zcore.functions.zcookie(ts9);
+			ts9=structnew();
+			ts9.name="ztokenset";
+			ts9.value="1";
+			ts9.expires="never";
+			application.zcore.functions.zcookie(ts9);
 			if(debug){
 				abort;	
 			}
@@ -1609,6 +1634,11 @@ formString = userCom.loginForm(inputStruct);
 			ts9.name="ztoken";
 			ts9.value="";
 			ts9.httponly=true;
+			ts9.expires="now";
+			application.zcore.functions.zcookie(ts9);
+			ts9=structnew();
+			ts9.name="ztokenset";
+			ts9.value="";
 			ts9.expires="now";
 			application.zcore.functions.zcookie(ts9);
 			if(debug){ 
@@ -1635,6 +1665,11 @@ formString = userCom.loginForm(inputStruct);
 	ts9.name="ztoken";
 	ts9.value="";
 	ts9.httponly=true;
+	ts9.expires="now";
+	application.zcore.functions.zcookie(ts9);
+	ts9=structnew();
+	ts9.name="ztokenset";
+	ts9.value="";
 	ts9.expires="now";
 	application.zcore.functions.zcookie(ts9);
 	if(debug){

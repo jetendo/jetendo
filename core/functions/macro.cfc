@@ -1549,6 +1549,7 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 				var mapDefaultZoom = 1; 
 				function initialize_map() {
 					map = new ol.Map({
+  						interactions: ol.interaction.defaults({mouseWheelZoom:false}),
 						target: "zOpenLayerMap#request.zos.openLayerMapIndex#",
 						layers: [
 							new ol.layer.Tile({

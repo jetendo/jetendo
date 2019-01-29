@@ -6,19 +6,46 @@ var zLoggedIn=false;
 		if(!zIsLoggedIn()){
 			return false;
 		}
-
 		var d=zGetCookie("ZISADMIN");
 		if(d === "1"){
 			return true;
 		}else{
 			return false;
 		}
-	}
+	} 
 	var showingIdleLogoutWarning=false;
-
+	var lastExtensionDate=new Date();
 	function zIsLoggedIn(){
 		if(typeof window.zGetCookie == "undefined"){
 			return false;
+		}
+		var tokenSet=zGetCookie("ZTOKENSET");
+		if(tokenSet==="1"){
+			var nowDate=new Date();
+			millisecondsSinceExtension=nowDate-lastExtensionDate;
+			if(millisecondsSinceExtension < 60000*15){
+				return true;
+			}
+			// auto extend session every 15 minutes to make token sessions last forever
+			var obj={
+				id:"zAutoContinueSession",
+				method:"get",
+				callback:function(r){
+					var r=JSON.parse(r);
+					if(r.success){
+						console.log('Session extended automatically');
+						lastExtensionDate=nowDate;
+					}else{
+						window.location.replace('/z/user/home/index?zlogout=1');
+					}
+				},
+				errorCallback:function(){ 
+					console.log('Failed to extend session automatically'); 
+				},
+				url:"/z/user/home/extendSession"
+			}; 
+			zAjax(obj);
+			return true;
 		}
 		var loggedIn=zGetCookie("ZLOGGEDIN");
 		var d=zGetCookie("ZSESSIONEXPIREDATE");
@@ -33,62 +60,40 @@ var zLoggedIn=false;
 				zDeleteCookie("ZSESSIONEXPIREDATE");
 				return false;
 			}else{
-				
 				var secondsBeforeLogout=130;
 				if(n-newDate<=secondsBeforeLogout*1000){ 
-					if(typeof zTokenLogin != "undefined" && zTokenLogin){
-						// session lasts forever
-						var obj={
-							id:"zContinueSession",
-							method:"get",
-							callback:function(r){
-								var r=JSON.parse(r);
-								if(r.success){
-									console.log('Session extended automatically');
-								}else{
-									window.location.replace('/z/user/home/index?zlogout=1');
-								}
-							},
-							errorCallback:function(){ 
-								console.log('Failed to extend session automatically'); 
-							},
-							url:"/z/user/home/extendSession"
-						}; 
-						zAjax(obj);
-					}else{
-						if(!showingIdleLogoutWarning){
-							showingIdleLogoutWarning=true;
-							var modalContent1='<h2>Idle Session Warning</h2><p>You will be logged out in <span id="zIdleWarningDiv1"></span> seconds.</p><p><strong><a href="##" id="zIdleWarningButton" style="border-radius:5px; padding:5px; padding-left:10px; padding-right:10px; text-decoration:none; background-color:#666; color:#FFF;">Continue session</a> <a href="##" id="zIdleLogoutButton" style="border-radius:5px; padding:5px; padding-left:10px; padding-right:10px; text-decoration:none; background-color:#666; color:#FFF;">Log Out</a></strong></p>';
-							zShowModal(modalContent1,{'width':390,'height':200, 'disableClose':true});
-							
-							$("#zIdleLogoutButton").bind("click", function(e){
-								e.preventDefault();
-								window.location.replace('/z/user/home/index?zlogout=1');
-							});
-							$("#zIdleWarningButton").bind("click", function(e){
-								e.preventDefault();
+					if(!showingIdleLogoutWarning){
+						showingIdleLogoutWarning=true;
+						var modalContent1='<h2>Idle Session Warning</h2><p>You will be logged out in <span id="zIdleWarningDiv1"></span> seconds.</p><p><strong><a href="##" id="zIdleWarningButton" style="border-radius:5px; padding:5px; padding-left:10px; padding-right:10px; text-decoration:none; background-color:#666; color:#FFF;">Continue session</a> <a href="##" id="zIdleLogoutButton" style="border-radius:5px; padding:5px; padding-left:10px; padding-right:10px; text-decoration:none; background-color:#666; color:#FFF;">Log Out</a></strong></p>';
+						zShowModal(modalContent1,{'width':390,'height':200, 'disableClose':true});
+						
+						$("#zIdleLogoutButton").bind("click", function(e){
+							e.preventDefault();
+							window.location.replace('/z/user/home/index?zlogout=1');
+						});
+						$("#zIdleWarningButton").bind("click", function(e){
+							e.preventDefault();
 
-								var obj={
-									id:"zContinueSession",
-									method:"get",
-									callback:function(r){
-										var r=JSON.parse(r);
-										if(r.success){
-											console.log('Session extended'); 
-										}else{
-											window.location.replace('/z/user/home/index?zlogout=1');
-										}
-										showingIdleLogoutWarning=false;
-										zCloseModal();
-									},
-									errorCallback:function(){ alert('Unknown error occurred'); },
-									url:"/z/user/home/extendSession"
-								}; 
-								zAjax(obj);
-								showingIdleLogoutWarning=false;
-								zCloseModal();
-							});
-						}
+							var obj={
+								id:"zContinueSession",
+								method:"get",
+								callback:function(r){
+									var r=JSON.parse(r);
+									if(r.success){
+										console.log('Session extended'); 
+									}else{
+										window.location.replace('/z/user/home/index?zlogout=1');
+									}
+									showingIdleLogoutWarning=false;
+									zCloseModal();
+								},
+								errorCallback:function(){ alert('Unknown error occurred'); },
+								url:"/z/user/home/extendSession"
+							}; 
+							zAjax(obj);
+							showingIdleLogoutWarning=false;
+							zCloseModal();
+						});
 					}
 					$("#zIdleWarningDiv1").html(Math.round((n-newDate)/1000));
 				}else{
@@ -112,9 +117,6 @@ var zLoggedIn=false;
 	var zLoggedInTimeoutID=false;
 
 	zArrDeferredFunctions.push(function(){
-		/*if(zIsTestServer() || zIsDeveloper()){
-			return;
-		}*/
 		zLoggedInTimeoutID=setInterval(function(){
 			zLoggedIn=zIsLoggedIn(); 
 			if((typeof zUserLoggedIn != "undefined" || zWasLoggedIn) && !zLoggedIn){
@@ -144,6 +146,7 @@ var zLoggedIn=false;
 		},
 		enterPressed:false,
 		lastKeyPressed:0,
+		
 		loginCallback:function(r){
 			var json=eval('(' + r + ')');
 			// supplement ip developer security with cookie to identify a single computer from the IP.
@@ -151,7 +154,7 @@ var zLoggedIn=false;
 				// cookie expires one year in future
 				zSetCookie({key:"ZDEVELOPER",value:json.developer,futureSeconds:31536000,enableSubdomains:false}); 
 			}
-			if(json.success){
+			if((typeof json.success != "undefined" && json.success) || (typeof json.SUCCESS != "undefined" && json.SUCCESS)){
 				zLogin.zShowLoginError("Logging in...");
 				var d1=window.parent.document.getElementById("zRepostForm");
 				if(d1){
