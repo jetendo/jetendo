@@ -10,10 +10,7 @@
 	WHERE event_id= #db.param(application.zcore.functions.zso(form,'event_id'))# and 
 	event_deleted = #db.param(0)# and
 	site_id = #db.param(request.zos.globals.id)#";
-
-	if(structkeyexists(form, 'return')){
-		StructInsert(request.zsession, "event_return"&form.event_id, request.zos.CGI.HTTP_REFERER, true);		
-	}
+ 
 	form.returnJson=application.zcore.functions.zso(form, 'returnJson', true, 0);
 	qCheck=db.execute("qCheck");
 	
@@ -50,18 +47,12 @@
 		eventCom=application.zcore.app.getAppCFC("event");
 		eventCom.searchIndexDeleteEvent(form.event_id);
 
-		if(structkeyexists(request.zsession, 'event_return'&form.event_id)){
-			a=request.zsession['event_return'&form.event_id];
-			structdelete(request.zsession, 'event_return'&form.event_id);
-			application.zcore.functions.zRedirect(a);
+		if(form.returnJson EQ 1){
+			application.zcore.functions.zReturnJson({success:true});
 		}else{
-			if(form.returnJson EQ 1){
-				application.zcore.functions.zReturnJson({success:true});
-			}else{
-				application.zcore.status.setStatus(Request.zsid, 'Event deleted');
-				application.zcore.functions.zRedirect('/z/event/admin/manage-events/index?zsid=#request.zsid#');
-			}
-		}
+			application.zcore.status.setStatus(Request.zsid, 'Event deleted');
+			application.zcore.functions.zRedirect('/z/event/admin/manage-events/index?zsid=#request.zsid#');
+		} 
 		</cfscript>
 	<cfelse>
 		<div style="font-size:14px; font-weight:bold; text-align:center; "> Are you sure you want to delete this Event?<br />
@@ -508,8 +499,8 @@
 	if(application.zcore.functions.zso(form,'event_id') EQ ''){
 		form.event_id = -1;
 	}
-	if(structkeyexists(form, 'return')){
-		StructInsert(request.zsession, "event_return"&form.event_id, request.zos.CGI.HTTP_REFERER, true);		
+	if(structkeyexists(form, 'returnURL')){
+		request.zsession["event_return"&form.event_id]=form.returnURL;
 	}
 
 	db.sql="SELECT * FROM #db.table("event_calendar", request.zos.zcoreDatasource)#  

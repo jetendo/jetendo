@@ -130,8 +130,8 @@
 	}
 
 
-	writeoutput('<div style="display:block; float:left; width:100%;"  id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;return=1">'); 
-	application.zcore.template.prependTag('pagetitle','<span style="display:inline;" id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;return=1">');
+	writeoutput('<div style="display:block; float:left; width:100%;"  id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;returnURL=#request.zos.originalURL#">'); 
+	application.zcore.template.prependTag('pagetitle','<span style="display:inline;" id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;returnURL=#request.zos.originalURL#">');
 	application.zcore.template.appendTag('pagetitle','</span>');  
 
 	</cfscript>  
@@ -424,7 +424,7 @@
 	<div class="zEventView-buttons z-float">
 		<a href="#calendarLink#" class="zEventView1-backToCalendar">Back To Calendar</a>
 		<cfif application.zcore.user.checkGroupAccess("member") and application.zcore.adminSecurityFilter.checkFeatureAccess("Events", true)>
-			<a href="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;return=1" class="zNoContentTransition zEventView1-backToCalendar" style="margin-left:10px;">Edit</a>
+			<a href="/z/event/admin/manage-events/edit?event_id=#struct.event_id#&amp;returnURL=#request.zos.originalURL#" class="zNoContentTransition zEventView1-backToCalendar" style="margin-left:10px;">Edit</a>
 		</cfif>
 	</div>
 	
