@@ -141,6 +141,20 @@
 	ts=structnew("sync");
 	timeLimit=0; 
 	sleepTime=500;
+
+	query name="qSite" datasource="#request.zos.zCoreDatasource#"{
+		echo("select * from site WHERE 
+		site_id='#id#' and 
+		site_active=1 and 
+		site_deleted=0");
+	} 
+	if(qSite.recordcount EQ 0){
+		structdelete(application.zcoreSitesPriorityLoadStruct, id);
+		structdelete(application.zcoreSitesNotLoaded, id);
+		structdelete(application.zcoreSitesNotListingLoaded, id);
+		echo(id&" is not an active site and will not be loaded.<br>");
+		return;
+	}
 	while(not structkeyexists(application, 'zcore') or not structkeyexists(application.zcore, 'serverglobals')){
 		sleep(sleepTime);
 		timeLimit+=sleepTime;
@@ -173,6 +187,13 @@
 
 	structappend(ts.globals, application.zcore.siteGlobals[id],true);
 	
+	if(not structkeyexists(ts.globals, "id")){
+		structdelete(application.zcoreSitesPriorityLoadStruct, id);
+		structdelete(application.zcoreSitesNotLoaded, id);
+		structdelete(application.zcoreSitesNotListingLoaded, id);
+		echo(id&" is broken (missing id in cache) and will not be loaded.<br>");
+		return;
+	}
 	ts.site_id=id;
 
 	// temporarily force all the site globals so zGetSite can work correctly.
@@ -180,7 +201,13 @@
 	setSiteRequestGlobals(id);
 
 	// zGetSite MIGHT require the same domain to have been called
-	ts=application.zcore.functions.zGetSite(ts);
+	try{
+		ts=application.zcore.functions.zGetSite(ts);
+	}catch(Any e){
+		echo("<h2>Error loading site_id:#id#</h2>");
+		writedump(e);
+		abort;
+	}
 	arrayClear(request.zos.arrQueryLog);
 	application.siteStruct[id]=ts; 
 
