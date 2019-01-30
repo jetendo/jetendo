@@ -22,7 +22,7 @@ var zLoggedIn=false;
 		var tokenSet=zGetCookie("ZTOKENSET");
 		if(tokenSet==="1"){
 			var nowDate=new Date();
-			millisecondsSinceExtension=nowDate-lastExtensionDate;
+			var millisecondsSinceExtension=nowDate-lastExtensionDate;
 			if(millisecondsSinceExtension < 60000*15){
 				return true;
 			}
