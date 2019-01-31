@@ -31,12 +31,16 @@ var zLoggedIn=false;
 				id:"zAutoContinueSession",
 				method:"get",
 				callback:function(r){
-					var r=JSON.parse(r);
-					if(r.success){
-						console.log('Session extended automatically');
-						lastExtensionDate=nowDate;
-					}else{
-						window.location.replace('/z/user/home/index?zlogout=1');
+					try{
+						var r=JSON.parse(r);
+						if(r.success){
+							console.log('Session extended automatically');
+							lastExtensionDate=nowDate;
+						}else{
+							window.location.replace('/z/user/home/index?zlogout=1');
+						}
+					}catch(e){
+						// ignore error
 					}
 				},
 				errorCallback:function(){ 

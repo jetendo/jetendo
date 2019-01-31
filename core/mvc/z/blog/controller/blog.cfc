@@ -2759,10 +2759,6 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 			}
 			db.sql&=" blog_x_category.blog_category_id NOT IN (#db.trustedSQL(arrayToList(arrId, ","))#) and ";
 		} 
-		if(arguments.displayStruct.randomize){
-			startId=randrange(1, qCount.count-arguments.displayCount);
-			db.sql&=" blog.blog_id >=#db.param(startId)# and ";
-		}
 		if(arguments.author CONTAINS "|"){
 			user_id=listGetAt(arguments.author, 1, "|");
 			user_id_siteIDType=listGetAt(arguments.author, 2, "|");
@@ -2770,13 +2766,14 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		}
 		db.sql&=" blog_status <> #db.param(2)#  
 		group by blog.blog_id ";
-		if(not arguments.displayStruct.randomize){  
+		if(arguments.displayStruct.randomize){
+			startId=randrange(1, qCount.count-arguments.displayCount);
+		}else{
+			startId=arguments.displayStruct.offset;
 			db.sql&=" order by blog_sticky desc, blog_datetime desc"; 
 		}
-		db.sql&=" LIMIT #db.param(arguments.displayStruct.offset)#,#db.param(arguments.displayCount)#";
-		qList=db.execute("qList"); 
-		
-
+		db.sql&=" LIMIT #db.param(startId)#,#db.param(arguments.displayCount)#";
+		qList=db.execute("qList");  
 		processArticleIncludeQuery(qList, arguments.displayStruct);
 		</cfscript>
 	</cfif>
