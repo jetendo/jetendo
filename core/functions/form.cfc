@@ -2753,10 +2753,11 @@ echo('
 </cffunction>
     
     
-    
-<cffunction name="zCountryAbbrToFullName" localmode="modern" returntype="any" output="false">
-	<cfargument name="country_code" type="string" required="no" default="">
+<cffunction name="zGetCountryMap" localmode="modern" returntype="any" output="false">
 	<cfscript>
+	if(structkeyexists(request.zos, 'countryMap')){
+		return request.zos.countryMap;
+	}
 	countryMap={};
 	countryMap["US"]="United States";
 	countryMap["RS"]="Serbia";
@@ -3011,9 +3012,53 @@ echo('
 	countryMap["YU"]="Yugoslavia";
 	countryMap["ZM"]="Zambia";
 	countryMap["ZW"]="Zimbabwe";
+	request.zos.countryMap=countryMap;
+	return countryMap;
+	</cfscript>
+</cffunction>
+
+<cffunction name="zGetCountryNameMap" localmode="modern">
+	<cfscript>
+	if(structkeyexists(request.zos, 'countryNameMap')){
+		return request.zos.countryNameMap;
+	}
+	countryMap=zGetCountryMap();
+	countryNameMap={};
+	for(abbr in countryMap){
+		countryNameMap[countryMap[abbr]]=abbr;
+	}
+	request.zos.countryNameMap=countryNameMap;
+	return countryNameMap;
+	</cfscript>
+</cffunction>
+
+<cffunction name="zCountryNameToAbbr" localmode="modern" returntype="any" output="false">
+	<cfargument name="country_name" type="string" required="yes">
+	<cfargument name="throwIfMissing" type="boolean" required="no" default="#false#">
+	<cfscript>
+	countryNameMap=zGetCountryNameMap();
+	if(structkeyexists(countryNameMap, arguments.country_name)){
+		return countryNameMap[arguments.country_name];
+	}else{
+		if(arguments.throwIfMissing){
+			throw("Country name is not valid: #arguments.country_name#");
+		}
+		return arguments.country_name;
+	}
+	</cfscript>
+</cffunction>
+    
+<cffunction name="zCountryAbbrToFullName" localmode="modern" returntype="any" output="false">
+	<cfargument name="country_code" type="string" required="yes">
+	<cfargument name="throwIfMissing" type="boolean" required="no" default="#false#">
+	<cfscript>
+	countryMap=zGetCountryMap();
 	if(structkeyexists(countryMap, arguments.country_code)){
 		return countryMap[arguments.country_code];
 	}else{
+		if(arguments.throwIfMissing){
+			throw("Country code is not valid: #arguments.country_code#");
+		}
 		return arguments.country_code;
 	}
 	</cfscript>
