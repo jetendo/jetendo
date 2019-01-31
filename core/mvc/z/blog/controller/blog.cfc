@@ -2767,7 +2767,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 		db.sql&=" blog_status <> #db.param(2)#  
 		group by blog.blog_id ";
 		if(arguments.displayStruct.randomize){
-			startId=randrange(1, qCount.count-arguments.displayCount);
+			startId=max(0, randrange(1, qCount.count-arguments.displayCount));
 		}else{
 			startId=arguments.displayStruct.offset;
 			db.sql&=" order by blog_sticky desc, blog_datetime desc"; 
