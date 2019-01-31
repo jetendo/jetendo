@@ -212,9 +212,9 @@
 					var typeId=sog.optionLookup[row.groupSetOptionId].type;
 					if(typeId EQ 2){
 						if(row.groupSetValue EQ ""){
-							local.tempValue="";
+							tempValue="";
 						}else{
-							local.tempValue='<div class="zEditorHTML">'&row.groupSetValue&'</div>';
+							tempValue='<div class="zEditorHTML">'&row.groupSetValue&'</div>';
 						}
 					}else if(typeId EQ 3 or typeId EQ 9){
 						if(row.groupSetValue NEQ "" and row.groupSetValue NEQ "0"){
@@ -225,19 +225,19 @@
 								tempValue="/zupload/site-options/"&row.groupSetValue;
 							}
 						}else{
-							local.tempValue="";
+							tempValue="";
 						}
 					}else{
-						local.tempValue=row.groupSetValue;
+						tempValue=row.groupSetValue;
 					}
-					sog.optionGroupSetId[id&"_f"&row.groupSetOptionId]=local.tempValue; 
+					sog.optionGroupSetId[id&"_f"&row.groupSetOptionId]=tempValue; 
 					if(typeId EQ 2){
-						sog.optionGroupSetId[id&"_f"&row.groupSetOptionId]=local.tempValue;
+						sog.optionGroupSetId[id&"_f"&row.groupSetOptionId]=tempValue;
 					}else if(typeId EQ 3){
 						if(row.groupSetOriginal NEQ ""){
 							sog.optionGroupSetId["__original "&id&"_f"&row.groupSetOptionId]="/zupload/site-options/"&row.groupSetOriginal;
 						}else{
-							sog.optionGroupSetId["__original "&id&"_f"&row.groupSetOptionId]=local.tempValue;
+							sog.optionGroupSetId["__original "&id&"_f"&row.groupSetOptionId]=tempValue;
 						}
 					}
 				}
@@ -296,26 +296,26 @@
 			}
 			t9=sog;
 			if(structkeyexists(t9.optionGroupDefaults, row.site_option_group_id)){
-				local.defaultStruct=t9.optionGroupDefaults[row.site_option_group_id];
+				defaultStruct=t9.optionGroupDefaults[row.site_option_group_id];
 			}else{
-				local.defaultStruct={};
+				defaultStruct={};
 			}
 			if(structkeyexists(t9.optionGroupSetId, ts.__setId&"_groupId")){
 				groupId=t9.optionGroupSetId[ts.__setId&"_groupId"];
 				if(structkeyexists(t9.optionGroupFieldLookup, groupId)){
-					local.fieldStruct=t9.optionGroupFieldLookup[groupId];
+					fieldStruct=t9.optionGroupFieldLookup[groupId];
 				
-					for(local.i2 in local.fieldStruct){
-						local.cf=t9.optionLookup[local.i2];
-						if(structkeyexists(t9.optionGroupSetId, "__original "&ts.__setId&"_f"&local.i2)){
-							ts["__original "&local.cf.name]=t9.optionGroupSetId["__original "&ts.__setId&"_f"&local.i2];
+					for(i2 in fieldStruct){
+						cf=t9.optionLookup[i2];
+						if(structkeyexists(t9.optionGroupSetId, "__original "&ts.__setId&"_f"&i2)){
+							ts["__original "&cf.name]=t9.optionGroupSetId["__original "&ts.__setId&"_f"&i2];
 						}
-						if(structkeyexists(t9.optionGroupSetId, ts.__setId&"_f"&local.i2)){
-							ts[local.cf.name]=t9.optionGroupSetId[ts.__setId&"_f"&local.i2];
-						}else if(structkeyexists(local.defaultStruct, local.cf.name)){
-							ts[local.cf.name]=local.defaultStruct[local.cf.name];
+						if(structkeyexists(t9.optionGroupSetId, ts.__setId&"_f"&i2)){
+							ts[cf.name]=t9.optionGroupSetId[ts.__setId&"_f"&i2];
+						}else if(structkeyexists(defaultStruct, cf.name)){
+							ts[cf.name]=defaultStruct[cf.name];
 						}else{
-							ts[local.cf.name]="";
+							ts[cf.name]="";
 						}
 					}
 				}
@@ -377,37 +377,37 @@
 		tempStruct.site_option_edit_enabled[row.site_option_name]=row.site_option_edit_enabled;
 		if(row.site_option_type_id EQ 1 and row.site_option_line_breaks EQ 1){
 			if(row.site_x_option_id EQ ""){
-				local.c1=application.zcore.functions.zparagraphformat(row.site_option_default_value);
+				c1=application.zcore.functions.zparagraphformat(row.site_option_default_value);
 			}else{
-				local.c1=application.zcore.functions.zparagraphformat(row.site_x_option_value);
+				c1=application.zcore.functions.zparagraphformat(row.site_x_option_value);
 			}
 		}else{
 			if(row.site_x_option_id EQ ""){
-				local.c1=row.site_option_default_value;
+				c1=row.site_option_default_value;
 			}else{
-				local.c1=row.site_x_option_value;
+				c1=row.site_x_option_value;
 			}
-			if(local.c1 NEQ "" and local.c1 NEQ "0" and (row.site_option_type_id EQ 3 or row.site_option_type_id EQ 9)){
-				local.c1="/zupload/site-options/"&local.c1;
+			if(c1 NEQ "" and c1 NEQ "0" and (row.site_option_type_id EQ 3 or row.site_option_type_id EQ 9)){
+				c1="/zupload/site-options/"&c1;
 			}
 		}
 		if(row.site_option_app_id NEQ 0){
 			if(structkeyexists(tempStruct.site_option_app, row.site_option_app_id) EQ false){
 				tempStruct.site_option_app[row.site_option_app_id]=structnew();
 			}
-			tempStruct.site_option_app[row.site_option_app_id][row.site_option_name]=local.c1;
+			tempStruct.site_option_app[row.site_option_app_id][row.site_option_name]=c1;
 			if(row.site_x_option_original NEQ ""){
 				tempStruct.site_option_app[row.site_option_app_id]["__original "&row.site_option_name]="/zupload/site-options/"&row.site_x_option_original;
 			}else{
-				tempStruct.site_option_app[row.site_option_app_id]["__original "&row.site_option_name]=local.c1;
+				tempStruct.site_option_app[row.site_option_app_id]["__original "&row.site_option_name]=c1;
 			}
 		}else{
-			tempStruct.site_options[row.site_option_name]=local.c1;
+			tempStruct.site_options[row.site_option_name]=c1;
 			if(row.site_option_type_id EQ 3){
 				if(row.site_x_option_original NEQ ""){
 					tempStruct.site_options["__original "&row.site_option_name]="/zupload/site-options/"&row.site_x_option_original;
 				}else{
-					tempStruct.site_options["__original "&row.site_option_name]=local.c1;
+					tempStruct.site_options["__original "&row.site_option_name]=c1;
 				}
 			}
 		}
@@ -529,29 +529,29 @@
 	site_option_group_admin_app_only= #db.param(0)#
 	ORDER BY site_option_group_display_name ";
 	qoptionGroup=db.execute("qoptionGroup"); 
-	for(local.i=1;local.i LTE qoptionGroup.recordcount;local.i++){
+	for(i=1;i LTE qoptionGroup.recordcount;i++){
 		ts=structnew();
-		ts.featureName="Custom: "&qoptionGroup.site_option_group_display_name[local.i];
-		ts.link="/z/admin/site-options/manageGroup?site_option_group_id="&qoptionGroup.site_option_group_id[local.i];
+		ts.featureName="Custom: "&qoptionGroup.site_option_group_display_name[i];
+		ts.link="/z/admin/site-options/manageGroup?site_option_group_id="&qoptionGroup.site_option_group_id[i];
 		ts.children=structnew();
-		if(qoptionGroup.site_option_group_menu_name[local.i] EQ ""){
-			local.curMenu="Custom";
+		if(qoptionGroup.site_option_group_menu_name[i] EQ ""){
+			curMenu="Custom";
 		}else{
-			local.curMenu=qoptionGroup.site_option_group_menu_name[local.i];
+			curMenu=qoptionGroup.site_option_group_menu_name[i];
 		}
 		
-		if(structkeyexists(arguments.linkStruct, local.curMenu) EQ false){
-			arguments.linkStruct[local.curMenu]={
+		if(structkeyexists(arguments.linkStruct, curMenu) EQ false){
+			arguments.linkStruct[curMenu]={
 				featureName:"Custom",
 				link:"/z/admin/site-options/index",
 				children:{}
 			};
 		}
 		plural="(s)";
-		if(qOptionGroup.site_option_group_limit[local.i] EQ 1 or right(qOptionGroup.site_option_group_display_name[local.i], 1) EQ "s"){
+		if(qOptionGroup.site_option_group_limit[i] EQ 1 or right(qOptionGroup.site_option_group_display_name[i], 1) EQ "s"){
 			plural="";
 		}
-		arguments.linkStruct[local.curMenu].children[qoptionGroup.site_option_group_display_name[local.i]&plural]=ts;
+		arguments.linkStruct[curMenu].children[qoptionGroup.site_option_group_display_name[i]&plural]=ts;
 	}
 	return arguments.linkStruct;
 	</cfscript>
@@ -1718,16 +1718,16 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 	site_option_group_disable_site_map = #db.param(0)# and 
 	site_option_group.site_option_group_enable_unique_url = #db.param(1)# 
 	GROUP BY site_option_group.site_option_group_id";
-	local.qGroup=db.execute("qGroup");
-	for(row in local.qGroup){ 
-		local.arr1=optionGroupStruct(row.site_option_group_name, 0, row.site_id, {__groupId=0,__setId=0}, row.site_option_name);
-		for(i=1;i LTE arraylen(local.arr1);i++){
-			if(local.arr1[i].__approved EQ 1){
-				local.t2=StructNew();
-				local.t2.groupName=row.site_option_group_display_name;
-				local.t2.url=request.zos.currentHostName&local.arr1[i].__url;
-				local.t2.title=local.arr1[i].__title;
-				arrayappend(arguments.arrUrl,local.t2);
+	qGroup=db.execute("qGroup");
+	for(row in qGroup){ 
+		arr1=optionGroupStruct(row.site_option_group_name, 0, row.site_id, {__groupId=0,__setId=0}, row.site_option_name);
+		for(i=1;i LTE arraylen(arr1);i++){
+			if(arr1[i].__approved EQ 1){
+				t2=StructNew();
+				t2.groupName=row.site_option_group_display_name;
+				t2.url=request.zos.currentHostName&arr1[i].__url;
+				t2.title=arr1[i].__title;
+				arrayappend(arguments.arrUrl,t2);
 			}
 		}
 	}
@@ -1894,8 +1894,8 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 	<cfscript>
 	var db=request.zos.queryObject;
 	var ts=arguments.setOptionStruct;
-	local.arrLabel=[];
-	local.arrValue=[];
+	arrLabel=[];
+	arrValue=[];
 	delimiter="|";
 	if(arguments.setOptionStruct.selectmenu_delimiter EQ "|"){
 		delimiter=",";
@@ -1907,9 +1907,9 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		WHERE site_option_group_id=#db.param(ts.selectmenu_groupid)# and 
 		site_option_group_deleted=#db.param(0)# and 
 		site_id = #db.param(request.zos.globals.id)# ";
-		qParentGroup=db.execute("qParentGroup");
-		found=false;
-		if(qParentGroup.site_option_group_parent_id NEQ 0 and form.site_x_option_group_set_parent_id NEQ 0){ 
+		qParentGroup=db.execute("qParentGroup", "", 10000, "query", false); 
+		found=false; 
+		if(qParentGroup.recordcount NEQ 0 and qParentGroup.site_option_group_parent_id NEQ 0 and form.site_x_option_group_set_parent_id NEQ 0){ 
 			for(i=1;i<=50;i++){
 				db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# WHERE 
 				 site_x_option_group_set_deleted=#db.param(0)# and 
@@ -1964,108 +1964,112 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		 db.sql&="
 		s2.site_id = #db.param(request.zos.globals.id)#
 		GROUP BY s2.site_id ";
-		local.qTemp=db.execute("qTemp");
-		db.sql="select 
-		s1.site_x_option_group_set_id id, 
-		s1.site_x_option_group_value label,
-		 s2.site_x_option_group_value value";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=", s3.site_x_option_group_value parentId ";
-		//	db.sql&=", s3.site_x_option_group_value parentId ";
-		 }
-		 db.sql&=" from (
-		 #db.table("site_x_option_group_set", request.zos.zcoredatasource)# set1,
-		 #db.table("site_x_option_group", request.zos.zcoredatasource)# s1 , 
-		 #db.table("site_x_option_group", request.zos.zcoredatasource)# s2 ";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=" ,#db.table("site_x_option_group", request.zos.zcoredatasource)# s3";
-		 }
-		db.sql&=") WHERE ";
-		if(parentID NEQ 0){
-			db.sql&=" set1.site_x_option_group_set_parent_id=#db.param(parentId)# and ";
-		}
-		db.sql&=" set1.site_x_option_group_set_deleted=#db.param(0)# and 
-		set1.site_x_option_group_set_id=s1.site_x_option_group_set_id and
-		set1.site_id = s1.site_id and 
-		s1.site_x_option_group_deleted = #db.param(0)# and 
-		s2.site_x_option_group_deleted = #db.param(0)# and 
-		s1.site_option_id = #db.param(local.qTemp.labelFieldId)# and 
-		s1.site_option_group_id = #db.param(ts.selectmenu_groupid)# and 
-		s1.site_x_option_group_set_id = s2.site_x_option_group_set_id AND 
-		s2.site_id = s1.site_id and 
-		s2.site_option_id = #db.param(local.qTemp.valueFieldId)# and 
-		s2.site_option_group_id = #db.param(ts.selectmenu_groupid)# and ";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=" s3.site_id = s1.site_id and 
-			s3.site_option_id = #db.param(local.qTemp.parentFieldID)# and 
-			s3.site_option_group_id = #db.param(ts.selectmenu_groupid)# and 
-			s1.site_x_option_group_set_id = s3.site_x_option_group_set_id and 
-			s3.site_x_option_group_deleted = #db.param(0)# and ";
-		 }
-		if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
-			if(arguments.site_option_group_id EQ ts.selectmenu_groupid){
-				// exclude current site_x_option_group_set_id from query
-				db.sql&="  s1.site_x_option_group_set_id <> #db.param(form.site_x_option_group_set_id)# and ";
-			}
-		}
-		db.sql&=" s2.site_id = #db.param(request.zos.globals.id)#
-		GROUP BY s1.site_x_option_group_set_id, s2.site_x_option_group_set_id
-		ORDER BY label asc ";
-		local.qTemp2=db.execute("qTemp2");
-		//writedump(qtemp2);abort;
+		qTemp=db.execute("qTemp", "", 10000, "query", false);  
 
+		if(qTemp.recordcount NEQ 0){
+			db.sql="select 
+			s1.site_x_option_group_set_id id, 
+			s1.site_x_option_group_value label,
+			 s2.site_x_option_group_value value";
+			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+				db.sql&=", s3.site_x_option_group_value parentId ";
+			//	db.sql&=", s3.site_x_option_group_value parentId ";
+			 }
+			 db.sql&=" from (
+			 #db.table("site_x_option_group_set", request.zos.zcoredatasource)# set1,
+			 #db.table("site_x_option_group", request.zos.zcoredatasource)# s1 , 
+			 #db.table("site_x_option_group", request.zos.zcoredatasource)# s2 ";
+			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+				db.sql&=" ,#db.table("site_x_option_group", request.zos.zcoredatasource)# s3";
+			 }
+			db.sql&=") WHERE ";
+			if(parentID NEQ 0){
+				db.sql&=" set1.site_x_option_group_set_parent_id=#db.param(parentId)# and ";
+			}
+			db.sql&=" set1.site_x_option_group_set_deleted=#db.param(0)# and 
+			set1.site_x_option_group_set_id=s1.site_x_option_group_set_id and
+			set1.site_id = s1.site_id and 
+			s1.site_x_option_group_deleted = #db.param(0)# and 
+			s2.site_x_option_group_deleted = #db.param(0)# and 
+			s1.site_option_id = #db.param(qTemp.labelFieldId)# and 
+			s1.site_option_group_id = #db.param(ts.selectmenu_groupid)# and 
+			s1.site_x_option_group_set_id = s2.site_x_option_group_set_id AND 
+			s2.site_id = s1.site_id and 
+			s2.site_option_id = #db.param(qTemp.valueFieldId)# and 
+			s2.site_option_group_id = #db.param(ts.selectmenu_groupid)# and ";
+			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+				db.sql&=" s3.site_id = s1.site_id and 
+				s3.site_option_id = #db.param(qTemp.parentFieldID)# and 
+				s3.site_option_group_id = #db.param(ts.selectmenu_groupid)# and 
+				s1.site_x_option_group_set_id = s3.site_x_option_group_set_id and 
+				s3.site_x_option_group_deleted = #db.param(0)# and ";
+			 }
+			if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
+				if(arguments.site_option_group_id EQ ts.selectmenu_groupid){
+					// exclude current site_x_option_group_set_id from query
+					db.sql&="  s1.site_x_option_group_set_id <> #db.param(form.site_x_option_group_set_id)# and ";
+				}
+			}
+			db.sql&=" s2.site_id = #db.param(request.zos.globals.id)#
+			GROUP BY s1.site_x_option_group_set_id, s2.site_x_option_group_set_id
+			ORDER BY label asc ";
+			qTemp2=db.execute("qTemp2", "", 10000, "query", false); 
+			//writedump(qtemp2);abort;
+		}
 
 		// ts.selectmenu_groupid
 		// site_option_group_id=9
 		if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			local.ds=structnew();
-			local.ds2=structnew();
-			for(local.row2 in local.qTemp2){
-				if(local.row2.parentId EQ ""){
-					local.row2.parentId=0;
+			ds=structnew();
+			ds2=structnew();
+			if(qTemp.recordcount NEQ 0){
+				for(row2 in qTemp2){
+					if(row2.parentId EQ ""){
+						row2.parentId=0;
+					}
+					if(not structkeyexists(ds, row2.parentId)){
+						ds[row2.parentId]={};
+						ds2[row2.parentId]=[];
+					}
+					ds[row2.parentId][row2.id]={ value: row2.value, label:row2.label, id:row2.id, parentId:row2.parentId };
 				}
-				if(not structkeyexists(local.ds, local.row2.parentId)){
-					local.ds[local.row2.parentId]={};
-					local.ds2[local.row2.parentId]=[];
-				}
-				local.ds[local.row2.parentId][local.row2.id]={ value: local.row2.value, label:local.row2.label, id:local.row2.id, parentId:local.row2.parentId };
 			}
-			for(local.n in local.ds){
-				local.arrKey=structsort(local.ds[local.n], "text", "asc", "label");
-				for(local.f=1;local.f LTE arraylen(local.arrKey);local.f++){
-					arrayAppend(local.ds2[local.n], local.ds[local.n][local.arrKey[local.f]]);
+			for(n in ds){
+				arrKey=structsort(ds[n], "text", "asc", "label");
+				for(f=1;f LTE arraylen(arrKey);f++){
+					arrayAppend(ds2[n], ds[n][arrKey[f]]);
 				}
 			}
 			// all subcategories sorted, now do the combine + indent
-			if(structkeyexists(local.ds2, "0")){
-				local.arrCurrent=local.ds2["0"];
+			if(structkeyexists(ds2, "0")){
+				arrCurrent=ds2["0"];
 			}
 			if(arguments.enableSearchView){
-				for(n in local.ds){
-					for(g in local.ds[n]){
+				for(n in ds){
+					for(g in ds[n]){
 						arrChildValues=[];
-						arrChildValues=variables.getChildValues(local.ds, local.ds[n][g], arrChildValues, 1);
+						arrChildValues=variables.getChildValues(ds, ds[n][g], arrChildValues, 1);
 						arraySort(arrChildValues, "text");
-						//local.ds[n][g].value=arrayToList(arrChildValues, delimiter);
-						local.ds[n][g].idChild=arrayToList(arrChildValues, delimiter);
+						//ds[n][g].value=arrayToList(arrChildValues, delimiter);
+						ds[n][g].idChild=arrayToList(arrChildValues, delimiter);
 					}
 				}
 			}
-			if(structkeyexists(local.ds2, "0")){
-//				writedump(arguments.setoptionstruct);				writedump(local.ds2);				writedump(local.ds);				writedump(local.arrValue);				abort;/**/
-				variables.rebuildParentStructData(local.ds2, local.arrLabel, local.arrValue, local.arrCurrent, 0);
+			if(structkeyexists(ds2, "0")){
+//				writedump(arguments.setoptionstruct);				writedump(ds2);				writedump(ds);				writedump(arrValue);				abort;/**/
+				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, 0);
 			}
 		}
 	}
-	local.rs= { 
+	rs= { 
 		ts: ts, 
-		arrLabel: local.arrLabel, 
-		arrValue: local.arrValue
+		arrLabel: arrLabel, 
+		arrValue: arrValue
 	};
 	if(structkeyexists(local, 'qTemp2')){
-		local.rs.qTemp2=local.qTemp2;
+		rs.qTemp2=qTemp2;
 	}
-	return local.rs;
+	return rs;
 	</cfscript>
 </cffunction>
 
