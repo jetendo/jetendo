@@ -92,7 +92,7 @@
 
 	if(!isSimpleValue(log)) {
 		c={};
-		writedump(log);
+		// writedump(log);
 		modernCom.readDebug(c,log,"admin");
 	} 
 	</cfscript>

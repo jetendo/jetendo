@@ -837,6 +837,9 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 			<cfset var prettify=structKeyExists(arguments.custom,'timeformat') and arguments.custom.timeformat EQ "natural">
 		</cfsilent>
 		<!--- General --->
+		<style>
+		#debugContainer th{ text-align:left;}
+		</style>
 
 		<div id="debugContainer">
 			<cfoutput>
@@ -999,7 +1002,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				<cfset renderSectionHeadTR( sectionId
 					, "debugging", "#unitFormat( arguments.custom.unit, tot-q-loa, prettify )#
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Application" )>
-				<tr><td><table>
+				<tr><td><table class="table-list">
 					<tr>
 						<td class="pad txt-r">#unitFormat( arguments.custom.unit, loa,prettify )#</td>
 						<td class="pad">Startup/Compilation</td>
@@ -1015,7 +1018,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				</table></td></tr>
 				<tr>
 					<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-						<table class="details" cellpadding="2" cellspacing="0">
+						<table class="table-list" class="details" cellpadding="2" cellspacing="0">
 							<tr>
 								<th>
 									<cfif (sCookieSort ?: '-') neq 'id'>
@@ -1155,9 +1158,8 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 			<cfif !isNull(debugging.genericData) && debugging.genericData.recordcount>
 	<cfoutput query="#debugging.genericData#" group="category">
 	
-		<div class="section-title">#debugging.genericData.category#</div>
-		<table>
-		<table>
+		<div class="section-title">#debugging.genericData.category#</div> 
+		<table class="table-list">
 		<cfoutput>
 			<tr>
 				<td class="pad txt-r ">#debugging.genericData.name#</td>
@@ -1245,7 +1247,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
                     }
                     arrValue=[];
 
-                    arrayAppend(arrValue, '<table style="width:100%;">');
+                    arrayAppend(arrValue, '<table class="table-list" style="width:100%;">');
 					if(arrLenU ?: 0){
                         arrayAppend(arrValue, '<tr>
                                 <th>Used:</th>
@@ -1258,12 +1260,12 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
                             <td colspan="8" class="red">#arrayToList(usageNotRead, ', ')#</td>
                         </tr>');
                     }
-					sSQL = replace(queries.sql, chr(9), "&nbsp;&nbsp;", "ALL");
-					sSQL = replace(sSQL, chr(10), "<br>", "ALL");
+					sSQL = replace(rereplace(queries.sql, "\s+", " ", "all"), chr(9), " ", "ALL");
+					sSQL = replacenocase(replacenocase(replacenocase(sSQL, " and ", " and <br>", "ALL"), " WHERE ", "<br>WHERE ", "ALL"), "LEFT JOIN ", "<br>LEFT JOIN", "ALL");
                     arrayAppend(arrValue, '<tr>
-                        <th class="label">SQL:</th>
+                        <th class="label" style="width:40px;">SQL:</th>
                             <td id="-lucee-debug-query-sql-#queries.currentRow#" colspan="8" onclick="__LUCEE.debug.selectText( this.id );">
-                    <div class="__sql">#trim( sSQL )#</div>
+                    <div class="__sql" style="padding:0px; padding-bottom:20px;">#trim( sSQL )#</div>
 	                </td>
 	                </tr>
 	                </table>');
@@ -1316,7 +1318,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
             			<table><tr><td>
 							<cfset hasCachetype=ListFindNoCase(queries.columnlist,"cachetype") gt 0>
 							<cfset local.bUsage = listFindNoCase(queries.columnlist, 'usage') && isStruct(queries.usage)>
-			                <table class="details">
+			                <table class="table-list details">
 			                <tr>
 			                    <th></th>
 			                    <th>Name</th>
@@ -1390,7 +1392,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 					<tr>
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<table class="details">
+							<table class="table-list details">
 
 								<tr>
 									<th>Type</th>
@@ -1430,7 +1432,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "session")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.session#" />
+							<cfdump var="#arguments.debugging.scope.session#">
 						<td>
 						</tr>
 					</table>
@@ -1444,7 +1446,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "client")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.client#" />
+							<cfdump var="#arguments.debugging.scope.client#">
 						<td>
 						</tr>
 					</table>
@@ -1459,7 +1461,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "Form")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.form#" />
+							<cfdump var="#arguments.debugging.scope.form#">
 						<td>
 						</tr>
 					</table>
@@ -1473,7 +1475,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "URL")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.URL#" />
+							<cfdump var="#arguments.debugging.scope.URL#">
 						<td>
 						</tr>
 					</table>
@@ -1487,7 +1489,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "cgi")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.cgi#" />
+							<cfdump var="#arguments.debugging.scope.cgi#">
 						<td>
 						</tr>
 					</table>
@@ -1517,7 +1519,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<tr>
 						<cfset renderSectionHeadTR( sectionId, "debugging", "Cookie")>
 						<td  id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<cfdump var="#arguments.debugging.scope.Cookie#" />
+							<cfdump var="#arguments.debugging.scope.Cookie#">
 						<td>
 						</tr>
 					</table>
@@ -1537,7 +1539,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 					<tr>
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<table class="details">
+							<table class="table-list details">
 
 								<tr>
 									<th>Template</th>
@@ -1577,7 +1579,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 					<tr>
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<table class="details">
+							<table class="table-list details">
 
 								<tr>
 									<th align="center">Label</th>
@@ -1615,7 +1617,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 					<tr>
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<table class="details">
+							<table class="table-list details">
 								<tr>
 									<th>Type</th>
 									<cfif hasCategory>
@@ -1680,7 +1682,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 					<tr>
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
-							<table class="details">
+							<table class="table-list details">
 								<tr>
 									<th>Output</th>
 									<th>Template</th>
@@ -1713,7 +1715,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 						<td id="-lucee-debug-#sectionId#" class="#isOpen ? '' : 'collapsed'#">
 							New expression: <input type="text" id="expr_newValue">&nbsp;
 							<a onClick="__LUCEE.debug.addExpression()">Add</a><br>
-							<table class="details">
+							<table class="table-list details">
 								<tr>
 									<th>Expression</th>
 									<th>Value</th>
@@ -1753,7 +1755,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				<cfset renderSectionHeadTR( "#sectionId#", "metrics" , "Scopes in Memory", "" )>
 				<tr>
 					<td id="-lucee-metrics-#sectionId#" class="#isOpen ? '' : 'collapsed'#" >
-						<table class="details" style="text-align: left;">
+						<table class="table-list details" style="text-align: left;">
 							<tbody>
 								<tr>
 									<th rowspan="3" scope="row" style="width: 39%;">
@@ -1783,7 +1785,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				<cfset renderSectionHeadTR( "#sectionId#", "metrics", "Request/Threads", ""  )>
 				<tr>
 					<td id="-lucee-metrics-#sectionId#" class="#isOpen ? '' : 'collapsed'#" >
-						<table class="details" style="text-align: left;">
+						<table class="table-list details" style="text-align: left;">
 							<tbody>
 								<tr>
 									<th rowspan="3" scope="row" style="width: 39%;">
@@ -1816,7 +1818,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				<cfset renderSectionHeadTR( "#sectionId#", "metrics", "Datasource Connections", ""  )>
 				<tr>
 					<td id="-lucee-metrics-#sectionId#" class="#isOpen ? '' : 'collapsed'#" >
-						<table class="details" style="text-align: left;">
+						<table class="table-list details" style="text-align: left;">
 							<tbody>
 								<tr>
 									<th rowspan="2" scope="row" style="width: 39%;">
@@ -1842,7 +1844,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 				<cfset renderSectionHeadTR( "#sectionId#", "metrics", "Task Spooler", ""  )>
 				<tr>
 					<td id="-lucee-metrics-#sectionId#" class="#isOpen ? '' : 'collapsed'#" >
-						<table class="details" style="text-align: left;">
+						<table class="table-list details" style="text-align: left;">
 							<tbody>
 								<tr>
 									<th rowspan="2" scope="row" style="width: 39%;">
