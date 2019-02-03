@@ -38,13 +38,13 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 
 		private void function throwWhenEmpty(struct custom, string name){
 			if(!structKeyExists(custom,name) or len(trim(custom[name])) EQ 0)
-			throw "value for ["&name&"] is not defined";
+			cfthrow(message="value for ["&name&"] is not defined");
 		}
 
 		private void function throwWhenNotNumeric(struct custom, string name){
 			throwWhenEmpty(arguments.custom, arguments.name);
 			if(!isNumeric(trim(arguments.custom[arguments.name])))
-			throw "value for [" & arguments.name & "] must be numeric";
+			cfthrow(message="value for [" & arguments.name & "] must be numeric");
 		}
 
 

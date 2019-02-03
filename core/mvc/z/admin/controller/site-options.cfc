@@ -2436,7 +2436,7 @@
 		if(hasUserField){
 			db.sql&=", site_x_option_group_set_user=#db.param(userFieldValue)# ";
 		}
-		db.sql&="WHERE 
+		db.sql&=" WHERE 
 		site_x_option_group_set_deleted = #db.param(0)# and
 		site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
 		site_id = #db.param(request.zos.globals.id)#";

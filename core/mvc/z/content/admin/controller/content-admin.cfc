@@ -819,7 +819,7 @@
 			app_x_site_deleted = #db.param(0)# and
 			app_x_site.site_id=#db.param(request.zos.globals.id)# and 
 			mls_status = #db.param('1')#";
-			qMLS=db.execute("qMLS");
+			qMLS=db.execute("qMLS", "", 10000, "query", false);
 			</cfscript>
 
 			<tr> 

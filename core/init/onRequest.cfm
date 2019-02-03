@@ -14,7 +14,7 @@
 	application.zcore.functions.zabort();*/ 
 	savecontent variable="request.zos.onRequestOutput"{
 		if(structkeyexists(form, request.zos.urlRoutingParameter) EQ false){
-			include template="#arguments.targetpage#";
+			cfinclude(template="#arguments.targetpage#");
 			return;
 		} 
 		if(request.zos.routingIsCFC EQ false){
@@ -43,7 +43,7 @@
 				if(structkeyexists(form,'__zcoreinternalroutingpath') and form.__zcoreinternalroutingpath NEQ ""){
 					application.zcore.template.prependErrorContent("There was an error while running #expandpath('zcorerootmapping')#/#form.__zcoreinternalroutingpath#.");
 					try{
-						include template="/zcorerootmapping/#form.__zcoreinternalroutingpath#"
+						cfinclude(template="/zcorerootmapping/#form.__zcoreinternalroutingpath#");
 					}catch(any e){
 						if(request.zos.isdeveloper or cfcatch.type NEQ "missinginclude"){
 							rethrow;
@@ -78,7 +78,7 @@
 						application.zcore.functions.z404("onRequest missing include. "&request.zos.scriptNameTemplate);
 					}
 					try{
-						include template="#request.zos.scriptNameTemplate#";
+						cfinclude(template="#request.zos.scriptNameTemplate#");
 					}catch(missinginclude e){
 						application.zcore.functions.z404("onRequest missing include. Path:"&request.zos.scriptNameTemplate);
 					}

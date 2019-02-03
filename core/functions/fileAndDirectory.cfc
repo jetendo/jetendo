@@ -998,19 +998,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 		//GET INFO BEFORE CONVERTING - SOMEHOW WE DESTROY INFO
 		local.imageSize=application.zcore.functions.zGetImageSize(cs.sourceFilePath);        
 		if(not local.imageSize.success){
-			if(fileExists(cs.sourceFilePath)){
-				fileInfo=ImageInfo(cs.sourceFilePath);
-				local.imageSize={};
-				local.imageSize.success=true;
-				local.imageSize.width=fileInfo.width;
-				local.imageSize.height=fileInfo.height;
-				local.imageSize.image_latitude=""; 
-				local.imageSize.image_longitude=""; 
-				local.imageSize.image_altitude=""; 
-				local.imageSize.image_taken_datetime="";  
-			}else{
-				throw(local.imageSize.errorMessage);
-			}
+			throw(local.imageSize.errorMessage);
 		} 
 		secureCommand="getImageMagickConvertResize"&chr(9)&cs.resizeWidth&chr(9)&cs.resizeHeight&chr(9)&cs.cropWidth&chr(9)&cs.cropHeight&chr(9)&cs.cropXOffset&chr(9)&cs.cropYOffset&chr(9)&cs.sourceFilePath&chr(9)&cs.destinationFilePath;
 		output=application.zcore.functions.zSecureCommand(secureCommand, 200); 

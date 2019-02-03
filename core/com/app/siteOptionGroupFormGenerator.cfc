@@ -193,7 +193,7 @@ add options for:
 				<td><input type="text" name="childAdminURL" value="#htmleditformat(form.childAdminURL?:'/admin/child_table/')#"></td>
 			</tr> 
 			<tr>
-				<th>Child Table Name *</th>
+				<th>Child Table Name</th>
 				<td><input type="text" name="childTableName" value="#htmleditformat(form.childTableName?:'child')#"></td>
 			</tr>
 			<tr>

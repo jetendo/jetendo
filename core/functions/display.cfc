@@ -123,15 +123,19 @@
 	for(row in qDir){
 		fileExt=application.zcore.functions.zGetFileExt(row.name);
 		if(structkeyexists(imageFileExt, fileExt)){
-			s=imageinfo(row.directory&"/"&row.name);
-			arrayAppend(arrOutput, '<img width="#s.width#" height="#s.height#" src="#arguments.relativePath##row.Name#" alt="#htmleditformat(application.zcore.functions.zgetfilename(row.name))#" />');
+			s=application.zcore.functions.zGetImageSize(row.directory&"/"&row.name);
+			if(s.success){  
+				arrayAppend(arrOutput, '<img width="#s.width#" height="#s.height#" src="#arguments.relativePath##row.Name#" alt="#htmleditformat(application.zcore.functions.zgetfilename(row.name))#" />');
+			}
 		}
 	}
 	for(row in qDir){
 		fileExt=application.zcore.functions.zGetFileExt(row.name);
 		if(structkeyexists(imageFileExt, fileExt)){
-			s=imageinfo(row.directory&"/"&row.name);
-			arrayAppend(arrOutput, '<div style=" width:#s.width#px; height:#s.height#px; float:left; background-image:url(#arguments.relativePath##row.Name#); background-repeat:no-repeat;"></div>');
+			s=application.zcore.functions.zGetImageSize(row.directory&"/"&row.name);
+			if(s.success){  
+				arrayAppend(arrOutput, '<div style=" width:#s.width#px; height:#s.height#px; float:left; background-image:url(#arguments.relativePath##row.Name#); background-repeat:no-repeat;"></div>');
+			}
 		}
 	}
 	return arrayToList(arrOutput, chr(10));

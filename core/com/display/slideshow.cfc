@@ -1096,9 +1096,9 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 				}else{ 
 					for(i=1;i LTE arraylen(arrImages);i++){
 						if(left(variables.qslideshow.slideshow_custom_include,18) EQ "/zcorerootmapping/"){
-							include template="#variables.qslideshow.slideshow_custom_include#";
+							cfinclude(template="#variables.qslideshow.slideshow_custom_include#");
 						}else{
-							include template="#request.zRootPath##removechars(variables.qslideshow.slideshow_custom_include,1,1)#";
+							cfinclude(template="#request.zRootPath##removechars(variables.qslideshow.slideshow_custom_include,1,1)#");
 						}
 					} 
 				}

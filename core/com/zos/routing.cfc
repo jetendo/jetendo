@@ -1237,7 +1237,7 @@
 		}
 		request.zos.tempcom[form.method]();
 	}else{
-		include template="/zcorerootmapping/#form.__zcoreinternalroutingpath#";
+		cfinclude(template="/zcorerootmapping/#form.__zcoreinternalroutingpath#");
 	}
 	</cfscript></cffunction>
 

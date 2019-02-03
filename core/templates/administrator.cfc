@@ -25,7 +25,7 @@
 		adminCom.init();
 		echo(adminCom.render(tagStruct));
 	}else if(fileexists(request.zos.globals.homedir&'templates/administrator.cfm')){
-		include template="#request.zrootpath#templates/administrator.cfm";
+		cfinclude(template="#request.zrootpath#templates/administrator.cfm");
 	}
 	request.znotemplate=1;
 	if(application.zcore.functions.zIsTestServer() EQ false){
