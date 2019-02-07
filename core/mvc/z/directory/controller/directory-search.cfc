@@ -634,20 +634,21 @@ This is the structure of the renderMethod function
 					} else {
 						// 7500-10000
 						range = listToArray( value, '-' );
+						if(arrayLen(range) EQ 2){
+							rangeMinimum = range[ 1 ];
+							rangeMaximum = range[ 2 ];
 
-						rangeMinimum = range[ 1 ];
-						rangeMaximum = range[ 2 ];
+							first = true;
 
-						first = true;
+							for ( searchField in field['searchFields'] ) {
+								if ( not first ) {
+									db.sql &= ' or ';
+								}
+								first = false;
 
-						for ( searchField in field['searchFields'] ) {
-							if ( not first ) {
-								db.sql &= ' or ';
+								db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
+									AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
 							}
-							first = false;
-
-							db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
-								AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
 						}
 					}
 
