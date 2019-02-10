@@ -2319,6 +2319,11 @@ not used
 		ts.controllerComponentCache=application.zcore.controllerComponentCache;
 		ts.registeredControllerPathStruct=application.zcore.registeredControllerPathStruct;
 		ts.registeredControllerStruct=application.zcore.registeredControllerStruct;
+		for(i in ts.hookAppCom){
+			ts.hookAppCom[i].registerHooks(arguments.ss.componentObjectCache.hook);
+		}
+
+		// call register hooks...
 		structappend(arguments.ss, ts, true);
 	}
 	</cfscript>
