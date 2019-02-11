@@ -2231,7 +2231,7 @@ if(application.zcore.user.hasSourceAdminAccess()){
 	if(currentDay EQ 1 or currentDay EQ 7){
 		return false;
 	}
-	if(currentTime LT 830 or currentTime GTE 1300){
+	if(currentTime LT 830 or currentTime GTE 1700){
 		return false;
 	}
 	return true;

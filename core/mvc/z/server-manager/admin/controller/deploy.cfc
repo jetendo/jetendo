@@ -43,7 +43,7 @@
 		setting requesttimeout="150";
 	}
 	if(not application.zcore.user.hasDeployAdminAccess(false)){
-		echo("You don't have access to deploy sites as this time of day.");
+		echo("You don't have access to deploy sites at this time of day.");
 		abort;
 	}
 	if(not structkeyexists(application.siteStruct, form.sid)){
