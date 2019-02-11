@@ -15,40 +15,40 @@ var zLoggedIn=false;
 	} 
 	var showingIdleLogoutWarning=false;
 	var lastExtensionDate=new Date();
+	var autoContinueSessionFailed=false;
 	function zIsLoggedIn(){
 		if(typeof window.zGetCookie == "undefined"){
 			return false;
 		}
 		var tokenSet=zGetCookie("ZTOKENSET");
-		if(tokenSet==="1"){
+		if(tokenSet==="1" && !autoContinueSessionFailed){
 			var nowDate=new Date();
 			var millisecondsSinceExtension=nowDate-lastExtensionDate;
 			if(millisecondsSinceExtension < 60000*15){
 				return true;
 			}
 			// auto extend session every 15 minutes to make token sessions last forever
-			var obj={
-				id:"zAutoContinueSession",
-				method:"get",
-				callback:function(r){
+			$.ajax({
+				type: "GET",
+				url: '/z/user/home/extendSession',
+				error: function(data){
+					autoContinueSessionFailed=true;
+				},
+				success: function(data){
 					try{
 						var r=JSON.parse(r);
 						if(r.success){
 							console.log('Session extended automatically');
 							lastExtensionDate=nowDate;
 						}else{
+							autoContinueSessionFailed=true;
 							window.location.replace('/z/user/home/index?zlogout=1');
 						}
 					}catch(e){
-						// ignore error
+						autoContinueSessionFailed=true;
 					}
-				},
-				errorCallback:function(){ 
-					console.log('Failed to extend session automatically'); 
-				},
-				url:"/z/user/home/extendSession"
-			}; 
-			zAjax(obj);
+				}
+			});
 			return true;
 		}
 		var loggedIn=zGetCookie("ZLOGGEDIN");
