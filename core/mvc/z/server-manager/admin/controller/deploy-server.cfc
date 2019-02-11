@@ -3,6 +3,11 @@
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript>
 	form.sid=application.zcore.functions.zso(form, 'sid');
+
+	if(not application.zcore.user.hasDeployAdminAccess(true)){
+		echo("You don't have permission to use the deploy servers feature.");
+		abort;
+	}
 	</cfscript>
 </cffunction>
 

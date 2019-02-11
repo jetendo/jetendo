@@ -868,7 +868,7 @@ If the link does not work, please copy and paste the entire link in your browser
 				</cfif>
 			</div>
 		</cfif>
-		<cfscript>
+		<!--- <cfscript>
 		openIdEnabled=true;
 		if(request.zos.globals.disableOpenID EQ 1 or (request.zos.globals.parentID NEQ 0 and application.zcore.functions.zvar('disableOpenId', request.zos.globals.parentID) EQ 1)){
 			openIdEnabled=false;
@@ -881,27 +881,27 @@ If the link does not work, please copy and paste the entire link in your browser
 			writeoutput(openIdCom.displayOpenIdProviderForUser(variables.qcheckemail.user_id, variables.qcheckemail.site_id));
 			</cfscript>
 			</cfsavecontent>
-		</cfif>
+		</cfif> --->
 		<cfif variables.qcheckemail.recordcount eq 0 and form.user_password EQ ''>
 			<div class="z-user-preference-left">
 			<p style="font-size:130%; font-weight:bold;">Your Personal Information</p>
 			<cfset local.hideAllPrefFields=false>
-		<cfelseif openIdCom.isAdminChangeAllowed() EQ false>
+		<!--- <cfelseif openIdCom.isAdminChangeAllowed() EQ false>
 			<h2>Please login again to verify your identity</h2>
 			<div style="float:left; padding-right:0px;width:100%;">
-			<cfset local.hideAllPrefFields=true>
+			<cfset local.hideAllPrefFields=true> --->
 		<cfelse>
 			<div class="z-user-preference-left">
 			<p style="font-size:130%; font-weight:bold;">Your Personal Information</p>
 			<cfset local.hideAllPrefFields=false>
 		</cfif>
 		<cfif variables.qcheckemail.recordcount NEQ 0 and local.hideAllPrefFields>
-			<cfif openIdEnabled>
+			<!--- <cfif openIdEnabled>
 			<div class="zmember-openid">#local.openIdOutput# </div>
 			<br style="clear:both;" />
 			<hr />
-			</cfif>
-			<h3><cfif openIdEnabled>Or </cfif>Login with your password:</h3>
+			</cfif> --->
+			<h3><!--- <cfif openIdEnabled>Or </cfif> --->Login with your password:</h3>
 			<div class="zmember-openid-buttons">Email: #form.e#</div>
 			<br />
 			<br />
@@ -924,9 +924,9 @@ If the link does not work, please copy and paste the entire link in your browser
 			<div class="zmember-openid-buttons">
 				<button type="button" name="submitPref3" onclick="window.location.href='/z/user/preference/index?zlogout=1';" value="" style="font-size:120%; padding:5px; margin-bottom:5px;">Logout</button>
 			</div>
-			<cfif not openIdCom.isAdminChangeAllowed()>
+			<!--- <cfif not openIdCom.isAdminChangeAllowed()>
 				<cfset local.hideAllPrefFields=true>
-			</cfif>
+			</cfif> --->
 		<cfelse>
 			<table style="border-spacing:0px; width:98%;" class="zinquiry-form-table">
 				<tr>
@@ -1091,12 +1091,12 @@ If the link does not work, please copy and paste the entire link in your browser
 					<a href="/z/user/privacy/index" onclick="window.open(this.href); return false;" title="View our privacy policy in a new window." class="zPrivacyPolicyLink">View Our Privacy Policy</a></p>
 			</div>
 		</cfif>
-		<cfif openIdEnabled and variables.qcheckemail.recordcount NEQ 0 and openIdCom.isAdminChangeAllowed()>
+		<!--- <cfif openIdEnabled and variables.qcheckemail.recordcount NEQ 0 and openIdCom.isAdminChangeAllowed()>
 			<div class="zmember-openid" style="width:100%; float:left; padding-bottom:0px;">
 				<p style="font-size:130%; font-weight:bold;">OpenID Options</p>
 				#local.openIdOutput#
 			</div>
-		</cfif>
+		</cfif> --->
 		<cfif local.hideAllPrefFields EQ false>
 			<div class="zmember-openid-buttons" style="width:100%; float:left; padding-top:5px;">
 				<hr />

@@ -2,6 +2,10 @@
 <cfoutput>
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	if(not application.zcore.user.hasSourceAdminAccess()){
+		echo("Global import requires source admin access");
+		abort;
+	}
 	var db=request.zos.queryObject;
 	var selectStruct=0;
 	application.zcore.user.requireAllCompanyAccess();
@@ -43,6 +47,10 @@
 	
 <cffunction name="process" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	if(not application.zcore.user.hasSourceAdminAccess()){
+		echo("Global import requires source admin access");
+		abort;
+	}
 	var db=request.zos.queryObject;
 	var dbNoVerify=request.zos.noVerifyQueryObject;
 	var i=0;

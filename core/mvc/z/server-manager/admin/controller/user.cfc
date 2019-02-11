@@ -687,7 +687,7 @@
 				</script>
 			</cfif>
 	
-			<cfif currentMethod EQ "editUser">
+			<!--- <cfif currentMethod EQ "editUser">
 				<tr>
 					<td style="vertical-align:top; width:140px;">Sign In With:</td>
 					<td><cfscript>
@@ -695,7 +695,7 @@
 					    writeoutput(openIdCom.displayOpenIdProviderForUser(qUser.user_id, qUser.site_id));
 					    </cfscript></td>
 				</tr>
-			</cfif>
+			</cfif> --->
 			<tr>
 				<td style="width:140px;">&nbsp;</td>
 				<td><input type="submit" name="submit" value="<cfif currentMethod EQ "editUser">Update<cfelse>Add</cfif> User">

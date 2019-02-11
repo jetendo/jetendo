@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript>
+	throw("deploy archive is no longer implemented");
 	if(not request.zOS.cfmlAdminWriteEnabled){
 		throw("request.zOS.cfmlAdminWriteEnabled is not enabled.");
 	}
@@ -22,7 +23,7 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="deployCfmlArchive" localmode="modern" access="private" output="no">
+<!--- <cffunction name="deployCfmlArchive" localmode="modern" access="private" output="no">
 	<cfscript>
 	
 	var qDir=0;
@@ -249,6 +250,6 @@
 	writeoutput('Deploy Successful');
 	application.zcore.functions.zabort();
 	</cfscript>
-</cffunction>
+</cffunction> --->
 </cfoutput>
 </cfcomponent>

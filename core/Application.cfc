@@ -154,7 +154,20 @@
 // BEGIN override cfml admin settings
 // regional
 if(structkeyexists(form, 'firstlineabort')){
-	echo(1);//echo(replace(jetendo.showLuceeStartTime(), chr(10), "<br>", "all"));
+	if(structkeyexists(form, 'stopWebServer')){ 
+		jetendo.stopWebServer();
+		echo('stopped | <a href="/?firstlineabort=1">start</a><br>');
+	}else if(structkeyexists(form, 'startWebServer')){
+		jetendo.startWebServer();
+		echo('started | <a href="/?firstlineabort=1&stopWebServer=1">stop</a><br>');
+	}else{
+		echo('<a href="/?firstlineabort=1&startWebServer=1">start</a><br>');
+	}
+
+	d=jetendo.callCFMLFunction();
+	echo("called:"&d);
+	//echo(replace(jetendo.showLuceeStartTime(), chr(10), "<br>", "all"));
+	
 	//echo(1);
 	abort;
 }

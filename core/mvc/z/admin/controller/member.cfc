@@ -868,7 +868,7 @@
 				</td>
 				</tr>
 			</cfif>
-			<cfif currentMethod EQ "edit" and request.zos.globals.disableOpenID EQ 0>
+			<!--- <cfif currentMethod EQ "edit" and request.zos.globals.disableOpenID EQ 0>
 				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("Sign In With","member.member.edit user_openid_provider")#</th>
 					<td><cfscript>
@@ -876,7 +876,7 @@
 					writeoutput(openIdCom.displayOpenIdProviderForUser(qMember.user_id, qMember.site_id));
 					</cfscript></td>
 				</tr>
-			</cfif>
+			</cfif> --->
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Google+ URL","member.member.edit user_googleplus_url")#</th>
 				<td><input type="text" name="user_googleplus_url" value="#form.user_googleplus_url#" size="30" /></td>

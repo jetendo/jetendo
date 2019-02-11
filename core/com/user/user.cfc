@@ -2204,5 +2204,38 @@ if(application.zcore.user.hasSourceAdminAccess()){
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="hasDeployAdminAccess" localmode="modern" access="public">
+	<cfargument name="requireExplicitAccess" type="boolean" required="yes">
+	<cfscript>
+	if(not request.zos.isDeveloper){ 
+		return false;
+	}
+	// if never configured, just allow it.
+	if(not structkeyexists(request.zos, 'deployAdminUserStruct')){ 
+		return true;
+	}
+	if(not structkeyexists(request.zsession, 'user')){
+		return false;
+	}
+	if(structkeyexists(request.zos.deployAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id)){ 
+		return true; 
+	} 
+	if(arguments.requireExplicitAccess){
+		return false;
+	}
+
+	// limit hours to mon-fri 8:30am to 5pm to reduce downtime risk.
+	currentDay=dayofweek(now());
+	currentTime=timeformat(now(), "HHmm"); 
+	if(currentDay EQ 1 or currentDay EQ 7){
+		return false;
+	}
+	if(currentTime LT 830 or currentTime GTE 1300){
+		return false;
+	}
+	return true;
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

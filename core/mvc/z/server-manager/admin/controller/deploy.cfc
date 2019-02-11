@@ -42,6 +42,10 @@
 	if(form.method EQ "deploySite"){
 		setting requesttimeout="150";
 	}
+	if(not application.zcore.user.hasDeployAdminAccess(false)){
+		echo("You don't have access to deploy sites as this time of day.");
+		abort;
+	}
 	if(not structkeyexists(application.siteStruct, form.sid)){
 
 		db.sql="select * from #db.table("site", request.zos.zcoreDatasource)#
@@ -140,7 +144,7 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="deployAllSites" localmode="modern" access="remote" roles="serveradministrator">
+<!--- <cffunction name="deployAllSites" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
@@ -221,7 +225,7 @@
 		echo('</table>');
 	}
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
 
 <cffunction name="saveSite" localmode="modern" access="remote" roles="serveradministrator">
@@ -258,6 +262,10 @@
 
 <cffunction name="saveAllSites" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	if(not application.zcore.user.hasDeployAdminAccess(true)){
+		echo("You don't have permission to use the import site feature.");
+		abort;
+	}
 	var db=request.zos.queryObject; 
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
@@ -287,8 +295,12 @@
 
 <cffunction name="editAllSites" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	if(not application.zcore.user.hasDeployAdminAccess()){
+		echo("You don't have permission to use the edit all sites feature.");
+		abort;
+	}
 	var db=request.zos.queryObject;
-	application.zcore.user.requireAllCompanyAccess();
+	application.zcore.user.requireAllCompanyAccess(true);
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zStatusHandler(request.zsid);
 	if(form.sid EQ ""){
@@ -311,6 +323,7 @@
 	site_x_deploy_server_deleted = #db.param(0)#
 	WHERE site.site_active = #db.param(1)# and 
 	site.site_id <> #db.param(-1)# and 
+	site_deleted=#db.param(0)# and 
 	deploy_server_deleted = #db.param(0)#  and 
 	deploy_server_deploy_enabled = #db.param(1)#
 	ORDER BY shortDomain asc, deploy_server_host asc";
@@ -388,6 +401,7 @@
 		index=0;
 		for(row in qDeploy){
 			index++;
+			deployServer={};
 			for(g=1;g LTE arraylen(arrDeployServer);g++){
 				if(arrDeployServer[g].row.deploy_server_id EQ row.deploy_server_id){
 					deployServer=arrDeployServer[g];
@@ -395,6 +409,13 @@
 				}
 			}
 			curDomain=replace(replace(row.site_short_domain, '.'&request.zos.testDomain, ''), "www.", "");
+			if(structcount(deployServer) EQ 0){
+				if(row.deploy_server_host EQ ""){
+					continue; // safe to ignore the jetendodev entries.
+				}
+				echo('<tr><td colspan="2">Couldn''t find deploy server. Database was corrected manually for site_id: #row.site_id#</td><td colspan="3">'&curDomain&'</td></tr>');
+				continue;
+			}
 			echo('<tr>
 			<td>'&deployServer.row.deploy_server_ssh_host&'</td>
 			<td>'&deployServer.row.deploy_server_host&'</td>
@@ -579,6 +600,10 @@
 
 <cffunction name="processDeployCore" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
+	if(not application.zcore.user.hasDeployAdminAccess(true)){
+		echo("You don't have permission to use the deploy core feature.");
+		abort;
+	}
 	db=request.zos.queryObject;
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager", true);
@@ -676,8 +701,11 @@
 
 
 <cffunction name="deployCore" localmode="modern" access="remote" roles="serveradministrator">
-	<cfscript>
-	
+	<cfscript> 
+	if(not application.zcore.user.hasDeployAdminAccess(true)){
+		echo("You don't have permission to use the deploy core feature.");
+		abort;
+	}
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	form.deploy_server_group =application.zcore.functions.zso(form, 'deploy_server_group');
@@ -782,6 +810,7 @@
 <cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	var db=request.zos.queryObject;
+ 
 	if(form.sid EQ ""){
 		application.zcore.functions.zSetPageHelpId("8.4");
 	}else{
@@ -864,7 +893,8 @@
 					}
 				}
 				echo('</td></tr>');
-				if(allowDeploy){
+
+				if(allowDeploy and application.zcore.user.hasDeployAdminAccess(false)){
 					echo('<tr><th>&nbsp;</th><td><span id="deployButtonsId" class="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#&amp;preview=1" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Preview Changes</a></span></td></tr>');
 				}
 			}
@@ -881,24 +911,31 @@
 		}
 		</cfscript>
 		
-		<p><a href="/z/server-manager/admin/deploy/editSite?sid=#form.sid#" class="z-manager-search-button">Edit Site Deployment Configuration</a> <a href="/z/server-manager/admin/deploy/editAllSites" class="z-manager-search-button">Edit All Sites At Once</a> 
-			<a href="/z/server-manager/tasks/verify-conventions/verifySiteConventions?sid=#form.sid#" target="_blank" class="z-manager-search-button">Verify Conventions</a> 
-			<a href="/z/server-manager/admin/compress-images/compressSiteHomedirImages?sid=#form.sid#" target="_blank" class="z-manager-search-button">Compress Homedir Images</a></p> 
+		<p><a href="/z/server-manager/admin/deploy/editSite?sid=#form.sid#" class="z-manager-search-button">Edit Site Deployment Configuration</a> 
+			<cfif application.zcore.user.hasDeployAdminAccess(true)>
+				<a href="/z/server-manager/admin/deploy/editAllSites" class="z-manager-search-button">Edit All Sites At Once</a> 
+				<a href="/z/server-manager/tasks/verify-conventions/verifySiteConventions?sid=#form.sid#" target="_blank" class="z-manager-search-button">Verify Conventions</a> 
+				<a href="/z/server-manager/admin/compress-images/compressSiteHomedirImages?sid=#form.sid#" target="_blank" class="z-manager-search-button">Compress Homedir Images</a>
+			</cfif>
+			</p> 
 		<p>Configure excluded directories and files for this site on the <a href="/z/server-manager/admin/site/edit?sid=#form.sid#">globals</a> page.</p>
 	<cfelse> 
-		<p><a href="/z/server-manager/admin/deploy-server/index">Manage Deploy Server(s)</a></p>
-		<p><a href="/z/server-manager/admin/deploy/editAllSites">Edit Deployment Configuration For All Sites</a></p>
-		<p><a href="/z/server-manager/admin/deploy/deployAllSites">Deploy All Sites</a></p>
-		<p><a href="/z/server-manager/admin/deploy/deployCore">Deploy Core</a></p> 
+		<cfif application.zcore.user.hasDeployAdminAccess(true)>
+			<p><a href="/z/server-manager/admin/deploy-server/index">Manage Deploy Server(s)</a></p>
+			<p><a href="/z/server-manager/admin/deploy/editAllSites">Edit Deployment Configuration For All Sites</a></p>
+			<!--- <p><a href="/z/server-manager/admin/deploy/deployAllSites">Deploy All Sites</a></p> --->
+			<p><a href="/z/server-manager/admin/deploy/deployCore">Deploy Core</a></p> 
+		</cfif>
 		<p>For site deployment, <a href="/z/server-manager/admin/site-select/index?sid=">select a site</a> and click deploy</p>
-		<cfif not request.zos.isExecuteEnabled or not request.zos.cfmlAdminWriteEnabled or not request.zos.cfmlAdminReadEnabled>
+		<!--- <cfif not request.zos.isExecuteEnabled or not request.zos.cfmlAdminWriteEnabled or not request.zos.cfmlAdminReadEnabled>
 			<p>Deploy Sourceless Archive: Disabled | This feature requires request.zos.isExecuteEnabled, request.zos.cfmlAdminWriteEnabled  and request.zos.cfmlAdminReadEnabled to be set to true in Application.cfc.</p>
 		<cfelse>
 			<p><a href="/z/server-manager/tasks/deploy-archive/index">Deploy Sourceless Archive</a></p>
 		</cfif>
-		<p><strong>About Deploy Sourceless Archive:</strong> If you choose to deploy via an source-less archive, the cfml server will have to compile and upload all the source code as a zip file which can be slower then <a href="/z/server-manager/admin/deploy/deployCore">Deploy #request.zos.installPath#core/</a> which relies on rsync to send only the source code that has changed.  An archive also causes the cfml server to run out of perm gen memory faster on the target server since more class files are replaced (This was true before the cfml server ran on OSGi class loaders at least even with java agent enabled).  Why use a sourceless archive? It can be more secure since your code doesn't exist as plain text on the target server.</p> 
+		<p><strong>About Deploy Sourceless Archive:</strong> If you choose to deploy via an source-less archive, the cfml server will have to compile and upload all the source code as a zip file which can be slower then <a href="/z/server-manager/admin/deploy/deployCore">Deploy #request.zos.installPath#core/</a> which relies on rsync to send only the source code that has changed.  An archive also causes the cfml server to run out of perm gen memory faster on the target server since more class files are replaced (This was true before the cfml server ran on OSGi class loaders at least even with java agent enabled).  Why use a sourceless archive? It can be more secure since your code doesn't exist as plain text on the target server.</p>  --->
 	</cfif> 
 	</div>
 </cffunction>
+
 </cfoutput>
 </cfcomponent>

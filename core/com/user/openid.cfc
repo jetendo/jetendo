@@ -613,7 +613,7 @@ WHERE site_id <>'16'
 		</cfscript>
     </cffunction>
     
-    <cffunction name="displayOpenIdProviderForUser" localmode="modern" output="no" returntype="any">
+    <!--- <cffunction name="displayOpenIdProviderForUser" localmode="modern" output="no" returntype="any">
     	<cfargument name="user_id" type="string" required="yes">
     	<cfargument name="site_id" type="string" required="yes">
         <cfscript>
@@ -691,6 +691,6 @@ WHERE site_id <>'16'
 		</cfif>
         </cfsavecontent>
         <cfreturn local.out>
-    </cffunction>
+    </cffunction> --->
     </cfoutput>
 </cfcomponent>

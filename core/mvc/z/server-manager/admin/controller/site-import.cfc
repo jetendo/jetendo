@@ -2,7 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript> 
-	if(not request.zos.isTestServer and (not structkeyexists(request.zos, 'sourceAdminUserStruct') or not structkeyexists(request.zos.sourceAdminUserStruct, request.zsession.user.id&"|"&request.zsession.user.site_id))){
+	if(not application.zcore.user.hasSourceAdminAccess()){
 		echo("You don't have permission to use the import site feature.");
 		abort;
 	}
@@ -12,7 +12,7 @@
 	<cfscript>
 	var db=request.zos.queryObject;
 	var selectStruct=0;
-	// init();
+	init();
 	application.zcore.user.requireAllCompanyAccess();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
 	application.zcore.functions.zSetPageHelpId("8.1.2");
@@ -702,86 +702,5 @@ UNLOCK TABLES;
 	}
 	 </cfscript>
 </cffunction>
-</cfoutput>
-	<!--- 
-site-backup.cfm notes:
-	// all existing table relationships in the exact order they should be exported.
-	a1=arraynew(1);
-	arrayappend(a1, {source="database.table.table_id", destination:"database2.table2.table_id"});
-	/backup-database-test.cfm
-	
-	import new id for all rows so that all primary keys are available.   then go back and update the foreign keys within the table.
-	all the tables with multi-field primary key must be inserted after the others are done.
-	
-	must retain compatibility with old export versions.   If it was stored as insert statement, it would be harder to modify.  I need to be using array objects that can be filtered later by a script that will upgrade them to the new version.
-		i.e.
-		fs["database.table"]=["field1","field2","etc"];
-		// put all table structures in a single the export file name table-index.tsv
-		#table-export-id	datasource-variable-name	table-name	field-name	field-name2	etc
-		1	"zcoreDatasource"	"table"	"field1"	"field2"	"etc"
-		
-		// put each table in a separate table-name.tsv
-		"data1"	"data2"	"etc"
-		
-		
-	TODO: more thorough db structure verification and ALTER SQL generation
-		
-	show databases
-	
-	SHOW TABLES IN `zcore`
-	
-	SHOW TABLE STATUS FROM `zcore` WHERE ENGINE IS NOT NULL; 
-	SELECT CCSA.character_set_name FROM information_schema.`TABLES` T, information_schema.`COLLATION_CHARACTER_SET_APPLICABILITY` CCSA WHERE CCSA.collation_name = T.table_collation  AND T.table_schema = "zcore"  AND T.table_name = "site";
-	#table struct
-	tableStruct=structnew();
-	tableStruct["zcoreDatasource"]=structnew();
-	tableStruct["zcoreDatasource"]["tablename"]={engine="",version="",create_options="",collation="",charset=""};
-	
-	
-	show FIELDS from #request.zos.queryObject.table("site", request.zos.zcoreDatasource)# 
-	#table field struct:
-	fieldStruct["zcoreDatasource.name"]=structnew();
-	fieldStruct["zcoreDatasource.name"]["fieldname"]={type="",null="",key="", default="",extra=""};
-	
-	show KEYS from #request.zos.queryObject.table("site", request.zos.zcoreDatasource)# site
-	#keys struct
-	keyStruct["zcoreDatasource.name"]=structnew();
-	keyStruct["zcoreDatasource.name"]["keyname"]={non_unique="",key_name="",seq_in_index="",column_name="",index_type=""};
-	
-	non_unique=1 is NOT UNIQUE
-	non_unique=0 is UNIQUE
-	
-	uniqueStruct=structnew();
-	// tableStruct2 is the NEW structure
-	for(i in tableStruct){
-		for(n in tableStruct[i]){
-			if(structkeyexists(tableStruct2, n) and structkeyexists(tableStruct2, i)){
-				uniqueStruct[n&"."&i]=true;
-				if(tableStruct[i][n].engine NEQ tableStruct2[i][n].engine){
-					// add alter engine sql
-				}
-				if(tableStruct[i][n].version NEQ tableStruct2[i][n].version){
-					// not sure about this one
-				}
-				if(tableStruct[i][n].create_options NEQ tableStruct2[i][n].create_options){
-					// can this be altered?
-				}
-				if(tableStruct[i][n].collation NEQ tableStruct2[i][n].collation){
-					// add alter collation sql
-					// CONVERT TO CHARACTER SET `#tableStruct2[i][n].charset#` COLLATE `#tableStruct2[i][n].collation#
-				}
-			}
-		}
-	}
-	for(i in tableStruct2){
-		for(n in tableStruct2[i]){
-			if(structkeyexists(uniqueStruct, n&"."&i) EQ false){
-				// must create table from scratch
-				tableStruct2[i][n];
-			}
-		}
-	}
-	
-	SHOW CREATE TABLE #request.zos.queryObject.table("site", request.zos.zcoreDatasource)# site;
- --->
+</cfoutput> 
  </cfcomponent>
