@@ -378,40 +378,23 @@
 	if(not fileexists(arguments.filePath)){
 		throw("importTableData failed because arguments.filePath, ""#arguments.filePath#"", doesn't exist.");
 	}
-	try{
-		if(arguments.hasSiteId){
-			query name="qDelete" datasource="#arguments.datasource#"{
-				echo(preserveSingleQuotes("delete from `#arguments.datasource#`.`#arguments.table#` 
-				where site_id = 0"));
-			}
-			query name="qDisableTrigger" datasource="#arguments.datasource#"{
-				echo(preserveSingleQuotes("set @zDisableTriggers=1"));
-			}
-		}else{
-			query name="qTruncate" datasource="#arguments.datasource#"{
-				echo("truncate table `#arguments.datasource#`.`#arguments.table#`");
-			}
+	if(arguments.hasSiteId){
+		query name="qDelete" datasource="#arguments.datasource#"{
+			echo(preserveSingleQuotes("delete from `#arguments.datasource#`.`#arguments.table#` 
+			where site_id = 0"));
 		}
+	}else{
+		query name="qTruncate" datasource="#arguments.datasource#"{
+			echo("truncate table `#arguments.datasource#`.`#arguments.table#`");
+		}
+	}
 
-		query name="qLoadData" datasource="#arguments.datasource#"{
-			echo(preserveSingleQuotes("LOAD DATA LOCAL INFILE '#escape(arguments.filePath)#' 
-			REPLACE INTO TABLE `#arguments.datasource#`.`#arguments.table#` 
-			FIELDS TERMINATED BY ',' ENCLOSED BY '""' 
-		 	ESCAPED BY '\\' LINES TERMINATED BY '\n' STARTING BY ''
-			IGNORE 1 LINES (#arguments.columnList#)"));
-		}
-		if(arguments.hasSiteId){
-			query name="qEnableTrigger" datasource="#arguments.datasource#"{
-				echo(preserveSingleQuotes("set @zDisableTriggers=NULL"));
-			}
-		}
-	}catch(Any e){
-		if(arguments.hasSiteId){
-			query name="qEnableTrigger" datasource="#arguments.datasource#"{
-				echo(preserveSingleQuotes("set @zDisableTriggers=NULL"));
-			}
-		}
-		rethrow;
+	query name="qLoadData" datasource="#arguments.datasource#"{
+		echo(preserveSingleQuotes("LOAD DATA LOCAL INFILE '#escape(arguments.filePath)#' 
+		REPLACE INTO TABLE `#arguments.datasource#`.`#arguments.table#` 
+		FIELDS TERMINATED BY ',' ENCLOSED BY '""' 
+	 	ESCAPED BY '\\' LINES TERMINATED BY '\n' STARTING BY ''
+		IGNORE 1 LINES (#arguments.columnList#)"));
 	}
 
 	</cfscript>

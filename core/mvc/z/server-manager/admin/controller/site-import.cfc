@@ -632,26 +632,16 @@ UNLOCK TABLES;
 		c.datasource=n;
 		c.verifyQueriesEnabled=false;
 		dbNoVerify=application.zcore.db.newQuery(c);
-		dbNoVerify.sql="set @zDisableTriggers=1";
-		dbNoVerify.execute("qDisableTrigger");
-		try{
-			for(i=1;i LTE arrayLen(dsStruct[n]);i++){
-				dbNoVerify.sql=dsStruct[n][i];
-				if(dbNoVerify.sql CONTAINS "`site_id`"){
-					dbNoVerify.sql=replace(dbNoVerify.sql, ";", "")&" SET `site_id` = '"&form.sid&"'";
-				}
-				if(debug) writeoutput(dbNoVerify.sql&";<br />");
-				writeLogEntry(";#dbNoVerify.sql#;");
-				result=dbNoVerify.execute("qLoad");
-				writeLogEntry("load result: #result#");
+		for(i=1;i LTE arrayLen(dsStruct[n]);i++){
+			dbNoVerify.sql=dsStruct[n][i];
+			if(dbNoVerify.sql CONTAINS "`site_id`"){
+				dbNoVerify.sql=replace(dbNoVerify.sql, ";", "")&" SET `site_id` = '"&form.sid&"'";
 			}
-		}catch(Any e){
-			dbNoVerify.sql="set @zDisableTriggers=NULL";
-			dbNoVerify.execute("qEnableTrigger");
-			rethrow;
+			if(debug) writeoutput(dbNoVerify.sql&";<br />");
+			writeLogEntry(";#dbNoVerify.sql#;");
+			result=dbNoVerify.execute("qLoad");
+			writeLogEntry("load result: #result#");
 		}
-		dbNoVerify.sql="set @zDisableTriggers=NULL";
-		dbNoVerify.execute("qEnableTrigger");
 	}
 	
 	// force system to self-heal
