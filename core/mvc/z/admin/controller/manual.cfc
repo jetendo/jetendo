@@ -224,6 +224,7 @@ zdoc css style documentation
 	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Problem Link Report")){
 		arrayAppend(arrS, { id:"__2.6", url:"/problem-link-report.html", title:"Problem Link Report"});
 	}
+
 	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Site Options")){
 		arrayAppend(arrS, { id:"__2.7", url:"/site-options.html", title:"Site Options"});
 	}
@@ -236,6 +237,11 @@ zdoc css style documentation
 		arrayAppend(arrS, { id:"___2.7.3", url:"/manage-site-options.html", title:"Site Options"});
 		arrayAppend(arrS, { id:"___2.7.4", url:"/add-edit-site-options.html", title:"Add/Edit Site Options"});
 		arrayAppend(arrS, { id:"___2.7.5", url:"/sync-site-option-structure.html", title:"Sync Site Option Structure"});
+	}
+	if(request.zos.isTestServer){
+		if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Features")){
+			arrayAppend(arrS, { id:"__2.11", url:"/site-options.html", title:"Features"});
+		}
 	}
 	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Video Library")){
 		arrayAppend(arrS, { id:"__2.8", url:"/video-library.html", title:"Video Library"});

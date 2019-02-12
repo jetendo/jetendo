@@ -114,6 +114,7 @@
 		componentObjectCache.adminSecurityFilter=createobject("component","zcorerootmapping.com.app.adminSecurityFilter");
 		componentObjectCache.grid=createobject("component","zcorerootmapping.com.grid.grid");
 		componentObjectCache.virtualFile=createobject("component","zcorerootmapping.com.zos.virtualFile");
+		componentObjectCache.featureCom=CreateObject("component","zcorerootmapping.mvc.z.feature.feature");
 
 		componentObjectCache.siteOptionCom.init("site", "site");
  

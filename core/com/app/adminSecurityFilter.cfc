@@ -23,6 +23,7 @@
 	ms["Slideshows"]={ parent:'Content Manager',value:'Slideshows', label:chr(9)&"Slideshows"};
 	ms["Site Options"]={ parent:'Content Manager',value:'Site Options', label:chr(9)&"Site Options"};
 	if(request.zos.isTestServer){
+		ms["Features"]={ parent:'Content Manager',value:'Features', label:chr(9)&"Features"};
 		ms["Layouts"]={ parent:'Content Manager',value:'Layouts', label:chr(9)&"Layouts"};
 		ms["Landing Pages"]={ parent:'Content Manager',value:'Landing Pages', label:chr(9)&"Landing Pages"};
 		ms["Sections"]={ parent:'Content Manager',value:'Sections', label:chr(9)&"Sections"};
