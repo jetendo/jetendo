@@ -2,7 +2,7 @@
 <cfoutput>
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript> 
-	if(not application.zcore.user.hasSourceAdminAccess()){
+	if(not application.zcore.user.hasSourceAdminAccess() or (not request.zos.isTestServer and not application.zcore.user.hasDeployAdminAccess(true))){
 		echo("You don't have permission to use the import site feature.");
 		abort;
 	}

@@ -104,9 +104,9 @@
 				<tr class="table-shadow">
 					<td colspan="13" class="tiny"><h2 style="display:inline;">Sites</h2> &nbsp;&nbsp;
 					<cfif application.zcore.user.hasSourceAdminAccess()> 
-						<a href="/z/server-manager/admin/site/newDomain" class="z-manager-search-button">Add Site</a> 
+						<cfif request.zos.isTestServer or application.zcore.user.hasDeployAdminAccess(true)> 
+							<a href="/z/server-manager/admin/site/newDomain" class="z-manager-search-button">Add Site</a> 
 
-						<cfif application.zcore.user.checkAllCompanyAccess()>
 							<a href="/z/server-manager/admin/site-import/index" class="z-manager-search-button">Import Site</a>
 							<a href="/z/server-manager/admin/company/index">Companies</a> 
 						 

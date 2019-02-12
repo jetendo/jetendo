@@ -1064,6 +1064,10 @@
 <cffunction name="newDomain" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Server Manager");
+	if(not request.zos.isTestServer and not application.zcore.user.hasDeployAdminAccess(true)){
+		echo("You don't have access to add site.");
+		abort;
+	}
 	</cfscript>
 	<h2>Add Site</h2>
 	<form class="zFormCheckDirty" action="/z/server-manager/admin/site/add" method="get">
