@@ -51,34 +51,34 @@
 <cffunction name="getFieldTypeCFCs" returntype="struct" localmode="modern" access="public">
 	<cfscript>
 	ts={
-		"0": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.textFieldType"),
-		"1": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.textareaFieldType"),
-		"2": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.htmlEditorFieldType"),
-		"3": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.imageFieldType"),
-		"4": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.dateTimeFieldType"),
-		"5": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.dateFieldType"),
-		"6": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.timeFieldType"),
-		"7": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.selectMenuFieldType"),
-		"8": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.checkboxFieldType"),
-		"9": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.fileFieldType"),
-		"10": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.emailFieldType"),
-		"11": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.htmlSeparatorFieldType"),
-		"12": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.hiddenFieldType"),
-		"13": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.mapPickerFieldType"),
-		"14": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.radioFieldType"),
-		"15": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.urlFieldType"),
-		"16": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.userPickerFieldType"),
-		"17": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.numberFieldType"),
-		"18": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.colorFieldType"),
-		"19": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.stateFieldType"),
-		"20": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.countryFieldType"),
-		"21": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.listingSavedSearchFieldType"),
-		"22": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.sliderFieldType"),
-		"23": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.imageLibraryFieldType"),
-		"24": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.stylesetFieldType"),
-		"25": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.productFieldType"),
-		"26": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.productCategoryFieldType"),
-		"27": createobject("component", "zcorerootmapping.mvc.z.admin.optionTypes.officePickerFieldType")
+		"0": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.textFieldType"),
+		"1": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.textareaFieldType"),
+		"2": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.htmlEditorFieldType"),
+		"3": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.imageFieldType"),
+		"4": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.dateTimeFieldType"),
+		"5": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.dateFieldType"),
+		"6": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.timeFieldType"),
+		"7": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.selectMenuFieldType"),
+		"8": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.checkboxFieldType"),
+		"9": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.fileFieldType"),
+		"10": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.emailFieldType"),
+		"11": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.htmlSeparatorFieldType"),
+		"12": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.hiddenFieldType"),
+		"13": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.mapPickerFieldType"),
+		"14": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.radioFieldType"),
+		"15": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.urlFieldType"),
+		"16": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.userPickerFieldType"),
+		"17": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.numberFieldType"),
+		"18": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.colorFieldType"),
+		"19": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.stateFieldType"),
+		"20": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.countryFieldType"),
+		"21": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.listingSavedSearchFieldType"),
+		"22": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.sliderFieldType"),
+		"23": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.imageLibraryFieldType"),
+		"24": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.stylesetFieldType"),
+		"25": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.productFieldType"),
+		"26": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.productCategoryFieldType"),
+		"27": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.officePickerFieldType")
 	};
 
 	return ts;
@@ -672,7 +672,7 @@ used to do search for a list of values
 	<cfscript>
 	t9=getTypeData(request.zos.globals.id);
 	if(structkeyexists(t9.optionSchemaLookup, arguments.option_group_id)){
-		return t9.optionSchemaLookup[arguments.option_group_id]["feature_schema_name"];
+		return t9.optionSchemaLookup[arguments.option_group_id]["feature_schema_variable_name"];
 	}else{
 		return "";
 	}
@@ -692,7 +692,7 @@ used to do search for a list of values
 			throw("Possible infinite loop.  Verify that feature_schema_parent_id is able to reach the root for #arguments.option_group_id#");
 		}
 		if(structkeyexists(t9.optionSchemaLookup, groupID)){
-			arrayPrepend(arrSchemaName, t9.optionSchemaLookup[groupID]["feature_schema_name"]);
+			arrayPrepend(arrSchemaName, t9.optionSchemaLookup[groupID]["feature_schema_variable_name"]);
 			groupID=t9.optionSchemaLookup[groupID]["feature_schema_parent_id"];
 			if(groupID EQ 0){
 				break;
@@ -784,7 +784,7 @@ used to do search for a list of values
 	curParentSetId=struct.__parentId;
 
 	getSetParentLinks(curSchemaId, curParentId, curParentSetId, true);
-	echo('<h2>Manage Section: #groupStruct["feature_schema_name"]# | #struct.__title#</h2>');
+	echo('<h2>Manage Section: #groupStruct["feature_schema_variable_name"]# | #struct.__title#</h2>');
 	</cfscript>
 	
 </cffunction>
@@ -1006,7 +1006,7 @@ used to do search for a list of values
 
 <!--- application.zcore.functions.zGetSiteSchemaIdWithNameArray(["SchemaName"]); --->
 <cffunction name="getSchemaIdWithNameArray" localmode="modern" output="no" returntype="numeric" hint="returns the group id for the last group in the array.">
-	<cfargument name="arrSchemaName" type="array" required="no" default="An array of feature_schema_name">
+	<cfargument name="arrSchemaName" type="array" required="no" default="An array of feature_schema_variable_name">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
 	t9=getTypeData(arguments.site_id);
@@ -1168,14 +1168,14 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 	if(arguments.ss.count EQ 0){
 		return arrOutput;
 	}
-	if(arguments.ss["#variables.siteType#_option_app_id"] EQ 0){
+	if(arguments.ss["feature_id"] EQ 0){
 		if(arguments.ss.output){
 			return;
 		}else{
 			return arrOutput;
 		}
 	}
-	application.zcore.siteFieldCom.registerSize(arguments.ss["#variables.siteType#_option_app_id"], arguments.ss.size, arguments.ss.crop);
+	application.zcore.siteFieldCom.registerSize(arguments.ss["feature_id"], arguments.ss.size, arguments.ss.crop);
 	</cfscript>
 	<cfif arguments.ss.output>
 		<cfloop query="arguments.ss.query" startrow="#arguments.ss.row#" endrow="#arguments.ss.row#">
@@ -1185,7 +1185,7 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 			arrImageUpdatedDate=listtoarray(arguments.ss.query.imageUpdatedDateList, chr(9), true);
 			</cfscript>
 			<cfloop from="1" to="#arguments.ss.count#" index="g2">
-				<img src="#application.zcore.siteFieldCom.getImageLink(arguments.ss["#variables.siteType#_option_app_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2])#" <cfif arrCaption[g2] NEQ "">alt="#htmleditformat(arrCaption[g2])#"</cfif> style="border:none;" />
+				<img src="#application.zcore.siteFieldCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2])#" <cfif arrCaption[g2] NEQ "">alt="#htmleditformat(arrCaption[g2])#"</cfif> style="border:none;" />
 				<cfif arrCaption[g2] NEQ ""><br /><div style="padding-top:5px;">#arrCaption[g2]#</div></cfif><br /><br />
 			</cfloop>
 		</cfloop>
@@ -1204,7 +1204,7 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 			<cfloop from="1" to="#arguments.ss.count#" index="g2">
 				<cfscript>
 				ts=structnew();
-				ts.link=application.zcore.siteFieldCom.getImageLink(arguments.ss["#variables.siteType#_option_app_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2]);
+				ts.link=application.zcore.siteFieldCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2]);
 				ts.caption=arrCaption[g2];
 				ts.id=arrId[g2];
 				arrayappend(arrOutput,ts);
@@ -1215,39 +1215,5 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 	</cfif>
 </cffunction>
 
-<!---  
-ts=structnew();
-ts.name="option_app_id";
-ts.app_id=0;
-ts.value=option_app_id;
-application.zcore.siteFieldCom.getFieldForm(ts); --->
-<cffunction name="getFieldForm" localmode="modern" returntype="any" output="yes">
-	<cfargument name="ss" type="struct" required="yes">
-	<cfscript>
-	qLibrary=getFieldAppById(arguments.ss.value, arguments.ss.app_id);
-	option_app_id=qLibrary["#variables.siteType#_option_app_id"];
-	</cfscript>
-<script type="text/javascript">
-	/* <![CDATA[ */
-	function showoptionWindow(){
-		var windowSize=zGetClientWindowSize();
-		var modalContent1='<iframe src="/z/admin/#variables.type#-options/index?#variables.siteType#_option_app_id=#option_app_id#&amp;ztv='+Math.random()+'"  style="margin:0px;border:none; overflow:auto;" seamless="seamless" width="100%" height="95%"><\/iframe>';		
-		zShowModal(modalContent1,{'width':windowSize.width-100,'height':windowSize.height-100});
-	}
-	/* ]]> */
-	</script>
-<input type="hidden" name="#arguments.ss.name#" value="#option_app_id#" />
-<h2><a href="##" onclick="showoptionWindow(); return false;">Edit Custom Fields</a></h2>
-
-</cffunction>
-
-<cffunction name="optionappform" localmode="modern" access="remote" roles="member" returntype="any" output="yes">
-	<cfscript>
-	application.zcore.template.setTemplate("zcorerootmapping.templates.blank",true,true);
-	c=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.#variables.type#-options");
-	c.index();
-	</cfscript>
-</cffunction>
-  
 </cfoutput>
 </cfcomponent>

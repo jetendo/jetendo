@@ -1528,6 +1528,13 @@ if(rCom.isOK() EQ false){
 	var i=0;
 	var list=0;
 	var arrIgnoreIds=0;
+
+	for(id in arguments.ss.arrId){
+		if(id EQ 50){
+			throw("URL ID 50 is required for the feature schema system. Choose another number.");
+		}
+	}
+
 	var rCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.zos.return", true);
 	if(structkeyexists(arguments.ss,'arrId') EQ false){
 		rCom.setError("arguments.ss.arrId is required.",1);
@@ -1616,6 +1623,7 @@ if(rCom.isOK() EQ false){
 		request.zos.selectAppUrlIdCount=0;
 		request.zos.selectAppUrlIdNameStruct=structnew(); 
 		savecontent variable="out2"{
+			writeoutput('arrId[50]=1;'); // 50 is reserved for the feature system
 			arrId=listtoarray(qD.idlist);
 			for(i=1;i LTE arraylen(arrId);i++){
 				writeoutput('arrId[#arrId[i]#]=1;');

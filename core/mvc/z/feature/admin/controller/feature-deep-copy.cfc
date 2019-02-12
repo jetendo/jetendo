@@ -19,13 +19,13 @@ When making a version the primary record, it will have option to preserve the or
 				they can only work on the groups with parent_id = 0 because relationships with other records would break if we didn't restrict this.
 				
 				a "Version" is an inactive copy of the data. 
-				site_x_option_group_set_version
-					all the same fields as site_x_option_group_set with site_x_option_group_set_version prefix
+				feature_data_version
+					all the same fields as feature_data with feature_data_version prefix
 					plus:
-					site_x_option_group_set_version_status char(1) default 0 | 0 is archived | 1 is primary | 2 is primary preview  - there can only be 1 record at a time that is value 1, and 1 that is value 2.   preview records are only visible for logged in user with manager privileges.
-					site_x_option_group_set_id
-				site_x_option_group_set
-					site_x_option_group_set_master_set_id (refers to the main site_x_option_group_set_id record)  
+					feature_data_version_status char(1) default 0 | 0 is archived | 1 is primary | 2 is primary preview  - there can only be 1 record at a time that is value 1, and 1 that is value 2.   preview records are only visible for logged in user with manager privileges.
+					feature_data_id
+				feature_data
+					feature_data_master_set_id (refers to the main feature_data_id record)  
 						if this is 0, then it is the master, else it is a version, and should not be included in the main arrays and query results that are used for site output.   
 						when non-zero, the full tree of data for this record and its child records should ALWAYS be cached in memory if the version record for this id is not archived.
 				site_x_option_group
@@ -56,25 +56,25 @@ When making a version the primary record, it will have option to preserve the or
 	<cfscript>
 	var db=request.zos.queryObject;
 	var row=arguments.rowStruct;
-	row.site_x_option_group_set_override_url="";
-	row.site_x_option_group_set_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
+	row.feature_data_override_url="";
+	row.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 	row.site_id = arguments.site_id;
 
-	if(row.site_x_option_group_set_image_library_id NEQ 0){
+	if(row.feature_data_image_library_id NEQ 0){
 
 		logCopyMessage('Copying image library for set ###arguments.option_group_set_id#');
-		row.site_x_option_group_set_image_library_id=application.zcore.imageLibraryCom.copyImageLibrary(row.site_x_option_group_set_image_library_id, row.site_id);
+		row.feature_data_image_library_id=application.zcore.imageLibraryCom.copyImageLibrary(row.feature_data_image_library_id, row.site_id);
 	}
 	ts=structnew();
 	ts.struct=row;
 	ts.datasource="jetendofeature";
-	ts.table="site_x_option_group_set";
+	ts.table="feature_data";
 	newSetId=application.zcore.functions.zInsert(ts);
 
 	logCopyMessage('Copying set ###arguments.option_group_set_id#');
 	db.sql="select * from 
 	#db.table("site_x_option_group", "jetendofeature")# WHERE 
-	site_x_option_group_set_id = #db.param(arguments.option_group_set_id)# and 
+	feature_data_id = #db.param(arguments.option_group_set_id)# and 
 	site_x_option_group_deleted=#db.param(0)# and 
 	site_id = #db.param(arguments.site_id)# ";
 	qValue=db.execute("qValue");
@@ -83,7 +83,7 @@ When making a version the primary record, it will have option to preserve the or
 	for(row2 in qValue){
 
 		structdelete(row2, 'site_x_option_group_id');  
-		row2.site_x_option_group_set_id=newSetId;
+		row2.feature_data_id=newSetId;
 		row2.site_id=arguments.site_id;
 		row2.site_x_option_group_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 
@@ -138,16 +138,16 @@ When making a version the primary record, it will have option to preserve the or
 
 
 	db.sql="select * from 
-	#db.table("site_x_option_group_set", "jetendofeature")# WHERE 
-	site_x_option_group_set_parent_id = #db.param(arguments.option_group_set_id)# and 
-	site_x_option_group_set_master_set_id = #db.param(0)# and 
-	site_x_option_group_set_deleted=#db.param(0)#  and 
+	#db.table("feature_data", "jetendofeature")# WHERE 
+	feature_data_parent_id = #db.param(arguments.option_group_set_id)# and 
+	feature_data_master_set_id = #db.param(0)# and 
+	feature_data_deleted=#db.param(0)#  and 
 	site_id = #db.param(arguments.site_id)# ";
 	typeCache={};
 	qChild=db.execute("qChild");
 	for(row3 in qChild){
-		row3.site_x_option_group_set_parent_id=newSetId;
-		this.copySchemaRecursive(row3.site_x_option_group_set_id, arguments.site_id, row3, arguments.groupStruct, arguments.optionStruct);
+		row3.feature_data_parent_id=newSetId;
+		this.copySchemaRecursive(row3.feature_data_id, arguments.site_id, row3, arguments.groupStruct, arguments.optionStruct);
 	}
 	</cfscript>
 </cffunction>
@@ -231,45 +231,45 @@ When making a version the primary record, it will have option to preserve the or
 		for(row in qSet){
 			tempSchema=groupStruct[row.feature_schema_id];
 			if(tempSchema.data.feature_schema_enable_sorting EQ 1){
-				db.sql="select max(site_x_option_group_set_sort) maxSort from #db.table("site_x_option_group_set", "jetendofeature")# 
-				WHERE site_x_option_group_set_parent_id = #db.param(row.site_x_option_group_set_parent_id)# and 
+				db.sql="select max(feature_data_sort) maxSort from #db.table("feature_data", "jetendofeature")# 
+				WHERE feature_data_parent_id = #db.param(row.feature_data_parent_id)# and 
 				site_id = #db.param(row.site_id)# and 
-				site_x_option_group_set_deleted=#db.param(0)# and 
-				site_x_option_group_set_master_set_id = #db.param(0)#";
+				feature_data_deleted=#db.param(0)# and 
+				feature_data_master_set_id = #db.param(0)#";
 				qSort=db.execute("qSort");
 				for(row2 in qSort){
-					row.site_x_option_group_set_sort=qSort.maxSort+1;
+					row.feature_data_sort=qSort.maxSort+1;
 				}
 			}
-			row.site_x_option_group_set_copy_id=form.site_x_option_group_set_id;
+			row.feature_data_copy_id=form.feature_data_id;
 			if(form.createVersion EQ 1){
 				if(tempSchema.data.feature_schema_enable_versioning EQ 0){
 					application.zcore.status.setStatus(request.zsid, "Versioning is not allowed.", form, true);
 					application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
 				}
 				if(tempSchema.data.feature_schema_version_limit NEQ 0){
-					db.sql="select count(site_x_option_group_set_id) count from #db.table("site_x_option_group_set", "jetendofeature")# 
-					WHERE site_x_option_group_set_master_set_id = #db.param(row.site_x_option_group_set_id)# and 
+					db.sql="select count(feature_data_id) count from #db.table("feature_data", "jetendofeature")# 
+					WHERE feature_data_master_set_id = #db.param(row.feature_data_id)# and 
 					site_id = #db.param(row.site_id)# and 
-					site_x_option_group_set_deleted=#db.param(0)# ";
+					feature_data_deleted=#db.param(0)# ";
 					qVersionCount=db.execute("qVersionCount");
 					if(qVersionCount.recordcount NEQ 0 and tempSchema.data.feature_schema_version_limit LTE qVersionCount.count){
 						application.zcore.status.setStatus(request.zsid, "Version limit reached. You must delete a version before creating a new one.", form, true);
-						application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#row.site_x_option_group_set_id#&zsid=#request.zsid#");
+						application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#row.feature_data_id#&zsid=#request.zsid#");
 					}
 				}
-				db.sql="select site_x_option_group_set_id from #db.table("site_x_option_group_set", "jetendofeature")# 
-				WHERE site_x_option_group_set_master_set_id = #db.param(row.site_x_option_group_set_id)# and 
+				db.sql="select feature_data_id from #db.table("feature_data", "jetendofeature")# 
+				WHERE feature_data_master_set_id = #db.param(row.feature_data_id)# and 
 				site_id = #db.param(row.site_id)# and 
-				site_x_option_group_set_deleted=#db.param(0)# and 
-				site_x_option_group_set_version_status = #db.param(1)#";
+				feature_data_deleted=#db.param(0)# and 
+				feature_data_version_status = #db.param(1)#";
 				qVersionStatus=db.execute("qVersionStatus");
 				if(qVersionStatus.recordcount EQ 0){
-					row.site_x_option_group_set_version_status=1;
+					row.feature_data_version_status=1;
 				}
-				row.site_x_option_group_set_master_set_id=form.site_x_option_group_set_id;
+				row.feature_data_master_set_id=form.feature_data_id;
 			}
-			this.copySchemaRecursive(form.site_x_option_group_set_id, form.newSiteId, row, groupStruct, optionStruct);
+			this.copySchemaRecursive(form.feature_data_id, form.newSiteId, row, groupStruct, optionStruct);
 		}
 
 		if(form.newSiteID NEQ request.zos.globals.id){
@@ -306,9 +306,9 @@ When making a version the primary record, it will have option to preserve the or
 		success:true
 	};
 	if(form.createVersion EQ 1){
-		rs.redirectURL="/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#qSet.site_x_option_group_set_id#";
+		rs.redirectURL="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qSet.feature_data_id#";
 	}else{
-		rs.redirectURL="/z/feature/admin/features/manageSchema?site_x_option_group_set_parent_id=#qSet.site_x_option_group_set_parent_id#&feature_id=#qSet.feature_id#&feature_schema_id=#qSet.feature_schema_id#&zsid=#request.zsid#";
+		rs.redirectURL="/z/feature/admin/features/manageSchema?feature_data_parent_id=#qSet.feature_data_parent_id#&feature_id=#qSet.feature_id#&feature_schema_id=#qSet.feature_schema_id#&zsid=#request.zsid#";
 	}
 	application.zcore.functions.zReturnJSON(rs);
 	</cfscript>
@@ -319,10 +319,10 @@ When making a version the primary record, it will have option to preserve the or
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select feature_schema_id, count(site_id) count from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
+	db.sql="select feature_schema_id, count(site_id) count from #db.table("feature_data", "jetendofeature")# WHERE 
 	site_id = #db.param(arguments.site_id)# and 
-	site_x_option_group_set_deleted=#db.param(0)# and 
-	site_x_option_group_set_master_set_id=#db.param(arguments.setId)#";
+	feature_data_deleted=#db.param(0)# and 
+	feature_data_master_set_id=#db.param(arguments.setId)#";
 	qVersion=db.execute("qVersion");
 	if(qVersion.recordcount EQ 0){
 		return false;
@@ -353,39 +353,39 @@ When making a version the primary record, it will have option to preserve the or
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	</cfscript>
 	<form class="zFormCheckDirty" action="/z/feature/admin/feature-deep-copy/setVersionActive" method="post">
-		<input type="hidden" name="site_x_option_group_set_id" value="#form.site_x_option_group_set_id#" />
-		<input type="hidden" name="site_x_option_group_set_master_set_id" value="#form.site_x_option_group_set_master_set_id#" />
+		<input type="hidden" name="feature_data_id" value="#form.feature_data_id#" />
+		<input type="hidden" name="feature_data_master_set_id" value="#form.feature_data_master_set_id#" />
 		<cfscript>
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# 
-	where site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	where feature_data_id = #db.param(form.feature_data_id)# and 
+	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qVersion=db.execute("qVersion");
-		form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
-		form.site_x_option_group_set_master_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_master_set_id');
+		form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
+		form.feature_data_master_set_id=application.zcore.functions.zso(form, 'feature_data_master_set_id');
 		form.preserveURL=application.zcore.functions.zso(form, 'preserveURL', true, 1);
 		form.preserveMeta=application.zcore.functions.zso(form, 'preserveMeta', true, 1);
 		</cfscript>
 		<!--- TODO: consider showing new/old values to help user understand what is being asked. --->
 		<h2>Are you sure you want to make this version active?</h2>
 		<p>The active record will be made inactive, and this record will take its place.</p>
-		<p>ID: #qVersion.site_x_option_group_set_id# | Title: #qVersion.site_x_option_group_set_title#</p>
+		<p>ID: #qVersion.feature_data_id# | Title: #qVersion.feature_data_title#</p>
 
-		<p>URL: <cfif qVersion.site_x_option_group_set_override_url EQ "">
+		<p>URL: <cfif qVersion.feature_data_override_url EQ "">
 			(Default/Automatic)
 		<cfelse>
-			#qVersion.site_x_option_group_set_override_url#
+			#qVersion.feature_data_override_url#
 		</cfif></p>
-		<p>Meta Title: #qVersion.site_x_option_group_set_metatitle#</p>
-		<p>Meta Keywords: #qVersion.site_x_option_group_set_metakey#</p>
-		<p>Meta Description: #qVersion.site_x_option_group_set_metadesc#</p>
+		<p>Meta Title: #qVersion.feature_data_metatitle#</p>
+		<p>Meta Keywords: #qVersion.feature_data_metakey#</p>
+		<p>Meta Description: #qVersion.feature_data_metadesc#</p>
 		<h3>Keep URL the same?
 		#application.zcore.functions.zInput_Boolean("preserveURL")#</h3>
 		<h3>Keep Meta Tags the same?
 		#application.zcore.functions.zInput_Boolean("preserveMeta")#</h3>
 
 		<p><input type="submit" name="submit1" value="Make Primary" />
-		<input type="button" name="cancel1" onclick="window.location.href='/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#qVersion.site_x_option_group_set_master_set_id#';" value="Cancel" /></p>
+		<input type="button" name="cancel1" onclick="window.location.href='/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qVersion.feature_data_master_set_id#';" value="Cancel" /></p>
 	</form>
 </cffunction>
 
@@ -395,20 +395,20 @@ When making a version the primary record, it will have option to preserve the or
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	// TODO: consider more security checks here are necessary
 
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
-	form.site_x_option_group_set_master_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_master_set_id');
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
+	form.feature_data_master_set_id=application.zcore.functions.zso(form, 'feature_data_master_set_id');
 	form.preserveURL=application.zcore.functions.zso(form, 'preserveURL', true, 1);
 	form.preserveMeta=application.zcore.functions.zso(form, 'preserveMeta', true, 1);
 
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# 
-	where site_x_option_group_set_id = #db.param(form.site_x_option_group_set_master_set_id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	where feature_data_id = #db.param(form.feature_data_master_set_id)# and 
+	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qMaster=db.execute("qMaster");
 
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# 
-	where site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	where feature_data_id = #db.param(form.feature_data_id)# and 
+	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qVersion=db.execute("qVersion");
 
@@ -426,28 +426,28 @@ When making a version the primary record, it will have option to preserve the or
 	}
 
 
-	backupMasterSetId=tempMaster.site_x_option_group_set_id;
-	backupVersionSetId=tempVersion.site_x_option_group_set_id;
+	backupMasterSetId=tempMaster.feature_data_id;
+	backupVersionSetId=tempVersion.feature_data_id;
 
 
-	structdelete(tempMaster, 'site_x_option_group_set_id');
-	tempMaster.site_x_option_group_set_master_set_id=backupMasterSetId;
-	tempMaster.site_x_option_group_set_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
+	structdelete(tempMaster, 'feature_data_id');
+	tempMaster.feature_data_master_set_id=backupMasterSetId;
+	tempMaster.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 
-	if(form.preserveURL EQ 1 and tempMaster.site_x_option_group_set_override_url NEQ ""){
-		tempVersion.site_x_option_group_set_override_url=tempMaster.site_x_option_group_set_override_url;
-		tempMaster.site_x_option_group_set_override_url="";
+	if(form.preserveURL EQ 1 and tempMaster.feature_data_override_url NEQ ""){
+		tempVersion.feature_data_override_url=tempMaster.feature_data_override_url;
+		tempMaster.feature_data_override_url="";
 	}
 	ts={
-		table:"site_x_option_group_set",
+		table:"feature_data",
 		datasource:"jetendofeature",
 		struct:tempMaster
 	};
-	tempVersion.site_x_option_group_set_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
+	tempVersion.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 	if(form.preserveMeta EQ 1){
-		tempVersion.site_x_option_group_set_metatitle=tempMaster.site_x_option_group_set_metatitle;
-		tempVersion.site_x_option_group_set_metakey=tempMaster.site_x_option_group_set_metakey;
-		tempVersion.site_x_option_group_set_metadesc=tempMaster.site_x_option_group_set_metadesc;
+		tempVersion.feature_data_metatitle=tempMaster.feature_data_metatitle;
+		tempVersion.feature_data_metakey=tempMaster.feature_data_metakey;
+		tempVersion.feature_data_metadesc=tempMaster.feature_data_metadesc;
 	}
 
 	writedump(ts);
@@ -457,53 +457,53 @@ When making a version the primary record, it will have option to preserve the or
 	newMasterId=application.zcore.functions.zInsert(ts);
 	transaction action="begin"{
 		try{
-			db.sql="delete from #db.table("site_x_option_group_set", "jetendofeature")# where 
+			db.sql="delete from #db.table("feature_data", "jetendofeature")# where 
 			site_id = #db.param(tempMaster.site_id)# and 
-			site_x_option_group_set_id = #db.param(backupMasterSetId)# and 
-			site_x_option_group_set_deleted=#db.param(0)#";
+			feature_data_id = #db.param(backupMasterSetId)# and 
+			feature_data_deleted=#db.param(0)#";
 			db.execute("qDelete");
 			db.sql="update site_x_option_group set 
-			site_x_option_group_set_id = #db.param(newMasterId)#, 
+			feature_data_id = #db.param(newMasterId)#, 
 			site_x_option_group_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where site_x_option_group_set_id = #db.param(backupMasterSetId)# and 
+			where feature_data_id = #db.param(backupMasterSetId)# and 
 			site_id = #db.param(tempMaster.site_id)# and 
 			site_x_option_group_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
-			db.sql="update site_x_option_group_set set 
-			site_x_option_group_set_parent_id = #db.param(newMasterId)#, 
-			site_x_option_group_set_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where site_x_option_group_set_parent_id = #db.param(backupMasterSetId)# and 
+			db.sql="update feature_data set 
+			feature_data_parent_id = #db.param(newMasterId)#, 
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
+			where feature_data_parent_id = #db.param(backupMasterSetId)# and 
 			site_id = #db.param(tempMaster.site_id)# and 
 			site_x_option_group_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 
-			db.sql="update site_x_option_group_set set 
-			site_x_option_group_set_id = #db.param(backupMasterSetId)#, 
-			site_x_option_group_set_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where site_x_option_group_set_id = #db.param(backupVersionSetId)# and 
+			db.sql="update feature_data set 
+			feature_data_id = #db.param(backupMasterSetId)#, 
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
+			where feature_data_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
 			site_x_option_group_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 			db.sql="update site_x_option_group set 
-			site_x_option_group_set_id = #db.param(backupMasterSetId)#, 
+			feature_data_id = #db.param(backupMasterSetId)#, 
 			site_x_option_group_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where site_x_option_group_set_id = #db.param(backupVersionSetId)# and 
+			where feature_data_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
 			site_x_option_group_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
-			db.sql="update site_x_option_group_set set 
-			site_x_option_group_set_parent_id = #db.param(backupMasterSetId)#, 
-			site_x_option_group_set_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where site_x_option_group_set_parent_id = #db.param(backupVersionSetId)# and 
+			db.sql="update feature_data set 
+			feature_data_parent_id = #db.param(backupMasterSetId)#, 
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
+			where feature_data_parent_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
 			site_x_option_group_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 
-			tempVersion.site_x_option_group_set_id=backupMasterSetId;
-			tempVersion.site_x_option_group_set_master_set_id=0;
+			tempVersion.feature_data_id=backupMasterSetId;
+			tempVersion.feature_data_master_set_id=0;
 
 			ts={
-				table:"site_x_option_group_set",
+				table:"feature_data",
 				datasource:"jetendofeature",
 				struct:tempVersion
 			};
@@ -511,10 +511,10 @@ When making a version the primary record, it will have option to preserve the or
 
 		}catch(Any e){
 			transaction action="rollback";
-			db.sql="delete from #db.table("site_x_option_group_set", "jetendofeature")# where 
+			db.sql="delete from #db.table("feature_data", "jetendofeature")# where 
 			site_id = #db.param(tempMaster.site_id)# and 
-			site_x_option_group_set_id = #db.param(newMasterId)# and 
-			site_x_option_group_set_deleted=#db.param(0)#";
+			feature_data_id = #db.param(newMasterId)# and 
+			feature_data_deleted=#db.param(0)#";
 			db.execute("qDelete");
 			rethrow;
 		}
@@ -525,7 +525,7 @@ When making a version the primary record, it will have option to preserve the or
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#backupMasterSetId#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#backupMasterSetId#");
 	</cfscript>
 	
 </cffunction>
@@ -535,42 +535,42 @@ When making a version the primary record, it will have option to preserve the or
 	db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	form.statusValue=application.zcore.functions.zso(form, 'statusValue', true, 0);
-	form.site_x_option_group_set_master_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_master_set_id');
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
+	form.feature_data_master_set_id=application.zcore.functions.zso(form, 'feature_data_master_set_id');
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 
 	// verify the set is a version
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
 	WHERE feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_id= #db.param(form.site_x_option_group_set_id)# and 
-	site_x_option_group_set_master_set_id=#db.param(form.site_x_option_group_set_master_set_id)# and 
-	site_x_option_group_set_deleted=#db.param(0)# ";
+	feature_data_id= #db.param(form.feature_data_id)# and 
+	feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
+	feature_data_deleted=#db.param(0)# ";
 	qArchive=db.execute("qArchive");
 
 	if(qArchive.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Version no longer exists.");
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#form.site_x_option_group_set_master_set_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_master_set_id#");
 	}
 
 	transaction action="begin"{
 		try{
 			if(form.statusValue EQ 1){
-				db.sql="update #db.table("site_x_option_group_set", "jetendofeature")# 
+				db.sql="update #db.table("feature_data", "jetendofeature")# 
 				SET 
-				site_x_option_group_set_version_status=#db.param(0)#, 
-				site_x_option_group_set_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
+				feature_data_version_status=#db.param(0)#, 
+				feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
 				WHERE feature_id=#db.param(form.feature_id)# and 
-				site_x_option_group_set_master_set_id=#db.param(form.site_x_option_group_set_master_set_id)# and 
-				site_x_option_group_set_deleted=#db.param(0)# ";
+				feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
+				feature_data_deleted=#db.param(0)# ";
 				qUpdate=db.execute("qUpdate");
 			}
-			db.sql="update #db.table("site_x_option_group_set", "jetendofeature")# 
+			db.sql="update #db.table("feature_data", "jetendofeature")# 
 			SET 
-			site_x_option_group_set_version_status=#db.param(form.statusValue)#, 
-			site_x_option_group_set_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
+			feature_data_version_status=#db.param(form.statusValue)#, 
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
 			WHERE feature_id=#db.param(form.feature_id)# and 
-			site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
-			site_x_option_group_set_master_set_id=#db.param(form.site_x_option_group_set_master_set_id)# and 
-			site_x_option_group_set_deleted=#db.param(0)# ";
+			feature_data_id=#db.param(form.feature_data_id)# and 
+			feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
+			feature_data_deleted=#db.param(0)# ";
 			qUpdate=db.execute("qUpdate");  
 		}catch(Any e){
 			transaction action="rollback"; 
@@ -588,7 +588,7 @@ When making a version the primary record, it will have option to preserve the or
 	}else{
 		application.zcore.status.setStatus(request.zsid, "Version archived.");
 	}
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#form.site_x_option_group_set_master_set_id#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_master_set_id#");
 	</cfscript>
 </cffunction>
 
@@ -601,14 +601,14 @@ When making a version the primary record, it will have option to preserve the or
 	structappend(arguments.struct, defaultStruct, false);
 	qSet=getSet(); 
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")#,
+	db.sql="select * from #db.table("feature_data", "jetendofeature")#,
 	#db.table("feature_schema", "jetendofeature")# WHERE 
-	feature_schema.feature_schema_id = site_x_option_group_set.feature_schema_id and 
+	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 	feature_schema_deleted=#db.param(0)# and 
-	feature_schema.site_id = site_x_option_group_set.site_id and 
-	site_x_option_group_set.feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_deleted=#db.param(0)# and 
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)#";
+	feature_schema.site_id = feature_data.site_id and 
+	feature_data.feature_id=#db.param(form.feature_id)# and 
+	feature_data_deleted=#db.param(0)# and 
+	feature_data_id=#db.param(form.feature_data_id)#";
 	qMaster=db.execute("qMaster");
 	if(qMaster.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Invalid request", form, true);
@@ -620,19 +620,19 @@ When making a version the primary record, it will have option to preserve the or
 	feature_schema_id=#db.param(qMaster.feature_schema_id)# ";
 	qSchema=db.execute("qSchema");
 
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 	echo('<p><a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qMaster.feature_schema_id#">Manage #qSchema.feature_schema_display_name#</a> /</p>');
-	echo('<h2>Showing versions for "'&qSet.site_x_option_group_set_title&'"</h2>');
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
+	echo('<h2>Showing versions for "'&qSet.feature_data_title&'"</h2>');
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_deleted=#db.param(0)# and 
-	site_x_option_group_set_master_set_id=#db.param(form.site_x_option_group_set_id)#";
+	feature_data_deleted=#db.param(0)# and 
+	feature_data_master_set_id=#db.param(form.feature_data_id)#";
 	qVersion=db.execute("qVersion");
 
 
-	limitReached=isVersionLimitReached(form.site_x_option_group_set_id, request.zos.globals.id);
+	limitReached=isVersionLimitReached(form.feature_data_id, request.zos.globals.id);
 	if(not limitReached){
-		echo('<p><a href="/z/feature/admin/feature-deep-copy/index?createVersion=1&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#">Create new version</a></p>');
+		echo('<p><a href="/z/feature/admin/feature-deep-copy/index?createVersion=1&amp;feature_data_id=#form.feature_data_id#">Create new version</a></p>');
 	}else{
 		echo('<p>Version limit reached. To create a new version, please delete one of the previous versions.</p>');
 	}
@@ -648,41 +648,37 @@ When making a version the primary record, it will have option to preserve the or
 		</tr>');
 	for(row in qVersion){
 		echo('<tr>
-			<td>'&row.site_x_option_group_set_id&'</td>
-			<td>'&row.site_x_option_group_set_title&'</td>');
+			<td>'&row.feature_data_id&'</td>
+			<td>'&row.feature_data_title&'</td>');
 
 		echo('
 			<td>');
-		if(row.site_x_option_group_set_version_status EQ 0){
+		if(row.feature_data_version_status EQ 0){
 			echo('Archived');
 		}else{
 			echo('Preview Enabled');
 		}
 		echo('</td>
-		<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.site_x_option_group_set_updated_datetime)&'</td>
+		<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime)&'</td>
 			<td>');
-		if(row.site_x_option_group_set_version_status EQ 0){
+		if(row.feature_data_version_status EQ 0){
 			// 0 is archived | 1 is primary
-			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_master_set_id=#row.site_x_option_group_set_master_set_id#&amp;statusValue=1">Enable Preview</a>');
+			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=1">Enable Preview</a>');
 		}else{
 			if(qMaster.feature_schema_enable_unique_url EQ 1){
-				if(row.site_x_option_group_set_override_url NEQ ""){
-					link=row.site_x_option_group_set_override_url;
+				if(row.feature_data_override_url NEQ ""){
+					link=row.feature_data_override_url;
 				}else{
-					var urlId=application.zcore.functions.zvar('optionSchemaUrlId', qMaster.site_id);
-					if(urlId EQ "" or urlId EQ 0){
-						throw("feature_schema_url_id is not set for site_id, #site_id#.");
-					}
-					link="/#application.zcore.functions.zURLEncode(row.site_x_option_group_set_title, '-')#-#urlId#-#row.site_x_option_group_set_id#.html";
+					link="/#application.zcore.functions.zURLEncode(row.feature_data_title, '-')#-50-#row.feature_data_id#.html";
 				}
 				echo('<a href="#link#" target="_blank">View</a> | ');
 			}
-			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_master_set_id=#row.site_x_option_group_set_master_set_id#&amp;statusValue=0">Disable Preview</a>');
+			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=0">Disable Preview</a>');
 		}
-		echo(' | <a href="/z/feature/admin/feature-deep-copy/confirmVersionActive?site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_master_set_id=#row.site_x_option_group_set_master_set_id#">Make Primary</a>');
+		echo(' | <a href="/z/feature/admin/feature-deep-copy/confirmVersionActive?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#">Make Primary</a>');
 
-		editLink=application.zcore.functions.zURLAppend(arguments.struct.editURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#"); // &amp;modalpopforced=1&amp;disableSorting=1
-		deleteLink=application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+		editLink=application.zcore.functions.zURLAppend(arguments.struct.editURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#"); // &amp;modalpopforced=1&amp;disableSorting=1
+		deleteLink=application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#");
 
 		echo(' | <a href="#editLink#">Edit</a>');
 		//echo(' | <a href="##" onclick="zDeleteTableRecordRow(this, ''#deleteLink#'');  return false;">Delete</a>');
@@ -699,10 +695,10 @@ When making a version the primary record, it will have option to preserve the or
 	var db=request.zos.queryObject;
 	application.zcore.functions.zSetPageHelpId("2.11.1.2");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
-	db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# 
-	where site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
+	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	where feature_data_id = #db.param(form.feature_data_id)# and 
+	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qSet=db.execute("qSet");
 	if(qSet.recordcount EQ 0){
@@ -727,19 +723,19 @@ When making a version the primary record, it will have option to preserve the or
 
 	<h2>Select Copy Method</h2>
 	<p>Note: Creating a deep copy or a new version can take several seconds. Please be patient.</p>
-	<p>Selected Record ID###form.site_x_option_group_set_id# | Title: #qSet.site_x_option_group_set_title#</p>
+	<p>Selected Record ID###form.feature_data_id# | Title: #qSet.feature_data_title#</p>
 	<hr />
 	<div id="copyMessageDiv">
-		<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/copySchema?site_x_option_group_set_id=#form.site_x_option_group_set_id#'); return false;">Deep Copy</a></h3>
+		<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/copySchema?feature_data_id=#form.feature_data_id#'); return false;">Deep Copy</a></h3>
 		<p>A deep copy will force the URL to be unique, but all other data including text, files And sub-records will be fully cloned.</p>
-		<h3><a href="/z/feature/admin/features/addSchema?feature_id=#qSet.feature_id#&amp;feature_schema_id=#qSet.feature_schema_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#qSet.site_x_option_group_set_parent_id#">Shallow Copy</a></h3>
+		<h3><a href="/z/feature/admin/features/addSchema?feature_id=#qSet.feature_id#&amp;feature_schema_id=#qSet.feature_schema_id#&amp;feature_data_id=#form.feature_data_id#&amp;feature_data_parent_id=#qSet.feature_data_parent_id#">Shallow Copy</a></h3>
 		<p>Shallow copy prefills the form for creating a new record with only this record's text.  All files and sub-records will be left blank on the new record.</p>
 		<cfif request.zos.istestserver>
-			<cfif isVersionLimitReached(form.site_x_option_group_set_id, qSet.site_id)>
+			<cfif isVersionLimitReached(form.feature_data_id, qSet.site_id)>
 				<h3>Version limit reached.  You must delete a previous version before creating a new one.</h3>
-				<p><a href="/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#form.site_x_option_group_set_id#">List versions</a></p>
+				<p><a href="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_id#">List versions</a></p>
 			<cfelse>
-				<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?site_x_option_group_set_id=#form.site_x_option_group_set_id#'); return false;">Create new version</a></h3>
+				<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_data_id=#form.feature_data_id#'); return false;">Create new version</a></h3>
 				<p>A version is a deep copy that is linked with the original record.  The new record will be invisible to the public until finalized.  You will be able to preserve the URL and existing relationships that the original record had when you set the version to be the primary record.</p>
 			</cfif>
 		</cfif>
@@ -751,7 +747,7 @@ When making a version the primary record, it will have option to preserve the or
 		
 		<script type="text/javascript">
 		zArrDeferredFunctions.push(function(){
-			doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?site_x_option_group_set_id=#form.site_x_option_group_set_id#');
+			doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_data_id=#form.feature_data_id#');
 		});
 		</script>
 	</cfif>

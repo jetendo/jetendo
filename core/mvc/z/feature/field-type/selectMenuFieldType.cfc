@@ -448,7 +448,7 @@
 			<cfscript>
 			// and 	feature_schema_parent_id=#db.param(0)# 
 			db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")#
-			WHERE `#variables.type#_id` = #db.param(request.zos.globals.id)#  and 
+			WHERE feature_id=#db.param(arguments.dataStruct.feature_id)#  and 
 			feature_schema_deleted = #db.param(0)# 
 			ORDER BY feature_schema_display_name"; 
 			var qSchema2=db.execute("qSchema2", "", 10000, "query", false);
@@ -566,7 +566,7 @@
 		s2.feature_field_deleted = #db.param(0)# and
 		s2.feature_field_id = s1.feature_field_id and 
 		s2.feature_schema_id = s1.feature_schema_id and 
-		s2.`#variables.type#_id` = s1.`#variables.type#_id` and 
+		s2.feature_id = s1.feature_id and 
 		s1.feature_schema_id = #db.param(ts2.selectmenu_groupid)# and 
 		s1.feature_id=#db.param(form.feature_id)# ";
 		local.qSchemaData=db.execute("qSchemaData");

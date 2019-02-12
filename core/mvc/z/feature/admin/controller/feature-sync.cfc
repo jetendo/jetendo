@@ -44,7 +44,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	if(arraylen(arrSchema) EQ 0){
 		return {success:false};
 	}
-	feature_schema_name=arrSchema[arrayLen(arrSchema)];
+	feature_schema_variable_name=arrSchema[arrayLen(arrSchema)];
 	if(arraylen(arrSchema) LTE 1 or arguments.groupNameList EQ 0){
 		parentId=0;
 	}else{
@@ -58,7 +58,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	}else if(arguments.createIfMissing){
 		groupStruct={
 			new:true,
-			feature_schema_name:feature_schema_name,
+			feature_schema_variable_name:feature_schema_variable_name,
 			feature_schema_id:getNextSchemaId(arguments.groupNameList),
 			feature_schema_parent_id:parentId,
 			feature_id:request.zos.globals.id
@@ -162,7 +162,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 			inquiries_type_id = #db.param(row.inquiries_type_id)#";
 			qType=db.execute("qType");
 			if(qType.recordcount EQ 0){
-				throw("inquiries_type_id, ""#row.inquiries_type_id#"", doesn't exist, and it is required for this group to work:  Parent ID: #row.feature_schema_parent_id# Name: #row.feature_schema_name#.");
+				throw("inquiries_type_id, ""#row.inquiries_type_id#"", doesn't exist, and it is required for this group to work:  Parent ID: #row.feature_schema_parent_id# Name: #row.feature_schema_variable_name#.");
 			}
 			row.inquiriesTypeName = qType.inquiries_type_name;
 		}
@@ -202,7 +202,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	struct.optionSchemaStruct["0"]={};
 	struct.optionNameStruct["0"]={};
 	for(i=1;i LTE arraylen(ts.arrSchema);i++){
-		groupNameList=arrayToList(getFullSchemaPath(struct, ts.arrSchema[i].feature_schema_parent_id, ts.arrSchema[i].feature_schema_name), chr(9));
+		groupNameList=arrayToList(getFullSchemaPath(struct, ts.arrSchema[i].feature_schema_parent_id, ts.arrSchema[i].feature_schema_variable_name), chr(9));
 		struct.optionSchemaNameStruct[groupNameList]=ts.arrSchema[i].feature_schema_id;
 		struct.optionNameStruct[groupNameList]={};
 		struct.optionSchemaNameLookupById[ts.arrSchema[i].feature_schema_id]=groupNameList;
@@ -212,7 +212,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 		struct.optionStruct[ts.arrField[i].feature_field_id]=ts.arrField[i];
 		if(ts.arrField[i].feature_schema_id NEQ 0 and structkeyexists(struct.optionSchemaStruct, ts.arrField[i].feature_schema_id)){ 
 			groupStruct=struct.optionSchemaStruct[ts.arrField[i].feature_schema_id];
-			groupNameList=getFullSchemaPath(struct, groupStruct.feature_schema_parent_id, groupStruct.feature_schema_name);
+			groupNameList=getFullSchemaPath(struct, groupStruct.feature_schema_parent_id, groupStruct.feature_schema_variable_name);
 			struct.optionNameStruct[arrayToList(groupNameList, chr(9))][ts.arrField[i].feature_field_name]=ts.arrField[i].feature_field_id;
 		}else{
 			struct.optionNameStruct["0"][ts.arrField[i].feature_field_name]=ts.arrField[i].feature_field_id;
@@ -245,7 +245,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 			rs=getSchemaById(sourceStruct, optionStruct.selectmenu_groupid);
 			
 			if(rs.success){
-				groupNameList=arrayToList(getFullSchemaPath(sourceStruct, rs.struct.feature_schema_parent_id, rs.struct.feature_schema_name), chr(9));
+				groupNameList=arrayToList(getFullSchemaPath(sourceStruct, rs.struct.feature_schema_parent_id, rs.struct.feature_schema_variable_name), chr(9));
 				
 				selectSchemaStruct=getSchemaByName(destinationStruct, groupNameList, true);
 				optionStruct.selectmenu_groupid=toString(selectSchemaStruct.struct.feature_schema_id);
@@ -322,15 +322,15 @@ This allows avoiding remaps more easily.  Less code when importing.
 	if(not arguments.skipSchemaIdRemap){
 		groupStruct=getSchemaById(sourceStruct, row.feature_schema_id);
 		if(groupStruct.success){
-			groupNameList=arrayToList(getFullSchemaPath(sourceStruct, groupStruct.struct.feature_schema_parent_id, row.feature_schema_name), chr(9));
+			groupNameList=arrayToList(getFullSchemaPath(sourceStruct, groupStruct.struct.feature_schema_parent_id, row.feature_schema_variable_name), chr(9));
 		}else{
-			groupNameList=row.feature_schema_name;
+			groupNameList=row.feature_schema_variable_name;
 		}
 		if(row.feature_schema_parent_id NEQ 0){
 			parentSchemaStruct=getSchemaById(sourceStruct, row.feature_schema_parent_id);
 			if(parentSchemaStruct.success){
 				
-				parentSchemaNameList=arrayToList(getFullSchemaPath(sourceStruct, parentSchemaStruct.struct.feature_schema_parent_id, parentSchemaStruct.struct.feature_schema_name), chr(9));
+				parentSchemaNameList=arrayToList(getFullSchemaPath(sourceStruct, parentSchemaStruct.struct.feature_schema_parent_id, parentSchemaStruct.struct.feature_schema_variable_name), chr(9));
 			}else{
 				parentSchemaNameList="";
 			}
@@ -387,7 +387,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 		if(currentParentId EQ 0 or not structkeyexists(arguments.struct.optionSchemaStruct, currentParentId)){
 			break;
 		}else{ 
-			currentName=arguments.struct.optionSchemaStruct[currentParentId].feature_schema_name;
+			currentName=arguments.struct.optionSchemaStruct[currentParentId].feature_schema_variable_name;
 			currentParentId=arguments.struct.optionSchemaStruct[currentParentId].feature_schema_parent_id; 
 		}
 		i++;

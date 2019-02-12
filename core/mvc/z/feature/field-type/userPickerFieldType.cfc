@@ -460,7 +460,7 @@
 			<td>
 			<cfscript>
 			form.user_group_id_list=application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list');
-			db.sql="SELECT *FROM #db.table("user_group", "jetendofeature")# user_group 
+			db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
 			WHERE feature_id=#db.param(form.feature_id)#  and 
 			user_group_deleted = #db.param(0)#
 			ORDER BY user_group_name asc"; 

@@ -243,7 +243,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		WHERE 
 		feature_schema_parent_id=#db.param(0)# and 
 		feature_schema_deleted=#db.param(0)# and 
-		feature_schema_name=#db.param(form.groupName)# and 
+		feature_schema_variable_name=#db.param(form.groupName)# and 
 		feature_id=#db.param(form.feature_id)# ";
 		qG=db.execute("qG");
 		if(qG.recordcount NEQ 0){
@@ -262,7 +262,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 			WHERE 
 			feature_schema_parent_id=#db.param(form.feature_schema_id)# and 
 			feature_schema_deleted=#db.param(0)# and 
-			feature_schema_name=#db.param(currentSchemaName)# and 
+			feature_schema_variable_name=#db.param(currentSchemaName)# and 
 			feature_id=#db.param(form.feature_id)# ";
 			qCheck=db.execute("qCheck"); 
 			if(qCheck.recordcount NEQ 0){
@@ -339,11 +339,10 @@ fieldName:type:required=1&option1=value1&option2=value2
 		struct:{
 			site_id:request.zos.globals.id,
 			feature_schema_parent_id:arguments.parentSchemaId,
-			feature_schema_name:arguments.groupName,
+			feature_schema_variable_name:arguments.groupName,
 			feature_schema_type:1,
 			feature_schema_display_name:arguments.groupName,
-			feature_schema_deleted:0,
-			feature_schema_appidlist:",,",
+			feature_schema_deleted:0, 
 			feature_schema_updated_datetime:request.zos.mysqlnow,
 			feature_schema_allow_public:arguments.publicForm
 		}

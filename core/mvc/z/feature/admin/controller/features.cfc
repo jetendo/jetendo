@@ -68,7 +68,7 @@
 				}else{
 					writeEnabled=false;
 				} 
-				application.zcore.adminSecurityFilter.requireFeatureAccess("Custom: "&qSchema.feature_schema_name, writeEnabled);	 
+				application.zcore.adminSecurityFilter.requireFeatureAccess("Custom: "&qSchema.feature_schema_variable_name, writeEnabled);	 
 			} 
 		}else{
 			application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
@@ -300,9 +300,9 @@
 	for(i in defaultStruct){
 		arrayAppend(arrSiteFieldId, optionIDLookupByName[i]); 
 	}
-	form.site_x_option_group_set_id=0;
+	form.feature_data_id=0;
 	form.site_id=request.zos.globals.id;
-	form.site_x_option_group_set_parent_id=0;
+	form.feature_data_parent_id=0;
 	form.feature_field_id=arraytolist(arrSiteFieldId, ",");
 	
 	filterEnabled=false;
@@ -346,7 +346,7 @@
 			form['newvalue'&optionIDLookupByName[i]]=ts[i];
 		}   
 		//writedump(ts);		writedump(form);		abort;
-		form.site_x_option_group_set_approved=1;
+		form.feature_data_approved=1;
 		rs=this.importInsertSchema(); 
 		arrayClear(request.zos.arrQueryLog);
 	} 
@@ -371,7 +371,7 @@
 		setSQL="";	
 	}else{
 		setSQL=" and feature_schema.feature_schema_id ='"&application.zcore.functions.zescape(arguments.parent_id)&"' and 
-		site_x_option_group_set.site_x_option_group_set_id = '"&application.zcore.functions.zescape(arguments.set_id)&"' ";
+		feature_data.feature_data_id = '"&application.zcore.functions.zescape(arguments.set_id)&"' ";
 	}
 	variables.recurseCount++;
 	if(variables.recurseCount GT 20){
@@ -385,11 +385,11 @@
 	feature_field.feature_field_id = site_x_option_group.feature_field_id and 
 	site_x_option_group.site_id = #db.param(arguments.site_id)# and 
 	site_x_option_group_deleted = #db.param(0)#
-	LEFT JOIN #db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set ON 
-	site_x_option_group_set.feature_schema_id = site_x_option_group.feature_schema_id and 
-	site_x_option_group_set.site_x_option_group_set_id = site_x_option_group.site_x_option_group_set_id and 
-	site_x_option_group_set.site_id = site_x_option_group.site_id and 
-	site_x_option_group_set_deleted = #db.param(0)#
+	LEFT JOIN #db.table("feature_data", "jetendofeature")# feature_data ON 
+	feature_data.feature_schema_id = site_x_option_group.feature_schema_id and 
+	feature_data.feature_data_id = site_x_option_group.feature_data_id and 
+	feature_data.site_id = site_x_option_group.site_id and 
+	feature_data_deleted = #db.param(0)#
     WHERE feature_field.site_id IN (#db.param('0')#,#db.param(arguments.site_id)#) and 
     feature_field_deleted = #db.param(0)# and 
     feature_schema_deleted = #db.param(0)# and
@@ -398,7 +398,7 @@
     feature_schema.feature_schema_id = feature_field.feature_schema_id and 
 	feature_schema.feature_schema_type=#db.param('1')#
      ORDER BY feature_schema.feature_schema_parent_id asc, site_x_option_group.feature_schema_id asc, 
-	 site_x_option_group_set.site_x_option_group_set_sort asc, feature_field.feature_field_name ASC";
+	 feature_data.feature_data_sort asc, feature_field.feature_field_name ASC";
 	qS2=db.execute("qS2");
 	 
 	lastSchema="";
@@ -411,15 +411,15 @@
 			ts[feature_schema_id]=structnew();
 			curSchema=ts[feature_schema_id];
 		}
-		if(lastSet NEQ site_x_option_group_set_id){
-			lastSet=site_x_option_group_set_id;
+		if(lastSet NEQ feature_data_id){
+			lastSet=feature_data_id;
 			t92=structnew();
 			t92.optionStruct=structnew();
 			t92.childStruct=structnew();
 			setCount=structcount(curSchema);
 			curSchema[setCount+1]=t92;
 			curSet=curSchema[setCount+1];
-			curSet.childStruct=variables.recurseSOP(arguments.site_id, site_x_option_group_set_id, feature_schema_parent_id);
+			curSet.childStruct=variables.recurseSOP(arguments.site_id, feature_data_id, feature_schema_parent_id);
 		}
 		t9=structnew();
 		if(form.feature_field_type_id EQ 1 and feature_field_line_breaks EQ 1){
@@ -436,8 +436,8 @@
 			}
 		}
 		t9.editEnabled=feature_field_edit_enabled;
-		t9.sort=site_x_option_group_set_sort;
-		t9.editURL="&amp;feature_schema_id="&feature_schema_id&"&amp;site_x_option_group_set_id="&site_x_option_group_set_id;
+		t9.sort=feature_data_sort;
+		t9.editURL="&amp;feature_schema_id="&feature_schema_id&"&amp;feature_data_id="&feature_data_id;
 		curSet.optionStruct[feature_field_name]=t9;
 	}
 	return ts;
@@ -545,20 +545,9 @@
 		feature_field_id_siteIDType=#db.param(form.siteIDType)# and 
 		feature_id=#db.param(form.feature_id)#";
 		q=db.execute("q");
-		if(qS2.feature_schema_id EQ 0 and qS2.site_id EQ 0){
-			form.site_id=0; 
-			application.zcore.functions.zDeleteRecord("feature_field","feature_field_id,site_id", "jetendofeature");
-			application.zcore.siteFieldCom.updateAllSitesFieldCache();
-		}else{
-			form.site_id=request.zos.globals.id;
-			application.zcore.functions.zDeleteRecord("feature_field","feature_field_id,site_id", "jetendofeature");
-			if(qS2.feature_schema_id EQ 0){
-				application.zcore.siteFieldCom.updateFieldCache(request.zos.globals.id);
-			}else{
-				application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(qS2.feature_schema_id);
-			}
-			//application.zcore.functions.zOS_cacheSiteAndUserSchemas(qS.site_id[i]);
-		}
+		form.site_id=request.zos.globals.id;
+		application.zcore.functions.zDeleteRecord("feature_field","feature_field_id,site_id", "jetendofeature");
+		application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(qS2.feature_schema_id);
 		if(qS2.feature_schema_id NEQ 0){
 			queueSortStruct = StructNew();
 			queueSortStruct.tableName = "feature_field";
@@ -712,15 +701,7 @@
 			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_field_id=#form.feature_field_id#&zsid=#request.zsid#"&returnAppendString);	
 		}
 	}
-	if(form.feature_schema_id EQ 0){
-		if(form.siteglobal EQ 1 and variables.allowGlobal){
-			application.zcore.siteFieldCom.updateAllSitesFieldCache();
-		}else{
-			application.zcore.siteFieldCom.updateFieldCache(request.zos.globals.id); 
-		}
-	}else{
-		application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
-	}
+	application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
 	if(form.method EQ 'insert'){
 		if(form.feature_schema_id NEQ 0 and form.feature_schema_id NEQ ""){
 			queueSortStruct = StructNew();
@@ -1315,7 +1296,7 @@
 				<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.site-option-group.edit feature_field_user_group_id_list")#</th>
 				<td>
 				<cfscript>
-				db.sql="SELECT *FROM #db.table("user_group", "jetendofeature")# user_group 
+				db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
 				WHERE feature_id=#db.param(form.feature_id)# and 
 				user_group_deleted = #db.param(0)# 
 				ORDER BY user_group_name asc"; 
@@ -1456,45 +1437,13 @@
 	feature_schema_deleted=#db.param(0)# ";
 	qSchema=db.execute("qSchema", "", 10000, "query", false);
 	queueComStruct=structnew();
-	if(form.feature_schema_id NEQ 0){
-		if(qSchema.recordcount EQ 0){
-			application.zcore.functions.zredirect("/z/feature/admin/features/index");
-		}  
-		  
-		theTitle="Schema Fields: "&qSchema.feature_schema_display_name;
-		application.zcore.template.setTag("title",theTitle);
-		application.zcore.template.setTag("pagetitle",theTitle);
-	}else{
-		theTitle="Features";
-		application.zcore.template.setTag("title",theTitle);
-		application.zcore.template.setTag("pagetitle",theTitle);
-
-		queueSortStruct = StructNew();
-		queueSortStruct.tableName = "feature_field";
-		queueSortStruct.sortFieldName = "feature_field_sort";
-		queueSortStruct.primaryKeyName = "feature_field_id";
-		//queueSortStruct.sortVarName="siteSchema"&qSchema.feature_schema_id;
-		queueSortStruct.datasource="jetendofeature";
-		queueSortStruct.where ="  feature_schema_id = '#application.zcore.functions.zescape(0)#' and 
-		feature_field.site_id ='#application.zcore.functions.zescape(request.zos.globals.id)#' and 
-		feature_field_deleted='0' ";
-
-		
-		queueSortStruct.ajaxTableId='sortRowTable';
-		queueSortStruct.ajaxURL='/z/feature/admin/features/manageFields?feature_schema_parent_id=0&feature_schema_id=0';
-
-		queueSortStruct.disableRedirect=true;
-		queueComStruct["obj0"] = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.queueSort");
-		queueComStruct["obj0"].init(queueSortStruct);
-		if(structkeyexists(form, 'zQueueSort')){
-			application.zcore.siteFieldCom.updateFieldCache(request.zos.globals.id);
-			//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
-			application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
-		}
-		if(structkeyexists(form, 'zQueueSortAjax')){
-			queueComStruct["obj0"].returnJson();
-		}
-	}
+	if(qSchema.recordcount EQ 0){
+		application.zcore.functions.zredirect("/z/feature/admin/features/index");
+	}  
+	  
+	theTitle="Schema Fields: "&qSchema.feature_schema_display_name;
+	application.zcore.template.setTag("title",theTitle);
+	application.zcore.template.setTag("pagetitle",theTitle);
 	lastSchema="";
 	loop query="qSchema"{
 		lastSchema=qSchema.feature_schema_display_name;
@@ -1547,8 +1496,8 @@
 	}
 	qS=db.execute("qS");
 	writeoutput('<p><a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Manage Schemas</a> / ');
-	if(qgroup.recordcount NEQ 0 and qgroup.feature_schema_parent_id NEQ 0){
-		curParentId=qgroup.feature_schema_parent_id;
+	if(qSchema.recordcount NEQ 0 and qSchema.feature_schema_parent_id NEQ 0){
+		curParentId=qSchema.feature_schema_parent_id;
 		arrParent=arraynew(1);
 		loop from="1" to="25" index="i"{
 			db.sql="select * from #db.table("feature_schema", "jetendofeature")# feature_schema 
@@ -1567,14 +1516,14 @@
 		for(i = arrayLen(arrParent);i GTE 1;i--){
 			writeOutput(arrParent[i]&' ');
 		}
-		if(qgroup.feature_schema_parent_id NEQ 0){
+		if(qSchema.feature_schema_parent_id NEQ 0){
 			writeoutput(application.zcore.functions.zFirstLetterCaps(qSchema.feature_schema_display_name)&" / ");
 		}
 	}
 	writeoutput('</p>');
 	</cfscript>
 	<cfif qSchema.recordcount NEQ 0>
-		<p><a href="/z/feature/admin/features/add?feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#qgroup.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Field</a> | <a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_id#">Manage Sub-Schemas</a></p>
+		<p><a href="/z/feature/admin/features/add?feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#qSchema.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Field</a> | <a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_id#">Manage Sub-Schemas</a></p>
 	</cfif>
 	<table id="sortRowTable" class="table-list" style="width:100%;">
 		<thead>
@@ -1662,134 +1611,13 @@
 		</tbody>
 	</table>
 </cffunction>
-
-<cffunction name="saveFields" localmode="modern" access="remote" roles="member">
-	<cfscript>
-	var db=request.zos.queryObject;
-	var nv=0;
-	var i=0;
-	var qD=0;
-	var nvd=0;
-	var arrList=0;
-	var oldnv=0;
-	var tempURL=0;
-	var qD2=0;
-	var q=0;
-	var photoresize=0;
-	var nowDate=request.zos.mysqlnow;
-	variables.init();
-	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true, 0);
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
-	arrSiteIdType=listtoarray(form.siteidtype);
-	arrSiteFieldId=listtoarray(form.feature_field_id);
-	if(arraylen(arrSiteFieldId) NEQ arraylen(arrSiteIdType)){
-		application.zcore.status.setStatus(request.zsid, "Invalid request");
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");	
-	}
-	arrSQL=arraynew(1);
-	for(i=1;i LTE arraylen(arrSiteIdType);i++){
-		arrayappend(arrSQL, "(feature_field.site_id='"&application.zcore.functions.zescape(application.zcore.functions.zGetSiteIdFromSiteIdType(arrSiteIdType[i]))&"' and 
-		feature_field.feature_field_id='"&application.zcore.functions.zescape(arrSiteFieldId[i])&"')");	
-	}
-	db.sql="SELECT *, feature_field.site_id siteFieldSiteId 
-	FROM #db.table("feature_field", "jetendofeature")# feature_field 
-	LEFT JOIN #db.table("site_x_option", "jetendofeature")# site_x_option ON 
-	site_x_option_deleted = #db.param(0)# and
-	site_x_option.feature_id = #db.param(form.feature_id)# and 
-	feature_field.feature_field_id = site_x_option.feature_field_id and 
-	site_x_option.feature_id=#db.param(form.feature_id)# 
-	and feature_field.site_id = "&db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("site_x_option.feature_field_id_siteIDType"))&" 
-	WHERE ("&db.trustedSQL(arraytolist(arrSQL, " or "))&") and 
-	feature_field_deleted = #db.param(0)#";
-	qD=db.execute("qD");
-	
-
-	var row=0;
-	for(row in qD){
-		if(row.site_x_option_updated_datetime EQ ""){
-			row.site_x_option_group_set_created_datetime=request.zos.mysqlnow;
-		}
-		row.site_x_option_group_set_updated_datetime=request.zos.mysqlnow;
-
-		var currentCFC=application.zcore.siteFieldCom.getTypeCFC(row.feature_field_type_id);  
-		nv=application.zcore.functions.zso(form, 'newvalue'&row.feature_field_id);
-		var optionStruct=deserializeJson(row.feature_field_type_json);
-		if(row.siteFieldSiteId EQ 0){
-			form.siteIDType=4;
-		}else{
-			form.siteIDType=1;
-		} 
-		var currentCFC=application.zcore.siteFieldCom.getTypeCFC(row.feature_field_type_id);
-		var rs=currentCFC.onBeforeUpdate(row, optionStruct, 'newvalue', form);
-		if(not rs.success){
-			application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
-		}
-		nv=rs.value;
-		var nvDate=rs.dateValue;  
-		if(nv EQ "" and row.site_x_option_id EQ ''){
-			nv=row.feature_field_default_value;
-			nvdate=nv;
-		} 
-		if(row.site_x_option_id EQ ""){
-			db.sql="INSERT INTO #db.table("site_x_option", "jetendofeature")#  SET 
-			feature_id=#db.param(form.feature_id)#, 
-			feature_id=#db.param(form.feature_id)#, 
-			feature_field_id_siteIDType=#db.param(form.siteIDType)#, 
-			site_x_option_value=#db.param(nv)#, 
-			site_x_option_date_value=#db.param(nvdate)#, 
-			site_x_option_deleted=#db.param(0)#, 
-			feature_field_id=#db.param(row.feature_field_id)#, 
-			site_x_option_updated_datetime=#db.param(nowDate)# ";
-			if(structkeyexists(rs, 'originalFile')){
-				db.sql&=", site_x_option_original=#db.param(rs.originalFile)#";
-			}
-			qD2=db.execute("qD2");
-		}else{
-			db.sql="UPDATE #db.table("site_x_option", "jetendofeature")#  SET 
-			site_x_option_value=#db.param(nv)#, 
-			site_x_option_date_value=#db.param(nvdate)#, 
-			site_x_option_updated_datetime=#db.param(nowDate)# ";
-			if(structkeyexists(rs, 'originalFile')){
-				db.sql&=", site_x_option_original=#db.param(rs.originalFile)#";
-			}
-			db.sql&=" WHERE 
-			feature_id=#db.param(form.feature_id)# and 
-			feature_id=#db.param(form.feature_id)# and 
-			feature_field_id_siteIDType=#db.param(form.siteIDType)# and 
-			site_x_option_deleted=#db.param(0)# and 
-			feature_field_id=#db.param(row.feature_field_id)# ";
-			qD2=db.execute("qD2");
-		}
-
-
-	}
-	db.sql="DELETE FROM #db.table("site_x_option", "jetendofeature")#  
-	WHERE site_x_option.feature_id = #db.param(form.feature_id)# and 
-	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_deleted = #db.param(0)# and
-	site_x_option_updated_datetime<#db.param(nowDate)#";
-	q=db.execute("q");
-	application.zcore.siteFieldCom.updateFieldCache(request.zos.globals.id);
-	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
-	
-	application.zcore.status.setStatus(request.zsid,"Site options saved.");
-	if(structkeyexists(request.zsession, 'siteoption_return') and request.zsession['siteoption_return'] NEQ "" and form.feature_id EQ 0){	
-		tempURL = request.zsession['siteoption_return'];
-		StructDelete(request.zsession, 'siteoption_return', true);
-		tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
-		application.zcore.functions.zRedirect(tempURL, true);
-	}else{	
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#&feature_id=#form.feature_id#");
-	}
-	</cfscript>
-</cffunction>
-
+ 
 
 <cffunction name="internalSchemaUpdate" localmode="modern" access="public">
 	<cfscript>
 	form.method="internalSchemaUpdate";
-	if(application.zcore.functions.zso(form, 'site_x_option_group_set_id', true, 0) EQ 0){
-		throw("Warning: form.site_x_option_group_set_id must be a valid id.");
+	if(application.zcore.functions.zso(form, 'feature_data_id', true, 0) EQ 0){
+		throw("Warning: form.feature_data_id must be a valid id.");
 	}
 	return this.updateSchema();
 	</cfscript>
@@ -1845,8 +1673,8 @@
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
 	form.method="publicUpdateSchema";
-	if(application.zcore.functions.zso(form, 'site_x_option_group_set_id', true, 0) EQ 0){
-		throw("Warning: form.site_x_option_group_set_id must be a valid id.");
+	if(application.zcore.functions.zso(form, 'feature_data_id', true, 0) EQ 0){
+		throw("Warning: form.feature_data_id must be a valid id.");
 	}
 	this.updateSchema(arguments.struct);
 	</cfscript>
@@ -1879,7 +1707,7 @@
 		request.zos.arrForceEmailAttachment=[];
 	}
 	if(methodBackup EQ "publicInsertSchema" or methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema"){
-		form.site_x_option_group_set_id=0;
+		form.feature_data_id=0;
 	}
 	form.modalpopforced=application.zcore.functions.zso(form, 'modalpopforced', false, 0);
 	request.zos.siteFieldInsertSchemaCache={};
@@ -1904,8 +1732,8 @@
 	var startTime=0;
 	if(debug) startTime=gettickcount();
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
-	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id');
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
+	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id');
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 	if(not structkeyexists(request.zos.siteFieldInsertSchemaCache, form.feature_schema_id)){
 		request.zos.siteFieldInsertSchemaCache[form.feature_schema_id]={};
 	}
@@ -1938,7 +1766,7 @@
 		}
 	}
 	if(qCheck.feature_schema_enable_approval EQ 0){
-		form.site_x_option_group_set_approved=1;
+		form.feature_data_approved=1;
 	}
 	if((methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema") and not structkeyexists(request.zos, 'disableSpamCheck')){
 		 
@@ -1988,18 +1816,18 @@
 	nowDate="#request.zos.mysqlnow#";
 	if(not structkeyexists(curCache, 'qD')){
 		db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# feature_field 
-		LEFT JOIN #db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set ON 
-		site_x_option_group_set.feature_id=#db.param(form.feature_id)# and 
-		site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-		site_x_option_group_set.site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
-		site_x_option_group_set.site_x_option_group_set_id<>#db.param(0)# and 
-		site_x_option_group_set_deleted = #db.param(0)# 
+		LEFT JOIN #db.table("feature_data", "jetendofeature")# feature_data ON 
+		feature_data.feature_id=#db.param(form.feature_id)# and 
+		feature_data.feature_id = #db.param(form.feature_id)# and 
+		feature_data.feature_data_id=#db.param(form.feature_data_id)# and 
+		feature_data.feature_data_id<>#db.param(0)# and 
+		feature_data_deleted = #db.param(0)# 
 		LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# site_x_option_group ON 
 		feature_field.feature_field_id = site_x_option_group.feature_field_id and 
 		site_x_option_group.feature_schema_id = feature_field.feature_schema_id and 
-		site_x_option_group.site_x_option_group_set_id<>#db.param(0)# and 
-		site_x_option_group_set.site_x_option_group_set_id = site_x_option_group.site_x_option_group_set_id and 
-		site_x_option_group_set.site_id = site_x_option_group.site_id and 
+		site_x_option_group.feature_data_id<>#db.param(0)# and 
+		feature_data.feature_data_id = site_x_option_group.feature_data_id and 
+		feature_data.site_id = site_x_option_group.site_id and 
 		site_x_option_group_deleted = #db.param(0)# 
 		WHERE 
 		feature_field_deleted = #db.param(0)# and ";
@@ -2026,8 +1854,8 @@
 	var optionStructCache={};
 	form.siteFieldTitle="";
 	form.siteFieldSummary="";
-	form.site_x_option_group_set_start_date='';
-	form.site_x_option_group_set_end_date='';
+	form.feature_data_start_date='';
+	form.feature_data_end_date='';
 	hasTitleField=false;
 	hasSummaryField=false;
 	hasPrimaryField=false;
@@ -2065,7 +1893,7 @@
 			continue;
 		}
 	}  
-	if(application.zcore.functions.zso(form,'site_x_option_group_set_override_url') NEQ "" and not application.zcore.functions.zValidateURL(application.zcore.functions.zso(form,'site_x_option_group_set_override_url'), true, true)){
+	if(application.zcore.functions.zso(form,'feature_data_override_url') NEQ "" and not application.zcore.functions.zValidateURL(application.zcore.functions.zso(form,'feature_data_override_url'), true, true)){
 		application.zcore.status.setStatus(request.zsid, "Override URL must be a valid URL beginning with / or ##, such as ""/z/misc/inquiry/index"" or ""##namedAnchor"". No special characters allowed except for this list of characters: a-z 0-9 . _ - and /.", form, true);
 		errors=true;
 	}  
@@ -2102,7 +1930,7 @@
 				newMethod="editSchema";
 			}
 			application.zcore.status.displayReturnJson(request.zsid);
-			//application.zcore.functions.zRedirect("/z/feature/admin/features/#newMethod#?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#form.modalpopforced#");
+			//application.zcore.functions.zRedirect("/z/feature/admin/features/#newMethod#?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#");
 		}
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1<br>'); startTime=gettickcount();
@@ -2117,9 +1945,9 @@
 
 		if(methodBackup EQ "userInsertSchema" or methodBackup EQ "insertSchema" or methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "publicMapInsertSchema" or methodBackup EQ "importInsertSchema"){
 			newRecord=true;
-			row.site_x_option_group_set_created_datetime=request.zos.mysqlnow;
+			row.feature_data_created_datetime=request.zos.mysqlnow;
 		}
-		row.site_x_option_group_set_updated_datetime=request.zos.mysqlnow;
+		row.feature_data_updated_datetime=request.zos.mysqlnow;
 		
 		nv=application.zcore.functions.zso(form, 'newvalue'&row.feature_field_id);
 		nvdate="";
@@ -2153,7 +1981,7 @@
 				if(newAction NEQ ""){
 					application.zcore.status.displayReturnJson(request.zsid);
 				}else{
-					application.zcore.functions.zRedirect("/z/feature/admin/features/#newAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_id=#form.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
+					application.zcore.functions.zRedirect("/z/feature/admin/features/#newAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
 				}
 			}
 		}
@@ -2220,7 +2048,7 @@
 		var tempData={
 			feature_id:form.feature_id,
 			feature_field_id_siteIDType:1,
-			site_x_option_group_set_id: form.site_x_option_group_set_id,
+			feature_data_id: form.feature_data_id,
 			site_id:request.zos.globals.id,
 			site_x_option_group_value:nv,
 			site_x_option_group_disable_time:form.site_x_option_group_disable_time,
@@ -2240,7 +2068,7 @@
 			site_x_option_group_deleted=#db.param(0)# and 
 			feature_field_id=#db.param(tempData.feature_field_id)# and 
 			feature_schema_id=#db.param(tempData.feature_schema_id)# and 
-			site_x_option_group_set_id=#db.param(tempData.site_x_option_group_set_id)# ";
+			feature_data_id=#db.param(tempData.feature_data_id)# ";
 			qUpdate=db.execute("qUpdate");
 			if(qUpdate.recordcount){
 				tempData.site_x_option_group_id=qUpdate.site_x_option_group_id;
@@ -2257,7 +2085,7 @@
 			arrayAppend(arrTempDataInsert, tempData); 
 		}
 	}
-	form.site_x_option_group_set_approved=application.zcore.functions.zso(form, 'site_x_option_group_set_approved', false, 1);
+	form.feature_data_approved=application.zcore.functions.zso(form, 'feature_data_approved', false, 1);
 	if(methodBackup EQ "publicUpdateSchema" or methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "publicMapInsertSchema" or methodBackup EQ "importInsertSchema" or methodBackup EQ "userUpdateSchema" or methodBackup EQ "userInsertSchema"){
 		if((methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "publicUpdateSchema") and (qCheck.recordcount EQ 0 or qCheck.feature_schema_allow_public NEQ 1)){
 			hasAccess=false;
@@ -2277,18 +2105,18 @@
 		if(qCheck.feature_schema_enable_approval EQ 1){
 			if(methodBackup EQ "publicUpdateSchema" or methodBackup EQ "userUpdateSchema"){
 				// must force approval status to stay the same on updates.
-				db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
-				site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
-				site_x_option_group_set_deleted = #db.param(0)# and
+				db.sql="select * from #db.table("feature_data", "jetendofeature")# WHERE 
+				feature_data_id = #db.param(form.feature_data_id)# and 
+				feature_data_deleted = #db.param(0)# and
 				feature_id=#db.param(form.feature_id)# ";
 				qSetCheck=db.execute("qSetCheck");
-				if(not application.zcore.user.checkSchemaAccess("administrator") and qSetCheck.site_x_option_group_set_approved EQ 2){
-					form.site_x_option_group_set_approved=0;
+				if(not application.zcore.user.checkSchemaAccess("administrator") and qSetCheck.feature_data_approved EQ 2){
+					form.feature_data_approved=0;
 				}else{
-					form.site_x_option_group_set_approved=qSetCheck.site_x_option_group_set_approved;
+					form.feature_data_approved=qSetCheck.feature_data_approved;
 				}
 			}else{
-				form.site_x_option_group_set_approved=0;
+				form.feature_data_approved=0;
 			}
 		}
 	}
@@ -2298,10 +2126,10 @@
 		methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or 
 		methodBackup EQ "publicMapInsertSchema" or methodBackup EQ "importInsertSchema"){ 
 		if(not structkeyexists(curCache, 'sortValue')){
-			db.sql="select max(site_x_option_group_set_sort) sortid 
-			from #db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set 
+			db.sql="select max(feature_data_sort) sortid 
+			from #db.table("feature_data", "jetendofeature")# feature_data 
 			WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
-			site_x_option_group_set_deleted = #db.param(0)# and
+			feature_data_deleted = #db.param(0)# and
 			feature_id=#db.param(form.feature_id)#";
 			qG2=db.execute("qG2");
 			if(qG2.recordcount EQ 0 or qG2.sortid EQ ""){
@@ -2314,45 +2142,45 @@
 			sortValue=curCache.sortValue;
 		}
 		sortValue++;
-		form.site_x_option_group_set_sort=sortValue;
+		form.feature_data_sort=sortValue;
 		if(methodBackup EQ "importInsertSchema"){
-			form.site_x_option_group_set_approved=1;
+			form.feature_data_approved=1;
 		}
-		db.sql="INSERT INTO #db.table("site_x_option_group_set", "jetendofeature")#  SET 
+		db.sql="INSERT INTO #db.table("feature_data", "jetendofeature")#  SET 
 		feature_id=#db.param(form.feature_id)#, 
-		site_x_option_group_set_sort=#db.param(form.site_x_option_group_set_sort)#,
-		site_x_option_group_set_created_datetime=#db.param(request.zos.mysqlnow)#, 
+		feature_data_sort=#db.param(form.feature_data_sort)#,
+		feature_data_created_datetime=#db.param(request.zos.mysqlnow)#, 
 		 feature_id=#db.param(form.feature_id)#, 
 		 feature_schema_id=#db.param(form.feature_schema_id)#,  
-		 site_x_option_group_set_start_date=#db.param(form.site_x_option_group_set_start_date)#,
-		 site_x_option_group_set_end_date=#db.param(form.site_x_option_group_set_end_date)#,
-		 site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)#,
-		site_x_option_group_set_override_url=#db.param(application.zcore.functions.zso(form,'site_x_option_group_set_override_url'))#,
-		site_x_option_group_set_approved=#db.param(form.site_x_option_group_set_approved)#, 
-		site_x_option_group_set_image_library_id=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id'))#, 
-		site_x_option_group_set_updated_datetime=#db.param(request.zos.mysqlNow)# , 
-		site_x_option_group_set_title=#db.param(form.siteFieldTitle)# , 
-		site_x_option_group_set_summary=#db.param(form.siteFieldSummary)#,
-		site_x_option_group_set_metatitle=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metatitle'))#,
-		site_x_option_group_set_metakey=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metakey'))#,
-		site_x_option_group_set_metadesc=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metadesc'))#,
-		site_x_option_group_set_deleted=#db.param(0)#";
+		 feature_data_start_date=#db.param(form.feature_data_start_date)#,
+		 feature_data_end_date=#db.param(form.feature_data_end_date)#,
+		 feature_data_parent_id=#db.param(form.feature_data_parent_id)#,
+		feature_data_override_url=#db.param(application.zcore.functions.zso(form,'feature_data_override_url'))#,
+		feature_data_approved=#db.param(form.feature_data_approved)#, 
+		feature_data_image_library_id=#db.param(application.zcore.functions.zso(form, 'feature_data_image_library_id'))#, 
+		feature_data_updated_datetime=#db.param(request.zos.mysqlNow)# , 
+		feature_data_title=#db.param(form.siteFieldTitle)# , 
+		feature_data_summary=#db.param(form.siteFieldSummary)#,
+		feature_data_metatitle=#db.param(application.zcore.functions.zso(form, 'feature_data_metatitle'))#,
+		feature_data_metakey=#db.param(application.zcore.functions.zso(form, 'feature_data_metakey'))#,
+		feature_data_metadesc=#db.param(application.zcore.functions.zso(form, 'feature_data_metadesc'))#,
+		feature_data_deleted=#db.param(0)#";
 		if(hasUserField){
-			db.sql&=", site_x_option_group_set_user=#db.param(userFieldValue)# ";
+			db.sql&=", feature_data_user=#db.param(userFieldValue)# ";
 		}
 		rs=db.insert("q", request.zOS.insertIDColumnForSiteIDTable); 
 		if(rs.success){
-			form.site_x_option_group_set_id=rs.result;
+			form.feature_data_id=rs.result;
 		}else{
 			throw("Failed to insert site option group set");
 		} 
 		if(arraylen(arrTempDataInsert)){
 			for(var n=1;n LTE arraylen(arrTempDataInsert);n++){
-				arrTempDataInsert[n].site_x_option_group_set_id=form.site_x_option_group_set_id;
+				arrTempDataInsert[n].feature_data_id=form.feature_data_id;
 			}
 		}  
 	}else{ 
-		structdelete(form, 'site_x_option_group_set_sort'); 
+		structdelete(form, 'feature_data_sort'); 
 
 
 	}
@@ -2401,12 +2229,12 @@
 			db.execute("qUpdate");
 		}
 	} 
-	if(form.site_x_option_group_set_id EQ 0){
-		throw("An error occurred when creating the site_x_option_group_set record.");
+	if(form.feature_data_id EQ 0){
+		throw("An error occurred when creating the feature_data record.");
 	}
-	libraryId=application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id');
+	libraryId=application.zcore.functions.zso(form, 'feature_data_image_library_id');
 	if(libraryId NEQ 0 and libraryId NEQ ""){
-		if(form.site_x_option_group_set_approved EQ 1){
+		if(form.feature_data_approved EQ 1){
 			application.zcore.imageLibraryCom.approveLibraryId(libraryId);
 		}else{
 			application.zcore.imageLibraryCom.unapproveLibraryId(libraryId);
@@ -2415,46 +2243,46 @@
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds2<br>'); startTime=gettickcount();
 	arrDataStructKeys=structkeyarray(newDataStruct);
 	if(methodBackup NEQ "publicInsertSchema" and methodBackup NEQ "publicAjaxInsertSchema" and methodBackup NEQ "publicMapInsertSchema" and methodBackup NEQ "importInsertSchema"){
-		db.sql="update #db.table("site_x_option_group_set", "jetendofeature")# 
-		set site_x_option_group_set_override_url=#db.param(application.zcore.functions.zso(form,'site_x_option_group_set_override_url'))#,
-		site_x_option_group_set_approved=#db.param(form.site_x_option_group_set_approved)#, 
-		 site_x_option_group_set_start_date=#db.param(form.site_x_option_group_set_start_date)#,
-		 site_x_option_group_set_end_date=#db.param(form.site_x_option_group_set_end_date)#,
-		site_x_option_group_set_image_library_id=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id'))#, 
-		site_x_option_group_set_updated_datetime=#db.param(request.zos.mysqlNow)# , 
-		site_x_option_group_set_title=#db.param(form.siteFieldTitle)# , 
-		site_x_option_group_set_summary=#db.param(form.siteFieldSummary)#,
-		site_x_option_group_set_metatitle=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metatitle'))#,
-		site_x_option_group_set_metakey=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metakey'))#,
-		site_x_option_group_set_metadesc=#db.param(application.zcore.functions.zso(form, 'site_x_option_group_set_metadesc'))#";
+		db.sql="update #db.table("feature_data", "jetendofeature")# 
+		set feature_data_override_url=#db.param(application.zcore.functions.zso(form,'feature_data_override_url'))#,
+		feature_data_approved=#db.param(form.feature_data_approved)#, 
+		 feature_data_start_date=#db.param(form.feature_data_start_date)#,
+		 feature_data_end_date=#db.param(form.feature_data_end_date)#,
+		feature_data_image_library_id=#db.param(application.zcore.functions.zso(form, 'feature_data_image_library_id'))#, 
+		feature_data_updated_datetime=#db.param(request.zos.mysqlNow)# , 
+		feature_data_title=#db.param(form.siteFieldTitle)# , 
+		feature_data_summary=#db.param(form.siteFieldSummary)#,
+		feature_data_metatitle=#db.param(application.zcore.functions.zso(form, 'feature_data_metatitle'))#,
+		feature_data_metakey=#db.param(application.zcore.functions.zso(form, 'feature_data_metakey'))#,
+		feature_data_metadesc=#db.param(application.zcore.functions.zso(form, 'feature_data_metadesc'))#";
 		if(hasUserField){
-			db.sql&=", site_x_option_group_set_user=#db.param(userFieldValue)# ";
+			db.sql&=", feature_data_user=#db.param(userFieldValue)# ";
 		}
 		db.sql&=" WHERE 
-		site_x_option_group_set_deleted = #db.param(0)# and
-		site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
+		feature_data_deleted = #db.param(0)# and
+		feature_data_id=#db.param(form.feature_data_id)# and 
 		feature_id=#db.param(form.feature_id)#";
 		db.execute("qUpdate");
 	}
-	if(application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id') NEQ ""){
-        	application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id'));
+	if(application.zcore.functions.zso(form, 'feature_data_image_library_id') NEQ ""){
+        	application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'feature_data_image_library_id'));
 	}
 	/*
 	// this isn't necessary, is it?
 	db.sql="DELETE FROM #db.table("site_x_option_group", "jetendofeature")#  WHERE 
 	site_x_option_group.feature_id = #db.param(form.feature_id)# and 
 	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
+	feature_data_id=#db.param(form.feature_data_id)# and 
 	feature_schema_id = #db.param(form.feature_schema_id)# and 
 	site_x_option_group_updated_datetime<#db.param(nowDate)# and 
 	site_x_option_group_deleted = #db.param(0)# ";
 	q=db.execute("q");
 	*/
-	application.zcore.routing.updateSiteSchemaSetUniqueURL(form.site_x_option_group_set_id);
+	application.zcore.routing.updateSiteSchemaSetUniqueURL(form.feature_data_id);
 	
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
 	if(request.zos.enableSiteSchemaCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.feature_schema_enable_cache EQ 1){ 
-		application.zcore.siteFieldCom.updateSchemaSetIdCache(request.zos.globals.id, form.site_x_option_group_set_id); 
+		application.zcore.siteFieldCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
 		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds4<br>'); startTime=gettickcount();
@@ -2463,7 +2291,7 @@
 			parentStruct=application.zcore.functions.zGetSiteSchemaById(qCheck.feature_schema_parent_id);
 			arrSchemaName=[];
 			while(true){
-				arrayAppend(arrSchemaName, parentStruct.feature_schema_name);
+				arrayAppend(arrSchemaName, parentStruct.feature_schema_variable_name);
 				if(parentStruct.feature_schema_parent_id NEQ 0){
 					parentStruct=application.zcore.functions.zGetSiteSchemaById(parentStruct.feature_schema_parent_id);
 				}else{
@@ -2471,9 +2299,9 @@
 				}
 			}
 			arrayAppend(arrSchemaName, qCheck.feature_schema_display_name);
-			application.zcore.siteFieldCom.searchReindexSet(form.site_x_option_group_set_id, request.zos.globals.id, arrSchemaName);
+			application.zcore.siteFieldCom.searchReindexSet(form.feature_data_id, request.zos.globals.id, arrSchemaName);
 		}else{
-			application.zcore.siteFieldCom.searchReindexSet(form.site_x_option_group_set_id, request.zos.globals.id, [qCheck.feature_schema_display_name]);
+			application.zcore.siteFieldCom.searchReindexSet(form.feature_data_id, request.zos.globals.id, [qCheck.feature_schema_display_name]);
 		}
 	}
 
@@ -2482,22 +2310,22 @@
 		if(left(path, 5) EQ "root."){
 			path=request.zRootCFCPath&removeChars(path, 1, 5);
 		}
-		if(form.site_x_option_group_set_approved EQ 0){
+		if(form.feature_data_approved EQ 0){
 			changeCom=application.zcore.functions.zcreateObject("component", path); 
-			changeCom[qCheck.feature_schema_change_cfc_delete_method](form.site_x_option_group_set_id);
+			changeCom[qCheck.feature_schema_change_cfc_delete_method](form.feature_data_id);
 		}else{
 			changeCom=application.zcore.functions.zcreateObject("component", path); 
 			arrSchemaName=application.zcore.siteFieldCom.getSchemaNameArrayById(qCheck.feature_schema_id);
-			dataStruct=application.zcore.siteFieldCom.getSchemaSetById(arrSchemaName, form.site_x_option_group_set_id, request.zos.globals.id, true);
+			dataStruct=application.zcore.siteFieldCom.getSchemaSetById(arrSchemaName, form.feature_data_id, request.zos.globals.id, true);
 			coreStruct={
-				site_x_option_group_set_sort:dataStruct.__sort,
-				// NOT USED YET: site_x_option_group_set_active:dataStruct.__active,
+				feature_data_sort:dataStruct.__sort,
+				// NOT USED YET: feature_data_active:dataStruct.__active,
 				feature_schema_id:dataStruct.__groupId,
-				site_x_option_group_set_approved:dataStruct.__approved,
-				site_x_option_group_set_override_url:application.zcore.functions.zso(dataStruct, '__url'),
-				site_x_option_group_set_parent_id:dataStruct.__parentId,
-				site_x_option_group_set_image_library_id:application.zcore.functions.zso(dataStruct, '__image_library_id', true),
-				site_x_option_group_set_id:dataStruct.__setId
+				feature_data_approved:dataStruct.__approved,
+				feature_data_override_url:application.zcore.functions.zso(dataStruct, '__url'),
+				feature_data_parent_id:dataStruct.__parentId,
+				feature_data_image_library_id:application.zcore.functions.zso(dataStruct, '__image_library_id', true),
+				feature_data_id:dataStruct.__setId
 			}; 
 			changeCom[qCheck.feature_schema_change_cfc_update_method](dataStruct, coreStruct);
 		}
@@ -2507,7 +2335,7 @@
 	mapRecord=false;
 	if(not structkeyexists(form, 'disableSiteSchemaMap')){
 		if(structkeyexists(request.zos, 'debugleadrouting')){
-			echo('disableSiteSchemaMap doesn''t exist (not an error) | #qCheck.feature_schema_name# | qCheck.feature_schema_map_insert_type=#qCheck.feature_schema_map_insert_type# | methodBackup = #methodBackup#<br />');
+			echo('disableSiteSchemaMap doesn''t exist (not an error) | #qCheck.feature_schema_variable_name# | qCheck.feature_schema_map_insert_type=#qCheck.feature_schema_map_insert_type# | methodBackup = #methodBackup#<br />');
 		}
 		form.disableSiteSchemaMap=true;
 		if(qCheck.feature_schema_map_insert_type EQ 1){
@@ -2515,7 +2343,7 @@
 				mapRecord=true;
 			}
 		}else if(qCheck.feature_schema_map_insert_type EQ 2){
-			if((methodBackup EQ "updateSchema" or methodBackup EQ "userUpdateSchema" or methodBackup EQ "internalSchemaUpdate") and form.site_x_option_group_set_approved EQ 1){
+			if((methodBackup EQ "updateSchema" or methodBackup EQ "userUpdateSchema" or methodBackup EQ "internalSchemaUpdate") and form.feature_data_approved EQ 1){
 				// only if this record was just approved
 				mapRecord=true;
 			}
@@ -2526,9 +2354,9 @@
 			echo('disableSiteSchemaMap exists<br />');
 		}
 	}
-	setIdBackup=form.site_x_option_group_set_id; 
+	setIdBackup=form.feature_data_id; 
 	disableSendEmail=false;
-	setIdBackup2=form.site_x_option_group_set_id;
+	setIdBackup2=form.feature_data_id;
 	groupIdBackup2=qCheck.feature_schema_id;
 	arrEmailStruct=[];
 	if((methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema") and qCheck.feature_schema_lead_routing_enabled EQ 1 and not structkeyexists(form, 'disableSchemaEmail')){
@@ -2536,7 +2364,7 @@
 		if(qCheck.feature_schema_newsletter_opt_in_form EQ 1){
 			form.inquiries_email_opt_in=1;
 		}
-		newDataStruct.site_x_option_group_set_id=setIdBackup2; 
+		newDataStruct.feature_data_id=setIdBackup2; 
 		newDataStruct.feature_schema_id=groupIdBackup2;
 
 		if(qCheck.feature_schema_disable_detailed_lead_email EQ 1){
@@ -2609,13 +2437,13 @@
 				mapDataToSchema(newDataStruct, form, disableSendEmail); 
 			}
 		}
-		setIdBackup2=form.site_x_option_group_set_id; 
+		setIdBackup2=form.feature_data_id; 
 		if(qCheck.feature_schema_delete_on_map EQ 1){
 			if(structkeyexists(request.zos, 'debugleadrouting')){
 				echo('autoDeleteSchema<br />');
 			}
 			form.feature_schema_id=qCheck.feature_schema_id;
-			form.site_x_option_group_set_id=setIdBackup;
+			form.feature_data_id=setIdBackup;
 			tempResult=variables.autoDeleteSchema(); 
 		}
 	}
@@ -2692,18 +2520,18 @@
 	request.zsession.zLastSiteXSchemaSetId=setIdBackup;
 	request.zsession.zLastInquiriesID=application.zcore.functions.zso(form, 'inquiries_id');
 	if(methodBackup EQ "publicMapInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "internalSchemaUpdate" or methodBackup EQ "importInsertSchema"){
-		ts={success:true, zsid:request.zsid, site_x_option_group_set_id:setIdBackup, formtoken:formtoken, inquiries_id: application.zcore.functions.zso(form, 'inquiries_id')};
+		ts={success:true, zsid:request.zsid, feature_data_id:setIdBackup, formtoken:formtoken, inquiries_id: application.zcore.functions.zso(form, 'inquiries_id')};
 		return ts;
 	}else if(methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicUpdateSchema"){ 
 		form.modalpopforced=application.zcore.functions.zso(form, 'modalpopforced');
 		application.zcore.status.setStatus(request.zsid,"Saved successfully.");
 		if(structkeyexists(arguments.struct, 'successURL')){
-			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.successURL, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#&site_x_option_group_set_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken));
+			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.successURL, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#&feature_data_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken));
 		}else{
 			if(qCheck.feature_schema_public_thankyou_url NEQ ""){
-				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(qCheck.feature_schema_public_thankyou_url, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#&site_x_option_group_set_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken));
+				application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(qCheck.feature_schema_public_thankyou_url, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#&feature_data_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken));
 			}else{
-				application.zcore.functions.zRedirect("/z/misc/thank-you/index?modalpopforced=#form.modalpopforced#&site_x_option_group_set_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken);
+				application.zcore.functions.zRedirect("/z/misc/thank-you/index?modalpopforced=#form.modalpopforced#&feature_data_id=#setIdBackup#&inquiries_id=#application.zcore.functions.zso(form,'inquiries_id')#"&urlformtoken);
 			}
 		}
 	}else if(form.modalpopforced EQ 1 and (methodBackup EQ "updateSchema" or methodBackup EQ "userUpdateSchema" or methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema")){
@@ -2713,7 +2541,7 @@
 		}else{
 			newRecord=false;
 		}
-		form.site_x_option_group_set_id=setIdBackup;
+		form.feature_data_id=setIdBackup;
 		if(methodBackup EQ "userUpdateSchema" or methodBackup EQ "userInsertSchema"){ 
 			form.method="userGetRowHTML";
 			rowHTML=userGetRowHTML();
@@ -2733,8 +2561,8 @@
 			//application.zcore.functions.zRedirect(replace(tempLink, "zsid=", "ztv=", "all"));
 		}else{
 			application.zcore.status.setStatus(request.zsid,"Saved successfully.");
-			tempLink=defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#form.modalpopforced#";
-			//application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#form.modalpopforced#");
+			tempLink=defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#";
+			//application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#");
 		}
 		application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink: tempLink});
 	}
@@ -2977,7 +2805,7 @@ Define this function in another CFC to override the default email format
 	form.feature_field_id=arrayToList(arrId, ",");
 	form.site_id=request.zos.globals.id;
 	form.feature_schema_id=ts.feature_schema_map_group_id;
-	form.site_x_option_group_set_id=0;
+	form.feature_data_id=0;
 	form.disableSchemaEmail=arguments.disableEmail;
 
 	variables.publicMapInsertSchema(); 
@@ -3006,11 +2834,11 @@ Define this function in another CFC to override the default email format
 	feature_id=#db.param(form.feature_id)# ";
 	qD=db.execute("qD");
 	rs.subject='New '&qd.feature_schema_display_name&' submitted on '&request.zos.globals.shortDomain;
-	editLink=request.zos.currentHostName&"/z/feature/admin/features/editSchema?feature_schema_id=#ts.feature_schema_id#&site_x_option_group_set_id=#ts.site_x_option_group_set_id#";
+	editLink=request.zos.currentHostName&"/z/feature/admin/features/editSchema?feature_schema_id=#ts.feature_schema_id#&feature_data_id=#ts.feature_data_id#";
 	savecontent variable="output"{
 		writeoutput('New '&qd.feature_schema_display_name&' submitted'&chr(10)&chr(10));
 		for(i=1;i LTE arraylen(arguments.arrKey);i++){
-			if(arguments.arrKey[i] NEQ "feature_schema_id" and arguments.arrKey[i] NEQ "site_x_option_group_set_id"){
+			if(arguments.arrKey[i] NEQ "feature_schema_id" and arguments.arrKey[i] NEQ "feature_data_id"){
 				writeoutput(arguments.arrKey[i]&': '&ts[arguments.arrKey[i]]&chr(10));
 			}
 		}
@@ -3028,11 +2856,11 @@ Define this function in another CFC to override the default email format
 		<p>New '&htmleditformat(qd.feature_schema_display_name)&' submitted on '&request.zos.globals.shortDomain&'</p>
 		<table style="border-spacing:0px;">');
 		for(i=1;i LTE arraylen(arguments.arrKey);i++){
-			if(arguments.arrKey[i] NEQ "feature_schema_id" and arguments.arrKey[i] NEQ "site_x_option_group_set_id"){
+			if(arguments.arrKey[i] NEQ "feature_schema_id" and arguments.arrKey[i] NEQ "feature_data_id"){
 				writeoutput('<tr><td style="padding:5px; border-bottom:1px solid ##CCC;">'&htmleditformat(arguments.arrKey[i])&':</td><td style="padding:5px; border-bottom:1px solid ##CCC;">'&htmleditformat(ts[arguments.arrKey[i]])&'</td></tr>');
 			}
 		}
-		approved=application.zcore.functions.zso(form, 'site_x_option_group_set_approved');
+		approved=application.zcore.functions.zso(form, 'feature_data_approved');
 		if(approved EQ 0){
 			echo('<tr><td style="padding:5px; border-bottom:1px solid ##CCC;">Approved?</td><td style="padding:5px; border-bottom:1px solid ##CCC;">Pending</td></tr>');
 		}else if(approved EQ 2){
@@ -3066,15 +2894,15 @@ Define this function in another CFC to override the default email format
 
 	if(application.zcore.adminSecurityFilter.checkFeatureAccess("Pages")){
 		echo('<h2>Pages</h2><p>');
-		echo('<a href="#application.zcore.app.getAppCFC("content").getSectionHomeLink(form.site_x_option_group_set_id)#" target="_blank">View Pages Section Home</a> | ');
-		echo('<a href="/z/content/admin/content-admin/index?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Manage Pages</a> | ');
-		echo('<a href="/z/content/admin/content-admin/add?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Add Page</a></p>');
+		echo('<a href="#application.zcore.app.getAppCFC("content").getSectionHomeLink(form.feature_data_id)#" target="_blank">View Pages Section Home</a> | ');
+		echo('<a href="/z/content/admin/content-admin/index?feature_data_id=#form.feature_data_id#">Manage Pages</a> | ');
+		echo('<a href="/z/content/admin/content-admin/add?feature_data_id=#form.feature_data_id#">Add Page</a></p>');
 	}
 	if(application.zcore.adminSecurityFilter.checkFeatureAccess("Blog Articles")){
 		echo('<h2>Blog</h2><p>');
-		echo('<a href="#application.zcore.app.getAppCFC("blog").getSectionHomeLink(form.site_x_option_group_set_id)#" target="_blank">View Blog Section Home</a> | ');
-		echo('<a href="/z/blog/admin/blog-admin/articleList?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Manage Blog Articles</a> | ');
-		echo('<a href="/z/blog/admin/blog-admin/articleAdd?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Add Article</a></p>');
+		echo('<a href="#application.zcore.app.getAppCFC("blog").getSectionHomeLink(form.feature_data_id)#" target="_blank">View Blog Section Home</a> | ');
+		echo('<a href="/z/blog/admin/blog-admin/articleList?feature_data_id=#form.feature_data_id#">Manage Blog Articles</a> | ');
+		echo('<a href="/z/blog/admin/blog-admin/articleAdd?feature_data_id=#form.feature_data_id#">Add Article</a></p>');
 		echo('<h2>Blog Category Section Links</h2>');
 		db.sql="select * from #db.table("blog_category", "jetendofeature")# WHERE 
 		feature_id=#db.param(form.feature_id)# and 
@@ -3082,17 +2910,17 @@ Define this function in another CFC to override the default email format
 		ORDER BY blog_category_name ASC";
 		qCategory=db.execute("qCategory");
 		for(row in qCategory){
-			link=application.zcore.app.getAppCFC("blog").getBlogCategorySectionLink(row, form.site_x_option_group_set_id);
+			link=application.zcore.app.getAppCFC("blog").getBlogCategorySectionLink(row, form.feature_data_id);
 			echo('<a href="#link#" target="_blank">'&row.blog_category_name&'</a><br />');
 		}
 	}
 	/*if(application.zcore.adminSecurityFilter.checkFeatureAccess("Menus")){
-		echo('<a href="/z/admin/menu/index?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Manage Menus</a> | ');
-		echo('<a href="/z/admin/menu/add?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Add Menu</a><br />');
+		echo('<a href="/z/admin/menu/index?feature_data_id=#form.feature_data_id#">Manage Menus</a> | ');
+		echo('<a href="/z/admin/menu/add?feature_data_id=#form.feature_data_id#">Add Menu</a><br />');
 	}*/
 	/*if(application.zcore.adminSecurityFilter.checkFeatureAccess("Blog Categories")){
-		echo('<a href="/z/blog/admin/blog-admin/categoryList?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Manage Pages</a><br />');
-		echo('<a href="/z/blog/admin/blog-admin/categoryAdd?site_x_option_group_set_id=#form.site_x_option_group_set_id#">Add Page</a><br />');
+		echo('<a href="/z/blog/admin/blog-admin/categoryList?feature_data_id=#form.feature_data_id#">Manage Pages</a><br />');
+		echo('<a href="/z/blog/admin/blog-admin/categoryAdd?feature_data_id=#form.feature_data_id#">Add Page</a><br />');
 	}*/
 	</cfscript>
 
@@ -3137,8 +2965,8 @@ Define this function in another CFC to override the default email format
 	<cfscript>
 	db=request.zos.queryObject;
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
-	currentSetId=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true);
-	currentParentId=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
+	currentSetId=application.zcore.functions.zso(form, 'feature_data_id', true);
+	currentParentId=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
 	db.sql="select * from #db.table("feature_schema", "jetendofeature")# WHERE 
 	feature_schema_deleted=#db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
@@ -3166,19 +2994,19 @@ Define this function in another CFC to override the default email format
 				request.isUserPrimarySchema=false;
 			} 
 			first=false;
-			db.sql="select * from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
-			site_x_option_group_set_deleted=#db.param(0)# and 
+			db.sql="select * from #db.table("feature_data", "jetendofeature")# WHERE 
+			feature_data_deleted=#db.param(0)# and 
 			feature_id=#db.param(form.feature_id)# and 
-			site_x_option_group_set_id=#db.param(currentSetId)# ";
+			feature_data_id=#db.param(currentSetId)# ";
 			qCheckSet=db.execute("qCheckSet");
 			if(qCheckSet.recordcount EQ 0){
 				application.zcore.functions.z404("Invalid record.  set id doesn't exist: #currentSetId#");
 			}
-			if(qCheckSet.site_x_option_group_set_parent_id EQ 0){
-				currentSetId=qCheckSet.site_x_option_group_set_id;
+			if(qCheckSet.feature_data_parent_id EQ 0){
+				currentSetId=qCheckSet.feature_data_id;
 				break;
 			}else{
-				currentSetId=qCheckSet.site_x_option_group_set_parent_id;
+				currentSetId=qCheckSet.feature_data_parent_id;
 			}
 			i++;
 			if(i > 255){
@@ -3194,7 +3022,7 @@ Define this function in another CFC to override the default email format
 				qCheckSchema=db.execute("qCheckSchema");
 			}
 			if(qCheckSchema.feature_schema_user_id_field EQ ""){
-				application.zcore.functions.z404("This feature_schema requires feature_schema_user_id_field to be defined to enable user dashboard editing: #qCheckSchema.feature_schema_name#");
+				application.zcore.functions.z404("This feature_schema requires feature_schema_user_id_field to be defined to enable user dashboard editing: #qCheckSchema.feature_schema_variable_name#");
 			} 
 	 
 			db.sql="select * from #db.table("feature_field", "jetendofeature")# feature_field 
@@ -3210,7 +3038,7 @@ Define this function in another CFC to override the default email format
 			feature_field_id=#db.param(qField.feature_field_id)# and 
 			site_x_option_group_deleted=#db.param(0)# and 
 			feature_id=#db.param(form.feature_id)# and 
-			site_x_option_group_set_id=#db.param(currentSetId)# and 
+			feature_data_id=#db.param(currentSetId)# and 
 			feature_schema_id=#db.param(qCheckSet.feature_schema_id)# ";
 			qCheckValue=db.execute("qCheckValue");  
 			if(qCheckValue.recordcount NEQ 0){
@@ -3224,7 +3052,7 @@ Define this function in another CFC to override the default email format
 		}
 	} 
 	if(qCheckSchema.feature_schema_user_group_id_list EQ ""){
-		application.zcore.functions.z404("This feature_schema doesn't allow user dashboard editing: #qCheckSchema.feature_schema_name# (feature_schema_user_group_id_list is blank)");
+		application.zcore.functions.z404("This feature_schema doesn't allow user dashboard editing: #qCheckSchema.feature_schema_variable_name# (feature_schema_user_group_id_list is blank)");
 	}
 	arrId=listToArray(qCheckSchema.feature_schema_user_group_id_list); 
 	for(i=1;i<=arraylen(arrId);i++){
@@ -3232,7 +3060,7 @@ Define this function in another CFC to override the default email format
 			return;
 		}
 	} 
-	application.zcore.functions.z404("User doesn't have access to this feature_schema: #qCheckSchema.feature_schema_name#");
+	application.zcore.functions.z404("User doesn't have access to this feature_schema: #qCheckSchema.feature_schema_variable_name#");
 	</cfscript>
 </cffunction>
 
@@ -3292,7 +3120,7 @@ Define this function in another CFC to override the default email format
 		sog=application.zcore.siteFieldCom.getTypeData(request.zos.globals.id); 
 
 		form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id',true);
-		form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id',true);
+		form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id',true);
 		mainSchemaStruct=application.zcore.functions.zso(sog.optionSchemaLookup, form.feature_schema_id, false, {});
 		if(structcount(mainSchemaStruct) EQ 0){
 			application.zcore.functions.zredirect("/z/feature/admin/features/index");
@@ -3355,13 +3183,13 @@ Define this function in another CFC to override the default email format
 		// this childCount wasn't used anymore
 		// db.sql="select *, count(s3.feature_schema_id) childCount 
 		// from #db.table("feature_schema", "jetendofeature")# feature_schema 
-		// left join #db.table("site_x_option_group_set", "jetendofeature")# s3 ON 
+		// left join #db.table("feature_data", "jetendofeature")# s3 ON 
 		// feature_schema.feature_schema_id = s3.feature_schema_id and 
 		// s3.site_id = feature_schema.site_id  and 
-		// s3.site_x_option_group_set_master_set_id = #db.param(0)# and 
-		// s3.site_x_option_group_set_deleted = #db.param(0)# ";
+		// s3.feature_data_master_set_id = #db.param(0)# and 
+		// s3.feature_data_deleted = #db.param(0)# ";
 		// if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-		// 	db.sql&=" and site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+		// 	db.sql&=" and feature_data_id = #db.param(form.feature_data_id)# ";
 		// }
 		// db.sql&=" where 
 		// feature_schema_deleted = #db.param(0)# and
@@ -3412,21 +3240,21 @@ Define this function in another CFC to override the default email format
 			currentUserIdValue=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
 		}
 		if(sortEnabled){
-			queueSortStruct.tableName = "site_x_option_group_set";
-			queueSortStruct.sortFieldName = "site_x_option_group_set_sort";
-			queueSortStruct.primaryKeyName = "site_x_option_group_set_id";
+			queueSortStruct.tableName = "feature_data";
+			queueSortStruct.sortFieldName = "feature_data_sort";
+			queueSortStruct.primaryKeyName = "feature_data_id";
 			queueSortStruct.datasource="jetendofeature";
 			queueSortStruct.ajaxTableId='sortRowTable';
-			queueSortStruct.ajaxURL=application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#&enableSorting=1");
+			queueSortStruct.ajaxURL=application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#&enableSorting=1");
 			
-			queueSortStruct.where =" site_x_option_group_set.feature_id = '#application.zcore.functions.zescape(form.feature_id)#' and  
+			queueSortStruct.where =" feature_data.feature_id = '#application.zcore.functions.zescape(form.feature_id)#' and  
 			feature_schema_id = '#application.zcore.functions.zescape(form.feature_schema_id)#' and 
-			site_x_option_group_set_parent_id='#application.zcore.functions.zescape(form.site_x_option_group_set_parent_id)#' and 
+			feature_data_parent_id='#application.zcore.functions.zescape(form.feature_data_parent_id)#' and 
 			site_id = '#request.zos.globals.id#' and 
-			site_x_option_group_set_master_set_id = '0' and 
-			site_x_option_group_set_deleted='0' ";
+			feature_data_master_set_id = '0' and 
+			feature_data_deleted='0' ";
 			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				queueSortStruct.where &=" and site_x_option_group_set_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+				queueSortStruct.where &=" and feature_data_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
 			}
 			
 			queueSortStruct.disableRedirect=true;
@@ -3435,7 +3263,7 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(form, 'zQueueSort')){
 				// update cache
 				if(request.zos.enableSiteSchemaCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
-					application.zcore.siteFieldCom.updateSchemaSetIdCache(request.zos.globals.id, form.site_x_option_group_set_id); 
+					application.zcore.siteFieldCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
 				}
 				//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 				// redirect with zqueuesort renamed
@@ -3444,7 +3272,7 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(form, 'zQueueSortAjax')){
 				// update cache
 				if(request.zos.enableSiteSchemaCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
-					application.zcore.siteFieldCom.resortSchemaSets(request.zos.globals.id, form.feature_id, form.feature_schema_id, form.site_x_option_group_set_parent_id); 
+					application.zcore.siteFieldCom.resortSchemaSets(request.zos.globals.id, form.feature_id, form.feature_schema_id, form.feature_data_parent_id); 
 				}else{
 
 					t9=application.zcore.siteFieldCom.getTypeData(request.zos.globals.id);
@@ -3459,18 +3287,18 @@ Define this function in another CFC to override the default email format
 						changeCom=application.zcore.functions.zcreateObject("component", path); 
 						offset=0;
 						while(true){
-							db.sql="select site_x_option_group_set_id FROM #db.table("site_x_option_group_set", "jetendofeature")# 
+							db.sql="select feature_data_id FROM #db.table("feature_data", "jetendofeature")# 
 							WHERE 
-							site_x_option_group_set.feature_id = #db.param(form.feature_id)# and  
+							feature_data.feature_id = #db.param(form.feature_id)# and  
 							feature_schema_id = #db.param(form.feature_schema_id)# and 
-							site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)# and 
+							feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
 							feature_id=#db.param(form.feature_id)# and 
-							site_x_option_group_set_master_set_id = #db.param(0)# and 
-							site_x_option_group_set_deleted=#db.param(0)# ";
+							feature_data_master_set_id = #db.param(0)# and 
+							feature_data_deleted=#db.param(0)# ";
 							if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-								db.sql&=" and site_x_option_group_set_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+								db.sql&=" and feature_data_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
 							}
-							db.sql&=" ORDER BY site_x_option_group_set_sort ASC 
+							db.sql&=" ORDER BY feature_data_sort ASC 
 							LIMIT #db.param(offset)#, #db.param(20)#";
 							qSorted=db.execute("qSorted");
 							if(qSorted.recordcount EQ 0){
@@ -3478,7 +3306,7 @@ Define this function in another CFC to override the default email format
 							}
 							for(row in qSorted){
 								offset++;
-								changeCom[groupStruct.feature_schema_change_cfc_sort_method](row.site_x_option_group_set_id, offset); 
+								changeCom[groupStruct.feature_schema_change_cfc_sort_method](row.feature_data_id, offset); 
 							}
 						}
 					}
@@ -3604,7 +3432,7 @@ Define this function in another CFC to override the default email format
 				application.zcore.template.setTag("pagetitle",theTitle);  
 			} 
 			curParentId=mainSchemaStruct.feature_schema_parent_id;
-			curParentSetId=form.site_x_option_group_set_parent_id;
+			curParentSetId=form.feature_data_parent_id;
 			if(not structkeyexists(arguments.struct, 'hideNavigation') or not arguments.struct.hideNavigation){
 				application.zcore.siteFieldCom.getSetParentLinks(mainSchemaStruct.feature_schema_id, curParentId, curParentSetId, false);
 			}
@@ -3632,7 +3460,7 @@ Define this function in another CFC to override the default email format
 		if(not structkeyexists(arguments.struct, 'recurse') and form.feature_schema_id NEQ 0 and arraylen(arrSearchTable)){ 
 			arrayAppend(arrSearch, '<form action="#arguments.struct.listURL#" method="get">
 			<input type="hidden" name="searchOn" value="1" />
-			<input type="hidden" name="site_x_option_group_set_parent_id" value="#form.site_x_option_group_set_parent_id#" />
+			<input type="hidden" name="feature_data_parent_id" value="#form.feature_data_parent_id#" />
 			<input type="hidden" name="feature_schema_id" value="#form.feature_schema_id#" />
 			<input type="hidden" name="feature_id" value="#form.feature_id#" />
 			<div class="z-float " style="border-bottom:1px solid ##CCC; padding-bottom:10px;">');
@@ -3686,7 +3514,7 @@ Define this function in another CFC to override the default email format
 			if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
 				if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
 					if(structkeyexists(form, 'searchOn')){
-						searchStruct['site_x_option_group_set_approved']=application.zcore.functions.zso(form,'site_x_option_group_set_approved');
+						searchStruct['feature_data_approved']=application.zcore.functions.zso(form,'feature_data_approved');
 						if(not structkeyexists(request.zsession, 'siteSchemaSearch')){
 							request.zsession.siteSchemaSearch={};
 						}
@@ -3695,7 +3523,7 @@ Define this function in another CFC to override the default email format
 				}
 				arrayAppend(arrSearch, '<div class="z-float-left z-pr-10 z-pb-10">Approval Status:<br />');
 				ts = StructNew();
-				ts.name = "site_x_option_group_set_approved";
+				ts.name = "feature_data_approved";
 				ts.listLabels= "Approved|Pending|Deactivated By User|Rejected";
 				ts.listValues= "1|0|2|3";
 				ts.listLabelsdelimiter="|";
@@ -3706,7 +3534,7 @@ Define this function in another CFC to override the default email format
 				arrayAppend(arrSearch, '</div>');
 			}
 			arrayAppend(arrSearch, '<div class="z-float-left">&nbsp;<br><input type="submit" name="searchSubmit1" value="Search" class="z-manager-search-button" /> 
-				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
+				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
 			</div></div></form>');
 
 			if ( mainSchemaStruct.feature_schema_enable_sorting EQ 1 ) {
@@ -3716,31 +3544,31 @@ Define this function in another CFC to override the default email format
 				}
 			}
 		}
-		status=application.zcore.functions.zso(searchStruct, 'site_x_option_group_set_approved');
+		status=application.zcore.functions.zso(searchStruct, 'feature_data_approved');
 
 
 		if(mainSchemaStruct.feature_schema_limit GT 0){
 			db.sql="SELECT count(feature_schema.feature_schema_id) count
 			FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-			#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set)  "; 
+			#db.table("feature_data", "jetendofeature")# feature_data)  "; 
 			db.sql&="WHERE  
-			site_x_option_group_set_deleted = #db.param(0)# and 
+			feature_data_deleted = #db.param(0)# and 
 			feature_schema_deleted = #db.param(0)# and 
-			site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-			site_x_option_group_set_master_set_id = #db.param(0)# and 
-			feature_schema.site_id=site_x_option_group_set.site_id and 
-			feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id "; 
+			feature_data.feature_id = #db.param(form.feature_id)# and 
+			feature_data_master_set_id = #db.param(0)# and 
+			feature_schema.site_id=feature_data.site_id and 
+			feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
 			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 			}
-			if(form.site_x_option_group_set_parent_id NEQ 0){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+			if(form.feature_data_parent_id NEQ 0){
+				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 			} 
 			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+				db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
 			}
 			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+				db.sql&=" and feature_data_archived =#db.param(0)# ";
 			}
 			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
@@ -3751,11 +3579,11 @@ Define this function in another CFC to override the default email format
 		if(methodBackup EQ "userManageSchema"){
 			db.sql="SELECT count(feature_schema.feature_schema_id) count
 			FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-			#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set)  ";
+			#db.table("feature_data", "jetendofeature")# feature_data)  ";
 			for(i=1;i LTE arraylen(arrVal);i++){
 				if(structkeyexists(searchFieldEnabledStruct, i)){
 					db.sql&="LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s#i# on 
-					s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+					s#i#.feature_data_id = feature_data.feature_data_id and 
 					s#i#.feature_field_id = #db.param(arrVal[i])# and 
 					s#i#.feature_schema_id = feature_schema.feature_schema_id and 
 					s#i#.site_id = feature_schema.site_id and 
@@ -3764,29 +3592,29 @@ Define this function in another CFC to override the default email format
 				}
 			}
 			db.sql&="WHERE  
-			site_x_option_group_set_deleted = #db.param(0)# and 
+			feature_data_deleted = #db.param(0)# and 
 			feature_schema_deleted = #db.param(0)# and 
-			site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-			site_x_option_group_set_master_set_id = #db.param(0)# and 
-			feature_schema.site_id=site_x_option_group_set.site_id and 
-			feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id ";
+			feature_data.feature_id = #db.param(form.feature_id)# and 
+			feature_data_master_set_id = #db.param(0)# and 
+			feature_schema.site_id=feature_data.site_id and 
+			feature_schema.feature_schema_id=feature_data.feature_schema_id ";
 			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 			}
-			if(form.site_x_option_group_set_parent_id NEQ 0){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+			if(form.feature_data_parent_id NEQ 0){
+				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 			}
 			if(status NEQ ""){
-				db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+				db.sql&=" and feature_data_approved = #db.param(status)# ";
 			}
 			if(arraylen(arrSearchSQL)){
 				db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
 			}
 			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+				db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
 			}
 			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+				db.sql&=" and feature_data_archived =#db.param(0)# ";
 			}
 			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
@@ -3796,11 +3624,11 @@ Define this function in another CFC to override the default email format
 			if(mainSchemaStruct.feature_schema_user_child_limit NEQ 0){
 				db.sql="SELECT count(feature_schema.feature_schema_id) count
 				FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-				#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set)  ";
+				#db.table("feature_data", "jetendofeature")# feature_data)  ";
 				for(i=1;i LTE arraylen(arrVal);i++){
 					if(structkeyexists(searchFieldEnabledStruct, i)){
 						db.sql&="LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s#i# on 
-						s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+						s#i#.feature_data_id = feature_data.feature_data_id and 
 						s#i#.feature_field_id = #db.param(arrVal[i])# and 
 						s#i#.feature_schema_id = feature_schema.feature_schema_id and 
 						s#i#.site_id = feature_schema.site_id and 
@@ -3809,23 +3637,23 @@ Define this function in another CFC to override the default email format
 					}
 				}
 				db.sql&="WHERE  
-				site_x_option_group_set_deleted = #db.param(0)# and 
+				feature_data_deleted = #db.param(0)# and 
 				feature_schema_deleted = #db.param(0)# and 
-				site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-				site_x_option_group_set_master_set_id = #db.param(0)# and 
-				feature_schema.site_id=site_x_option_group_set.site_id and 
-				feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id ";
+				feature_data.feature_id = #db.param(form.feature_id)# and 
+				feature_data_master_set_id = #db.param(0)# and 
+				feature_schema.site_id=feature_data.site_id and 
+				feature_schema.feature_schema_id=feature_data.feature_schema_id ";
 				if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-					db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+					db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 				}
-				if(form.site_x_option_group_set_parent_id NEQ 0){
-					db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+				if(form.feature_data_parent_id NEQ 0){
+					db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 				} 
 				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-					db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+					db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
 				}
 				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-					db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+					db.sql&=" and feature_data_archived =#db.param(0)# ";
 				}
 				db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 				feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
@@ -3836,11 +3664,11 @@ Define this function in another CFC to override the default email format
 			if(arraylen(arrSearchSQL) GT 0 or mainSchemaStruct.feature_schema_enable_cache EQ 0 or mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
 				db.sql="SELECT count(feature_schema.feature_schema_id) count
 				FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-				#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set)  ";
+				#db.table("feature_data", "jetendofeature")# feature_data)  ";
 				for(i=1;i LTE arraylen(arrVal);i++){
 					if(structkeyexists(searchFieldEnabledStruct, i)){
 						db.sql&="LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s#i# on 
-						s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+						s#i#.feature_data_id = feature_data.feature_data_id and 
 						s#i#.feature_field_id = #db.param(arrVal[i])# and 
 						s#i#.feature_schema_id = feature_schema.feature_schema_id and 
 						s#i#.site_id = feature_schema.site_id and 
@@ -3849,29 +3677,29 @@ Define this function in another CFC to override the default email format
 					}
 				}
 				db.sql&="WHERE  
-				site_x_option_group_set_deleted = #db.param(0)# and 
+				feature_data_deleted = #db.param(0)# and 
 				feature_schema_deleted = #db.param(0)# and 
-				site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-				site_x_option_group_set_master_set_id = #db.param(0)# and 
-				feature_schema.site_id=site_x_option_group_set.site_id and 
-				feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id "; 
+				feature_data.feature_id = #db.param(form.feature_id)# and 
+				feature_data_master_set_id = #db.param(0)# and 
+				feature_schema.site_id=feature_data.site_id and 
+				feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
 				if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-					db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+					db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 				}
-				if(form.site_x_option_group_set_parent_id NEQ 0){
-					db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+				if(form.feature_data_parent_id NEQ 0){
+					db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 				}
 				if(status NEQ ""){
-					db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+					db.sql&=" and feature_data_approved = #db.param(status)# ";
 				}
 				if(arraylen(arrSearchSQL)){
 					db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
 				}
 				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-					db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+					db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
 				}
 				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-					db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+					db.sql&=" and feature_data_archived =#db.param(0)# ";
 				}
 				db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 				feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
@@ -3884,15 +3712,15 @@ Define this function in another CFC to override the default email format
 		} 
 
 
-		db.sql="SELECT feature_schema.*,  site_x_option_group_set.*";
+		db.sql="SELECT feature_schema.*,  feature_data.*";
 		for(i=1;i LTE arraylen(arrVal);i++){
 			db.sql&=" , s#i#.site_x_option_group_value sVal#i# ";
 		}
 		db.sql&=" FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-		#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set) ";
+		#db.table("feature_data", "jetendofeature")# feature_data) ";
 		for(i=1;i LTE arraylen(arrVal);i++){
 			db.sql&="LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s#i# on 
-			s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+			s#i#.feature_data_id = feature_data.feature_data_id and 
 			s#i#.feature_field_id = #db.param(arrVal[i])# and 
 			s#i#.feature_schema_id = feature_schema.feature_schema_id and 
 			s#i#.site_id = feature_schema.site_id and 
@@ -3902,38 +3730,38 @@ Define this function in another CFC to override the default email format
 		db.sql&="
 		WHERE  
 		feature_schema_deleted = #db.param(0)# and
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
-		site_x_option_group_set_deleted = #db.param(0)# and 
-		site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-		feature_schema.site_id=site_x_option_group_set.site_id and 
-		feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id ";
+		feature_data_master_set_id = #db.param(0)# and 
+		feature_data_deleted = #db.param(0)# and 
+		feature_data.feature_id = #db.param(form.feature_id)# and 
+		feature_schema.site_id=feature_data.site_id and 
+		feature_schema.feature_schema_id=feature_data.feature_schema_id ";
 		if(arraylen(arrSearchSQL)){
 			db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
 		}
 		if(status NEQ ""){
-			db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+			db.sql&=" and feature_data_approved = #db.param(status)# ";
 		}
 		if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-			db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+			db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 		}
-		if(form.site_x_option_group_set_parent_id NEQ 0){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+		if(form.feature_data_parent_id NEQ 0){
+			db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 		}
 		if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-			db.sql&=" and site_x_option_group_set.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# ";
+			db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
 		}
 		db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 		feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
 		feature_schema.feature_schema_type=#db.param('1')# ";
 
 		if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-			db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+			db.sql&=" and feature_data_archived =#db.param(0)# ";
 		}
-		//GROUP BY site_x_option_group_set.site_x_option_group_set_id
+		//GROUP BY feature_data.feature_data_id
 		if(arraylen(arrSortSQL)){
 			db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
 		}else{
-			db.sql&=" ORDER BY site_x_option_group_set_sort asc ";
+			db.sql&=" ORDER BY feature_data_sort asc ";
 		}
 		if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
 			db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
@@ -3942,15 +3770,15 @@ Define this function in another CFC to override the default email format
 
 
 		if(mainSchemaStruct.feature_schema_limit GT 0){
-			db.sql="SELECT feature_schema.*,  site_x_option_group_set.*";
+			db.sql="SELECT feature_schema.*,  feature_data.*";
 			for(i=1;i LTE arraylen(arrVal);i++){
 				db.sql&=" , s#i#.site_x_option_group_value sVal#i# ";
 			}
 			db.sql&=" FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-			#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set) ";
+			#db.table("feature_data", "jetendofeature")# feature_data) ";
 			for(i=1;i LTE arraylen(arrVal);i++){
 				db.sql&="LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s#i# on 
-				s#i#.site_x_option_group_set_id = site_x_option_group_set.site_x_option_group_set_id and 
+				s#i#.feature_data_id = feature_data.feature_data_id and 
 				s#i#.feature_field_id = #db.param(arrVal[i])# and 
 				s#i#.feature_schema_id = feature_schema.feature_schema_id and 
 				s#i#.site_id = feature_schema.site_id and 
@@ -3960,34 +3788,34 @@ Define this function in another CFC to override the default email format
 			db.sql&="
 			WHERE  
 			feature_schema_deleted = #db.param(0)# and
-			site_x_option_group_set_master_set_id = #db.param(0)# and 
-			site_x_option_group_set_deleted = #db.param(0)# and 
-			site_x_option_group_set.feature_id = #db.param(form.feature_id)# and 
-			feature_schema.site_id=site_x_option_group_set.site_id and 
-			feature_schema.feature_schema_id=site_x_option_group_set.feature_schema_id ";
+			feature_data_master_set_id = #db.param(0)# and 
+			feature_data_deleted = #db.param(0)# and 
+			feature_data.feature_id = #db.param(form.feature_id)# and 
+			feature_schema.site_id=feature_data.site_id and 
+			feature_schema.feature_schema_id=feature_data.feature_schema_id ";
 			if(arraylen(arrSearchSQL)){
 				db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
 			}
 			if(status NEQ ""){
-				db.sql&=" and site_x_option_group_set_approved = #db.param(status)# ";
+				db.sql&=" and feature_data_approved = #db.param(status)# ";
 			}
 			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 			}
-			if(form.site_x_option_group_set_parent_id NEQ 0){
-				db.sql&=" and site_x_option_group_set.site_x_option_group_set_parent_id = #db.param(form.site_x_option_group_set_parent_id)#";
+			if(form.feature_data_parent_id NEQ 0){
+				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
 			} 
 			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and site_x_option_group_set_archived =#db.param(0)# ";
+				db.sql&=" and feature_data_archived =#db.param(0)# ";
 			}
 			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
 			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
 			feature_schema.feature_schema_type=#db.param('1')# ";
-			//GROUP BY site_x_option_group_set.site_x_option_group_set_id
+			//GROUP BY feature_data.feature_data_id
 			if(arraylen(arrSortSQL)){
 				db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
 			}else{
-				db.sql&=" ORDER BY site_x_option_group_set_sort asc ";
+				db.sql&=" ORDER BY feature_data_sort asc ";
 			}
 			if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
 				db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
@@ -4010,10 +3838,10 @@ Define this function in another CFC to override the default email format
 		if(not structkeyexists(arguments.struct, 'recurse')){
 			if(mainSchemaStruct.feature_schema_enable_sorting EQ 1){
 				if(not sortEnabled and subgroupRecurseEnabled){
-					sortLink=('<a href="/z/feature/admin/features/#methodBackup#?feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&amp;enableSorting=1" class="z-manager-search-button">Enable Sorting</a>');
+					sortLink=('<a href="/z/feature/admin/features/#methodBackup#?feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#&amp;enableSorting=1" class="z-manager-search-button">Enable Sorting</a>');
 					
 				}else if(form.enableSorting EQ 1){
-					sortLink=('<a href="/z/feature/admin/features/#methodBackup#?feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#" class="z-manager-search-button">Disable Sorting</a>');
+					sortLink=('<a href="/z/feature/admin/features/#methodBackup#?feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#" class="z-manager-search-button">Disable Sorting</a>');
 				}
 			}
 		} 
@@ -4026,7 +3854,7 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(arguments.struct, 'recurse') EQ false){ 
 				echo('<div class="z-float z-mb-10"><h2 style="display:inline-block; ">#mainSchemaStruct.feature_schema_display_name#(s)</h2> &nbsp;&nbsp; ');
 				if(addEnabled){
-					writeoutput('<a href="#application.zcore.functions.zURLAppend(arguments.struct.addURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#")#&modalpopforced=1" onclick="zTableRecordAdd(this, ''sortRowTable''); return false; " class="z-manager-quick-add-link z-manager-search-button ">Add</a>');
+					writeoutput('<a href="#application.zcore.functions.zURLAppend(arguments.struct.addURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#")#&modalpopforced=1" onclick="zTableRecordAdd(this, ''sortRowTable''); return false; " class="z-manager-quick-add-link z-manager-search-button ">Add</a>');
 					if(application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1){
 						application.zcore.skin.addDeferredScript(' $(".z-manager-quick-add-link").trigger("click"); ');
 					} 
@@ -4037,9 +3865,9 @@ Define this function in another CFC to override the default email format
 
 				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1){
 					if(showArchived){ 
-						echo(' <a href="/z/feature/admin/features/#methodBackup#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&showArchived=0" class="z-button">Hide Archived</a>'); 
+						echo(' <a href="/z/feature/admin/features/#methodBackup#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&showArchived=0" class="z-button">Hide Archived</a>'); 
 					}else{
-						echo(' <a href="/z/feature/admin/features/#methodBackup#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&showArchived=1" class="z-button">Show Archived</a>');
+						echo(' <a href="/z/feature/admin/features/#methodBackup#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&showArchived=1" class="z-button">Show Archived</a>');
 					}
 				}
 				echo(' #sortLink#</div>'); 
@@ -4096,7 +3924,7 @@ Define this function in another CFC to override the default email format
 					curRowIndex=0;
 					curIndent=0;
 					for(n=1;n LTE arraylen(rs.arrValue);n++){
-						if(row.site_x_option_group_set_id EQ rs.arrValue[n]){
+						if(row.feature_data_id EQ rs.arrValue[n]){
 							curRowIndex=n;
 							curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
 							break;
@@ -4112,7 +3940,7 @@ Define this function in another CFC to override the default email format
 				firstDisplayed=true; 
 				// image is not being added to list view
 				savecontent variable="rowOutput"{ 
-					echo('<td class="z-hide-at-767">'&row.site_x_option_group_set_id&'</td>');
+					echo('<td class="z-hide-at-767">'&row.feature_data_id&'</td>');
 					for(var i=1;i LTE arraylen(arrVal);i++){
 						if(arrDisplay[i]){
 							writeoutput('<td>');
@@ -4141,24 +3969,24 @@ Define this function in another CFC to override the default email format
 						}
 					}
 					if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
-						echo('<td>'&application.zcore.siteFieldCom.getStatusName(row.site_x_option_group_set_approved)&'</td>');
+						echo('<td>'&application.zcore.siteFieldCom.getStatusName(row.feature_data_approved)&'</td>');
 					}
 					/*if(sortEnabled){
 						echo('<td>');
 						if(row.site_id NEQ 0 or variables.allowGlobal){
-							queueSortCom.getRowStruct(row.site_x_option_group_set_id);
-							echo(queueSortCom.getAjaxHandleButton(row.site_x_option_group_set_id));
+							queueSortCom.getRowStruct(row.feature_data_id);
+							echo(queueSortCom.getAjaxHandleButton(row.feature_data_id));
 						}
 						echo('</td>');
 					}*/
-					echo('<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.site_x_option_group_set_updated_datetime)&'</td>');
+					echo('<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime)&'</td>');
 					writeoutput('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
 					if(row.site_id NEQ 0 or variables.allowGlobal){
 						if(sortEnabled){
 							if(row.site_id NEQ 0 or variables.allowGlobal){
 								echo('<div class="z-manager-button-container">');
-								queueSortCom.getRowStruct(row.site_x_option_group_set_id);
-								echo(queueSortCom.getAjaxHandleButton(row.site_x_option_group_set_id));
+								queueSortCom.getRowStruct(row.feature_data_id);
+								echo(queueSortCom.getAjaxHandleButton(row.feature_data_id));
 								echo('</div>');
 							}
 						}
@@ -4166,14 +3994,14 @@ Define this function in another CFC to override the default email format
 
 						if(row.feature_schema_enable_unique_url EQ 1){
 							var tempLink="";
-							if(row.site_x_option_group_set_override_url NEQ ""){
-								tempLink=row.site_x_option_group_set_override_url;
+							if(row.feature_data_override_url NEQ ""){
+								tempLink=row.feature_data_override_url;
 							}else{
-								tempLink="/#application.zcore.functions.zURLEncode(row.site_x_option_group_set_title, '-')#-#request.zos.globals.optionSchemaURLID#-#row.site_x_option_group_set_id#.html";
+								tempLink="/#application.zcore.functions.zURLEncode(row.feature_data_title, '-')#-50-#row.feature_data_id#.html";
 							}
 							if(row.feature_schema_enable_approval EQ 1){
 
-								if(row.site_x_option_group_set_approved NEQ 1){
+								if(row.feature_data_approved NEQ 1){
 									echo('<div class="z-manager-button-container">
 										<a title="Inactive"><i class="fa fa-times-circle" aria-hidden="true" style="color:##900;"></i></a>
 									</div>');
@@ -4184,7 +4012,7 @@ Define this function in another CFC to override the default email format
 								}
 							}
 
-							if(row.site_x_option_group_set_approved EQ 1){
+							if(row.feature_data_approved EQ 1){
 								writeoutput('<div class="z-manager-button-container"><a href="'&tempLink&'" target="_blank" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
 							}else{
 								writeoutput('<div class="z-manager-button-container"><a href="'&application.zcore.functions.zURLAppend(tempLink, "zpreview=1")&'" target="_blank" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
@@ -4194,10 +4022,10 @@ Define this function in another CFC to override the default email format
 						hasMultipleEditFeatures=false;
 						savecontent variable="editHTML"{
 							echo('
-							<a href="##" class="z-manager-edit" id="z-manager-edit#row.site_x_option_group_set_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
+							<a href="##" class="z-manager-edit" id="z-manager-edit#row.feature_data_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
 							<div class="z-manager-edit-menu">');
 
-							editLink=application.zcore.functions.zURLAppend(arguments.struct.editURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#&amp;modalpopforced=1");
+							editLink=application.zcore.functions.zURLAppend(arguments.struct.editURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#&amp;modalpopforced=1");
 							if(not sortEnabled){
 								editLink&="&amp;disableSorting=1";
 							}
@@ -4205,7 +4033,7 @@ Define this function in another CFC to override the default email format
 							if(arrayLen(arrChildSchema) NEQ 0){ 
 								for(n in arrChildSchema){
 									if(structkeyexists(subgroupStruct, n.feature_schema_id)){
-										link=application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_schema_id=#n.feature_schema_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_id#");
+										link=application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_id#");
 										echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(n.feature_schema_display_name)#(s)</a>'); // n.childCount
 										hasMultipleEditFeatures=true;
 									}
@@ -4214,26 +4042,26 @@ Define this function in another CFC to override the default email format
 							copyLink="";
 							if(methodBackup NEQ "userManageSchema" and methodBackup NEQ "userGetRowHTML"){
 								if(mainSchemaStruct.feature_schema_limit EQ 0 or qSCount.recordcount LT mainSchemaStruct.feature_schema_limit){
-									if(mainSchemaStruct.feature_schema_enable_versioning EQ 1 and row.site_x_option_group_set_parent_id EQ 0){
-										copyLink=application.zcore.functions.zURLAppend(arguments.struct.copyURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#"); 
-										echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.versionURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#")#">Versions</a>');
+									if(mainSchemaStruct.feature_schema_enable_versioning EQ 1 and row.feature_data_parent_id EQ 0){
+										copyLink=application.zcore.functions.zURLAppend(arguments.struct.copyURL, "feature_data_id=#row.feature_data_id#"); 
+										echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.versionURL, "feature_data_id=#row.feature_data_id#")#">Versions</a>');
 										hasMultipleEditFeatures=true;
 									}else{
-										copyLink=application.zcore.functions.zURLAppend(arguments.struct.addURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+										copyLink=application.zcore.functions.zURLAppend(arguments.struct.addURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#");
 										
 									}
 								}
 							}
 							
 							if(row.feature_schema_enable_section EQ 1){
-								echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.sectionURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#">Manage Section</a> ');
+								echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.sectionURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#")#">Manage Section</a> ');
 								hasMultipleEditFeatures=true;
 							}
 							if(row.feature_schema_enable_archiving EQ 1){
-								if(row.site_x_option_group_set_archived EQ 1){
-									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.unarchiveURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#">Unarchive</a> ');
+								if(row.feature_data_archived EQ 1){
+									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.unarchiveURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#")#">Unarchive</a> ');
 								}else{
-									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.archiveURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#")#" onclick="archiveSchemaRecord(this); return false;">Archive</a> ');
+									echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.archiveURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#")#" onclick="archiveSchemaRecord(this); return false;">Archive</a> ');
 								}
 								hasMultipleEditFeatures=true;
 							}
@@ -4242,7 +4070,7 @@ Define this function in another CFC to override the default email format
 						if(hasMultipleEditFeatures){
 							echo(editHTML);
 						}else{
-							echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;" class="z-manager-edit" id="z-manager-edit#row.site_x_option_group_set_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>');
+							echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;" class="z-manager-edit" id="z-manager-edit#row.feature_data_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>');
 						}
 
 						echo('</div>');
@@ -4250,7 +4078,7 @@ Define this function in another CFC to override the default email format
 						if(copyLink NEQ ""){
 							echo('<div class="z-manager-button-container"><a href="#copyLink#" class="z-manager-copy" title="Copy"><i class="fa fa-clone" aria-hidden="true"></i></a></div>');
 						}
-						deleteLink=application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#&amp;returnJson=1&amp;confirm=1");
+						deleteLink=application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#&amp;returnJson=1&amp;confirm=1");
 						//zShowModalStandard(this.href, 2000,2000, true, true);
 						allowDelete=true;
 						if(methodBackup EQ "userManageSchema" or methodBackup EQ "userGetRowHTML"){
@@ -4266,14 +4094,14 @@ Define this function in another CFC to override the default email format
 							}
 						}
 						if(allowDelete){
-							if(methodBackup NEQ "userManageSchema" and methodBackup NEQ "userGetRowHTML" and not application.zcore.functions.zIsForceDeleteEnabled(row.site_x_option_group_set_override_url) and mainSchemaStruct.feature_schema_enable_locked_delete EQ 0){
+							if(methodBackup NEQ "userManageSchema" and methodBackup NEQ "userGetRowHTML" and not application.zcore.functions.zIsForceDeleteEnabled(row.feature_data_override_url) and mainSchemaStruct.feature_schema_enable_locked_delete EQ 0){
 								//echo('Delete disabled');
 							}else{
 								echo('<div class="z-manager-button-container"><a href="##"  onclick="zDeleteTableRecordRow(this, ''#deleteLink#'');  return false;" class="z-manager-delete" title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></a></div>');
 							}
 						}
-						if(row.site_x_option_group_set_copy_id NEQ 0){
-							echo('<div class="z-manager-button-container"><a title="This record is a copy of another record" style="padding-top:6px;display:inline-block;">Copy of ###row.site_x_option_group_set_copy_id#</a></div>');
+						if(row.feature_data_copy_id NEQ 0){
+							echo('<div class="z-manager-button-container"><a title="This record is a copy of another record" style="padding-top:6px;display:inline-block;">Copy of ###row.feature_data_copy_id#</a></div>');
 						}
 					}
 					writeoutput('</td>'); 
@@ -4282,13 +4110,13 @@ Define this function in another CFC to override the default email format
 				sublistEnabled=false;
 				backupSiteFieldAppId=form.feature_id;
 				backupSiteSchemaId=form.feature_schema_id;
-				backupSiteXSchemaSetParentId=form.site_x_option_group_set_parent_id;
+				backupSiteXSchemaSetParentId=form.feature_data_parent_id;
 				savecontent variable="recurseOut"{
 					if(subgroupRecurseEnabled and form.enableSorting EQ 0 and arrayLen(arrChildSchema) NEQ 0){
 						for(var n in arrChildSchema){
 							if(n.feature_schema_enable_list_recurse EQ "1"){
 								form.feature_schema_app_id=row.feature_id;
-								form.site_x_option_group_set_parent_id=row.site_x_option_group_set_id;
+								form.feature_data_parent_id=row.feature_data_id;
 								form.feature_schema_id=n.feature_schema_id;
 								if(methodBackup EQ "userManageSchema"){
 									userManageSchema({recurse:true});
@@ -4300,7 +4128,7 @@ Define this function in another CFC to override the default email format
 						}
 					}
 				}
-				form.site_x_option_group_set_parent_id=backupSiteXSchemaSetParentId;
+				form.feature_data_parent_id=backupSiteXSchemaSetParentId;
 				form.feature_schema_id=backupSiteSchemaId;
 				form.feature_id=backupSiteFieldAppId;
 				if(not sublistEnabled){
@@ -4316,7 +4144,7 @@ Define this function in another CFC to override the default email format
 
 				if(sortEnabled){
 					if(row.site_id NEQ 0 or variables.allowGlobal){
-						rowStruct[curRowIndex].trHTML=queueSortCom.getRowHTML(row.site_x_option_group_set_id);
+						rowStruct[curRowIndex].trHTML=queueSortCom.getRowHTML(row.feature_data_id);
 					}
 				}
 			}
@@ -4496,8 +4324,8 @@ Define this function in another CFC to override the default email format
 	variables.init();
 	methodBackup=form.method;
 	application.zcore.functions.zstatusHandler(request.zsid, true, false, form); 
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
-	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id',true);
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
+	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id',true);
 	 
  
 	form.modalpopforced=application.zcore.functions.zso(form, 'modalpopforced',true, 0);
@@ -4515,8 +4343,8 @@ Define this function in another CFC to override the default email format
 	feature_field.feature_schema_id = site_x_option_group.feature_schema_id and 
 	feature_field.feature_field_id = site_x_option_group.feature_field_id and 
 	site_x_option_group.site_id = feature_schema.site_id and 
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
-	site_x_option_group.site_x_option_group_set_id<>#db.param(0)#
+	feature_data_id=#db.param(form.feature_data_id)# and 
+	site_x_option_group.feature_data_id<>#db.param(0)#
 	WHERE 
 	feature_field_deleted = #db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and
@@ -4550,26 +4378,26 @@ Define this function in another CFC to override the default email format
 	}
 
 	curParentId=qS.feature_schema_parent_id;
-	curParentSetId=form.site_x_option_group_set_parent_id;
+	curParentSetId=form.feature_data_parent_id;
 	/*
 	arrParent=arraynew(1);
 	if(not structkeyexists(arguments.struct, 'hideNavigation') or not arguments.struct.hideNavigation){
 		if(curParentSetId NEQ 0){
 			loop from="1" to="25" index="i"{
-				db.sql="select s1.*, s2.site_x_option_group_set_title, s2.site_x_option_group_set_id d2, s2.site_x_option_group_set_parent_id d3 
+				db.sql="select s1.*, s2.feature_data_title, s2.feature_data_id d2, s2.feature_data_parent_id d3 
 				from #db.table("feature_schema", "jetendofeature")# s1, 
-				#db.table("site_x_option_group_set", "jetendofeature")# s2
+				#db.table("feature_data", "jetendofeature")# s2
 				where s1.site_id = s2.site_id and 
 				s1.feature_id=#db.param(form.feature_id)# and 
 				s1.feature_schema_id=s2.feature_schema_id and 
-				s2.site_x_option_group_set_id=#db.param(curParentSetId)# and 
+				s2.feature_data_id=#db.param(curParentSetId)# and 
 				s1.feature_schema_id = #db.param(curParentId)# and 
 				s1.feature_schema_deleted = #db.param(0)# and 
-				s2.site_x_option_group_set_deleted = #db.param(0)#
+				s2.feature_data_deleted = #db.param(0)#
 				LIMIT #db.param(0)#,#db.param(1)#";
 				q12=db.execute("q12");
 				loop query="q12"{
-					arrayappend(arrParent, '<a href="#application.zcore.functions.zURLAppend("/z/feature/admin/features/#methodBackup#", "feature_schema_id=#q12.feature_schema_id#&amp;site_x_option_group_set_parent_id=#q12.d3#")#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / #q12.site_x_option_group_set_title# / ');
+					arrayappend(arrParent, '<a href="#application.zcore.functions.zURLAppend("/z/feature/admin/features/#methodBackup#", "feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#")#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / #q12.feature_data_title# / ');
 					curParentId=q12.feature_schema_parent_id;
 					curParentSetId=q12.d3;
 				}
@@ -4586,10 +4414,10 @@ Define this function in another CFC to override the default email format
 			writeoutput(" </p>");
 		}
 	}*/
-	db.sql="SELECT * FROM #db.table("site_x_option_group_set", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 	WHERE
-	site_x_option_group_set_deleted = #db.param(0)# and
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# and 
+	feature_data_deleted = #db.param(0)# and
+	feature_data_id=#db.param(form.feature_data_id)# and 
 	feature_id=#db.param(form.feature_id)#  ";
 	
 	qSet=db.execute("qSet");
@@ -4604,15 +4432,15 @@ Define this function in another CFC to override the default email format
 	
 	if(qS.feature_schema_limit NEQ 0){
 		if(methodBackup EQ "addSchema"){ 
-			db.sql="select site_id from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
+			db.sql="select site_id from #db.table("feature_data", "jetendofeature")# WHERE 
 			feature_id=#db.param(form.feature_id)# and 
-			site_x_option_group_set_deleted=#db.param(0)# and 
-			site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)# and 
+			feature_data_deleted=#db.param(0)# and 
+			feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
 			feature_schema_id=#db.param(form.feature_schema_id)# ";
 			qCountCheck=db.execute("qCountCheck");
 			if(qS.feature_schema_limit NEQ 0 and qCountCheck.recordcount GTE qS.feature_schema_limit){
 				application.zcore.status.setStatus(request.zsid, "You can't add another record of this type because you've reached the limit.", form, true);
-				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
+				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
 			}
 		}
 	}
@@ -4622,16 +4450,16 @@ Define this function in another CFC to override the default email format
 	// check limit for user if this
 	if(qS.feature_schema_user_child_limit NEQ 0){
 		if(methodBackup EQ "userAddSchema"){
-			db.sql="select site_id from #db.table("site_x_option_group_set", "jetendofeature")# WHERE 
+			db.sql="select site_id from #db.table("feature_data", "jetendofeature")# WHERE 
 			feature_id=#db.param(form.feature_id)# and 
-			site_x_option_group_set_deleted=#db.param(0)# and 
-			site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)# and 
+			feature_data_deleted=#db.param(0)# and 
+			feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
 			feature_schema_id=#db.param(form.feature_schema_id)# and 
-			site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+			feature_data_user = #db.param(currentUserIdValue)# ";
 			qCountCheck=db.execute("qCountCheck");
 			if(qS.feature_schema_user_child_limit NEQ 0 and qCountCheck.recordcount GTE qS.feature_schema_user_child_limit){
 				application.zcore.status.setStatus(request.zsid, "You can't add another record of this type because you've reached the limit.", form, true);
-				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
+				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
 			}
 		}
 	}
@@ -4700,7 +4528,7 @@ Define this function in another CFC to override the default email format
 		});
 		</script>
 		<cfif methodBackup EQ "publicEditSchema">
-			<cfif qSet.site_x_option_group_set_approved EQ 2>
+			<cfif qSet.feature_data_approved EQ 2>
 				<p><strong>Note: Updating this record will re-submit this listing for approval.</strong></p>
 			</cfif>
 		</cfif>
@@ -4733,7 +4561,7 @@ Define this function in another CFC to override the default email format
 				echo('<ul>');
 				for(var n in q1){
 					if(structkeyexists(subgroupStruct, n.feature_schema_id)){
-						echo('<li><a href="#application.zcore.functions.zURLAppend(defaultStruct.listURL, "feature_schema_id=#n.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_id#")#" target="_top">#subgroupStruct[n.feature_schema_id].feature_schema_display_name#</a></li>');
+						echo('<li><a href="#application.zcore.functions.zURLAppend(defaultStruct.listURL, "feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_id#")#" target="_top">#subgroupStruct[n.feature_schema_id].feature_schema_display_name#</a></li>');
 					}
 				}
 				echo('</ul>');
@@ -4788,14 +4616,14 @@ Define this function in another CFC to override the default email format
 		</cfif>
 		<input type="hidden" name="disableSorting" value="#application.zcore.functions.zso(form, 'disableSorting', true, 0)#" />
 		<input type="hidden" name="feature_schema_id" value="#htmleditformat(form.feature_schema_id)#" />
-		<input type="hidden" name="site_x_option_group_set_id" value="#htmleditformat(form.site_x_option_group_set_id)#" />
-		<input type="hidden" name="site_x_option_group_set_parent_id" value="#htmleditformat(form.site_x_option_group_set_parent_id)#" />
+		<input type="hidden" name="feature_data_id" value="#htmleditformat(form.feature_data_id)#" />
+		<input type="hidden" name="feature_data_parent_id" value="#htmleditformat(form.feature_data_parent_id)#" />
 		<table style="border-spacing:0px;" class="table-list">
 
 			<cfscript>
-			cancelLink="#defaultStruct.listURL#?feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#";
-			if(methodBackup EQ "editSchema" and qSet.site_x_option_group_set_master_set_id NEQ 0){
-				cancelLink="/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#qSet.site_x_option_group_set_master_set_id#";
+			cancelLink="#defaultStruct.listURL#?feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#";
+			if(methodBackup EQ "editSchema" and qSet.feature_data_master_set_id NEQ 0){
+				cancelLink="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qSet.feature_data_master_set_id#";
 			}
 			</cfscript>
 			<cfif methodBackup EQ "addSchema" or methodBackup EQ "editSchema" or 
@@ -4944,9 +4772,9 @@ Define this function in another CFC to override the default email format
 
 			if(methodBackup EQ 'addSchema'){ 
 				if(not posted){
-					form.site_x_option_group_set_override_url='';
+					form.feature_data_override_url='';
 					qSet={ recordcount: 0};
-					form.site_x_option_group_set_image_library_id='';
+					form.feature_data_image_library_id='';
 				}
 			}
 			</cfscript>
@@ -4955,9 +4783,9 @@ Define this function in another CFC to override the default email format
 				<cfif qCheck.feature_schema_enable_approval EQ 1>
 					<cfscript>
 					if(methodBackup EQ 'addSchema'){
-						form.site_x_option_group_set_approved=1;
+						form.feature_data_approved=1;
 					}else{
-						form.site_x_option_group_set_approved=qSet.site_x_option_group_set_approved;
+						form.feature_data_approved=qSet.feature_data_approved;
 					}
 					</cfscript>
 					<tr class="siteFieldFormField#qS.feature_field_id# <cfif tempIndex MOD 2 EQ 0>row1<cfelse>row2</cfif>">
@@ -4965,7 +4793,7 @@ Define this function in another CFC to override the default email format
 					<td style="vertical-align:top; ">
 						<cfscript>
 						ts = StructNew();
-						ts.name = "site_x_option_group_set_approved";
+						ts.name = "feature_data_approved";
 						ts.labelList = "Approved|Pending|Deactivated By User|Rejected";
 						ts.valueList = "1|0|2|3";
 						ts.delimiter="|";
@@ -4982,17 +4810,17 @@ Define this function in another CFC to override the default email format
 		 
 					<tr <cfif tempIndex MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
 					<th style="vertical-align:top;"><div style="padding-bottom:0px;float:left;">Meta Title:</div></th>
-					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="site_x_option_group_set_metatitle" value="#htmleditformat(application.zcore.functions.zso(form, 'site_x_option_group_set_metatitle'))#" /> 
+					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="feature_data_metatitle" value="#htmleditformat(application.zcore.functions.zso(form, 'feature_data_metatitle'))#" /> 
 					</td>
 					</tr>
 					<tr <cfif tempIndex MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
 					<th style="vertical-align:top;"><div style="padding-bottom:0px;float:left;">Meta Keywords:</div></th>
-					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="site_x_option_group_set_metakey" value="#htmleditformat(application.zcore.functions.zso(form, 'site_x_option_group_set_metakey'))#" /> 
+					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="feature_data_metakey" value="#htmleditformat(application.zcore.functions.zso(form, 'feature_data_metakey'))#" /> 
 					</td>
 					</tr>
 					<tr <cfif tempIndex MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
 					<th style="vertical-align:top;"><div style="padding-bottom:0px;float:left;">Meta Description:</div></th>
-					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="site_x_option_group_set_metadesc" value="#htmleditformat(application.zcore.functions.zso(form, 'site_x_option_group_set_metadesc'))#" /> 
+					<td style="vertical-align:top; white-space: nowrap;"><input type="text" style="width:95%;" maxlength="255" name="feature_data_metadesc" value="#htmleditformat(application.zcore.functions.zso(form, 'feature_data_metadesc'))#" /> 
 					</td>
 					</tr>
 				</cfif>
@@ -5003,9 +4831,9 @@ Define this function in another CFC to override the default email format
 					<td style="vertical-align:top; "> 
 
 						<cfif form.method EQ "publicAddSchema" or form.method EQ "addSchema">
-							#application.zcore.functions.zInputUniqueUrl("site_x_option_group_set_override_url", true)#
+							#application.zcore.functions.zInputUniqueUrl("feature_data_override_url", true)#
 						<cfelse>
-							#application.zcore.functions.zInputUniqueUrl("site_x_option_group_set_override_url")# 
+							#application.zcore.functions.zInputUniqueUrl("feature_data_override_url")# 
 						</cfif>
 					</td>
 					</tr>
@@ -5018,8 +4846,8 @@ Define this function in another CFC to override the default email format
 				<td style="vertical-align:top;">
 					<cfscript>
 					ts=structnew();
-					ts.name="site_x_option_group_set_image_library_id";
-					ts.value=application.zcore.functions.zso(form, 'site_x_option_group_set_image_library_id', true);
+					ts.name="feature_data_image_library_id";
+					ts.value=application.zcore.functions.zso(form, 'feature_data_image_library_id', true);
 					ts.allowPublicEditing=true;
 					application.zcore.imageLibraryCom.getLibraryForm(ts);
 					
@@ -5041,11 +4869,11 @@ Define this function in another CFC to override the default email format
 				<th>&nbsp;</th>
 				<td>
 				<cfif qS.feature_schema_is_home_page EQ 1>
-					<input type="hidden" name="site_x_option_group_set_override_url" value="/" />
+					<input type="hidden" name="feature_data_override_url" value="/" />
 				</cfif>
 				#arraytolist(arrEnd, '')#
 				<cfif qS.feature_schema_enable_unique_url EQ 1 and (methodBackup EQ "userAddSchema" or methodBackup EQ "userEditSchema")>
-					<input type="hidden" name="site_x_option_group_set_override_url" value="#application.zcore.functions.zso(form, 'site_x_option_group_set_override_url')#" />
+					<input type="hidden" name="feature_data_override_url" value="#application.zcore.functions.zso(form, 'feature_data_override_url')#" />
 				</cfif>
 				<cfif form.modalpopforced EQ 1>
 					<input type="hidden" name="modalpopforced" value="1" />
@@ -5170,24 +4998,24 @@ Define this function in another CFC to override the default email format
 	<cfscript>
 	var db=request.zos.queryObject;
 	init();
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true);
-	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id', true);
+	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true);
-	db.sql="update #db.table("site_x_option_group_set", "jetendofeature")# SET 
-	site_x_option_group_set_archived=#db.param(1)# 
+	db.sql="update #db.table("feature_data", "jetendofeature")# SET 
+	feature_data_archived=#db.param(1)# 
 	WHERE 
-	site_x_option_group_set_deleted=#db.param(0)# and 
+	feature_data_deleted=#db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# ";
+	feature_data_id=#db.param(form.feature_data_id)# ";
 	db.execute("qUpdate");/**/
 
 	application.zcore.functions.zReturnJson({success:true});
 	/*
 	application.zcore.status.setStatus(request.zsid, "Record archived.");
 	if(form.method EQ "userUnarchiveSchema"){
-		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#row.feature_schema_id#&site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#row.feature_schema_id#&feature_data_id=#row.feature_data_id#&feature_data_parent_id=#row.feature_data_parent_id#");
 	}else{
-		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#row.feature_schema_id#&site_x_option_group_set_id=#row.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#row.feature_schema_id#&feature_data_id=#row.feature_data_id#&feature_data_parent_id=#row.feature_data_parent_id#");
 	}*/
 	</cfscript>
 </cffunction>
@@ -5196,22 +5024,22 @@ Define this function in another CFC to override the default email format
 	<cfscript>
 	var db=request.zos.queryObject;
 	init();
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id', true);
-	form.site_x_option_group_set_parent_id=application.zcore.functions.zso(form, 'site_x_option_group_set_parent_id', true);
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id', true);
+	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true);
-	db.sql="update #db.table("site_x_option_group_set", "jetendofeature")# SET 
-	site_x_option_group_set_archived=#db.param(0)# 
+	db.sql="update #db.table("feature_data", "jetendofeature")# SET 
+	feature_data_archived=#db.param(0)# 
 	WHERE 
-	site_x_option_group_set_deleted=#db.param(0)# and 
+	feature_data_deleted=#db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_id=#db.param(form.site_x_option_group_set_id)# ";
+	feature_data_id=#db.param(form.feature_data_id)# ";
 	db.execute("qUpdate");
 
 	application.zcore.status.setStatus(request.zsid, "Record unarchived.");
 	if(form.method EQ "userUnarchiveSchema"){
-		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_id=#form.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
 	}else{
-		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#form.feature_schema_id#&site_x_option_group_set_id=#form.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
 	}
 	</cfscript>
 </cffunction>
@@ -5256,19 +5084,19 @@ Define this function in another CFC to override the default email format
 		//application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
 	}
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
-	form.site_x_option_group_set_id=application.zcore.functions.zso(form, 'site_x_option_group_set_id');
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# feature_schema, 
-	#db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set WHERE
+	#db.table("feature_data", "jetendofeature")# feature_data WHERE
 	feature_schema_deleted = #db.param(0)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
-	site_x_option_group_set.site_id = feature_schema.site_id and 
-	feature_schema.feature_schema_id = site_x_option_group_set.feature_schema_id and 
-	site_x_option_group_set_id= #db.param(form.site_x_option_group_set_id)# and 
+	feature_data_deleted = #db.param(0)# and
+	feature_data.site_id = feature_schema.site_id and 
+	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
+	feature_data_id= #db.param(form.feature_data_id)# and 
 	feature_schema.feature_schema_id= #db.param(form.feature_schema_id)# and 
-	site_x_option_group_set.site_id= #db.param(request.zos.globals.id)#";
+	feature_data.site_id= #db.param(request.zos.globals.id)#";
 	if(form.method EQ "userDeleteSchema" and request.isUserPrimarySchema){
 		currentUserIdValue=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
-		db.sql&=" and site_x_option_group_set_user = #db.param(currentUserIdValue)# ";
+		db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
 	}
 	qCheck=db.execute("qCheck", "", 10000, "query", false);
 	if(qCheck.recordcount EQ 0){
@@ -5276,7 +5104,7 @@ Define this function in another CFC to override the default email format
 		if(form.method EQ "autoDeleteSchema"){
 			return false;
 		}else{
-			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id="&form.feature_id&"&feature_schema_id="&form.feature_schema_id&"&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&zsid="&request.zsid));
+			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id="&form.feature_id&"&feature_schema_id="&form.feature_schema_id&"&feature_data_parent_id=#form.feature_data_parent_id#&zsid="&request.zsid));
 		}
 	} 
 
@@ -5314,33 +5142,33 @@ Define this function in another CFC to override the default email format
 		if(form.method EQ "userDeleteSchema"){ 
 			if(qCheck.feature_schema_change_email_usergrouplist NEQ ""){
 				newAction='deleted'; 
-				application.zcore.siteFieldCom.sendChangeEmail(qCheck.site_x_option_group_set_id, newAction);
+				application.zcore.siteFieldCom.sendChangeEmail(qCheck.feature_data_id, newAction);
 			}
 		}
 		for(row in qCheck){
-			application.zcore.siteFieldCom.deleteSchemaSetRecursively(row.site_x_option_group_set_id, row);
+			application.zcore.siteFieldCom.deleteSchemaSetRecursively(row.feature_data_id, row);
 		}
  
 		if(qCheck.feature_schema_enable_sorting EQ 1){
 			queueSortStruct = StructNew();
-			queueSortStruct.tableName = "site_x_option_group_set";
-			queueSortStruct.sortFieldName = "site_x_option_group_set_sort";
-			queueSortStruct.primaryKeyName = "site_x_option_group_set_id";
+			queueSortStruct.tableName = "feature_data";
+			queueSortStruct.sortFieldName = "feature_data_sort";
+			queueSortStruct.primaryKeyName = "feature_data_id";
 			queueSortStruct.datasource="jetendofeature";
 			
-			queueSortStruct.where =" site_x_option_group_set.feature_id = '#application.zcore.functions.zescape(form.feature_id)#' and  
+			queueSortStruct.where =" feature_data.feature_id = '#application.zcore.functions.zescape(form.feature_id)#' and  
 			feature_schema_id = '#application.zcore.functions.zescape(form.feature_schema_id)#' and 
 			site_id = '#request.zos.globals.id#' and 
-			site_x_option_group_set_master_set_id = '0' and 
-			site_x_option_group_set_deleted='0' ";
+			feature_data_master_set_id = '0' and 
+			feature_data_deleted='0' ";
 			
 			queueSortStruct.disableRedirect=true;
 			queueSortCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.queueSort");
 			r1=queueSortCom.init(queueSortStruct);
 			queueSortCom.sortAll();
 		}
-		if((request.zos.enableSiteSchemaCache and qCheck.feature_schema_enable_cache EQ 1) or (qCheck.feature_schema_enable_versioning EQ 1 and qCheck.site_x_option_group_set_master_set_id NEQ 0)){
-			application.zcore.siteFieldCom.deleteSchemaSetIdCache(request.zos.globals.id, form.site_x_option_group_set_id);
+		if((request.zos.enableSiteSchemaCache and qCheck.feature_schema_enable_cache EQ 1) or (qCheck.feature_schema_enable_versioning EQ 1 and qCheck.feature_data_master_set_id NEQ 0)){
+			application.zcore.siteFieldCom.deleteSchemaSetIdCache(request.zos.globals.id, form.feature_data_id);
 		}
 		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 		application.zcore.status.setStatus(request.zsid, "Deleted successfully.");
@@ -5348,10 +5176,10 @@ Define this function in another CFC to override the default email format
 			return true;
 		}else if(form.returnJson EQ 1){
 			application.zcore.functions.zReturnJson({success:true});
-		}else if(qcheck.site_x_option_group_set_master_set_id NEQ 0){
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#qcheck.site_x_option_group_set_master_set_id#&zsid="&request.zsid);
+		}else if(qcheck.feature_data_master_set_id NEQ 0){
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qcheck.feature_data_master_set_id#&zsid="&request.zsid);
 		}else{
-			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id="&form.feature_id&"&feature_schema_id="&form.feature_schema_id&"&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&zsid="&request.zsid));
+			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id="&form.feature_id&"&feature_schema_id="&form.feature_schema_id&"&feature_data_parent_id=#form.feature_data_parent_id#&zsid="&request.zsid));
 		}
         	</cfscript>
 	<cfelse>
@@ -5364,16 +5192,16 @@ Define this function in another CFC to override the default email format
 		Are you sure you want to delete this data?<br />
 		<br />
 		#qcheck.feature_schema_display_name# 		<br />
-		ID## #form.site_x_option_group_set_id# <br />
+		ID## #form.feature_data_id# <br />
 		<br />
 		<cfscript>
-		if(qcheck.site_x_option_group_set_master_set_id NEQ 0){
-			deleteLink="/z/feature/admin/feature-deep-copy/versionList?site_x_option_group_set_id=#qcheck.site_x_option_group_set_master_set_id#";
+		if(qcheck.feature_data_master_set_id NEQ 0){
+			deleteLink="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qcheck.feature_data_master_set_id#";
 		}else{
-			deleteLink="#application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#")#";
+			deleteLink="#application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#")#";
 		}
 		</cfscript>
-		<a href="#application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#form.feature_id#&amp;confirm=1&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#")#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="#deleteLink#">No</a>
+		<a href="#application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#form.feature_id#&amp;confirm=1&amp;feature_data_id=#form.feature_data_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#")#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="#deleteLink#">No</a>
 	</cfif>
 </cffunction>
 
@@ -5395,14 +5223,14 @@ Define this function in another CFC to override the default email format
 	theTitle="Features";
 	application.zcore.template.setTag("title",theTitle);
 	application.zcore.template.setTag("pagetitle",theTitle);
-	db.sql="SELECT feature_schema.*, count(site_x_option_group_set.feature_schema_id) childCount 
+	db.sql="SELECT feature_schema.*, count(feature_data.feature_schema_id) childCount 
 	FROM #db.table("feature_schema", "jetendofeature")# feature_schema 
-	LEFT JOIN #db.table("site_x_option_group_set", "jetendofeature")# site_x_option_group_set ON 
-	site_x_option_group_set.feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_master_set_id = #db.param(0)# and 
-	site_x_option_group_set.feature_schema_id = feature_schema.feature_schema_id and 
+	LEFT JOIN #db.table("feature_data", "jetendofeature")# feature_data ON 
+	feature_data.feature_id=#db.param(form.feature_id)# and 
+	feature_data_master_set_id = #db.param(0)# and 
+	feature_data.feature_schema_id = feature_schema.feature_schema_id and 
 	feature_id=#db.param(form.feature_id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# 
+	feature_data_deleted = #db.param(0)# 
 	WHERE feature_schema.feature_id=#db.param(form.feature_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	feature_schema_parent_id = #db.param('0')# and 

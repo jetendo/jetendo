@@ -28,10 +28,7 @@
 <cffunction name="displayoptionAdminNav" access="public" localmode="modern">
 	<cfscript>
 	
-	form.feature_id=application.zcore.functions.zso(form, 'feature_id',false,0);
-	if(form.feature_id NEQ 0){
-		application.zcore.template.setTemplate("zcorerootmapping.templates.blank",true,true);
-	}
+	form.feature_id=application.zcore.functions.zso(form, 'feature_id',false,0); 
 	</cfscript>
 	<div class="z-float z-mb-10">
 		DevTools:
@@ -70,7 +67,7 @@
 
 	for(i in t9.optionSchemaLookup){
 		groupStruct=t9.optionSchemaLookup[i];
-		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_name), " ", "", "all"), "");
+		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_variable_name), " ", "", "all"), "");
 		if(isNumeric(left(groupName, 1))){
 			groupName="Schema"&groupName;
 		}
@@ -89,14 +86,14 @@
 			}
 			if(groupStruct.feature_schema_parent_id NEQ 0){
 				parentSchemaStruct=t9.optionSchemaLookup[groupStruct.feature_schema_parent_id];
-				parentSchemaName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(parentSchemaStruct.feature_schema_name), " ", "", "all"), "");
+				parentSchemaName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(parentSchemaStruct.feature_schema_variable_name), " ", "", "all"), "");
 				if(isNumeric(left(parentSchemaName, 1))){
 					parentSchemaName="Schema"&parentSchemaName;
 				}
 				parentSchemaNameInstance=lcase(left(parentSchemaName, 1))&removeChars(parentSchemaName,1,1);
-				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
 			}else{
-				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_name#");'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
 		}
 		if(not arguments.disableDebugOutput and structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
@@ -210,18 +207,18 @@
 
 	groupStruct=t9.optionSchemaLookup[arguments.groupId];
  
-	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_name, "_"));
+	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_variable_name, "_"));
  
 	echo("CREATE TABLE `#tableName#` (
 `#tableName#_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-`site_x_option_group_set_id` int(11) unsigned NOT NULL DEFAULT '0',
+`feature_data_id` int(11) unsigned NOT NULL DEFAULT '0',
 `feature_schema_id` int(11) unsigned NOT NULL DEFAULT '0',
-`site_x_option_group_set_sort` int(11) unsigned NOT NULL DEFAULT '0',
-`site_x_option_group_set_active` char(1) NOT NULL DEFAULT '0',
-`site_x_option_group_set_parent_id` int(11) NOT NULL DEFAULT '0',
-`site_x_option_group_set_image_library_id` int(11) NOT NULL DEFAULT '0',
-`site_x_option_group_set_override_url` varchar(255) NOT NULL,
-`site_x_option_group_set_approved` char(1) NOT NULL DEFAULT '0',
+`feature_data_sort` int(11) unsigned NOT NULL DEFAULT '0',
+`feature_data_active` char(1) NOT NULL DEFAULT '0',
+`feature_data_parent_id` int(11) NOT NULL DEFAULT '0',
+`feature_data_image_library_id` int(11) NOT NULL DEFAULT '0',
+`feature_data_override_url` varchar(255) NOT NULL,
+`feature_data_approved` char(1) NOT NULL DEFAULT '0',
 `#tableName#_updated_datetime` datetime NOT NULL,
 `#tableName#_deleted` char(1) NOT NULL DEFAULT '0',"&chr(10));  
 	if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
@@ -236,7 +233,7 @@
 		} 
 	}
 	echo('PRIMARY KEY (`#tableName#_id`),
-KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
+KEY `feature_data_id` (`feature_data_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;');  
 	</cfscript>
 </cffunction>
@@ -251,7 +248,7 @@ KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
 
 	groupStruct=t9.optionSchemaLookup[arguments.groupId];
  
-	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_name, "_"));
+	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_variable_name, "_"));
   
 	if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
 		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
@@ -309,7 +306,7 @@ KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
 	}
 		groupStruct=t9.optionSchemaLookup[form.feature_schema_id];
 
-		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_name), " ", "", "all"), "");
+		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_variable_name), " ", "", "all"), "");
 		if(isNumeric(left(groupName, 1))){
 			groupName="Schema"&groupName;
 		}
@@ -322,13 +319,13 @@ KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
 	echo('</textarea>');
 	if(groupStruct.feature_schema_enable_unique_url EQ 1){
 		savecontent variable="output"{
-		echo('<!--- Below is an example of a CFC that is used for making a custom page, search result, and search index for a site_x_option_group_set record. --->
+		echo('<!--- Below is an example of a CFC that is used for making a custom page, search result, and search index for a feature_data record. --->
 <cfcomponent>
 <cfoutput>
 <cffunction name="index" access="public" localmode="modern">
 	<cfargument name="query" type="query" required="yes">
 	<cfscript>
-	#groupNameInstance#=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], arguments.query.site_x_option_group_set_id);  
+	#groupNameInstance#=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], arguments.query.feature_data_id);  
 	</cfscript> 
 	#cfcOutput#
 </cffunction>
@@ -407,8 +404,8 @@ KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
 	<h2>Miscellaneous Code</h2>
 	<p>To select a single group set, use one of the following:</p>
 	<ul>
-	<li>Memory Cache Enabled: struct=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], site_x_option_group_set_id);</li>
-	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.siteFieldCom.getSchemaSetByID(["#groupNameArray#"], site_x_option_group_set_id, request.zos.globals.id, showUnapproved); </li>
+	<li>Memory Cache Enabled: struct=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], feature_data_id);</li>
+	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.siteFieldCom.getSchemaSetByID(["#groupNameArray#"], feature_data_id, request.zos.globals.id, showUnapproved); </li>
 	</ul>');
 	if(groupStruct.feature_schema_allow_public NEQ 0){
 		if(groupStruct.feature_schema_public_form_url NEQ ""){
@@ -436,7 +433,7 @@ displaySchemaCom.add();')&'</pre>');
 	<p>Simple Example with fake group/field info:</p>
 	<pre>
 	
-	groupName="#groupStruct.feature_schema_name#";
+	groupName="#groupStruct.feature_schema_variable_name#";
 	// build search as an array of structs.  Supports nested sub-group search, AND/OR, logic grouping, many operators, and multiple values.  See the function definition of searchSchema for more information.
 	arrSearch=[{
 		type="=",
@@ -688,7 +685,7 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.status.setStatus(request.zsid, "Site option group no longer exists.", form, true);
 		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
-	header name="Content-Disposition" value="attachment; filename=#dateformat(now(), "yyyy-mm-dd-")&qSchema.feature_schema_name#.csv";
+	header name="Content-Disposition" value="attachment; filename=#dateformat(now(), "yyyy-mm-dd-")&qSchema.feature_schema_variable_name#.csv";
 	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.features");
 
 	db.sql="SELECT * FROM  
@@ -783,10 +780,10 @@ displaySchemaCom.ajaxInsert();
 		// process x groups at a time.
 		xlimit=20;
 
-		db.sql="SELECT * FROM #db.table("site_x_option_group_set", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and 
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
-		site_x_option_group_set_deleted = #db.param(0)# and 
+		feature_data_master_set_id = #db.param(0)# and 
+		feature_data_deleted = #db.param(0)# and 
 		feature_id=#db.param(form.feature_id)# 
 		LIMIT #db.param(doffset)#, #db.param(xlimit)#";
 		qSchemas=db.execute("qSchemas");
@@ -800,7 +797,7 @@ displaySchemaCom.ajaxInsert();
 			#db.table("site_x_option_group", "jetendofeature")# 
 			WHERE  
 			site_x_option_group.feature_schema_id = #db.param(currentSchemaId)# and 
-			site_x_option_group_set_id = #db.param(row.site_x_option_group_set_id)# and 
+			feature_data_id = #db.param(row.feature_data_id)# and 
 			site_x_option_group_deleted = #db.param(0)# and 
 			site_x_option_group.feature_id=#db.param(form.feature_id)#  ";
 			qValues=db.execute("qValues");
@@ -864,10 +861,10 @@ displaySchemaCom.ajaxInsert();
 		// process x groups at a time.
 		xlimit=20;
 
-		db.sql="SELECT * FROM #db.table("site_x_option_group_set", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and 
-		site_x_option_group_set_deleted = #db.param(0)# and 
-		site_x_option_group_set_master_set_id = #db.param(0)# and 
+		feature_data_deleted = #db.param(0)# and 
+		feature_data_master_set_id = #db.param(0)# and 
 		feature_id=#db.param(form.feature_id)# 
 		LIMIT #db.param(doffset)#, #db.param(xlimit)#";
 		qSchemas=db.execute("qSchemas");
@@ -885,7 +882,7 @@ displaySchemaCom.ajaxInsert();
 			feature_field.site_id = site_x_option_group.site_id and 
 			feature_field_deleted = #db.param(0)# and 
 			site_x_option_group.feature_schema_id = #db.param(currentSchemaId)# and 
-			site_x_option_group_set_id = #db.param(row.site_x_option_group_set_id)# and 
+			feature_data_id = #db.param(row.feature_data_id)# and 
 			site_x_option_group_deleted = #db.param(0)# and 
 			site_x_option_group.feature_id=#db.param(form.feature_id)#  ";
 			qValues=db.execute("qValues");
@@ -917,7 +914,7 @@ displaySchemaCom.ajaxInsert();
 			} 
 		}
 	}
-	application.zcore.status.setStatus(request.zsid, "Schema, ""#qSchema.feature_schema_name#"", was reprocessed successfully.");
+	application.zcore.status.setStatus(request.zsid, "Schema, ""#qSchema.feature_schema_variable_name#"", was reprocessed successfully.");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
@@ -1206,7 +1203,7 @@ displaySchemaCom.ajaxInsert();
 	} 
 	for(row in local.qSchema){
 		if(form.newSchemaName NEQ ""){
-			row.feature_schema_name=form.newSchemaName;
+			row.feature_schema_variable_name=form.newSchemaName;
 			row.feature_schema_display_name=form.newSchemaName;
 		}
 		this.copySchemaRecursive(form.feature_schema_id, form.newSiteId, row, groupStruct, optionStruct);
@@ -1284,14 +1281,14 @@ displaySchemaCom.ajaxInsert();
 		writeoutput('</p>');
 	}
 	</cfscript>
-	<p><a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=<cfif isquery(qgroup)>#qgroup.feature_schema_id#</cfif>">Add Schema</a> 
+	<p><a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>">Add Schema</a> 
 
 	 | <a href="/z/admin/site-option-group-import/importSchema">Import Schema</a> 
 	 
-	<cfif isquery(qgroup) and qgroup.feature_schema_id NEQ 0>
-		| <a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_schema_id=<cfif isquery(qgroup)>#qgroup.feature_schema_id#</cfif>" target="_blank">Display Schema Code</a>
+	<cfif isquery(qSchema) and qSchema.feature_schema_id NEQ 0>
+		| <a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_schema_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>" target="_blank">Display Schema Code</a>
 	</cfif>
-	<cfif isquery(qgroup)> | <a href="/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#qgroup.feature_schema_id#&feature_schema_parent_id=#qgroup.feature_schema_parent_id#">Manage Fields</a></cfif></p>
+	<cfif isquery(qSchema)> | <a href="/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#qSchema.feature_schema_id#&feature_schema_parent_id=#qSchema.feature_schema_parent_id#">Manage Fields</a></cfif></p>
 	<table style="border-spacing:0px;" class="table-list" >
 		<tr>
 			<th>ID</th>
@@ -1302,7 +1299,7 @@ displaySchemaCom.ajaxInsert();
 		<cfloop query="qProp">
 		<tr <cfif qProp.currentrow MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
 			<td>#qProp.feature_schema_id#</td>
-			<td>#qProp.feature_schema_name#</td>
+			<td>#qProp.feature_schema_variable_name#</td>
 			<td><cfif qProp.feature_schema_disable_admin EQ 1>
 					Yes
 				<cfelse>
@@ -1438,8 +1435,8 @@ displaySchemaCom.ajaxInsert();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
 	myForm.feature_schema_display_name.required=true;
 	myForm.feature_schema_display_name.friendlyName="Display Name";
-	myForm.feature_schema_name.required=true;
-	myForm.feature_schema_name.friendlyName="Code Name";
+	myForm.feature_schema_variable_name.required=true;
+	myForm.feature_schema_variable_name.friendlyName="Code Name";
 	errors=application.zcore.functions.zValidateStruct(form, myForm,request.zsid, true);
 	
 	form.feature_schema_allow_delete_usergrouplist=application.zcore.functions.zso(form, 'feature_schema_allow_delete_usergrouplist');
@@ -1456,7 +1453,7 @@ displaySchemaCom.ajaxInsert();
 			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#");
 		}
 		// force code name to never change after initial creation
-		//form.feature_schema_name=qCheck.feature_schema_name;
+		//form.feature_schema_variable_name=qCheck.feature_schema_variable_name;
 	}
 	if(application.zcore.functions.zso(form, 'feature_schema_enable_unique_url', false, 0) EQ 1){
 		if(form.feature_schema_view_cfc_path EQ "" or form.feature_schema_view_cfc_method EQ ""){
@@ -1466,14 +1463,8 @@ displaySchemaCom.ajaxInsert();
 	}
 	if(form.feature_schema_parent_id NEQ "" and form.feature_schema_parent_id NEQ 0){
 		form.feature_schema_enable_new_button=0;
-	} 
-	
-	form.feature_schema_appidlist=","&application.zcore.functions.zso(form,'feature_schema_appidlist')&",";
-	 if(application.zcore.functions.zso(form,'optionSchemaglobal',false,0) EQ 1 and variables.allowGlobal){
-		 form.site_id='0';
-	 }else{
-		 form.site_id=request.zos.globals.id;
-	 }
+	}  
+	form.site_id=request.zos.globals.id;
 	if(errors){
 		if(form.method EQ 'insert'){
 			application.zcore.status.setStatus(request.zsid, false, form,true);
@@ -1576,12 +1567,7 @@ displaySchemaCom.ajaxInsert();
 	}
 	application.zcore.template.setTag("title",theTitle);
 	application.zcore.template.setTag("pagetitle",theTitle);
-	</cfscript>
-				<cfscript>
-				if(form.site_id EQ 0){
-					form.optionSchemaglobal='1';
-				}
-				</cfscript> 
+	</cfscript> 
 	<form class="zFormCheckDirty" name="myForm" id="myForm" action="/z/feature/admin/feature-schema/<cfif currentMethod EQ "edit">update<cfelse>insert</cfif>?feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#" method="post">
 
 		<cfscript>
@@ -1643,9 +1629,9 @@ displaySchemaCom.ajaxInsert();
 				</td>
 			</tr>
 			<tr>
-				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Code Name","member.site-option-group.edit feature_schema_name")#</th>
+				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Code Name","member.site-option-group.edit feature_schema_variable_name")#</th>
 				<td>
-					<input name="feature_schema_name" id="feature_schema_name" size="50" type="text" value="#htmleditformat(form.feature_schema_name)#"  onkeyup="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" onblur="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" maxlength="100" />
+					<input name="feature_schema_variable_name" id="feature_schema_variable_name" size="50" type="text" value="#htmleditformat(form.feature_schema_variable_name)#"  onkeyup="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" onblur="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" maxlength="100" />
 					<input type="hidden" name="feature_schema_type" value="1" />
 				<cfif currentMethod NEQ "add">
 					<br><br><strong>WARNING:</strong> You should not change the "Name" on a live site unless you are ready to deploy the corrections to the source code immediately.  Editing the "Name" will also prevent the Sync feature from working.  Make sure to communicate with the other developers if you change the "Name".  Any code that refers to this name will start throwing undefined errors immediately after changing this.
@@ -1663,15 +1649,7 @@ displaySchemaCom.ajaxInsert();
 							<input name="feature_schema_menu_name" id="feature_schema_menu_name" size="50" type="text" value="#htmleditformat(form.feature_schema_menu_name)#" maxlength="100" /><br />
 							(Put this group in a different manager menu - default is Custom)</div>
 						<div  id="groupMenuNameId2" style="display:none;">Disabled - Only allowed on the root groups.</div></td>
-				</tr>
-				<!---
-				TODO:  optionSchemaglobal is not fully implemented
-				<cfif variables.allowGlobal>
-					<tr>
-						<th>#application.zcore.functions.zOutputHelpToolTip("Global","member.site-option-group.edit optionSchemaglobal")#</th>
-						<td>#application.zcore.functions.zInput_Boolean("optionSchemaglobal")#</td>
-					</tr>
-				</cfif> --->
+				</tr> 
 				<cfscript>
 				if(form.feature_schema_admin_paging_limit EQ ""){
 					form.feature_schema_admin_paging_limit=0;
@@ -1811,33 +1789,7 @@ displaySchemaCom.ajaxInsert();
 					Sort Method: <input type="text" name="feature_schema_change_cfc_sort_method" id="feature_schema_change_cfc_sort_method" value="#htmleditformat(form.feature_schema_change_cfc_sort_method)#" /><br />
 					 (Each function should exist in the CFC with access="public")
 					</td>
-				</tr>
-				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Only Show App Admin?","member.site-option-group.edit feature_schema_admin_app_only")#</th>
-					<td>#application.zcore.functions.zInput_Boolean("feature_schema_admin_app_only")# (Disables list/add links on developer's manage groups page)</td>
-				</tr>
-				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Associate With Apps","member.site-option-group.edit feature_schema_appidlist")#</th>
-					<td><cfscript>
-					db.sql="select app.* from #db.table("app", "jetendofeature")# app, 
-					#db.table("app_x_site", "jetendofeature")# app_x_site 
-					WHERE app_x_site.feature_id=#db.param(form.feature_id)# and 
-	 				app.app_built_in=#db.param(0)# and 
-					app_x_site.app_id = app.app_id and 
-					app_x_site_deleted = #db.param(0)# and 
-					app_deleted = #db.param(0)# 
-					order by app_name ";
-					qApp=db.execute("qApp");
-					
-					selectStruct=structnew();
-					selectStruct.name="feature_schema_appidlist";
-					selectStruct.query = qApp;
-					selectStruct.onchange="";
-					selectStruct.queryLabelField = "app_name";
-					selectStruct.queryValueField = "app_id";
-					application.zcore.functions.zInput_Checkbox(selectStruct);
-					</cfscript> (Deprecated - DO NOT USE)</td>
-				</tr>
+				</tr> 
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Section?","member.site-option-group.edit feature_schema_enable_section")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_section")# Deprecated DO NOT USE (Requires Enable Unique URL to be set to Yes)</td>
@@ -1888,8 +1840,8 @@ displaySchemaCom.ajaxInsert();
 					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.site-option-group.edit feature_schema_user_group_id_list")#</th>
 					<td>
 					<cfscript>
-					db.sql="SELECT *FROM #db.table("user_group", "jetendofeature")# user_group 
-					WHERE feature_id=#db.param(form.feature_id)# and 
+					db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
+					WHERE site_id=#db.param(request.zos.globals.id)# and 
 					user_group_deleted = #db.param(0)# 
 					ORDER BY user_group_name asc"; 
 					var qSchema2=db.execute("qSchema2", "", 10000, "query", false); 
@@ -1989,7 +1941,7 @@ displaySchemaCom.ajaxInsert();
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">Enable Unique URL</th>
 					<td>
-				<cfif request.zos.globals.optionSchemaURLID NEQ 0>
+				<cfif 50 NEQ 0>
 					#application.zcore.functions.zInput_Boolean("feature_schema_enable_unique_url")#
 				<cfelse>
 					Field group URL ID must be set in server manager to use this feature.
@@ -2086,7 +2038,7 @@ displaySchemaCom.ajaxInsert();
 					if(form.inquiries_type_id_siteIDType NEQ "" and form.inquiries_type_id_siteIDType NEQ 0){
 						form.inquiries_type_id=form.inquiries_type_id&"|"&application.zcore.functions.zGetSiteIDFromSiteIdType(form.inquiries_type_id_siteIDType);
 					}
-					db.sql="SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_type.site_id"))# as inquiries_type_id_siteIDType from #db.table("inquiries_type", "jetendofeature")# inquiries_type 
+					db.sql="SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("inquiries_type.site_id"))# as inquiries_type_id_siteIDType from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
 					WHERE  site_id IN (#db.param(0)#,#db.param(request.zos.globals.id)#) and 
 					inquiries_type_deleted = #db.param(0)# ";
 					if(not application.zcore.app.siteHasApp("listing")){
@@ -2152,20 +2104,13 @@ displaySchemaCom.ajaxInsert();
 				</tr>
 		</table>
 		#tabCom.endFieldSet()# 
-		#tabCom.endTabMenu()#
-				 
-				
-		<cfif variables.allowGlobal EQ false>
-			<input type="hidden" name="optionSchemaglobal" value="0" />
-		</cfif>
+		#tabCom.endTabMenu()# 
 	</form>
 	<script type="text/javascript">
 		/* <![CDATA[ */
 		var arrD=[];<cfloop query="qG">arrD.push("#qG.site_id#");</cfloop>
 		var firstLoad11=true;
-		function doParentCheck(){
-			var d1=document.getElementById("optionSchemaglobal1");
-			var d0=document.getElementById("optionSchemaglobal0");
+		function doParentCheck(){ 
 			var groupMenuName=document.getElementById("groupMenuNameId");
 			var groupMenuName2=document.getElementById("groupMenuNameId2");
 			var groupMenuNameField=document.getElementById("feature_schema_menu_name");
@@ -2173,28 +2118,14 @@ displaySchemaCom.ajaxInsert();
 				return;
 			}
 			if(firstLoad11){
-				firstLoad11=false;
-				if(d1 != null){
-					$(d1).bind("change",function(){ doParentCheck(); });
-					$(d0).bind("change",function(){ doParentCheck(); });
-				}
-				
+				firstLoad11=false; 
 			}
 			var a=document.getElementById("feature_schema_parent_id");
 			if(a.selectedIndex != 0){
 				groupMenuNameField.value='';
 				groupMenuName.style.display="none";
 				groupMenuName2.style.display="block";
-
-				if(d1 != null){
-					if(arrD[a.selectedIndex-1] == 0){
-						d1.checked=true;
-						d0.checked=false;	
-					}else{
-						d1.checked=false;
-						d0.checked=true;	
-					}
-				}
+ 
 			}else{
 				groupMenuName.style.display="block";
 				groupMenuName2.style.display="none";
