@@ -332,27 +332,32 @@ if(not rs.success){
 	var arrErrors = ArrayNew(1);
 	statusStruct = application.zcore.status.getStruct(arguments.id);
 	arrErrors = application.zcore.status.getErrors(arguments.id);
-	if(isDefined('statusStruct.arrMessages')){
+	if(structkeyexists(statusStruct, 'arrMessages')){
+		if(ArrayLen(arrErrors) EQ 0){
+			bgColor="336699";
+		}else{
+			bgColor="990000";
+		}
 		if(arguments.getVars){
 			StructAppend(arguments.targetStruct, statusStruct.varStruct, true);
 		}
 		if(arguments.silent EQ false){
 			if(ArrayLen(statusStruct.arrMessages) GT 0 or ArrayLen(arrErrors) GT 0){
-				writeoutput('<div style="float:left;width:100%;"><div style=" width:100%; overflow:hidden; display:block; clear:both; margin-bottom:10px;">');
+				writeoutput('<div style="float:left;width:100%; border-radius:5px; box-sizing:border-box !important; border:1px solid ###bgColor#; margin-bottom:10px;">');
 			}
 			if(ArrayLen(statusStruct.arrMessages) GT 0){
-				writeoutput('<div style="display:block; clear:both;float:left; color:##FFFFFF; width:98%; padding:1%; background-color:##990000; font-weight:bold;">Status:</div>');
-				writeoutput('<div style="display:block; clear:both;float:left; color:##000000;width:98%; padding:1%; border-bottom:1px solid ##660000; background-color:##FFFFFF;"><p style="padding-bottom:0px;">'&ArrayToList(statusStruct.arrMessages, '</p><hr /><p style="padding-bottom:0px;">')&'</p></div>');
+				writeoutput('<div style="display:block; clear:both;float:left; color:##FFFFFF; width:100%; padding:10px; background-color:###bgColor#; font-weight:bold;">Status:</div>');
+				writeoutput('<div style="display:block; clear:both;float:left; color:##000000; width:100%; padding:10px; border-radius:5px;  background-color:##FFFFFF;"><p style="padding:0px;">'&ArrayToList(statusStruct.arrMessages, '</p><hr style="margin-top:5px; margin-bottom:5px; padding:0px;" /><p style="padding-bottom:0px;">')&'</p></div>');
 				if(ArrayLen(arrErrors) GT 0){
 					writeoutput('');
 				}
 			}
 			if(ArrayLen(arrErrors) GT 0){
-				writeoutput('<div style="display:block; clear:both;float:left; color:##FFFFFF; width:98%; padding:1%; font-weight:bold; background-color:##993333;">The following errors occurred:</div>');
-				writeoutput('<div style="display:block; clear:both;float:left; color:##000000; width:98%; padding:1%; border-bottom:1px solid ##660000; background-color:##FFFFFF;"><p style="padding-bottom:0px;">'&ArrayToList(arrErrors, '</p><hr /><p style="padding-bottom:0px;">')&'</p></div>');
+				writeoutput('<div style="display:block; clear:both;float:left; color:##FFFFFF; width:100%; padding:10px; font-weight:bold; background-color:###bgcolor#;">The following errors occurred:</div>');
+				writeoutput('<div style="display:block; clear:both;float:left; color:##000000; width:100%; padding:10px; border-radius:5px; background-color:##FFFFFF;"><p style="padding:0px;">'&ArrayToList(arrErrors, '</p><hr style="margin-top:5px; margin-bottom:5px; padding:0px;" /><p style="padding-bottom:0px;">')&'</p></div>');
 			}
 			if(ArrayLen(statusStruct.arrMessages) GT 0 or ArrayLen(arrErrors) GT 0){
-				writeoutput('</div></div><br style="clear:both;" />');
+				writeoutput('</div><br style="clear:both;" />');
 			}
 		}
 	}
