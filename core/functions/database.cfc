@@ -1411,12 +1411,12 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		ELSE 
 			SET @zLastInsertId=(
 				SELECT table_increment_table_id 
-				FROM `table_increment` 
+				FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 				WHERE `table_increment`.site_id = NEW.site_id and 
 				table_increment_table = '#arguments.table#' FOR UPDATE
 			) ;
 			IF (@zLastInsertId IS NULL) THEN
-				INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
+				INSERT INTO `jetendo`.`table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
 				NEW.site_id, 
 				'#arguments.table#', 
 				IFNULL(MAX(`#arguments.primaryKeyFieldName#`), 0)  as value
@@ -1424,13 +1424,13 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 				WHERE `#arguments.table#`.site_id = NEW.site_id;
 				SET @zLastInsertId=(
 					SELECT table_increment_table_id
-					FROM `table_increment` 
+					FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 					WHERE `table_increment`.site_id = NEW.site_id and 
 					table_increment_table = '#arguments.table#' FOR UPDATE
 				) ; 
 			END IF;
 			SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-			UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+			UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
 			WHERE `table_increment`.site_id = NEW.site_id and 
 			table_increment_table = '#arguments.table#';
 			SET NEW.`#arguments.primaryKeyFieldName#`=@zLastInsertId;

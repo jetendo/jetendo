@@ -43,7 +43,7 @@
 		ELSE 
 			SET @zLastInsertId=(
 				SELECT table_increment_table_id 
-				FROM `table_increment` 
+				FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 				WHERE `table_increment`.site_id = NEW.site_id and 
 				table_increment_table = '##tableName##' FOR UPDATE
 			) ;
@@ -56,13 +56,13 @@
 				WHERE `##tableName##`.site_id = NEW.site_id;
 				SET @zLastInsertId=(
 					SELECT table_increment_table_id
-					FROM `table_increment` 
+					FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 					WHERE `table_increment`.site_id = NEW.site_id and 
 					table_increment_table = '##tableName##' FOR UPDATE
 				) ; 
 			END IF;
 			SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-			UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+			UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
 			WHERE `table_increment`.site_id = NEW.site_id and 
 			table_increment_table = '##tableName##';
 			SET NEW.`##keyName##`=@zLastInsertId;
@@ -218,7 +218,7 @@
 								ELSE 
 									SET @zLastInsertId=(
 										SELECT table_increment_table_id 
-										FROM `table_increment` 
+										FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 										WHERE `table_increment`.site_id = NEW.site_id and 
 										table_increment_table = '#local.curTableName#' FOR UPDATE
 									) ;
@@ -231,13 +231,13 @@
 										WHERE `#local.curTableName#`.site_id = NEW.site_id;
 										SET @zLastInsertId=(
 											SELECT table_increment_table_id
-											FROM `table_increment` 
+											FROM `#request.zos.zcoreDatasource#`.`table_increment` 
 											WHERE `table_increment`.site_id = NEW.site_id and 
 											table_increment_table = '#local.curTableName#' FOR UPDATE
 										) ; 
 									END IF;
 									SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-									UPDATE `table_increment` SET table_increment_table_id=@zLastInsertId 
+									UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
 									WHERE `table_increment`.site_id = NEW.site_id and 
 									table_increment_table = '#local.curTableName#';
 									SET NEW.`#local.curPrimaryKeyId#`=@zLastInsertId;
