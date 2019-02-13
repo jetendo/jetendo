@@ -796,17 +796,17 @@ If the link does not work, please copy and paste the entire link in your browser
 	</cfif>
 	</form>
 	<div style="width:100%; float:left; padding-bottom:10px;">
-		<div style="width:185px; float:left;">
+		<!--- <div style="width:185px; float:left;"> --->
 			<cfscript>
 		      loginCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.user.controller.login");
 		      writeoutput(loginCom.displayLoginForm());
 		      </cfscript>
-		</div>
+		<!--- </div>
 		<div style="width:300px; float:left;">
 			<cfscript>
 		      writeoutput(loginCom.displayOpenIdLoginForm(request.zos.currentHostName&"/z/user/preference/index?disableOpenIDLoginRedirect=1"));
 		      </cfscript>
-		</div>
+		</div> --->
 	</div>
 	<div class="zUserLoginCreateAccount zmember-openid-buttons" style="float:left; width:100%; padding-bottom:15px;width:100%;border-top:1px solid ##999; padding-top:15px;">
 		<h3>If you don't have an account:</h3>
@@ -1222,7 +1222,7 @@ If the link does not work, please copy and paste the entire link in your browser
 					local.openIdCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.user.openid");
 					local.openIdCom.disableDeveloperLoginLinks();
 					local.openIdCom.enableRegistrationLoginLinks();
-					writeoutput(local.openIdCom.displayProviderLinks(request.zos.currentHostName&"/z/user/preference/register?disableOpenIDLoginRedirect=1"));
+					//writeoutput(local.openIdCom.displayProviderLinks(request.zos.currentHostName&"/z/user/preference/register?disableOpenIDLoginRedirect=1"));
 					if(structkeyexists(form, 'zRegisterAccount')){
 						if(request.zos.globals.disableOpenID EQ 1){
 							application.zcore.functions.z404("OpenID login is disabled in server manager for this site.");

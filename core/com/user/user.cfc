@@ -1309,9 +1309,9 @@ formString = userCom.loginForm(inputStruct);
 				</cfscript>
 			</cfif>
 		</div>
-		<cfscript>
+		<!--- <cfscript>
 			writeoutput(loginCom.displayOpenIdLoginForm(request.zos.currentHostName&actionVar&returnStruct.cgiFormString));
-			</cfscript>
+			</cfscript> --->
 	</div> 
 	<cfif request.zos.globals.parentID EQ 0 or application.zcore.functions.zvar("disableGlobalLoginMessage", request.zos.globals.parentID) NEQ 1>
 		<div id="loginFooterMessage" style="width:100%; float:left; font-size:120%; padding-top:10px; padding-bottom:10px;<cfif request.zos.globals.id EQ request.zos.globals.serverId>display:none !important;</cfif> border-top:1px solid ##999; margin-top:20px;">
