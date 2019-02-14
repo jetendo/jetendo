@@ -276,7 +276,7 @@ When making a version the primary record, it will have option to preserve the or
 			application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
 		}else{
 			siteStruct=application.zcore.functions.zGetSiteGlobals(form.newSiteId);
-			application.zcore.siteFieldCom.updateSchemaCache(siteStruct);
+			application.zcore.featureCom.updateSchemaCache(siteStruct);
 		}
 
 	}catch(Any e){
@@ -521,7 +521,7 @@ When making a version the primary record, it will have option to preserve the or
 		transaction action="commit";
 	}
 
-	application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(qMaster.feature_schema_id);
+	application.zcore.featureCom.updateSchemaCacheBySchemaId(qMaster.feature_schema_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
@@ -581,7 +581,7 @@ When making a version the primary record, it will have option to preserve the or
 
 
 	// TODO: consider removing the version data from memory using structdelete instead of full rebuild:
-	application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(qArchive.feature_schema_id);
+	application.zcore.featureCom.updateSchemaCacheBySchemaId(qArchive.feature_schema_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	if(form.statusValue EQ 1){
 		application.zcore.status.setStatus(request.zsid, "Version preview enabled.");

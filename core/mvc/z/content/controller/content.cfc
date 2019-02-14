@@ -322,6 +322,14 @@ this.app_id=12;
 				ts.link="/z/admin/site-option-group/index?site_option_app_id=0";
 				arguments.linkStruct["Content Manager"].children["Custom Groups"]=ts;
 			}    
+			if(request.zos.isdeveloper){
+				if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Features") EQ false){
+					ts=structnew();
+					ts.featureName="Features";
+					ts.link="/z/feature/admin/feature-manage/index";
+					arguments.linkStruct["Content Manager"].children["Features"]=ts;
+				}   
+			} 
 		}
 		/*if(structkeyexists(arguments.linkStruct["Content Manager"].children,"Add Slideshow") EQ false){
 			ts=structnew();

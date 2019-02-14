@@ -37,24 +37,14 @@
 	</cfscript>
 </cffunction>
 
-<!--- application.zcore.siteFieldCom.updateFieldCache(); --->
-<cffunction name="updateFieldCache" access="public" localmode="modern"> 
-	<cfargument name="site_id" type="string" required="yes">
-	<cfscript>
-	siteStruct=application.zcore.functions.zGetSiteGlobals(arguments.site_id); 
-	internalUpdateFieldFieldCache(siteStruct);
 
-	application.zcore.functions.zCacheJsonSiteAndUserSchema(arguments.site_id, siteStruct);
-	</cfscript>
-</cffunction>
-
-<!--- application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(optionSchemaId); --->
+<!--- application.zcore.featureCom.updateSchemaCacheBySchemaId(optionSchemaId); --->
 <cffunction name="updateSchemaCacheBySchemaId" access="public" localmode="modern">
 	<cfargument name="optionSchemaId" type="string" required="yes">
 	<cfscript>
 	siteStruct=application.zcore.functions.zGetSiteGlobals(request.zos.globals.id);
 	internalUpdateSchemaCacheBySchemaId(siteStruct, arguments.optionSchemaId);
-	application.zcore.functions.zCacheJsonSiteAndUserSchema(request.zos.globals.id, siteStruct);
+	application.zcore.functions.zCacheJsonSiteAndUserGroup(request.zos.globals.id, siteStruct);
 	</cfscript>
 </cffunction>
 
@@ -495,7 +485,7 @@ ts=[
 	]
 ];
 // Valid types are =, <>, <, <=, >, >=, between, not between, like, not like
-application.zcore.siteFieldCom.searchSchema("groupName", ts, 0, false);
+application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
  --->
 <cffunction name="searchSchema" access="public" output="no" returntype="struct" localmode="modern">
 	<cfargument name="groupName" type="string" required="yes">
@@ -761,7 +751,7 @@ ts.endDate=dateAdd("m", 1, now());
 ts.limit=3;
 ts.offset=0;
 ts.orderBy="startDateASC"; // startDateASC | startDateDESC
-arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, request.zos.globals.id);
+arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, request.zos.globals.id);
 </cfscript>
  --->
 <cffunction name="optionSchemaSetFromDatabaseBySearch" access="public" returntype="array" localmode="modern">
@@ -889,9 +879,6 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 	curParentSetId=arguments.feature_data_parent_id;
 	groupStruct=getSchemaById(curSchemaId); 
 	if(arguments.linkCurrentPage){
-		if(form.method NEQ "sectionSchema"){
-			arrayAppend(arrParent, '<a href="/z/feature/admin/features/sectionSchema?feature_data_id=#form.feature_data_id#">Manage Section</a> /');
-		}
 		manageAction="manageSchema";
 		if(form.method EQ "userManageSchema"){
 			manageAction="userManageSchema";
@@ -1543,7 +1530,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 						}
 						t9.optionSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id]=arrTemp;
 					}catch(Any e){
-						application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(row.feature_schema_id);
+						application.zcore.featureCom.updateSchemaCacheBySchemaId(row.feature_schema_id);
 						//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 						ts={};
 						ts.subject="Site option group update resort failed";
@@ -1590,7 +1577,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 	}  
 	if(debug and structkeyexists(local, 'arrChild')) writedump(arrChild);
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-4<br>'); startTime=gettickcount();
-	application.zcore.functions.zCacheJsonSiteAndUserSchema(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
+	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-5<br>'); startTime=gettickcount();
 	if(debug) application.zcore.functions.zabort();
 	</cfscript>
@@ -1703,7 +1690,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 	}
 	db.sql="delete from #db.table("search", "jetendofeature")# WHERE 
 	site_id <> #db.param(-1)# and 
-	app_id = #db.param(14)# and 
+	app_id = #db.param(21)# and 
 	search_deleted = #db.param(0)#";
 	if(structkeyexists(form, 'sid') and form.sid NEQ ""){
 		db.sql&=" and site_id = #db.param(form.sid)# ";
@@ -1723,7 +1710,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 	var db=request.zos.queryObject;
 	db.sql="DELETE FROM #db.table("search", "jetendofeature")# 
 	WHERE site_id =#db.param(arguments.site_id)# and 
-	app_id = #db.param(14)# and 
+	app_id = #db.param(21)# and 
 	search_deleted = #db.param(0)# and 
 	search_table_id = #db.param(arguments.setId)# ";
 	db.execute("qDelete");
@@ -1773,7 +1760,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 		if(request.zos.enableSiteSchemaCache and groupStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.optionSchemaSet, arguments.setId)){
 			groupStruct=t9.optionSchemaSet[arguments.setId];
 			groupStruct.__approved=approved;
-			application.zcore.functions.zCacheJsonSiteAndUserSchema(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
+			application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
 		}
 	}
 	
@@ -1972,7 +1959,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 
 
  
-<!--- application.zcore.siteFieldCom.activateFieldAppId(feature_id); --->
+<!--- application.zcore.featureCom.activateFieldAppId(feature_id); --->
 <cffunction name="activateFieldAppId" localmode="modern" returntype="any" output="no">
 	<cfargument name="feature_id" type="string" required="yes">
 	<cfscript>
@@ -2042,7 +2029,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 	</cfscript>
 </cffunction> 
  --->
-<!--- application.zcore.siteFieldCom.deleteFieldAppId(feature_id); --->
+<!--- application.zcore.featureCom.deleteFieldAppId(feature_id); --->
 <cffunction name="deleteFieldAppId" localmode="modern" returntype="any" output="no">
 	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
@@ -2144,7 +2131,7 @@ arr1=application.zcore.siteFieldCom.optionSchemaSetFromDatabaseBySearch(ts, requ
 ts=structnew();
 ts.feature_id_field="rental.rental_feature_id";
 ts.count = 1; // how many images to get
-application.zcore.siteFieldCom.getImageSQL(ts);
+application.zcore.featureCom.getImageSQL(ts);
  --->
 <cffunction name="getImageSQL" localmode="modern" returntype="any" output="yes">
 	<cfargument name="ss" type="struct" required="yes">
@@ -2408,7 +2395,7 @@ if(not rs.success){
 		sog=siteStruct.soSchemaData;
 		for(row2 in qFields){
 			if(structkeyexists(sog.optionLookup, row2.feature_field_id)){
-				var currentCFC=application.zcore.siteFieldCom.getTypeCFC(sog.optionLookup[row2.feature_field_id].type); 
+				var currentCFC=application.zcore.featureCom.getTypeCFC(sog.optionLookup[row2.feature_field_id].type); 
 				if(currentCFC.hasCustomDelete()){
 					optionStruct=sog.optionLookup[row2.feature_field_id].optionStruct;
 					//writeLogEntry("delete for feature_field_id:"&row2.feature_field_id&" type:"&sog.optionLookup[row2.feature_field_id].type);
@@ -2495,7 +2482,7 @@ if(not rs.success){
 	securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/site-options/';
 	for(row in qFields){
 		if(structkeyexists(sog.optionLookup, row.feature_field_id)){
-			var currentCFC=application.zcore.siteFieldCom.getTypeCFC(sog.optionLookup[row.feature_field_id].type); 
+			var currentCFC=application.zcore.featureCom.getTypeCFC(sog.optionLookup[row.feature_field_id].type); 
 			if(currentCFC.hasCustomDelete()){
 				optionStruct=sog.optionLookup[row.feature_field_id].optionStruct;
 				currentCFC.onDelete(row, optionStruct); 
@@ -2705,7 +2692,7 @@ if(not rs.success){
 </cffunction>
 
 <!--- 
-rs=application.zcore.siteFieldCom.deleteNotUpdatedSchemaSet(["groupName"]); 
+rs=application.zcore.featureCom.deleteNotUpdatedSchemaSet(["groupName"]); 
 application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records deleted");
 --->
 <cffunction name="deleteNotUpdatedSchemaSet" localmode="modern" access="public" returnType="struct">

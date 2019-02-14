@@ -573,10 +573,10 @@
 		// loop the group data
 		local.tempSet={};
 		for(local.row2 in local.qSchemaData){
-			if(not structkeyexists(local.tempSet, local.row2["#variables.siteType#_x_option_group_set_id"])){
-				local.tempSet[local.row2["#variables.siteType#_x_option_group_set_id"]]={};
+			if(not structkeyexists(local.tempSet, local.row2["feature_data_id"])){
+				local.tempSet[local.row2["feature_data_id"]]={};
 			}
-			local.tempSet[local.row2["#variables.siteType#_x_option_group_set_id"]][local.row2["feature_field_name"]]=local.row2["#variables.siteType#_x_option_group_value"];
+			local.tempSet[local.row2["feature_data_id"]][local.row2["feature_field_name"]]=local.row2["#variables.siteType#_x_option_group_value"];
 		}
 		for(local.n in local.tempSet){
 			if(arguments.indexById){
@@ -603,7 +603,7 @@
 		local.selectedValue=form["newvalue"&arguments.option_id];
 	}
 	
-	local.rs=application.zcore.siteFieldCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, false); 
+	local.rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, false); 
 	ts=local.rs.ts; 
 	if(structkeyexists(ts,'selectmenu_labels') and ts.selectmenu_labels NEQ ""){ 
 		local.arrTemp=listToArray(ts.selectmenu_values, ts.selectmenu_delimiter, true);
@@ -644,7 +644,7 @@
 	<cfscript>
 	var selectStruct = StructNew();
 	var ts=0;
-	local.rs=application.zcore.siteFieldCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, arguments.enableSearchView);
+	local.rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, arguments.enableSearchView);
 	selectStruct.name = "newvalue#arguments.option_id#";
 	ts=local.rs.ts;
 	local.enabled=false;
@@ -676,9 +676,9 @@
 			selectStruct.listLabels=arraytolist(local.rs.arrLabel, ts.selectmenu_delimiter);
 			selectStruct.listValues=arraytolist(local.rs.arrValue, ts.selectmenu_delimiter);
 		}
-		if(structkeyexists(form, '#variables.siteType#_x_option_group_set_id')){
+		if(structkeyexists(form, 'feature_data_id')){
 
-			selectStruct.onchange="for(var i in this.options){ if(this.options[i].selected && this.options[i].value != '' && this.options[i].value=='#form["#variables.siteType#_x_option_group_set_id"]#'){alert('You can\'t select the same item you are editing.');this.selectedIndex=0;}; } ";
+			selectStruct.onchange="for(var i in this.options){ if(this.options[i].selected && this.options[i].value != '' && this.options[i].value=='#form["feature_data_id"]#'){alert('You can\'t select the same item you are editing.');this.selectedIndex=0;}; } ";
 		}
 		local.enabled=true;
 		// must use id as the value instead of "value" because parent_id can't be a string or uniqueness would be wrong.
@@ -700,7 +700,7 @@
 			if(application.zcore.functions.zso(ts, 'selectmenu_multipleselection', true, 0) EQ 1){
 				selectStruct.multiple=true;
 				selectStruct.hideSelect=true;
-				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), arguments.required);
+				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'feature_data_id'), arguments.required);
 			}
 		}
 		selectStruct.output=false;

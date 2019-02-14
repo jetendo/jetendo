@@ -133,7 +133,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 		var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["feature_field_id"]#');
-		//application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id')
+		//application.zcore.functions.zso(form, 'feature_data_id')
 		var db=request.zos.queryObject;
 		db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
 		feature_id=#db.param(form.feature_id)# and 
@@ -230,7 +230,7 @@
 			selectStruct.multiple=true;
 			selectStruct.hideSelect=true;
 			application.zcore.functions.zInputSelectBox(selectStruct);
-			application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), true);
+			application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'feature_data_id'), true);
 		}
 		--->
 		return { label: true, hidden: false, value: output};  

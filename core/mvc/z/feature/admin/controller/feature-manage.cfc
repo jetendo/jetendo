@@ -4,7 +4,7 @@
 <cffunction name="init" localmode="modern" access="private" roles="member">
 	<cfscript>
 	featureSchemaCom=createobject("component", "feature-schema");
-	featureSchemaCom.displayoptionAdminNav();
+	featureSchemaCom.displayFeatureAdminNav();
 	</cfscript>
 </cffunction>
       
@@ -28,6 +28,7 @@
 	</cfscript>
 	<p>
 		<a href="/z/feature/admin/feature-manage/add">Add Feature</a> 
+		<a href="/z/feature/admin/feature-manage/assign">Assign Feature</a> 
 	</p> 
 	<table style="border-spacing:0px;" class="table-list" >
 		<tr>
@@ -203,6 +204,17 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="assign" localmode="modern" access="remote" roles="member">
+	<cfscript>
+	</cfscript>
+	Assign will list all features, so you can pick which ones to apply to the current site.
+
+	How does this get stored?
+
+	feature_x_site?  needs trigger.
+	this is only used for giving access.  it doesn't allow creating multiple instances of a feature.
+	
+</cffunction>
 
 <cffunction name="add" localmode="modern" access="remote" roles="member">
 	<cfscript>

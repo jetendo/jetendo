@@ -114,25 +114,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	return rs;
 	</cfscript>
 </cffunction>
-
-<cffunction name="processSectionData" access="public" localmode="modern">
-	<cfargument name="sectionStruct" type="struct" required="yes">
-	<cfscript>
-	init();
-	cs=arguments.sectionStruct; 
-	csNew={};
-	//echo(serializeJson(cs));
-	gs=processSchema(cs, csNew);
-	/*writedump(csNew);
-	writedump(gs);
-	echo(serializeJson(gs));
-	abort;*/
-	return csNew;
-	</cfscript>
-</cffunction>
-
-
-	
+ 
 <cffunction name="importSchema" access="remote" localmode="modern" roles="serveradministrator">
 	<cfscript>
 	db=request.zos.queryObject;

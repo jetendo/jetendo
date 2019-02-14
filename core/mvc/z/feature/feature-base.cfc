@@ -6,15 +6,11 @@
 	<cfscript>
 	variables.type=arguments.type;
 	variables.siteType=arguments.siteType;
-	if(variables.type EQ "site"){
-		variables.siteStorageKey="soSchemaData";
-		variables.typeStorageKey="soSchemaData";
-	}else if(variables.type EQ "theme"){
-		variables.siteStorageKey="themeData";
-		variables.typeStorageKey="themeTypeData";
-	}else if(variables.type EQ "widget"){
-		variables.siteStorageKey="widgetData";
-		variables.typeStorageKey="widgetTypeData";
+	if(variables.type EQ "feature"){
+		variables.siteStorageKey="featureData";
+		variables.typeStorageKey="featureTypeData";
+	}else{
+		throw("#variables.type# is not supported");
 	}
 
 	</cfscript>
@@ -22,7 +18,7 @@
 
 <cffunction name="getTypeCFCStruct" returntype="struct" localmode="modern" access="public">
 	<cfscript>
-	return application.zcore[variables.typeStorageKey].optionTypeStruct;
+	return application.zcore[variables.typeStorageKey].fieldTypeStruct;
 	</cfscript>
 </cffunction>
 	
@@ -30,7 +26,7 @@
 <cffunction name="getTypeCFC" returntype="struct" localmode="modern" access="public" output="no">
 	<cfargument name="typeId" type="string" required="yes" hint="site_id, theme_id or widget_id">
 	<cfscript>
-	return application.zcore[variables.typeStorageKey].optionTypeStruct[arguments.typeID];
+	return application.zcore[variables.typeStorageKey].fieldTypeStruct[arguments.typeID];
 	</cfscript>
 </cffunction>
 
@@ -89,7 +85,7 @@
 <cffunction name="getTypeCustomDeleteArray" returntype="array" localmode="modern" access="public">
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
-	ss=arguments.sharedStruct.optionTypeStruct;
+	ss=arguments.sharedStruct.fieldTypeStruct;
 	arrCustomDelete=[];
 	for(i in ss){
 		if(ss[i].hasCustomDelete()){
@@ -720,42 +716,11 @@ used to do search for a list of values
 <cffunction name="setIdHiddenField" access="public" returntype="any" localmode="modern">
 	<cfscript>
     ts3=structnew();
-    ts3.name="#variables.siteType#_x_option_group_set_id";
+    ts3.name="feature_data_id";
     application.zcore.functions.zinput_hidden(ts3);
 	</cfscript>
 </cffunction>
-
-<cffunction name="requireSectionEnabledSetId" access="public" returntype="any" localmode="modern">
-	<cfargument name="arrSchemaName" type="array" required="yes">
-	<cfscript>
-	form['#variables.siteType#_x_option_group_set_id']=application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id', true, 0);
-	if(not isSectionEnabledForSetId(arguments.arrSchemaName, form['#variables.siteType#_x_option_group_set_id'])){
-		application.zcore.functions.z404("form.#variables.siteType#_x_option_group_set_id, ""#form['#variables.siteType#_x_option_group_set_id']#"", doesn't exist or doesn't has enable section set to use for the option_group.");
-	}
-	</cfscript>
-</cffunction>
-
-<cffunction name="isSectionEnabledForSetId" access="public" returntype="boolean" localmode="modern">
-	<cfargument name="arrSchemaName" type="array" required="yes">
-	<cfargument name="setId" type="string" required="yes">
-	<cfscript>
-	if(arguments.setId EQ "" or arguments.setId EQ 0){
-		return true;
-	}
-	struct=getSchemaSetById(arguments.arrSchemaName, arguments.setId);
-	if(structcount(struct) EQ 0){
-		return false;
-	}else{
-		groupStruct=getSchemaById(struct.__groupId);
-		if(groupStruct["feature_schema_enable_section"] EQ 1){
-			return true;
-		}else{
-			return false;
-		}
-	}
-	</cfscript>
-</cffunction>
-
+ 
 <cffunction name="getFieldFieldNameById" access="public" returntype="string" localmode="modern">
 	<cfargument name="option_id" type="string" required="yes">
 	<cfscript>
@@ -766,36 +731,14 @@ used to do search for a list of values
 		return "";
 	}
 	</cfscript>
-</cffunction>
-
-
-<cffunction name="displaySectionNav" localmode="modern" access="remote" roles="member">
-	<cfargument name="arrSchemaName" type="array" required="yes">
-	<cfscript>
-	form["#variables.siteType#_x_option_group_set_id"]=application.zcore.functions.zso(form, "#variables.siteType#_x_option_group_set_id");
-	struct=getSchemaSetById(arguments.arrSchemaName, form["#variables.siteType#_x_option_group_set_id"]);
-	if(structcount(struct) EQ 0){
-		return;
-	}else{
-		groupStruct=getSchemaById(struct.__groupId);
-	}
-	curSchemaId=groupStruct["feature_schema_id"];
-	curParentId=groupStruct["feature_schema_parent_id"];
-	curParentSetId=struct.__parentId;
-
-	getSetParentLinks(curSchemaId, curParentId, curParentSetId, true);
-	echo('<h2>Manage Section: #groupStruct["feature_schema_variable_name"]# | #struct.__title#</h2>');
-	</cfscript>
-	
-</cffunction>
-
+</cffunction> 
 
 <cffunction name="deleteSchemaSetIdCache" localmode="modern" access="public">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes"> 
 	<cfscript>
 	deleteSchemaSetIdCacheInternal(arguments.site_id, arguments.setId, false);
-	application.zcore.functions.zCacheJsonSiteAndUserSchema(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
+	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
 	</cfscript>
 </cffunction>
 
@@ -940,7 +883,7 @@ used to do search for a list of values
 	}
 	searchCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.searchFunctions");
 	ds=searchCom.getSearchIndexStruct();
-	ds.app_id=14; 
+	ds.app_id=21; 
 	ds.search_table_id=local.dataStruct.__setId;
 	ds.site_id=arguments.site_id;
 	ds.search_content_datetime=local.dataStruct.__dateModified;
@@ -986,7 +929,7 @@ used to do search for a list of values
 </cffunction>
 
 
-<!--- application.zcore.siteFieldCom.getCurrentFieldAppId(); --->
+<!--- application.zcore.featureCom.getCurrentFieldAppId(); --->
 <cffunction name="getCurrentFieldAppId" localmode="modern" output="no" returntype="any">
 	<cfscript>
 	if(structkeyexists(request.zos, "#variables.type#currentFieldAppId")){
@@ -1141,7 +1084,7 @@ ts.row=currentrow;
 ts.size="250x160";
 ts.crop=0;
 ts.count = 1; // how many images to get
-application.zcore.siteFieldCom.displayImageFromSQL(ts);
+application.zcore.featureCom.displayImageFromSQL(ts);
  --->
 <cffunction name="displayImageFromSQL" localmode="modern" returntype="any" output="yes">
 	<cfargument name="ss" type="struct" required="yes">
@@ -1175,7 +1118,7 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 			return arrOutput;
 		}
 	}
-	application.zcore.siteFieldCom.registerSize(arguments.ss["feature_id"], arguments.ss.size, arguments.ss.crop);
+	application.zcore.featureCom.registerSize(arguments.ss["feature_id"], arguments.ss.size, arguments.ss.crop);
 	</cfscript>
 	<cfif arguments.ss.output>
 		<cfloop query="arguments.ss.query" startrow="#arguments.ss.row#" endrow="#arguments.ss.row#">
@@ -1185,7 +1128,7 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 			arrImageUpdatedDate=listtoarray(arguments.ss.query.imageUpdatedDateList, chr(9), true);
 			</cfscript>
 			<cfloop from="1" to="#arguments.ss.count#" index="g2">
-				<img src="#application.zcore.siteFieldCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2])#" <cfif arrCaption[g2] NEQ "">alt="#htmleditformat(arrCaption[g2])#"</cfif> style="border:none;" />
+				<img src="#application.zcore.featureCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2])#" <cfif arrCaption[g2] NEQ "">alt="#htmleditformat(arrCaption[g2])#"</cfif> style="border:none;" />
 				<cfif arrCaption[g2] NEQ ""><br /><div style="padding-top:5px;">#arrCaption[g2]#</div></cfif><br /><br />
 			</cfloop>
 		</cfloop>
@@ -1204,7 +1147,7 @@ application.zcore.siteFieldCom.displayImageFromSQL(ts);
 			<cfloop from="1" to="#arguments.ss.count#" index="g2">
 				<cfscript>
 				ts=structnew();
-				ts.link=application.zcore.siteFieldCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2]);
+				ts.link=application.zcore.featureCom.getImageLink(arguments.ss["feature_id"], arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrImageUpdatedDate[g2]);
 				ts.caption=arrCaption[g2];
 				ts.id=arrId[g2];
 				arrayappend(arrOutput,ts);

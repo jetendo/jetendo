@@ -16,16 +16,17 @@
 	if(not application.zcore.functions.zIsWidgetBuilderEnabled()){
 		application.zcore.functions.z301Redirect('/member/');
 	}
+	echo('<p><a href="/z/feature/admin/feature-manage/index">Features</a> / </p>');
 	theTitle="Manage Feature Schemas";
-	application.zcore.template.setTag("title",theTitle);
-	application.zcore.template.setTag("pagetitle",theTitle);
+	application.zcore.template.setTag("title",theTitle); 
+	echo('<h2>Feature Schemas</h2>');
 	
-	this.displayoptionAdminNav();
+	this.displayFeatureAdminNav();
 	</cfscript>
 </cffunction>
 
 
-<cffunction name="displayoptionAdminNav" access="public" localmode="modern">
+<cffunction name="displayFeatureAdminNav" access="public" localmode="modern">
 	<cfscript>
 	
 	form.feature_id=application.zcore.functions.zso(form, 'feature_id',false,0); 
@@ -91,9 +92,9 @@
 					parentSchemaName="Schema"&parentSchemaName;
 				}
 				parentSchemaNameInstance=lcase(left(parentSchemaName, 1))&removeChars(parentSchemaName,1,1);
-				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
 			}else{
-				echo(indent&'arr#groupName#=application.zcore.siteFieldCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
 		}
 		if(not arguments.disableDebugOutput and structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
@@ -101,7 +102,7 @@
 			for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
 				optionStruct=t9.optionLookup[n];
 
-				typeCFC=application.zcore.siteFieldCom.getTypeCFC(optionStruct.feature_field_type_id);
+				typeCFC=application.zcore.featureCom.getTypeCFC(optionStruct.feature_field_type_id);
 				debugValue=typeCFC.getDebugValue(optionStruct);
 				jsonStruct[optionStruct.feature_field_name]=debugValue; 
 			} 
@@ -225,7 +226,7 @@
 		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
 			optionStruct=t9.optionLookup[n];
 			savecontent variable="out"{
-				var currentCFC=application.zcore.siteFieldCom.getTypeCFC(optionStruct.type); 
+				var currentCFC=application.zcore.featureCom.getTypeCFC(optionStruct.type); 
 				fieldName="#tableName#_"&lcase(application.zcore.functions.zURLEncode(optionStruct.feature_field_name, "_"));
 				v=currentCFC.getCreateTableColumnSQL(fieldName);
 			}
@@ -275,9 +276,9 @@ KEY `feature_data_id` (`feature_data_id`)
 	echo('<h2>Source code generated below.</h2>
 	<p>Note: searchSchema() retrieves all the records.  If "Enable Memory Caching" is disabled for the group, it will perform a query to select all the data.  This can be very slow if you are working with hundreds or thousands of records and it may cause nested queries to run if the sub-groups also have "Enable Memory Caching" disabled.   Conversely, for small datasets, this feature is much faster then running a query.</p>
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
-	<p>Example: arr1=application.zcore.siteFieldCom.optionSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
+	<p>Example: arr1=application.zcore.featureCom.optionSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
-	<p>fullStruct=application.zcore.siteFieldCom.getSchemaSetById(["Schema Name"], dataStruct.__setId);</p>
+	<p>fullStruct=application.zcore.featureCom.getSchemaSetById(["Schema Name"], dataStruct.__setId);</p>
 
 	<p>Warning: The data returned from these function calls is the original copy.  Make sure not to modify the object or it will be modified for all requests until the database is read again.  Also make a new variable first or use the duplicate() function to make a copy.   If the datatype is not able to be converted to a string automatically, then it will always be accessed as a reference to the original instead of a copy.  i.e. struct/array/components are references.  String/boolean/number are copied when you set a variable.</p>
 	');
@@ -312,7 +313,7 @@ KEY `feature_data_id` (`feature_data_id`)
 		}
 		groupNameInstance=lcase(left(groupName, 1))&removeChars(groupName,1,1);
 
-		groupNameArray=arrayToList(application.zcore.siteFieldCom.getSchemaNameArrayById(groupStruct.feature_schema_id), '","');
+		groupNameArray=arrayToList(application.zcore.featureCom.getSchemaNameArrayById(groupStruct.feature_schema_id), '","');
 		
 	}
 	echo(trim(output));
@@ -325,7 +326,7 @@ KEY `feature_data_id` (`feature_data_id`)
 <cffunction name="index" access="public" localmode="modern">
 	<cfargument name="query" type="query" required="yes">
 	<cfscript>
-	#groupNameInstance#=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], arguments.query.feature_data_id);  
+	#groupNameInstance#=application.zcore.featureCom.getSchemaSetById(["#groupNameArray#"], arguments.query.feature_data_id);  
 	</cfscript> 
 	#cfcOutput#
 </cffunction>
@@ -404,8 +405,8 @@ KEY `feature_data_id` (`feature_data_id`)
 	<h2>Miscellaneous Code</h2>
 	<p>To select a single group set, use one of the following:</p>
 	<ul>
-	<li>Memory Cache Enabled: struct=application.zcore.siteFieldCom.getSchemaSetById(["#groupNameArray#"], feature_data_id);</li>
-	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.siteFieldCom.getSchemaSetByID(["#groupNameArray#"], feature_data_id, request.zos.globals.id, showUnapproved); </li>
+	<li>Memory Cache Enabled: struct=application.zcore.featureCom.getSchemaSetById(["#groupNameArray#"], feature_data_id);</li>
+	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.featureCom.getSchemaSetByID(["#groupNameArray#"], feature_data_id, request.zos.globals.id, showUnapproved); </li>
 	</ul>');
 	if(groupStruct.feature_schema_allow_public NEQ 0){
 		if(groupStruct.feature_schema_public_form_url NEQ ""){
@@ -421,12 +422,12 @@ KEY `feature_data_id` (`feature_data_id`)
 		echo('<h2>CFML Embed Form Code</h2><pre>'&htmlcodeformat('
 application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, "x_ajax_id"));
 // Note: if this group is a child group, you must update the array below to have the parent groups as well.
-form.feature_schema_id=application.zcore.siteFieldCom.getSchemaIDWithNameArray(["#groupNameArray#"]);
+form.feature_schema_id=application.zcore.featureCom.getSchemaIDWithNameArray(["#groupNameArray#"]);
 displaySchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.misc.controller.display-site-option-group");
 displaySchemaCom.add();')&'</pre>');
 	}
 	echo('<h2>Alternative Schema Search Method</h2>
-	<p>application.zcore.siteFieldCom.searchSchema(); can also be used to filter records with SQL-LIKE object input.</p>
+	<p>application.zcore.featureCom.searchSchema(); can also be used to filter records with SQL-LIKE object input.</p>
 	<p>By default, all records are looped & compared in memory with a single thread, so be aware that it may take a lot of CPU time with a larger database.</p>
 	<p>When working with hundreds or thousands of records, you can achieve better performance & reduced memory usage with the database based search method that is built in to searchSchema.  It translates the structured input array into an efficient SQL query that returns only the records you select.  To switch to using database queries for searchSchema, you only need to disable "Enable Memory Caching" on the edit group form.  Keep in mind the sub-groups have their own "Enable Memory Caching" setting which you may want to enable or disable.</p>
 	<p>Even when memory cache is disabled queries are only necessary to retrieve data value because the schema information is still cached in memory.</p>
@@ -446,7 +447,7 @@ displaySchemaCom.add();')&'</pre>');
 	offset=0;
 	limit=10;
 	// perform search and return struct with array of structs and whether or not there are more records.
-	rs=application.zcore.siteFieldCom.searchSchema(groupName, arrSearch, parentSchemaId, showUnapproved, offset, limit);
+	rs=application.zcore.featureCom.searchSchema(groupName, arrSearch, parentSchemaId, showUnapproved, offset, limit);
 	if(arraylen(rs.arrResult)){
 		for(i=1;i LTE arraylen(rs.arrResult);i++){
 			c=rs.arrResult[i];
@@ -566,7 +567,7 @@ displaySchemaCom.ajaxInsert();
 		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
 			optionStruct=t9.optionLookup[n];
 			count++;
-			currentCFC=application.zcore.siteFieldCom.getTypeCFC(optionStruct.type);   
+			currentCFC=application.zcore.featureCom.getTypeCFC(optionStruct.type);   
 			typeName=currentCFC.getTypeName();
 			options=currentCFC.getFieldFieldStruct();
 			currentFields=duplicate(optionStruct.optionStruct);
@@ -899,8 +900,8 @@ displaySchemaCom.ajaxInsert();
 
 			//throw("warning: this will delete unique url and image gallery id - because internalSchemaUpdate is broken.");
 
-			arrSchemaName =application.zcore.siteFieldCom.getSchemaNameArrayById(qSchema.feature_schema_id); 
-			application.zcore.siteFieldCom.setSchemaImportStruct(arrSchemaName, 0, 0, ts, form); 
+			arrSchemaName =application.zcore.featureCom.getSchemaNameArrayById(qSchema.feature_schema_id); 
+			application.zcore.featureCom.setSchemaImportStruct(arrSchemaName, 0, 0, ts, form); 
 			structappend(form, row, true);
 			// writedump(form);abort;
  
@@ -1388,9 +1389,9 @@ displaySchemaCom.ajaxInsert();
 	<cfif structkeyexists(form,'confirm')>
 		<cfscript>
 		// TODO: fix group delete that has no options - it leaves a remnant in memory that breaks the application
-		application.zcore.siteFieldCom.deleteSchemaRecursively(form.feature_schema_id, true);
+		application.zcore.featureCom.deleteSchemaRecursively(form.feature_schema_id, true);
 		application.zcore.status.setStatus(request.zsid, "Schema deleted successfully.");
-		application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(qCheck.feature_schema_id);
+		application.zcore.featureCom.updateSchemaCacheBySchemaId(qCheck.feature_schema_id);
 
 		structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
@@ -1506,7 +1507,7 @@ displaySchemaCom.ajaxInsert();
 	}
 	
 	
-	application.zcore.siteFieldCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
+	application.zcore.featureCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 	application.zcore.routing.initRewriteRuleApplicationStruct(application.sitestruct[request.zos.globals.id]);
@@ -1582,15 +1583,36 @@ displaySchemaCom.ajaxInsert();
 		#tabCom.beginTabMenu()# 
 		#tabCom.beginFieldSet("Basic")#
 		<table  style="border-spacing:0px;" class="table-list">
-			<cfsavecontent variable="db.sql"> SELECT * FROM #db.table("feature_schema", "jetendofeature")# feature_schema WHERE 
-			feature_id=#db.param(form.feature_id)# and 
-			feature_schema_deleted = #db.param(0)# 
-			<!--- <cfif form.feature_schema_id NEQ 0 and form.feature_schema_id NEQ "">
-				and feature_schema_id <> #db.param(form.feature_schema_id)# and 
-				feature_schema_parent_id <> #db.param(form.feature_schema_id)#
-			</cfif> --->
-			ORDER BY feature_schema_display_name </cfsavecontent>
+			<tr>
+				<th style="vertical-align:top; white-space:nowrap;">Feature *</th>
+				<td><cfscript>
+				db.sql="SELECT * 
+				FROM #db.table("feature", "jetendofeature")# 
+				WHERE
+				feature.feature_deleted = #db.param(0)# and  
+				feature.feature_id IN (#db.trustedSQL(request.feature_id_list)#) 
+				order by feature.feature_display_name ASC ";
+				qFeature=db.execute("qFeature"); 
+				selectStruct=structnew();
+				selectStruct.name="feature_id"; 
+				selectStruct.onchange="";
+				selectStruct.hideSelect=true;
+				selectStruct.query=qFeature;
+ 				selectStruct.queryLabelField = "feature_display_name";
+ 				selectStruct.queryValueField = "feature_id";
+				application.zcore.functions.zInputSelectBox(selectStruct); 
+				</cfscript> 
+				</td>
+			</tr>
 			<cfscript>
+				db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# WHERE 
+			feature_id=#db.param(form.feature_id)# and 
+			feature_schema_deleted = #db.param(0)# ";
+			if(form.feature_schema_id NEQ 0 and form.feature_schema_id NEQ ""){
+				db.sql&=" and feature_schema_id <> #db.param(form.feature_schema_id)# and 
+				feature_schema_parent_id <> #db.param(form.feature_schema_id)# ";
+			}
+			db.sql&=" ORDER BY feature_schema_display_name ";
 			qG=db.execute("qG", "", 10000, "query", false); 
 			</cfscript>
 			<tr>
@@ -2107,8 +2129,7 @@ displaySchemaCom.ajaxInsert();
 		#tabCom.endTabMenu()# 
 	</form>
 	<script type="text/javascript">
-		/* <![CDATA[ */
-		var arrD=[];<cfloop query="qG">arrD.push("#qG.site_id#");</cfloop>
+		/* <![CDATA[ */ 
 		var firstLoad11=true;
 		function doParentCheck(){ 
 			var groupMenuName=document.getElementById("groupMenuNameId");

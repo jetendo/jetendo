@@ -883,7 +883,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 		if(form.debugEnabled){
 			echo("delete feature_schema where feature_schema_id=#groupId#<br>");
 		}else{
-			application.zcore.siteFieldCom.deleteSchemaRecursively(groupId, false);
+			application.zcore.featureCom.deleteSchemaRecursively(groupId, false);
 		}
 	}
 	arrKey=structkeyarray(fieldChangeStruct.extraFields);
@@ -907,7 +907,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 					qSiteXField=db.execute("qSiteXField");
 					for(row in qSiteXField){
 						optionStruct=deserializeJson(row.feature_field_type_json); 
-						currentCFC=application.zcore.siteFieldCom.getTypeCFC(row.feature_field_type_id);
+						currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
 						if(currentCFC.hasCustomDelete()){
 							// call delete on optionType
 							currentCFC.onDelete(row, optionStruct);
@@ -930,7 +930,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 					qSiteXSchema=db.execute("qSiteXSchema");
 					for(row in qSiteXSchema){
 						optionStruct=deserializeJson(row.feature_field_type_json); 
-						currentCFC=application.zcore.siteFieldCom.getTypeCFC(row.feature_field_type_id);
+						currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
 						if(currentCFC.hasCustomDelete()){
 							// call delete on optionType
 							currentCFC.onDelete(row, optionStruct);
@@ -1166,7 +1166,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 <cffunction name="init" access="private" localmode="modern">
 	<cfscript>
 	optionSchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-option-group");
-	optionSchemaCom.displayoptionAdminNav();
+	optionSchemaCom.displayFeatureAdminNav();
 	</cfscript>
 </cffunction>
 

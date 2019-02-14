@@ -31,10 +31,10 @@
 	for(i=1;i<=arraylen(a);i++){
 		a[i].arrParentLabel=arguments.arrParentLabel; 
 		arrayAppend(arguments.arrData, a[i]);
-		if(arrayLen(arguments.arrData) GT 1000){
+		if(arrayLen(arguments.arrData) GT 100){
 			throw("Possible infinite loop for this data set.");
 		}
-		if(structkeyexists(arguments.parentStruct, a[i].value)){
+		if(a[i].value NEQ 0 and structkeyexists(arguments.parentStruct, a[i].value)){
 			a2=duplicate(a[i].arrParentLabel);
 			arrayAppend(a2, a[i].label); 
 			application.zcore.functions.zInternalGetRecurseLabelValueStruct(arguments.arrData, arguments.parentStruct, a2, a[i].value);

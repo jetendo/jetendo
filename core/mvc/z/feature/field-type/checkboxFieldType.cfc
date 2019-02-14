@@ -74,7 +74,7 @@
 		}else{
 			required=false;
 		}
-		application.zcore.functions.zSetupMultipleSelect(ts.name, application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id'), required);  
+		application.zcore.functions.zSetupMultipleSelect(ts.name, application.zcore.functions.zso(form, 'feature_data_id'), required);  
 		tempOutput=application.zcore.functions.zInputSelectBox(ts);
 		return tempOutput;
 	}else{
