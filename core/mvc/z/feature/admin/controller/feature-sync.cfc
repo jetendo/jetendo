@@ -1165,7 +1165,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 
 <cffunction name="init" access="private" localmode="modern">
 	<cfscript>
-	optionSchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.site-option-group");
+	optionSchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.feature-schema");
 	optionSchemaCom.displayFeatureAdminNav();
 	</cfscript>
 </cffunction>

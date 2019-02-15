@@ -124,7 +124,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	</cfscript>
 	<h2>Import Schema</h2>
 	<p>Note: The JSON format is usually generated via the widget project by merging many properly named sections into one larger structure and then pasting that here.</p>
-	<form action="/z/admin/site-option-group-import/processImportSchema" method="post">
+	<form action="/z/feature/admin/feature-import/processImportSchema" method="post">
 		<h3>Add to existing group:</h3>
 		<p><cfscript>
 		// consider having all groups with parent -> child selection 
@@ -204,7 +204,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0);
 	if((form.feature_schema_id EQ 0 and form.groupName EQ "") or form.fieldData EQ ""){
 		application.zcore.status.setStatus(request.zsid, "Schema name and JSON are required", form, true);
-		application.zcore.functions.zRedirect("/z/admin/site-option-group-import/importSchema?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-import/importSchema?zsid=#request.zsid#");
 	}
 	if(form.feature_schema_id NEQ 0){
 
@@ -216,7 +216,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		qG=db.execute("qG");
 		if(qG.recordcount EQ 0){
 			application.zcore.status.setStatus(request.zsid, "Invalid group", form, true);
-			application.zcore.functions.zRedirect("/z/admin/site-option-group-import/importSchema?zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-import/importSchema?zsid=#request.zsid#");
 		}
 		parentId=qG.feature_schema_parent_id;
 		form.groupName=qG.feature_schema_display_name;
@@ -230,7 +230,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		qG=db.execute("qG");
 		if(qG.recordcount NEQ 0){
 			application.zcore.status.setStatus(request.zsid, "This group already exists", form, true);
-			application.zcore.functions.zRedirect("/z/admin/site-option-group-import/importSchema?zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-import/importSchema?zsid=#request.zsid#");
 		}
 		parentId=0;
 	}
@@ -249,7 +249,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 			qCheck=db.execute("qCheck"); 
 			if(qCheck.recordcount NEQ 0){
 				application.zcore.status.setStatus(request.zsid, "There is already a sub-group called ""#currentSchemaName#"".  Sub-group names must be unique.", form, true);
-				application.zcore.functions.zRedirect("/z/admin/site-option-group-import/importSchema?zsid=#request.zsid#");
+				application.zcore.functions.zRedirect("/z/feature/admin/feature-import/importSchema?zsid=#request.zsid#");
 			} 
 		}
 	} 

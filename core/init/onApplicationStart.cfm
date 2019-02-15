@@ -603,8 +603,8 @@
 	}
 
 	
-	ts.themeTypeData={};
-	ts.widgetTypeData={}
+	// ts.themeTypeData={};
+	// ts.widgetTypeData={}
 	
 	var qDomain=0;
 	query name="qDomain" datasource="#ts.serverGlobals.serverdatasource#"{
@@ -676,6 +676,13 @@
 	ts.componentObjectCache.siteOptionCom.init("site", "site");
  	ts.cloudVendor=ts.componentObjectCache.cloudFile.getCloudVendors();
 
+	if(request.zos.isTestServer){
+		// TODO: doesn't work yet
+		// ts.featureData={
+		// 	optionTypeStruct:ts.componentObjectCache.featureCom.getFieldTypes()
+		// };
+		// ts.featureData.arrCustomDelete=ts.componentObjectCache.featureCom.getTypeCustomDeleteArray(ts.featureData);
+	}
 	ts.soGroupData={
 		optionTypeStruct:ts.componentObjectCache.siteOptionCom.getOptionTypes()
 	};

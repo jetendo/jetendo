@@ -136,19 +136,27 @@
 		
 		zcore.componentObjectCache=componentObjectCache;
 		structappend(application.zcore, zcore.componentObjectCache);
+		if(request.zos.isTestServer){
+		// doesn't work yet
+			// featureData={
+			// 	optionTypeStruct:componentObjectCache.featureCom.getFieldTypes()
+			// };
+			// featureData.arrCustomDelete=componentObjectCache.featureCom.getTypeCustomDeleteArray(featureData);
+			// zcore.featureData=featureData;
+		}
 		soGroupData={
 			optionTypeStruct:componentObjectCache.siteOptionCom.getOptionTypes()
 		};
 		soGroupData.arrCustomDelete=componentObjectCache.siteOptionCom.getTypeCustomDeleteArray(soGroupData);
 		zcore.soGroupData=soGroupData;
-		themeTypeData={
-			optionTypeStruct:{}
-		};
-		zcore.themeTypeData=themeTypeData;
-		widgetTypeData={
-			optionTypeStruct:{}
-		};
-		zcore.widgetTypeData=widgetTypeData;
+		// themeTypeData={
+		// 	optionTypeStruct:{}
+		// };
+		// zcore.themeTypeData=themeTypeData;
+		// widgetTypeData={
+		// 	optionTypeStruct:{}
+		// };
+		// zcore.widgetTypeData=widgetTypeData;
 		if(zos.allowRequestCFC){
 			structappend(request.zos, zcore.componentObjectCache, true);
 		}

@@ -1,4 +1,4 @@
-<cfcomponent implements="zcorerootmapping.interface.optionType">
+<cfcomponent implements="zcorerootmapping.interface.fieldType">
 <cfoutput>
 <cffunction name="init" localmode="modern" access="public" output="no">
 	<cfargument name="type" type="string" required="yes">

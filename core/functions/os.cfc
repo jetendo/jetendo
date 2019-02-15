@@ -510,6 +510,10 @@ if(not rs.success){
 	routingCom= application.zcore.componentObjectCache.routing;
 	routingCom.initRewriteRuleApplicationStruct(ts);
 	
+
+	application.zcore.featureCom.onSiteStart(ts);
+
+
 	appCom =application.zcore.app;
 	appCom.onSiteStart(ts);
 	ts.adminFeatureMapStruct=application.zcore.adminSecurityFilter.getFeatureMap(ts);

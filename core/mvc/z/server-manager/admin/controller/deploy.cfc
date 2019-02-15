@@ -295,7 +295,7 @@
 
 <cffunction name="editAllSites" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
-	if(not application.zcore.user.hasDeployAdminAccess()){
+	if(not application.zcore.user.hasDeployAdminAccess(true)){
 		echo("You don't have permission to use the edit all sites feature.");
 		abort;
 	}

@@ -1293,7 +1293,7 @@
 			<!--- 
 			TODO: feature_field_user_group_id_list | this feature is not fully implemented yet
 			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.site-option-group.edit feature_field_user_group_id_list")#</th>
+				<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.feature-schema.edit feature_field_user_group_id_list")#</th>
 				<td>
 				<cfscript>
 				db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
@@ -1314,7 +1314,7 @@
 				</cfscript></td>
 			</tr> --->
 			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Force Small Label Width","member.site-option-group.edit feature_field_small_width")#</th>
+				<th>#application.zcore.functions.zOutputHelpToolTip("Force Small Label Width","member.feature-schema.edit feature_field_small_width")#</th>
 				<td>#application.zcore.functions.zInput_Boolean("feature_field_small_width")# (With yes selected, public forms will force the label column to be as small as possible.)</td>
 			</tr>
 			<tr>
@@ -1916,7 +1916,7 @@
 				if(qCheck.feature_schema_public_form_url NEQ ""){
 					application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(qCheck.feature_schema_public_form_url, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#"));
 				}else{
-					application.zcore.functions.zRedirect("/z/misc/display-site-option-group/add?feature_schema_id=#form.feature_schema_id#&feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
+					application.zcore.functions.zRedirect("/z/feature/feature-display/add?feature_schema_id=#form.feature_schema_id#&feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
 				}
 			}
 		}else{
@@ -4261,7 +4261,7 @@ Define this function in another CFC to override the default email format
 
 	defaultStruct=getDefaultStruct();
 	if(not structkeyexists(arguments.struct, 'action')){
-		arguments.struct.action='/z/misc/display-site-option-group/insert';	
+		arguments.struct.action='/z/feature/feature-display/insert';	
 	}
 	if(application.zcore.functions.zso(form, 'feature_schema_id') EQ ""){
 		if(application.zcore.user.checkSchemaAccess("member")){
@@ -4275,7 +4275,7 @@ Define this function in another CFC to override the default email format
 	}
 	request.zsession.siteSchemaReturnURL=application.zcore.functions.zso(form, 'returnURL');
 	if(not structkeyexists(arguments.struct, 'returnURL')){
-		arguments.struct.returnURL='/z/misc/display-site-option-group/add?feature_schema_id=#form.feature_schema_id#';	
+		arguments.struct.returnURL='/z/feature/feature-display/add?feature_schema_id=#form.feature_schema_id#';	
 	}
 	variables.init();
 	methodBackup=form.method;
@@ -5214,7 +5214,7 @@ Define this function in another CFC to override the default email format
 						if(qSchema.feature_schema_public_form_url NEQ ""){
 							writeoutput('<a href="#htmleditformat(qSchema.feature_schema_public_form_url)#" target="_blank" class="z-manager-search-button">Public Form</a> ');
 						}else{
-							writeoutput('<a href="/z/misc/display-site-option-group/add?feature_schema_id=#qSchema.feature_schema_id#" target="_blank" class="z-manager-search-button">Public Form</a> ');
+							writeoutput('<a href="/z/feature/feature-display/add?feature_schema_id=#qSchema.feature_schema_id#" target="_blank" class="z-manager-search-button">Public Form</a> ');
 						}
 					}
 					if(qSchema.feature_schema_limit EQ 0 or qSchema.childCount LT qSchema.feature_schema_limit){

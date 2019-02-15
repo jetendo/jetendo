@@ -412,7 +412,7 @@ KEY `feature_data_id` (`feature_data_id`)
 		if(groupStruct.feature_schema_public_form_url NEQ ""){
 			link=groupStruct.feature_schema_public_form_url;
 		}else{
-			link='/z/misc/display-site-option-group/add?feature_schema_id=#groupStruct.feature_schema_id#';
+			link='/z/feature/feature-display/add?feature_schema_id=#groupStruct.feature_schema_id#';
 		}
 		link=application.zcore.functions.zURLAppend(link, 'modalpopforced=1');
 		echo('<h2>Iframe Embed Code</h2><pre>'&htmlcodeformat('<iframe src="'&link&'" frameborder="0"  style=" margin:0px; border:none; overflow:auto;" seamless="seamless" width="100%" height="500" />')&'</pre>');
@@ -423,7 +423,7 @@ KEY `feature_data_id` (`feature_data_id`)
 application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, "x_ajax_id"));
 // Note: if this group is a child group, you must update the array below to have the parent groups as well.
 form.feature_schema_id=application.zcore.featureCom.getSchemaIDWithNameArray(["#groupNameArray#"]);
-displaySchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.misc.controller.display-site-option-group");
+displaySchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.controller.feature-display");
 displaySchemaCom.add();')&'</pre>');
 	}
 	echo('<h2>Alternative Schema Search Method</h2>
@@ -465,7 +465,7 @@ displaySchemaCom.add();')&'</pre>');
 		<h3>Embed Public Form in any page</h3>
 		'&htmlcodeformat('<cfscript>
 form.feature_schema_id=application.zcore.functions.zGetSiteSchemaIDWithNameArray(["#groupNameArray#"]);
-displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.display-site-option-group");
+displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.feature.controller.feature-display");
 displaySchemaCom.add();
 </cfscript>')&'
 
@@ -478,7 +478,7 @@ displaySchemaCom.add();
     application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, "x_ajax_id")); 
     form.feature_schema_id=application.zcore.functions.zGetSiteSchemaIDWithNameArray(["#groupNameArray#"]);
 	
-    displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.display-site-option-group");
+    displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.feature.controller.feature-display");
     displaySchemaCom.ajaxInsert();
 
 	</cfscript>
@@ -530,7 +530,7 @@ request.zos.disableSpamCheck=true;
 application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, "x_ajax_id"));
 form.feature_schema_id=application.zcore.functions.zGetSiteSchemaIDWithNameArray(["#groupNameArray#"]);
 
-displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.display-site-option-group");
+displaySchemaCom=createobject("component", "zcorerootmapping.mvc.z.feature.controller.feature-display");
 displaySchemaCom.ajaxInsert();
 </cfscript>'));
 	}
@@ -1284,7 +1284,7 @@ displaySchemaCom.ajaxInsert();
 	</cfscript>
 	<p><a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>">Add Schema</a> 
 
-	 | <a href="/z/admin/site-option-group-import/importSchema">Import Schema</a> 
+	 | <a href="/z/feature/admin/feature-import/importSchema">Import Schema</a>
 	 
 	<cfif isquery(qSchema) and qSchema.feature_schema_id NEQ 0>
 		| <a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_schema_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>" target="_blank">Display Schema Code</a>
@@ -1323,7 +1323,7 @@ displaySchemaCom.ajaxInsert();
 						<cfif qProp.feature_schema_public_form_url NEQ "">
 							<a href="#htmleditformat(qProp.feature_schema_public_form_url)#" target="_blank">Public Form</a> | 
 						<cfelse>
-							<a href="/z/misc/display-site-option-group/add?feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a> | 
+							<a href="/z/feature/feature-display/add?feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a> | 
 						</cfif>
 					</cfif>
 					<cfif application.zcore.user.checkServerAccess()>
@@ -1534,6 +1534,7 @@ displaySchemaCom.ajaxInsert();
 	</cfscript>
 </cffunction>
 
+
 <cffunction name="edit" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -1575,7 +1576,7 @@ displaySchemaCom.ajaxInsert();
 		tabCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.display.tab-menu");
 		tabCom.init();
 		tabCom.setTabs(["Basic","Public Form", "Landing Page", "Email & Mapping"]);//,"Plug-ins"]);
-		tabCom.setMenuName("member-site-option-group-edit");
+		tabCom.setMenuName("member-feature-schema-edit");
 		cancelURL="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#"; 
 		tabCom.setCancelURL(cancelURL);
 		tabCom.enableSaveButtons();
@@ -1590,7 +1591,7 @@ displaySchemaCom.ajaxInsert();
 				FROM #db.table("feature", "jetendofeature")# 
 				WHERE
 				feature.feature_deleted = #db.param(0)# and  
-				feature.feature_id IN (#db.trustedSQL(request.feature_id_list)#) 
+				#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature")#
 				order by feature.feature_display_name ASC ";
 				qFeature=db.execute("qFeature"); 
 				selectStruct=structnew();
@@ -1616,7 +1617,7 @@ displaySchemaCom.ajaxInsert();
 			qG=db.execute("qG", "", 10000, "query", false); 
 			</cfscript>
 			<tr>
-				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Schema","member.site-option-group.edit feature_schema_parent_id")#</th>
+				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Schema","member.feature-schema.edit feature_schema_parent_id")#</th>
 				<td><cfscript>
 				arrData=[];
 				for(row in qG){
@@ -1651,7 +1652,7 @@ displaySchemaCom.ajaxInsert();
 				</td>
 			</tr>
 			<tr>
-				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Code Name","member.site-option-group.edit feature_schema_variable_name")#</th>
+				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Code Name","member.feature-schema.edit feature_schema_variable_name")#</th>
 				<td>
 					<input name="feature_schema_variable_name" id="feature_schema_variable_name" size="50" type="text" value="#htmleditformat(form.feature_schema_variable_name)#"  onkeyup="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" onblur="var d1=document.getElementById('feature_schema_display_name');d1.value=this.value;" maxlength="100" />
 					<input type="hidden" name="feature_schema_type" value="1" />
@@ -1660,13 +1661,13 @@ displaySchemaCom.ajaxInsert();
 				</cfif></td>
 			</tr>
 			<tr>
-				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Display Name","member.site-option-group.edit feature_schema_display_name")#</th>
+				<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Display Name","member.feature-schema.edit feature_schema_display_name")#</th>
 				<td><input name="feature_schema_display_name" id="feature_schema_display_name" size="50" type="text" value="#htmleditformat(form.feature_schema_display_name)#" maxlength="100" />
 				</td>
 			</tr>
 				
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Menu Name","member.site-option-group.edit feature_schema_menu_name")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Menu Name","member.feature-schema.edit feature_schema_menu_name")#</th>
 					<td><div  id="groupMenuNameId">
 							<input name="feature_schema_menu_name" id="feature_schema_menu_name" size="50" type="text" value="#htmleditformat(form.feature_schema_menu_name)#" maxlength="100" /><br />
 							(Put this group in a different manager menu - default is Custom)</div>
@@ -1678,33 +1679,33 @@ displaySchemaCom.ajaxInsert();
 				}
 				</cfscript>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Child Limit","member.site-option-group.edit feature_schema_limit")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Child Limit","member.feature-schema.edit feature_schema_limit")#</th>
 					<td><input type="number" name="feature_schema_limit" id="feature_schema_limit" value="#htmleditformat(form.feature_schema_limit)#" /></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("User Child Limit","member.site-option-group.edit feature_schema_user_child_limit")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("User Child Limit","member.feature-schema.edit feature_schema_user_child_limit")#</th>
 					<td><input type="number" name="feature_schema_user_child_limit" id="feature_schema_user_child_limit" value="#htmleditformat(form.feature_schema_user_child_limit)#" /></td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Sorting","member.site-option-group.edit feature_schema_enable_sorting")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Sorting","member.feature-schema.edit feature_schema_enable_sorting")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_sorting")#</td>
 				</tr>
 
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Image Library?","member.site-option-group.edit feature_schema_enable_image_library")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Image Library?","member.feature-schema.edit feature_schema_enable_image_library")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_image_library")#</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Admin?","member.site-option-group.edit feature_schema_disable_admin")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Admin?","member.feature-schema.edit feature_schema_disable_admin")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_disable_admin")#</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Archiving?","member.site-option-group.edit feature_schema_enable_archiving")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Archiving?","member.feature-schema.edit feature_schema_enable_archiving")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_archiving")#</td>
 				</tr>
 				<cfif form.feature_schema_parent_id EQ 0> 
 					<tr>
-						<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable New Button","member.site-option-group.edit feature_schema_enable_new_button")#</th>
+						<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable New Button","member.feature-schema.edit feature_schema_enable_new_button")#</th>
 						<td>
 							#application.zcore.functions.zInput_Boolean("feature_schema_enable_new_button")# 
 							(Places this group in the Create New button in manager header)
@@ -1718,7 +1719,7 @@ displaySchemaCom.ajaxInsert();
 					<td><input name="feature_schema_admin_paging_limit" id="feature_schema_admin_paging_limit" type="number" value="#htmleditformat(form.feature_schema_admin_paging_limit)#"  /> (Number of records to display in admin until showing page navigation)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Form Description:","member.site-option-group.edit feature_schema_form_description")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Form Description:","member.feature-schema.edit feature_schema_form_description")#</th>
 					<td>
 						<cfscript>
 						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
@@ -1730,7 +1731,7 @@ displaySchemaCom.ajaxInsert();
 						</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Form Bottom Description:","member.site-option-group.edit feature_schema_bottom_form_description")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Form Bottom Description:","member.feature-schema.edit feature_schema_bottom_form_description")#</th>
 					<td>
 						<cfscript>
 						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
@@ -1743,7 +1744,7 @@ displaySchemaCom.ajaxInsert();
 				</tr>
 
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("List View Description:","member.site-option-group.edit feature_schema_list_description")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("List View Description:","member.feature-schema.edit feature_schema_list_description")#</th>
 					<td>
 						<cfscript>
 						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
@@ -1755,24 +1756,24 @@ displaySchemaCom.ajaxInsert();
 						</cfscript></td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Field","member.site-option-group.edit feature_schema_parent_field")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Field","member.feature-schema.edit feature_schema_parent_field")#</th>
 					<td><input type="text" name="feature_schema_parent_field" id="feature_schema_parent_field" value="#htmleditformat(form.feature_schema_parent_field)#" /> (Fieldal, enables indented heirarchy on list view)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable List Recurse","member.site-option-group.edit feature_schema_enable_list_recurse")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable List Recurse","member.feature-schema.edit feature_schema_enable_list_recurse")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_list_recurse")# (Displays this group's records on parent groups manager list view)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Export?","member.site-option-group.edit feature_schema_disable_export")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Export?","member.feature-schema.edit feature_schema_disable_export")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_disable_export")#</td>
 				</tr>
 
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Versioning?","member.site-option-group.edit feature_schema_enable_versioning")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Versioning?","member.feature-schema.edit feature_schema_enable_versioning")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_versioning")# (This enables deep copy and changing between versions of a record. Changing versions doesn't support recursion.)</td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Max ## of Versions","member.site-option-group.edit feature_schema_version_limit")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Max ## of Versions","member.feature-schema.edit feature_schema_version_limit")#</th>
 					<td><input name="feature_schema_version_limit" id="feature_schema_version_limit" size="50" type="text" value="#htmleditformat(application.zcore.functions.zso(form, 'feature_schema_version_limit', true))#" maxlength="100" />
 							</td></tr>
 
@@ -1783,15 +1784,15 @@ displaySchemaCom.ajaxInsert();
 				}
 				</cfscript>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Memory Caching","member.site-option-group.edit feature_schema_enable_cache")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Memory Caching","member.feature-schema.edit feature_schema_enable_cache")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_cache")# (Warning: "Yes" will result in very slow manager performance if this group has many records.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable URL Caching","member.site-option-group.edit feature_schema_enable_partial_page_caching")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable URL Caching","member.feature-schema.edit feature_schema_enable_partial_page_caching")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_partial_page_caching")# (Incomplete - will store rendered page in memory)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Help Description:","member.site-option-group.edit feature_schema_help_description")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Help Description:","member.feature-schema.edit feature_schema_help_description")#</th>
 					<td>
 						<cfscript>
 						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
@@ -1803,7 +1804,7 @@ displaySchemaCom.ajaxInsert();
 						</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Change CFC Path","member.site-option-group.edit feature_schema_change_cfc_path")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Change CFC Path","member.feature-schema.edit feature_schema_change_cfc_path")#</th>
 					<td><input type="text" name="feature_schema_change_cfc_path" id="feature_schema_change_cfc_path" value="#htmleditformat(form.feature_schema_change_cfc_path)#" /><br /> (Should begin with zcorerootmapping, root or another root relative path.)<br /><br />
 
 					Update Method: <input type="text" name="feature_schema_change_cfc_update_method" id="feature_schema_change_cfc_update_method" value="#htmleditformat(form.feature_schema_change_cfc_update_method)#" /><br /><br />
@@ -1813,12 +1814,12 @@ displaySchemaCom.ajaxInsert();
 					</td>
 				</tr> 
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Section?","member.site-option-group.edit feature_schema_enable_section")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Section?","member.feature-schema.edit feature_schema_enable_section")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_section")# Deprecated DO NOT USE (Requires Enable Unique URL to be set to Yes)</td>
 				</tr>
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">
-						#application.zcore.functions.zOutputHelpToolTip("Allow Locked Delete?","member.site-option-group.edit feature_schema_enable_locked_delete")#
+						#application.zcore.functions.zOutputHelpToolTip("Allow Locked Delete?","member.feature-schema.edit feature_schema_enable_locked_delete")#
 					</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_locked_delete")# 
 						(When a record is locked, setting this to yes will allow a non-developer to delete the record.)
@@ -1829,11 +1830,11 @@ displaySchemaCom.ajaxInsert();
 		#tabCom.beginFieldSet("Public Form")#
 		<table  style="border-spacing:0px;" class="table-list">
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Form Title","member.site-option-group.edit feature_schema_public_form_title")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Form Title","member.feature-schema.edit feature_schema_public_form_title")#</th>
 					<td><input name="feature_schema_public_form_title" id="feature_schema_public_form_title" size="50" type="text" value="#htmleditformat(form.feature_schema_public_form_title)#" maxlength="100" />
 							</td></tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Public Form?","member.site-option-group.edit feature_schema_allow_public")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Public Form?","member.feature-schema.edit feature_schema_allow_public")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_allow_public")#
 
 					<script type="text/javascript">
@@ -1859,7 +1860,7 @@ displaySchemaCom.ajaxInsert();
 					</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.site-option-group.edit feature_schema_user_group_id_list")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Data Entry<br />For User Schemas","member.feature-schema.edit feature_schema_user_group_id_list")#</th>
 					<td>
 					<cfscript>
 					db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
@@ -1880,7 +1881,7 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Delete<br />For User Schemas","member.site-option-group.edit feature_schema_allow_delete_usergrouplist")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Delete<br />For User Schemas","member.feature-schema.edit feature_schema_allow_delete_usergrouplist")#</th>
 					<td>
 					<cfscript> 
 					ts = StructNew();
@@ -1897,7 +1898,7 @@ displaySchemaCom.ajaxInsert();
 				</tr>
 
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Changes Email Alert<br />For User Schemas","member.site-option-group.edit feature_schema_change_email_usergrouplist")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Changes Email Alert<br />For User Schemas","member.feature-schema.edit feature_schema_change_email_usergrouplist")#</th>
 					<td>
 					<cfscript> 
 					ts = StructNew();
@@ -1914,46 +1915,46 @@ displaySchemaCom.ajaxInsert();
 				</tr>
 				<cfif application.zcore.functions.zso(form, 'feature_schema_parent_id', true) EQ 0>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable User Dashboard Admin","member.site-option-group.edit feature_schema_enable_user_dashboard_admin")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable User Dashboard Admin","member.feature-schema.edit feature_schema_enable_user_dashboard_admin")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_user_dashboard_admin")# | If you select yes, you must specify the User Id Field below.</td>
 				</tr>
 	
 					<tr>
-						<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("User Id Field","member.site-option-group.edit feature_schema_user_id_field")#</th>
+						<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("User Id Field","member.feature-schema.edit feature_schema_user_id_field")#</th>
 						<td>
 							<input name="feature_schema_user_id_field" id="feature_schema_user_id_field" size="50" type="text" value="#htmleditformat(form.feature_schema_user_id_field)#" maxlength="50" />
 						</td>
 					</tr>
 					<tr>
-						<th>#application.zcore.functions.zOutputHelpToolTip("Enable Alternate Admin Layout","member.site-option-group.edit feature_schema_subgroup_alternate_admin")#</th>
+						<th>#application.zcore.functions.zOutputHelpToolTip("Enable Alternate Admin Layout","member.feature-schema.edit feature_schema_subgroup_alternate_admin")#</th>
 						<td>#application.zcore.functions.zInput_Boolean("feature_schema_subgroup_alternate_admin")#</td>
 					</tr>
 				</cfif>
 
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Require Approval#chr(10)#of Public Data?","member.site-option-group.edit feature_schema_enable_approval")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Require Approval#chr(10)#of Public Data?","member.feature-schema.edit feature_schema_enable_approval")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_approval")#</td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Form URL","member.site-option-group.edit feature_schema_public_form_url")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Form URL","member.feature-schema.edit feature_schema_public_form_url")#</th>
 					<td>
 							<input name="feature_schema_public_form_url" id="feature_schema_public_form_url" size="50" type="text" value="#htmleditformat(form.feature_schema_public_form_url)#" maxlength="100" />
 					</td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Thank You URL","member.site-option-group.edit feature_schema_public_thankyou_url")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Public Thank You URL","member.feature-schema.edit feature_schema_public_thankyou_url")#</th>
 					<td>
 							<input name="feature_schema_public_thankyou_url" id="feature_schema_public_thankyou_url" size="50" type="text" value="#htmleditformat(form.feature_schema_public_thankyou_url)#" maxlength="100" />
 					</td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Session Form Token","member.site-option-group.edit feature_schema_public_thankyou_token")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Session Form Token","member.feature-schema.edit feature_schema_public_thankyou_token")#</th>
 					<td>
 							<input name="feature_schema_public_thankyou_token" id="feature_schema_public_thankyou_token" size="50" type="text" value="#htmleditformat(form.feature_schema_public_thankyou_token)#" maxlength="100" /> <br />(The thank you url will have this token added to it with a unique value that will also be added to the user's session memory.  Comparing these 2 values on the server side will allow you to show content to only users that have submitted the form.  I.e. allow them to download a file, etc.)
 					</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Ajax?","member.site-option-group.edit feature_schema_ajax_enabled")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Ajax?","member.feature-schema.edit feature_schema_ajax_enabled")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_ajax_enabled")# <br />(Yes will make public form insertions use ajax instead, but not for updating existing records.)</td>
 				</tr>
 		</table>
@@ -1976,29 +1977,29 @@ displaySchemaCom.ajaxInsert();
 					</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Meta Tags?","member.site-option-group.edit feature_schema_enable_meta")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Meta Tags?","member.feature-schema.edit feature_schema_enable_meta")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_meta")#</td>
 				</tr>
 				<!--- 
 				This field doesn't do anything yet!
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Embedding?","member.site-option-group.edit feature_schema_embed")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Embedding?","member.feature-schema.edit feature_schema_embed")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_embed")#</td>
 				</tr> --->
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Embed HTML Code:","member.site-option-group.edit feature_schema_code")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Embed HTML Code:","member.feature-schema.edit feature_schema_code")#</th>
 					<td><textarea name="feature_schema_code" id="feature_schema_code" cols="100" rows="10">#htmleditformat(form.feature_schema_code)#</textarea></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("View CFC Path","member.site-option-group.edit feature_schema_view_cfc_path")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("View CFC Path","member.feature-schema.edit feature_schema_view_cfc_path")#</th>
 					<td><input type="text" name="feature_schema_view_cfc_path" id="feature_schema_view_cfc_path" value="#htmleditformat(form.feature_schema_view_cfc_path)#" /> <br />(Should begin with zcorerootmapping, root or another root relative path.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("View CFC Method","member.site-option-group.edit feature_schema_view_cfc_method")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("View CFC Method","member.feature-schema.edit feature_schema_view_cfc_method")#</th>
 					<td><input type="text" name="feature_schema_view_cfc_method" id="feature_schema_view_cfc_method" value="#htmleditformat(form.feature_schema_view_cfc_method)#" /><br />(A function name in the CFC with access="remote")</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Site Map?","member.site-option-group.edit feature_schema_disable_site_map")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Site Map?","member.feature-schema.edit feature_schema_disable_site_map")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_disable_site_map")#</td>
 				</tr>
 				<tr>
@@ -2008,20 +2009,20 @@ displaySchemaCom.ajaxInsert();
 					<input name="feature_schema_public_searchable" id="feature_schema_public_searchable0" style="border:none; background:none;" type="radio" value="0" <cfif application.zcore.functions.zso(form, 'feature_schema_public_searchable', true, 0) EQ 0>checked="checked"</cfif> /> No</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Search Index CFC Path","member.site-option-group.edit feature_schema_search_index_cfc_path")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Search Index CFC Path","member.feature-schema.edit feature_schema_search_index_cfc_path")#</th>
 					<td><input type="text" name="feature_schema_search_index_cfc_path" id="feature_schema_search_index_cfc_path" value="#htmleditformat(form.feature_schema_search_index_cfc_path)#" /><br />
 					(Should begin with zcorerootmapping, root or another root relative path.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Search Index CFC Method","member.site-option-group.edit feature_schema_search_index_cfc_method")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Search Index CFC Method","member.feature-schema.edit feature_schema_search_index_cfc_method")#</th>
 					<td><input type="text" name="feature_schema_search_index_cfc_method" id="feature_schema_search_index_cfc_method" value="#htmleditformat(form.feature_schema_search_index_cfc_method)#" /><br /> (A function name in the CFC with access="public")</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Search Result CFC Path","member.site-option-group.edit feature_schema_search_result_cfc_path")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Search Result CFC Path","member.feature-schema.edit feature_schema_search_result_cfc_path")#</th>
 					<td><input type="text" name="feature_schema_search_result_cfc_path" id="feature_schema_search_result_cfc_path" value="#htmleditformat(form.feature_schema_search_result_cfc_path)#" /><br /> (Should begin with zcorerootmapping, root or another root relative path.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Search Result CFC Method","member.site-option-group.edit feature_schema_search_result_cfc_method")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Search Result CFC Method","member.feature-schema.edit feature_schema_search_result_cfc_method")#</th>
 					<td><input type="text" name="feature_schema_search_result_cfc_method" id="feature_schema_search_result_cfc_method" value="#htmleditformat(form.feature_schema_search_result_cfc_method)#" /> <br />(A function name in the CFC with access="public")</td>
 				</tr>
 		</table>
@@ -2029,7 +2030,7 @@ displaySchemaCom.ajaxInsert();
 		#tabCom.beginFieldSet("Email & Mapping")#
 		<table  style="border-spacing:0px;" class="table-list">
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Map Fields Type","member.site-option-group.edit feature_schema_map_fields_type")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Map Fields Type","member.feature-schema.edit feature_schema_map_fields_type")#</th>
 					<td><cfscript>
 					form.feature_schema_map_fields_type=application.zcore.functions.zso(form, 'feature_schema_map_fields_type', true, 0);
 					ts = StructNew();
@@ -2043,7 +2044,7 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map Schema","member.site-option-group.edit feature_schema_map_group_id")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map Schema","member.feature-schema.edit feature_schema_map_group_id")#</th>
 					<td><cfscript>
 					selectStruct=structnew();
 					selectStruct.name="feature_schema_map_group_id";
@@ -2055,7 +2056,7 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map To Lead Type","member.site-option-group.edit inquiries_type_id")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map To Lead Type","member.feature-schema.edit inquiries_type_id")#</th>
 					<td><cfscript>
 					if(form.inquiries_type_id_siteIDType NEQ "" and form.inquiries_type_id_siteIDType NEQ 0){
 						form.inquiries_type_id=form.inquiries_type_id&"|"&application.zcore.functions.zGetSiteIDFromSiteIdType(form.inquiries_type_id_siteIDType);
@@ -2081,7 +2082,7 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.site-option-group.edit feature_schema_map_insert_type")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.feature-schema.edit feature_schema_map_insert_type")#</th>
 					<td><cfscript>
 					form.feature_schema_map_insert_type=application.zcore.functions.zso(form, 'feature_schema_map_insert_type', true, 0);
 					ts = StructNew();
@@ -2095,23 +2096,23 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Delete On Map?","member.site-option-group.edit feature_schema_delete_on_map")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Delete On Map?","member.feature-schema.edit feature_schema_delete_on_map")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_delete_on_map")# (Set this to no when a file upload field is used on the form.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Lead Routing?","member.site-option-group.edit feature_schema_lead_routing_enabled")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Lead Routing?","member.feature-schema.edit feature_schema_lead_routing_enabled")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_lead_routing_enabled")# | If Yes, an email will be generated when a new record is inserted.</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Detailed Lead Email?","member.site-option-group.edit feature_schema_disable_detailed_lead_email")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Disable Detailed Lead Email?","member.feature-schema.edit feature_schema_disable_detailed_lead_email")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_disable_detailed_lead_email")# | If Yes, a simple lead email will be sent excluding any personal information from the contact.</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Path","member.site-option-group.edit feature_schema_email_cfc_path")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Path","member.feature-schema.edit feature_schema_email_cfc_path")#</th>
 					<td><input type="text" name="feature_schema_email_cfc_path" id="feature_schema_email_cfc_path" value="#htmleditformat(form.feature_schema_email_cfc_path)#" /><br /> (Should begin with zcorerootmapping, root or another root relative path.)</td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Method","member.site-option-group.edit feature_schema_email_cfc_method")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Email CFC Method","member.feature-schema.edit feature_schema_email_cfc_method")#</th>
 					<td><input type="text" name="feature_schema_email_cfc_method" id="feature_schema_email_cfc_method" value="#htmleditformat(form.feature_schema_email_cfc_method)#" /><br /> (A function name in the CFC with access="public")</td>
 				</tr>
 				<tr>
