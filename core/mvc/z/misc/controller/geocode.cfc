@@ -26,6 +26,39 @@ ts={
 	mode: "server", // server or client
 	// id, latitude & longitude will be passed in the query string to the callbackURL when the geocode has been completed.
 	callbackURL:request.zos.globals.domain&"place/updateCoordinates?id=1",
+
+	// for multiple addresses:
+	arrAddress: [], // requires geocodio api to work
+	// or for single address
+	address:"", // in this exact format: address, city state zip
+
+	// or preferably separated to guarantee formatting:
+	address:"",
+	address2:"", // be sure to split out unit, apt # or it may result in inaccurate geocoding
+	city:"",
+	state:"",
+	country:"",
+	zip:""
+};
+rs=geocodeCom.getGeocode(ts);
+if(rs.status EQ "error"){
+	// handle error
+	throw(rs.errorMessage);
+}else if(rs.status EQ "queued"){
+	// do nothing
+}else if(rs.status EQ "complete"){
+	// store the latitude/longitude
+	latitude=rs.latitude;
+	longitude=rs.longitude;
+}
+ts={
+	mode: "server", // server or client
+	// id, latitude & longitude will be passed in the query string to the callbackURL when the geocode has been completed.
+	callbackURL:request.zos.globals.domain&"place/updateCoordinates?id=1",
+
+	// for multiple addresses:
+	arrAddress: [], // requires geocodio api to work
+	// or for single address
 	address:"", // in this exact format: address, city state zip
 
 	// or preferably separated to guarantee formatting:
@@ -103,9 +136,34 @@ if(rs.status EQ "error"){
 	</ul>
 </cffunction>
 
+<!--- /z/misc/geocode/testAjaxGeocode --->
+<cffunction name="testAjaxGeocode" localmode="modern" access="remote" roles="serveradministrator"> 
+	<cfscript>
+	</cfscript>
+	<h2>Ajax Geocode</h2>
+	<p>125 Basin Street, Suite 203, Daytona Beach, FL 32114</p>
+	<p id="mapCoordinates"></p>
+	<script>
+	zArrDeferredFunctions.push(function(){
+		var options={
+			address:"125 Basin Street, Suite 203, Daytona Beach, FL 32114",
+			callback:function(r){
+				if(r.success){
+					// do something with result
+					var mapLocation=r.latitude+","+r.longitude;
+					$("##mapCoordinates").html(mapLocation);
+				}else{
+					alert("Unable to map location, please try a different input.");
+				}
+			}
+		};
+		zGeocodeAddress(options);
+	});
+	</script>
+</cffunction>
 
 <!--- /z/misc/geocode/testServerGeocode --->
-<cffunction name="testServerGeocode" localmode="modern" access="remote"> 
+<cffunction name="testServerGeocode" localmode="modern" access="remote" roles="serveradministrator"> 
 	<cfscript>
 	form.mode="server";
 	testClientGeocode();
@@ -114,7 +172,7 @@ if(rs.status EQ "error"){
  
 
 <!--- /z/misc/geocode/testClientGeocode --->
-<cffunction name="testClientGeocode" localmode="modern" access="remote"> 
+<cffunction name="testClientGeocode" localmode="modern" access="remote" roles="serveradministrator"> 
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only developer or server can access this url");
@@ -397,12 +455,58 @@ if(rs.status EQ "error"){
 	</cfscript>
 </cffunction>
 
+
+<!---
+/z/misc/geocode/geocodeAjaxKey
+ --->
+<cffunction name="geocodeAjaxKey" localmode="modern" access="remote">
+	<cfscript>
+	application.zcore.session.forceEnable();
+	form.v=application.zcore.functions.zso(form, "v");
+	if(form.v EQ ""){
+		application.zcore.functions.zReturnJson({success:false});
+	}
+	if(not structkeyexists(request.zsession, "geocodeKey"&form.v)){
+		request.zsession["geocodeKey"&form.v]=hash(randRange(1, 1000000)&form.v);
+	}
+	application.zcore.functions.zReturnJson({success:true, value:request.zsession["geocodeKey"&form.v]});
+	</cfscript>
+</cffunction>
+ 
+<cffunction name="geocodeAjax" localmode="modern" access="remote">
+	<cfscript>
+	form.address=application.zcore.functions.zso(form, "address");
+	form.key=application.zcore.functions.zso(form, 'key');
+
+	if(not structkeyexists(request.zsession, "geocodeKey"&form.v) or request.zsession["geocodeKey"&form.v] NEQ form.key){
+		application.zcore.functions.zReturnJSON({success:false, key:form.key, errorMessage:"Invalid key"});
+	}
+	ts={
+		mode:"server",
+		address:form.address
+	};
+	if(not structkeyexists(request.zos, 'geocodeCom')){
+		request.zos.geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
+	}
+	rs=request.zos.geocodeCom.getGeocode(ts); 
+	if(rs.status EQ "complete" and rs.latitude NEQ ""){
+		application.zcore.functions.zReturnJson({success:true, key:form.key, latitude:rs.latitude, longitude:rs.longitude});
+	}else{
+		application.zcore.functions.zReturnJson({success:false, key:form.key, errorMessage:"Couldn't find coordinates for address"});
+	}
+	</cfscript>
+</cffunction>
+
+<!--- 
+
+ --->
 <cffunction name="getGeocode" localmode="modern" access="remote">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	// this function may be called directly or internally 
 	ts={
 		callbackURL:"",
+		arrAddress:[],
 		address:"",
 		address2:"", // be sure to split out unit, apt # or it may result in inaccurate geocoding
 		city:"",
@@ -414,13 +518,18 @@ if(rs.status EQ "error"){
 	ss=arguments.ss;
 	structappend(ss, ts, false);
 	for(i in ss){
+		if(i EQ "arrAddress"){
+			continue;
+		}
 		ss[i]=trim(ss[i]);
 	} 
 	if(ss.address EQ ""){
 		throw("arguments.ss.address is required");
 	}
-	if(ss.callbackURL EQ ""){
-		throw("arguments.ss.callbackURL is required");
+	if(ss.mode EQ "client"){
+		if(ss.callbackURL EQ ""){
+			throw("arguments.ss.callbackURL is required");
+		}
 	}
 	arrAddress=[ss.address];
 	if(ss.city NEQ ""){
@@ -459,10 +568,18 @@ if(rs.status EQ "error"){
 		// already geocoded
 		rs={};
 		rs.status="complete";
-		rs.latitude=qGeocode.geocode_cache_latitude;
-		rs.longitude=qGeocode.geocode_cache_longitude;
+		// fix the double casting
+		if(qGeocode.geocode_cache_latitude EQ "0E-7" or qGeocode.geocode_cache_latitude EQ "0"){
+			rs.latitude="";
+			rs.longitude="";
+		}else{
+			rs.latitude=qGeocode.geocode_cache_latitude;
+			rs.longitude=qGeocode.geocode_cache_longitude;
+		}
 		return rs;  
 	}
+
+	useGeocodio=false;
 
 	if(ss.mode EQ "server"){ 
 		if(not structkeyexists(application, 'zGeocodeServerCount') or application.zGeocodeServerDate NEQ dateformat(now(), 'yyyymmdd')){
@@ -473,40 +590,107 @@ if(rs.status EQ "error"){
 		if(application.zGeocodeServerCount GT 1500){
 			rs={success:false};
 		}else{
-			link="https://maps.google.com/maps/api/geocode/json?key=#application.zcore.functions.zso(request.zos, 'googleMapsApiServerKey')#&address="&urlencodedformat(ts.struct.geocode_cache_address)&"&sensor=false";
-			rs=application.zcore.functions.zDownloadLink(link, 10, false); 
+			if(arrayLen(ss.arrAddress) EQ 1){
+				ss.address=ss.arrAddress[1];
+				ss.arrAddress=[];
+			}
+			if(arrayLen(ss.arrAddress) GT 1){
+				throw("Bulk geocoding is not implemented yet. The request is done, but not the response processing.");
+				if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+					http url="https://api.geocod.io/v1.3/geocode?api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="post"{
+						header name="Content-Type" value="application/json";
+						header name="body" value="#serializeJSON(ss.arrAddress)#"; 
+					}
+					useGeocodio=true;
+				}else{
+					throw("Geocodio API Key is not defined and it required to be able to geocode multiple addresses at once.");
+				}
+			}else{
+				if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+					http url="https://api.geocod.io/v1.3/geocode?q=#urlencodedformat(ts.struct.geocode_cache_address)#&api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="get"{}
+					useGeocodio=true;
+				}else{
+					link="https://maps.google.com/maps/api/geocode/json?key=#application.zcore.functions.zso(request.zos, 'googleMapsApiServerKey')#&address="&urlencodedformat(ts.struct.geocode_cache_address)&"&sensor=false";
+					http url="#link#" timeout="10" method="get"{}
+				}
+			} 
 		}
 
-		if(rs.success){
-			location=deserializeJson(rs.cfhttp.filecontent);
-			if(isArray(location.results) and location['status'] NEQ "ZERO_RESULTS"){ 
-				locationGeometry=location['results'][1]['geometry']['location'];
-				rs={};
-				rs.latitude=locationGeometry.lat;
-				rs.longitude=locationGeometry.lng;
-				rs.status="complete";
-				ts.struct.geocode_cache_accuracy=location['results'][1]['geometry'].location_type;
-				if(ts.struct.geocode_cache_accuracy EQ "ROOFTOP"){
+		if(cfhttp.status_code EQ 200){
+			location=deserializeJson(cfhttp.filecontent);
+			if(structkeyexists(form, 'debugGeocode')){
+				writedump(location);
+				abort;
+			}
+			if(useGeocodio){
+				if(structkeyexists(location, "results") and arraylen(location.results) GT 0){
+					result=location.results[1];
+					if(result.accuracy EQ "rooftop" or result.accuracy EQ "point"){
+						rs={};
+						rs.latitude=result.location.lat;
+						rs.longitude=result.location.lng;
+						rs.status="complete";
+						ts.struct.geocode_cache_accuracy="ROOFTOP";
+						ts.struct.geocode_cache_latitude=rs.latitude;
+						ts.struct.geocode_cache_longitude=rs.longitude;
+						ts.struct.geocode_cache_status="OK";
+						ts.struct.geocode_cache_confirm_count=3;
+						ts.struct.geocode_cache_callback_url="";
+						application.zcore.functions.zInsert(ts); 
+					}else{ 
+						ts.struct.geocode_cache_accuracy="ESTIMATE";
+						ts.struct.geocode_cache_status="OK";
+						ts.struct.geocode_cache_confirm_count=3;
+						ts.struct.geocode_cache_callback_url="";
+						application.zcore.functions.zInsert(ts);
+						rs={};
+						rs.status="complete"; 
+						rs.latitude="";
+						rs.longitude="";
+					}
+				}else{
+					ts.struct.geocode_cache_accuracy="FAILED";
+					ts.struct.geocode_cache_status="OK";
+					ts.struct.geocode_cache_confirm_count=3;
+					ts.struct.geocode_cache_callback_url="";
+					application.zcore.functions.zInsert(ts);
+					rs={};
+					rs.status="complete"; 
+					rs.latitude="";
+					rs.longitude="";
+				}
+			}else{ 
+				if(isArray(location.results) and arraylen(location.results) GT 0 and location['status'] NEQ "ZERO_RESULTS"){ 
+					locationGeometry=location['results'][1]['geometry']['location'];
+					types=arrayToList(location['results'][1].types, ",");
+					rs={};
+					rs.latitude=locationGeometry.lat;
+					rs.longitude=locationGeometry.lng;
+					rs.status="complete";
+					ts.struct.geocode_cache_accuracy="";
+					if(types=="street_address" || types == "premise" || types == "subpremise"){
+						ts.struct.geocode_cache_accuracy="ROOFTOP";
+					}else{
+						ts.struct.geocode_cache_accuracy="ESTIMATE";
+					}
 					ts.struct.geocode_cache_latitude=rs.latitude;
 					ts.struct.geocode_cache_longitude=rs.longitude;
+					ts.struct.geocode_cache_status="OK";
+					ts.struct.geocode_cache_confirm_count=3;
+					ts.struct.geocode_cache_callback_url="";
+					application.zcore.functions.zInsert(ts); 
 				}else{
-					// ignore less accurate coordinates
+					// store it as no coordinates
+					ts.struct.geocode_cache_accuracy="FAILED";
+					ts.struct.geocode_cache_status="OK";
+					ts.struct.geocode_cache_confirm_count=3;
+					ts.struct.geocode_cache_callback_url="";
+					application.zcore.functions.zInsert(ts);
+					rs={};
+					rs.status="complete"; 
+					rs.latitude="";
+					rs.longitude="";
 				}
-				ts.struct.geocode_cache_status="OK";
-				ts.struct.geocode_cache_confirm_count=3;
-				ts.struct.geocode_cache_callback_url="";
-				application.zcore.functions.zInsert(ts); 
-			}else{
-				// store it as no coordinates
-				ts.struct.geocode_cache_accuracy="FAILED";
-				ts.struct.geocode_cache_status="OK";
-				ts.struct.geocode_cache_confirm_count=3;
-				ts.struct.geocode_cache_callback_url="";
-				application.zcore.functions.zInsert(ts);
-				rs={};
-				rs.status="complete"; 
-				rs.latitude="";
-				rs.longitude="";
 			}
 		}else{
 			rs={};

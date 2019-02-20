@@ -83,6 +83,7 @@
 	if(request.zos.isdeveloper EQ false and request.zos.istestserver EQ false){
 		structdelete(form,'debugajaxgeocoder');
 	}
+	geocodeLimit=5;
 	c=arraylen(application.zcore.arrListingJsFiles);
 	for(i=1;i LTE c;i++){
 		application.zcore.skin.includeJS(application.zcore.arrListingJsFiles[i]);
@@ -175,9 +176,9 @@
 	if(structkeyexists(form, 'debugajaxgeocoder')){
 		db.sql&=db.param(0);
 	}else{
-		db.sql&=db.param(randrange(0,10)*10);
+		db.sql&=db.param(randrange(0,geocodeLimit)*geocodeLimit);
 	}
-	db.sql&=","&db.param(10);
+	db.sql&=","&db.param(geocodeLimit);
 	qG=db.execute("qG");
 	if(structkeyexists(form, 'debugajaxgeocoder')){
 		writedump(qG);

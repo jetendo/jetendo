@@ -280,9 +280,10 @@ var zArrGeolocationWatchCallback=[];
 			if (status == google.maps.GeocoderStatus.OK) {
 				var a1=new Array();
 				for(var i=0;i<results.length;i++){
-					//var a2=new Array();
-					//a2[0]=results[i].types.join(",");
-					if(results[i].geometry.location_type=="ROOFTOP"){//"street_address"){  
+					types=arrayToList(results[i].types, ",");
+					ts.struct.geocode_cache_accuracy="";
+					if(types=="street_address" || types == "premise" || types == "subpremise"){
+						ts.struct.geocode_cache_accuracy="ROOFTOP";
 						data.status="OK";
 						data.latitude=results[i].geometry.location.lat();
 						data.longitude=results[i].geometry.location.lng();
@@ -358,6 +359,65 @@ var zArrGeolocationWatchCallback=[];
 			}
 		});
 	}
+
+
+	/*
+	var options={
+		address:"125 Basin St, Suite 203, Daytona Beach, FL 32114",
+		callback:function(r){
+			if(r.success){
+				// do something with result
+				var mapLocation=r.latitude+","+r.longitude;
+				alert(mapLocation);
+			}else{
+				alert("Unable to map location, please try a different input.");
+			}
+		}
+	};
+	zGeocodeAddress(options);
+	*/
+	var lastGeocodeAddress="";
+	var lastGeocodeResult=false;
+	function zGeocodeAddress(options) {
+		if(options.address == lastGeocodeAddress){
+			options.callback(lastGeocodeResult);
+			return;
+		}
+		lastGeocodeAddress=options.address;
+		if(options.address==""){
+			console.log("Address is required.");
+			return;
+		}
+		var v=Math.random();
+		var tempObj={};
+		tempObj.ignoreOldRequests=true;
+		tempObj.id="zGeocodeAjaxKey";
+		tempObj.url="/z/misc/geocode/geocodeAjaxKey?v="+v;
+		tempObj.callback=function(r){
+			var r=JSON.parse(r);
+			if(r.success){
+				var tempObj2={};
+				tempObj2.ignoreOldRequests=true;
+				tempObj2.id="zGeocodeAjaxKey";
+				tempObj2.url="/z/misc/geocode/geocodeAjax?v="+v+"&address="+escape(options.address)+"&key="+r.value;
+				tempObj2.callback=function(r2){
+					var r2=JSON.parse(r2);
+					if(r.value==r2.key){
+						lastGeocodeResult=r2;
+						options.callback(r2);
+					}
+				};
+				tempObj2.cache=false;
+				zAjax(tempObj2);
+			}else{
+				lastGeocodeResult=r;
+				options.callback(r);
+			}
+		};
+		tempObj.cache=false;
+		zAjax(tempObj);
+	}
+
 
 	// zGetDirectionsDistance(sourceLat, sourceLong, destinationLat, destinationLong, directionsCallbackFunction);
 	function zGetDirectionsDistanceByLatLng(sourceLat, sourceLong, destinationLat, destinationLong, directionsCallbackFunction){
@@ -863,4 +923,5 @@ var zArrGeolocationWatchCallback=[];
 	window.zDisplayDirectionsDistance=zDisplayDirectionsDistance;
 	window.zGetDirectionsDistanceByLatLng=zGetDirectionsDistanceByLatLng;
 	window.zGetDirectionsDistanceByAddress=zGetDirectionsDistanceByAddress;
+	window.zGeocodeAddress=zGeocodeAddress;
 })(jQuery, window, document, "undefined"); 
