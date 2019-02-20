@@ -2552,13 +2552,13 @@ if(right(form[request.zos.urlRoutingParameter],4) NEQ ".xml" and right(request.c
 		}
 		//application.zcore.template.prependTag("topcontent",'<div id="sl894nsdh783" style="width:100%; float:left; clear:both;"></div>');
 	}
-	if (not request.zos.trackingspider and (not request.zos.istestserver or structkeyexists(form, 'debugajaxgeocoder')) and request.zos.originalURL NEQ "/z/listing/ajax-geocoder/index" and (randrange(1, request.zos.geocodeFrequency) EQ 1)){
-		savecontent variable="geocodeOutput"{
-			geocodeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.ajax-geocoder");
-			geocodeCom.index();
-		}
-		application.zcore.template.appendTag("scripts", geocodeOutput);
-	}
+	// if (not request.zos.trackingspider and (not request.zos.istestserver or structkeyexists(form, 'debugajaxgeocoder')) and request.zos.originalURL NEQ "/z/listing/ajax-geocoder/index" and (randrange(1, request.zos.geocodeFrequency) EQ 1)){
+	// 	savecontent variable="geocodeOutput"{
+	// 		geocodeCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.listing.controller.ajax-geocoder");
+	// 		geocodeCom.index();
+	// 	}
+	// 	application.zcore.template.appendTag("scripts", geocodeOutput);
+	// }
 	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_disable_image_enlarge EQ 2){
 		application.zcore.skin.addDeferredScript("zIImageClickLoad=true;");
 		application.zcore.template.appendTag("meta",'<script type="text/javascript">zIImageClickLoad=true;</script>', true);
