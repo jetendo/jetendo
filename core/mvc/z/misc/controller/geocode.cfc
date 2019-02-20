@@ -744,9 +744,13 @@ if(rs.status EQ "error"){
 				application.zGeocodeIncompleteCount=0;
 			}
 			application.zGeocodeIncompleteCount++;
+			savecontent variable="out"{
+				writedump(form);
+				writedump(cfhttp);
+			}
 			ts={
 				type:"Custom",
-				errorHTML:"Geocode was queued. Vendor might not be available. Queue is currently not enabled for processing, must review this manually.",
+				errorHTML:"Geocode was queued. Vendor might not be available. Queue is currently not enabled for processing, must review this manually.<br><br>"&out,
 				scriptName:'',
 				url:request.zos.originalURL,
 				exceptionMessage:"Geocode was queued.  Vendor might not be available. Queue is currently not enabled for processing, must review this manually.",

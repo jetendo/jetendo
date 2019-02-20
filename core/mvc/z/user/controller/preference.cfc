@@ -619,7 +619,11 @@ If the link does not work, please copy and paste the entire link in your browser
 
 		if(application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false){
 			mail   charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
-writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username# This user has signed up as a user on your web site.   This is not a direct sales inquiry.
+writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username#
+
+This user has signed up as a user on your web site. Public users can signup on the web site. It doesn''t pose a security risk.  Some websites are built to give this kind of user additional access.
+
+This is not a direct sales inquiry.  We notify you of new users to let you know about how people are using the web site.  This message can be disabled if you contact the web developer.
 
 To view more info about this new user, click the following link: 
 
