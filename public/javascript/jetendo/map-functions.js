@@ -363,6 +363,7 @@ var zArrGeolocationWatchCallback=[];
 
 	/*
 	var options={
+		exact:false, // true will exclude results that are ESTIMATES or the general area.
 		address:"125 Basin St, Suite 203, Daytona Beach, FL 32114",
 		callback:function(r){
 			if(r.success){
@@ -379,6 +380,9 @@ var zArrGeolocationWatchCallback=[];
 	var lastGeocodeAddress="";
 	var lastGeocodeResult=false;
 	function zGeocodeAddress(options) {
+		if(typeof options.exact == "undefined"){
+			options.exact=false;
+		}
 		if(options.address == lastGeocodeAddress){
 			options.callback(lastGeocodeResult);
 			return;
@@ -404,6 +408,9 @@ var zArrGeolocationWatchCallback=[];
 					var r2=JSON.parse(r2);
 					if(r.value==r2.key){
 						lastGeocodeResult=r2;
+						if(options.exact && !r2.exact){
+							r2={success:false, exact:false, latitude:"", longitude:""};
+						}
 						options.callback(r2);
 					}
 				};

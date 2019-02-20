@@ -2,6 +2,7 @@
 <cfoutput>
 <cffunction name="save" localmode="modern" access="remote">
 	<cfscript>
+	application.zcore.functions.z404("ajax geocoder is disabled");
 	var db=request.zos.queryObject;
 	if(request.zos.isdeveloper EQ false and request.zos.istestserver EQ false){
 		structdelete(form,'debugajaxgeocoder');
@@ -80,6 +81,7 @@
 
 <cffunction name="index" localmode="modern" access="remote" returntype="any"><cfscript>
 	var db=request.zos.queryObject;
+	application.zcore.functions.z404("Ajax geocoder is disabled");
 	if(request.zos.isdeveloper EQ false and request.zos.istestserver EQ false){
 		structdelete(form,'debugajaxgeocoder');
 	}

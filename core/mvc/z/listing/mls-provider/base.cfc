@@ -228,25 +228,31 @@
 	<cfargument name="zip" type="string" required="yes">
 	<cfargument name="listing_id" type="string" required="yes">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var rs=structnew();
-	rs.latitude="";
-	rs.longitude="";
-	rs.accuracy="";
+	// var db=request.zos.queryObject;
+	// var rs=structnew();
+	// rs.latitude="";
+	// rs.longitude="";
+	// rs.accuracy="";
 	// Note: this table stores city name in listing_coordinates_address, but the feeds don't pass it into this function.
-	db.sql="SELECT * FROM #db.table("listing_coordinates", request.zos.zcoreDatasource)# listing_coordinates 
-	WHERE listing_id = #db.param(arguments.listing_id)# and 
-	listing_coordinates_zip = #db.param(arguments.zip)# and 
-	listing_coordinates_latitude<>#db.param('')# and 
-	listing_coordinates_status=#db.param('OK')# and 
-	listing_coordinates_accuracy=#db.param('ROOFTOP')# and 
-	listing_coordinates_deleted = #db.param(0)#";
-	//listing_coordinates_address = #db.param(arguments.address)# and 
-	qD=db.execute("qD");
-	if(qD.recordcount NEQ 0){
-		rs.latitude=qD.listing_coordinates_latitude;
-		rs.longitude=qD.listing_coordinates_longitude;
-		rs.accuracy=qD.listing_coordinates_accuracy;
+	// db.sql="SELECT * FROM #db.table("listing_coordinates", request.zos.zcoreDatasource)# listing_coordinates 
+	// WHERE listing_id = #db.param(arguments.listing_id)# and 
+	// listing_coordinates_zip = #db.param(arguments.zip)# and 
+	// listing_coordinates_latitude<>#db.param('')# and 
+	// listing_coordinates_status=#db.param('OK')# and 
+	// listing_coordinates_accuracy=#db.param('ROOFTOP')# and 
+	// listing_coordinates_deleted = #db.param(0)#";
+	// //listing_coordinates_address = #db.param(arguments.address)# and 
+	// qD=db.execute("qD");
+	// if(qD.recordcount NEQ 0){
+	// 	rs.latitude=qD.listing_coordinates_latitude;
+	// 	rs.longitude=qD.listing_coordinates_longitude;
+	// 	rs.accuracy=qD.listing_coordinates_accuracy;
+	// }
+	rs=application.zcore.functions.zGeocode(arguments.address&", "&arguments.state&" "&arguments.zip, true);
+	if(rs.success){
+		rs.accuracy="ROOFTOP"; // for legacy compatibility
+	}else{
+		// no coordinates found
 	}
 	return rs;
 	</cfscript>

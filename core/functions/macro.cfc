@@ -1666,15 +1666,17 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 
 
 <!--- 
-rs=application.zcore.functions.zGeocode("address");
+rs=application.zcore.functions.zGeocode("address", true);
 if(rs.success){
-	mapCoordinates=rs.latitude&","&rs.longitude;
+	mapCoordinates=rs.latitude&","&rs.longitude&" exact:"&rs.exact;
+	echo(mapCoordinates);
 }else{
 	// no coordinates found
 }
  --->
 <cffunction name="zGeocode" localmode="modern" access="remote">
 	<cfargument name="address" type="string" required="yes">
+	<cfargument name="exact" type="boolean" required="yes" hint="true will remove coordinates for geocoding that is not exact rooftop/premise/point.">
 	<cfscript>
 	ts={
 		mode:"server",
@@ -1684,10 +1686,15 @@ if(rs.success){
 		request.zos.geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
 	}
 	rs=request.zos.geocodeCom.getGeocode(ts);
+	if(arguments.exact and not rs.exact){
+		rs.latitude="";
+		rs.longitude="";
+		rs.success=false;
+	}
 	if(rs.status EQ "complete" and rs.latitude NEQ ""){
-		return {success:true, latitude:rs.latitude, longitude:rs.longitude};
+		return {success:true, exact:rs.exact, latitude:rs.latitude, longitude:rs.longitude};
 	}else{
-		return {success:false, errorMessage:"Couldn't find coordinates for address"};
+		return {success:false, exact:false, errorMessage:"Couldn't find coordinates for address"};
 	}
 	</cfscript>
 </cffunction>

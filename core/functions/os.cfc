@@ -878,8 +878,8 @@ if(not rs.success){
 		}
 		application.zcore.skin.includeJS(link);
 
-		geocodeCom=application.zcore.functions.zCreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
-		geocodeCom.processGeocodeQueue();
+		// geocodeCom=application.zcore.functions.zCreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
+		// geocodeCom.processGeocodeQueue();
 		zos.JavascriptRequiredGoogleMaps=true;
 	}
 	</cfscript>
