@@ -130,8 +130,10 @@ unlimited between 7pm and 5am hawaii time
 			curLong="";
 				if(trim(address) NEQ ""){// and cityName NEQ ""){
 					rs5=this.baseGetLatLong(address,ts.rets20_stateorprovince,ts.rets20_postalcode, arguments.ss.listing_id);
-					curLat=rs5.latitude;
-					curLong=rs5.longitude;
+					if(rs5.success){
+						curLat=rs5.latitude;
+						curLong=rs5.longitude;
+					}
 				}
 			if(application.zcore.functions.zso(ts, 'rets20_unitnumber') NEQ ''){
 				address&=" Unit: "&ts["rets20_unitnumber"];	

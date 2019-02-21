@@ -239,8 +239,10 @@
 		}else{
 			if(trim(address) NEQ ""){
 				rs5=this.baseGetLatLong(address, ts.far_mls_state_id, ts.far_zip_code, arguments.ss.listing_id);
-				curLat=rs5.latitude;
-				curLong=rs5.longitude;
+				if(rs5.success){
+					curLat=rs5.latitude;
+					curLong=rs5.longitude;
+				}
 			}
 		}
 		if(ts.far_unit_number NEQ ''){

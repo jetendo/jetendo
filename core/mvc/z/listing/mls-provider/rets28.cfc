@@ -200,8 +200,10 @@ variables.tableLookup=structnew();
 	/*
 	if(curLat EQ "" and trim(address) NEQ ""){
 		rs5=this.baseGetLatLong(address,ts['StateOrProvince'],ts['postalcode'], arguments.ss.listing_id);
-		curLat=rs5.latitude;
-		curLong=rs5.longitude;
+		if(rs5.success){
+			curLat=rs5.latitude;
+			curLong=rs5.longitude;
+		}
 	}*/
 	
 	if(ts['Address Unit Number'] NEQ ''){

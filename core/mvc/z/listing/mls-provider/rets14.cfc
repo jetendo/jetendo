@@ -75,8 +75,10 @@
 		address=listing_data_address;
 		if(trim(address) NEQ ""){
 			rs5=this.baseGetLatLong(address,ts['rets14_stateorprovince'],ts['rets14_zip'], arguments.ss.listing_id);
-			curLat=rs5.latitude;
-			curLong=rs5.longitude;
+			if(rs5.success){
+				curLat=rs5.latitude;
+				curLong=rs5.longitude;
+			}
 		}
 		listing_data_address=address;
 		listing_data_remarks=application.zcore.functions.zso(ts,'rets14_PublicRemarks');

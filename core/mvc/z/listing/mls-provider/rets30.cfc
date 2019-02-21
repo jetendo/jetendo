@@ -219,8 +219,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		curLong='';
 		if(trim(address) NEQ ""){
 			rs5=this.baseGetLatLong(address,ts['State Or Province'],ts['postal code'], arguments.ss.listing_id);
-			curLat=rs5.latitude;
-			curLong=rs5.longitude;
+			if(rs5.success){
+				curLat=rs5.latitude;
+				curLong=rs5.longitude;
+			}
 		}
 		address=application.zcore.functions.zfirstlettercaps(address);
 		

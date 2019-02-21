@@ -620,35 +620,35 @@ if(rs.status EQ "error"){
 			application.zGeocodeServerCount=0;
 			application.zGeocodeServerDate=dateformat(now(), 'yyyymmdd');
 		} 		 
-		application.zGeocodeServerCount++;
-		if(application.zGeocodeServerCount GT 1500){
-			rs={success:false};
-		}else{
-			if(arrayLen(ss.arrAddress) EQ 1){
-				ss.address=ss.arrAddress[1];
-				ss.arrAddress=[];
-			}
-			if(arrayLen(ss.arrAddress) GT 1){
-				throw("Bulk geocoding is not implemented yet. The request is done, but not the response processing.");
-				if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
-					http url="https://api.geocod.io/v1.3/geocode?api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="post"{
-						header name="Content-Type" value="application/json";
-						header name="body" value="#serializeJSON(ss.arrAddress)#"; 
-					}
-					useGeocodio=true;
-				}else{
-					throw("Geocodio API Key is not defined and it required to be able to geocode multiple addresses at once.");
-				}
-			}else{
-				if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
-					http url="https://api.geocod.io/v1.3/geocode?q=#urlencodedformat(ts.struct.geocode_cache_address)#&api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="get"{}
-					useGeocodio=true; 
-				}else{
-					link="https://maps.google.com/maps/api/geocode/json?key=#application.zcore.functions.zso(request.zos, 'googleMapsApiServerKey')#&address="&urlencodedformat(ts.struct.geocode_cache_address)&"&sensor=false";
-					http url="#link#" timeout="10" method="get"{}
-				}
-			} 
+		// application.zGeocodeServerCount++;
+		// if(application.zGeocodeServerCount GT 1500){
+		// 	rs={success:false};
+		// }else{
+		if(arrayLen(ss.arrAddress) EQ 1){
+			ss.address=ss.arrAddress[1];
+			ss.arrAddress=[];
 		}
+		if(arrayLen(ss.arrAddress) GT 1){
+			throw("Bulk geocoding is not implemented yet. The request is done, but not the response processing.");
+			if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+				http url="https://api.geocod.io/v1.3/geocode?api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="post"{
+					header name="Content-Type" value="application/json";
+					header name="body" value="#serializeJSON(ss.arrAddress)#"; 
+				}
+				useGeocodio=true;
+			}else{
+				throw("Geocodio API Key is not defined and it required to be able to geocode multiple addresses at once.");
+			}
+		}else{
+			if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+				http url="https://api.geocod.io/v1.3/geocode?q=#urlencodedformat(ts.struct.geocode_cache_address)#&api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="get"{}
+				useGeocodio=true; 
+			}else{
+				link="https://maps.google.com/maps/api/geocode/json?key=#application.zcore.functions.zso(request.zos, 'googleMapsApiServerKey')#&address="&urlencodedformat(ts.struct.geocode_cache_address)&"&sensor=false";
+				http url="#link#" timeout="10" method="get"{}
+			}
+		} 
+		// }
 
 		if(cfhttp.status_code EQ 200){
 			location=deserializeJson(cfhttp.filecontent);
@@ -734,30 +734,45 @@ if(rs.status EQ "error"){
 				rs.exact=false;
 			}
 		}else{
-			rs={
-				exact:false
-			};
-			// queue it | hit limit or temporary api failure
-			rs.status="queued";
-			application.zcore.functions.zInsert(ts);
-			if(not structkeyexists(application, 'zGeocodeIncompleteCount')){
-				application.zGeocodeIncompleteCount=0;
+			if(useGeocodio and cfhttp.status_code EQ "422"){
+				rs={};
+				rs.status="complete"; 
+				rs.latitude="";
+				rs.longitude="";
+				rs.exact=false;
+				ts.struct.geocode_cache_accuracy="FAILED";
+				ts.struct.geocode_cache_status="OK";
+				ts.struct.geocode_cache_confirm_count=3;
+				ts.struct.geocode_cache_callback_url="";
+				application.zcore.functions.zInsert(ts);
+
+			}else{
+
+				rs={
+					exact:false
+				};
+				// queue it | hit limit or temporary api failure
+				rs.status="queued";
+				application.zcore.functions.zInsert(ts);
+				if(not structkeyexists(application, 'zGeocodeIncompleteCount')){
+					application.zGeocodeIncompleteCount=0;
+				}
+				application.zGeocodeIncompleteCount++;
+				savecontent variable="out"{
+					writedump(form);
+					writedump(cfhttp);
+				}
+				ts={
+					type:"Custom",
+					errorHTML:"Geocode was queued. Vendor might not be available. Queue is currently not enabled for processing, must review this manually.<br><br>"&out,
+					scriptName:'',
+					url:request.zos.originalURL,
+					exceptionMessage:"Geocode was queued.  Vendor might not be available. Queue is currently not enabled for processing, must review this manually.",
+					// optional
+					lineNumber:'710'
+				}
+				application.zcore.functions.zLogError(ts);
 			}
-			application.zGeocodeIncompleteCount++;
-			savecontent variable="out"{
-				writedump(form);
-				writedump(cfhttp);
-			}
-			ts={
-				type:"Custom",
-				errorHTML:"Geocode was queued. Vendor might not be available. Queue is currently not enabled for processing, must review this manually.<br><br>"&out,
-				scriptName:'',
-				url:request.zos.originalURL,
-				exceptionMessage:"Geocode was queued.  Vendor might not be available. Queue is currently not enabled for processing, must review this manually.",
-				// optional
-				lineNumber:'710'
-			}
-			application.zcore.functions.zLogError(ts);
 		} 
 		return rs;
 	}else if(ss.mode EQ "client"){ 

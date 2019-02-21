@@ -88,8 +88,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		curLong='';
 		if(trim(address) NEQ ""){
 			rs5=this.baseGetLatLong(address,application.zcore.functions.zso(ts, 'rets18_state'),application.zcore.functions.zso(ts, 'rets18_zipcode'), arguments.ss.listing_id);
-			curLat=rs5.latitude;
-			curLong=rs5.longitude;
+			if(rs5.success){
+				curLat=rs5.latitude;
+				curLong=rs5.longitude;
+			}
 		}
 		if(application.zcore.functions.zso(ts, 'rets18_unit_num') NEQ ''){
 			address&=" Unit: "&ts["rets18_unit_num"];	

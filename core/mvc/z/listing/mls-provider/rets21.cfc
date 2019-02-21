@@ -231,8 +231,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		curLong='';
 		if(trim(address) NEQ ""){
 			rs5=this.baseGetLatLong(address,ts['rets21_state'],ts['rets21_zipcode'], arguments.ss.listing_id);
-			curLat=rs5.latitude;
-			curLong=rs5.longitude;
+			if(rs5.success){
+				curLat=rs5.latitude;
+				curLong=rs5.longitude;
+			}
 		}
 		
 		if(structkeyexists(ts, 'rets21_unitnumber') and ts['rets21_unitnumber'] NEQ ''){

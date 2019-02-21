@@ -154,8 +154,10 @@ variables.tableLookup["I"]="I";
 	curLong=ts["rets24_list_47"];
 	if(curLat EQ "" and trim(address) NEQ ""){
 		rs5=this.baseGetLatLong(address,ts['State'],ts['zip code'], arguments.ss.listing_id);
-		curLat=rs5.latitude;
-		curLong=rs5.longitude;
+		if(rs5.success){
+			curLat=rs5.latitude;
+			curLong=rs5.longitude;
+		}
 	}
 	
 	if(ts['Unit ##'] NEQ ''){

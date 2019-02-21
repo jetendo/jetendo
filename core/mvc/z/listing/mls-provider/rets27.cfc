@@ -212,8 +212,10 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	curLong=ts["rets27_list_47"];
 	if(curLat EQ "" and trim(address) NEQ ""){
 		rs5=this.baseGetLatLong(address,ts['State/Province'],ts['postal code'], arguments.ss.listing_id);
-		curLat=rs5.latitude;
-		curLong=rs5.longitude;
+		if(rs5.success){
+			curLat=rs5.latitude;
+			curLong=rs5.longitude;
+		}
 	}
 	
 	if(ts['Unit ##'] NEQ ''){

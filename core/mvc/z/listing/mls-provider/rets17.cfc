@@ -132,8 +132,10 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		}else{
 			if(trim(address) NEQ ""){// and cityName NEQ ""){
 				rs5=this.baseGetLatLong(address,application.zcore.functions.zso(ts, 'rets17_state'),application.zcore.functions.zso(ts, 'rets17_zip'), arguments.ss.listing_id);
-				curLat=rs5.latitude;
-				curLong=rs5.longitude;
+				if(rs5.success){
+					curLat=rs5.latitude;
+					curLong=rs5.longitude;
+				}
 			}
 		}
 		if(application.zcore.functions.zso(ts, 'rets17_unit_num') NEQ ''){
