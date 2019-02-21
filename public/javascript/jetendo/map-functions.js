@@ -373,13 +373,21 @@ var zArrGeolocationWatchCallback=[];
 			}else{
 				alert("Unable to map location, please try a different input.");
 			}
-		}
+		},
+		customKeyURL:"",  // If the client is using proxy, you may need to change the urls to a different path
+		customGeocodeURL:""
 	};
 	zGeocodeAddress(options);
 	*/
 	var lastGeocodeAddress="";
 	var lastGeocodeResult=false;
 	function zGeocodeAddress(options) {
+		if(typeof options.customKeyURL == "undefined" || options.customKeyURL == ""){
+			options.customKeyURL="/z/misc/geocode/geocodeAjaxKey";
+		}
+		if(typeof options.customGeocodeURL == "undefined" || options.customGeocodeURL == ""){
+			options.customGeocodeURL="/z/misc/geocode/geocodeAjax";
+		}
 		if(typeof options.exact == "undefined"){
 			options.exact=false;
 		}
@@ -396,14 +404,14 @@ var zArrGeolocationWatchCallback=[];
 		var tempObj={};
 		tempObj.ignoreOldRequests=true;
 		tempObj.id="zGeocodeAjaxKey";
-		tempObj.url="/z/misc/geocode/geocodeAjaxKey?v="+v;
+		tempObj.url=options.customKeyURL+"?v="+v;
 		tempObj.callback=function(r){
 			var r=JSON.parse(r);
 			if(r.success){
 				var tempObj2={};
 				tempObj2.ignoreOldRequests=true;
 				tempObj2.id="zGeocodeAjaxKey";
-				tempObj2.url="/z/misc/geocode/geocodeAjax?v="+v+"&address="+escape(options.address)+"&key="+r.value;
+				tempObj2.url=options.customGeocodeURL+"?v="+v+"&address="+escape(options.address)+"&key="+r.value;
 				tempObj2.callback=function(r2){
 					var r2=JSON.parse(r2);
 					if(r.value==r2.key){
