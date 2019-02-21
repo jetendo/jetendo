@@ -103,11 +103,11 @@ dataImportCom.init(ts);
 	<cfscript>
 	var i=1;
 	var ts=StructNew();
-	var arrData = this.parseCSVRow();
+	var arrData = this.parseCSVRow(); 
 	if(isArray(arrData) EQ false){
 		return false;
 	}
-	if(isDefined('this.config.allowUnequalColumnCount') EQ false and (ArrayLen(arrData) NEQ ArrayLen(this.arrMappedColumns))){
+	if(structkeyexists(this.config, 'allowUnequalColumnCount') EQ false and (ArrayLen(arrData) NEQ ArrayLen(this.arrMappedColumns))){
 		return false;
 	}
 	for(i=1;i LTE ArrayLen(this.arrMappedColumns);i=i+1){

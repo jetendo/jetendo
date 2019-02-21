@@ -266,6 +266,14 @@
 	d1=application.zcore.functions.zdeletefile(request.zos.globals.privatehomedir&"/zupload/user/"&f1);
 	 
 	dataImportCom = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.dataImport");
+	ts=StructNew();
+	ts.escapedBy='"';
+	ts.textQualifier='"';
+	ts.seperator=",";
+	ts.lineDelimiter=chr(10);
+	ts.bufferedReadEnabled=false;  
+	ts.allowUnequalColumnCount=true;
+	dataImportCom.init(ts);
 	dataImportCom.parseCSV(fileContents);
 	dataImportCom.getFirstRowAsColumns(); 
 	requiredCheckStruct=duplicate(requiredStruct); 
@@ -286,12 +294,12 @@
 	if(structcount(requiredCheckStruct)){
 		application.zcore.status.setStatus(request.zsid, "The following required fields were missing in the column header of the CSV file: "&structKeyList(requiredCheckStruct)&".", false, true);
 		application.zcore.functions.zRedirect("/z/admin/site-options/import?site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#&zsid=#request.zsid#"); 
-	} 
-	dataImportCom.mapColumns(ts);
+	}  
+	dataImportCom.mapColumns(ts); 
 	arrData=arraynew(1);
-	curCount=dataImportCom.getCount();
+	curCount=dataImportCom.getCount(); 
 	for(g=1;g  LTE curCount;g++){
-		ts=dataImportCom.getRow();	
+		ts=dataImportCom.getRow();	 
 		for(i in requiredStruct){
 			if(trim(ts[i]) EQ ""){
 				application.zcore.status.setStatus(request.zsid, "#i# was empty on row #g# and it is a required field.  Make sure all required fields are entered and re-import.", false, true);
@@ -323,13 +331,13 @@
 	}
 	request.zos.disableSiteCacheUpdate=true; 
 	for(g=1;g  LTE curCount;g++){
-		ts=dataImportCom.getRow();	
+		ts=dataImportCom.getRow();	 
 		for(i in ts){
 			ts[i]=trim(ts[i]);
 			if(len(ts[i]) EQ 0){
 				structdelete(ts, i);
 			}
-		}
+		} 
 		if(filterEnabled){
 			result=filterInstance[form.cfcMethod](ts);
 			if(not result){
@@ -342,16 +350,20 @@
 				arrC=listToArray(ts[i], ",");
 				arrC2=[];
 				for(i2=1;i2 LTE arraylen(arrC);i2++){
-					c=trim(arrC[i2]);
+					c=trim(arrC[i2]); 
 					if(structkeyexists(dataStruct[optionIDLookupByName[i]].struct, c)){
+						// convert the name to the id because a match was found
 						arrayAppend(arrC2, dataStruct[optionIDLookupByName[i]].struct[c]);
+					}else{
+						// put the original value to avoid losing data.
+						arrayAppend(arrC2, c);
 					}
 				}
 				ts[i]=arrayToList(arrC2, ",");
 			} 
 			form['newvalue'&optionIDLookupByName[i]]=ts[i];
 		}   
-		//writedump(ts);		writedump(form);		abort;
+		// writedump(ts);		writedump(form);		abort;
 		form.site_x_option_group_set_approved=1;
 		rs=this.importInsertGroup(); 
 		arrayClear(request.zos.arrQueryLog);
@@ -366,7 +378,7 @@
 </cffunction> 
 
 
-<cffunction name="recurseSOP" localmode="modern" output="yes" returntype="any">
+<!--- <cffunction name="recurseSOP" localmode="modern" output="yes" returntype="any">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="set_id" type="any" required="yes">
 	<cfargument name="parent_id" type="string" required="yes">
@@ -448,7 +460,7 @@
 	}
 	return ts;
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
 	<cfscript>
