@@ -527,13 +527,39 @@ if(rs.status EQ "error"){
 </cffunction>
 
 <!--- 
-
+ts={
+	mode:"server",
+	address:"address",
+	returnAddressComponents:true
+};
+geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
+rs=geocodeCom.getGeocode(ts);
+if(rs.success){
+	/* returns this structure
+	rs.exact=true or false
+	rs.latitude
+	rs.longitude
+	rs.addressComponents={
+		number: "1109",
+		predirectional: "N",
+		street: "Highland",
+		suffix: "St",
+		formatted_street: "N Highland St",
+		city: "Arlington",
+		county: "Arlington County",
+		state: "VA",
+		zip: "22201",
+		country: "US"
+	}
+	*/
+}
  --->
 <cffunction name="getGeocode" localmode="modern" access="remote">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	// this function may be called directly or internally 
 	ts={
+		returnAddressComponents:false,
 		callbackURL:"",
 		arrAddress:[],
 		address:"",
@@ -610,7 +636,14 @@ if(rs.status EQ "error"){
 		}else{
 			rs.exact=false;
 		}
-		return rs;  
+		if(qGeocode.geocode_cache_address_json NEQ ""){
+			rs.addressComponents=deserializeJson(qGeocode.geocode_cache_address_json);
+		}
+		if(ss.returnAddressComponents and rs.latitude NEQ "" and qGeocode.geocode_cache_address_json EQ ""){
+			// don't return because we require address components
+		}else{
+			return rs;  
+		}
 	}
 
 	useGeocodio=false;
@@ -659,10 +692,26 @@ if(rs.status EQ "error"){
 			if(useGeocodio){
 				if(structkeyexists(location, "results") and arraylen(location.results) GT 0){
 					result=location.results[1];
+
+					t9={
+						"number": "",
+						"predirectional": "",
+						"street": "",
+						"suffix": "",
+						"formatted_street": "",
+						"city": "",
+						"county": "",
+						"state": "",
+						"zip": "",
+						"country": ""
+					};
+					// force existence of all keys
+					structappend(result.address_components, t9, false);
 					if(result.accuracy_type EQ "rooftop" or result.accuracy_type EQ "point"){
 						rs={};
 						rs.latitude=result.location.lat;
 						rs.longitude=result.location.lng;
+						rs.addressComponents=result.address_components;
 						rs.status="complete";
 						ts.struct.geocode_cache_accuracy="ROOFTOP";
 						ts.struct.geocode_cache_latitude=rs.latitude;
@@ -670,19 +719,32 @@ if(rs.status EQ "error"){
 						ts.struct.geocode_cache_status="OK";
 						ts.struct.geocode_cache_confirm_count=3;
 						ts.struct.geocode_cache_callback_url="";
-						application.zcore.functions.zInsert(ts); 
+						ts.struct.geocode_cache_address_json=serializeJson(result.address_components);
+						if(qGeocode.recordcount NEQ 0){
+							ts.struct.geocode_cache_id=qGeocode.geocode_cache_id;
+							application.zcore.functions.zUpdate(ts); 
+						}else{
+							application.zcore.functions.zInsert(ts); 
+						}
 					}else{ 
 						rs={};
 						rs.status="complete"; 
 						rs.latitude=result.location.lat;
 						rs.longitude=result.location.lng;
+						rs.addressComponents=result.address_components;
 						ts.struct.geocode_cache_accuracy="ESTIMATE";
 						ts.struct.geocode_cache_status="OK";
 						ts.struct.geocode_cache_confirm_count=3;
 						ts.struct.geocode_cache_callback_url="";
 						ts.struct.geocode_cache_latitude=rs.latitude;
 						ts.struct.geocode_cache_longitude=rs.longitude;
-						application.zcore.functions.zInsert(ts);
+						ts.struct.geocode_cache_address_json=serializeJson(result.address_components);
+						if(qGeocode.recordcount NEQ 0){
+							ts.struct.geocode_cache_id=qGeocode.geocode_cache_id;
+							application.zcore.functions.zUpdate(ts); 
+						}else{
+							application.zcore.functions.zInsert(ts);
+						}
 					} 
 				}else{
 					ts.struct.geocode_cache_accuracy="FAILED";

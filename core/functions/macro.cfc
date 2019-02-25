@@ -1677,10 +1677,12 @@ if(rs.success){
 <cffunction name="zGeocode" localmode="modern" access="remote">
 	<cfargument name="address" type="string" required="yes">
 	<cfargument name="exact" type="boolean" required="yes" hint="true will remove coordinates for geocoding that is not exact rooftop/premise/point.">
+	<cfargument name="returnAddressComponents" type="boolean" required="no" default="#false#">
 	<cfscript>
 	ts={
 		mode:"server",
-		address:arguments.address
+		address:arguments.address,
+		returnAddressComponents:returnAddressComponents
 	};
 	if(not structkeyexists(request.zos, 'geocodeCom')){
 		request.zos.geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
@@ -1692,7 +1694,7 @@ if(rs.success){
 		rs.success=false;
 	}
 	if(rs.status EQ "complete" and rs.latitude NEQ ""){
-		return {success:true, exact:rs.exact, latitude:rs.latitude, longitude:rs.longitude};
+		return {success:true, exact:rs.exact, addressComponents:rs.addressComponents, latitude:rs.latitude, longitude:rs.longitude};
 	}else{
 		return {success:false, exact:false, errorMessage:"Couldn't find coordinates for address"};
 	}
