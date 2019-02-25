@@ -650,5 +650,137 @@ USER WAS PERMANENTLY BLOCKED.');
 		</cfmail>
 	</cfif>
 </cffunction>
+
+
+<!--- 
+ts={
+	name:"geocoding",
+	type:"ip",
+	limits:{
+		minute:30,
+		hour:300,
+		day:1000
+	}
+};
+if(application.zcore.tracking.isAPIUsageThrottled(ts)){
+	// return error message to use that api is temporarily unavailable or they are blocked.
+}
+ --->
+<cffunction name="isAPIUsageThrottled" access="public" localmode="modern">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	ss=arguments.ss;
+	if(request.zos.isServer){
+		return false; // ignore throttling for internal requests.
+	}
+	defaultLimits={
+		minute:0,
+		hour:0,
+		day:0
+	};
+	structappend(ss.limits, defaultLimits, false);
+	currentDay=dateformat(now(), "yyyymmdd");
+	currentMinute=currentDay&timeformat(now(), "HHmm");
+	currentHour=currentDay&timeformat(now(), "HH");
+
+	if(not structkeyexists(application, "zThrottleAPIStruct")){
+		application.zThrottleAPIStruct={}
+	}
+	if(not structkeyexists(application.zThrottleAPIStruct, ss.name)){
+		application.zThrottleAPIStruct[ss.name]={}
+	}
+	if(not structkeyexists(application.zThrottleAPIStruct[ss.name], ss.type)){
+		application.zThrottleAPIStruct[ss.name][ss.type]={};
+	}
+	if(ss.type EQ "ip"){
+		if(not structkeyexists(application.zThrottleAPIStruct[ss.name][ss.type], request.zos.cgi.remote_addr)){
+			application.zThrottleAPIStruct[ss.name][ss.type][request.zos.cgi.remote_addr]={
+				dayEmailAlert:false,
+				hourEmailAlert:false,
+				minuteEmailAlert:false,
+				currentDay:currentDay,
+				currentHour:currentHour,
+				currentMinute:currentMinute,
+				dayRequestCount:0,
+				hourRequestCount:0,
+				minuteRequestCount:0,
+				userAgent:request.zos.cgi.http_user_agent
+			};
+		}
+	}else{
+		throw("ss.type: #ss.type# is not implemented yet.");
+	}
+	// reset values to 0 if date has changed
+	userStruct=application.zThrottleAPIStruct[ss.name][ss.type][request.zos.cgi.remote_addr];
+	if(userStruct.currentDay NEQ currentDay){
+		userStruct.currentDay=currentDay;
+		userStruct.dayRequestCount=0;
+		userStruct.dayEmailAlert=false;
+	}
+	if(userStruct.currentHour NEQ currentHour){
+		userStruct.currentHour=currentHour;
+		userStruct.hourRequestCount=0;
+		userStruct.hourEmailAlert=false;
+	}
+	if(userStruct.currentMinute NEQ currentMinute){
+		userStruct.currentMinute=currentMinute;
+		userStruct.minuteRequestCount=0;
+		userStruct.minuteEmailAlert=false;
+	}
+	throttle=false;
+	sendEmail=false;
+	throttleType="";
+	userStruct.dayRequestCount++;
+	userStruct.hourRequestCount++;
+	userStruct.minuteRequestCount++;
+	if(ss.type EQ "ip"){
+		if(ss.limits.day NEQ 0 and userStruct.dayRequestCount GT ss.limits.day){
+			if(not userStruct.dayEmailAlert){
+				sendEmail=true;
+				throttleType="daily";
+				userStruct.dayEmailAlert=true;
+			}
+			throttle=true;
+		}
+		if(ss.limits.hour NEQ 0 and userStruct.hourRequestCount GT ss.limits.hour){
+			if(not userStruct.hourEmailAlert){
+				sendEmail=true;
+				throttleType="hourly";
+				userStruct.hourEmailAlert=true;
+			}
+			throttle=true;
+		}
+		if(ss.limits.minute NEQ 0 and userStruct.minuteRequestCount GT ss.limits.minute){
+			if(not userStruct.minuteEmailAlert){
+				sendEmail=true;
+				throttleType="minute";
+				userStruct.minuteEmailAlert=true;
+			}
+			throttle=true;
+		}
+	}
+
+
+	savecontent variable="out"{
+		echo('<h2>#request.zos.cgi.remote_addr# exceeded #throttleType# api usage limit set for #ss.name#</h2>');
+		writedump(userStruct);
+	}
+
+	if(sendEmail){
+		ts={
+			type:"Custom",
+			errorHTML:out,
+			scriptName:request.zos.originalURL,
+			url:request.zos.originalURL,
+			exceptionMessage:'#request.zos.cgi.remote_addr# exceeded #throttleType# api usage limit set for #ss.name#',
+			// optional
+			lineNumber:'730'
+		}
+		application.zcore.functions.zLogError(ts);
+	}
+	
+	return throttle;
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

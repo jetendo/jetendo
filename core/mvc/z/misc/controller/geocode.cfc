@@ -559,6 +559,24 @@ if(rs.success){
 	<cfscript>
 	// this function may be called directly or internally 
 	ts={
+		name:"geocoding",
+		type:"ip",
+		limits:{
+			minute:30,
+			hour:300,
+			day:1000
+		}
+	};
+	if(application.zcore.tracking.isAPIUsageThrottled(ts)){
+		// this request was blocked due to high usage
+		rs={};
+		rs.status="complete"; 
+		rs.latitude="";
+		rs.longitude="";
+		return rs;
+	}
+
+	ts={
 		returnAddressComponents:false,
 		callbackURL:"",
 		arrAddress:[],
