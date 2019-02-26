@@ -1691,12 +1691,13 @@ if(rs.success){
 	if(arguments.exact and not rs.exact){
 		rs.latitude="";
 		rs.longitude="";
+		rs.addressComponents={};
 		rs.success=false;
 	}
 	if(rs.status EQ "complete" and rs.latitude NEQ ""){
 		return {success:true, exact:rs.exact, addressComponents:rs.addressComponents, latitude:rs.latitude, longitude:rs.longitude};
 	}else{
-		return {success:false, exact:false, errorMessage:"Couldn't find coordinates for address"};
+		return {success:false, exact:false, errorNumber:rs.errorNumber, errorMessage:"Couldn't find coordinates for address"};
 	}
 	</cfscript>
 </cffunction>

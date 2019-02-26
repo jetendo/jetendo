@@ -670,7 +670,7 @@ if(application.zcore.tracking.isAPIUsageThrottled(ts)){
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss;
-	if(request.zos.isServer){
+	if(request.zos.isServer or request.zos.isDeveloper){
 		return false; // ignore throttling for internal requests.
 	}
 	defaultLimits={

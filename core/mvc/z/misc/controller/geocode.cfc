@@ -573,6 +573,9 @@ if(rs.success){
 		rs.status="complete"; 
 		rs.latitude="";
 		rs.longitude="";
+		rs.addressComponents={};
+		rs.exact=false;
+		rs.errorNumber=1;
 		return rs;
 	}
 
@@ -641,10 +644,13 @@ if(rs.success){
 		// already geocoded
 		rs={};
 		rs.status="complete";
+		rs.addressComponents={};
+		rs.errorNumber=0;
 		// fix the double casting
 		if(qGeocode.geocode_cache_latitude EQ "0E-7" or qGeocode.geocode_cache_latitude EQ "0"){
 			rs.latitude="";
 			rs.longitude="";
+			rs.errorNumber=2;
 		}else{
 			rs.latitude=qGeocode.geocode_cache_latitude;
 			rs.longitude=qGeocode.geocode_cache_longitude;
@@ -727,6 +733,7 @@ if(rs.success){
 					structappend(result.address_components, t9, false);
 					if(result.accuracy_type EQ "rooftop" or result.accuracy_type EQ "point"){
 						rs={};
+						rs.errorNumber=0;
 						rs.latitude=result.location.lat;
 						rs.longitude=result.location.lng;
 						rs.addressComponents=result.address_components;
@@ -746,6 +753,7 @@ if(rs.success){
 						}
 					}else{ 
 						rs={};
+						rs.errorNumber=0;
 						rs.status="complete"; 
 						rs.latitude=result.location.lat;
 						rs.longitude=result.location.lng;
@@ -774,6 +782,8 @@ if(rs.success){
 					rs.status="complete"; 
 					rs.latitude="";
 					rs.longitude="";
+					rs.errorNumber=3;
+					rs.addressComponents={};
 				}
 			}else{ 
 				if(isArray(location.results) and arraylen(location.results) GT 0 and location['status'] NEQ "ZERO_RESULTS"){ 
@@ -819,6 +829,7 @@ if(rs.success){
 				rs.status="complete"; 
 				rs.latitude="";
 				rs.longitude="";
+				rs.errorNumber=4;
 				rs.exact=false;
 				ts.struct.geocode_cache_accuracy="FAILED";
 				ts.struct.geocode_cache_status="OK";
