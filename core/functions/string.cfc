@@ -1635,5 +1635,23 @@ abort;
 	</cfscript>
 </cffunction>
 
+<cffunction name="zDisplayCookieNotice" localmode="modern" access="public">
+	<cfif not structkeyexists(cookie, "ZHIDECOOKIENOTICE")>
+		<div class="z-float zCookieNoticeDiv">
+			<div class="z-container">
+				Our website uses cookies to ensure a great experience. We also use third party cookies.  To find out more about the cookies on our web site, please read our <a href="/z/user/privacy/index">privacy policy</a>.  By continuing to use our website, you agree to the use of cookies. <a href="##" class="zStopCookieNotice">Continue</a>
+			</div>
+		</div>
+		<script>
+		zArrDeferredFunctions.push(function(){
+			$(".zStopCookieNotice").on("click", function(e){
+				e.preventDefault();
+				zSetCookie({key:"ZHIDECOOKIENOTICE",value:"1",futureSeconds:365*60 * 60 * 24 * 7,enableSubdomains:false});
+				$(".zCookieNoticeDiv").hide();
+			});
+		});
+		</script>
+	</cfif>
+</cffunction>
 </cfoutput>
 </cfcomponent>
