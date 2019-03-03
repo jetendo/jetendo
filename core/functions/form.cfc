@@ -573,9 +573,10 @@ USAGE
 	<cfscript>
 	var yes = '<input name="#arguments.fieldName#" class="zBooleanRadio" id="#arguments.fieldName#1" style="border:none; background:none;" type="radio" value="1"';
 	var no = '<input name="#arguments.fieldName#" class="zBooleanRadio" id="#arguments.fieldName#0" style="border:none; background:none;" type="radio" value="0"'; 
-	if(structkeyexists(form, arguments.fieldName) and form[arguments.fieldName] NEQ "" and form[arguments.fieldName]){
+	if(structkeyexists(form, arguments.fieldName) and form[arguments.fieldName] NEQ "" and form[arguments.fieldName] EQ 1){
 		yes = yes&' checked';
-	}else{
+	}
+	if(structkeyexists(form, arguments.fieldName) and form[arguments.fieldName] NEQ "" and form[arguments.fieldName] EQ 0){
 		no = no&' checked';
 	}
 	yes=yes&' /> <label for="#arguments.fieldName#1">Yes</label> ';

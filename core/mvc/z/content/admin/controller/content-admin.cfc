@@ -5,7 +5,7 @@
 	form.site_id=request.zos.globals.id;
 
 	form.searchOn=application.zcore.functions.zso(form, 'searchOn', true, 0);
-	form.contentStatus = application.zcore.functions.zso(form, "contentStatus", true, 1);
+	form.contentStatus = application.zcore.functions.zso(form, "contentStatus", false, "");
     application.zcore.adminSecurityFilter.requireFeatureAccess("Pages");
 	if(structcount(application.zcore.app.getAppData("content")) EQ 0){
 		application.zcore.status.setStatus(request.zsid,"Access denied");
@@ -22,13 +22,13 @@
 	variables.queueSortWhere="site_id = '#application.zcore.functions.zescape(request.zos.globals.id)#' and content_deleted=0 ";
 	if(form.contentStatus EQ "1"){
 		variables.queueSortWhere&=" and content_for_sale<>2 ";
-	}else{
+	}else if(form.contentStatus EQ "0"){
 		variables.queueSortWhere&=" and content_for_sale=2 ";
 	}
 	variables.queueSortStruct.where = variables.queueSortWhere&" and content_parent_id='#application.zcore.functions.zescape(form.content_parent_id)#' ";
 	if(form.contentStatus EQ "1"){
 		variables.queueSortStruct.where&=" and content_for_sale<>2 ";
-	}else{
+	}else if(form.contentStatus EQ "0"){
 		variables.queueSortStruct.where&=" and content_for_sale=2 ";
 	}
 	variables.queueSortStruct.disableRedirect=true;
@@ -2132,10 +2132,12 @@
 			</cfif> 
 		</cfif>
 	</cfif> 
-	<cfif form.contentStatus EQ 1> 
-		and content.content_for_sale<>#db.param('2')#
-	<cfelseif form.contentStatus EQ 0> 
-		and content.content_for_sale=#db.param('2')#
+	<cfif form.contentStatus NEQ "">
+		<cfif form.contentStatus EQ 1> 
+			and content.content_for_sale<>#db.param('2')#
+		<cfelseif form.contentStatus EQ 0> 
+			and content.content_for_sale=#db.param('2')#
+		</cfif>
 	</cfif>
 	and content.content_deleted = #db.param('0')# and 
 	content.site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# 
@@ -2258,7 +2260,7 @@
 			<input type="text" name="searchtext" id="searchtext" value="#htmleditformat(application.zcore.functions.zso(form, 'searchtext'))#" style="min-width:100px; width:300px;max-width:100%; min-width:auto;" size="20" maxchars="10" /> 
 		</div>
 		<div class="z-float-left z-pr-10 z-pb-10">
-			Active: #application.zcore.functions.zInput_Boolean("contentStatus")# 
+			Active: #application.zcore.functions.zInput_Boolean("contentStatus", form.contentStatus)# 
 			</div>
 			<div class="z-float-left z-pr-10 z-pb-10">
 			<input type="submit" name="searchForm" value="Search" class="z-manager-search-button" /> 
