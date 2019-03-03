@@ -2069,7 +2069,7 @@ not used
 	}
 	// don't need a lock for a temporary object
 	//lock name="#request.zos.installPath#-zCacheJsonSiteAndUserGroup-serialize" type="exclusive" timeout="10"{
-	a=serializeJson(tempStruct);
+	a=serializeJson(duplicate(tempStruct));
 	//}
 	application.zcore.functions.zWriteFile(curPrivatePath&'_cache/scripts/global.json', a);
 	curSiteId=tempStruct.id;
@@ -2112,7 +2112,7 @@ not used
 	structappend(application.sitestruct[arguments.site_id].globals, arguments.tempStruct, true);
 	application.zcore.siteglobals[arguments.site_id]=arguments.tempStruct;
 	lock name="#request.zos.installPath#-zCacheJsonSiteAndUserGroup-serialize" type="exclusive" timeout="10"{
-		a=serializeJson(arguments.tempStruct);
+		a=serializeJson(duplicate(arguments.tempStruct));
 	}
 	application.zcore.functions.zWriteFile(curPrivatePath&'_cache/scripts/global.json', a);
 	</cfscript>

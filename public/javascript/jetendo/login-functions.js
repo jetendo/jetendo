@@ -414,6 +414,7 @@ var zLoggedIn=false;
 			if(typeof json === "object"){
 				if(json.success){
 					// do the repost form
+					zSetCookie({key:"zautologin",value:"1",futureSeconds:60,enableSubdomains:false}); 
 					zLogin.zShowLoginError("Logging in...");
 					var d1=window.parent.document.getElementById("zRepostForm");
 					if(d1){

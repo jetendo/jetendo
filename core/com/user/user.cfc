@@ -424,7 +424,7 @@ userCom.checkLogin(inputStruct);
 		if(not failedLogin){
 			if(qUserCheck.recordcount NEQ 0){
 				if(arguments.inputStruct.secureLogin){
-					if((structkeyexists(form,'zautologin') and compare(form.zautologin,"1") EQ 0) or (structkeyexists(cookie,'zautologin') and compare(cookie.zautologin,"1") EQ 0)){
+					if((structkeyexists(form,'zautologin') and form.zautologin EQ "1") or (structkeyexists(cookie,'zautologin') and compare(cookie.zautologin,"1") EQ 0)){
 						generateToken(form.zUsername); // start making the token before we know if we need it 
 					}
 					if(arguments.inputStruct.disableSecurePassword EQ false){
