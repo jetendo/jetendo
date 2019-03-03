@@ -2351,6 +2351,12 @@ not used
 	qSite=db.execute("qSite");
 	for(row in qSite){
 	    application.zcore.functions.zOS_cacheSiteAndUserGroups(row.site_id);
+
+	    // to avoid running out of memory, unload site immediately
+	    if(request.zos.isTestServer and row.site_id NEQ 1){
+			structdelete(application.siteStruct, row.site_id);
+			structdelete(application.siteAccessCache, row.site_id);
+		}
 	}
     </cfscript>
 </cffunction>
