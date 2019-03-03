@@ -462,7 +462,6 @@ this.app_id=12;
 	 content_unique_name <> #db.param('')# and  
 	 content_unique_name <> #db.param('/')# and 
 	 content_unique_name NOT LIKE #db.param('/z/%')# and 
-	 content_for_sale<>#db.param(2)# and 
 	 content_deleted=#db.param(0)# 
 	ORDER BY content_deleted ASC, content_for_sale ASC, content_unique_name DESC, content_url_only ASC ";
 	qContent=db.execute("qContent");
@@ -547,8 +546,7 @@ this.app_id=12;
 	 content_unique_name <> #db.param('')# and  
 	 content_unique_name <> #db.param('/')# and 
 	 content_unique_name NOT LIKE #db.param('/z/%')# and 
-	 content_url_only = #db.param('')# and 
-	 content_for_sale<>#db.param(2)# and 
+	 content_url_only = #db.param('')# and  
 	 content_id = #db.param(arguments.id)# and 
 	 content_deleted=#db.param(0)# ";
 	qF=db.execute("qF"); 
@@ -2977,13 +2975,13 @@ configCom.includeContentByName(ts);
 		db.sql&=" and content_deleted=#db.param(0)# 
 		GROUP BY content.content_id ";
 	   	qContent=db.execute("qContent");
+		if(qContent.recordcount EQ 0 and contentConfig.disableContentMeta EQ false){
+			application.zcore.functions.z404("Content record was missing in includeFullContent");
+		} 
 	   	if(qContent.site_x_option_group_set_id NEQ 0){
 	   		form.site_x_option_group_set_id=qContent.site_x_option_group_set_id;
 	   	}
 		returnCountTotal=qContent.recordcount;
-		if(qContent.recordcount EQ 0 and contentConfig.disableContentMeta EQ false){
-			application.zcore.functions.z404("Content record was missing in includeFullContent");
-		} 
 		ts994824713=structnew();
 		application.zcore.functions.zQueryToStruct(qContent,ts994824713);
 		 
