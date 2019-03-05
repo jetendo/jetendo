@@ -94,12 +94,12 @@ When making a version the primary record, it will have option to preserve the or
 					tempFieldStruct=arguments.optionStruct[row2.feature_field_id].type;
 					path=tempPath;
 					if(application.zcore.functions.zso(tempFieldStruct, 'file_securepath') EQ 'Yes'){
-						path&='zuploadsecure/site-options/';
+						path&='zuploadsecure/feature-options/';
 					}else{
-						path&='zupload/site-options/';
+						path&='zupload/feature-options/';
 					}
 				}else if(typeId EQ 3){
-					path=tempPath&'zupload/site-options/';
+					path=tempPath&'zupload/feature-options/';
 				}else if(typeId EQ 23){ 
 					row2.feature_data_value=application.zcore.imageLibraryCom.copyImageLibrary(row2.feature_data_value, row2.site_id);
 				}else if(typeId EQ 21){

@@ -416,42 +416,23 @@
 	</cfscript>
 </cffunction> --->
 
+
+
 <cffunction name="delete" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var siteIdSQL=0;
-	var qS2=0;
-	var theTitle=0;
-	var i=0;
-	var qS=0;
-	var tempURL=0;
-	var q=0;
-	var queueSortStruct=0;
-	var queueComStruct=0;
-	variables.init();
-	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
-	siteIdSQL=" ";
-	if(form.feature_schema_id NEQ 0){
-		siteIdSQL=" and feature_field.site_id='"&application.zcore.functions.zescape(request.zos.globals.id)&"'";
-		form.site_id =request.zos.globals.id;
-		form.siteIDType=1;
-	}else{
-		if(structkeyexists(form, 'globalvar')){
-			siteIdSQL=" and feature_field.site_id='0'";
-			form.site_id='0';
-			form.siteIDType=4;
-		}else{
-			siteIdSQL=" and feature_field.site_id='"&application.zcore.functions.zescape(request.zos.globals.id)&"'";
-			form.site_id=request.zos.globals.id;
-			form.siteIDType=1;
-		}
-	}
+	init();
+	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);		 
+	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")#
+	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
+	feature_schema_deleted = #db.param(0)#";
+	qSchema=db.execute("qSchema"); 
 	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# feature_field 
 	WHERE feature_field_id = #db.param(form.feature_field_id)# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id=#db.param(form.feature_schema_id)#";
 	qS2=db.execute("qS2");
-	if(qS2.recordcount EQ 0){
+	if(qS2.recordcount EQ 0 or qSchema.recordcount EQ 0){
 		application.zcore.status.setStatus(Request.zsid, "Feature Field no longer exists.",false,true);
 		if(structkeyexists(request.zsession, 'feature_return') and request.zsession['feature_return'] NEQ ""){
 			tempURL = request.zsession['feature_return'];
@@ -465,36 +446,46 @@
 	</cfscript>
 	<cfif structkeyexists(form, 'confirm')>
 		<cfscript>
-		var arrDeleteStruct=[];
+		arrDeleteStruct=[];
 		typeCFCStruct=application.zcore.featureCom.getTypeCFCStruct();
-		for(i in typeCFCStruct){
-			if(typeCFCStruct[i].hasCustomDelete()){
-				arrayAppend(arrDeleteStruct, application.zcore.functions.zescape(i));
-			}
-		} 
-			
-		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")#, 
-		#db.table("feature_field", "jetendofeature")# 
+		hasCustomDelete=typeCFCStruct[qS2.feature_field_type_id].hasCustomDelete();
+		typeCFC=application.zcore.featureCom.getTypeCFC(qS2.feature_field_type_id); 
+		optionStruct=deserializeJson(qS2.feature_field_type_json);
+
+		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 		WHERE feature_data.feature_schema_id=#db.param(form.feature_schema_id)# and 
-		feature_data.site_id<>#db.param(-1)# and 
-		feature_field_deleted = #db.param(0)# and 
-		feature_data_deleted = #db.param(0)# and 
-		feature_data.feature_field_id = feature_field.feature_field_id and 
-		feature_field.feature_field_type_id IN (#db.trustedSQL("'"&arrayToList(arrDeleteStruct, "','")&"'")#) and 
-		feature_field.feature_field_id=#db.param(form.feature_field_id)#";
-		var qSchema=db.execute("qSchema"); 
-		for(row in qSchema){
-			var currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id); 
-			var optionStruct=deserializeJson(row.feature_field_type_json);
-			currentCFC.onDelete(row, optionStruct); 
-		}  
-		db.sql="DELETE FROM #db.table("feature_data", "jetendofeature")#  
+		feature_data.site_id<>#db.param(-1)# and  
+		feature_data_deleted = #db.param(0)#";
+		qData=db.execute("qData"); 
+		for(row in qData){
+			// delete file if it is necessary
+
+			arrField=listToArray(row.feature_data_field_order, chr(13), true);
+			arrData=listToArray(row.feature_data_data, chr(13), true);
+			arrNewField=[];
+			arrNewData=[];
+			for(i=1;i LTE arraylen(arrField);i++){
+				if(arrField[i] NEQ qS2.feature_field_id){
+					arrayAppend(arrNewField, arrField[i]);
+					arrayAppend(arrNewData, arrData[i]);
+				}else if(arrData[i] NEQ ""){
+					typeCFC.onDelete(arrData[i], optionStruct); 
+				}
+			}
+			db.sql="UPDATE #db.table("feature_data", "jetendofeature")# SET 
+			feature_data_field_order=#db.param(arrayToList(arrNewField, chr(13)))#, 
+			feature_data_data=#db.param(arrayToList(arrNewData, chr(13)))# 
+			WHERE 
+			feature_data_id=#db.param(row.feature_data_id)# and 
+			site_id=#db.param(row.site_id)# and 
+			feature_data_deleted=#db.param(0)# ";
+			db.execute("qUpdate");
+		}
+			
+		db.sql="DELETE FROM #db.table("feature_field", "jetendofeature")#  
 		WHERE feature_field_id = #db.param(form.feature_field_id)# and 
-		feature_data_deleted = #db.param(0)# and 
-		feature_field_id_siteIDType=#db.param(form.siteIDType)# and 
-		site_id<>#db.param(-1)#";
+		feature_field_deleted = #db.param(0)# ";
 		q=db.execute("q"); 
-		application.zcore.functions.zDeleteRecord("feature_field","feature_field_id", "jetendofeature");
 		application.zcore.featureCom.updateSchemaCacheBySchemaId(qS2.feature_schema_id);
 		if(qS2.feature_schema_id NEQ 0){
 			queueSortStruct = StructNew();
@@ -562,18 +553,9 @@
 
 <cffunction name="update" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var qCheck=0;
-	var result=0;
-	var returnAppendString=0; 
-	var tempURL=0;
-	var qDF=0;
-	var queueSortStruct=0;
-	var queueComStruct=0;
-	var ts=0;
-	var myForm=structnew();
-	var formaction=0;
-	variables.init();
+	db=request.zos.queryObject;
+	myForm=structnew();
+	init();
 	form.siteglobal=application.zcore.functions.zso(form,'siteglobal', false, 0);
 
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	 
@@ -593,8 +575,7 @@
 	if(form.method EQ "update"){
 		db.sql="select * from #db.table("feature_field", "jetendofeature")# feature_field 
 		where feature_field_id = #db.param(form.feature_field_id)# and 
-		feature_field_deleted = #db.param(0)# and 
-		site_id = #db.param(form.site_id)#"; 
+		feature_field_deleted = #db.param(0)#"; 
 		qCheck=db.execute("qCheck");
 		if(qCheck.site_id EQ 0 and variables.allowGlobal EQ false){
 			application.zcore.functions.zRedirect("/z/feature/admin/features/index");
@@ -1321,7 +1302,6 @@
 		//queueSortStruct.sortVarName="siteSchema"&qSchema.feature_schema_id;
 		queueSortStruct.datasource="jetendofeature";
 		queueSortStruct.where ="  feature_schema_id = '#application.zcore.functions.zescape(qSchema.feature_schema_id)#' and 
-		feature_field.site_id ='#application.zcore.functions.zescape(request.zos.globals.id)#' and 
 		feature_field_deleted='0' ";
 
 		
@@ -1356,8 +1336,7 @@
 		loop from="1" to="25" index="i"{
 			db.sql="select * from #db.table("feature_schema", "jetendofeature")# feature_schema 
 			where feature_schema_id = #db.param(curParentId)# and 
-			feature_schema_deleted = #db.param(0)# and
-			feature_id=#db.param(form.feature_id)#";
+			feature_schema_deleted = #db.param(0)#";
 			q1=db.execute("q1", "", 10000, "query", false);
 			loop query="q1"{
 				arrayappend(arrParent, '<a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#q1.feature_schema_id#">#application.zcore.functions.zFirstLetterCaps(q1.feature_schema_display_name)#</a> / ');
@@ -1901,9 +1880,7 @@
 		}
 		var tempData={
 			feature_id:form.feature_id,
-			feature_field_id_siteIDType:1,
 			feature_data_id: form.feature_data_id,
-			site_id:request.zos.globals.id,
 			feature_data_value:nv,
 			feature_data_disable_time:form.feature_data_disable_time,
 			feature_data_date_value:nvDate,
@@ -4561,7 +4538,7 @@ Define this function in another CFC to override the default email format
 				}  
 				if(row.feature_field_type_id EQ 3){
 					if(row.feature_data_original NEQ ""){
-						echo('<p><a href="/zupload/site-options/#row.feature_data_original#" target="_blank">View Original Image</a></p>');
+						echo('<p><a href="/zupload/feature-options/#row.feature_data_original#" target="_blank">View Original Image</a></p>');
 					}
 				}
 

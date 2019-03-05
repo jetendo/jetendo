@@ -138,19 +138,14 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
+<cffunction name="onDelete" localmode="modern" access="public">
+	<cfargument name="value" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfscript>
-	uploadPath=getUploadPath(arguments.optionStruct);
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_value')){
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_group_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_group_value"]);
-		}
-	}else{
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/site-options/'&arguments.row["#variables.siteType#_x_option_value"]);
-		}
+	uploadPath=getUploadPath(arguments.optionStruct); 
+	if(arguments.value NEQ "" and fileexists(application.zcore.functions.zvar('privatehomedir',arguments.site_id)&uploadPath&'/feature-options/'&arguments.value)){
+		application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.site_id)&uploadPath&'/feature-options/'&arguments.value);
 	}
 	</cfscript>
 </cffunction> 
@@ -172,15 +167,15 @@
 		if(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]] NEQ ""){
 			uploadPath=getUploadPath(arguments.optionStruct);
 			if(uploadPath EQ "zuploadsecure"){
-				ts3.downloadPath="/zuploadsecure/site-options/";
+				ts3.downloadPath="/zuploadsecure/feature-options/";
 				if(application.zcore.user.checkGroupAccess("administrator")){
-					echo('<p><a href="#request.zos.currentHostName#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/site-options/"&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&'" target="_blank">Download File</a></p>');
+					echo('<p><a href="#request.zos.currentHostName#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/feature-options/"&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&'" target="_blank">Download File</a></p>');
 				}else{
 					echo('<p>'&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]&' | You must be an administrator to download the file.</p>');
 				}
 			}else{
-				ts3.downloadPath="/zupload/site-options/";
-				writeoutput('<p><a href="/'&uploadPath&'/site-options/#arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]#" 
+				ts3.downloadPath="/zupload/feature-options/";
+				writeoutput('<p><a href="/'&uploadPath&'/feature-options/#arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]#" 
 				target="_blank" 
 				title="#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])#">Download File</a></p>');
 			}
@@ -211,9 +206,9 @@
 	if(arguments.value NEQ ""){
 		uploadPath=getUploadPath(arguments.optionStruct);
 		if(uploadPath EQ "zuploadsecure"){
-			return '<a href="#request.zos.globals.domain#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/site-options/"&arguments.value)&'" target="_blank">Download File</a>';
+			return '<a href="#request.zos.globals.domain#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/feature-options/"&arguments.value)&'" target="_blank">Download File</a>';
 		}else{
-			return '<a href="#request.zos.globals.domain#/'&uploadPath&'/site-options/#arguments.value#" target="_blank">Download File</a>';
+			return '<a href="#request.zos.globals.domain#/'&uploadPath&'/feature-options/#arguments.value#" target="_blank">Download File</a>';
 		}
 	}else{
 		return ('N/A');
@@ -255,10 +250,10 @@
 	filename="";
 	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
 		form["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/site-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_group_value');	
+		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_group_value');	
 	}else{
 		form["#variables.siteType#_x_option_id"]=arguments.row["#variables.siteType#_x_option_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/site-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_value');	
+		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_value');	
 	}
 	if(not structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete') and (isNull(fileName) or fileName EQ "")){
 		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){

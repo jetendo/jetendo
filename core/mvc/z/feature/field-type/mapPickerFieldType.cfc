@@ -46,11 +46,10 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
+<cffunction name="onDelete" localmode="modern" access="public">
+	<cfargument name="value" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
-	<cfscript>
-	</cfscript>
 </cffunction>
 
 <cffunction name="isCopyable" localmode="modern" access="public" returntype="boolean" output="no">

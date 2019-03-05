@@ -144,17 +144,12 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
+<cffunction name="onDelete" localmode="modern" access="public">
+	<cfargument name="value" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfscript>
-
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_value')){
-		v=arguments.row['#variables.siteType#_x_option_group_value'];
-	}else{
-		v=arguments.row['#variables.siteType#_x_option_value'];
-	}
-	application.zcore.imageLibraryCom.deleteImageLibraryId(v);
+	application.zcore.imageLibraryCom.deleteImageLibraryId(arguments.value, arguments.site_id);
 	</cfscript>
 </cffunction>
 

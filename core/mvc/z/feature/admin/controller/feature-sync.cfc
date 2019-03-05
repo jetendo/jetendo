@@ -895,53 +895,28 @@ This allows avoiding remaps more easily.  Less code when importing.
 			if(form.debugEnabled){
 				echo("delete feature_schema where feature_field_id=#optionId#<br>");
 			}else{
-				if(i EQ 0){
-					db.sql="select * from #db.table("site_x_option", request.zos.zcoreDatasource)# s1,
-					#db.table("feature_field", request.zos.zcoreDatasource)# s2
-					where s1.feature_field_id = #db.param(optionId)# and 
-					s1.feature_id = #db.param(form.feature_id)# and 
-					s1.site_x_option_deleted = #db.param(0)# and 
-					s2.feature_field_deleted = #db.param(0)# and
-					s1.feature_id = s2.feature_id and 
-					s1.feature_field_id = s2.feature_field_id ";
-					qSiteXField=db.execute("qSiteXField");
-					for(row in qSiteXField){
-						optionStruct=deserializeJson(row.feature_field_type_json); 
-						currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
-						if(currentCFC.hasCustomDelete()){
-							// call delete on optionType
-							currentCFC.onDelete(row, optionStruct);
-						}
+				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data, 
+				#db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
+				where feature_data.feature_field_id = #db.param(optionId)# and 
+				feature_data.feature_id = #db.param(form.feature_id)# and 
+				feature_data_deleted = #db.param(0)# and 
+				feature_field_deleted = #db.param(0)# and
+				feature_data.feature_field_id = feature_field.feature_field_id and 
+				feature_data.feature_id = feature_field.feature_id ";
+				qSiteXSchema=db.execute("qSiteXSchema");
+				for(row in qSiteXSchema){
+					optionStruct=deserializeJson(row.feature_field_type_json); 
+					currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
+					if(currentCFC.hasCustomDelete()){
+						// call delete on optionType
+						currentCFC.onDelete(row, optionStruct);
 					}
-					db.sql="delete from #db.param("site_x_option", request.zos.zcoreDatasource)# 
-					where feature_field_id = #db.param(optionId)# and 
-					site_x_option_deleted = #db.param(0)# and
-					feature_id = #db.param(form.feature_id)#";
-					db.execute("qDelete");
-				}else{
-					db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data, 
-					#db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
-					where feature_data.feature_field_id = #db.param(optionId)# and 
-					feature_data.feature_id = #db.param(form.feature_id)# and 
-					feature_data_deleted = #db.param(0)# and 
-					feature_field_deleted = #db.param(0)# and
-					feature_data.feature_field_id = feature_field.feature_field_id and 
-					feature_data.feature_id = feature_field.feature_id ";
-					qSiteXSchema=db.execute("qSiteXSchema");
-					for(row in qSiteXSchema){
-						optionStruct=deserializeJson(row.feature_field_type_json); 
-						currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
-						if(currentCFC.hasCustomDelete()){
-							// call delete on optionType
-							currentCFC.onDelete(row, optionStruct);
-						}
-					}
-					db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# 
-					where feature_field_id = #db.param(optionId)# and 
-					feature_data_deleted = #db.param(0)# and
-					feature_id = #db.param(form.feature_id)#";
-					db.execute("qDelete");
-				} 
+				}
+				db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# 
+				where feature_field_id = #db.param(optionId)# and 
+				feature_data_deleted = #db.param(0)# and
+				feature_id = #db.param(form.feature_id)#";
+				db.execute("qDelete");
 				
 				/*db.sql="delete from #db.table("feature_schema_map", request.zos.zcoreDatasource)# 
 				where feature_field_id = #db.param(optionId)# and 

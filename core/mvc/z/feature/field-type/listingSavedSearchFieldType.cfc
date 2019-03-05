@@ -52,12 +52,17 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
+<cffunction name="onDelete" localmode="modern" access="public">
+	<cfargument name="value" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="optionStruct" type="struct" required="yes">
 	<cfscript>
-	// delete from the mls_saved_search table using the function from blog
-        request.zos.listing.functions.zMLSSearchFieldsUpdate('delete', arguments.row["#variables.siteType#_x_option_group_value"]);
+	db=request.zos.queryObject;
+	db.sql="delete from #db.table("mls_saved_search", request.zos.zcoreDatasource)#  
+	WHERE mls_saved_search_id=#db.param(arguments.value)# and 
+	site_id=#db.param(arguments.site_id)# and 
+	mls_saved_search_deleted =#db.param(0)# ";
+	db.execute("q");
 	</cfscript>
 </cffunction>
 

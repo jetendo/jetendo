@@ -356,9 +356,9 @@
 						if(row.groupSetValue NEQ "" and row.groupSetValue NEQ "0"){
 							optionStruct=sog.optionLookup[row.groupSetFieldId].optionStruct;
 							if(application.zcore.functions.zso(optionStruct, 'file_securepath') EQ "Yes"){
-								tempValue="/zuploadsecure/site-options/"&row.groupSetValue;
+								tempValue="/zuploadsecure/feature-options/"&row.groupSetValue;
 							}else{
-								tempValue="/zupload/site-options/"&row.groupSetValue;
+								tempValue="/zupload/feature-options/"&row.groupSetValue;
 							}
 						}else{
 							tempValue="";
@@ -371,7 +371,7 @@
 						sog.optionSchemaSetId[id&"_f"&row.groupSetFieldId]=tempValue;
 					}else if(typeId EQ 3){
 						if(row.groupSetOriginal NEQ ""){
-							sog.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="/zupload/site-options/"&row.groupSetOriginal;
+							sog.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="/zupload/feature-options/"&row.groupSetOriginal;
 						}else{
 							sog.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]=tempValue;
 						}
@@ -1314,9 +1314,9 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 		}else if(typeId EQ 3 or typeId EQ 9){
 			if(arguments.row.feature_data_value NEQ "" and arguments.row.feature_data_value NEQ "0"){
 				if(application.zcore.functions.zso(t9.optionLookup[arguments.row.feature_field_id].optionStruct, 'file_securepath') EQ "Yes"){
-					tempValue="/zuploadsecure/site-options/"&arguments.row.feature_data_value;
+					tempValue="/zuploadsecure/feature-options/"&arguments.row.feature_data_value;
 				}else{
-					tempValue="/zupload/site-options/"&arguments.row.feature_data_value;
+					tempValue="/zupload/feature-options/"&arguments.row.feature_data_value;
 				}
 			}else{
 				tempValue="";
@@ -1579,9 +1579,9 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 			if(row.groupSetValue NEQ "" and row.groupSetValue NEQ "0"){
 				optionStruct=typeStruct.optionLookup[row.groupSetFieldId].optionStruct;
 				if(application.zcore.functions.zso(optionStruct, 'file_securepath') EQ "Yes"){
-					tempValue="/zuploadsecure/site-options/"&row.groupSetValue;
+					tempValue="/zuploadsecure/feature-options/"&row.groupSetValue;
 				}else{
-					tempValue="/zupload/site-options/"&row.groupSetValue;
+					tempValue="/zupload/feature-options/"&row.groupSetValue;
 				}
 			}else{
 				tempValue="";
@@ -1592,7 +1592,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 		t9.optionSchemaSetId[id&"_f"&row.groupSetFieldId]=tempValue;
 		if(row.typeId EQ 3){
 			if(row.groupSetOriginal NEQ ""){
-				t9.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="/zupload/site-options/"&row.groupSetOriginal;
+				t9.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="/zupload/feature-options/"&row.groupSetOriginal;
 			}else{
 				t9.optionSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]=tempValue;
 			}
@@ -2389,8 +2389,8 @@ if(not rs.success){
 		feature_field.feature_field_id = feature_data.feature_field_id ";
 		qFields=db.execute("qFields");
 		//writeLogEntry("#qFields.recordcount# qFields records that need onDelete");
-		path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/site-options/';
-		securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/site-options/';
+		path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/feature-options/';
+		securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/feature-options/';
 		siteStruct=application.zcore.functions.zGetSiteGlobals(request.zos.globals.id);
 		sog=siteStruct.soSchemaData;
 		for(row2 in qFields){
@@ -2458,28 +2458,27 @@ if(not rs.success){
 	 
 	db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 	WHERE  feature_data.feature_schema_id=#db.param(arguments.feature_schema_id)# and  
-	feature_data_deleted = #db.param(0)# and
+	feature_data_deleted = #db.param(0)# and 
+	feature_data_image_library_id<>#db.param(0)# and 
 	feature_data.feature_id=#db.param(form.feature_id)#  ";
 	qSets=db.execute("qSets");
 	for(row in qSets){
-		if(row.feature_data_image_library_id NEQ 0){
-			application.zcore.imageLibraryCom.deleteImageLibraryId(row.feature_data_image_library_id);
-		}
+		application.zcore.imageLibraryCom.deleteImageLibraryId(row.feature_data_image_library_id, row.site_id);
 	}
 
-	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")#, 
+	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
+	WHERE  feature_field.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
+	feature_field_deleted = #db.param(0)#";
+	qField=db.execute("qField");
+	db.sql="SELECT * FROM 
 	#db.table("feature_data", "jetendofeature")#  
 	WHERE  feature_data.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
-	feature_field_type_id in (#db.param(3)#, #db.param(9)#) and 
 	feature_data.feature_id=#db.param(form.feature_id)# and 
-	feature_field.site_id = feature_data.site_id and 
 	feature_data_value <> #db.param('')# and 
-	feature_field_deleted = #db.param(0)# and 
-	feature_data_deleted = #db.param(0)# and
-	feature_field.feature_field_id = feature_data.feature_field_id ";
+	feature_data_deleted = #db.param(0)# ";
 	qFields=db.execute("qFields");
-	path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/site-options/';
-	securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/site-options/';
+	path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/feature-options/';
+	securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/feature-options/';
 	for(row in qFields){
 		if(structkeyexists(sog.optionLookup, row.feature_field_id)){
 			var currentCFC=application.zcore.featureCom.getTypeCFC(sog.optionLookup[row.feature_field_id].type); 
