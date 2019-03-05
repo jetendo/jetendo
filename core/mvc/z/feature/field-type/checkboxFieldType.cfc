@@ -112,7 +112,7 @@
 	<cfscript>
 	ts={
 		type="=",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(structkeyexists(arguments.optionStruct, 'checkbox_labels') and arguments.optionStruct.checkbox_labels NEQ "" and arguments.optionStruct.checkbox_values NEQ ""){
@@ -361,7 +361,7 @@
 	</cfscript>
 </cffunction> 
 		
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 	};

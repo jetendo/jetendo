@@ -133,7 +133,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">
 </cffunction>
 		
-<cffunction name="getOptionFieldStruct" output="no" localmode="modern" access="public">
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public">
 </cffunction>
 
 <cffunction name="getTypeForm" localmode="modern" access="public">

@@ -3,7 +3,7 @@
 <!--- 
 deep copy for Feature Schemas
 	two ways to handle this.
-		create a "linked record" that will replace the original and maintain the same URL and original parent record ID, but all site_x_option_group_id ids will change, and the 
+		create a "linked record" that will replace the original and maintain the same URL and original parent record ID, but all feature_data_id ids will change, and the 
 			complications?
 				I should show modal window while version is being created, with loading animation, and maybe status feedback.   It might take a minute to copy some kinds of records.  Prevent double click.
 			
@@ -28,7 +28,7 @@ When making a version the primary record, it will have option to preserve the or
 					feature_data_master_set_id (refers to the main feature_data_id record)  
 						if this is 0, then it is the master, else it is a version, and should not be included in the main arrays and query results that are used for site output.   
 						when non-zero, the full tree of data for this record and its child records should ALWAYS be cached in memory if the version record for this id is not archived.
-				site_x_option_group
+				feature_data
 					no changes.
 				
 			versions can only be viewed/edited/deleted on the version page.   The version page could be made into a modal window instead of a separate page.  This makes it easier to stay where you where, similar to edit.
@@ -73,21 +73,21 @@ When making a version the primary record, it will have option to preserve the or
 
 	logCopyMessage('Copying set ###arguments.option_group_set_id#');
 	db.sql="select * from 
-	#db.table("site_x_option_group", "jetendofeature")# WHERE 
+	#db.table("feature_data", "jetendofeature")# WHERE 
 	feature_data_id = #db.param(arguments.option_group_set_id)# and 
-	site_x_option_group_deleted=#db.param(0)# and 
+	feature_data_deleted=#db.param(0)# and 
 	site_id = #db.param(arguments.site_id)# ";
 	qValue=db.execute("qValue");
 	typeCache={};
 	tempPath=application.zcore.functions.zvar('privatehomedir', arguments.site_id);
 	for(row2 in qValue){
 
-		structdelete(row2, 'site_x_option_group_id');  
+		structdelete(row2, 'feature_data_id');  
 		row2.feature_data_id=newSetId;
 		row2.site_id=arguments.site_id;
-		row2.site_x_option_group_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
+		row2.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 
-		if(row2.site_x_option_group_value NEQ ""){
+		if(row2.feature_data_value NEQ ""){
 			if(structkeyexists(arguments.optionStruct, row2.feature_field_id)){
 				typeId=arguments.optionStruct[row2.feature_field_id].data.feature_field_type_id;
 				if(typeId EQ 9){
@@ -101,11 +101,11 @@ When making a version the primary record, it will have option to preserve the or
 				}else if(typeId EQ 3){
 					path=tempPath&'zupload/site-options/';
 				}else if(typeId EQ 23){ 
-					row2.site_x_option_group_value=application.zcore.imageLibraryCom.copyImageLibrary(row2.site_x_option_group_value, row2.site_id);
+					row2.feature_data_value=application.zcore.imageLibraryCom.copyImageLibrary(row2.feature_data_value, row2.site_id);
 				}else if(typeId EQ 21){
 					db.sql="select * from #db.table("mls_saved_search", "jetendofeature")# WHERE 
 					site_id = #db.param(row2.site_id)# and 
-					mls_saved_search_id=#db.param(row2.site_x_option_group_value)# and 
+					mls_saved_search_id=#db.param(row2.feature_data_value)# and 
 					mls_saved_search_deleted=#db.param(0)# ";
 					qV=db.execute("qV");
 					for(r2 in qV){
@@ -115,15 +115,15 @@ When making a version the primary record, it will have option to preserve the or
 						ts.struct=r2;
 						ts.datasource="jetendofeature";
 						ts.table="mls_saved_search";
-						row2.site_x_option_group_value=application.zcore.functions.zInsert(ts);
+						row2.feature_data_value=application.zcore.functions.zInsert(ts);
 					}
 				}
 				if(typeId EQ 9 or typeId EQ 3){
-					newPath=application.zcore.functions.zcopyfile(path&row2.site_x_option_group_value);
-					row2.site_x_option_group_value=getfilefrompath(newPath); 
-					if(row2.site_x_option_group_original NEQ ""){
-						newPath=application.zcore.functions.zcopyfile(path&row2.site_x_option_group_original);
-						row2.site_x_option_group_original=getfilefrompath(newPath);
+					newPath=application.zcore.functions.zcopyfile(path&row2.feature_data_value);
+					row2.feature_data_value=getfilefrompath(newPath); 
+					if(row2.feature_data_original NEQ ""){
+						newPath=application.zcore.functions.zcopyfile(path&row2.feature_data_original);
+						row2.feature_data_original=getfilefrompath(newPath);
 					}
 				}
 			}
@@ -131,7 +131,7 @@ When making a version the primary record, it will have option to preserve the or
 		ts=structnew();
 		ts.struct=row2;
 		ts.datasource="jetendofeature";
-		ts.table="site_x_option_group";
+		ts.table="feature_data";
 		newValueId=application.zcore.functions.zInsert(ts);
 
 	}
@@ -462,19 +462,19 @@ When making a version the primary record, it will have option to preserve the or
 			feature_data_id = #db.param(backupMasterSetId)# and 
 			feature_data_deleted=#db.param(0)#";
 			db.execute("qDelete");
-			db.sql="update site_x_option_group set 
+			db.sql="update feature_data set 
 			feature_data_id = #db.param(newMasterId)#, 
-			site_x_option_group_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_id = #db.param(backupMasterSetId)# and 
 			site_id = #db.param(tempMaster.site_id)# and 
-			site_x_option_group_deleted=#db.param(0)# ";
+			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 			db.sql="update feature_data set 
 			feature_data_parent_id = #db.param(newMasterId)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_parent_id = #db.param(backupMasterSetId)# and 
 			site_id = #db.param(tempMaster.site_id)# and 
-			site_x_option_group_deleted=#db.param(0)# ";
+			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 
 			db.sql="update feature_data set 
@@ -482,21 +482,21 @@ When making a version the primary record, it will have option to preserve the or
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
-			site_x_option_group_deleted=#db.param(0)# ";
+			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
-			db.sql="update site_x_option_group set 
+			db.sql="update feature_data set 
 			feature_data_id = #db.param(backupMasterSetId)#, 
-			site_x_option_group_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
+			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
-			site_x_option_group_deleted=#db.param(0)# ";
+			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 			db.sql="update feature_data set 
 			feature_data_parent_id = #db.param(backupMasterSetId)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_parent_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
-			site_x_option_group_deleted=#db.param(0)# ";
+			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 
 			tempVersion.feature_data_id=backupMasterSetId;

@@ -3,22 +3,22 @@
 <!--- 
 need option for "Delete missing fields?"
 
-Maybe a better export format uses groupNameList for all the feature_schema_id and groupNameList+feature_field_name for all the feature_field_id
+Maybe a better export format uses groupNameList for all the feature_schema_id and groupNameList+feature_field_variable_name for all the feature_field_id
 This allows avoiding remaps more easily.  Less code when importing.
  --->
 
 <cffunction name="getNextFieldId" localmode="modern" returntype="numeric">
 	<cfargument name="groupNameList" type="string" required="yes">
-	<cfargument name="feature_field_name" type="string" required="yes">
+	<cfargument name="feature_field_variable_name" type="string" required="yes">
 	<cfscript>
 	if(not structkeyexists(request.nextFieldStruct, arguments.groupNameList)){
 		request.nextFieldStruct[arguments.groupNameList]={};
 	}
-	if(structkeyexists(request.nextFieldStruct[arguments.groupNameList], arguments.feature_field_name)){
-		request.nextFieldStruct[arguments.groupNameList][arguments.feature_field_name];
+	if(structkeyexists(request.nextFieldStruct[arguments.groupNameList], arguments.feature_field_variable_name)){
+		request.nextFieldStruct[arguments.groupNameList][arguments.feature_field_variable_name];
 	}
 	request.nextFieldId++;
-	request.nextFieldStruct[arguments.groupNameList][arguments.feature_field_name]=request.nextFieldId;
+	request.nextFieldStruct[arguments.groupNameList][arguments.feature_field_variable_name]=request.nextFieldId;
 	return request.nextFieldId;
 	</cfscript>
 </cffunction>
@@ -99,26 +99,26 @@ This allows avoiding remaps more easily.  Less code when importing.
 <cffunction name="getFieldByName" localmode="modern" returntype="struct">
 	<cfargument name="struct" type="struct" required="yes">
 	<cfargument name="groupNameList" type="string" required="yes">
-	<cfargument name="feature_field_name" type="string" required="yes">
+	<cfargument name="feature_field_variable_name" type="string" required="yes">
 	<cfargument name="createIfMissing" type="boolean" required="no" default="#false#">
 	<cfscript>
 	groupStruct=getSchemaByName(arguments.struct, arguments.groupNameList, arguments.createIfMissing);
 	if(not groupStruct.success){
 		return {success:false, errorMessage:"couldn't find group: "&arguments.groupNameList&"<br>"};
 	}
-	if(structkeyexists(arguments.struct.optionNameStruct, arguments.groupNameList) and structkeyexists(arguments.struct.optionNameStruct[arguments.groupNameList], arguments.feature_field_name)){
-		optionStruct=arguments.struct.optionStruct[arguments.struct.optionNameStruct[arguments.groupNameList][arguments.feature_field_name]];
+	if(structkeyexists(arguments.struct.optionNameStruct, arguments.groupNameList) and structkeyexists(arguments.struct.optionNameStruct[arguments.groupNameList], arguments.feature_field_variable_name)){
+		optionStruct=arguments.struct.optionStruct[arguments.struct.optionNameStruct[arguments.groupNameList][arguments.feature_field_variable_name]];
 		return { success:true, struct:optionStruct };
 	}else if(arguments.createIfMissing){
 		optionStruct={
 			new:true,
 			feature_schema_id:groupStruct.struct.feature_schema_id,
-			feature_field_id:getNextFieldId(arguments.groupNameList, arguments.feature_field_name),
+			feature_field_id:getNextFieldId(arguments.groupNameList, arguments.feature_field_variable_name),
 			feature_id:request.zos.globals.id
 		};
 		return { success:true, struct:optionStruct };
 	}else{
-		return {success:false, errorMessage:"feature_field_name, ""#arguments.feature_field_name#"", doesn't exist in group."};
+		return {success:false, errorMessage:"feature_field_variable_name, ""#arguments.feature_field_variable_name#"", doesn't exist in group."};
 	}
 	</cfscript>
 </cffunction>
@@ -213,9 +213,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 		if(ts.arrField[i].feature_schema_id NEQ 0 and structkeyexists(struct.optionSchemaStruct, ts.arrField[i].feature_schema_id)){ 
 			groupStruct=struct.optionSchemaStruct[ts.arrField[i].feature_schema_id];
 			groupNameList=getFullSchemaPath(struct, groupStruct.feature_schema_parent_id, groupStruct.feature_schema_variable_name);
-			struct.optionNameStruct[arrayToList(groupNameList, chr(9))][ts.arrField[i].feature_field_name]=ts.arrField[i].feature_field_id;
+			struct.optionNameStruct[arrayToList(groupNameList, chr(9))][ts.arrField[i].feature_field_variable_name]=ts.arrField[i].feature_field_id;
 		}else{
-			struct.optionNameStruct["0"][ts.arrField[i].feature_field_name]=ts.arrField[i].feature_field_id;
+			struct.optionNameStruct["0"][ts.arrField[i].feature_field_variable_name]=ts.arrField[i].feature_field_id;
 		}
 	}
 	/*
@@ -250,7 +250,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 				selectSchemaStruct=getSchemaByName(destinationStruct, groupNameList, true);
 				optionStruct.selectmenu_groupid=toString(selectSchemaStruct.struct.feature_schema_id);
 			}else{
-				echo("Warning: selectmenu_groupid, ""#optionStruct.selectmenu_groupid#"", doesn't exist in source. The site option, #row.feature_field_name# will be imported, but it must be manually corrected.");
+				echo("Warning: selectmenu_groupid, ""#optionStruct.selectmenu_groupid#"", doesn't exist in source. The Feature Field, #row.feature_field_variable_name# will be imported, but it must be manually corrected.");
 				optionStruct.selectmenu_groupid='';
 			}
 		}
@@ -267,7 +267,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 		}
 		
 		// this should work with feature_schema_id 0 as well.
-		optionStruct=getFieldByName(destinationStruct, groupNameList, row.feature_field_name, true);
+		optionStruct=getFieldByName(destinationStruct, groupNameList, row.feature_field_variable_name, true);
 		row.feature_field_id=optionStruct.struct.feature_field_id;
 	}
 	row.feature_id = request.zos.globals.id;
@@ -680,7 +680,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	if(not sourceField.success){
 		return {success:false, errorMessage:"skipping source where row.feature_field_id = ""#row.feature_field_id#""<br />" };
 	}
-	destinationFieldStruct=getFieldByName(destinationStruct, groupNameList, sourceField.struct.feature_field_name, true);
+	destinationFieldStruct=getFieldByName(destinationStruct, groupNameList, sourceField.struct.feature_field_variable_name, true);
 	row.feature_field_id=destinationFieldStruct.struct.feature_field_id;
 	
 	// remap feature_schema_map_fieldname if this feature_field_id is mapped to a feature_schema_id
@@ -694,7 +694,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 		if(not sourceField2.success){
 			return {success:false, errorMessage:"can't map due to missing feature_field_id, #row.feature_schema_map_fieldname#, in source<br />" };
 		}else{
-			destinationFieldStruct2=getFieldByName(destinationStruct, groupNameList2, sourceField2.struct.feature_field_name, true);
+			destinationFieldStruct2=getFieldByName(destinationStruct, groupNameList2, sourceField2.struct.feature_field_variable_name, true);
 			// feature_schema_map_fieldname is a field in the feature_schema_map_group_id field of the current feature_schema_id
 			row.feature_schema_map_fieldname=destinationFieldStruct2.struct.feature_field_id;
 		}
@@ -919,14 +919,14 @@ This allows avoiding remaps more easily.  Less code when importing.
 					feature_id = #db.param(form.feature_id)#";
 					db.execute("qDelete");
 				}else{
-					db.sql="select * from #db.table("site_x_option_group", request.zos.zcoreDatasource)# site_x_option_group, 
+					db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data, 
 					#db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
-					where site_x_option_group.feature_field_id = #db.param(optionId)# and 
-					site_x_option_group.feature_id = #db.param(form.feature_id)# and 
-					site_x_option_group_deleted = #db.param(0)# and 
+					where feature_data.feature_field_id = #db.param(optionId)# and 
+					feature_data.feature_id = #db.param(form.feature_id)# and 
+					feature_data_deleted = #db.param(0)# and 
 					feature_field_deleted = #db.param(0)# and
-					site_x_option_group.feature_field_id = feature_field.feature_field_id and 
-					site_x_option_group.feature_id = feature_field.feature_id ";
+					feature_data.feature_field_id = feature_field.feature_field_id and 
+					feature_data.feature_id = feature_field.feature_id ";
 					qSiteXSchema=db.execute("qSiteXSchema");
 					for(row in qSiteXSchema){
 						optionStruct=deserializeJson(row.feature_field_type_json); 
@@ -936,9 +936,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 							currentCFC.onDelete(row, optionStruct);
 						}
 					}
-					db.sql="delete from #db.table("site_x_option_group", request.zos.zcoreDatasource)# 
+					db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# 
 					where feature_field_id = #db.param(optionId)# and 
-					site_x_option_group_deleted = #db.param(0)# and
+					feature_data_deleted = #db.param(0)# and
 					feature_id = #db.param(form.feature_id)#";
 					db.execute("qDelete");
 				} 
@@ -1180,7 +1180,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	application.zcore.functions.zStatusHandler(request.zsid);
 	</cfscript>
 	<h2>Sync Tool</h2>
-	<p>Allows import/export of configuration data for site options system.   <!--- Coming soon: sync for menus, slideshows, site globals, app configuration, and more. ---></p>
+	<p>Allows import/export of configuration data for Feature Fields system.   <!--- Coming soon: sync for menus, slideshows, site globals, app configuration, and more. ---></p>
 	<p><strong>WARNING: Sync only works if the Code Name matches on both servers.  If you have edited the code name manually, you must edit the remote server manually too, or you may cause data loss.</strong></p>
 	<p>If you are unsure about the safety of using this feature, you should probably download a copy of the newest version of the project instead of using this tool.</p>
 	<h3><a href="/z/admin/sync/exportData?download=1" class="z-manager-search-button">Export</a> </h3>

@@ -65,7 +65,7 @@
 	ts.struct=arguments.dataStruct; 
 	ts.onclick=arguments.onChangeJavascript;
 	ts.output=false;
-	return application.zcore.functions.zInput_RadioSchema(ts);    
+	return application.zcore.functions.zInput_RadioGroup(ts);    
 	</cfscript>
 </cffunction>
 
@@ -90,7 +90,7 @@
 	<cfscript>
 	ts={
 		type="=",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
@@ -154,7 +154,7 @@
 	ts.delimiter = arguments.optionStruct.radio_delimiter;
 	ts.struct=arguments.dataStruct; 
 	ts.output=false;
-	return { label: true, hidden: false, value: application.zcore.functions.zInput_RadioSchema(ts)};   
+	return { label: true, hidden: false, value: application.zcore.functions.zInput_RadioGroup(ts)};   
 	</cfscript>
 </cffunction>
 
@@ -173,7 +173,7 @@
 	ts.delimiter = "#arguments.optionStruct.radio_delimiter#";
 	ts.struct=form; 
 	ts.output=true;
-	application.zcore.functions.zInput_RadioSchema(ts);   
+	application.zcore.functions.zInput_RadioGroup(ts);   
 	</cfscript>
 	';
 	</cfscript>
@@ -305,7 +305,7 @@
 	</cfscript>
 </cffunction> 
 		
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		radio_delimiter:"|",

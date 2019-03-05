@@ -136,13 +136,12 @@
 		
 		zcore.componentObjectCache=componentObjectCache;
 		structappend(application.zcore, zcore.componentObjectCache);
-		if(request.zos.isTestServer){
-		// doesn't work yet
-			// featureData={
-			// 	optionTypeStruct:componentObjectCache.featureCom.getFieldTypes()
-			// };
-			// featureData.arrCustomDelete=componentObjectCache.featureCom.getTypeCustomDeleteArray(featureData);
-			// zcore.featureData=featureData;
+		if(request.zos.isTestServer){ 
+			featureData={
+				fieldTypeStruct:componentObjectCache.featureCom.getFieldTypes()
+			};
+			featureData.arrCustomDelete=componentObjectCache.featureCom.getTypeCustomDeleteArray(featureData);
+			zcore.featureData=featureData;
 		}
 		soGroupData={
 			optionTypeStruct:componentObjectCache.siteOptionCom.getOptionTypes()

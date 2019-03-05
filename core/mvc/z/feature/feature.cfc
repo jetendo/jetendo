@@ -37,6 +37,9 @@
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.sharedStruct;
+	if(not request.zos.isTestServer){
+		return;
+	}
 	// if(structkeyexists(arguments.sharedStruct, 'featureStruct')){
 	// 	return; // TODO: remove this when I properly integrate this later.
 	// }
@@ -85,6 +88,21 @@
 <cffunction name="getFeatureIdList" localmode="modern" access="public">
 	<cfscript>
 	return application.siteStruct[request.zos.globals.id].featureStruct.featureIdList;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getFeatureIdForSchema" localmode="modern" access="public">
+	<cfargument name="feature_schema_id" type="string" required="yes">
+	<cfscript>
+	db.sql="select feature_id from #db.table("feature_schema", "jetendofeature")# 
+	WHERE feature_schema_id =#db.param(arguments.feature_schema_id)# and 
+	feature_schema_deleted=#db.param(0)# ";
+	qId=db.execute("qId");
+	if(qId.recordcount EQ 0){
+		throw("Invalid feature_schema_id:#arguments.feature_schema_id#");
+	}
+	return qId.feature_id;
 	</cfscript>
 </cffunction>
 
@@ -171,7 +189,7 @@
 	<cfscript>
 	db=request.zos.queryObject; 
 	db.sql="SELECT feature_schema_id FROM #db.table("feature_schema", "jetendofeature")# 
-	WHERE site_id =#db.param(arguments.siteStruct.id)# and 
+	WHERE #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 	feature_schema_deleted = #db.param(0)# 
 	ORDER BY feature_schema_parent_id asc";
 	qS=db.execute("qS"); 
@@ -224,7 +242,7 @@
 		sog.optionLookup[row.feature_field_id]=row;
 		structappend(sog.optionLookup[row.feature_field_id], {
 			edit:row.feature_field_edit_enabled,
-			name:row.feature_field_name,
+			name:row.feature_field_variable_name,
 			type:row.feature_field_type_id,
 			optionStruct:{}
 		});
@@ -232,8 +250,8 @@
 		if(not structkeyexists(sog.optionSchemaDefaults, row.feature_schema_id)){
 			sog.optionSchemaDefaults[row.feature_schema_id]={};
 		}
-		sog.optionSchemaDefaults[row.feature_schema_id][row.feature_field_name]=row.feature_field_default_value;
-		sog.optionIdLookup[row.feature_schema_id&chr(9)&row.feature_field_name]=row.feature_field_id;
+		sog.optionSchemaDefaults[row.feature_schema_id][row.feature_field_variable_name]=row.feature_field_default_value;
+		sog.optionIdLookup[row.feature_schema_id&chr(9)&row.feature_field_variable_name]=row.feature_field_id;
 		if(row.feature_schema_id NEQ 0){
 			if(structkeyexists(sog.optionSchemaFieldLookup, row.feature_schema_id) EQ false){
 				sog.optionSchemaFieldLookup[row.feature_schema_id]=structnew();
@@ -313,12 +331,12 @@
 		}
 		if(cacheEnabled or (versioningEnabled and arraylen(arrVersionSetId))){
 			db.sql="SELECT s3.feature_data_id, s3.feature_field_id groupSetFieldId, 
-			s3.site_x_option_group_value groupSetValue , 
-			s3.site_x_option_group_original groupSetOriginal 
-			FROM #db.table("site_x_option_group", "jetendofeature")# s3 
+			s3.feature_data_value groupSetValue , 
+			s3.feature_data_original groupSetOriginal 
+			FROM #db.table("feature_data", "jetendofeature")# s3 
 			WHERE s3.site_id = #db.param(site_id)#  and 
 			s3.feature_schema_id = #db.param(groupId)# and 
-			s3.site_x_option_group_deleted = #db.param(0)# "; 
+			s3.feature_data_deleted = #db.param(0)# "; 
 			if(not cacheEnabled){
 				db.sql&=" and s3.feature_data_id IN (#db.trustedSQL(arrayToList(arrVersionSetId, ', '))#) ";
 			}
@@ -766,29 +784,29 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 				tableName="sSchema"&fieldStruct[i];
 				orderTableLookup[i]=fieldIndex;
 				//arrayAppend(arrSelect, "sVal"&i);
-				arrayAppend(arrTable, "site_x_option_group "&tableName);
+				arrayAppend(arrTable, "feature_data "&tableName);
 				arrayAppend(arrWhere, "#tableName#.site_id = s1.site_id and 
 				#tableName#.feature_data_id = s1.feature_data_id and 
 				#tableName#.feature_field_id = '#application.zcore.functions.zescape(i)#' and 
 				#tableName#.feature_schema_id = s1.feature_schema_id AND 
-				#tableName#.site_x_option_group_deleted = 0");
+				#tableName#.feature_data_deleted = 0");
 				fieldIndex++;
 			}
 			if(arguments.orderBy NEQ ""){
-				// need to lookup the field feature_field_id using the feature_field_name and groupId
+				// need to lookup the field feature_field_id using the feature_field_variable_name and groupId
 				optionIdLookup=t9.optionIdLookup;
 				if(structkeyexists(optionIdLookup, groupId&chr(9)&arguments.orderBy)){
 					feature_field_id=optionIdLookup[groupId&chr(9)&arguments.orderBy];
 					feature_field_type_id=t9.optionLookup[feature_field_id].type;
 					currentCFC=getTypeCFC(feature_field_type_id);
 
-					arrayAppend(arrSelect, "s2.site_x_option_group_value sVal2");
-					arrayAppend(arrTable, "site_x_option_group s2");
+					arrayAppend(arrSelect, "s2.feature_data_value sVal2");
+					arrayAppend(arrTable, "feature_data s2");
 					arrayAppend(arrWhere, "s2.site_id = s1.site_id and 
 					s2.feature_data_id = s1.feature_data_id and 
 					s2.feature_field_id = '#application.zcore.functions.zescape(feature_field_id)#' and 
 					s2.feature_schema_id = s1.feature_schema_id AND 
-					s2.site_x_option_group_deleted = 0");
+					s2.feature_data_deleted = 0");
 					fieldIndex++;
 
 
@@ -850,10 +868,10 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 			
 			 db.sql="SELECT *  FROM 
 			 #db.table("feature_data", "jetendofeature")# s1, 
-			 #db.table("site_x_option_group", "jetendofeature")# s2
+			 #db.table("feature_data", "jetendofeature")# s2
 			WHERE  s1.feature_id=#db.param(form.feature_id)# and 
 			s1.feature_data_deleted = #db.param(0)# and 
-			s2.site_x_option_group_deleted = #db.param(0)# and 
+			s2.feature_data_deleted = #db.param(0)# and 
 			s1.site_id = s2.site_id and 
 			s1.feature_schema_id = s2.feature_schema_id and 
 			s1.feature_data_master_set_id = #db.param(0)# and 
@@ -978,10 +996,10 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	
 	 db.sql="SELECT * FROM 
 	 #db.table("feature_data", "jetendofeature")# s1, 
-	 #db.table("site_x_option_group", "jetendofeature")# s2
+	 #db.table("feature_data", "jetendofeature")# s2
 	WHERE  s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.site_x_option_group_deleted = #db.param(0)# and 
+	s2.feature_data_deleted = #db.param(0)# and 
 	s1.feature_data_master_set_id = #db.param(0)# and 
 	s1.site_id = s2.site_id and 
 	s1.feature_schema_id = s2.feature_schema_id and 
@@ -1127,12 +1145,12 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	db=request.zos.noVerifyQueryObject;
 	 db.sql="SELECT * FROM 
 	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`), 
-	 #db.table("site_x_option_group", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
+	 #db.table("feature_data", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
 	WHERE s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.site_x_option_group_deleted = #db.param(0)# and 
+	s2.feature_data_deleted = #db.param(0)# and 
 	feature_data_master_set_id = #db.param(0)# and 
-	site_x_option_group_value <> #db.param('')# and 
+	feature_data_value <> #db.param('')# and 
 	s1.site_id = s2.site_id and 
 	s1.feature_schema_id = s2.feature_schema_id and 
 	s1.feature_data_id = s2.feature_data_id and 
@@ -1174,10 +1192,10 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	idList="'"&arrayToList(arguments.arrSetId, "','")&"'";
 	 db.sql="SELECT * FROM 
 	 #db.table("feature_data", "jetendofeature")# s1, 
-	 #db.table("site_x_option_group", "jetendofeature")# s2
+	 #db.table("feature_data", "jetendofeature")# s2
 	WHERE s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.site_x_option_group_deleted = #db.param(0)# and 
+	s2.feature_data_deleted = #db.param(0)# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	s1.site_id = s2.site_id and 
 	s1.feature_schema_id = s2.feature_schema_id and 
@@ -1217,17 +1235,17 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	db=request.zos.noVerifyQueryObject;
 	 db.sql="SELECT * FROM 
 	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`), 
-	 #db.table("site_x_option_group", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
+	 #db.table("feature_data", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
 	WHERE s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.site_x_option_group_deleted = #db.param(0)# and 
+	s2.feature_data_deleted = #db.param(0)# and 
 	s1.site_id = s2.site_id and 
 	s1.feature_schema_id = s2.feature_schema_id and 
 	s1.feature_id = #db.param(arguments.feature_id)# and 
 	s1.feature_data_id = s2.feature_data_id and 
 	s1.feature_data_parent_id = #db.param(arguments.parentStruct.__setId)# and 
 	s1.feature_data_approved=#db.param(1)# and 
-	s2.site_x_option_group_value <> #db.param('')# and 
+	s2.feature_data_value <> #db.param('')# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_schema_id = #db.param(arguments.groupId)# ";
 
@@ -1288,23 +1306,23 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	if(arguments.row.feature_field_id NEQ ""){
 		typeId=t9.optionLookup[arguments.row.feature_field_id].type;
 		if(typeId EQ 2){
-			if(arguments.row.site_x_option_group_value EQ ""){
+			if(arguments.row.feature_data_value EQ ""){
 				tempValue="";
 			}else{
-				tempValue='<div class="zEditorHTML">'&arguments.row.site_x_option_group_value&'</div>';;
+				tempValue='<div class="zEditorHTML">'&arguments.row.feature_data_value&'</div>';;
 			}
 		}else if(typeId EQ 3 or typeId EQ 9){
-			if(arguments.row.site_x_option_group_value NEQ "" and arguments.row.site_x_option_group_value NEQ "0"){
+			if(arguments.row.feature_data_value NEQ "" and arguments.row.feature_data_value NEQ "0"){
 				if(application.zcore.functions.zso(t9.optionLookup[arguments.row.feature_field_id].optionStruct, 'file_securepath') EQ "Yes"){
-					tempValue="/zuploadsecure/site-options/"&arguments.row.site_x_option_group_value;
+					tempValue="/zuploadsecure/site-options/"&arguments.row.feature_data_value;
 				}else{
-					tempValue="/zupload/site-options/"&arguments.row.site_x_option_group_value;
+					tempValue="/zupload/site-options/"&arguments.row.feature_data_value;
 				}
 			}else{
 				tempValue="";
 			}
 		}else{
-			tempValue=arguments.row.site_x_option_group_value;
+			tempValue=arguments.row.feature_data_value;
 		}
 		arguments.curStruct[t9.optionLookup[arguments.row.feature_field_id].name]=tempValue;
 	}
@@ -1379,7 +1397,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 		var arroptionId=[];
 		for(row in qField){
 			arrayAppend(arroptionId, row.feature_field_id);
-			ts[row.feature_field_name]=row.feature_field_id;
+			ts[row.feature_field_variable_name]=row.feature_field_id;
 		} 
 		ts.feature_field_id=arrayToList(arroptionId, ",");
 		request.zos["#variables.type#SchemaImportTable"][form.feature_schema_id]=ts;
@@ -1462,9 +1480,9 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 
 	t9=getSiteData(arguments.site_id);
 	typeStruct=getTypeData(arguments.site_id);
-	db.sql="SELECT s1.*, s3.feature_field_id groupSetFieldId, s4.feature_field_type_id typeId, s3.site_x_option_group_value groupSetValue, s3.site_x_option_group_original groupSetOriginal  
+	db.sql="SELECT s1.*, s3.feature_field_id groupSetFieldId, s4.feature_field_type_id typeId, s3.feature_data_value groupSetValue, s3.feature_data_original groupSetOriginal  
 	FROM #db.table("feature_data", "jetendofeature")# s1  
-	LEFT JOIN #db.table("site_x_option_group", "jetendofeature")# s3  ON 
+	LEFT JOIN #db.table("feature_data", "jetendofeature")# s3  ON 
 	s1.feature_schema_id = s3.feature_schema_id AND 
 	s1.feature_data_id = s3.feature_data_id and 
 	s1.site_id = s3.site_id
@@ -1474,7 +1492,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	s4.site_id = s3.site_id 
 	WHERE s1.site_id = #db.param(arguments.site_id)#  and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s3.site_x_option_group_deleted = #db.param(0)# and 
+	s3.feature_data_deleted = #db.param(0)# and 
 	s4.feature_field_deleted = #db.param(0)# and 
 	s1.feature_data_approved=#db.param(1)# and 
 	s1.feature_data_id=#db.param(arguments.feature_data_id)#
@@ -1681,7 +1699,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 						application.zcore.featureCom.updateSchemaCacheBySchemaId(row.feature_schema_id);
 						//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 						ts={};
-						ts.subject="Site option group update resort failed";
+						ts.subject="Feature Schema update resort failed";
 						savecontent variable="output"{
 							echo('#application.zcore.functions.zHTMLDoctype()#
 							<head>
@@ -1752,7 +1770,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=optionSchemaStruct(row.feature_schema_variable_name, 0, row.site_id, {__groupId=0,__setId=0}, row.feature_field_name);
+		arr1=optionSchemaStruct(row.feature_schema_variable_name, 0, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
@@ -1981,16 +1999,16 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 		 s1.feature_field_deleted = #db.param(0)# and 
 		 s2.feature_field_deleted = #db.param(0)# and
 		s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-		s1.feature_field_name = #db.param(ts.selectmenu_labelfield)# and 
+		s1.feature_field_variable_name = #db.param(ts.selectmenu_labelfield)# and 
 		
 		s2.site_id = s1.site_id and 
 		s2.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-		s2.feature_field_name = #db.param(ts.selectmenu_valuefield)# and 
+		s2.feature_field_variable_name = #db.param(ts.selectmenu_valuefield)# and 
 		";
 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 			db.sql&=" s3.site_id = s1.site_id and 
 			s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-			s3.feature_field_name = #db.param(ts.selectmenu_parentfield)# and 
+			s3.feature_field_variable_name = #db.param(ts.selectmenu_parentfield)# and 
 			s3.feature_field_deleted = #db.param(0)# and ";
 		 }
 		 db.sql&="
@@ -2001,18 +2019,18 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 		if(qTemp.recordcount NEQ 0){
 			db.sql="select 
 			s1.feature_data_id id, 
-			s1.site_x_option_group_value label,
-			 s2.site_x_option_group_value value";
+			s1.feature_data_value label,
+			 s2.feature_data_value value";
 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-				db.sql&=", s3.site_x_option_group_value parentId ";
-			//	db.sql&=", s3.site_x_option_group_value parentId ";
+				db.sql&=", s3.feature_data_value parentId ";
+			//	db.sql&=", s3.feature_data_value parentId ";
 			 }
 			 db.sql&=" from (
 			 #db.table("feature_data", "jetendofeature")# set1,
-			 #db.table("site_x_option_group", "jetendofeature")# s1 , 
-			 #db.table("site_x_option_group", "jetendofeature")# s2 ";
+			 #db.table("feature_data", "jetendofeature")# s1 , 
+			 #db.table("feature_data", "jetendofeature")# s2 ";
 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-				db.sql&=" ,#db.table("site_x_option_group", "jetendofeature")# s3";
+				db.sql&=" ,#db.table("feature_data", "jetendofeature")# s3";
 			 }
 			db.sql&=") WHERE ";
 			if(parentID NEQ 0){
@@ -2021,8 +2039,8 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 			db.sql&=" set1.feature_data_deleted=#db.param(0)# and 
 			set1.feature_data_id=s1.feature_data_id and
 			set1.site_id = s1.site_id and 
-			s1.site_x_option_group_deleted = #db.param(0)# and 
-			s2.site_x_option_group_deleted = #db.param(0)# and 
+			s1.feature_data_deleted = #db.param(0)# and 
+			s2.feature_data_deleted = #db.param(0)# and 
 			s1.feature_field_id = #db.param(qTemp.labelFieldId)# and 
 			s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
 			s1.feature_data_id = s2.feature_data_id AND 
@@ -2034,7 +2052,7 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 				s3.feature_field_id = #db.param(qTemp.parentFieldID)# and 
 				s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
 				s1.feature_data_id = s3.feature_data_id and 
-				s3.site_x_option_group_deleted = #db.param(0)# and ";
+				s3.feature_data_deleted = #db.param(0)# and ";
 			 }
 			if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
 				if(arguments.feature_schema_id EQ ts.selectmenu_groupid){
@@ -2104,172 +2122,6 @@ arr1=application.zcore.featureCom.optionSchemaSetFromDatabaseBySearch(ts, reques
 	return rs;
 	</cfscript>
 </cffunction>
-
-
- 
-<!--- application.zcore.featureCom.activateFieldAppId(feature_id); --->
-<!--- <cffunction name="activateFieldAppId" localmode="modern" returntype="any" output="no">
-	<cfargument name="feature_id" type="string" required="yes">
-	<cfscript>
-	var db=request.zos.queryObject;
-	 db.sql="UPDATE #db.table("feature", "jetendofeature")# feature 
-	 SET feature_active = #db.param('1')#, 
-	 feature_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	 WHERE feature_id=#db.param(arguments.feature_id)# and 
-	 feature_deleted = #db.param(0)# and 
-	 feature_id=#db.param(form.feature_id)#";
-	 db.execute("q");
-	</cfscript>
-</cffunction> --->
-
-
-<!--- /z/_com/app/site-option?method=getNewFieldAppId --->
-<!--- <cffunction name="getNewFieldAppId" localmode="modern" access="remote" roles="member" returntype="any" output="no">
-	<cfargument name="app_id" type="string" required="yes">
-	<cfscript>
-	ts.datasource="jetendofeature";
-	ts.table="feature";
-	ts.struct=structnew();
-	ts.struct.site_id=request.zos.globals.id;
-	ts.struct.app_id=arguments.app_id;
-	ts.struct.feature_active=0;
-	//ts.debug=true;
-	//ts.struct.feature_datetime=request.zos.mysqlnow;
-	feature_id=application.zcore.functions.zInsert(ts);
-	if(feature_id EQ false){
-		application.zcore.template.fail("Error: zcorerootmapping.com.app.site-option.cfc - getNewFieldAppId() failed to insert into feature.");
-	}
-	if(application.zcore.functions.zso(form, 'method') EQ 'getNewFieldAppId'){
-		writeoutput('new id:'&feature_id);
-		application.zcore.functions.zabort();
-	}else{
-		return feature_id;
-	}
-	</cfscript>
-</cffunction> --->
-
-<!--- this.getFieldAppById(feature_id, app_id, newOnMissing); --->
-<!--- <cffunction name="getFieldAppById" localmode="modern" returntype="any" output="yes">
-	<cfargument name="feature_id" type="string" required="yes">
-	<cfargument name="app_id" type="string" required="yes">
-	<cfargument name="newOnMissing" type="boolean" required="no" default="#true#">
-	<cfscript>
-	var qG=0;
-	var db=request.zos.queryObject;
-	db.sql="SELECT * FROM #request.zos.queryObject.table("feature", "jetendofeature")# feature 
-	WHERE feature_id = #db.param(arguments.feature_id)# and 
-	feature_deleted = #db.param(0)# and 
-	feature_id =#db.param(form.feature_id)#";
-	qG=db.execute("qG");
-	if(qG.recordcount EQ 0){
-		if(arguments.newOnMissing){
-			arguments.feature_id=this.getNewFieldAppId(arguments.app_id);
-			db.sql="SELECT * FROM #request.zos.queryObject.table("feature", "jetendofeature")# feature 
-			WHERE feature_id = #db.param(arguments.feature_id)# and 
-			feature_deleted = #db.param(0)# and
-			feature_id =#db.param(form.feature_id)#";
-			qG=db.execute("qG");
-		}else{
-			return false;
-		}
-	}
-	return qG;
-	</cfscript>
-</cffunction>  --->
-
-<!--- application.zcore.featureCom.deleteFieldAppId(feature_id); --->
-<!--- <cffunction name="deleteFieldAppId" localmode="modern" returntype="any" output="no">
-	<cfargument name="feature_id" type="string" required="yes">
-	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
-	<cfscript>
-	var q=0;
-	var db=request.zos.queryObject;
-	typeStruct=getTypeData(arguments.site_id);
-	if(arguments.feature_id NEQ 0 and arguments.feature_id NEQ ""){
-		db.sql="SELECT * FROM #request.zos.queryObject.table("site_x_option", "jetendofeature")# site_x_option, 
-		#request.zos.queryObject.table("feature_field", "jetendofeature")# feature_field 
-		WHERE site_x_option.feature_id=#db.param(form.feature_id)# and 
-		site_x_option_deleted = #db.param(0)# and 
-		feature_field_deleted = #db.param(0)# and 
-		feature_field.site_id=#db.param(arguments.site_id)# and  
-		site_x_option.feature_field_id = feature_field.feature_field_id and 
-		site_x_option.feature_id=#db.param(arguments.feature_id)# and 
-		feature_field_type_id IN (#db.param(3)#, #db.param(9)#) and 
-		site_x_option_value <> #db.param('')# and 
-		feature_field_type_id=#db.param('3')#";
-		path=application.zcore.functions.zvar('privatehomedir',arguments.site_id)&'zupload/site-options/';
-		securepath=application.zcore.functions.zvar('privatehomedir',arguments.site_id)&'zuploadsecure/site-options/';
-		qS=db.execute("qS");
-		for(i=1;i LTE qS.recordcount;i++){
-			optionStruct=typeStruct.optionLookup[row.feature_field_id].optionStruct;
-			if(application.zcore.functions.zso(optionStruct, 'file_securepath') EQ 'Yes'){
-				if(fileexists(securepath&qS.site_x_option_value[i])){
-					application.zcore.functions.zdeletefile(securepath&qS.site_x_option_value[i]);
-				}
-			}else{
-				if(fileexists(path&qS.site_x_option_value[i])){
-					application.zcore.functions.zdeletefile(path&qS.site_x_option_value[i]);
-				}
-				if(qS.site_x_option_original[i] NEQ "" and fileexists(path&qS.site_x_option_value[i])){
-					application.zcore.functions.zdeletefile(path&qS.site_x_option_original[i]);
-				}
-			}
-		}
-		db.sql="SELECT * FROM #request.zos.queryObject.table("site_x_option_group", "jetendofeature")# site_x_option_group, 
-		#request.zos.queryObject.table("feature_field", "jetendofeature")# feature_field 
-		WHERE site_x_option_group.feature_id=#db.param(form.feature_id)# and 
-		feature_field.site_id=#db.param(arguments.site_id)# and  
-		site_x_option_group.feature_field_id = feature_field.feature_field_id and 
-		site_x_option_group.feature_id=#db.param(arguments.feature_id)# and 
-		feature_field_type_id IN (#db.param(3)#, #db.param(9)#) and 
-		site_x_option_group_value <> #db.param('')# and 
-		feature_field_deleted = #db.param(0)# and 
-		site_x_option_group_deleted = #db.param(0)# and 
-		feature_field_type_id=#db.param('3')#";
-		qS=db.execute("qS");
-		for(i=1;i LTE qS.recordcount;i++){
-			optionStruct=typeStruct.optionLookup[row.feature_field_id].optionStruct;
-			if(application.zcore.functions.zso(optionStruct, 'file_securepath') EQ 'Yes'){
-				if(fileexists(securepath&qS.site_x_option_group_value[i])){
-					application.zcore.functions.zdeletefile(securepath&qS.site_x_option_group_value[i]);
-				}
-			}else{
-				if(fileexists(path&qS.site_x_option_group_value[i])){
-					application.zcore.functions.zdeletefile(path&qS.site_x_option_group_value[i]);
-				}
-				if(qS.site_x_option_group_original[i] NEQ "" and fileexists(path&qS.site_x_option_group_original[i])){
-					application.zcore.functions.zdeletefile(path&qS.site_x_option_group_original[i]);
-				}
-			}
-		}
-		
-		db.sql="DELETE FROM #request.zos.queryObject.table("site_x_option", "jetendofeature")#  
-		WHERE feature_id = #db.param(arguments.feature_id)# and 
-		site_x_option_deleted = #db.param(0)# and 
-		site_id = #db.param(arguments.site_id)#";
-		q=db.execute("q");
-		db.sql="DELETE FROM #request.zos.queryObject.table("site_x_option_group", "jetendofeature")#  
-		WHERE feature_id = #db.param(arguments.feature_id)# and 
-		site_x_option_group_deleted = #db.param(0)# and 
-		site_id = #db.param(arguments.site_id)#";
-		q=db.execute("q");
-		db.sql="DELETE FROM #request.zos.queryObject.table("feature_data", "jetendofeature")#  
-		WHERE feature_id = #db.param(arguments.feature_id)# and 
-		feature_data_deleted = #db.param(0)# and 
-		site_id = #db.param(arguments.site_id)#";
-		q=db.execute("q");
-		db.sql="DELETE FROM #request.zos.queryObject.table("feature", "jetendofeature")#  
-		WHERE feature_id = #db.param(arguments.feature_id)# and 
-		feature_deleted = #db.param(0)# and 
-		 site_id = #db.param(arguments.site_id)#";
-		q=db.execute("q");
-
-		// Need more efficient way to rebuild after feature_id delete - or remove this feature perhaps
-		application.zcore.functions.zOS_cacheSiteAndUserSchemas(arguments.site_id);
-	}
-	</cfscript>
-</cffunction> --->
-
 
 
 
@@ -2344,8 +2196,8 @@ if(not rs.success){
 	var arroption=[];
 	for(var row in qD){
 		arrayAppend(arroption, row.feature_field_id);
-		// doesn't work with time/date and other multi-field site option types probably...
-		form['newvalue'&row.feature_field_id]=arguments.struct[row.feature_field_name];
+		// doesn't work with time/date and other multi-field Feature Field types probably...
+		form['newvalue'&row.feature_field_id]=arguments.struct[row.feature_field_variable_name];
 	}
 	form.feature_field_id=arrayToList(arroption, ','); 
 	var rs=optionsCom.internalSchemaUpdate(); 
@@ -2437,7 +2289,7 @@ if(not rs.success){
 				return start&application.siteStruct[arguments.site_id].globals.feature_fields[arguments.name]&end;
 			}
 		}else{
-			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a site option.");
+			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a Feature Field.");
 			return "";//Field Missing: #arguments.name#";		
 		}
 	}else{
@@ -2452,7 +2304,7 @@ if(not rs.success){
 				return start&application.siteStruct[arguments.site_id].globals.feature[arguments.feature_id][arguments.name]&end;
 			}
 		}else{
-			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a site option.");
+			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a Feature Field.");
 			return "";//Field Missing: #arguments.name#";		
 		}
 	}
@@ -2525,16 +2377,16 @@ if(not rs.success){
 		typeIdList=arrayToList(application.zcore.soSchemaData.arrCustomDelete, ",");
 
 		db.sql="SELECT * FROM 
-		#db.table("site_x_option_group", "jetendofeature")#,
+		#db.table("feature_data", "jetendofeature")#,
 		#db.table("feature_field", "jetendofeature")#  
 		WHERE feature_data_id=#db.param(arguments.feature_data_id)# and 
 		feature_field_type_id in (#db.trustedSQL(typeIdList)#) and 
-		site_x_option_group.feature_id=#db.param(form.feature_id)# and 
-		feature_field.site_id = site_x_option_group.site_id and 
-		site_x_option_group_value <> #db.param('')# and 
+		feature_data.feature_id=#db.param(form.feature_id)# and 
+		feature_field.site_id = feature_data.site_id and 
+		feature_data_value <> #db.param('')# and 
 		feature_field_deleted = #db.param(0)# and 
-		site_x_option_group_deleted = #db.param(0)# and
-		feature_field.feature_field_id = site_x_option_group.feature_field_id ";
+		feature_data_deleted = #db.param(0)# and
+		feature_field.feature_field_id = feature_data.feature_field_id ";
 		qFields=db.execute("qFields");
 		//writeLogEntry("#qFields.recordcount# qFields records that need onDelete");
 		path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/site-options/';
@@ -2555,9 +2407,9 @@ if(not rs.success){
 
 	//writeLogEntry("deleteSchemaSetIndex version set id:"&arguments.feature_data_id);
 	deleteSchemaSetIndex(arguments.feature_data_id, request.zos.globals.id);
-	db.sql="DELETE FROM #db.table("site_x_option_group", "jetendofeature")#  
+	db.sql="DELETE FROM #db.table("feature_data", "jetendofeature")#  
 	WHERE  feature_data_id=#db.param(arguments.feature_data_id)# and  
-	site_x_option_group_deleted = #db.param(0)# and 
+	feature_data_deleted = #db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# ";
 	result =db.execute("result");
 	//writeLogEntry("deleted set values for set id:"&arguments.feature_data_id);
@@ -2616,15 +2468,15 @@ if(not rs.success){
 	}
 
 	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")#, 
-	#db.table("site_x_option_group", "jetendofeature")#  
-	WHERE  site_x_option_group.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
+	#db.table("feature_data", "jetendofeature")#  
+	WHERE  feature_data.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
 	feature_field_type_id in (#db.param(3)#, #db.param(9)#) and 
-	site_x_option_group.feature_id=#db.param(form.feature_id)# and 
-	feature_field.site_id = site_x_option_group.site_id and 
-	site_x_option_group_value <> #db.param('')# and 
+	feature_data.feature_id=#db.param(form.feature_id)# and 
+	feature_field.site_id = feature_data.site_id and 
+	feature_data_value <> #db.param('')# and 
 	feature_field_deleted = #db.param(0)# and 
-	site_x_option_group_deleted = #db.param(0)# and
-	feature_field.feature_field_id = site_x_option_group.feature_field_id ";
+	feature_data_deleted = #db.param(0)# and
+	feature_field.feature_field_id = feature_data.feature_field_id ";
 	qFields=db.execute("qFields");
 	path=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zupload/site-options/';
 	securepath=application.zcore.functions.zvar('privatehomedir', request.zos.globals.id)&'zuploadsecure/site-options/';
@@ -2637,9 +2489,9 @@ if(not rs.success){
 			}
 		}
 	}
-	db.sql="DELETE FROM #db.table("site_x_option_group", "jetendofeature")#  
+	db.sql="DELETE FROM #db.table("feature_data", "jetendofeature")#  
 	WHERE  feature_schema_id=#db.param(arguments.feature_schema_id)# and 
-	site_x_option_group_deleted = #db.param(0)# and 
+	feature_data_deleted = #db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# ";
 	result =db.execute("result");
 	db.sql="DELETE FROM #request.zos.queryObject.table("feature_data", "jetendofeature")#  
@@ -2742,7 +2594,7 @@ if(not rs.success){
 	}
 	request.zos.sendChangeEmailSiteSchemaExecuted=true;
 	db=request.zos.queryObject; 
-	if(application.zcore.user.checkSchemaAccess("member")){
+	if(application.zcore.user.checkGroupAccess("member")){
 		return;
 	}
 	currentSetId=arguments.feature_data_id;
@@ -2870,7 +2722,7 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 
 <cffunction name="getTypeCFCStruct" returntype="struct" localmode="modern" access="public">
 	<cfscript>
-	return application.zcore["featureTypeData"].fieldTypeStruct;
+	return application.zcore["featureData"].fieldTypeStruct;
 	</cfscript>
 </cffunction>
 	
@@ -2878,7 +2730,7 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 <cffunction name="getTypeCFC" returntype="struct" localmode="modern" access="public" output="no">
 	<cfargument name="typeId" type="string" required="yes" hint="site_id, theme_id or widget_id">
 	<cfscript>
-	return application.zcore["featureTypeData"].fieldTypeStruct[arguments.typeID];
+	return application.zcore["featureData"].fieldTypeStruct[arguments.typeID];
 	</cfscript>
 </cffunction>
 
@@ -2892,7 +2744,7 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 <cffunction name="getTypeData" returntype="struct" localmode="modern" access="public">
 	<cfargument name="key" type="string" required="yes" hint="site_id, theme_id or widget_id">
 	<cfscript>
-	return application.zcore["featureTypeData"][arguments.key];
+	return application.zcore["featureData"][arguments.key];
 	</cfscript>
 </cffunction>
 
@@ -3578,7 +3430,7 @@ used to do search for a list of values
 	<cfscript>
 	t9=getTypeData(request.zos.globals.id);
 	if(structkeyexists(t9.optionLookup, arguments.option_id)){
-		return t9.optionLookup[arguments.option_id]["feature_field_name"];
+		return t9.optionLookup[arguments.option_id]["feature_field_variable_name"];
 	}else{
 		return "";
 	}

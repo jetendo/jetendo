@@ -125,7 +125,7 @@
 		// }
 		groupCom[setStruct.feature_schema_view_cfc_method](qSet);
 	}else{
-		application.zcore.functions.z404("feature_schema_view_cfc_path and feature_schema_view_cfc_method must be set when editing the site option group to allow rendering of the group.");
+		application.zcore.functions.z404("feature_schema_view_cfc_path and feature_schema_view_cfc_method must be set when editing the Feature Schema to allow rendering of the group.");
 	}
 	echo('</div>');
 	

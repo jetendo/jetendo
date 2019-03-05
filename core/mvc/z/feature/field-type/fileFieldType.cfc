@@ -85,7 +85,7 @@
 	<cfscript>
 	ts={
 		type="LIKE",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
@@ -180,7 +180,7 @@
 			uploadPath=getUploadPath(arguments.optionStruct);
 			if(uploadPath EQ "zuploadsecure"){
 				ts3.downloadPath="/zuploadsecure/site-options/";
-				/*if(application.zcore.user.checkSchemaAccess("administrator")){
+				/*if(application.zcore.user.checkGroupAccess("administrator")){
 					echo('<p><a href="#request.zos.currentHostName#/z/misc/download/index?fp='&urlencodedformat("/"&uploadPath&"/site-options/"&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&'" target="_blank">Download File</a></p>');
 				}else{ 
 					echo('<p>'&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]&' | You must be an administrator to download the file.</p>');
@@ -349,7 +349,7 @@
 	</cfscript>
 </cffunction>
 		
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		file_securepath:"No",
@@ -388,7 +388,7 @@
 		ts.valueList = "Yes,No";
 		ts.hideSelect=true;
 		ts.struct=arguments.optionStruct;
-		writeoutput(application.zcore.functions.zInput_RadioSchema(ts));
+		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 		</cfscript>
 		</td></tr>
 		<tr><td>Attach To Lead Email: </td><td>

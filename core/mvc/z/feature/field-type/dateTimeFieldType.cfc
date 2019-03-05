@@ -99,7 +99,7 @@
 	<cfscript>
 	ts={
 		type="=",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
@@ -408,8 +408,8 @@
 			}
 		}
 	}catch(Any excpt){
-		application.zcore.status.setStatus(request.zsid, arguments.row["feature_field_name"]&" must be a valid date.", form, true);
-		return { success: false, message: arguments.row["feature_field_name"]&" must be a valid date.", value: "", dateValue: "" };
+		application.zcore.status.setStatus(request.zsid, arguments.row["feature_field_variable_name"]&" must be a valid date.", form, true);
+		return { success: false, message: arguments.row["feature_field_variable_name"]&" must be a valid date.", value: "", dateValue: "" };
 	}
 	return { success: true, value: nv, dateValue: nvdate };
 	</cfscript>
@@ -500,7 +500,7 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		datetime_range_search_type:"0",
@@ -547,7 +547,7 @@
 		ts.valueList = "1,2,0";
 		ts.hideSelect=true;
 		ts.struct=arguments.optionStruct;
-		writeoutput(application.zcore.functions.zInput_RadioSchema(ts));
+		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 		</cfscript>
 		<br />
 		Force Value: 
@@ -560,7 +560,7 @@
 		ts.valueList = "1,2,0";
 		ts.hideSelect=true;
 		ts.struct=arguments.optionStruct;
-		writeoutput(application.zcore.functions.zInput_RadioSchema(ts));
+		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 		</cfscript>
 	</div>	
 	</cfsavecontent>

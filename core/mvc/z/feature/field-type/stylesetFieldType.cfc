@@ -242,7 +242,7 @@
 </cffunction>
 		
 
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		styleset_selector:"",
@@ -269,7 +269,7 @@
 	feature_id=#db.param(form.feature_id)# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id = #db.param(arguments.dataStruct["feature_schema_id"])# 	
-	ORDER BY feature_field_name ASC";
+	ORDER BY feature_field_variable_name ASC";
 	qSchema=db.execute("qSchema");
 	</cfscript>
 	<cfsavecontent variable="output">

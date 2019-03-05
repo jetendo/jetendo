@@ -52,11 +52,11 @@
 				<td><cfif qFeature.feature_active EQ 1>Yes<cfelse>No</cfif></td>
 				<td>
 					<cfif (request.zos.isTestServer and qFeature.feature_test_domain NEQ request.zos.globals.domain) or (not request.zos.isTestServer and qFeature.feature_live_domain NEQ request.zos.globals.domain)>
-						<a href="##" onclick="if(confirm('Are you sure you want to unassign this feature?')){ window.location.href='/z/feature/admin/feature-manage/unassignSave'; } return false;" target="_blank" class="z-manager-search-button">Unassign</a>
+						<a href="##" onclick="if(confirm('Are you sure you want to unassign this feature?')){ window.location.href='/z/feature/admin/feature-manage/unassignSave?feature_id=#qFeature.feature_id#'; } return false;" target="_blank" class="z-manager-search-button">Unassign</a>
 						<cfif request.zos.isTestServer>
-							<a href="#qFeature.feature_test_domain#/z/feature/admin/feature-manage/index" target="_blank" class="z-manager-search-button">Configure</a>
+							<a href="#qFeature.feature_test_domain#/z/feature/admin/feature-manage/index" target="_blank" class="z-manager-search-button" title="This feature is managed on #qFeature.feature_test_domain#">Configure</a>
 						<cfelse>
-							<a href="#qFeature.feature_live_domain#/z/feature/admin/feature-manage/index" target="_blank" class="z-manager-search-button">Configure</a>
+							<a href="#qFeature.feature_live_domain#/z/feature/admin/feature-manage/index" target="_blank" class="z-manager-search-button" title="This feature is managed on #qFeature.feature_live_domain#">Configure</a>
 						</cfif>
 					<cfelse>
 						<a href="/z/feature/admin/feature-manage/edit?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Edit</a> 
@@ -76,8 +76,10 @@
 	db.sql="DELETE FROM #db.table("feature_x_site", "jetendofeature")# WHERE 
 	feature_id = #db.param(form.feature_id)# and 
 	site_id = #db.param(request.zos.globals.id)# ";
-	db.execute("qInsert");
+	db.execute("qDelete");
 	application.zcore.featureCom.reloadFeatureCache();
+	application.zcore.status.setStatus(request.zsid, "Feature Unassigned");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-manage/index?zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
 
@@ -151,27 +153,31 @@
 			</td>
 		</tr>
 	</table>
-	<table style="border-spacing:0px; margin-bottom:10px;" class="table-list" >
-		<tr>
-			<th>ID</th>
-			<th>Feature Name</th>
-			<th>Category</th>
-			<th>Admin</th>
-		</tr>
-		<cfloop query="qFeature">
-			<cfscript>
-			siteId=application.zcore.featureCom.getFeatureSiteId(qFeature.feature_test_domain, qFeature.feature_live_domain);
-			</cfscript>
-			<tr <cfif qFeature.currentrow MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
-				<td>#qFeature.feature_id#</td>
-				<td>#qFeature.feature_display_name#</td> 
-				<td>#qFeature.feature_category_name#</td> 
-				<td>
-					<a href="/z/feature/admin/feature-manage/assignSave?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Assign</a>
-				</td>
+	<cfif qFeature.recordcount EQ 0>
+		<p>No unassigned features match this search.</p>
+	<cfelse>
+		<table style="border-spacing:0px; margin-bottom:10px;" class="table-list" >
+			<tr>
+				<th>ID</th>
+				<th>Feature Name</th>
+				<th>Category</th>
+				<th>Admin</th>
 			</tr>
-		</cfloop>
-	</table> 
+			<cfloop query="qFeature">
+				<cfscript>
+				siteId=application.zcore.featureCom.getFeatureSiteId(qFeature.feature_test_domain, qFeature.feature_live_domain);
+				</cfscript>
+				<tr <cfif qFeature.currentrow MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
+					<td>#qFeature.feature_id#</td>
+					<td>#qFeature.feature_display_name#</td> 
+					<td>#qFeature.feature_category_name#</td> 
+					<td>
+						<a href="/z/feature/admin/feature-manage/assignSave?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Assign</a>
+					</td>
+				</tr>
+			</cfloop>
+		</table> 
+	</cfif>
 
 	<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onclick="window.location.href='/z/feature/admin/feature-manage/index';">
 	
@@ -189,8 +195,7 @@
 	feature.feature_id = feature_schema.feature_id and 
 	feature_schema_deleted=#db.param(0)#  
 	WHERE 
-	feature.feature_id = #db.param(form.feature_id)# and 
-	feature.site_id = #db.param(request.zos.globals.id)# and 
+	feature.feature_id = #db.param(form.feature_id)# and  
 	feature_deleted = #db.param(0)# 
 	GROUP BY feature.feature_id ";
 	qCheck=db.execute("qCheck");
@@ -207,6 +212,12 @@
 		<cfscript> 
 		application.zcore.status.setStatus(request.zsid, "Feature deleted successfully.");
 		form.site_id = request.zos.globals.id;
+
+		db.sql="delete from #db.table("feature_x_site", "jetendofeature")# WHERE 
+		feature_x_site.feature_id=#db.param(form.feature_id)# and 
+		feature_x_site.site_id<>#db.param(-1)# and 
+		feature_x_site_deleted=#db.param(0)# ";
+		db.execute("qDelete");
 		application.zcore.functions.zDeleteRecord("feature", "feature_id,site_id", "jetendofeature");
 
 		application.zcore.featureCom.reloadFeatureCache();
@@ -231,7 +242,7 @@
 		<br />
 		Feature: #qcheck.feature_display_name#<br />
 		<br />
-		<a href="/z/feature/admin/feature-manage/delete?confirm=1&feature_id=#form.feature_id#&zrand=#gettickcount()#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/feature/admin/feature-manage/index">No</a> </h2>
+		<a href="/z/feature/admin/feature-manage/delete?confirm=1&feature_id=#form.feature_id#&zrand=#gettickcount()#" class="z-manager-search-button">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/feature/admin/feature-manage/index" class="z-manager-search-button">No</a> </h2>
 	</cfif>
 </cffunction>
 
@@ -247,6 +258,27 @@
 	var db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	 
 	errors=false;
+	if(form.method EQ "update"){
+		db.sql="select feature.*, 
+		if(feature_schema_id IS NULL, #db.param(0)#, #db.param(1)#) hasSchema 
+		FROM #db.table("feature", "jetendofeature")# 
+		LEFT JOIN #db.table("feature_schema", "jetendofeature")# ON 
+		feature.feature_id = feature_schema.feature_id and 
+		feature_schema_deleted=#db.param(0)# 
+		where 
+		feature.feature_deleted = #db.param(0)# and 
+		feature.feature_id=#db.param(form.feature_id)# 
+		GROUP BY feature.feature_id ";
+		qCheck=db.execute("qCheck");
+		if(qCheck.recordcount EQ 0){
+			application.zcore.status.setStatus(request.zsid, "Invalid Feature ID", form,true);
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-manage/index?zsid=#request.zsid#");
+		}
+		if(qCheck.hasSchema EQ 1){
+			// force code name to never change after initial creation if there is a schema
+			form.feature_variable_name=qCheck.feature_variable_name;
+		}
+	} 
 	if(form.feature_live_domain EQ ""){
 		application.zcore.status.setStatus(request.zsid, "Live Short Domain is required.", form, true);
 		errors=true;
@@ -264,7 +296,7 @@
 		errors=true;
 	} 
 	testShortDomain=replace(replace(replace(form.feature_test_domain, "www.", ""), "http://", ""), "https://", "");
-	liveShortDomain=replace(replace(replace(form.feature_test_domain, "www.", ""), "http://", ""), "https://", "");
+	liveShortDomain=replace(replace(replace(form.feature_live_domain, "www.", ""), "http://", ""), "https://", "");
 	if(right(testShortDomain, 1) EQ "/" or left(form.feature_test_domain, 4) NEQ "http"){
 		application.zcore.status.setStatus(request.zsid, "Test Domain must not have a trailing slash and must start with http:// or https://.", form, true);
 		errors=true;
@@ -290,27 +322,6 @@
 	form.feature_test_mapping_path=replace(testShortDomain, ".", "_", "all");
 	form.feature_live_mapping_path=replace(liveShortDomain, ".", "_", "all");
 
-	if(form.method EQ "update"){
-		db.sql="select feature.*, 
-		if(feature_schema_id IS NULL, #db.param(0)#, #db.param(1)#) hasSchema 
-		FROM #db.table("feature", "jetendofeature")# 
-		LEFT JOIN #db.table("feature_schema", "jetendofeature")# ON 
-		feature.feature_id = feature_schema.feature_id and 
-		feature_schema_deleted=#db.param(0)# 
-		where 
-		feature.feature_deleted = #db.param(0)# and 
-		feature.feature_id=#db.param(form.feature_id)# 
-		GROUP BY feature.feature_id ";
-		qCheck=db.execute("qCheck");
-		if(qCheck.recordcount EQ 0){
-			application.zcore.status.setStatus(request.zsid, "Invalid Feature ID", form,true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-manage/index?zsid=#request.zsid#");
-		}
-		if(qCheck.hasSchema EQ 1){
-			// force code name to never change after initial creation if there is a schema
-			form.feature_variable_name=qCheck.feature_variable_name;
-		}
-	} 
 	if(errors){
 		if(form.method EQ 'insert'){
 			application.zcore.status.setStatus(request.zsid, false, form,true);
@@ -413,6 +424,26 @@
 		#tabCom.beginTabMenu()# 
 		#tabCom.beginFieldSet("Basic")#
 		<table  style="border-spacing:0px;" class="table-list"> 
+			<tr>
+				<th>Category</th>
+				<td>
+					<cfscript>
+					var ts= StructNew();
+					ts.name = "feature_category_id";
+					ts.size = 1; // more for multiple select
+					ts.output = true; // set to false to save to variable
+					ts.hideSelect=true;
+					ts.selectedDelimiter = ","; // change if comma conflicts...
+					// options for list data
+					ts.listLabels = "Custom";
+					ts.listValues = "1";
+					ts.listLabelsDelimiter = ","; // tab delimiter
+					ts.listValuesDelimiter = ",";
+					
+					application.zcore.functions.zInputSelectBox(ts);
+					</cfscript>
+				</td>
+			</tr>
 			<tr>
 				<th style="vertical-align:top; white-space:nowrap;">Variable Name</th>
 				<td>

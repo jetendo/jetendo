@@ -90,7 +90,7 @@
 	<cfscript>
 	ts={
 		type="=",
-		field: arguments.row["feature_field_name"]
+		field: arguments.row["feature_field_variable_name"]
 	};
 	if(arguments.optionStruct.selectmenu_delimiter EQ "|"){
 		ts.arrValue=listToArray(arguments.value, ',', true);
@@ -384,7 +384,7 @@
 </cffunction>
 
 
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		selectmenu_delimiter:"|",
@@ -473,7 +473,7 @@
 			}
 			arrSchema=[];
 			mainSchemaID="";
-			if(arrayLen(gs[form.feature_schema_id].arrParentID) NEQ 0){
+			if(structkeyexists(gs, form.feature_schema_id) and arrayLen(gs[form.feature_schema_id].arrParentID) NEQ 0){
 				mainSchemaID=gs[form.feature_schema_id].arrParentID[1];
 			}
 			for(group in qSchema2){
@@ -576,7 +576,7 @@
 			if(not structkeyexists(local.tempSet, local.row2["feature_data_id"])){
 				local.tempSet[local.row2["feature_data_id"]]={};
 			}
-			local.tempSet[local.row2["feature_data_id"]][local.row2["feature_field_name"]]=local.row2["#variables.siteType#_x_option_group_value"];
+			local.tempSet[local.row2["feature_data_id"]][local.row2["feature_field_variable_name"]]=local.row2["#variables.siteType#_x_option_group_value"];
 		}
 		for(local.n in local.tempSet){
 			if(arguments.indexById){

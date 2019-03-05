@@ -98,7 +98,7 @@
 	<cfscript>
 	ts={
 		type="LIKE",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
@@ -266,7 +266,7 @@
 </cffunction>
 		
 
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		addressfield:"",
@@ -291,7 +291,7 @@
 	feature_id=#db.param(form.feature_id)# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id = #db.param(arguments.dataStruct["feature_schema_id"])# 	
-	ORDER BY feature_field_name ASC";
+	ORDER BY feature_field_variable_name ASC";
 	qSchema=db.execute("qSchema", "", 10000, "query", false);
 	</cfscript>
 	<cfsavecontent variable="output">
@@ -313,7 +313,7 @@
 		selectStruct = StructNew();
 		selectStruct.name = "addressfield";
 		selectStruct.query = qSchema;
-		selectStruct.queryLabelField = "feature_field_name";
+		selectStruct.queryLabelField = "feature_field_variable_name";
 		selectStruct.queryValueField = "feature_field_id";
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.optionStruct, 'addressfield');
 		application.zcore.functions.zInputSelectBox(selectStruct);
@@ -324,7 +324,7 @@
 		selectStruct = StructNew();
 		selectStruct.name = "cityfield";
 		selectStruct.query = qSchema;
-		selectStruct.queryLabelField = "feature_field_name";
+		selectStruct.queryLabelField = "feature_field_variable_name";
 		selectStruct.queryValueField = "feature_field_id";
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.optionStruct, 'cityfield');
 		application.zcore.functions.zInputSelectBox(selectStruct);
@@ -335,7 +335,7 @@
 		selectStruct = StructNew();
 		selectStruct.name = "statefield";
 		selectStruct.query = qSchema;
-		selectStruct.queryLabelField = "feature_field_name";
+		selectStruct.queryLabelField = "feature_field_variable_name";
 		selectStruct.queryValueField = "feature_field_id";
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.optionStruct, 'statefield');
 		application.zcore.functions.zInputSelectBox(selectStruct);
@@ -346,7 +346,7 @@
 		selectStruct = StructNew();
 		selectStruct.name = "zipfield";
 		selectStruct.query = qSchema;
-		selectStruct.queryLabelField = "feature_field_name";
+		selectStruct.queryLabelField = "feature_field_variable_name";
 		selectStruct.queryValueField = "feature_field_id";
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.optionStruct, 'zipfield');
 		application.zcore.functions.zInputSelectBox(selectStruct);
@@ -358,7 +358,7 @@
 		selectStruct = StructNew();
 		selectStruct.name = "countryfield";
 		selectStruct.query = qSchema;
-		selectStruct.queryLabelField = "feature_field_name";
+		selectStruct.queryLabelField = "feature_field_variable_name";
 		selectStruct.queryValueField = "feature_field_id";
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.optionStruct, 'countryfield');
 		application.zcore.functions.zInputSelectBox(selectStruct);

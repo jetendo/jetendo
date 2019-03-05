@@ -1574,10 +1574,10 @@
 					}
 				}else if(application.sitestruct[request.zos.globals.id].fileExistsCache[tempPath&"index.htm"]){
 					writeoutput(application.zcore.functions.zreadfile(request.zos.globals.homedir&removeChars(entireURL,1,1)&"index.htm"));
-					application.zcore.functions.zabort();
+					abort;
 				}else if(application.sitestruct[request.zos.globals.id].fileExistsCache[tempPath&"index.html"]){
 					writeoutput(application.zcore.functions.zreadfile(request.zos.globals.homedir&removeChars(entireURL,1,1)&"index.html"));
-					application.zcore.functions.zabort();
+					abort;
 				}else{
 					
 					// if(request.zos.themePath NEQ ""){

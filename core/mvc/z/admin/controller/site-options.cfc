@@ -525,7 +525,7 @@
 		site_option_deleted = #db.param(0)# and 
 		site_x_option_deleted = #db.param(0)# and
 		site_x_option.site_option_id = site_option.site_option_id and 
-		site_option.site_option_id IN (#db.trustedSQL("'"&arrayToList(arrSiteOptionIdCustomDeleteStruct, "','")&"'")#) and 
+		site_option.site_option_type_id IN (#db.trustedSQL("'"&arrayToList(arrSiteOptionIdCustomDeleteStruct, "','")&"'")#) and 
 		site_option.site_option_id=#db.param(form.site_option_id)#";
 		qS=db.execute("qS");
 		var row=0;
@@ -542,7 +542,7 @@
 		site_option_deleted = #db.param(0)# and 
 		site_x_option_group_deleted = #db.param(0)# and 
 		site_x_option_group.site_option_id = site_option.site_option_id and 
-		site_option.site_option_id IN (#db.trustedSQL("'"&arrayToList(arrSiteOptionIdCustomDeleteStruct, "','")&"'")#) and 
+		site_option.site_option_type_id IN (#db.trustedSQL("'"&arrayToList(arrSiteOptionIdCustomDeleteStruct, "','")&"'")#) and 
 		site_option.site_option_id=#db.param(form.site_option_id)#";
 		var qSGroup=db.execute("qSGroup"); 
 		for(row in qSGroup){

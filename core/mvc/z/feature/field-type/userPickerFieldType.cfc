@@ -124,7 +124,7 @@
 	<cfscript>
 	ts={
 		type="=",
-		field: arguments.row["feature_field_name"],
+		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
@@ -410,7 +410,7 @@
 </cffunction>
 		
 
-<cffunction name="getFieldFieldStruct" output="no" localmode="modern" access="public"> 
+<cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
 	ts={
 		user_group_id_list:"0",
@@ -453,7 +453,7 @@
 			ts.valueList = "0,1,2";
 			ts.hideSelect=true;
 			ts.struct=arguments.optionStruct;
-			writeoutput(application.zcore.functions.zInput_RadioSchema(ts));
+			writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 			</cfscript>
 			</td></tr>
 			<tr><td style="vertical-align:top;">Limit User Schemas: </td>
@@ -461,7 +461,7 @@
 			<cfscript>
 			form.user_group_id_list=application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list');
 			db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
-			WHERE feature_id=#db.param(form.feature_id)#  and 
+			WHERE site_id=#db.param(request.zos.globals.id)#  and 
 			user_group_deleted = #db.param(0)#
 			ORDER BY user_group_name asc"; 
 			var qSchema2=db.execute("qSchema2"); 
@@ -487,7 +487,7 @@
 			ts.valueList = "Yes,No";
 			ts.hideSelect=true;
 			ts.struct=arguments.optionStruct;
-			writeoutput(application.zcore.functions.zInput_RadioSchema(ts));
+			writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 			</cfscript>
 			</td></tr>
 			</table>
