@@ -688,21 +688,15 @@ if(rs.success){
 			rs.errorMessage="Connection timeout for #ss.url#";
 			return rs;
 		}
-		try{
-			blogs_xml=XMLParse(cfhttp.FileContent); 
-		}catch(Any e){
-			rs.success=false;
-			rs.errorMessage="Failed to parse xml";
-			return rs;
-		}
-	}else{
-		try{
-			blogs_xml=XMLParse(x);
-		}catch(Any e){
-			rs.success=false;
-			rs.errorMessage="Failed to parse xml";
-			return rs;
-		}
+		x=cfhttp.filecontent;
+	}
+	x=rereplace(x, "<!-- .*? --->", "", "all");
+	try{
+		blogs_xml=XMLParse(x); 
+	}catch(Any e){
+		rs.success=false;
+		rs.errorMessage="Failed to parse xml";
+		return rs;
 	}
 	//rs.xmlStruct=blogs_xml;
 
@@ -714,11 +708,23 @@ if(rs.success){
 				break;
 			}
 			c=arrItems[x];
-			ts={
-				title:c.title.xmltext,
-				link:c.link.xmltext,
-				description:c.description.xmltext
-			};
+			try{
+				ts={
+					title:c.title.xmltext,
+					link:c.link.xmltext,
+					description:""
+				}
+				if(structkeyexists(c, "description")){
+					ts.description=c.description.xmltext;
+				}
+			}catch(Any e){
+				savecontent variable="out"{
+					echo("<h2>RSS feed has invalid structure: "&ss.url&"</h2>");
+					writedump(c);
+					writedump(e);
+				}
+				throw(out);
+			}
 
 			if(structkeyexists(ss, 'filterCFC') and structkeyexists(ss, 'filterMethod')){
 				ts=ss.filterCFC[ss.filterMethod](ts);
