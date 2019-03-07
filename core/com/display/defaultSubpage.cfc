@@ -149,6 +149,29 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	</cfscript>
 </cffunction>
 
+<cffunction name="setCurrentSection" access="public" localmode="modern"> 
+	<cfargument name="arrGroupData" type="array" required="yes">
+	<cfargument name="sectionId" type="string" required="yes">
+	<cfscript> 
+	rs={success:false};  
+	if(not structkeyexists(request.zos, 'subpageLinkCacheStruct')){
+		processGroup(arguments.arrGroupData);
+	}
+
+	cs=request.zos.subpageLinkCacheStruct;
+	for(row in arguments.arrGroupData){
+		if(row.__setId EQ arguments.sectionId){
+			if(structkeyexists(cs.linkCache, row.url)){
+				rs.section=cs.sectionCache[cs.linkCache[row.url]].section;
+				rs.arrLink=cs.sectionCache[cs.linkCache[row.url]].arrLink;
+				rs.success=true;
+				return rs;
+			}
+		}
+	}
+	return rs;
+	</cfscript>
+</cffunction>
 
 <cffunction name="displaySubpage" access="public" localmode="modern"> 
 	<cfargument name="ss" type="struct" required="yes"> 

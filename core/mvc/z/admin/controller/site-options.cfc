@@ -1533,12 +1533,13 @@
 		queueSortStruct.disableRedirect=true;
 		queueComStruct["obj"&qGroup.site_option_group_id] = application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.display.queueSort");
 		queueComStruct["obj"&qGroup.site_option_group_id].init(queueSortStruct);
+		application.zcore.siteOptionCom.updateOptionGroupCacheByGroupId(qGroup.site_option_group_id);
 		if(structkeyexists(form, 'zQueueSort')){
-			application.zcore.siteOptionCom.updateOptionGroupCacheByGroupId(qGroup.site_option_group_id);
 			//application.zcore.functions.zOS_cacheSiteAndUserGroups(request.zos.globals.id);
 			application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
 		}
 		if(structkeyexists(form, 'zQueueSortAjax')){
+
 			queueComStruct["obj"&qGroup.site_option_group_id].returnJson();
 		}
 	}
@@ -3533,7 +3534,7 @@ Define this function in another CFC to override the default email format
 		arrKey=structsort(mainOptionStruct, "numeric", "asc", "sort");
 		for(i=1;i<=arrayLen(arrKey);i++){
 			arrayAppend(arrMainOption, mainOptionStruct[arrKey[i]].row);
-		} 
+		}  
 		parentIndex=0;
 		arrSearchTable=[];
 		arrSortSQL=[];
