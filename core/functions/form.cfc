@@ -567,17 +567,28 @@ USAGE
 
 
 
-<!--- FUNCTION: zInput_Boolean(fieldName); --->
+<!--- application.zcore.functions.zInput_Boolean(fieldName, value, emptyStringIsNo); --->
 <cffunction name="zInput_Boolean" localmode="modern" returntype="any" output="false">
 	<cfargument name="fieldName" type="string" required="yes">
+	<cfargument name="value" type="string" required="no" default="">
+	<cfargument name="emptyStringIsNo" type="boolean" required="no" default="#true#">
 	<cfscript>
 	var yes = '<input name="#arguments.fieldName#" class="zBooleanRadio" id="#arguments.fieldName#1" style="border:none; background:none;" type="radio" value="1"';
 	var no = '<input name="#arguments.fieldName#" class="zBooleanRadio" id="#arguments.fieldName#0" style="border:none; background:none;" type="radio" value="0"'; 
-	if(structkeyexists(form, arguments.fieldName) and form[arguments.fieldName] NEQ "" and form[arguments.fieldName] EQ 1){
-		yes = yes&' checked';
+	v="";
+	if(arguments.value NEQ ""){
+		v=arguments.value;
+	}else if(structkeyexists(form, arguments.fieldName)){
+		v=form[arguments.fieldName];
 	}
-	if(structkeyexists(form, arguments.fieldName) and form[arguments.fieldName] NEQ "" and form[arguments.fieldName] EQ 0){
-		no = no&' checked';
+	if(v EQ 1){
+		yes&=' checked';
+	}
+	if(v EQ 0){
+		no&=' checked';
+	}
+	if(arguments.emptyStringIsNo and v EQ ""){
+		no&=' checked';
 	}
 	yes=yes&' /> <label for="#arguments.fieldName#1">Yes</label> ';
 	no=no&' /> <label for="#arguments.fieldName#0">No</label> ';

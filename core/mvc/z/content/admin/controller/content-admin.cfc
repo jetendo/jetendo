@@ -2260,7 +2260,7 @@
 			<input type="text" name="searchtext" id="searchtext" value="#htmleditformat(application.zcore.functions.zso(form, 'searchtext'))#" style="min-width:100px; width:300px;max-width:100%; min-width:auto;" size="20" maxchars="10" /> 
 		</div>
 		<div class="z-float-left z-pr-10 z-pb-10">
-			Active: #application.zcore.functions.zInput_Boolean("contentStatus", form.contentStatus)# 
+			Active: #application.zcore.functions.zInput_Boolean("contentStatus", form.contentStatus, false)# 
 			</div>
 			<div class="z-float-left z-pr-10 z-pb-10">
 			<input type="submit" name="searchForm" value="Search" class="z-manager-search-button" /> 
