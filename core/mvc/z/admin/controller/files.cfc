@@ -751,6 +751,10 @@
 	    alert('HTML Editor is missing');
 	}
 	function insertFile(){ 
+		if(typeof $ == "undefined"){
+			alert("Your browser is not compatible with this feature, and was unable to load the javascript that is required.  Please try another browser such as Firefox or Chrome.");
+			return;
+		}
 		var fileLabel=$("##fileLabel").val();
 		var fileLink=$("##fileLink").val();
 		if(fileLabel.trim() == ""){

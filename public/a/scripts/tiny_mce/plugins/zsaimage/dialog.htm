@@ -19,8 +19,9 @@ function zInsertGalleryImage(content){
 	<button onclick="top.tinymce.activeEditor.windowManager.getWindows()[0].close();">Close window</button>-->
 	<script type="text/javascript">
 	function setIframeHeight(){
-		console.log(parent.$);
-		
+		if(typeof parent.$ == "undefined"){
+			return;
+		}
 		parent.$(".mce-floatpanel").each(function(){
 			if(parent.$(this).attr("aria-label") == "Insert Image"){ 
 				parent.$( this).attr('style', 'left:5%; top:5%; width:90%;    border-width: 1px;    z-index: 65536;    ');
