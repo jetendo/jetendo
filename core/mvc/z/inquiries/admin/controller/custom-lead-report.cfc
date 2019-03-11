@@ -1924,7 +1924,7 @@ leadchart
 			uniqueKeyword[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]=true;
 			keywordVolumeSortStruct[count]={
 				keyword:row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword,
-				volume:vs[row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword]
+				volume:application.zcore.functions.zso(vs, row.keyword_ranking_source_id&chr(9)&row.keyword_ranking_keyword, false, 0)
 			};
 		}
 		count++;
