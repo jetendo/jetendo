@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return "/stylesheets/style.css";
 	</cfscript>
@@ -19,14 +19,14 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -54,7 +54,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -67,7 +67,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -78,7 +78,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -98,7 +98,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -115,7 +115,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
@@ -131,7 +131,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -148,9 +148,9 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	uploadPath=getUploadPath(arguments.optionStruct); 
+	uploadPath=getUploadPath(arguments.typeStruct); 
 	if(arguments.value NEQ "" and fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/feature-options/'&arguments.value)){
 		application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.site_id)&uploadPath&'/feature-options/'&arguments.value);
 	} 
@@ -159,7 +159,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfsavecontent variable="local.output">
@@ -172,7 +172,7 @@
 		ts3.name=arguments.prefixString&arguments.row["feature_field_id"];
 		ts3.allowDelete=allowDelete;
 		if(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]] NEQ ""){
-			uploadPath=getUploadPath(arguments.optionStruct);
+			uploadPath=getUploadPath(arguments.typeStruct);
 			if(uploadPath EQ "zuploadsecure"){
 				ts3.downloadPath="/zuploadsecure/feature-options/";
 				/*if(application.zcore.user.checkGroupAccess("administrator")){
@@ -197,7 +197,7 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfsavecontent variable="out">
 		<cfscript> 
@@ -224,13 +224,13 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(arguments.value NEQ ""){
-		uploadPath=getUploadPath(arguments.optionStruct);
+		uploadPath=getUploadPath(arguments.typeStruct);
 		appendValue="";
-		if(application.zcore.functions.zso(arguments.optionStruct, 'file_attachtoemail', true, 0) EQ 1 and structkeyexists(request.zos, 'arrForceEmailAttachment')){
+		if(application.zcore.functions.zso(arguments.typeStruct, 'file_attachtoemail', true, 0) EQ 1 and structkeyexists(request.zos, 'arrForceEmailAttachment')){
 			arrayAppend(request.zos.arrForceEmailAttachment, request.zos.globals.privateHomeDir&uploadPath&"/feature-options/"&arguments.value); 
 			appendValue=" | Also attached to lead email"; 
 		} 
@@ -248,7 +248,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -256,10 +256,10 @@
 </cffunction>
 
 <cffunction name="getUploadPath" localmode="modern" access="private">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	uploadPath="zupload";
-	if(application.zcore.functions.zso(arguments.optionStruct, 'file_securepath') EQ 'Yes'){
+	if(application.zcore.functions.zso(arguments.typeStruct, 'file_securepath') EQ 'Yes'){
 		uploadPath='zuploadsecure';
 	}
 	return uploadPath;
@@ -268,12 +268,12 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
 	var nv=0;
-	uploadPath=getUploadPath(arguments.optionStruct);
+	uploadPath=getUploadPath(arguments.typeStruct);
 	arguments.dataStruct["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
 	nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	filename="";
@@ -340,7 +340,7 @@
 		file_attachtoemail:form.file_attachtoemail
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
@@ -356,7 +356,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -370,11 +370,11 @@
 		<table style="border-spacing:0px;">
 		<tr><td>Secure Path: </td><td>
 		<cfscript>
-		arguments.optionStruct.file_securepath=application.zcore.functions.zso(arguments.optionStruct, 'file_securepath', false, "No");
-		arguments.optionStruct.file_attachtoemail=application.zcore.functions.zso(arguments.optionStruct, 'file_attachtoemail', false, "0");
-		form.file_attachtoemail=arguments.optionStruct.file_attachtoemail;
-		if(arguments.optionStruct.file_securepath EQ ""){
-			arguments.optionStruct.file_securepath="No";
+		arguments.typeStruct.file_securepath=application.zcore.functions.zso(arguments.typeStruct, 'file_securepath', false, "No");
+		arguments.typeStruct.file_attachtoemail=application.zcore.functions.zso(arguments.typeStruct, 'file_attachtoemail', false, "0");
+		form.file_attachtoemail=arguments.typeStruct.file_attachtoemail;
+		if(arguments.typeStruct.file_securepath EQ ""){
+			arguments.typeStruct.file_securepath="No";
 		}
 		var ts = StructNew();
 		ts.name = "file_securepath";
@@ -382,7 +382,7 @@
 		ts.labelList = "Yes,No";
 		ts.valueList = "Yes,No";
 		ts.hideSelect=true;
-		ts.struct=arguments.optionStruct;
+		ts.struct=arguments.typeStruct;
 		writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 		</cfscript>
 		</td></tr>

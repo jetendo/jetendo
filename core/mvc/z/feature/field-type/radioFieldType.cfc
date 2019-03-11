@@ -10,10 +10,10 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	if(arguments.optionStruct.optionStruct.radio_values NEQ ""){
-		return listgetat(arguments.optionStruct.optionStruct.radio_values, 1, arguments.optionStruct.optionStruct.radio_delimiter);
+	if(arguments.typeStruct.typeStruct.radio_values NEQ ""){
+		return listgetat(arguments.typeStruct.typeStruct.radio_values, 1, arguments.typeStruct.typeStruct.radio_delimiter);
 	}else{
 		return "You need to set this value manually";
 	}
@@ -23,7 +23,7 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
@@ -51,7 +51,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -59,9 +59,9 @@
 	<cfscript>
 	var ts = StructNew();
 	ts.name = arguments.prefixString&arguments.row["feature_field_id"];
-	ts.labelList = arguments.optionStruct.radio_labels;
-	ts.valueList = arguments.optionStruct.radio_values;
-	ts.delimiter = arguments.optionStruct.radio_delimiter;
+	ts.labelList = arguments.typeStruct.radio_labels;
+	ts.valueList = arguments.typeStruct.radio_values;
+	ts.delimiter = arguments.typeStruct.radio_delimiter;
 	ts.struct=arguments.dataStruct; 
 	ts.onclick=arguments.onChangeJavascript;
 	ts.output=false;
@@ -72,7 +72,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -83,7 +83,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -103,7 +103,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -121,9 +121,9 @@
 
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	return { mapData: false, struct: variables.buildSelectMap(arguments.optionStruct, false)};
+	return { mapData: false, struct: variables.buildSelectMap(arguments.typeStruct, false)};
 	</cfscript>
 </cffunction>
 
@@ -136,21 +136,21 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript> 
 	var ts = StructNew();
 	ts.name = arguments.prefixString&arguments.row["feature_field_id"];
-	ts.labelList = arguments.optionStruct.radio_labels;
-	ts.valueList = arguments.optionStruct.radio_values;
-	ts.delimiter = arguments.optionStruct.radio_delimiter;
+	ts.labelList = arguments.typeStruct.radio_labels;
+	ts.valueList = arguments.typeStruct.radio_values;
+	ts.delimiter = arguments.typeStruct.radio_delimiter;
 	ts.struct=arguments.dataStruct; 
 	ts.output=false;
 	return { label: true, hidden: false, value: application.zcore.functions.zInput_RadioGroup(ts)};   
@@ -160,16 +160,16 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript> 
 	return '
 	<cfscript>
 	var ts = StructNew();
 	ts.name = "#arguments.fieldName#";
-	ts.labelList = "#replace(replace(arguments.optionStruct.radio_labels, '"' , '""', "all"), "####", "########", "all")#";
-	ts.valueList = "#replace(replace(arguments.optionStruct.radio_values, '"' , '""', "all"), "####", "########", "all")#";
-	ts.delimiter = "#arguments.optionStruct.radio_delimiter#";
+	ts.labelList = "#replace(replace(arguments.typeStruct.radio_labels, '"' , '""', "all"), "####", "########", "all")#";
+	ts.valueList = "#replace(replace(arguments.typeStruct.radio_values, '"' , '""', "all"), "####", "########", "all")#";
+	ts.delimiter = "#arguments.typeStruct.radio_delimiter#";
 	ts.struct=form; 
 	ts.output=true;
 	application.zcore.functions.zInput_RadioGroup(ts);   
@@ -180,7 +180,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.value)){
@@ -193,10 +193,10 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
-	return variables.buildSelectMap(arguments.optionStruct, true);
+	return variables.buildSelectMap(arguments.typeStruct, true);
 	</cfscript>
 </cffunction>
 
@@ -226,7 +226,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -236,7 +236,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -246,7 +246,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
@@ -300,7 +300,7 @@
 		radio_values:application.zcore.functions.zso(arguments.dataStruct, 'radio_values')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction> 
 		
@@ -317,7 +317,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes"> 
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -344,9 +344,9 @@
 			<table style="border-spacing:0px;">
 			<tr>
 			<th>
-			Delimiter </th><td><input type="text" name="radio_delimiter"  value="<cfif structkeyexists(form, 'radio_delimiter')>#htmleditformat(form.radio_delimiter)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'radio_delimiter', false, '|'))#</cfif>" size="1" maxlength="1" /></td></tr>
-			<tr><td>Labels List: </td><td><input type="text" name="radio_labels"  value="<cfif structkeyexists(form, 'radio_labels')>#htmleditformat(form.radio_labels)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'radio_labels'))#</cfif>" /></td></tr>
-			<tr><td>Values List:</td><td> <input type="text" name="radio_values" value="<cfif structkeyexists(form, 'radio_values')>#htmleditformat(form.radio_values)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'radio_values'))#</cfif>" /></td></tr>
+			Delimiter </th><td><input type="text" name="radio_delimiter"  value="<cfif structkeyexists(form, 'radio_delimiter')>#htmleditformat(form.radio_delimiter)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'radio_delimiter', false, '|'))#</cfif>" size="1" maxlength="1" /></td></tr>
+			<tr><td>Labels List: </td><td><input type="text" name="radio_labels"  value="<cfif structkeyexists(form, 'radio_labels')>#htmleditformat(form.radio_labels)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'radio_labels'))#</cfif>" /></td></tr>
+			<tr><td>Values List:</td><td> <input type="text" name="radio_values" value="<cfif structkeyexists(form, 'radio_values')>#htmleditformat(form.radio_values)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'radio_values'))#</cfif>" /></td></tr>
 			</table>
 		</div>
 	</cfsavecontent>

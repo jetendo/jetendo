@@ -52,7 +52,7 @@ When making a version the primary record, it will have option to preserve the or
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="rowStruct" type="struct" required="yes">
 	<cfargument name="groupStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
 	var row=arguments.rowStruct;
@@ -88,10 +88,10 @@ When making a version the primary record, it will have option to preserve the or
 		row2.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 
 		if(row2.feature_data_value NEQ ""){
-			if(structkeyexists(arguments.optionStruct, row2.feature_field_id)){
-				typeId=arguments.optionStruct[row2.feature_field_id].data.feature_field_type_id;
+			if(structkeyexists(arguments.typeStruct, row2.feature_field_id)){
+				typeId=arguments.typeStruct[row2.feature_field_id].data.feature_field_type_id;
 				if(typeId EQ 9){
-					tempFieldStruct=arguments.optionStruct[row2.feature_field_id].type;
+					tempFieldStruct=arguments.typeStruct[row2.feature_field_id].type;
 					path=tempPath;
 					if(application.zcore.functions.zso(tempFieldStruct, 'file_securepath') EQ 'Yes'){
 						path&='zuploadsecure/feature-options/';
@@ -118,13 +118,20 @@ When making a version the primary record, it will have option to preserve the or
 						row2.feature_data_value=application.zcore.functions.zInsert(ts);
 					}
 				}
-				if(typeId EQ 9 or typeId EQ 3){
+				if(typeId EQ 3){
+					arrValue=listToArray(row2.feature_data_value, chr(9));
+					if(arrValue[1] NEQ ""){
+						newPath=application.zcore.functions.zcopyfile(path&arrValue[1]);
+						arrValue[1]=getfilefrompath(newPath); 
+					}
+					if(arrayLen(arrValue) EQ 2 and arrValue[2] NEQ ""){
+						newPath=application.zcore.functions.zcopyfile(path&arrValue[2]);
+						arrValue[2]=getfilefrompath(newPath);
+					}
+					row2.feature_data_value=arrayToList(arrValue, chr(9));
+				}else if(typeId EQ 9){
 					newPath=application.zcore.functions.zcopyfile(path&row2.feature_data_value);
 					row2.feature_data_value=getfilefrompath(newPath); 
-					if(row2.feature_data_original NEQ ""){
-						newPath=application.zcore.functions.zcopyfile(path&row2.feature_data_original);
-						row2.feature_data_original=getfilefrompath(newPath);
-					}
 				}
 			}
 		}
@@ -147,7 +154,7 @@ When making a version the primary record, it will have option to preserve the or
 	qChild=db.execute("qChild");
 	for(row3 in qChild){
 		row3.feature_data_parent_id=newSetId;
-		this.copySchemaRecursive(row3.feature_data_id, arguments.site_id, row3, arguments.groupStruct, arguments.optionStruct);
+		this.copySchemaRecursive(row3.feature_data_id, arguments.site_id, row3, arguments.groupStruct, arguments.typeStruct);
 	}
 	</cfscript>
 </cffunction>
@@ -173,19 +180,19 @@ When making a version the primary record, it will have option to preserve the or
 <cffunction name="getFields" localmode="modern" access="public" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject;
-	optionStruct={};
+	typeStruct={};
 	db.sql="select * from #db.table("feature_field", "jetendofeature")# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_field_deleted=#db.param(0)# and 
 	feature_schema_id <> #db.param(0)#";
 	qField=db.execute("qField");
 	for(row in qField){
-		optionStruct[row.feature_field_id]={
+		typeStruct[row.feature_field_id]={
 			data: row,
 			type: deserializeJson(row.feature_field_type_json)
 		}
 	}
-	return optionStruct;
+	return typeStruct;
 	</cfscript>
 </cffunction>
 
@@ -225,7 +232,7 @@ When making a version the primary record, it will have option to preserve the or
 	form.createVersion=application.zcore.functions.zso(form, 'createVersion', true, 0);
 	logCopyMessage('Copy Initializing.');
 	groupStruct=getSchemas();
-	optionStruct=getFields();
+	typeStruct=getFields();
 
 	try{
 		for(row in qSet){
@@ -269,7 +276,7 @@ When making a version the primary record, it will have option to preserve the or
 				}
 				row.feature_data_master_set_id=form.feature_data_id;
 			}
-			this.copySchemaRecursive(form.feature_data_id, form.newSiteId, row, groupStruct, optionStruct);
+			this.copySchemaRecursive(form.feature_data_id, form.newSiteId, row, groupStruct, typeStruct);
 		}
 
 		if(form.newSiteID NEQ request.zos.globals.id){

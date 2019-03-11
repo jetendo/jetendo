@@ -10,10 +10,10 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	width=application.zcore.functions.zso(arguments.optionStruct.optionStruct, 'imagewidth',false,'1000');
-	height=application.zcore.functions.zso(arguments.optionStruct.optionStruct, 'imageHeight',false,'1000');
+	width=application.zcore.functions.zso(arguments.typeStruct.typeStruct, 'imagewidth',false,'1000');
+	height=application.zcore.functions.zso(arguments.typeStruct.typeStruct, 'imageHeight',false,'1000');
 	if(structkeyexists(request.zos, 'forceAbsoluteImagePlaceholderURL')){
 		return request.zos.mlsImagesDomain&application.zcore.functions.zGetImagePlaceholderURL(width, height);
 	}else{
@@ -25,14 +25,14 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -61,7 +61,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -74,7 +74,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -85,7 +85,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -104,7 +104,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -121,7 +121,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
@@ -137,7 +137,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -154,7 +154,7 @@
 <cffunction name="onDelete" localmode="modern" access="public" output="no">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	if(arguments.value NEQ ""){
 		arrValue=listToArray(arguments.value, chr(9));
@@ -172,7 +172,7 @@
 
 <!--- <cffunction name="onDelete" localmode="modern" access="public" output="no">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_value')){
 		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_value"])){
@@ -194,7 +194,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
@@ -204,14 +204,14 @@
 	}
 	return { label: true, hidden: false, value:application.zcore.functions.zInputImage(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/', request.zos.currentHostName&'/zupload/feature-options/',250, allowDelete)&'<br /><br />
 	Note: The image will be resized to fit inside these pixel dimensions: '&
-	application.zcore.functions.zso(arguments.optionStruct, 'imagewidth',false,'1000')&' x '&
-	application.zcore.functions.zso(arguments.optionStruct, 'imageheight',false,'1000')&'<br />'};  
+	application.zcore.functions.zso(arguments.typeStruct, 'imagewidth',false,'1000')&' x '&
+	application.zcore.functions.zso(arguments.typeStruct, 'imageheight',false,'1000')&'<br />'};  
 	</cfscript>
 </cffunction>
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var allowDelete=true;
@@ -221,7 +221,7 @@
 	return '
 	<cfscript>
 	echo(application.zcore.functions.zInputImage("#arguments.fieldName#", left(request.zos.globals.privatehomedir, len(request.zos.globals.privatehomedir)-1)&"{uploadDisplayPath}", request.zos.currentHostName&"{uploadDisplayPath}",250, #allowDelete#));
-	echo("<br /><br />Note: The image will be resized to fit inside these pixel dimensions: #application.zcore.functions.zso(arguments.optionStruct, 'imagewidth',false,'1000')# x #application.zcore.functions.zso(arguments.optionStruct, 'imageheight',false,'1000')#<br />");  
+	echo("<br /><br />Note: The image will be resized to fit inside these pixel dimensions: #application.zcore.functions.zso(arguments.typeStruct, 'imagewidth',false,'1000')# x #application.zcore.functions.zso(arguments.typeStruct, 'imageheight',false,'1000')#<br />");  
 	</cfscript>
 	';
 	</cfscript>
@@ -229,7 +229,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(arguments.value NEQ "" and fileexists(request.zos.globals.privatehomedir&'zupload/feature-options/#arguments.value#')){
@@ -242,7 +242,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -251,7 +251,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -270,7 +270,7 @@
 				return { success: true, value: replace(nv, '/zupload/feature-options/', ''), dateValue: "" };
 			}
 		}
-		photoresize=application.zcore.functions.zso(arguments.optionStruct, 'imagewidth',false,'1000')&"x"&application.zcore.functions.zso(arguments.optionStruct, 'imageHeight',false,'1000');
+		photoresize=application.zcore.functions.zso(arguments.typeStruct, 'imagewidth',false,'1000')&"x"&application.zcore.functions.zso(arguments.typeStruct, 'imageHeight',false,'1000');
 		nvd=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete');
 		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
 			arguments.dataStruct["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
@@ -283,7 +283,7 @@
 		}
 		destination=application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/';
 		//echo(form[arguments.prefixString&arguments.row["feature_field_id"]]);	abort;
-		if(application.zcore.functions.zso(arguments.optionStruct, 'imagecrop') EQ '1'){
+		if(application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') EQ '1'){
 			arrList = application.zcore.functions.zUploadResizedImagesToDb(arguments.prefixString&arguments.row["feature_field_id"], destination, photoresize,'','','',request.zos.globals.datasource,'1', request.zos.globals.id, false);
 			//originalPath=form[arguments.prefixString&arguments.row["feature_field_id"]];
 
@@ -311,9 +311,9 @@
 			}
 			nv=arrList[1];
 			local.tempPath9=application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'; 
-			arguments.optionStruct.imagemaskpath=application.zcore.functions.zso(arguments.optionStruct, 'imagemaskpath');
-			if(arguments.optionStruct.imagemaskpath NEQ ""){
-				local.absImageMaskPath=request.zos.globals.homedir&removechars(arguments.optionStruct.imagemaskpath, 1, 1);
+			arguments.typeStruct.imagemaskpath=application.zcore.functions.zso(arguments.typeStruct, 'imagemaskpath');
+			if(arguments.typeStruct.imagemaskpath NEQ ""){
+				local.absImageMaskPath=request.zos.globals.homedir&removechars(arguments.typeStruct.imagemaskpath, 1, 1);
 				
 				var ts=structnew();
 				ts.absImageMaskPath=local.absImageMaskPath;
@@ -418,7 +418,7 @@
 		imagemaskpath:application.zcore.functions.zso(arguments.dataStruct, 'imagemaskpath')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
@@ -436,7 +436,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -460,17 +460,17 @@
 		Image<br />
 		<div id="typeFields3" style="display:none;padding-left:30px;"> 
 			<p>Image Max Width:
-			<input type="text" name="imagewidth" id="imagewidth" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'imagewidth'))#" /></p>
+			<input type="text" name="imagewidth" id="imagewidth" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'imagewidth'))#" /></p>
 
 			<p>Image Max Height:
-			<input type="text" name="imageheight" id="imageheight" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'imageheight'))#" /></p>
+			<input type="text" name="imageheight" id="imageheight" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'imageheight'))#" /></p>
 			<p>Crop:
-			<input type="radio" name="imagecrop" id="imagecrop1" value="1" <cfif application.zcore.functions.zso(arguments.optionStruct, 'imagecrop') EQ 1 and application.zcore.functions.zso(arguments.optionStruct, 'imagecrop') NEQ "">checked="checked"</cfif>/>
+			<input type="radio" name="imagecrop" id="imagecrop1" value="1" <cfif application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') EQ 1 and application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') NEQ "">checked="checked"</cfif>/>
 			Yes
-			<input type="radio" name="imagecrop" id="imagecrop0" value="0" <cfif application.zcore.functions.zso(arguments.optionStruct, 'imagecrop') EQ "" or application.zcore.functions.zso(arguments.optionStruct, 'imagecrop') EQ 0>checked="checked"</cfif>/>
+			<input type="radio" name="imagecrop" id="imagecrop0" value="0" <cfif application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') EQ "" or application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') EQ 0>checked="checked"</cfif>/>
 			No</p>
 			<p>Image Mask URL: 
-			<input type="text" name="imagemaskpath" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'imagemaskpath'))#" /><br />Note: White pixels in the mask will result in the pixel having full opacity. Shades of grey are used to reduce opacity. Black will make the pixel have zero opacity.</p>
+			<input type="text" name="imagemaskpath" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'imagemaskpath'))#" /><br />Note: White pixels in the mask will result in the pixel having full opacity. Shades of grey are used to reduce opacity. Black will make the pixel have zero opacity.</p>
 		</div>
 							
 	</cfsavecontent>

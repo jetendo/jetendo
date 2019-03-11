@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return "";
 	</cfscript>
@@ -19,14 +19,14 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -49,7 +49,7 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 <cffunction name="isCopyable" localmode="modern" access="public" returntype="boolean" output="no">
@@ -66,7 +66,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -79,7 +79,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -90,7 +90,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -110,7 +110,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -127,7 +127,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
@@ -238,7 +238,7 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	return '';
@@ -247,7 +247,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -257,7 +257,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -267,7 +267,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.value)){
@@ -280,7 +280,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -289,7 +289,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -332,7 +332,7 @@
 		product_image_library_id:application.zcore.functions.zso(arguments.dataStruct, 'product_image_library_id')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
@@ -348,7 +348,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 		var db=request.zos.queryObject;

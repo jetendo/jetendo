@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return "<p>HTML <strong>Example</strong></p>";
 	</cfscript>
@@ -19,14 +19,14 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -55,7 +55,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -68,7 +68,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -79,7 +79,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -98,7 +98,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -115,7 +115,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
@@ -131,7 +131,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -141,7 +141,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfsavecontent variable="local.output">
@@ -149,8 +149,8 @@
 		var htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
 		htmlEditor.instanceName	= arguments.prefixString&arguments.row["feature_field_id"];
 		htmlEditor.value			= application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
-		htmlEditor.width			= application.zcore.functions.zso(arguments.optionStruct, 'editorwidth',false,"100%");
-		htmlEditor.height		= application.zcore.functions.zso(arguments.optionStruct, 'editorheight',false,400);
+		htmlEditor.width			= application.zcore.functions.zso(arguments.typeStruct, 'editorwidth',false,"100%");
+		htmlEditor.height		= application.zcore.functions.zso(arguments.typeStruct, 'editorheight',false,400);
 		htmlEditor.config.EnterMode= "br"; 
 		htmlEditor.create();
 		</cfscript>
@@ -177,7 +177,7 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	return '
@@ -185,8 +185,8 @@
 	var htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
 	htmlEditor.instanceName	= "#arguments.fieldName#";
 	htmlEditor.value			= application.zcore.functions.zso(form, "#arguments.fieldName#");
-	htmlEditor.width			= "#application.zcore.functions.zso(arguments.optionStruct, 'editorwidth',false,"100%")#";
-	htmlEditor.height		= "#application.zcore.functions.zso(arguments.optionStruct, 'editorheight',false,400)#";
+	htmlEditor.width			= "#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth',false,"100%")#";
+	htmlEditor.height		= "#application.zcore.functions.zso(arguments.typeStruct, 'editorheight',false,400)#";
 	htmlEditor.config.EnterMode= "br"; 
 	htmlEditor.create();
 	echo(''<br />Cache External Images: '');
@@ -207,7 +207,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.value)){
@@ -220,7 +220,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -229,7 +229,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -274,7 +274,7 @@
 		editorheight:application.zcore.functions.zso(arguments.dataStruct, 'editorheight')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 
@@ -297,13 +297,13 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -327,9 +327,9 @@
 		HTML Editor<br />
 		<div id="typeFields2" style="display:none;padding-left:30px;"> 
 			<p>Editor Width:
-			<input type="text" name="editorwidth" id="editorwidth" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'editorwidth'))#" /></p>
+			<input type="text" name="editorwidth" id="editorwidth" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'editorwidth'))#" /></p>
 			<p>Editor Height:
-			<input type="text" name="editorheight" id="editorheight" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'editorheight'))#" /></p>
+			<input type="text" name="editorheight" id="editorheight" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'editorheight'))#" /></p>
 		</div>	
 	</cfsavecontent>
 	<cfreturn output>

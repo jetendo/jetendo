@@ -57,15 +57,16 @@
 	}else{
 		ss.curIndex++;
 	}
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData;
+	fsd=application.zcore.featureSchemaData;
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
 	indent="";
 	for(i=1;i LTE arguments.depth;i++){
 		indent&=chr(9);
 	}
 
 
-	for(i in t9.optionSchemaLookup){
-		groupStruct=t9.optionSchemaLookup[i];
+	for(i in fsd.featureSchemaLookup){
+		groupStruct=fsd.featureSchemaLookup[i];
 		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_variable_name), " ", "", "all"), "");
 		if(isNumeric(left(groupName, 1))){
 			groupName="Schema"&groupName;
@@ -84,25 +85,25 @@
 				echo(indent&'// comment out when debugging#chr(10)#');
 			}
 			if(groupStruct.feature_schema_parent_id NEQ 0){
-				parentSchemaStruct=t9.optionSchemaLookup[groupStruct.feature_schema_parent_id];
+				parentSchemaStruct=fsd.featureSchemaLookup[groupStruct.feature_schema_parent_id];
 				parentSchemaName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(parentSchemaStruct.feature_schema_variable_name), " ", "", "all"), "");
 				if(isNumeric(left(parentSchemaName, 1))){
 					parentSchemaName="Schema"&parentSchemaName;
 				}
 				parentSchemaNameInstance=lcase(left(parentSchemaName, 1))&removeChars(parentSchemaName,1,1);
-				echo(indent&'arr#groupName#=application.zcore.featureCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.featureSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
 			}else{
-				echo(indent&'arr#groupName#=application.zcore.featureCom.optionSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.featureSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
 		}
-		if(not arguments.disableDebugOutput and structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
+		if(not arguments.disableDebugOutput and structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
 			jsonStruct={};
-			for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-				optionStruct=t9.optionLookup[n];
+			for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+				typeStruct=fsd.fieldLookup[n];
 
-				typeCFC=application.zcore.featureCom.getTypeCFC(optionStruct.feature_field_type_id);
-				debugValue=typeCFC.getDebugValue(optionStruct);
-				jsonStruct[optionStruct.feature_field_variable_name]=debugValue; 
+				typeCFC=application.zcore.featureCom.getTypeCFC(typeStruct.feature_field_type_id);
+				debugValue=typeCFC.getDebugValue(typeStruct);
+				jsonStruct[typeStruct.feature_field_variable_name]=debugValue; 
 			} 
 			if(groupStruct.feature_schema_enable_unique_url EQ 1){
 				jsonStruct.__url='##';
@@ -135,16 +136,16 @@
 		if(not arguments.disableLoop){
 			echo(indent&'<cfloop from="1" to="##arrayLen(arr#groupName#)##" index="i#ss.curIndex#">#chr(10)&indent&chr(9)#<cfscript>#groupNameInstance#=arr#groupName#[i#ss.curIndex#];</cfscript>#chr(10)#');
 		}
-		if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
-			c=t9.optionSchemaFieldLookup[groupStruct.feature_schema_id];
+		if(structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
+			c=fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id];
 			fieldStruct={};
-			for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-				optionStruct=t9.optionLookup[n];
-				f=indent&chr(9)&'###groupNameInstance#["'&replace(replace(optionStruct.feature_field_variable_name, "##", "####", "all"), '"', '""', 'all')&'"]##'&chr(10);
+			for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+				typeStruct=fsd.fieldLookup[n];
+				f=indent&chr(9)&'###groupNameInstance#["'&replace(replace(typeStruct.feature_field_variable_name, "##", "####", "all"), '"', '""', 'all')&'"]##'&chr(10);
 
 				ts={
 					html: f,
-					sort: optionStruct.feature_field_sort
+					sort: typeStruct.feature_field_sort
 				};
 				fieldStruct[n]=ts;
 			}
@@ -201,10 +202,11 @@
 	<cfargument name="groupId" type="numeric" required="yes">  
 	<cfscript>
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	 
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData; 
+	fsd=application.zcore.featureSchemaData; 
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
 
 
-	groupStruct=t9.optionSchemaLookup[arguments.groupId];
+	groupStruct=fsd.featureSchemaLookup[arguments.groupId];
  
 	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_variable_name, "_"));
  
@@ -220,12 +222,12 @@
 `feature_data_approved` char(1) NOT NULL DEFAULT '0',
 `#tableName#_updated_datetime` datetime NOT NULL,
 `#tableName#_deleted` char(1) NOT NULL DEFAULT '0',"&chr(10));  
-	if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
-		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-			optionStruct=t9.optionLookup[n];
+	if(structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
+		for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+			typeStruct=fsd.fieldLookup[n];
 			savecontent variable="out"{
-				var currentCFC=application.zcore.featureCom.getTypeCFC(optionStruct.type); 
-				fieldName="#tableName#_"&lcase(application.zcore.functions.zURLEncode(optionStruct.feature_field_variable_name, "_"));
+				var currentCFC=application.zcore.featureCom.getTypeCFC(typeStruct.type); 
+				fieldName="#tableName#_"&lcase(application.zcore.functions.zURLEncode(typeStruct.feature_field_variable_name, "_"));
 				v=currentCFC.getCreateTableColumnSQL(fieldName);
 			}
 			echo(v&","&chr(10));
@@ -242,20 +244,21 @@ KEY `feature_data_id` (`feature_data_id`)
 	<cfscript>
  
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	 
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData; 
+	fsd=application.zcore.featureSchemaData; 
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
 
 
-	groupStruct=t9.optionSchemaLookup[arguments.groupId];
+	groupStruct=fsd.featureSchemaLookup[arguments.groupId];
  
 	tableName=lcase(application.zcore.functions.zURLEncode(groupStruct.feature_schema_variable_name, "_"));
   
-	if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
-		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-			optionStruct=t9.optionLookup[n];
+	if(structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
+		for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+			typeStruct=fsd.fieldLookup[n];
 			savecontent variable="out"{ 
-				fieldName="#tableName#_"&lcase(application.zcore.functions.zURLEncode(optionStruct.feature_field_variable_name, "_"));
+				fieldName="#tableName#_"&lcase(application.zcore.functions.zURLEncode(typeStruct.feature_field_variable_name, "_"));
 			}
-			echo(fieldName&':ds["'&replace(optionStruct.feature_field_variable_name, "##", "####", "all")&'"],'&chr(10)); 
+			echo(fieldName&':ds["'&replace(typeStruct.feature_field_variable_name, "##", "####", "all")&'"],'&chr(10)); 
 		} 
 	}
 	</cfscript>
@@ -269,12 +272,18 @@ KEY `feature_data_id` (`feature_data_id`)
 	application.zcore.template.setPlainTemplate();
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0);
 	form.feature_schema_parent_id=application.zcore.functions.zso(form, 'feature_schema_parent_id', true, 0);
+
+	// TODO: remove when site cache automatically updates...
+
+	featuresCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features"); 
+	featuresCom.checkFieldCache();
+
 	
 	echo('<div style="width:98% !important; float:left;margin:1%;">');
 	echo('<h2>Source code generated below.</h2>
 	<p>Note: searchSchema() retrieves all the records.  If "Enable Memory Caching" is disabled for the group, it will perform a query to select all the data.  This can be very slow if you are working with hundreds or thousands of records and it may cause nested queries to run if the sub-groups also have "Enable Memory Caching" disabled.   Conversely, for small datasets, this feature is much faster then running a query.</p>
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
-	<p>Example: arr1=application.zcore.featureCom.optionSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
+	<p>Example: arr1=application.zcore.featureCom.featureSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
 	<p>fullStruct=application.zcore.featureCom.getSchemaSetById(["Schema Name"], dataStruct.__setId);</p>
 
@@ -299,11 +308,12 @@ KEY `feature_data_id` (`feature_data_id`)
 		generateSchemaCode(form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, false, false, false);
 		
 		 
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData;
-	if(not structkeyexists(t9.optionSchemaLookup, form.feature_schema_id)){
+	fsd=application.zcore.featureSchemaData; 
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
+	if(not structkeyexists(fsd.featureSchemaLookup, form.feature_schema_id)){
 		application.zcore.functions.z404("#form.feature_schema_id# is not a valid feature_schema_id");
 	}
-		groupStruct=t9.optionSchemaLookup[form.feature_schema_id];
+		groupStruct=fsd.featureSchemaLookup[form.feature_schema_id];
 
 		groupName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(groupStruct.feature_schema_variable_name), " ", "", "all"), "");
 		if(isNumeric(left(groupName, 1))){
@@ -560,15 +570,16 @@ displaySchemaCom.ajaxInsert();
 	echo('cs={};'&chr(10));
  	echo('cs.dataFields=[');
 	count=0; 
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData;
-	if(structkeyexists(t9.optionSchemaFieldLookup, groupStruct.feature_schema_id)){
-		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-			optionStruct=t9.optionLookup[n];
+	fsd=application.zcore.featureSchemaData; 
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
+	if(structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
+		for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+			typeStruct=fsd.fieldLookup[n];
 			count++;
-			currentCFC=application.zcore.featureCom.getTypeCFC(optionStruct.type);   
+			currentCFC=application.zcore.featureCom.getTypeCFC(typeStruct.type);   
 			typeName=currentCFC.getTypeName();
 			options=currentCFC.getFieldStruct();
-			currentFields=duplicate(optionStruct.optionStruct);
+			currentFields=duplicate(typeStruct.typeStruct);
 			structappend(currentFields, options, false);
 			tabs=chr(9);
 			if(count NEQ 1){
@@ -576,10 +587,10 @@ displaySchemaCom.ajaxInsert();
 			}
 			echo(chr(10)&'{'&chr(10));
 			echo('#tabs#id:"#count#",'&chr(10));
-			echo('#tabs#label:"#replace(replace(optionStruct.feature_field_variable_name, '##', '####', 'all'), '"', '""', "all")#",'&chr(10));
+			echo('#tabs#label:"#replace(replace(typeStruct.feature_field_variable_name, '##', '####', 'all'), '"', '""', "all")#",'&chr(10));
 			echo('#tabs#type:"#typeName#",'&chr(10));
-			echo('#tabs#required:#optionStruct.feature_field_required#,'&chr(10));
-			echo('#tabs#defaultValue:"#replace(replace(optionStruct.feature_field_default_value, '##', '####', 'all'), '"', '""', "all")#",'&chr(10));
+			echo('#tabs#required:#typeStruct.feature_field_required#,'&chr(10));
+			echo('#tabs#defaultValue:"#replace(replace(typeStruct.feature_field_default_value, '##', '####', 'all'), '"', '""', "all")#",'&chr(10));
 			echo('#tabs#options:{');
 			first=true;
 			for(g in currentFields){
@@ -604,9 +615,10 @@ displaySchemaCom.ajaxInsert();
 	<cfscript>
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0);
 	
-	t9=application.zcore.siteGlobals[request.zos.globals.id].soSchemaData; 
-	for(i in t9.optionSchemaLookup){
-		groupStruct=t9.optionSchemaLookup[i];
+	fsd=application.zcore.featureSchemaData; 
+	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
+	for(i in fsd.featureSchemaLookup){
+		groupStruct=fsd.featureSchemaLookup[i];
 		if(form.feature_schema_id NEQ 0 and form.feature_schema_id NEQ groupStruct.feature_schema_id){
 			continue;
 		} 
@@ -615,18 +627,18 @@ displaySchemaCom.ajaxInsert();
 		echo('<div style="width:100%; float:left; padding-bottom:10px;"><h2>Fields</h2>
 		<table class="table-list">');
 		ss={};
-		for(n in t9.optionSchemaFieldLookup[groupStruct.feature_schema_id]){
-			ss[n]=t9.optionLookup[n];
+		for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+			ss[n]=fsd.fieldLookup[n];
 		}
 		arrKey=structsort(ss, "text", "asc", "feature_field_variable_name");
 		for(n=1;n LTE arraylen(arrKey);n++){
-			optionStruct=t9.optionLookup[arrKey[n]];
+			typeStruct=fsd.fieldLookup[arrKey[n]];
 			echo('<tr>');
-			echo('<th style="width:150px; ">#htmleditformat(optionStruct.feature_field_variable_name)#</th><td>');
-			if(optionStruct.feature_field_tooltip EQ ""){
+			echo('<th style="width:150px; ">#htmleditformat(typeStruct.feature_field_variable_name)#</th><td>');
+			if(typeStruct.feature_field_tooltip EQ ""){
 				echo('No help available.');
 			}else{
-				echo(optionStruct.feature_field_tooltip);
+				echo(typeStruct.feature_field_tooltip);
 			}
 			echo('</td></tr>');
 			
@@ -648,22 +660,22 @@ displaySchemaCom.ajaxInsert();
 		form.feature_field_id=application.zcore.functions.zso(form, 'option'&local.i);
 		form.mapField=application.zcore.functions.zso(form, 'mapField'&local.i);
 		if(form.mapField NEQ ""){
-			db.sql="INSERT INTO #db.table("feature_schema_map", "jetendofeature")# 
-			SET feature_schema_map_updated_datetime = #db.param(request.zos.mysqlnow)#, 
+			db.sql="INSERT INTO #db.table("feature_map", "jetendofeature")# 
+			SET feature_map_updated_datetime = #db.param(request.zos.mysqlnow)#, 
 			feature_field_id=#db.param(form.feature_field_id)#,
-			feature_schema_map_fieldname=#db.param(form.mapField)#,
+			feature_map_fieldname=#db.param(form.mapField)#,
 			feature_schema_id=#db.param(form.feature_schema_id)#, 
 			feature_id=#db.param(form.feature_id)#, 
-			feature_schema_map_deleted=#db.param(0)#
+			feature_map_deleted=#db.param(0)#
 			";
 			db.execute("qInsert");
 		}
 	}
-	db.sql="delete from #db.table("feature_schema_map", "jetendofeature")# 
+	db.sql="delete from #db.table("feature_map", "jetendofeature")# 
 	where feature_schema_id=#db.param(form.feature_schema_id)# and 
-	feature_schema_map_deleted = #db.param(0)# and 
+	feature_map_deleted = #db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
-	feature_schema_map_updated_datetime < #db.param(request.zos.mysqlnow)#";
+	feature_map_updated_datetime < #db.param(request.zos.mysqlnow)#";
 	db.execute("qDelete");
 	application.zcore.status.setStatus(request.zsid, "Map fields saved.");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
@@ -698,8 +710,8 @@ displaySchemaCom.ajaxInsert();
 	qField=db.execute("qField");
 	arrField=[];
 	arrRowDefault=[];
-	optionStruct={};
-	optionStructType={};
+	typeStruct={};
+	typeStructType={};
 	first=true;
 
 	hasUser=false;
@@ -715,8 +727,8 @@ displaySchemaCom.ajaxInsert();
 		}
 		first=false;
 		echo('"'&v&'"');
-		optionStruct[row.feature_field_id]=arraylen(arrField);
-		optionStructType[row.feature_field_id]=row.feature_field_type_id;
+		typeStruct[row.feature_field_id]=arraylen(arrField);
+		typeStructType[row.feature_field_id]=row.feature_field_type_id;
 	}
 	if(hasUser){
 		userStruct={};
@@ -810,9 +822,9 @@ displaySchemaCom.ajaxInsert();
 			userStructRow={};
 			arrAddUser=[];
 			for(value in qValues){
-				if(structkeyexists(optionStruct, value.feature_field_id)){
-					offset=optionStruct[value.feature_field_id]; 
-					if(optionStructType[value.feature_field_id] EQ 16){ 
+				if(structkeyexists(typeStruct, value.feature_field_id)){
+					offset=typeStruct[value.feature_field_id]; 
+					if(typeStructType[value.feature_field_id] EQ 16){ 
 						if(structkeyexists(userStruct, value.feature_data_value)){
 							arrayAppend(arrAddUser, userStruct[value.feature_data_value]); 
 						} 
@@ -932,9 +944,9 @@ displaySchemaCom.ajaxInsert();
 	}
 	echo("<h2>Map Fields For Feature Schema: #qSchema.feature_schema_display_name#</h2>");
 	
-	if(qSchema.feature_schema_map_group_id NEQ 0){
+	if(qSchema.feature_map_group_id NEQ 0){
 		db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
-		WHERE feature_schema_id = #db.param(qSchema.feature_schema_map_group_id)# and 
+		WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
 		feature_schema_deleted = #db.param(0)# and 
 		feature_id=#db.param(qSchema.feature_id)# ";
 		qMapSchema=db.execute("qMapSchema");
@@ -946,14 +958,14 @@ displaySchemaCom.ajaxInsert();
 	}else{
 		echo("<p>Mapping to Inquiries Table.</p>");
 	}
-	db.sql="SELECT * FROM #db.table("feature_schema_map", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_map", "jetendofeature")# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
-	feature_schema_map_deleted = #db.param(0)# and 
+	feature_map_deleted = #db.param(0)# and 
 	feature_id=#db.param(qSchema.feature_id)# ";
 	local.qMap=db.execute("qMap");
 	local.mapStruct={};
 	for(row in local.qMap){
-		local.mapStruct[row.feature_field_id]=row.feature_schema_map_fieldname;
+		local.mapStruct[row.feature_field_id]=row.feature_map_fieldname;
 	}
 	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
@@ -966,7 +978,7 @@ displaySchemaCom.ajaxInsert();
 	if(qSchema.feature_schema_map_fields_type EQ "2"){ // group
 		// get second group
 		db.sql="SELECT feature_field_display_name, feature_field_id FROM #db.table("feature_field", "jetendofeature")# 
-		WHERE feature_schema_id = #db.param(qSchema.feature_schema_map_group_id)# and 
+		WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
 		feature_field_deleted = #db.param(0)# and
 		feature_id=#db.param(qSchema.feature_id)# and
 		feature_field_allow_public = #db.param(1)#
@@ -1032,7 +1044,7 @@ displaySchemaCom.ajaxInsert();
 	if(mappingEnabled){
 		writeoutput('<p>Map as many fields as you wish. You can map an option to the same field multiple times to automatically combine those values.</p>
 			<p>To save time, try clicking <a href="##" class="zSchemaAutoMap">auto-map</a> first.</p>
-		<form class="zFormCheckDirty" id="optionSchemaMapForm" action="/z/feature/admin/feature-schema/saveMapFields?feature_schema_id=#form.feature_schema_id#" method="post">
+		<form class="zFormCheckDirty" id="featureSchemaMapForm" action="/z/feature/admin/feature-schema/saveMapFields?feature_schema_id=#form.feature_schema_id#" method="post">
 		<table class="table-list"><tr><th>Field Field</th><th>Map To Field</th></tr>');
 		for(row in qField){
 			writeoutput('<tr><td><input type="hidden" name="option#local.index#" value="#row.feature_field_id#" /><div id="fieldLabel#local.index#" class="fieldLabelDiv" data-id="#local.index#">'&htmleditformat(row.feature_field_display_name)&'</div></td><td>');
@@ -1121,7 +1133,7 @@ displaySchemaCom.ajaxInsert();
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="rowStruct" type="struct" required="yes">
 	<cfargument name="groupStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
 	var row=arguments.rowStruct;
@@ -1132,14 +1144,14 @@ displaySchemaCom.ajaxInsert();
 	// TODO: we would need to guarantee inquiries_type_id is cloned first by checking for same new on the new site - then i could copy the map table too.  For now, it just removes these.
 	row.inquiries_type_id=0;
 	row.inquiries_type_id_siteIDType=0;
-	row.feature_schema_map_group_id=0;
+	row.feature_map_group_id=0;
 	row.site_id = arguments.site_id;
 	ts=structnew();
 	ts.struct=row;
 	ts.datasource="jetendofeature";
 	ts.table="feature_schema";
-	local.newoptionSchemaId=application.zcore.functions.zInsert(ts);
-	arguments.groupStruct[arguments.feature_schema_id]=local.newoptionSchemaId;
+	local.newfeatureSchemaId=application.zcore.functions.zInsert(ts);
+	arguments.groupStruct[arguments.feature_schema_id]=local.newfeatureSchemaId;
 	db.sql="select * from #db.table("feature_field", "jetendofeature")# 
 	where #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 	feature_field_deleted = #db.param(0)# and
@@ -1147,14 +1159,14 @@ displaySchemaCom.ajaxInsert();
 	local.qFields=db.execute("qFields");
 	for(row2 in local.qFields){
 		row2.site_id=arguments.site_id;
-		row2.feature_schema_id=local.newoptionSchemaId;
+		row2.feature_schema_id=local.newfeatureSchemaId;
 		// row2.featureidlist     
 		ts=structnew();
 		ts.struct=row2;
 		ts.datasource="jetendofeature";
 		ts.table="feature_field";
 		local.newoptionId=application.zcore.functions.zInsert(ts);
-		arguments.optionStruct[row2.feature_field_id]=local.newoptionId;
+		arguments.typeStruct[row2.feature_field_id]=local.newoptionId;
 	}
 	db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
 	where feature_schema_parent_id = #db.param(arguments.feature_schema_id)# and 
@@ -1162,8 +1174,8 @@ displaySchemaCom.ajaxInsert();
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
 	local.qSchema=db.execute("qSchema");
 	for(row in local.qSchema){
-		row.feature_schema_parent_id=local.newoptionSchemaId;
-		this.copySchemaRecursive(row.feature_schema_id, arguments.site_id, row, arguments.groupStruct, arguments.optionStruct);
+		row.feature_schema_parent_id=local.newfeatureSchemaId;
+		this.copySchemaRecursive(row.feature_schema_id, arguments.site_id, row, arguments.groupStruct, arguments.typeStruct);
 	}
 	</cfscript>
 </cffunction>
@@ -1174,7 +1186,7 @@ displaySchemaCom.ajaxInsert();
 	var row=0;
 	var row2=0;
 	var ts=0;
-	var optionStruct={};
+	var typeStruct={};
 	var groupStruct={};
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
 	form.newSchemaName=application.zcore.functions.zso(form, 'newSchemaName');
@@ -1198,7 +1210,7 @@ displaySchemaCom.ajaxInsert();
 			row.feature_schema_variable_name=form.newSchemaName;
 			row.feature_schema_display_name=form.newSchemaName;
 		}
-		this.copySchemaRecursive(form.feature_schema_id, form.newSiteId, row, groupStruct, optionStruct);
+		this.copySchemaRecursive(form.feature_schema_id, form.newSiteId, row, groupStruct, typeStruct);
 	}
 	application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
 		
@@ -1210,14 +1222,9 @@ displaySchemaCom.ajaxInsert();
 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var qSchema=0;
-	var qProp=0;
-	var curParentId=0;
-	var arrParent=0;
-	var q1=0;
-	var i=0;
-	variables.init();
+	db=request.zos.queryObject;
+	init();
+	qSchema=0;
 	application.zcore.functions.zSetPageHelpId("2.11.1");
 	application.zcore.functions.zstatushandler(request.zsid);
 	form.feature_schema_parent_id=application.zcore.functions.zso(form, 'feature_schema_parent_id',true);
@@ -1226,7 +1233,7 @@ displaySchemaCom.ajaxInsert();
 		where feature_schema_id=#db.param(form.feature_schema_parent_id)# and 
 		feature_schema_deleted = #db.param(0)# and
 		#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
-		qSchema=db.execute("qSchema");
+		qSchema=db.execute("qSchema", "", 10000, "query", false);
         if(qSchema.recordcount EQ 0){
             application.zcore.functions.z301redirect("/z/feature/admin/feature-schema/index");	
         }
@@ -1243,7 +1250,7 @@ displaySchemaCom.ajaxInsert();
 	feature_schema.feature_schema_parent_id = #db.param(form.feature_schema_parent_id)# 
 	group by feature_schema.feature_schema_id 
 	order by feature_schema.feature_schema_display_name ASC ";
-	qProp=db.execute("qProp");
+	qProp=db.execute("qProp", "", 10000, "query", false);
 	if(form.feature_schema_parent_id NEQ 0){
 		writeoutput('<p><a href="/z/feature/admin/feature-schema/index">Manage Schemas</a> / ');
 		curParentId=form.feature_schema_parent_id;
@@ -1299,15 +1306,12 @@ displaySchemaCom.ajaxInsert();
 				</cfif>
 			</td>
 			<td>
-				<cfif qProp.feature_schema_admin_app_only EQ "0">
-					<cfif qProp.feature_schema_parent_id EQ 0>
-	
-						<a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
-						<a href="/z/feature/admin/features/import?feature_schema_id=#qProp.feature_schema_id#">Import</a> | 
-						<!--- <a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qProp.feature_schema_id#&amp;zManagerAddOnLoad=1">Add</a> |  --->
-					</cfif>
+				<cfif qProp.feature_schema_parent_id EQ 0>
+
+					<a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
+					<a href="/z/feature/admin/features/import?feature_schema_id=#qProp.feature_schema_id#">Import</a> | 
 				</cfif>
-				<cfif qProp.site_id NEQ 0 or variables.allowGlobal>
+				<cfif variables.allowGlobal>
 					<a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
 					<a href="/z/feature/admin/features/manageFields?feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#">Fields</a> | 
 					<cfif qProp.feature_schema_allow_public NEQ 0>
@@ -1331,10 +1335,10 @@ displaySchemaCom.ajaxInsert();
 					<cfif qProp.feature_schema_map_fields_type NEQ 0>
 						<a href="/z/feature/admin/feature-schema/mapFields?feature_schema_id=#qProp.feature_schema_id#">Map Fields</a>
 						<cfscript>
-						db.sql="select count(feature_schema_map_id) count 
-						from #db.table("feature_schema_map", "jetendofeature")# feature_schema_map WHERE 
+						db.sql="select count(feature_map_id) count 
+						from #db.table("feature_map", "jetendofeature")# feature_map WHERE 
 						site_id = #db.param(qProp.site_id)# AND 
-						feature_schema_map_deleted = #db.param(0)# and
+						feature_map_deleted = #db.param(0)# and
 						feature_schema_id = #db.param(qProp.feature_schema_id)# ";
 						qMap=db.execute("qMap");
 						if(qMap.recordcount EQ 0 or qMap.count EQ 0){
@@ -2040,10 +2044,10 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map Schema","member.feature-schema.edit feature_schema_map_group_id")#</th>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map Schema","member.feature-schema.edit feature_map_group_id")#</th>
 					<td><cfscript>
 					selectStruct=structnew();
-					selectStruct.name="feature_schema_map_group_id";
+					selectStruct.name="feature_map_group_id";
 					selectStruct.query = qG;
 					selectStruct.onchange="doParentCheck();";
 					selectStruct.queryLabelField = "feature_schema_display_name";
@@ -2078,11 +2082,11 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.feature-schema.edit feature_schema_map_insert_type")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.feature-schema.edit feature_map_insert_type")#</th>
 					<td><cfscript>
-					form.feature_schema_map_insert_type=application.zcore.functions.zso(form, 'feature_schema_map_insert_type', true, 0);
+					form.feature_map_insert_type=application.zcore.functions.zso(form, 'feature_map_insert_type', true, 0);
 					ts = StructNew();
-					ts.name = "feature_schema_map_insert_type";
+					ts.name = "feature_map_insert_type";
 					ts.listLabels = "Disabled,Immediately on Insert,After Manual Approval";
 					ts.listValues = "0,1,2";
 					ts.radio=true;

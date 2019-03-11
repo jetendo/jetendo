@@ -52,8 +52,8 @@ This allows avoiding remaps more easily.  Less code when importing.
 		parentStruct=getSchemaByName(arguments.struct, arrayToList(arrSchema, chr(9)), arguments.createIfMissing);
 		parentId=parentStruct.struct.feature_schema_id;
 	}
-	if(structkeyexists(arguments.struct.optionSchemaNameStruct, arguments.groupNameList)){
-		groupStruct=arguments.struct.optionSchemaStruct[arguments.struct.optionSchemaNameStruct[arguments.groupNameList]];
+	if(structkeyexists(arguments.struct.featureSchemaNameStruct, arguments.groupNameList)){
+		groupStruct=arguments.struct.featureSchemaStruct[arguments.struct.featureSchemaNameStruct[arguments.groupNameList]];
 		return { success:true, struct:groupStruct };
 	}else if(arguments.createIfMissing){
 		groupStruct={
@@ -74,8 +74,8 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfargument name="struct" type="struct" required="yes">
 	<cfargument name="feature_schema_id" type="string" required="yes">
 	<cfscript>
-	if(structkeyexists(arguments.struct.optionSchemaStruct, arguments.feature_schema_id)){
-		groupStruct=arguments.struct.optionSchemaStruct[arguments.feature_schema_id];
+	if(structkeyexists(arguments.struct.featureSchemaStruct, arguments.feature_schema_id)){
+		groupStruct=arguments.struct.featureSchemaStruct[arguments.feature_schema_id];
 		return { success:true, struct:groupStruct };
 	}else{
 		return {success:false};
@@ -87,9 +87,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfargument name="struct" type="struct" required="yes">
 	<cfargument name="feature_field_id" type="string" required="yes">
 	<cfscript>
-	if(structkeyexists(arguments.struct.optionStruct, arguments.feature_field_id)){
-		optionStruct=arguments.struct.optionStruct[arguments.feature_field_id];
-		return { success:true, struct:optionStruct };
+	if(structkeyexists(arguments.struct.typeStruct, arguments.feature_field_id)){
+		typeStruct=arguments.struct.typeStruct[arguments.feature_field_id];
+		return { success:true, struct:typeStruct };
 	}else{
 		return {success:false};
 	}
@@ -107,16 +107,16 @@ This allows avoiding remaps more easily.  Less code when importing.
 		return {success:false, errorMessage:"couldn't find group: "&arguments.groupNameList&"<br>"};
 	}
 	if(structkeyexists(arguments.struct.optionNameStruct, arguments.groupNameList) and structkeyexists(arguments.struct.optionNameStruct[arguments.groupNameList], arguments.feature_field_variable_name)){
-		optionStruct=arguments.struct.optionStruct[arguments.struct.optionNameStruct[arguments.groupNameList][arguments.feature_field_variable_name]];
-		return { success:true, struct:optionStruct };
+		typeStruct=arguments.struct.typeStruct[arguments.struct.optionNameStruct[arguments.groupNameList][arguments.feature_field_variable_name]];
+		return { success:true, struct:typeStruct };
 	}else if(arguments.createIfMissing){
-		optionStruct={
+		typeStruct={
 			new:true,
 			feature_schema_id:groupStruct.struct.feature_schema_id,
 			feature_field_id:getNextFieldId(arguments.groupNameList, arguments.feature_field_variable_name),
 			feature_id:request.zos.globals.id
 		};
-		return { success:true, struct:optionStruct };
+		return { success:true, struct:typeStruct };
 	}else{
 		return {success:false, errorMessage:"feature_field_variable_name, ""#arguments.feature_field_variable_name#"", doesn't exist in group."};
 	}
@@ -169,9 +169,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 		arrayAppend(ts.arrSchema, row);
 	}
 	/*
-	db.sql="select * from #db.table("feature_schema_map", request.zos.zcoreDatasource)# 
+	db.sql="select * from #db.table("feature_map", request.zos.zcoreDatasource)# 
 	WHERE feature_id = #db.param(form.feature_id)# and 
-	feature_schema_map_deleted = #db.param(0)# ";
+	feature_map_deleted = #db.param(0)# ";
 	qMap=db.execute("qMap");
 	for(row in qMap){
 		arrayAppend(ts.arrSchemaMap, row);
@@ -186,32 +186,32 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfscript>
 	ts=arguments.dataStruct;
 	struct={
-		optionStruct:{},
-		optionSchemaStruct:{},
-		//optionSchemaMapStruct:{},
+		typeStruct:{},
+		featureSchemaStruct:{},
+		//featureSchemaMapStruct:{},
 		optionNameStruct:{},
-		optionSchemaNameStruct:{},
-		optionSchemaNameLookupById:{}
+		featureSchemaNameStruct:{},
+		featureSchemaNameLookupById:{}
 	};
 	for(i=1;i LTE arraylen(ts.arrSchema);i++){
 		ts.arrSchema[i].feature_id=request.zos.globals.id;
-		struct.optionSchemaStruct[ts.arrSchema[i].feature_schema_id]=ts.arrSchema[i];
+		struct.featureSchemaStruct[ts.arrSchema[i].feature_schema_id]=ts.arrSchema[i];
 	}
-	//writedump(struct.optionSchemaStruct);
+	//writedump(struct.featureSchemaStruct);
 	// force these to exist for options outside of a group to be synced.
-	struct.optionSchemaStruct["0"]={};
+	struct.featureSchemaStruct["0"]={};
 	struct.optionNameStruct["0"]={};
 	for(i=1;i LTE arraylen(ts.arrSchema);i++){
 		groupNameList=arrayToList(getFullSchemaPath(struct, ts.arrSchema[i].feature_schema_parent_id, ts.arrSchema[i].feature_schema_variable_name), chr(9));
-		struct.optionSchemaNameStruct[groupNameList]=ts.arrSchema[i].feature_schema_id;
+		struct.featureSchemaNameStruct[groupNameList]=ts.arrSchema[i].feature_schema_id;
 		struct.optionNameStruct[groupNameList]={};
-		struct.optionSchemaNameLookupById[ts.arrSchema[i].feature_schema_id]=groupNameList;
+		struct.featureSchemaNameLookupById[ts.arrSchema[i].feature_schema_id]=groupNameList;
 	}
 	for(i=1;i LTE arraylen(ts.arrField);i++){
 		ts.arrField[i].feature_id=request.zos.globals.id;
-		struct.optionStruct[ts.arrField[i].feature_field_id]=ts.arrField[i];
-		if(ts.arrField[i].feature_schema_id NEQ 0 and structkeyexists(struct.optionSchemaStruct, ts.arrField[i].feature_schema_id)){ 
-			groupStruct=struct.optionSchemaStruct[ts.arrField[i].feature_schema_id];
+		struct.typeStruct[ts.arrField[i].feature_field_id]=ts.arrField[i];
+		if(ts.arrField[i].feature_schema_id NEQ 0 and structkeyexists(struct.featureSchemaStruct, ts.arrField[i].feature_schema_id)){ 
+			groupStruct=struct.featureSchemaStruct[ts.arrField[i].feature_schema_id];
 			groupNameList=getFullSchemaPath(struct, groupStruct.feature_schema_parent_id, groupStruct.feature_schema_variable_name);
 			struct.optionNameStruct[arrayToList(groupNameList, chr(9))][ts.arrField[i].feature_field_variable_name]=ts.arrField[i].feature_field_id;
 		}else{
@@ -221,7 +221,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	/*
 	for(i=1;i LTE arraylen(ts.arrSchemaMap);i++){
 		ts.arrSchemaMap[i].feature_id=request.zos.globals.id;
-		struct.optionSchemaMapStruct[ts.arrSchemaMap[i].feature_schema_map_id]=ts.arrSchemaMap[i];
+		struct.featureSchemaMapStruct[ts.arrSchemaMap[i].feature_map_id]=ts.arrSchemaMap[i];
 	}*/
 	return struct;
 	</cfscript>
@@ -237,38 +237,38 @@ This allows avoiding remaps more easily.  Less code when importing.
 	sourceStruct=arguments.source;
 	destinationStruct=arguments.destination;
 	
-	row=duplicate(sourceStruct.optionStruct[arguments.sourceFieldId]);
+	row=duplicate(sourceStruct.typeStruct[arguments.sourceFieldId]);
 	// loop source feature_field and check for select_menu group_id usage and any other fields that allow groupID
 	if(row.feature_field_type_id EQ 7){
-		optionStruct=deserializeJson(row.feature_field_type_json);
-		if(structkeyexists(optionStruct, 'selectmenu_groupid') and optionStruct.selectmenu_groupid NEQ ""){
-			rs=getSchemaById(sourceStruct, optionStruct.selectmenu_groupid);
+		typeStruct=deserializeJson(row.feature_field_type_json);
+		if(structkeyexists(typeStruct, 'selectmenu_groupid') and typeStruct.selectmenu_groupid NEQ ""){
+			rs=getSchemaById(sourceStruct, typeStruct.selectmenu_groupid);
 			
 			if(rs.success){
 				groupNameList=arrayToList(getFullSchemaPath(sourceStruct, rs.struct.feature_schema_parent_id, rs.struct.feature_schema_variable_name), chr(9));
 				
 				selectSchemaStruct=getSchemaByName(destinationStruct, groupNameList, true);
-				optionStruct.selectmenu_groupid=toString(selectSchemaStruct.struct.feature_schema_id);
+				typeStruct.selectmenu_groupid=toString(selectSchemaStruct.struct.feature_schema_id);
 			}else{
-				echo("Warning: selectmenu_groupid, ""#optionStruct.selectmenu_groupid#"", doesn't exist in source. The Feature Field, #row.feature_field_variable_name# will be imported, but it must be manually corrected.");
-				optionStruct.selectmenu_groupid='';
+				echo("Warning: selectmenu_groupid, ""#typeStruct.selectmenu_groupid#"", doesn't exist in source. The Feature Field, #row.feature_field_variable_name# will be imported, but it must be manually corrected.");
+				typeStruct.selectmenu_groupid='';
 			}
 		}
-		row.feature_field_type_json=serializeJson(optionStruct);
+		row.feature_field_type_json=serializeJson(typeStruct);
 		//row.zfeature_field_type_json=row.feature_field_type_json;
 	}
 	
 	if(not arguments.skipIdRemap){
 		groupNameList="0";
 		if(row.feature_schema_id NEQ 0){
-			groupNameList=sourceStruct.optionSchemaNameLookupById[row.feature_schema_id];
+			groupNameList=sourceStruct.featureSchemaNameLookupById[row.feature_schema_id];
 			rs=getSchemaByName(destinationStruct, groupNameList, true);
 			row.feature_schema_id=rs.struct.feature_schema_id;
 		}
 		
 		// this should work with feature_schema_id 0 as well.
-		optionStruct=getFieldByName(destinationStruct, groupNameList, row.feature_field_variable_name, true);
-		row.feature_field_id=optionStruct.struct.feature_field_id;
+		typeStruct=getFieldByName(destinationStruct, groupNameList, row.feature_field_variable_name, true);
+		row.feature_field_id=typeStruct.struct.feature_field_id;
 	}
 	row.feature_id = request.zos.globals.id;
 	return row;
@@ -286,7 +286,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	db=request.zos.queryObject;
 	sourceStruct=arguments.source;
 	destinationStruct=arguments.destination;
-	row=sourceStruct.optionSchemaStruct[arguments.sourceSchemaId];
+	row=sourceStruct.featureSchemaStruct[arguments.sourceSchemaId];
 	
 	// find the user_group_id in destination site
 	if(row.feature_schema_user_group_id_list NEQ ""){
@@ -384,11 +384,11 @@ This allows avoiding remaps more easily.  Less code when importing.
 	i=0;
 	while(true){
 		arrayPrepend(arrParent, currentName); 
-		if(currentParentId EQ 0 or not structkeyexists(arguments.struct.optionSchemaStruct, currentParentId)){
+		if(currentParentId EQ 0 or not structkeyexists(arguments.struct.featureSchemaStruct, currentParentId)){
 			break;
 		}else{ 
-			currentName=arguments.struct.optionSchemaStruct[currentParentId].feature_schema_variable_name;
-			currentParentId=arguments.struct.optionSchemaStruct[currentParentId].feature_schema_parent_id; 
+			currentName=arguments.struct.featureSchemaStruct[currentParentId].feature_schema_variable_name;
+			currentParentId=arguments.struct.featureSchemaStruct[currentParentId].feature_schema_parent_id; 
 		}
 		i++;
 		if( i GT 100){
@@ -412,13 +412,13 @@ This allows avoiding remaps more easily.  Less code when importing.
 	newFields={};
 	extraFields={};
 	
-	for(i in sourceStruct.optionSchemaNameStruct){
-		groupId=sourceStruct.optionSchemaNameStruct[i];
+	for(i in sourceStruct.featureSchemaNameStruct){
+		groupId=sourceStruct.featureSchemaNameStruct[i];
 		
 		groupChanged=false; 
-		if(structkeyexists(destinationStruct.optionSchemaNameStruct, i)){
+		if(structkeyexists(destinationStruct.featureSchemaNameStruct, i)){
 			newSchemaStruct=remapSchema(sourceStruct, destinationStruct, groupId);
-			currentDestinationStruct=destinationStruct.optionSchemaStruct[destinationStruct.optionSchemaNameStruct[i]];
+			currentDestinationStruct=destinationStruct.featureSchemaStruct[destinationStruct.featureSchemaNameStruct[i]];
 			structdelete(newSchemaStruct, 'feature_schema_updated_datetime');
 			structdelete(currentDestinationStruct, 'feature_schema_updated_datetime');
 			if(not objectequals(newSchemaStruct, currentDestinationStruct)){
@@ -448,7 +448,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 				if(structkeyexists(destinationStruct.optionNameStruct[i], n)){
 					// check for field option changes
 					sourceFieldStruct=remapField(sourceStruct, destinationStruct, optionId);
-					destinationFieldStruct=destinationStruct.optionStruct[destinationStruct.optionNameStruct[i][n]];
+					destinationFieldStruct=destinationStruct.typeStruct[destinationStruct.optionNameStruct[i][n]];
 					structdelete(sourceFieldStruct, 'feature_field_updated_datetime');
 					structdelete(destinationFieldStruct, 'feature_field_updated_datetime');
 					if(not objectequals(sourceFieldStruct, destinationFieldStruct)){
@@ -488,7 +488,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 						if(form.debugEnabled){
 							echo("extra field: "&i&" | "&n&"<br>");
 						}
-						extraFields[i][n]=destinationStruct.optionStruct[optionId];
+						extraFields[i][n]=destinationStruct.typeStruct[optionId];
 					}
 				}
 			}
@@ -496,13 +496,13 @@ This allows avoiding remaps more easily.  Less code when importing.
 	}
 	
 	if(form.deleteEnabled EQ 1){
-		for(i in destinationStruct.optionSchemaNameStruct){
-			groupId=destinationStruct.optionSchemaNameStruct[i];
-			if(structkeyexists(sourceStruct.optionSchemaNameStruct, i)){
+		for(i in destinationStruct.featureSchemaNameStruct){
+			groupId=destinationStruct.featureSchemaNameStruct[i];
+			if(structkeyexists(sourceStruct.featureSchemaNameStruct, i)){
 				continue; // skip, already checked above.
 			}else{
 				// extra group
-				extraSchemas[i]=destinationStruct.optionSchemaStruct[groupId];
+				extraSchemas[i]=destinationStruct.featureSchemaStruct[groupId];
 			}
 		}
 	}
@@ -621,35 +621,35 @@ This allows avoiding remaps more easily.  Less code when importing.
 	throw("updateSchemaMap not implemented.");
 	abort;
 	db=request.zos.queryObject;
-	arguments.row.feature_schema_map_updated_datetime = request.zos.mysqlnow;
+	arguments.row.feature_map_updated_datetime = request.zos.mysqlnow;
 	if(arguments.new){
-		arrSQL=["INSERT INTO #db.table("feature_schema_map", request.zos.zcoreDatasource)# SET "];
+		arrSQL=["INSERT INTO #db.table("feature_map", request.zos.zcoreDatasource)# SET "];
 		for(i in arguments.row){
-			if(i NEQ "feature_schema_map_id"){
+			if(i NEQ "feature_map_id"){
 				arrayPrepend(arrSQL, "`"&i&"` = "&db.param(arguments.row[i]));
 			}
 		}
 		db.sql=arrayToList(arrSQL, " ")&" 
 		WHERE feature_id = #db.param(arguments.row.feature_id)# and 
-		feature_schema_map_deleted = #db.param(0)# and
-		feature_schema_map_id = #db.param(arguments.row.feature_schema_map_id)# ";
+		feature_map_deleted = #db.param(0)# and
+		feature_map_id = #db.param(arguments.row.feature_map_id)# ";
 		result=db.insert("qSchemaMapInsert", request.zos.insertIDColumnForSiteIDTable);
 		if(rs.success){
 			return rs.result;
 		}else{
-			throw("Failed to create feature_schema_map");	
+			throw("Failed to create feature_map");	
 		}
 	}else{
-		arrSQL=["UPDATE #db.table("feature_schema_map", request.zos.zcoreDatasource)# SET"];
+		arrSQL=["UPDATE #db.table("feature_map", request.zos.zcoreDatasource)# SET"];
 		for(i in arguments.row){
-			if(i NEQ "feature_id" or i NEQ "feature_schema_map_id"){
+			if(i NEQ "feature_id" or i NEQ "feature_map_id"){
 				arrayPrepend(arrSQL, "`"&i&"` = "&db.param(arguments.row[i]));
 			}
 		}
 		db.sql=arrayToList(arrSQL, " ")&" 
 		WHERE feature_id = #db.param(arguments.row.feature_id)# and 
-		feature_schema_map_deleted = #db.param(0)# and 
-		feature_schema_map_id = #db.param(arguments.row.feature_schema_map_id)# ";
+		feature_map_deleted = #db.param(0)# and 
+		feature_map_id = #db.param(arguments.row.feature_map_id)# ";
 		return db.execute("qSchemaMapUpdate");
 	}
 	</cfscript>
@@ -664,10 +664,10 @@ This allows avoiding remaps more easily.  Less code when importing.
 	sourceStruct=arguments.source;
 	destinationStruct=arguments.destination; 
 	
-	row=sourceStruct.optionSchemaMapStruct[arguments.sourceSchemaMapId];
+	row=sourceStruct.featureSchemaMapStruct[arguments.sourceSchemaMapId];
 	
 	
-	groupNameList=sourceStruct.optionSchemaNameLookupById[row.feature_schema_id];
+	groupNameList=sourceStruct.featureSchemaNameLookupById[row.feature_schema_id];
 		
 	sourceSchemaStruct=getSchemaByName(sourceStruct, groupNameList, true);
 	
@@ -683,23 +683,23 @@ This allows avoiding remaps more easily.  Less code when importing.
 	destinationFieldStruct=getFieldByName(destinationStruct, groupNameList, sourceField.struct.feature_field_variable_name, true);
 	row.feature_field_id=destinationFieldStruct.struct.feature_field_id;
 	
-	// remap feature_schema_map_fieldname if this feature_field_id is mapped to a feature_schema_id
-	if(sourceSchemaStruct.struct.feature_schema_map_group_id NEQ 0){
-		if(structkeyexists(sourceStruct.optionSchemaNameLookupById, sourceSchemaStruct.struct.feature_schema_map_group_id)){
-			return {success:false, errorMessage:"can't map due to missing feature_schema_map_group_id, #sourceSchemaStruct.struct.feature_schema_map_group_id#, in source<br />" };
+	// remap feature_map_fieldname if this feature_field_id is mapped to a feature_schema_id
+	if(sourceSchemaStruct.struct.feature_map_group_id NEQ 0){
+		if(structkeyexists(sourceStruct.featureSchemaNameLookupById, sourceSchemaStruct.struct.feature_map_group_id)){
+			return {success:false, errorMessage:"can't map due to missing feature_map_group_id, #sourceSchemaStruct.struct.feature_map_group_id#, in source<br />" };
 		}
-		groupNameList2=sourceStruct.optionSchemaNameLookupById[sourceSchemaStruct.struct.feature_schema_map_group_id];
+		groupNameList2=sourceStruct.featureSchemaNameLookupById[sourceSchemaStruct.struct.feature_map_group_id];
 		// remap feature_field_id
-		sourceField2=getFieldById(sourceStruct, row.feature_schema_map_fieldname);
+		sourceField2=getFieldById(sourceStruct, row.feature_map_fieldname);
 		if(not sourceField2.success){
-			return {success:false, errorMessage:"can't map due to missing feature_field_id, #row.feature_schema_map_fieldname#, in source<br />" };
+			return {success:false, errorMessage:"can't map due to missing feature_field_id, #row.feature_map_fieldname#, in source<br />" };
 		}else{
 			destinationFieldStruct2=getFieldByName(destinationStruct, groupNameList2, sourceField2.struct.feature_field_variable_name, true);
-			// feature_schema_map_fieldname is a field in the feature_schema_map_group_id field of the current feature_schema_id
-			row.feature_schema_map_fieldname=destinationFieldStruct2.struct.feature_field_id;
+			// feature_map_fieldname is a field in the feature_map_group_id field of the current feature_schema_id
+			row.feature_map_fieldname=destinationFieldStruct2.struct.feature_field_id;
 		}
 	}
-	row.feature_schema_map_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
+	row.feature_map_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	row.feature_id=request.zos.globals.id;
 	return {success:true, struct:row };
 	</cfscript>
@@ -879,7 +879,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	arraySort(arrKey, "text", "asc");
 	for(g=1;g LTE arrayLen(arrKey);g++){
 		i=arrKey[g];
-		groupId=destinationStruct.optionSchemaNameStruct[i];
+		groupId=destinationStruct.featureSchemaNameStruct[i];
 		if(form.debugEnabled){
 			echo("delete feature_schema where feature_schema_id=#groupId#<br>");
 		}else{
@@ -905,11 +905,11 @@ This allows avoiding remaps more easily.  Less code when importing.
 				feature_data.feature_id = feature_field.feature_id ";
 				qSiteXSchema=db.execute("qSiteXSchema");
 				for(row in qSiteXSchema){
-					optionStruct=deserializeJson(row.feature_field_type_json); 
+					typeStruct=deserializeJson(row.feature_field_type_json); 
 					currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
 					if(currentCFC.hasCustomDelete()){
 						// call delete on optionType
-						currentCFC.onDelete(row, optionStruct);
+						currentCFC.onDelete(row, typeStruct);
 					}
 				}
 				db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# 
@@ -918,7 +918,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 				feature_id = #db.param(form.feature_id)#";
 				db.execute("qDelete");
 				
-				/*db.sql="delete from #db.table("feature_schema_map", request.zos.zcoreDatasource)# 
+				/*db.sql="delete from #db.table("feature_map", request.zos.zcoreDatasource)# 
 				where feature_field_id = #db.param(optionId)# and 
 				feature_id = #db.param(form.feature_id)#";
 				db.execute("qDelete");*/
@@ -1011,19 +1011,19 @@ This allows avoiding remaps more easily.  Less code when importing.
 		}
 	}
 	/*
-	if(structcount(sourceStruct.optionSchemaMapStruct)){
+	if(structcount(sourceStruct.featureSchemaMapStruct)){
 		groupIdStruct={};
-		for(i in sourceStruct.optionSchemaMapStruct){
+		for(i in sourceStruct.featureSchemaMapStruct){
 			mapStruct=remapSchemaMap(sourceStruct, destinationStruct, i);
 			if(mapStruct.success){
 				groupIdStruct[mapStruct.struct.feature_schema_id]=true;
 				ts={};
-				ts.table="feature_schema_map";
+				ts.table="feature_map";
 				ts.struct=mapStruct.struct;
-				ts.struct.feature_schema_map_updated_datetime=request.zos.mysqlnow;
+				ts.struct.feature_map_updated_datetime=request.zos.mysqlnow;
 				ts.datasource=request.zos.zcoreDatasource;
 				if(form.debugEnabled){
-					echo("insert feature_schema_map<br>");
+					echo("insert feature_map<br>");
 					writedump(ts);
 				}else{
 					application.zcore.functions.zInsert(ts);
@@ -1034,11 +1034,11 @@ This allows avoiding remaps more easily.  Less code when importing.
 		idlist="'"&arrayToList(arrSchema, "','")&"'";
 		if(arrayLen(arrSchema)){
 			if(form.debugEnabled){
-				echo("remove feature_schema_map records that weren't updated where feature_schema_id in (#idlist#)<br>");
+				echo("remove feature_map records that weren't updated where feature_schema_id in (#idlist#)<br>");
 			}else{
-				db.sql="delete from #db.table("feature_schema_map", request.zos.zcoreDatasource)# 
-				where feature_schema_map_updated_datetime < #db.param(request.zos.mysqlnow)# and 
-				feature_schema_map_deleted = #db.param(0)# and
+				db.sql="delete from #db.table("feature_map", request.zos.zcoreDatasource)# 
+				where feature_map_updated_datetime < #db.param(request.zos.mysqlnow)# and 
+				feature_map_deleted = #db.param(0)# and
 				feature_id=#db.param(form.feature_id)# and 
 				feature_schema_id IN (#db.trustedSQL(idlist)#)";
 				db.execute("qDelete");
@@ -1140,8 +1140,8 @@ This allows avoiding remaps more easily.  Less code when importing.
 
 <cffunction name="init" access="private" localmode="modern">
 	<cfscript>
-	optionSchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.feature-schema");
-	optionSchemaCom.displayFeatureAdminNav();
+	featureSchemaCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.admin.controller.feature-schema");
+	featureSchemaCom.displayFeatureAdminNav();
 	</cfscript>
 </cffunction>
 

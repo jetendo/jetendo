@@ -41,10 +41,10 @@
 	var db=request.zos.queryObject;
 	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 
-	sog=application.siteStruct[request.zos.globals.id].globals.soSchemaData;
+	sog=application.siteStruct[request.zos.globals.id].globals.featureSchemaData;
 	setStruct={}; 
-	if(structkeyexists(sog, 'optionSchemaSetQueryCache') and structkeyexists(sog.optionSchemaSetQueryCache, form.feature_data_id)){
-		setStruct=duplicate(sog.optionSchemaSetQueryCache[form.feature_data_id]); 
+	if(structkeyexists(sog, 'featureSchemaSetQueryCache') and structkeyexists(sog.featureSchemaSetQueryCache, form.feature_data_id)){
+		setStruct=duplicate(sog.featureSchemaSetQueryCache[form.feature_data_id]); 
 	}else{
 		db.sql="select * from #db.table("feature_data", "jetendofeature")# feature_data,
 		#db.table("feature_schema", "jetendofeature")# 
@@ -63,8 +63,8 @@
 		for(row in qSet){
 			setStruct=row;
 			if(not structkeyexists(form, 'zpreview')){
-				if(request.zos.enableSiteSchemaCache and setStruct.feature_schema_enable_cache EQ 1){
-					sog.optionSchemaSetQueryCache[form.feature_data_id]=setStruct;
+				if(request.zos.enableSiteOptionGroupCache and setStruct.feature_schema_enable_cache EQ 1){
+					sog.featureSchemaSetQueryCache[form.feature_data_id]=setStruct;
 				}
 			}
 		}

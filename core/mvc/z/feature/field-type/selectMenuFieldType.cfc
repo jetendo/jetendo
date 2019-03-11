@@ -10,10 +10,10 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	if(application.zcore.functions.zso(arguments.optionStruct.optionStruct, 'selectmenu_values') NEQ ""){
-		return listgetat(arguments.optionStruct.optionStruct.selectmenu_values, 1, arguments.optionStruct.optionStruct.selectmenu_delimiter);
+	if(application.zcore.functions.zso(arguments.typeStruct.typeStruct, 'selectmenu_values') NEQ ""){
+		return listgetat(arguments.typeStruct.typeStruct.selectmenu_values, 1, arguments.typeStruct.typeStruct.selectmenu_delimiter);
 	}else{
 		return "You need to set this value manually";
 	}
@@ -23,16 +23,16 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfscript>	
-	return { mapData: true, struct: this.buildSelectMap(arguments.optionStruct, false) };
+	return { mapData: true, struct: this.buildSelectMap(arguments.typeStruct, false) };
 	</cfscript>
 </cffunction>
 
@@ -58,21 +58,21 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfscript> 
 	characterWidth=0;
-	return variables.createSelectMenu(arguments.row["feature_field_id"], arguments.row["feature_schema_id"], arguments.optionStruct, true, arguments.onChangeJavascript, characterWidth, false);
+	return variables.createSelectMenu(arguments.row["feature_field_id"], arguments.row["feature_schema_id"], arguments.typeStruct, true, arguments.onChangeJavascript, characterWidth, false);
 	</cfscript>
 </cffunction>
 
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -83,7 +83,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -92,7 +92,7 @@
 		type="=",
 		field: arguments.row["feature_field_variable_name"]
 	};
-	if(arguments.optionStruct.selectmenu_delimiter EQ "|"){
+	if(arguments.typeStruct.selectmenu_delimiter EQ "|"){
 		ts.arrValue=listToArray(arguments.value, ',', true);
 	}else{
 		ts.arrValue=listToArray(arguments.value, '|', true);
@@ -103,7 +103,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -113,12 +113,12 @@
 	var db=request.zos.queryObject;
 	if(arguments.value NEQ ""){
 		if(arguments.value CONTAINS ","){ 
-			if(arguments.optionStruct.selectmenu_delimiter EQ "|"){
+			if(arguments.typeStruct.selectmenu_delimiter EQ "|"){
 				arrTemp=listToArray(arguments.value, ',', true);
 			}else{
 				arrTemp=listToArray(arguments.value, '|', true);
 			}
-			if(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
+			if(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
 				for(var i=1;i LTE arrayLen(arrTemp);i++){
 					arrTemp[i]=db.trustedSQL('concat(",", '&arguments.databaseField&', ",") like ')&db.trustedSQL("'%,"&application.zcore.functions.zescape(arrTemp[i])&",%'");
 				} 
@@ -129,7 +129,7 @@
 			}
 			return '('&arrayToList(arrTemp, ' or ')&')';
 		}else{
-			if(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
+			if(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
 				return db.trustedSQL('concat(",", '&arguments.databaseField&', ",") LIKE ')&db.trustedSQL("'%,"&application.zcore.functions.zescape(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&",%'");
 			}else{
 				return arguments.databaseField&' = '&db.trustedSQL("'"&application.zcore.functions.zescape(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&"'");
@@ -142,7 +142,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -152,7 +152,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -162,7 +162,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
@@ -173,18 +173,18 @@
 	}else{
 		required=false;
 	}
-	return { label: true, hidden: false, value:variables.createSelectMenu(arguments.row["feature_field_id"], arguments.row["feature_schema_id"], arguments.optionStruct, false, '', characterWidth, required)};
+	return { label: true, hidden: false, value:variables.createSelectMenu(arguments.row["feature_field_id"], arguments.row["feature_schema_id"], arguments.typeStruct, false, '', characterWidth, required)};
 	</cfscript>
 </cffunction>
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
 	fieldName=arguments.fieldName;
-	optionStruct=arguments.optionStruct;
+	typeStruct=arguments.typeStruct;
 	characterWidth=arguments.row["feature_field_character_width"];
 	arrV=[];
 	arrayAppend(arrV, '
@@ -192,7 +192,7 @@
 			selectStruct={};
 		selectStruct.name = "#fieldName#"; 
 		enabled=false;
-		selectStruct.size=#application.zcore.functions.zso(optionStruct, 'selectmenu_size', true, 1)#;
+		selectStruct.size=#application.zcore.functions.zso(typeStruct, 'selectmenu_size', true, 1)#;
 	');
 	if(characterWidth NEQ 0){
 		arrayAppend(arrV, '
@@ -203,28 +203,28 @@
 		selectStruct.inlineStyle="width:95%; min-width:auto;";
 		');
 	}
-	if(structkeyexists(optionStruct,'selectmenu_labels') and optionStruct.selectmenu_labels NEQ ""){
-		arrayAppend(arrV, 'selectStruct.listLabelsDelimiter = "#optionStruct.selectmenu_delimiter#";
-		selectStruct.listValuesDelimiter = "#optionStruct.selectmenu_delimiter#";
-		selectStruct.listLabels="#replace(optionStruct.selectmenu_labels, "##", "####", "all")#";
-		selectStruct.listValues="#replace(optionStruct.selectmenu_values, "##", "####", "all")#";
+	if(structkeyexists(typeStruct,'selectmenu_labels') and typeStruct.selectmenu_labels NEQ ""){
+		arrayAppend(arrV, 'selectStruct.listLabelsDelimiter = "#typeStruct.selectmenu_delimiter#";
+		selectStruct.listValuesDelimiter = "#typeStruct.selectmenu_delimiter#";
+		selectStruct.listLabels="#replace(typeStruct.selectmenu_labels, "##", "####", "all")#";
+		selectStruct.listValues="#replace(typeStruct.selectmenu_values, "##", "####", "all")#";
 		enabled=true;
 		');
 	}
-	if(structkeyexists(optionStruct, 'selectmenu_parentfield') and optionStruct.selectmenu_parentfield NEQ ""){
+	if(structkeyexists(typeStruct, 'selectmenu_parentfield') and typeStruct.selectmenu_parentfield NEQ ""){
 		arrayAppend(arrV, '
-		selectStruct.listLabelsDelimiter = "#optionStruct.selectmenu_delimiter#";
-		selectStruct.listValuesDelimiter = "#optionStruct.selectmenu_delimiter#";
+		selectStruct.listLabelsDelimiter = "#typeStruct.selectmenu_delimiter#";
+		selectStruct.listValuesDelimiter = "#typeStruct.selectmenu_delimiter#";
 			');
-			if(structkeyexists(optionStruct,'selectmenu_labels') and optionStruct.selectmenu_labels NEQ ""){
+			if(structkeyexists(typeStruct,'selectmenu_labels') and typeStruct.selectmenu_labels NEQ ""){
 				arrayAppend(arrV, '
-		selectStruct.listLabels="#replace(selectStruct.listLabels&optionStruct.selectmenu_delimiter&arraytolist(rs.arrLabel, optionStruct.selectmenu_delimiter), "##", "####", "all")#";
-		selectStruct.listValues="#replace(selectStruct.listValues&optionStruct.selectmenu_delimiter&arraytolist(rs.arrValue, optionStruct.selectmenu_delimiter), "##", "####", "all")#";
+		selectStruct.listLabels="#replace(selectStruct.listLabels&typeStruct.selectmenu_delimiter&arraytolist(rs.arrLabel, typeStruct.selectmenu_delimiter), "##", "####", "all")#";
+		selectStruct.listValues="#replace(selectStruct.listValues&typeStruct.selectmenu_delimiter&arraytolist(rs.arrValue, typeStruct.selectmenu_delimiter), "##", "####", "all")#";
 				');
 			}else{
 				arrayAppend(arrV, '
-		selectStruct.listLabels="#replace(arraytolist(rs.arrLabel, optionStruct.selectmenu_delimiter), "##", "####", "all")#";
-		selectStruct.listValues="#replace(arraytolist(rs.arrValue, optionStruct.selectmenu_delimiter), "##", "####", "all")#";
+		selectStruct.listLabels="#replace(arraytolist(rs.arrLabel, typeStruct.selectmenu_delimiter), "##", "####", "all")#";
+		selectStruct.listValues="#replace(arraytolist(rs.arrValue, typeStruct.selectmenu_delimiter), "##", "####", "all")#";
 			');
 		} 
 		arrayAppend(arrV, '
@@ -260,7 +260,7 @@
 		}
 		selectStruct.multiple=false;
 		');
-		if(application.zcore.functions.zso(optionStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
+		if(application.zcore.functions.zso(typeStruct, 'selectmenu_multipleselection', true, 0) EQ 1){
 			arrayAppend(arrV, '
 		selectStruct.multiple=true;
 		selectStruct.hideSelect=true;
@@ -279,7 +279,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(arguments.value CONTAINS ","){
@@ -302,16 +302,16 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
-	return this.buildSelectMap(arguments.optionStruct, true);
+	return this.buildSelectMap(arguments.typeStruct, true);
 	</cfscript>
 </cffunction>
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -379,7 +379,7 @@
 		selectmenu_size:application.zcore.functions.zso(arguments.dataStruct, 'selectmenu_size')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 
@@ -410,13 +410,13 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -431,16 +431,16 @@
 			<table style="border-spacing:0px; width:100%;">
 			<tr><td>Multiple Selections: </td><td>
 			<cfscript>
-			form.selectmenu_multipleselection=application.zcore.functions.zso(arguments.optionStruct, "selectmenu_multipleselection", true, 0);
+			form.selectmenu_multipleselection=application.zcore.functions.zso(arguments.typeStruct, "selectmenu_multipleselection", true, 0);
 			echo(application.zcore.functions.zInput_Boolean("selectmenu_multipleselection"));
 			</cfscript></td></tr>
-			<tr><td>Size: </td><td><input type="text" name="selectmenu_size" style="min-width:20px; max-width:20px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_size', true, 1))#" /> <br />(Makes more options visible for easier multiple selection)</td></tr>
+			<tr><td>Size: </td><td><input type="text" name="selectmenu_size" style="min-width:20px; max-width:20px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_size', true, 1))#" /> <br />(Makes more options visible for easier multiple selection)</td></tr>
 			<tr><td colspan="2">Configure a manually entered list of values: </td></tr>
 			<tr>
 			<th>
-			Delimiter </th><td><input type="text" name="selectmenu_delimiter" style="min-width:20px; max-width:20px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_delimiter', false, '|'))#" size="1" maxlength="1" /></td></tr>
-			<tr><td>Labels List: </td><td><input type="text" style="min-width:150px;" name="selectmenu_labels" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_labels'))#" /></td></tr>
-			<tr><td>Values List:</td><td> <input type="text" style="min-width:150px;" name="selectmenu_values" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_values'))#" /></td></tr>
+			Delimiter </th><td><input type="text" name="selectmenu_delimiter" style="min-width:20px; max-width:20px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_delimiter', false, '|'))#" size="1" maxlength="1" /></td></tr>
+			<tr><td>Labels List: </td><td><input type="text" style="min-width:150px;" name="selectmenu_labels" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_labels'))#" /></td></tr>
+			<tr><td>Values List:</td><td> <input type="text" style="min-width:150px;" name="selectmenu_values" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_values'))#" /></td></tr>
 			<tr><td colspan="2">Configure a group as a datasource: </td></tr>
 			<tr><td>Use Schema: </td>
 			<td>
@@ -502,7 +502,7 @@
 			} 
 
 			var selectStruct = StructNew();
-			form.selectmenu_groupid=application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_groupid');
+			form.selectmenu_groupid=application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_groupid');
 			selectStruct.name = "selectmenu_groupid";
 			selectStruct.query = arrSchema;
 			selectStruct.queryLabelField = "label";
@@ -510,10 +510,10 @@
 			application.zcore.functions.zInputSelectBox(selectStruct);
 			</cfscript></td></tr>
 			<tr><td>Label Field: </td>
-			<td><input type="text" style="min-width:150px;" name="selectmenu_labelfield" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_labelfield'))#" /></td></tr>
-			<tr><td>Value Field: </td><td><input type="text" style="min-width:150px;" name="selectmenu_valuefield" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_valuefield'))#" /></td></tr>
+			<td><input type="text" style="min-width:150px;" name="selectmenu_labelfield" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_labelfield'))#" /></td></tr>
+			<tr><td>Value Field: </td><td><input type="text" style="min-width:150px;" name="selectmenu_valuefield" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_valuefield'))#" /></td></tr>
 			<tr><td>Parent Field: </td><td>
-			<input type="text" name="selectmenu_parentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_parentfield'))#" /> (Fieldal, only use when this group will allow recursive heirarchy)</td></tr>
+			<input type="text" name="selectmenu_parentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_parentfield'))#" /> (Fieldal, only use when this group will allow recursive heirarchy)</td></tr>
 			
 			
 			
@@ -521,12 +521,12 @@
 			This has not been implemented yet.
 			<tr><td colspan="2">Configure a database table as a datasource: </td></tr>
 			<tr><td>Table name: </td>
-			<td><input type="text" name="selectmenu_table" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_table'))#" /></td></tr>
+			<td><input type="text" name="selectmenu_table" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_table'))#" /></td></tr>
 			<tr><td>Label Field: </td>
-			<td><input type="text" name="selectmenu_tablelabelfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_tablelabelfield'))#" /></td></tr>
-			<tr><td>Value Field: </td><td><input type="text" name="selectmenu_tablevaluefield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_tablevaluefield'))#" style="min-width:150px;" /></td></tr>
+			<td><input type="text" name="selectmenu_tablelabelfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablelabelfield'))#" /></td></tr>
+			<tr><td>Value Field: </td><td><input type="text" name="selectmenu_tablevaluefield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablevaluefield'))#" style="min-width:150px;" /></td></tr>
 			<tr><td>Parent Field: </td><td>
-			<input type="text" name="selectmenu_tableparentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'selectmenu_tableparentfield'))#" /> (Fieldal, only use when this table has a parent_id field to allow recursive heirarchy)</td></tr>
+			<input type="text" name="selectmenu_tableparentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tableparentfield'))#" /> (Fieldal, only use when this table has a parent_id field to allow recursive heirarchy)</td></tr>
 			 --->
 			
 			</table>

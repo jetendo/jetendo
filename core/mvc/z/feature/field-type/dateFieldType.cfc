@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return dateformat(now(), "m/d/yyyy");
 	</cfscript>
@@ -18,7 +18,7 @@
 
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -35,9 +35,9 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	searchType=application.zcore.functions.zso(arguments.optionStruct, 'datetime_range_search_type', true, 0);
+	searchType=application.zcore.functions.zso(arguments.typeStruct, 'datetime_range_search_type', true, 0);
 	if(searchType EQ 1){
 		// start date
 		request.zos.siteFieldSearchDateRangeSortEnabled=true;
@@ -66,7 +66,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -89,7 +89,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -127,7 +127,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -138,11 +138,11 @@
 		arrValue:[]
 	};
 	if(arguments.value NEQ ""){
-		if(structkeyexists(arguments.optionStruct, 'datetime_range_search_type') and arguments.optionStruct.datetime_range_search_type EQ 1){
+		if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 1){
 			// start date
 			ts.type=">=";
 			arrayAppend(ts.arrValue, dateformat(arguments.value, 'yyyy-mm-dd')&' 00:00:00');
-		}else if(structkeyexists(arguments.optionStruct, 'datetime_range_search_type') and arguments.optionStruct.datetime_range_search_type EQ 2){
+		}else if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 2){
 			// end date
 			ts.type="<=";
 			arrayAppend(ts.arrValue, dateformat(arguments.value, 'yyyy-mm-dd')&' 23:59:59');
@@ -156,7 +156,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -165,10 +165,10 @@
 	<cfscript>
 	var db=request.zos.queryObject;
 	if(arguments.value NEQ ""){
-		if(structkeyexists(arguments.optionStruct, 'datetime_range_search_type') and arguments.optionStruct.datetime_range_search_type EQ 1){
+		if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 1){
 			// start date
 			return arguments.databaseDateField&' >= '&db.trustedSQL("'"&application.zcore.functions.zescape(dateformat(arguments.value, 'yyyy-mm-dd')&' 00:00:00')&"'");
-		}else if(structkeyexists(arguments.optionStruct, 'datetime_range_search_type') and arguments.optionStruct.datetime_range_search_type EQ 2){
+		}else if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 2){
 			// end date
 			return arguments.databaseDateField&' <= '&db.trustedSQL("'"&application.zcore.functions.zescape(dateformat(arguments.value, 'yyyy-mm-dd')&' 23:59:59')&"'");
 		}else{
@@ -181,7 +181,7 @@
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
@@ -199,18 +199,18 @@
 	}
 	application.zcore.functions.zRequireJqueryUI();
 	/*
-	arguments.optionStruct=duplicate(arguments.optionStruct);
-	arguments.optionStruct.datetime_min_offset=0;
-	arguments.optionStruct.datetime_max_offset=7;
+	arguments.typeStruct=duplicate(arguments.typeStruct);
+	arguments.typeStruct.datetime_min_offset=0;
+	arguments.typeStruct.datetime_max_offset=7;
 	*/
 	initValues="{";
-	if(structkeyexists(arguments.optionStruct, 'datetime_max_offset') and arguments.optionStruct.datetime_max_offset NEQ ""){
-		arrMaxDate=listToArray(dateformat(dateadd("d", arguments.optionStruct.datetime_max_offset, now()), 'yyyy,m,d'));
+	if(structkeyexists(arguments.typeStruct, 'datetime_max_offset') and arguments.typeStruct.datetime_max_offset NEQ ""){
+		arrMaxDate=listToArray(dateformat(dateadd("d", arguments.typeStruct.datetime_max_offset, now()), 'yyyy,m,d'));
 		maxDate=arrMaxDate[1]&","&(arrMaxDate[2]-1)&","&arrMaxDate[3];
 		initValues&="maxDate:new Date(#maxDate#)";
 	}
-	if(structkeyexists(arguments.optionStruct, 'datetime_min_offset') and arguments.optionStruct.datetime_min_offset NEQ ""){
-		arrMinDate=listToArray(dateformat(dateadd("d", arguments.optionStruct.datetime_min_offset, now()), 'yyyy,m,d'));
+	if(structkeyexists(arguments.typeStruct, 'datetime_min_offset') and arguments.typeStruct.datetime_min_offset NEQ ""){
+		arrMinDate=listToArray(dateformat(dateadd("d", arguments.typeStruct.datetime_min_offset, now()), 'yyyy,m,d'));
 		minDate=arrMinDate[1]&","&(arrMinDate[2]-1)&","&arrMinDate[3];
 		if(right(initValues, 1) NEQ "{"){
 			initValues&=", ";
@@ -225,7 +225,7 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	return '
@@ -250,7 +250,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.value)){
@@ -263,7 +263,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -272,7 +272,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -298,7 +298,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -308,7 +308,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>  
@@ -354,7 +354,7 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
@@ -376,7 +376,7 @@
 		datetime_max_offset:application.zcore.functions.zso(arguments.dataStruct, 'datetime_max_offset')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
@@ -393,7 +393,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -405,9 +405,9 @@
 	Date<br />
 	<div id="typeFields5" style="display:none;padding-left:30px;"> 
 		<p>Leave these values empty to disable date range restriction on the datepicker.<p>
-		<p>Min Date Offset in Days: <input type="text" name="datetime_min_offset" id="datetime_min_offset" value="#application.zcore.functions.zso(arguments.optionStruct, 'datetime_min_offset')#" style="width:100px; min-width:auto;"></p>
+		<p>Min Date Offset in Days: <input type="text" name="datetime_min_offset" id="datetime_min_offset" value="#application.zcore.functions.zso(arguments.typeStruct, 'datetime_min_offset')#" style="width:100px; min-width:auto;"></p>
 		<p>Max Date Offset in Days: 
-		<input type="text" name="datetime_max_offset" id="datetime_max_offset" value="#application.zcore.functions.zso(arguments.optionStruct, 'datetime_max_offset')#" style="width:100px; min-width:auto;"></p>
+		<input type="text" name="datetime_max_offset" id="datetime_max_offset" value="#application.zcore.functions.zso(arguments.typeStruct, 'datetime_max_offset')#" style="width:100px; min-width:auto;"></p>
 	</div>	
 	</cfsavecontent>
 	<cfreturn output>

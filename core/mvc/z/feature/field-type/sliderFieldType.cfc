@@ -10,16 +10,16 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	return arguments.optionStruct.optionStruct.slider_from;
+	return arguments.typeStruct.typeStruct.slider_from;
 	</cfscript>
 </cffunction>
 
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
@@ -47,20 +47,20 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfscript>
-	return '<input type="number" name="#arguments.prefixString##arguments.row["feature_field_id"]#" onkeyup="#arguments.onChangeJavascript#" onpaste="#arguments.onChangeJavascript#" min="#arguments.optionStruct.slider_from#" max="#arguments.optionStruct.slider_to#" step="#arguments.optionStruct.slider_step#" id="#arguments.prefixString##arguments.row["feature_field_id"]#" style="width:95%; min-width:95%;" value="#htmleditformat(arguments.value)#" size="8" />';
+	return '<input type="number" name="#arguments.prefixString##arguments.row["feature_field_id"]#" onkeyup="#arguments.onChangeJavascript#" onpaste="#arguments.onChangeJavascript#" min="#arguments.typeStruct.slider_from#" max="#arguments.typeStruct.slider_to#" step="#arguments.typeStruct.slider_step#" id="#arguments.prefixString##arguments.row["feature_field_id"]#" style="width:95%; min-width:95%;" value="#htmleditformat(arguments.value)#" size="8" />';
 	</cfscript>
 </cffunction>
 
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -71,7 +71,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -91,7 +91,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -109,7 +109,7 @@
 
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {}};
 	</cfscript>
@@ -124,17 +124,17 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript> 
-  	return { label: true, hidden: false, value: '<input type="range" name="#arguments.prefixString&arguments.row["feature_field_id"]#" min="#arguments.optionStruct.slider_from#" max="#arguments.optionStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.optionStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#"><br />
+  	return { label: true, hidden: false, value: '<input type="range" name="#arguments.prefixString&arguments.row["feature_field_id"]#" min="#arguments.typeStruct.slider_from#" max="#arguments.typeStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.typeStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#"><br />
   		Selected Value: <span id="#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput">#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#</span>' };
 	</cfscript>
 </cffunction>
@@ -142,11 +142,11 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript> 
   	return '
-  	<input type="range" name="#arguments.fieldName#" min="#arguments.optionStruct.slider_from#" max="#arguments.optionStruct.slider_to#" onchange="document.getElementById(''#arguments.fieldName#_valueInput'').innerHTML=this.value; " step="#arguments.optionStruct.slider_step#" value="##htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))##"><br />
+  	<input type="range" name="#arguments.fieldName#" min="#arguments.typeStruct.slider_from#" max="#arguments.typeStruct.slider_to#" onchange="document.getElementById(''#arguments.fieldName#_valueInput'').innerHTML=this.value; " step="#arguments.typeStruct.slider_step#" value="##htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))##"><br />
   	Selected Value: <span id="#arguments.fieldName#_valueInput">##htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))##</span>
   		';
 	</cfscript>
@@ -154,7 +154,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.value)){
@@ -167,7 +167,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -178,7 +178,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -188,7 +188,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -198,7 +198,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
@@ -248,7 +248,7 @@
 		slider_step:application.zcore.functions.zso(arguments.dataStruct, 'slider_step')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction> 
 		
@@ -265,7 +265,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes"> 
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -292,15 +292,15 @@
 			<table style="border-spacing:0px;">
 			<tr>
 			<th>From:</th>
-			<td><input type="number" name="slider_from" value="<cfif structkeyexists(form, 'slider_from')>#htmleditformat(form.slider_from)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'slider_from', false, '|'))#</cfif>"></td>
+			<td><input type="number" name="slider_from" value="<cfif structkeyexists(form, 'slider_from')>#htmleditformat(form.slider_from)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'slider_from', false, '|'))#</cfif>"></td>
 			</tr>
 			<tr>
 			<th>To:</th>
-			<td><input type="number" name="slider_to" value="<cfif structkeyexists(form, 'slider_to')>#htmleditformat(form.slider_to)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'slider_to', false, '|'))#</cfif>"></td>
+			<td><input type="number" name="slider_to" value="<cfif structkeyexists(form, 'slider_to')>#htmleditformat(form.slider_to)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'slider_to', false, '|'))#</cfif>"></td>
 			</tr>
 			<tr>
 			<th>Step:</th>
-			<td><input type="number" name="slider_step" value="<cfif structkeyexists(form, 'slider_step')>#htmleditformat(form.slider_step)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'slider_step', false, '|'))#</cfif>"></td>
+			<td><input type="number" name="slider_step" value="<cfif structkeyexists(form, 'slider_step')>#htmleditformat(form.slider_step)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'slider_step', false, '|'))#</cfif>"></td>
 			</tr> 
 			</table>
 		</div>

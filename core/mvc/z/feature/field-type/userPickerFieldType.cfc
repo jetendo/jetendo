@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return "1|1";
 	</cfscript>
@@ -19,14 +19,14 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -54,13 +54,13 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfscript>
-	arrSchema=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
+	arrSchema=listToArray(application.zcore.functions.zso(arguments.typeStruct, 'user_group_id_list'), ',');
 	for(i=1;i LTE arraylen(arrSchema);i++){
 		arrSchema[i]=application.zcore.functions.zescape(arrSchema[i]);
 	}
@@ -83,11 +83,11 @@
 		selectStruct.selectedValues=application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["feature_field_id"]#');
 		selectStruct.queryParseLabelVars=true;
 		selectStruct.queryParseValueVars=true;
-		if(arguments.optionStruct.user_displaytype EQ 0){
+		if(arguments.typeStruct.user_displaytype EQ 0){
 			selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-		}else if(arguments.optionStruct.user_displaytype EQ 1){
+		}else if(arguments.typeStruct.user_displaytype EQ 1){
 			selectStruct.queryLabelField = "##member_company## (##user_username##)";
-		}else if(arguments.optionStruct.user_displaytype EQ 2){
+		}else if(arguments.typeStruct.user_displaytype EQ 2){
 			selectStruct.queryLabelField = "##user_username##";
 		}
 		selectStruct.inlineStyle="width:200px; max-width:100%;";
@@ -106,7 +106,7 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
@@ -117,7 +117,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -136,7 +136,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -154,7 +154,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
@@ -170,7 +170,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>  
@@ -186,16 +186,16 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
-	arrSchema=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
+	arrSchema=listToArray(application.zcore.functions.zso(arguments.typeStruct, 'user_group_id_list'), ',');
 	for(i=1;i LTE arraylen(arrSchema);i++){
 		arrSchema[i]=application.zcore.functions.zescape(arrSchema[i]);
 	}
@@ -216,16 +216,16 @@
 	selectStruct.selectedValues=application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["feature_field_id"]#');
 	selectStruct.queryParseLabelVars=true;
 	selectStruct.queryParseValueVars=true;
-	if(arguments.optionStruct.user_displaytype EQ 0){
+	if(arguments.typeStruct.user_displaytype EQ 0){
 		selectStruct.queryLabelField = "##user_first_name## ##user_last_name## (##user_username##)";
-	}else if(arguments.optionStruct.user_displaytype EQ 1){
+	}else if(arguments.typeStruct.user_displaytype EQ 1){
 		selectStruct.queryLabelField = "##member_company## (##user_username##)";
-	}else if(arguments.optionStruct.user_displaytype EQ 2){
+	}else if(arguments.typeStruct.user_displaytype EQ 2){
 		selectStruct.queryLabelField = "##user_username##";
 	}
 	selectStruct.queryValueField = "##user_id##|##siteIdType##";
 	selectStruct.output=false;
-	if(application.zcore.functions.zso(arguments.optionStruct, 'user_multipleselection') EQ 'Yes'){
+	if(application.zcore.functions.zso(arguments.typeStruct, 'user_multipleselection') EQ 'Yes'){
 		selectStruct.multiple=true;
 		selectStruct.size=5;
 		selectStruct.hideSelect=true;
@@ -246,11 +246,11 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	arrV=[];
-	arrSchema=listToArray(application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list'), ',');
+	arrSchema=listToArray(application.zcore.functions.zso(arguments.typeStruct, 'user_group_id_list'), ',');
 	for(i=1;i LTE arraylen(arrSchema);i++){
 		arrSchema[i]=application.zcore.functions.zescape(arrSchema[i]);
 	}
@@ -278,15 +278,15 @@
 	selectStruct.queryParseLabelVars=true;
 	selectStruct.queryParseValueVars=true;
 	');
-	if(arguments.optionStruct.user_displaytype EQ 0){
+	if(arguments.typeStruct.user_displaytype EQ 0){
 		arrayAppend(arrV, ' 
 		selectStruct.queryLabelField = "####user_first_name#### ####user_last_name#### (####user_username####)";
 		');
-	}else if(arguments.optionStruct.user_displaytype EQ 1){
+	}else if(arguments.typeStruct.user_displaytype EQ 1){
 		arrayAppend(arrV, ' 
 		selectStruct.queryLabelField = "####member_company#### (####user_username####)";
 		');
-	}else if(arguments.optionStruct.user_displaytype EQ 2){
+	}else if(arguments.typeStruct.user_displaytype EQ 2){
 		arrayAppend(arrV, ' 
 		selectStruct.queryLabelField = "####user_username####";
 		');
@@ -295,7 +295,7 @@
 	selectStruct.queryValueField = "####user_id####|####siteIdType####";
 	selectStruct.output=false;
 	');
-	if(application.zcore.functions.zso(arguments.optionStruct, "user_multipleselection") EQ "Yes"){
+	if(application.zcore.functions.zso(arguments.typeStruct, "user_multipleselection") EQ "Yes"){
 		arrayAppend(arrV, ' 
 		selectStruct.multiple=true;
 		selectStruct.size=5;
@@ -325,7 +325,7 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
@@ -338,11 +338,11 @@
 		user_id = #db.param(arrUser[1])# ";
 		qUser=db.execute("qUser");
 		if(qUser.recordcount NEQ 0){
-			if(arguments.optionStruct.user_displaytype EQ 0){
+			if(arguments.typeStruct.user_displaytype EQ 0){
 				returnValue=qUser.user_first_name&" "&qUser.user_last_name&" ("&qUser.user_username&")";
-			}else if(arguments.optionStruct.user_displaytype EQ 1){
+			}else if(arguments.typeStruct.user_displaytype EQ 1){
 				returnValue= qUser.member_company&" ("&qUser.user_username&")";
-			}else if(arguments.optionStruct.user_displaytype EQ 2){
+			}else if(arguments.typeStruct.user_displaytype EQ 2){
 				returnValue=qUser.user_username;
 			}
 		}
@@ -353,7 +353,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -362,7 +362,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>	
@@ -404,7 +404,7 @@
 		user_multipleselection:application.zcore.functions.zso(form, 'user_multipleselection')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
@@ -422,7 +422,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -444,21 +444,21 @@
 			<table style="border-spacing:0px;">
 			<tr><td>Display Type: </td><td>
 			<cfscript>
-			arguments.optionStruct.user_displaytype=application.zcore.functions.zso(arguments.optionStruct, 'user_displaytype', true, 0);
+			arguments.typeStruct.user_displaytype=application.zcore.functions.zso(arguments.typeStruct, 'user_displaytype', true, 0);
 			var ts = StructNew();
 			ts.name = "user_displaytype";
 			ts.style="border:none;background:none;";
 			ts.labelList = "First/Last Name/Email,Company/Email,Email";
 			ts.valueList = "0,1,2";
 			ts.hideSelect=true;
-			ts.struct=arguments.optionStruct;
+			ts.struct=arguments.typeStruct;
 			writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 			</cfscript>
 			</td></tr>
 			<tr><td style="vertical-align:top;">Limit User Schemas: </td>
 			<td>
 			<cfscript>
-			form.user_group_id_list=application.zcore.functions.zso(arguments.optionStruct, 'user_group_id_list');
+			form.user_group_id_list=application.zcore.functions.zso(arguments.typeStruct, 'user_group_id_list');
 			db.sql="SELECT *FROM #db.table("user_group", request.zos.zcoreDatasource)# user_group 
 			WHERE site_id=#db.param(request.zos.globals.id)#  and 
 			user_group_deleted = #db.param(0)#
@@ -475,9 +475,9 @@
 			</cfscript></td></tr>
 			<tr><td>Multiple Selections: </td><td>
 			<cfscript>
-			arguments.optionStruct.user_multipleselection=application.zcore.functions.zso(arguments.optionStruct, 'user_multipleselection', false, "No");
-			if(arguments.optionStruct.user_multipleselection EQ ""){
-				arguments.optionStruct.user_multipleselection="No";
+			arguments.typeStruct.user_multipleselection=application.zcore.functions.zso(arguments.typeStruct, 'user_multipleselection', false, "No");
+			if(arguments.typeStruct.user_multipleselection EQ ""){
+				arguments.typeStruct.user_multipleselection="No";
 			}
 			var ts = StructNew();
 			ts.name = "user_multipleselection";
@@ -485,7 +485,7 @@
 			ts.labelList = "Yes,No";
 			ts.valueList = "Yes,No";
 			ts.hideSelect=true;
-			ts.struct=arguments.optionStruct;
+			ts.struct=arguments.typeStruct;
 			writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 			</cfscript>
 			</td></tr>

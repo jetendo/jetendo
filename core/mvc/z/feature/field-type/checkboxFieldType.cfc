@@ -10,7 +10,7 @@
 </cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return "1";
 	</cfscript>
@@ -19,7 +19,7 @@
 <cffunction name="getSearchFieldName" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="setTableName" type="string" required="yes">
 	<cfargument name="groupTableName" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
 	</cfscript>
@@ -47,7 +47,7 @@
 
 <cffunction name="getSearchFormField" localmode="modern" access="public"> 
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfargument name="value" type="string" required="yes">
@@ -56,14 +56,14 @@
 	var tempCheck='';
 
 	// if list feature is used, show multiple menu instead of checkbox
-	if(structkeyexists(arguments.optionStruct, 'checkbox_labels') and arguments.optionStruct.checkbox_labels NEQ "" and arguments.optionStruct.checkbox_values NEQ ""){
+	if(structkeyexists(arguments.typeStruct, 'checkbox_labels') and arguments.typeStruct.checkbox_labels NEQ "" and arguments.typeStruct.checkbox_values NEQ ""){
 		// multiple select
 		var ts = StructNew();
 		ts.name = arguments.prefixString&arguments.row["feature_field_id"]; 
-		ts.listLabelsDelimiter = arguments.optionStruct.checkbox_delimiter;
-		ts.listValuesDelimiter = arguments.optionStruct.checkbox_delimiter;
-		ts.listLabels=arguments.optionStruct.checkbox_labels;
-		ts.listValues=arguments.optionStruct.checkbox_values;
+		ts.listLabelsDelimiter = arguments.typeStruct.checkbox_delimiter;
+		ts.listValuesDelimiter = arguments.typeStruct.checkbox_delimiter;
+		ts.listLabels=arguments.typeStruct.checkbox_labels;
+		ts.listValues=arguments.typeStruct.checkbox_values;
 		ts.struct=arguments.dataStruct; 
 		ts.multiple=true;
 		ts.hideSelect=true; 
@@ -90,12 +90,12 @@
 
 <cffunction name="getSearchValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
 	<cfscript>
-	if(structkeyexists(arguments.optionStruct, 'checkbox_labels') and arguments.optionStruct.checkbox_labels NEQ "" and arguments.optionStruct.checkbox_values NEQ ""){
+	if(structkeyexists(arguments.typeStruct, 'checkbox_labels') and arguments.typeStruct.checkbox_labels NEQ "" and arguments.typeStruct.checkbox_values NEQ ""){
 		return application.zcore.functions.zso(form, arguments.prefixString&arguments.row["feature_field_id"], false, 0);
 	}else{
 		return application.zcore.functions.zso(form, arguments.prefixString&arguments.row["feature_field_id"], true, 0);
@@ -105,7 +105,7 @@
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
@@ -115,7 +115,7 @@
 		field: arguments.row["feature_field_variable_name"],
 		arrValue:[]
 	};
-	if(structkeyexists(arguments.optionStruct, 'checkbox_labels') and arguments.optionStruct.checkbox_labels NEQ "" and arguments.optionStruct.checkbox_values NEQ ""){
+	if(structkeyexists(arguments.typeStruct, 'checkbox_labels') and arguments.typeStruct.checkbox_labels NEQ "" and arguments.typeStruct.checkbox_values NEQ ""){
 		v=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"], false, 0);
 		arrValue=listToArray(v, ","); 
 		if(v NEQ ""){
@@ -138,7 +138,7 @@
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="databaseField" type="string" required="yes">
@@ -148,7 +148,7 @@
 	var db=request.zos.queryObject; 
 
 
-	if(structkeyexists(arguments.optionStruct, 'checkbox_labels') and arguments.optionStruct.checkbox_labels NEQ "" and arguments.optionStruct.checkbox_values NEQ ""){
+	if(structkeyexists(arguments.typeStruct, 'checkbox_labels') and arguments.typeStruct.checkbox_labels NEQ "" and arguments.typeStruct.checkbox_values NEQ ""){
 		v=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"], false, 0);
 		arrValue=listToArray(v, ","); 
 		if(v NEQ ""){
@@ -175,7 +175,7 @@
 
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	return { mapData: false, struct: {} };
 	</cfscript>
@@ -190,26 +190,26 @@
 <cffunction name="onDelete" localmode="modern" access="public">
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	var tempCheck='';
 	// if list feature is used, show multiple menu instead of checkbox
-	if(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.optionStruct, 'checkbox_values') NEQ ""){
+	if(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.typeStruct, 'checkbox_values') NEQ ""){
 		// multiple select
 		var ts = StructNew();
 		ts.name = arguments.prefixString&arguments.row["feature_field_id"]; 
-		ts.listLabels = arguments.optionStruct.checkbox_labels;
-		ts.listValues = arguments.optionStruct.checkbox_values;
-		ts.listLabelsDelimiter = application.zcore.functions.zso(arguments.optionStruct, 'checkbox_delimiter'); // tab delimiter
-		ts.listValuesDelimiter = application.zcore.functions.zso(arguments.optionStruct, 'checkbox_delimiter');
+		ts.listLabels = arguments.typeStruct.checkbox_labels;
+		ts.listValues = arguments.typeStruct.checkbox_values;
+		ts.listLabelsDelimiter = application.zcore.functions.zso(arguments.typeStruct, 'checkbox_delimiter'); // tab delimiter
+		ts.listValuesDelimiter = application.zcore.functions.zso(arguments.typeStruct, 'checkbox_delimiter');
 		ts.struct=arguments.dataStruct;  
 		ts.output=false; 
 		rs=application.zcore.functions.zInput_Checkbox(ts); 
@@ -226,20 +226,20 @@
 
 <cffunction name="getFormFieldCode" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	// if list feature is used, show multiple menu instead of checkbox
-	if(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.optionStruct, 'checkbox_values') NEQ ""){
+	if(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.typeStruct, 'checkbox_values') NEQ ""){
 		// multiple select
 		return ('
 		<cfscript>
 		var ts = StructNew();
 		ts.name = "#arguments.fieldName#"; 
-		ts.listLabels = "#replace(replace(arguments.optionStruct.checkbox_labels, '"' , '""', "all"), "####", "########", "all")#";
-		ts.listValues = "#replace(replace(arguments.optionStruct.checkbox_values, '"' , '""', "all"), "####", "########", "all")#";
-		ts.listLabelsDelimiter = "#application.zcore.functions.zso(arguments.optionStruct, 'checkbox_delimiter')#"; // tab delimiter
-		ts.listValuesDelimiter = "#application.zcore.functions.zso(arguments.optionStruct, 'checkbox_delimiter')#";
+		ts.listLabels = "#replace(replace(arguments.typeStruct.checkbox_labels, '"' , '""', "all"), "####", "########", "all")#";
+		ts.listValues = "#replace(replace(arguments.typeStruct.checkbox_values, '"' , '""', "all"), "####", "########", "all")#";
+		ts.listLabelsDelimiter = "#application.zcore.functions.zso(arguments.typeStruct, 'checkbox_delimiter')#"; // tab delimiter
+		ts.listValuesDelimiter = "#application.zcore.functions.zso(arguments.typeStruct, 'checkbox_delimiter')#";
 		ts.struct=form;  
 		ts.output=true; 
 		application.zcore.functions.zInput_Checkbox(ts); 
@@ -261,10 +261,10 @@
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
-	if(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.optionStruct, 'checkbox_values') NEQ ""){
+	if(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_labels') NEQ "" and application.zcore.functions.zso(arguments.typeStruct, 'checkbox_values') NEQ ""){
 		return arguments.value;
 	}else{ 
 		if(arguments.value EQ 1){
@@ -278,7 +278,7 @@
 
 <cffunction name="onBeforeListView" localmode="modern" access="public" returntype="struct">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
 	return {};
@@ -287,7 +287,7 @@
 
 <cffunction name="validateFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript> 
@@ -297,7 +297,7 @@
 
 <cffunction name="onInvalidFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>  
@@ -307,7 +307,7 @@
 
 <cffunction name="onBeforeUpdate" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes"> 
+	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
@@ -356,7 +356,7 @@
 		checkbox_values:application.zcore.functions.zso(arguments.dataStruct, 'checkbox_values')
 	};
 	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
-	return { success:true, optionStruct: ts};
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction> 
 		
@@ -370,7 +370,7 @@
 
 <cffunction name="getTypeForm" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="optionStruct" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -398,9 +398,9 @@
 		<table style="border-spacing:0px;">
 		<tr>
 		<th>
-		Delimiter </th><td><input type="text" name="checkbox_delimiter"  value="<cfif structkeyexists(form, 'checkbox_delimiter')>#htmleditformat(form.checkbox_delimiter)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_delimiter', false, '|'))#</cfif>" size="1" maxlength="1" /></td></tr>
-		<tr><td>Labels List: </td><td><input type="text" name="checkbox_labels"  value="<cfif structkeyexists(form, 'checkbox_labels')>#htmleditformat(form.checkbox_labels)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_labels'))#</cfif>" /></td></tr>
-		<tr><td>Values List:</td><td> <input type="text" name="checkbox_values" value="<cfif structkeyexists(form, 'checkbox_values')>#htmleditformat(form.checkbox_values)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.optionStruct, 'checkbox_values'))#</cfif>" /></td></tr>
+		Delimiter </th><td><input type="text" name="checkbox_delimiter"  value="<cfif structkeyexists(form, 'checkbox_delimiter')>#htmleditformat(form.checkbox_delimiter)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_delimiter', false, '|'))#</cfif>" size="1" maxlength="1" /></td></tr>
+		<tr><td>Labels List: </td><td><input type="text" name="checkbox_labels"  value="<cfif structkeyexists(form, 'checkbox_labels')>#htmleditformat(form.checkbox_labels)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_labels'))#</cfif>" /></td></tr>
+		<tr><td>Values List:</td><td> <input type="text" name="checkbox_values" value="<cfif structkeyexists(form, 'checkbox_values')>#htmleditformat(form.checkbox_values)#<cfelse>#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'checkbox_values'))#</cfif>" /></td></tr>
 		</table>
 	</div>
 	</cfsavecontent>

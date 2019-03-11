@@ -693,6 +693,7 @@
 		optionTypeStruct:{}
 	};
 
+
 	
 	structappend(ts, ts.componentObjectCache);
 	if(request.zos.allowRequestCFC){
@@ -713,6 +714,7 @@
 	*/
 
 	loadDbCFC(ts);
+	ts.componentObjectCache.featureCom.rebuildFeatureStructCache(ts);
 	/*
 	request.zos.globals=structnew();
 	structappend(request.zos.globals,duplicate(ts.serverGlobals));
