@@ -506,13 +506,15 @@ if(rs.status EQ "error"){
 	<cfscript>
 	form.address=application.zcore.functions.zso(form, "address");
 	form.key=application.zcore.functions.zso(form, 'key');
+	form.api=application.zcore.functions.zso(form, 'api', false, 0);
 
 	if(not structkeyexists(request.zsession, "geocodeKey"&form.v) or request.zsession["geocodeKey"&form.v] NEQ form.key){
 		application.zcore.functions.zReturnJSON({success:false, exact:false, key:form.key, errorMessage:"Invalid key"});
 	}
 	ts={
 		mode:"server",
-		address:form.address
+		address:form.address,
+		api:form.api // 0 is geocodio, 1 is google
 	};
 	if(not structkeyexists(request.zos, 'geocodeCom')){
 		request.zos.geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
@@ -561,6 +563,7 @@ if(rs.success){
 	ts={
 		name:"geocoding",
 		type:"ip",
+		api:0,
 		limits:{
 			minute:30,
 			hour:300,
@@ -687,17 +690,18 @@ if(rs.success){
 		}
 		if(arrayLen(ss.arrAddress) GT 1){
 			throw("Bulk geocoding is not implemented yet. The request is done, but not the response processing.");
-			if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+			if(ss.api EQ 0 and application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
 				http url="https://api.geocod.io/v1.3/geocode?api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="post"{
 					header name="Content-Type" value="application/json";
 					header name="body" value="#serializeJSON(ss.arrAddress)#"; 
 				}
 				useGeocodio=true;
 			}else{
-				throw("Geocodio API Key is not defined and it required to be able to geocode multiple addresses at once.");
+				//throw("Geocodio API Key is not defined and it required to be able to geocode multiple addresses at once.");
+				throw("Multiple address geocoding with ss.exact=false is not supported.");
 			}
 		}else{
-			if(application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
+			if(ss.api EQ 0 and application.zcore.functions.zso(request.zos, "geocodioAPIKey") NEQ ""){
 				http url="https://api.geocod.io/v1.3/geocode?q=#urlencodedformat(ts.struct.geocode_cache_address)#&api_key=#request.zos.geocodioAPIKey#" timeout="1000" method="get"{}
 				useGeocodio=true; 
 			}else{

@@ -360,6 +360,7 @@ var zArrGeolocationWatchCallback=[];
 		});
 	}
 
+	
 
 	/*
 	var options={
@@ -391,6 +392,9 @@ var zArrGeolocationWatchCallback=[];
 		if(typeof options.exact == "undefined"){
 			options.exact=false;
 		}
+		if(typeof options.api == "undefined"){
+			options.api=0;
+		}
 		if(options.address == lastGeocodeAddress){
 			options.callback(lastGeocodeResult);
 			return;
@@ -411,7 +415,7 @@ var zArrGeolocationWatchCallback=[];
 				var tempObj2={};
 				tempObj2.ignoreOldRequests=true;
 				tempObj2.id="zGeocodeAjaxKey";
-				tempObj2.url=options.customGeocodeURL+"?v="+v+"&address="+escape(options.address)+"&key="+r.value;
+				tempObj2.url=options.customGeocodeURL+"?v="+v+"&address="+escape(options.address)+"&key="+r.value+"&api="+options.api;
 				tempObj2.callback=function(r2){
 					var r2=JSON.parse(r2);
 					if(r.value==r2.key){
