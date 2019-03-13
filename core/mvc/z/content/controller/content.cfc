@@ -2381,7 +2381,7 @@ configCom.includeContentByName(ts);
 	}else{
 		tempQueryName=arguments.query;
 	}
-	index=0;
+	tempIndex=0;
 
 	hasImages=false;
 	arrData=[];
@@ -2391,8 +2391,8 @@ configCom.includeContentByName(ts);
 		if(request.zos.isDeveloper and structkeyexists(form, 'zdebug')){
 			echo('<p>Outputting child page: #row.content_id#</p>');
 		}
-		index++;
-		if(arguments.limit NEQ 0 and index GT arguments.limit){
+		tempIndex++;
+		if(arguments.limit NEQ 0 and tempIndex GT arguments.limit){
 			break;
 		}
 		ts=structnew();
@@ -3430,6 +3430,9 @@ configCom.includeContentByName(ts);
 	<cfargument name="count" type="numeric" required="no" default="#10#">
 	<cfscript>
 	db=request.zos.queryObject;
+	if(arguments.offset > 1000){
+		application.zcore.functions.z404("Invalid offset: #arguments.offset#");
+	}
 	subpageLinkLayoutBackup=arguments.qContent.content_subpage_link_layout;
 	if(arguments.contentConfig.disableChildContent EQ false){
 		// you must have a group by in your query or it may miss rows

@@ -586,6 +586,7 @@ if(rs.success){
 		returnAddressComponents:false,
 		callbackURL:"",
 		arrAddress:[],
+		api:0,
 		address:"",
 		address2:"", // be sure to split out unit, apt # or it may result in inaccurate geocoding
 		city:"",
