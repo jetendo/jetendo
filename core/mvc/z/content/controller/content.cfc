@@ -2399,7 +2399,7 @@ configCom.includeContentByName(ts);
 		ts.image_library_id=row.content_image_library_id;
 		ts.output=false;
 		ts.query=tempQueryName;
-		ts.row=index;
+		ts.row=tempIndex;
 		ts.size=request.zos.thumbnailSizeStruct.width&"x"&request.zos.thumbnailSizeStruct.height;
 		ts.crop=request.zos.thumbnailSizeStruct.crop;
 		ts.count = 1; 
