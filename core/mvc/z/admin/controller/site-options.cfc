@@ -4698,8 +4698,10 @@ Define this function in another CFC to override the default email format
 		theTitle="Edit "&qCheck.site_option_group_display_name;
 	}
 	echo('<div class="z-manager-edit-head">');
-		if(application.zcore.template.getTagContent("title") EQ ""){
-			application.zcore.template.setTag("title",theTitle);
+		if(methodBackup NEQ "publicAddGroup" or request.cgi_script_name EQ "/z/misc/display-site-option-group/add"){
+			if(application.zcore.template.getTagContent("title") EQ ""){
+				application.zcore.template.setTag("title",theTitle);
+			}
 		}
 		if(methodBackup EQ "publicAddGroup" or methodBackup EQ "publicEditGroup"){
 			if(application.zcore.template.getTagContent("pagetitle") EQ ""){
