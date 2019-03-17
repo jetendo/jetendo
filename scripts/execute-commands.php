@@ -42,6 +42,7 @@ $commandTypeLookup["convertHTMLTOPDF"]="image";
 $commandTypeLookup["getDiskUsage"]="serveradministrator";
 $commandTypeLookup["getFileMD5Sum"]="serveradministrator";
 $commandTypeLookup["imageMagickConvertSVGtoPNG"]="image";
+$commandTypeLookup["getImageMagickMergeImages"]="image";
 $commandTypeLookup["getImageMagickIdentify"]="imageidentify";
 $commandTypeLookup["getImageMagickConvertResize"]="image";
 $commandTypeLookup["getImageMagickConvertApplyMask"]="image";

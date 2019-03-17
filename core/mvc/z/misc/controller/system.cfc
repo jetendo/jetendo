@@ -17,8 +17,9 @@
 	if(form.width EQ 0 or form.height EQ 0){
 		application.zcore.functions.z404("Invalid width/height.");
 	}
-	i=ImageNew("#request.zos.installPath#public/images/widget/grey.png");
-	imageresize(i, form.width, form.height); 
+	application.zcore.functions.z404("Feature disabled");
+	// i=ImageNew("#request.zos.installPath#public/images/widget/grey.png");
+	// imageresize(i, form.width, form.height); 
 	header name="content-Disposition" value="attachment; filename=placeholder.png";
 	content variable="#i#"  type="image/png" reset="true";
 	abort; 

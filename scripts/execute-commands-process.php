@@ -11,6 +11,7 @@ imageMagickConvertSVGtoPNG#chr(9)#absoluteSource#chr(9)#absoluteDestination
 getImageMagickIdentify#chr(9)#absoluteFilePath
 getImageMagickConvertResize#chr(9)&#resizeWidth#chr(9)#resizeHeight#chr(9)#cropWidth#chr(9)#cropHeight#chr(9)#cropXOffset#chr(9)#cropYOffset#chr(9)#absoluteSourceFilePath#chr(9)#absoluteDestinationFilePath
 getImageMagickConvertApplyMask#chr(9)#absoluteImageInputPath#chr(9)#absoluteImageOutputPath
+getImageMagickMergeImages#chr(9)#imagesSeperatedBySpaces#chr(9)#absoluteImageOutputPath
 getUserList
 getScryptCheck#chr(9)#password#chr(9)#hashedPassword
 getScryptEncrypt#chr(9)#password
@@ -91,6 +92,8 @@ function processContents($contents){
 		return getImageMagickConvertResize($a);
 	}else if($contents =="getImageMagickConvertApplyMask"){
 		return getImageMagickConvertApplyMask($a);
+	}else if($contents=="getImageMagickMergeImages"){
+		return getImageMagickMergeImages($a);
 	}else if($contents =="getScryptCheck"){
 		return getScryptCheck($a);
 	}else if($contents =="getScryptEncrypt"){
@@ -1611,6 +1614,163 @@ function getImageMagickConvertApplyMask($a){
 	echo "Failed to apply image to image\n";
 	return "0";
 }
+
+
+function getImageMagickMergeImages($a){
+	set_time_limit(100);
+	if(count($a) != 8){
+		echo "Incorrect number of arguments to getImageMagickMergeImages.\n";
+		return "0|Incorrect number of arguments to getImageMagickMergeImages";
+	}
+	$arrInput=explode("*", trim($a[0]));
+	$absImageOutputPath=trim($a[1]); 
+	if(trim($a[0]) == ""){
+		echo "images was an empty string\n";
+		return "0|Images was an empty string";
+	} 
+	if(count($arrInput) <= 1){
+		echo "You must input at least 2 images separated by *.\n";
+		return "0|You must input at least 2 images separated by *";
+	} 
+	$absImageOutputPath=getAbsolutePath($absImageOutputPath);
+	$outputDir=getAbsolutePath(dirname($absImageOutputPath)); 
+	if($outputDir == "" || !is_dir($outputDir)){
+		echo "The parent directory for absImageOutputPath doesn't exist: ".$absImageOutputPath."\n";
+		return "0|The parent directory for absImageOutputPath doesn't exist: ".$absImageOutputPath;
+	} 
+
+	$resizeWidth=$a[2];
+	$resizeHeight=$a[3];
+	// crop happens after resize
+	$cropXOffset=$a[4];
+	$cropYOffset=$a[5];
+	$cropWidth=$a[6];
+	$cropHeight=$a[7];
+	if(!is_numeric($resizeWidth)){
+		echo "resizeWidth must be an integer\n";
+		return "0|resizeWidth must be an integer";
+	}
+	if(!is_numeric($resizeHeight)){
+		echo "resizeHeight must be an integer\n";
+		return "0|resizeHeight must be an integer";
+	}
+	if(!is_numeric($cropXOffset)){
+		echo "cropXOffset must be an integer\n";
+		return "0|cropXOffset must be an integer";
+	}
+	if(!is_numeric($cropYOffset)){
+		echo "cropYOffset must be an integer\n";
+		return "0|cropYOffset must be an integer";
+	}
+	if(!is_numeric($cropWidth)){
+		echo "cropWidth must be an integer\n";
+		return "0|cropWidth must be an integer";
+	}
+	if(!is_numeric($cropHeight)){
+		echo "cropHeight must be an integer\n";
+		return "0|cropHeight must be an integer";
+	}
+	
+	$outputExtension=getFileExt($absImageOutputPath);
+	 
+	$validTypes=array();
+	$validTypes["png"]=true;
+	$validTypes["jpg"]=true;
+	$validTypes["jpeg"]=true;
+	$validTypes["gif"]=true;
+	if(!isset($validTypes[strToLower($outputExtension)])){
+		echo "absImageOutputPath must end with .jpg, .jpeg, .png or .gif.  It ended with: ".$outputExtension."\n";
+		return "0|absImageOutputPath must end with .jpg, .jpeg, .png or .gif.  It ended with: ".$outputExtension;
+	} 
+	$path=$absImageOutputPath;
+	$p=get_cfg_var("jetendo_root_path");
+	$found=false;
+	if(substr($path, 0, strlen($p)) == $p){
+		$found=true;
+	}
+	$p=zGetBackupPath();
+	if(substr($path, 0, strlen($p)) == $p){
+		$found=true;
+	}
+	if(!$found){
+		echo "absImageOutputPath must be in the jetendo install or backup paths. Path:".$absImageOutputPath."\n";
+		return "0|absImageOutputPath must be in the jetendo install or backup paths. Path:".$absImageOutputPath;
+	} 
+	$compressQuality=93;
+	$ext=strtolower(substr($absImageOutputPath, -4));
+	if($ext == '.jpg' || $ext == '.jpeg'){
+		$cmd2="/usr/bin/identify -quiet -format '%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$r=trim(`$cmd2`);
+		if(is_numeric($r)){
+			$compressQuality=min($compressQuality, intval($r));
+		}
+	}
+	$pngColorFix="PNG32:"; 
+	$compress=' -define png:compression-filter=5 -define png:compression-level=7 -define png:compression-strategy=1 ';
+	$cmd="/usr/bin/convert -limit memory 100MB -limit map 100MB ".$compress." ";
+	for($i=0;$i<count($arrInput);$i++){
+		$tempPath=trim($arrInput[$i]);
+		if(strlen($tempPath)==0){
+			continue;
+		}
+		$tempPath=getAbsolutePath($tempPath);
+		if($tempPath == "" || !file_exists($tempPath)){
+			echo "The file doesn't exist: ".$tempPath."\n";
+			return "0|The file doesn't exist: ".$tempPath;
+		}
+		$tempPathInfo=pathinfo($tempPath);
+		if(!isset($validTypes[strToLower($tempPathInfo["extension"])])){
+			echo "image must end with .jpg, .jpeg, .png or .gif.  It ended with: ".$tempPathInfo["extension"]."\n";
+			return "0|image must end with .jpg, .jpeg, .png or .gif. It ended with: ".$tempPathInfo["extension"];
+		}
+		$path=$tempPath;
+		$p=get_cfg_var("jetendo_root_path");
+		$found=false;
+		if(substr($path, 0, strlen($p)) == $p){
+			$found=true;
+		}
+		$p=zGetBackupPath();
+		if(substr($path, 0, strlen($p)) == $p){
+			$found=true;
+		}
+		if(!$found){
+			echo "absImageInputPath must be in the jetendo install or backup paths. Path:".$tempPath."\n";
+			return "0|absImageInputPath must be in the jetendo install or backup paths.";
+		} 
+		$cmd.=escapeshellarg($tempPath)." ";
+	}
+	$cmd.=' -background none -layers flatten -resize "'.$resizeWidth.'x'.$resizeHeight.'>" ';
+	if($cropWidth != 0){
+		$cmd.=' -crop '.$cropWidth.'x'.$cropHeight.'+'.$cropXOffset.'+'.$cropYOffset;
+	} 
+	$cmd.=" ".$pngColorFix.escapeshellarg($absImageOutputPath); 
+	$r=`$cmd`;
+	echo $cmd."\n".$r."\n"; 
+	if(file_exists($absImageOutputPath)){
+		if(!zIsTestServer()){
+
+			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageInputPath);
+			echo $cmd."\n";
+			`$cmd`;
+			$cmd='/bin/chmod 660 '.escapeshellarg($absImageInputPath);
+			echo $cmd."\n";
+			`$cmd`;
+			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageOutputPath);
+			echo $cmd."\n";
+			`$cmd`;
+			$cmd='/bin/chmod 660 '.escapeshellarg($absImageOutputPath);
+			echo $cmd."\n";
+			`$cmd`;
+		}
+		return "1";
+	}
+	echo "Failed to apply image to image\n";
+	return "0|Failed to merge images";
+}
+
+// $r=processContents("getImageMagickMergeImages\t/var/jetendo-server/jetendo/sites-writable/avalon/zupload/3d/excalibur/base/base.png*/var/jetendo-server/jetendo/sites-writable/avalon/zupload/3d/excalibur/primary-wall/red.png*/var/jetendo-server/jetendo/sites-writable/avalon/zupload/3d/excalibur/secondary-wall/charcoal.png*/var/jetendo-server/jetendo/sites-writable/avalon/zupload/3d/excalibur/base-vinyl/conch-shell.png*/var/jetendo-server/jetendo/sites-writable/avalon/zupload/3d/excalibur/seat-accent-color/black.png\t/var/jetendo-server/jetendo/sites/test-final.png\t4800\t300\t0\t60\t400\t160");
+// echo $r;
+// exit;
 
 function getImageMagickConvertResize($a){
 	// the quality is 93% in imagemagick, which is 60 to 70% photoshop.  If the user uploads a lower quality image, the code will use that quality instead of 93.

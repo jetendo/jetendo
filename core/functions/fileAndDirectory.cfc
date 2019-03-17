@@ -750,9 +750,9 @@ notes: optionally delete an existing image that has a field in the specified dat
 	<cfscript>
 	var output = 0;
 	secureCommand="getImageMagickIdentify"&chr(9)&arguments.source;
-	output=trim(application.zcore.functions.zSecureCommand(secureCommand, 200));
-	if(output CONTAINS "," and listlen(output,",", true) GTE 9){
-		arrOut=listtoarray(output, ",", true);
+	output1=trim(application.zcore.functions.zSecureCommand(secureCommand, 200));
+	if(output1 CONTAINS "," and listlen(output1,",", true) GTE 9){
+		arrOut=listtoarray(output1, ",", true);
 		ext=application.zcore.functions.zGetFileExt(arguments.source);
 		if(ext NEQ "gif" and ext NEQ "png" and lcase(arrOut[3]) NEQ "srgb"){
 			form.invalidImagePath=arguments.source;
@@ -760,8 +760,7 @@ notes: optionally delete an existing image that has a field in the specified dat
 		}
 		return { success:true, width:arrOut[1], height:arrOut[2], quality:arrOut[4], image_latitude:arrOut[6],image_longitude:arrOut[7],image_altitude:arrOut[8],image_taken_datetime:arrOut[9]};
 	}else{
-		return{ success: false, errorMessage:"Unable to read image dimensions. Output:""#output#"".  The image may be corrupted or an unsupported format.  Please try again with a RGB jpg, png or gif." };
-		//application.zcore.template.fail("resizeImage: failed to get source image dimensions with zSecureCommand: "&secureCommand&" | Output: "&output,true);
+		return{ success: false, errorMessage:"Unable to read image dimensions. Output:""#output1#"".  The image may be corrupted or an unsupported format.  Please try again with a RGB jpg, png or gif." }; 
 	}
 	</cfscript>
 </cffunction>
@@ -1001,10 +1000,10 @@ notes: optionally delete an existing image that has a field in the specified dat
 			throw(local.imageSize.errorMessage);
 		} 
 		secureCommand="getImageMagickConvertResize"&chr(9)&cs.resizeWidth&chr(9)&cs.resizeHeight&chr(9)&cs.cropWidth&chr(9)&cs.cropHeight&chr(9)&cs.cropXOffset&chr(9)&cs.cropYOffset&chr(9)&cs.sourceFilePath&chr(9)&cs.destinationFilePath;
-		output=application.zcore.functions.zSecureCommand(secureCommand, 200); 
-		if(output NEQ "1"){
+		output1=application.zcore.functions.zSecureCommand(secureCommand, 200); 
+		if(output1 NEQ "1"){
 			if(request.zos.isDeveloper){
-				throw("Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output);
+				throw("Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output1);
 			}
 			return false;
 		}
@@ -1021,7 +1020,7 @@ notes: optionally delete an existing image that has a field in the specified dat
     	arrayAppend(request.arrLastImageTakenDate,local.imageSize.image_taken_datetime); 
 
         if(fileexists(filePath) EQ false){
-			throw("File not exists - Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output);
+			throw("File not exists - Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output1);
 			//return false;
         }    
         ArrayAppend(arrFiles, GetFileFromPath(filePath)); 
@@ -1030,6 +1029,55 @@ notes: optionally delete an existing image that has a field in the specified dat
     </cfscript>
 </cffunction>
 
+<!---
+ts={
+	arrImagePath:["/path/to/file"],
+	// resize is after images are merged
+	resizeWidth:400,
+	resizeHeight:300,
+	// crop happens after resize
+	cropXOffset:0,
+	cropYOffset:60,
+	cropWidth:400,
+	cropHeight:160,
+	// the destination file is only stored once
+	destinationFilePath:"/path/to/output/file"
+};
+if(application.zcore.functions.zMergeImages(ts)){
+	// success
+}else{
+	// failure
+}
+--->
+<cffunction name="zMergeImages" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	var result=0; 
+	arguments.ss.destinationFilePath=replace(arguments.ss.destinationFilePath, chr(9), "", "all"); 
+	for(tempImage in arguments.ss.arrImagePath){
+		if(not fileexists(tempImage)){
+			throw("""#tempImage#"", doesn't exist.");
+		}
+	}
+	outputDir=getdirectoryfrompath(arguments.ss.destinationFilePath);
+	if(not directoryexists(outputDir)){
+		throw("arguments.ss.destinationFilePath's parent directory, ""#outputDir#"", doesn't exist.");
+	}
+	result=application.zcore.functions.zSecureCommand("getImageMagickMergeImages"&chr(9)&arrayToList(arguments.ss.arrImagePath, "*")&chr(9)&arguments.ss.destinationFilePath&chr(9)&arguments.ss.resizeWidth&chr(9)&arguments.ss.resizeHeight&chr(9)&arguments.ss.cropXOffset&chr(9)&arguments.ss.cropYOffset&chr(9)&arguments.ss.cropWidth&chr(9)&arguments.ss.cropHeight, 200);
+	if(result NEQ ""){
+		arrResult=listToArray(result, "|");
+		if(arrResult[1] EQ 0){
+			arrayDeleteAt(arrResult, 1);
+			request.zos.mergeImageError=arrayToList(arrResult, "|");
+			return false;
+		}else{
+			return true;
+		}
+	}else{
+		return false;
+	}
+	</cfscript>
+</cffunction>
 
 <cffunction name="zApplyMaskToImage" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">

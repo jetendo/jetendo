@@ -283,6 +283,8 @@ if(arguments.a.height GT arguments.b.height){
 	<cfargument name="arrImage2" type="array" required="yes">
 	<cfargument name="spriteMapFile" type="string" required="yes">
 	<cfscript>
+		application.zcore.functions.z404("feature disabled");
+		
 		var imageCount=arraylen(arguments.arrImage2);
 		var transparent=false;
 		var uniqueStruct={};
@@ -396,25 +398,25 @@ if(arguments.a.height GT arguments.b.height){
 	    ts.rightDivided=ceiling(ts.right/imagePad);
 	    ts.bottomDivided=ceiling(ts.bottom/imagePad);
 	}
-	if(transparent){
-		finalImage = imagenew("", maxWidth, maxHeight, "argb");
-	}else{
-		finalImage = imagenew("", maxWidth, maxHeight, "rgb", "##FFFFFF");
-	}
-		ImageSetAntialiasing(finalImage,"on");
-	for(i in imageStruct){
-	    if(imageStruct[i].width  EQ  0) continue;
-	    ts=imageStruct[i];
-	    ts.width-=(this.spritePad*2);
-	    ts.height-=(this.spritePad*2);
-			ImagePaste(finalImage, ts.source, ts.left+this.spritePad, ts.top+this.spritePad);
-			structdelete(ts, 'source');
-	}
-	if(ext EQ ".png"){
-			imagewrite(finalImage, arguments.spriteMapFile, true, 5);
-	}else{  
-			imagewrite(finalImage, arguments.spriteMapFile, true, 90);
-	}        
+	// if(transparent){
+	// 	finalImage = imagenew("", maxWidth, maxHeight, "argb");
+	// }else{
+	// 	finalImage = imagenew("", maxWidth, maxHeight, "rgb", "##FFFFFF");
+	// }
+	// 	ImageSetAntialiasing(finalImage,"on");
+	// for(i in imageStruct){
+	//     if(imageStruct[i].width  EQ  0) continue;
+	//     ts=imageStruct[i];
+	//     ts.width-=(this.spritePad*2);
+	//     ts.height-=(this.spritePad*2);
+	// 		ImagePaste(finalImage, ts.source, ts.left+this.spritePad, ts.top+this.spritePad);
+	// 		structdelete(ts, 'source');
+	// }
+	// if(ext EQ ".png"){
+	// 		imagewrite(finalImage, arguments.spriteMapFile, true, 5);
+	// }else{  
+	// 		imagewrite(finalImage, arguments.spriteMapFile, true, 90);
+	// }        
 	return imageStruct;
 	</cfscript>
 </cffunction>
