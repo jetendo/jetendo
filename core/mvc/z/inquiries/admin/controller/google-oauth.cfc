@@ -433,7 +433,7 @@ Google Analytics:
 	// working example of all campaign report:
 	// response is: "Custom Campaign Performance Report (Aug 1, 2017-Sep 2, 2017)" Campaign ID,Campaign,Campaign state,Impressions,Clicks,Cost,Conversions,Budget 920259499,Search Campaign,enabled,0,0,0,0.00,5000000 Total, --, --,0,0,0,0.00,5000000
 	xmlText='<?xml version="1.0" encoding="UTF-8"?>
-	<reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201708">
+	<reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201809">
   <selector>
 <fields>CampaignId</fields>
 <fields>CampaignName</fields>
@@ -458,7 +458,7 @@ Google Analytics:
 /*
 // working example of ad group report
 xmlText='<?xml version="1.0" encoding="UTF-8"?>
-<reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201708">
+<reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201809">
   <selector>
     <fields>CampaignId</fields>
     <fields>AdGroupId</fields>
@@ -492,7 +492,7 @@ this can go in selector to filter the returned data
 		cfhttp={statuscode:'200 OK', filecontent:'"Custom Campaign Performance Report (Aug 1, 2017-Sep 2, 2017)" Campaign ID,Campaign,Campaign state,Impressions,Clicks,Cost,Conversions,Budget,Day 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-02 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-03 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-05 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-07 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-13 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-17 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-21 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-27 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-09-01 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-09 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-11 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-12 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-16 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-22 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-23 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-24 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-25 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-10 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-14 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-26 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-28 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-30 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-09-02 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-01 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-04 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-06 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-08 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-15 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-18 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-19 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-20 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-29 920259499,Search Campaign,enabled,0,0,0,0.00,5000000,2017-08-31 Total, --, --,0,0,0,0.00,5000000, --'};
 	}else{
 
-		apiLink="https://adwords.google.com/api/adwords/reportdownload/v201708";
+		apiLink="https://adwords.google.com/api/adwords/reportdownload/v201809";
 		http url="#apiLink#" method="post" charset="utf-8" timeout="1000" throwonerror="no"{ 
 			httpparam type="Header" name="Authorization" value="Bearer #application.googleAnalyticsAccessToken[form.accountType].access_token#";
 			httpparam type="Header" name="developerToken" value="#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#";
@@ -536,12 +536,12 @@ this can go in selector to filter the returned data
 	xmlText='<?xml version="1.0"?>
 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	  <soapenv:Header>
-	    <ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/cm/v201708" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
+	    <ns1:RequestHeader xmlns:ns1="https://adwords.google.com/api/adwords/cm/v201809" soapenv:actor="http://schemas.xmlsoap.org/soap/actor/next" soapenv:mustUnderstand="0">
 	      #getAdwordsAuthXML()#
 	    </ns1:RequestHeader>
 	  </soapenv:Header>
 	  <soapenv:Body>
-	    <mutate xmlns="https://adwords.google.com/api/adwords/cm/v201708">
+	    <mutate xmlns="https://adwords.google.com/api/adwords/cm/v201809">
 	      <operations>
 	        <operator>SET</operator>
 	        <operand>
@@ -552,7 +552,7 @@ this can go in selector to filter the returned data
 	    </mutate> 
 	  </soapenv:Body>
 	</soapenv:Envelope>';
-	//xmlText='<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><RequestHeader xmlns="https://adwords.google.com/api/adwords/cm/v201708"><clientCustomerId>#request.zos.googleAnalyticsConfig.adwordsTestAccount#</clientCustomerId><developerToken>#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#</developerToken></RequestHeader></soap:Header><soap:Body><get xmlns="https://adwords.google.com/api/adwords/cm/v201708"><selector><ids>#campaignId#</ids></selector></get></soap:Body></soap:Envelope>';//<authToken>********</authToken>
+	//xmlText='<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><RequestHeader xmlns="https://adwords.google.com/api/adwords/cm/v201809"><clientCustomerId>#request.zos.googleAnalyticsConfig.adwordsTestAccount#</clientCustomerId><developerToken>#request.zos.googleAnalyticsConfig.adwordsDeveloperToken#</developerToken></RequestHeader></soap:Header><soap:Body><get xmlns="https://adwords.google.com/api/adwords/cm/v201809"><selector><ids>#campaignId#</ids></selector></get></soap:Body></soap:Envelope>';//<authToken>********</authToken>
 
 	/*
 LAST_7_DAYS
@@ -561,7 +561,7 @@ LAST_7_DAYS
   <max>20150301</max>
 </dateRange>
 
-	  <reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201708">
+	  <reportDefinition xmlns="https://adwords.google.com/api/adwords/cm/v201809">
   <selector> 
 <dateRange>
   <min>20170901</min>
@@ -570,9 +570,9 @@ LAST_7_DAYS
   </selector>
   <dateRangeType>CUSTOM_DATE</dateRangeType>
 </reportDefinition>
-	 	<get xmlns="https://adwords.google.com/api/adwords/cm/v201708"><selector><ids>#campaignId#</ids></selector></get>
+	 	<get xmlns="https://adwords.google.com/api/adwords/cm/v201809"><selector><ids>#campaignId#</ids></selector></get>
 
-	    <mutate xmlns="https://adwords.google.com/api/adwords/cm/v201708">
+	    <mutate xmlns="https://adwords.google.com/api/adwords/cm/v201809">
 	      <operations>
 	        <operator>ADD</operator>
 	        <operand>
@@ -581,7 +581,7 @@ LAST_7_DAYS
 	          <budget>
 	            <budgetId>YOUR_BUDGET_ID</budgetId>
 	          </budget>
-	          <settings xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201708" xsi:type="ns2:GeoTargetTypeSetting">
+	          <settings xmlns:ns2="https://adwords.google.com/api/adwords/cm/v201809" xsi:type="ns2:GeoTargetTypeSetting">
 	            <positiveGeoTargetType>DONT_CARE</positiveGeoTargetType>
 	          </settings>
 	          <advertisingChannelType>SEARCH</advertisingChannelType>
@@ -591,7 +591,7 @@ LAST_7_DAYS
 	            <targetContentNetwork>false</targetContentNetwork>
 	          </networkSetting>
 	          <biddingStrategyConfiguration>
-	            <biddingScheme xmlns:ns4="https://adwords.google.com/api/adwords/cm/v201708" xsi:type="ns4:ManualCpcBiddingScheme">
+	            <biddingScheme xmlns:ns4="https://adwords.google.com/api/adwords/cm/v201809" xsi:type="ns4:ManualCpcBiddingScheme">
 	              <enhancedCpcEnabled>false</enhancedCpcEnabled>
 	            </biddingScheme>
 	          </biddingStrategyConfiguration>
@@ -606,14 +606,14 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:xsd="http://www.w3.org/2001/
 XMLSchema"><soap:Header><RequestHeader xmlns="https://
-adwords.google.com/api/adwords/cm/v201708"><authToken>********</
+adwords.google.com/api/adwords/cm/v201809"><authToken>********</
 authToken><clientCustomerId>some number</
 clientCustomerId><developerToken>some number</developerToken></
 RequestHeader></soap:Header><soap:Body><get xmlns="https://
-adwords.google.com/api/adwords/cm/v201708"><selector><ids>9382159670</
+adwords.google.com/api/adwords/cm/v201809"><selector><ids>9382159670</
 ids></selector></get></soap:Body></soap:Envelope>'; */
 
-// Google\AdsApi\AdWords\v201708\cm\CampaignStatus
+// Google\AdsApi\AdWords\v201809\cm\CampaignStatus
 /*
 
 possibly needed:
@@ -639,7 +639,7 @@ $headers = array(
 ); 
 */
 
-	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/cm/v201708/CampaignService', xmlText);
+	rs=doSOAPAPICall('https://adwords.google.com/api/adwords/cm/v201809/CampaignService', xmlText);
 	return rs;
 	</cfscript>
 </cffunction>
@@ -1583,7 +1583,7 @@ arrayAppend(arrXML, '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.o
 			echo('Processed search console for #row.site_short_domain# | #startMonthDate# to #endDate#<br>'); 
 			startMonthDate=dateFormat(dateadd("m", 1, startMonthDate), "yyyy-mm-dd");
 			endDate=dateformat(dateadd("m", 1, endDate), "yyyy-mm-dd");
-			sleep(15000); // sleep to avoid hitting google's api limit
+			sleep(30000); // sleep to avoid hitting google's api limit
 		}
 		db.sql="update #db.table("site", request.zos.zcoreDatasource)# SET 
 		site_google_search_console_last_import_datetime=#db.param(request.zos.mysqlnow)#,
