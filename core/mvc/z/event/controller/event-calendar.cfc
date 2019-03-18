@@ -625,5 +625,96 @@
 	writedump(form);
 	</cfscript>
 </cffunction>
+
+
+
+<cffunction name="eventFeed" localmode="modern" access="remote" output="yes" returntype="any">
+	<cfscript>  
+	form.categories=application.zcore.functions.zso(form, 'categories');
+	form.calendarids=application.zcore.functions.zso(form, 'calendarids');
+	form.offset=application.zcore.functions.zso(form, 'offset', true, 0); 
+	form.count=application.zcore.functions.zso(form, 'count', true, 25); 
+	form.returnCount=application.zcore.functions.zso(form, 'returnCount', true, 0); 
+	if(form.offset LT 0 or form.offset GT 1000){ 
+		echo("offset must be between 0 and 1000 inclusive.");
+		abort;
+	}
+	if(form.count < 10 or form.count > 100){
+		echo("count must be between 10 and 100 inclusive.");
+		abort;
+	}  
+	ss={};
+	if(form.categories NEQ ""){
+		ss.categories=form.categories;
+	}
+	if(form.calendarids NEQ ""){
+		ss.calendarids=form.calendarids;
+	}
+	ss.onlyFutureEvents=true;
+ 	ss.startDate=application.zcore.functions.zso(form, 'start', false, request.zos.mysqlnow);
+ 	ss.endDate=application.zcore.functions.zso(form, 'end', false, dateadd("d", application.zcore.app.getAppData("event").optionstruct.event_config_project_recurrence_days, request.zos.mysqlnow)); 
+ 	ss.perpage=form.count;
+ 	rs=application.zcore.app.getAppCFC("event").searchEvents(ss);  
+ 	arrData=[];
+
+	feedLink=request.zOS.currentHostName&request.zos.originalURL;
+	savecontent variable="rss_feed"{
+		echo('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+		<atom:link href="#feedLink#" rel="self" type="application/rss+xml" />
+		<title>Feed from #request.zos.globals.shortdomain#</title>
+		<link>#feedLink#</link>
+		<description>This feed contains events from #request.zOS.currentHostName#.</description>
+		<language>en-us</language>
+		<copyright>#year(now())#</copyright>
+		<lastBuildDate>#gethttptimestring()#</lastBuildDate>');
+
+		for(i=1;i LTE Min(arraylen(rs.arrData), form.count);i++){
+			row=rs.arrData[i];
+			event_title = application.zcore.functions.zXMLFormat(row.event_name);
+			event_summary = application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_summary), 150);
+			event_description = application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description);
+			tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(row.__url,"html");
+			event_start = row.event_start_datetime;
+			event_end = row.event_end_datetime;  
+			echo('<item>
+			<title>#event_title#</title>
+			<link>#tempLink#</link>');
+			if(event_summary NEQ ""){
+				echo('<summary>#event_summary#</summary>');
+			}
+			if(event_description NEQ ""){
+				echo('<description><![CDATA[ #event_description# ]]></description>');
+			}
+			if(event_start NEQ ""){
+				echo('<start>#DateTimeFormat(event_start, 'ddd, dd mmm yyyy HH:mm:ss')# EST</start>');
+			}
+			if(event_end NEQ ""){
+				echo('<end>#DateTimeFormat(event_end, 'ddd, dd mmm yyyy HH:mm:ss')# EST</end>');
+			} 
+			ts=structnew();  
+			ts.defaultAltText="Image";
+			ts.image_library_id=row.event_image_library_id; 
+			ts.output=false;
+			ts.size="640x400";
+			ts.limit=1;
+			ts.offset=0;
+			ts.layoutType=""; //  there is also galleryview-1.1, lightbox-and-thumbnails, and a cover flow slideshow option for ts.layoutType.
+			var arrImage=request.zos.imageLibraryCom.displayImages(ts);
+			for(i2=1;i2<=arrayLen(arrImage);i2++){
+				echo('<enclosure url="#request.zos.currentHostName&arrImage[i2].link#" type="image/*"/>');
+			}  
+			echo('<guid isPermaLink="false">zevent-#row.event_id#-#row.event_recur_id#</guid>');
+			echo('</item>');
+		}
+		echo('</channel></rss>');
+	}
+	content type="text/xml; utf-8";
+	rss_feed=replace(rss_feed, ' href="/', ' href="#request.zos.currentHostName#/', 'all');
+	rss_feed=replace(rss_feed, ' src="/', ' src="#request.zos.currentHostName#/', 'all');
+	echo(rss_feed);
+	abort;
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>
