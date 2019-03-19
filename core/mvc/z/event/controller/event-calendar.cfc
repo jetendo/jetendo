@@ -654,6 +654,7 @@
  	ss.startDate=application.zcore.functions.zso(form, 'start', false, request.zos.mysqlnow);
  	ss.endDate=application.zcore.functions.zso(form, 'end', false, dateadd("d", application.zcore.app.getAppData("event").optionstruct.event_config_project_recurrence_days, request.zos.mysqlnow)); 
  	ss.perpage=form.count;
+ 	ss.offset=form.offset;
  	rs=application.zcore.app.getAppCFC("event").searchEvents(ss);  
  	arrData=[];
 
@@ -675,23 +676,21 @@
 			event_summary = application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_summary), 150);
 			event_description = application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description);
 			tempLink = request.zOS.currentHostName&application.zcore.functions.zXMLFormat(row.__url,"html");
-			event_start = row.event_start_datetime;
-			event_end = row.event_end_datetime;  
+			event_start = row.event_recur_start_datetime;
+			event_end = row.event_recur_end_datetime;  
 			echo('<item>
 			<title>#event_title#</title>
 			<link>#tempLink#</link>');
 			if(event_summary NEQ ""){
 				echo('<summary>#event_summary#</summary>');
-			}
-			if(event_description NEQ ""){
-				echo('<description><![CDATA[ #event_description# ]]></description>');
-			}
-			if(event_start NEQ ""){
-				echo('<start>#DateTimeFormat(event_start, 'ddd, dd mmm yyyy HH:mm:ss')# EST</start>');
-			}
-			if(event_end NEQ ""){
-				echo('<end>#DateTimeFormat(event_end, 'ddd, dd mmm yyyy HH:mm:ss')# EST</end>');
 			} 
+			echo('<description><![CDATA[ #DateTimeFormat(event_start, 'ddd, dd mmm yyyy h:mm tt')# EST - #DateTimeFormat(event_end, 'ddd, dd mmm yyyy h:mm tt')# EST #event_description# ]]></description>'); 
+			// if(event_start NEQ ""){
+			// 	echo('<start>#DateTimeFormat(event_start, 'ddd, dd mmm yyyy HH:mm:ss')# EST</start>');
+			// }
+			// if(event_end NEQ ""){
+			// 	echo('<end>#DateTimeFormat(event_end, 'ddd, dd mmm yyyy HH:mm:ss')# EST</end>');
+			// } 
 			ts=structnew();  
 			ts.defaultAltText="Image";
 			ts.image_library_id=row.event_image_library_id; 
