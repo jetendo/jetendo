@@ -451,7 +451,7 @@ not important yet: create contacts at same time as create lead (use same functio
 
 		<p><input type="file" name="filepath" value="" /></p>
 		<p>&nbsp;</p> 
-		 <p><input type="submit" name="submit1" value="Import CSV" style="padding:10px; border-radius:5px;" onclick="this.style.display='none';document.getElementById('pleaseWait').style.display='block';" />
+		 <p><input type="submit" name="submit1" id="submitFormButton1" value="Import CSV" style="padding:10px; border-radius:5px;" onclick="this.style.display='none';document.getElementById('pleaseWait').style.display='block';" />
 		<div id="pleaseWait" style="display:none;">Please wait...</div></p>
 	</form>
 
@@ -480,14 +480,20 @@ not important yet: create contacts at same time as create lead (use same functio
 					}
 				}else{
 					alert(r.errorMessage);
+					resetForm();
 				}
 			};
 			tempObj.errorCallback=function(){
 				alert("Sorry, there was a temporary network problem, please try again later.");
+				resetForm();
 			}
 			tempObj.cache=false;
 			zAjax(tempObj);
 		});
+		function resetForm(){
+			$("##submitFormButton1").show();
+			$("##pleaseWait").hide();
+		}
 	});
 	</script>
 </cffunction>
