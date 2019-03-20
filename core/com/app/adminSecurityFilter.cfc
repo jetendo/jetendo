@@ -8,9 +8,9 @@
 	ms=structnew("linked");
 	if(application.zcore.app.structHasApp(ss, "blog")){
 		ms["Blog"]={ parent:'',value:'Blog', label:"Blog" };
-		ms["Blog Articles"]={ parent:'Manage Blog',value:'Blog Articles', label:chr(9)&"Blog Articles"};
-		ms["Blog Categories"]={ parent:'Manage Blog',value:'Blog Categories', label:chr(9)&"Blog Categories"};
-		ms["Blog Tags"]={ parent:'Manage Blog',value:'Blog Tags', label:chr(9)&"Blog Tags"};
+		ms["Blog Articles"]={ parent:'Blog',value:'Blog Articles', label:chr(9)&"Blog Articles"};
+		ms["Blog Categories"]={ parent:'Blog',value:'Blog Categories', label:chr(9)&"Blog Categories"};
+		ms["Blog Tags"]={ parent:'Blog',value:'Blog Tags', label:chr(9)&"Blog Tags"};
 	}
 	ms["Content Manager"]={ parent:'',value:'Content Manager', label:"Content Manager"};
 	if(application.zcore.app.structHasApp(ss, "content")){
@@ -30,7 +30,6 @@
 		ms["Theme Options"]={ parent:'Content Manager',value:'Theme Options', label:chr(9)&"Theme Options"};
 		ms["Design & Layout"]={ parent:'Content Manager',value:'Design & Layout', label:chr(9)&"Design & Layout"};
 
-		ms["Ecommerce"]={ parent:'',value:'Ecommerce', label:"Ecommerce"};
 
 
 	}
@@ -40,6 +39,9 @@
 	ms["Video Library"]={ parent:'Content Manager',value:'Short Links', label:chr(9)&"Short Links"};
 	ms["Video Library"]={ parent:'Content Manager',value:'Video Library', label:chr(9)&"Video Library"};
 	ms["Settings"]={ parent:'Content Manager',value:'Settings', label:chr(9)&"Settings"};
+	if(request.zos.isTestServer){
+		ms["Ecommerce"]={ parent:'',value:'Ecommerce', label:"Ecommerce"};
+	}
 
 
 	application.zcore.siteOptionCom.setFeatureMap(ms);
@@ -115,9 +117,37 @@
 	ms=getFeatureMap(application.siteStruct[request.zos.globals.id]);
 	arrValue=[];
 	arrLabel=[];
-	for(i in ms){ 
-		arrayAppend(arrLabel, replace(ms[i].label, chr(9), "__", "all"));
-		arrayAppend(arrValue, ms[i].value);
+	groupStruct={};
+	for(i in ms){
+		if(ms[i].parent EQ ""){
+			groupStruct[i]={
+				label:ms[i].label,
+				value:ms[i].value,
+				childStruct:structnew("linked")
+			};
+		}
+	}
+	for(i in ms){
+		if(ms[i].parent NEQ ""){
+			groupStruct[ms[i].parent].childStruct[i]={label: ms[i].label, value:ms[i].value};
+		}
+	}
+	arrGroup=structkeyarray(groupStruct);
+	arraySort(arrGroup, "text", "asc");
+
+	for(i=1;i<=arraylen(arrGroup);i++){ 
+		ms=groupStruct[arrGroup[i]];
+		arrayAppend(arrLabel, replace(ms.label, chr(9), "__", "all"));
+		arrayAppend(arrValue, ms.value);
+
+		arrChild=structkeyarray(ms.childStruct);
+		arraySort(arrChild, "text", "asc");
+
+		for(n=1;n<=arraylen(arrChild);n++){ 
+			child=ms.childStruct[arrChild[n]];
+			arrayAppend(arrLabel, replace(child.label, chr(9), "__", "all"));
+			arrayAppend(arrValue, child.value);
+		}
 	} 
 
 
