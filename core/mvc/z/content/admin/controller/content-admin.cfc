@@ -377,7 +377,7 @@
 	
 	ts=StructNew();
 	ts.table="content";
-	ts.struct=form;
+	ts.struct=form; 
 	ts.datasource="#request.zos.zcoreDatasource#";
 	form.content_updated_datetime=request.zos.mysqlnow;
 	if(form.method EQ 'insert'){

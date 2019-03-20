@@ -16,6 +16,10 @@
 	zeroDeleteFields=0;
 	zeroFields=0;
 	for(row in qTable){
+		if(left(row.table_increment_table, len("feature")) EQ "feature"){
+			echo("WARNING: #row.table_increment_table# is not being checked due to it being an incomplete feature outside of jetendo core.<br>");
+			continue;
+		}
 		db.sql="select *, `#db.trustedSQL(row.table_increment_table&"_id")#` id
 		from #db.table(row.table_increment_table, request.zos.zcoreDatasource)# 
 		WHERE site_id = #db.param(row.site_id)# and 
