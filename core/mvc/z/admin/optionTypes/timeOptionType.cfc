@@ -137,8 +137,12 @@
 		step: 15
 	});
 	');
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
 	
-	return { label: true, hidden: false, value:'<input type="text" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_time" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#_time" value="#htmleditformat(curTime)#" size="10" style="width:auto; min-width:auto;" />'};
+	return { label: true, hidden: false, value:'<input #required# type="text" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_time" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#_time" value="#htmleditformat(curTime)#" size="10" style="width:auto; min-width:auto;" />'};
 	</cfscript>
 </cffunction>
 

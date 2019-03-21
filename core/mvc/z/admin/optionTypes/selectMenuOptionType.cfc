@@ -688,6 +688,9 @@
 		selectStruct.queryLabelField = "label";
 		selectStruct.queryValueField = "id";
 	} 
+	if(arguments.required){
+		selectStruct.required=true;
+	}
 
 	selectStruct.onchange&=arguments.onChangeJavascript;
 	if(local.enabled){

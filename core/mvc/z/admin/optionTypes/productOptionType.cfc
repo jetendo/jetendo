@@ -132,20 +132,20 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
-		var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
-		//application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id')
-		var db=request.zos.queryObject;
-		db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
-		site_id = #db.param(request.zos.globals.id)# and 
-		product_deleted = #db.param(0)# and
-		product_active = #db.param(1)# 	
-		ORDER BY product_name ASC";
-		try{
-			qProd = db.execute("qProd");
-		}
-		catch(Any e){qProd = QueryNew("product_id, product_name");}
-
-		productName="";
+	var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
+	//application.zcore.functions.zso(form, '#variables.siteType#_x_option_group_set_id')
+	var db=request.zos.queryObject;
+	db.sql="select * from #db.table("product", request.zos.globals.datasource)# WHERE 
+	site_id = #db.param(request.zos.globals.id)# and 
+	product_deleted = #db.param(0)# and
+	product_active = #db.param(1)# 	
+	ORDER BY product_name ASC";
+	qProd = db.execute("qProd");
+	productName="";
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
 	</cfscript>
 	<cfsavecontent variable="output">
 	<script>
@@ -203,7 +203,7 @@
 			}
 		}
 	</script>	
-	<input style="width:200px; height:25px;" type="text" id="product_name_#arguments.row["#variables.type#_option_id"]#" value="#productName#"
+	<input #required# style="width:200px; height:25px;" type="text" id="product_name_#arguments.row["#variables.type#_option_id"]#" value="#productName#"
 		name="product_name_#arguments.row["#variables.type#_option_id"]#" list="productList" onkeyup="pspMgrSearchProduct_#arguments.row["#variables.type#_option_id"]#(event, this);" />
 	<button type="button" id="ddBtnProductName" onclick="pspMgrHideList_#arguments.row["#variables.type#_option_id"]#(this,'lstProductName');" style="padding:0px; width:22px; height:24px; top:1px; position:relative; left:-3px; cursor:pointer;">▼</button>
 	<datalist id="lstProductName" style="display:none; height:300px; width:250px; padding-left:0px;">

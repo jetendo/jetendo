@@ -132,21 +132,24 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
-		var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
-		var db=request.zos.queryObject;
-		db.sql="select p.product_category_id AS ProdId,p.product_category_name AS ProdName, child.product_category_id, child.product_category_name
-		 FROM #db.table("product_category", request.zos.globals.datasource)# p
-         LEFT JOIN #db.table("product_category", request.zos.globals.datasource)# AS child 
-         ON child.product_category_parent_id = p.product_category_id
-	   	WHERE p.product_category_parent_id = #db.param(0)#
-		AND p.site_id = #db.param(request.zos.globals.id)#
-			AND	p.product_category_deleted = #db.param(0)#
-			AND p.product_category_active = #db.param(1)# 		   
-		ORDER BY p.product_category_name, child.product_category_name";
-		try{
-			qProd = db.execute("qProd");
-		}
-		catch(Any e){qProd = QueryNew("product_category_id, product_category_name");}
+	var sValue = application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#');
+	var db=request.zos.queryObject;
+	db.sql="select p.product_category_id AS ProdId,p.product_category_name AS ProdName, child.product_category_id, child.product_category_name
+	 FROM #db.table("product_category", request.zos.globals.datasource)# p
+     LEFT JOIN #db.table("product_category", request.zos.globals.datasource)# AS child 
+     ON child.product_category_parent_id = p.product_category_id
+   	WHERE p.product_category_parent_id = #db.param(0)#
+	AND p.site_id = #db.param(request.zos.globals.id)#
+		AND	p.product_category_deleted = #db.param(0)#
+		AND p.product_category_active = #db.param(1)# 		   
+	ORDER BY p.product_category_name, child.product_category_name";
+	qProd = db.execute("qProd");
+
+
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
 	</cfscript>
 	<cfsavecontent variable="output">
 	<script>
@@ -168,7 +171,7 @@
 			}
 		}
 	</script>	
-	<select class="zProductCategoryIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdCategoryChanged_#arguments.row["#variables.type#_option_id"]#(this);">
+	<select #required# class="zProductCategoryIdClass" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" size="8" style="width:350px;" onchange="pspMgrProdCategoryChanged_#arguments.row["#variables.type#_option_id"]#(this);">
 		<option value="">No Product Category</option>
 		<cfset prodName = "">
 		<cfloop query="qProd">

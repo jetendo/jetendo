@@ -664,6 +664,9 @@
 		selectStruct.listValues=ts.selectmenu_values;
 		local.enabled=true;
 	}
+	if(arguments.row.site_option_required EQ 1){
+		selectStruct.required=true;
+	}
 	selectStruct.onchange="";
 	if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 		selectStruct.listLabelsDelimiter = ts.selectmenu_delimiter;

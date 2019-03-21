@@ -376,6 +376,9 @@ USAGE
 			echo('<label for="#ss.name##ss.enumerate#" style="#ss.labelStyle#">#ss.label#</label> ');
 		}
 		echo('<select ');
+		if(ss.required){
+			echo(" required ");
+		}
 		if(ss.onChange NEQ ""){
 			echo('onchange="#ss.onChange#"');
 		}
@@ -1010,6 +1013,9 @@ writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 			output = output&'onmouseover="window.status = ''#listGetAt(arguments.ss.statusbar,i, arguments.ss.delimiter, true)#'';" onmouseout="window.status = '''';" title="#listGetAt(arguments.ss.statusbar,i, true)#" ';
 		}
 		output = output&' type="radio" name="#arguments.ss.name#" id="#arguments.ss.name#_#i#" value="#htmleditformat(listGetAt(arguments.ss.valueList,i, arguments.ss.delimiter, true))#"';
+		if(arguments.ss.required){	
+			output&=" required ";
+		}
 		if(arguments.ss.style NEQ ''){
 			output = output&' style="#arguments.ss.style#"';
 		}
@@ -1598,6 +1604,9 @@ zInput_file(ts); --->
 	}
 	if(arguments.ss.className NEQ ""){
 		out&=' class="#arguments.ss.className#"';
+	} 
+	if(arguments.ss.required){	
+		out&=" required ";
 	}
 	
 	out&=' style=" width:95%; ';

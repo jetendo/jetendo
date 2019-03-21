@@ -138,7 +138,11 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
-	return { label: true, hidden: false, value:'<textarea cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.optionStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.optionStruct, 'editorheight2',false,200)#px;" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#">#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])#</textarea>'};  
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+	return { label: true, hidden: false, value:'<textarea #required# cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.optionStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.optionStruct, 'editorheight2',false,200)#px;" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#">#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])#</textarea>'};  
 	</cfscript> 
 </cffunction>
 

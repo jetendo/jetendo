@@ -1981,6 +1981,9 @@ var zLastAjaxVarName=""; */
 		if(typeof tinyMCE != "undefined"){
 			tinyMCE.triggerSave();
 		}
+		if(typeof obj.checkValidity != "undefined" && !obj.checkValidity()){
+			return false;
+		}
 		var tempObj={};
 		tempObj.formId=obj.id;
 		var form=document.getElementById(tempObj.formId);

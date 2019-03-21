@@ -235,6 +235,9 @@
 		selectStruct.size=5;
 		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 	}
+	if(arguments.row.site_option_required EQ 1){
+		selectStruct.required=true;
+	}
 
 	value=application.zcore.functions.zInputSelectBox(selectStruct);
 	if(not selectStruct.multiple){

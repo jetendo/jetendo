@@ -151,7 +151,11 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	application.zcore.functions.zIncludeJsColor();
-	v='##<input type="text" class="zColorInput" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" onkeyup="this.value.replace(''##'', '''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#'))#" />'
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+	v='##<input type="text" class="zColorInput" #required# name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" onkeyup="this.value.replace(''##'', '''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#'))#" />'
 	return { label: true, hidden: false, value:v};  
 	</cfscript>
 </cffunction>

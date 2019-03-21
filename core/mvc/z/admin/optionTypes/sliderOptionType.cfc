@@ -135,7 +135,11 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript> 
-  	return { label: true, hidden: false, value: '<input type="range" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" min="#arguments.optionStruct.slider_from#" max="#arguments.optionStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.optionStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]))#"><br />
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+  	return { label: true, hidden: false, value: '<input type="range" #required# name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" min="#arguments.optionStruct.slider_from#" max="#arguments.optionStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.optionStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]))#"><br />
   		Selected Value: <span id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_valueInput">#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]))#</span>' };
 	</cfscript>
 </cffunction>

@@ -4822,8 +4822,8 @@ Define this function in another CFC to override the default email format
 			<cfif methodBackup EQ "addGroup" or methodBackup EQ "editGroup" or 
 			methodBackup EQ "userEditGroup" or methodBackup EQ "userAddGroup">
 				<tr><td>&nbsp;</td><td>
-					<div class="tabWaitButton" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton" onclick="$('.tabSaveButton').hide(); $('.tabWaitButton').show();">Save</button>
+					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton">Save</button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
 							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>
@@ -5084,8 +5084,8 @@ Define this function in another CFC to override the default email format
 							<input type="hidden" name="js3812" id="js3812" value="#application.zcore.functions.zGetFormHashValue()#" />
 					    </cfif>
 				<cfelse>
-					<div class="tabWaitButton" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton" onclick="$('.tabSaveButton').hide(); $('.tabWaitButton').show();">Save</button>
+					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton">Save</button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
 							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>

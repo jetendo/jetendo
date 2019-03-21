@@ -275,8 +275,6 @@ KEY `feature_data_id` (`feature_data_id`)
 
 	// TODO: remove when site cache automatically updates...
 
-	featuresCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features"); 
-	featuresCom.checkFieldCache();
 
 	
 	echo('<div style="width:98% !important; float:left;margin:1%;">');

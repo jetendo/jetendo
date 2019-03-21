@@ -197,6 +197,9 @@
 	selectStruct.queryLabelField = "##office_name##";
 	selectStruct.queryValueField = "##office_id##";
 	selectStruct.output=false; 
+	if(arguments.row.site_option_required EQ 1){
+		selectStruct.required=true;
+	}
 	if(application.zcore.functions.zso(arguments.optionStruct, "office_multipleselection") EQ "Yes"){ 
 		selectStruct.multiple=true;
 		selectStruct.size=5;
@@ -209,7 +212,11 @@
 	value=application.zcore.functions.zInputSelectBox(selectStruct);
 	if(not selectStruct.multiple){
  
-		value='Search: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value; 
+		required="";
+		if(arguments.row.site_option_required EQ 1){
+			required="required";
+		}
+		value='Search: <input type="text" #required# name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value; 
 	} 
 	return { label: true, hidden: false, value:value};  
 	</cfscript>

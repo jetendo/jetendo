@@ -134,7 +134,11 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript> 
-  	return { label: true, hidden: false, value: '<input type="range" name="#arguments.prefixString&arguments.row["feature_field_id"]#" min="#arguments.typeStruct.slider_from#" max="#arguments.typeStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.typeStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#"><br />
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+  	return { label: true, hidden: false, value: '<input type="range" #required# name="#arguments.prefixString&arguments.row["feature_field_id"]#" min="#arguments.typeStruct.slider_from#" max="#arguments.typeStruct.slider_to#" onchange="document.getElementById(''#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput'').innerHTML=this.value; " step="#arguments.typeStruct.slider_step#" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#"><br />
   		Selected Value: <span id="#arguments.prefixString&arguments.row["feature_field_id"]#_valueInput">#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]))#</span>' };
 	</cfscript>
 </cffunction>

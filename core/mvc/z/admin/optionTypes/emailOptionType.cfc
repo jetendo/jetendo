@@ -156,7 +156,11 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
 	<cfscript>
-	v='<input type="email" name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" ';
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+	v='<input type="email" #required# name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" ';
 	size=arguments.row["#variables.type#_option_character_width"];
 	if(size NEQ 0){
 		v&=' size="#size#" style="min-width:auto; width:auto;" ';

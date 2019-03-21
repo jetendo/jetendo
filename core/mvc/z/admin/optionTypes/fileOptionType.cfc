@@ -191,6 +191,10 @@
 				target="_blank" 
 				title="#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["#variables.type#_option_id"]])#">Download File</a></p>');*/
 			}
+		}else{
+			if(arguments.row.site_option_required EQ 1){	
+				ts3.required=true;
+			}
 		}
 		application.zcore.functions.zInput_file(ts3);
 		</cfscript>

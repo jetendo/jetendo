@@ -219,7 +219,11 @@
 	}
 	initValues&="}";
 	application.zcore.skin.addDeferredScript('$( "###arguments.prefixString##arguments.row["feature_field_id"]#_date" ).datepicker(#initValues#);');
-	return { label: true, hidden: false, value:'<input type="text" name="#arguments.prefixString&arguments.row["feature_field_id"]#_date" id="#arguments.prefixString&arguments.row["feature_field_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
+	return { label: true, hidden: false, value:'<input #required# type="text" name="#arguments.prefixString&arguments.row["feature_field_id"]#_date" id="#arguments.prefixString&arguments.row["feature_field_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
 	</cfscript>
 </cffunction>
 

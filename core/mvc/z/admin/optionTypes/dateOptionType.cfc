@@ -218,8 +218,12 @@
 		initValues&=" minDate:new Date(#minDate#) ";
 	}
 	initValues&="}";
+	required="";
+	if(arguments.row.site_option_required EQ 1){
+		required="required";
+	}
 	application.zcore.skin.addDeferredScript('$( "###arguments.prefixString##arguments.row["#variables.type#_option_id"]#_date" ).datepicker(#initValues#);');
-	return { label: true, hidden: false, value:'<input type="text" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
+	return { label: true, hidden: false, value:'<input type="text" #required# name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
 	</cfscript>
 </cffunction>
 

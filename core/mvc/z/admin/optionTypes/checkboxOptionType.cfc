@@ -219,7 +219,11 @@
 		if(application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"], true, arguments.row["#variables.type#_option_default_value"]) EQ 1){
 			tempCheck=' checked="checked" ';
 		}
-		return { label: true, hidden: false, value:'<input type="checkbox" name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" value="1" #tempCheck# />'};  
+		required="";
+		if(arguments.row.site_option_required EQ 1){
+			required="required";
+		}
+		return { label: true, hidden: false, value:'<input type="checkbox" #required# name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#" value="1" #tempCheck# />'};  
 	}
 	</cfscript>
 </cffunction>

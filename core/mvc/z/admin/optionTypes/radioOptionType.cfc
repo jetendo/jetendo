@@ -152,6 +152,9 @@
 	ts.labelList = arguments.optionStruct.radio_labels;
 	ts.valueList = arguments.optionStruct.radio_values;
 	ts.delimiter = arguments.optionStruct.radio_delimiter;
+	if(arguments.row.site_option_required EQ 1){
+		ts.required=true;
+	}
 	ts.struct=arguments.dataStruct; 
 	ts.output=false;
 	return { label: true, hidden: false, value: application.zcore.functions.zInput_RadioGroup(ts)};   
