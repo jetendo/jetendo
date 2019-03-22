@@ -57,12 +57,10 @@
 		// Loop through all instances of our slider and set them up individually.
 		return this.each( function() {
 			var slider = $( this );
-
 			slider.html( '<div class="content-slides-container">' + slider.html() + '</div>' );
 			var slidesContainer = $( '.content-slides-container', slider );
 
 			var slides = slidesContainer.children( settings.childSelector );
-
 			var lastSlideIndex   = 0;
 			var activeSlideIndex = 0;
 			var totalSlides      = slides.length;
@@ -80,6 +78,7 @@
 			if ( totalSlides <= 1 ) {
 				//return;
 			}
+
 
 			slider.extend( {
 				calculateHeights: function() {
@@ -481,9 +480,15 @@
 						console.log( "--- SLIDER NEXT PREVIOUS BUTTONS ATTACHED ---" );
 					}
 				},
-				resetInterval: function( doAnimation ) {
+				resetInterval: function( doAnimation ) { 
 					if ( settings.auto ) {
 						clearInterval( sliderInterval );
+
+						var timeout=settings.timeout; 
+						var slideTimeout=$( slides[ activeSlideIndex ] ).attr("data-slide-timeout");
+						if(slideTimeout != ""){
+							timeout=parseInt(slideTimeout);
+						}
 
 						sliderInterval = setInterval( function() {
 							var doAnimation = typeof doAnimation !== 'undefined' ? doAnimation : true;
@@ -501,7 +506,7 @@
 							}
 
 							slider.setActiveSlide( activeSlideIndex, doAnimation, lastSlideIndex );
-						}, settings.timeout );
+						}, timeout );
 
 						if ( settings.debug ) {
 							console.log( "--- SLIDER INTERVAL RESET ---" );
@@ -561,6 +566,9 @@
 			// The first slide should not animate and be shown immediately.
 			slider.setActiveSlide( activeSlideIndex, false );
 			slider.loadImagesForCurrentSlide();
+			if ( settings.auto ) {
+				slider.resetInterval();
+			}
 		} );
 	}
 
