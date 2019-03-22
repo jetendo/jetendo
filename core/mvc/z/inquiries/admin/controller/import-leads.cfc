@@ -201,7 +201,11 @@ not important yet: create contacts at same time as create lead (use same functio
 	}else{
 		echo("userSchedule");
 	}
-	echo('" class="z-manager-search-button">New Import</a></p>');
+	echo('" class="z-manager-search-button">New Import</a>');
+	if(request.zos.isTestServer){
+		echo(' <a href="/z/inquiries/admin/import-leads/import" target="_blank" class="z-manager-search-button">Manually Run Import Cron Job</a>');
+	}
+	echo('</p>');
 
 	if(qImport.recordcount EQ 0){
 		echo('<p>No leads have been imported here before.</p>');
@@ -273,7 +277,7 @@ not important yet: create contacts at same time as create lead (use same functio
 	<h2>Import Lead Instructions</h2>
 	<div class="z-float z-t-18">
 		<p><strong>You must follow the instructions below.</strong></h3> 
-		<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish from the list of fields below. You must include the required field columns even if some of them will be empty.  You must save the spreadsheet as a tab delimited .csv format.  Typically, this is an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p> 
+		<p>The first row of the tab delimited file should contain the required fields and as many optional fields as you wish from the list of fields below. You must include the required field columns even if some of them will be empty.  You must save the spreadsheet as a tab delimited .txt format.  Typically, this is an option when you use the "Save as" feature of your spreadsheet software.  The file must have no fields with line breaks.  Any fields that are too long may be cut off at the end to fit the allowed size in the database.</p> 
 		<p>If you upload an invalid format, the system will show there was an error and not import any data.</p>
 		<p>You can't undo an import once it is submitted. Make sure you are uploading the correct information and not importing duplicate records.</p>
 		<p>To protect our system, we schedule the leads to be imported on a first come first served basis.  You will receive an email when the import is complete and the status will also be listed in the import log in the manager.  Please don't submit the same data twice.  Usually the leads will finish importing in a few minutes for a file with less then 100 records.</p>
@@ -446,12 +450,22 @@ not important yet: create contacts at same time as create lead (use same functio
 		/* ]]> */
 		</script>   
 
-		<h3>Select Tab Delimited CSV File *</h3>
+		<cfscript>
+		if(application.zcore.functions.zvar("enableLeadUserReminder") EQ 1 or application.zcore.functions.zvar("enableLeadAdminReminder") EQ 1){
+			form.inquiries_import_file_disable_reminders=1;
+			echo('<h3>Disable lead reminders for the leads being imported?</h3>')
+			echo("<p>"&application.zcore.functions.zInput_Boolean("inquiries_import_file_disable_reminders")&"</p><p>&nbsp;</p>");
+		}
+		</cfscript>
+
+
+		<h3>Select Tab Delimited .txt File *</h3>
+		<p>Use save as -> tab delimited in your spreadsheet software.</p>
 		<p style="font-size:18px;"><strong>Important: </strong> <a href="/z/inquiries/admin/import-leads/instructions" target="_blank">Read Instructions First (Opens in New Window)</a></p> 
 
 		<p><input type="file" name="filepath" value="" /></p>
 		<p>&nbsp;</p> 
-		 <p><input type="submit" name="submit1" id="submitFormButton1" value="Import CSV" style="padding:10px; border-radius:5px;" onclick="this.style.display='none';document.getElementById('pleaseWait').style.display='block';" />
+		 <p><input type="submit" name="submit1" id="submitFormButton1" value="Import Tab Delimited File" style="padding:10px; border-radius:5px;" onclick="this.style.display='none';document.getElementById('pleaseWait').style.display='block';" />
 		<div id="pleaseWait" style="display:none;">Please wait...</div></p>
 	</form>
 
@@ -589,6 +603,7 @@ not important yet: create contacts at same time as create lead (use same functio
 	// this function is meant to validate and store file reference in inquiries_import_file and return instantly.  processing is done later
 	init();
 	db=request.zos.queryObject;
+	form.inquiries_import_file_disable_reminders=application.zcore.functions.zso(form, 'inquiries_import_file_disable_reminders', true, 1);
 	form.inquiries_import_file_name=application.zcore.functions.zso(form, 'inquiries_import_file_name');
 	form.inquiries_type_id=application.zcore.functions.zso(form, 'inquiries_type_id');
 	form.inquiries_autoresponder_id=application.zcore.functions.zso(form, 'inquiries_autoresponder_id', true);
@@ -606,29 +621,17 @@ not important yet: create contacts at same time as create lead (use same functio
 		form.uid="";
 	}
  
-	// /z/inquiries/admin/import-leads/scheduleImport?debug=1
-	if(form.debug EQ 1){
-		form.filepath="monterey-tab-leads.csv";
-		form.office_id=64;
-		form.uid="367|298";
-		form.inquiries_import_file_email="skyflare@gmail.com";
-		form.inquiries_type_id="1|0";
-		form.inquiries_autoresponder_id="3";
-		form.inquiries_import_file_name="Import1";
-		form.inquiries_import_file_filename="monterey-tab-leads.csv";
-	}else{
-		application.zcore.functions.zCreateDirectory(request.importPath); 
-		form.filepath=application.zcore.functions.zUploadFile("filepath", request.importPath); 
-		if(form.filepath EQ false){
-			application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
-		}
+	application.zcore.functions.zCreateDirectory(request.importPath); 
+	form.filepath=application.zcore.functions.zUploadFile("filepath", request.importPath); 
+	if(form.filepath EQ false){
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"File upload failed"});
 	}
 	ext=application.zcore.functions.zGetFileExt(form.filepath);
-	if(ext NEQ "csv" and ext NEQ "tsv"){
+	if(ext NEQ "txt" and ext NEQ "csv" and ext NEQ "tsv"){
 		if(form.debug EQ 0){
 			application.zcore.functions.zDeleteFile(request.importPath&form.filePath);
 		}
-		application.zcore.functions.zReturnJson({success:false, errorMessage:"File must be .csv or .tsv.  Other formats are not accepted."});
+		application.zcore.functions.zReturnJson({success:false, errorMessage:"File extension must be .csv, .txt or .tsv."});
 	}
 	request.offset=1;
 	request.error=false;
@@ -776,7 +779,8 @@ not important yet: create contacts at same time as create lead (use same functio
 			inquiries_import_file_deleted:0,
 			inquiries_import_file_is_administrator:0,
 			inquiries_import_file_import_user_id:request.zsession.user.id,
-			inquiries_import_file_import_user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id)
+			inquiries_import_file_import_user_id_siteidtype:application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id),
+			inquiries_import_file_disable_reminders:form.inquiries_import_file_disable_reminders
 		}
 	};
 	if(application.zcore.user.checkGroupAccess("administrator")){
@@ -837,7 +841,7 @@ not important yet: create contacts at same time as create lead (use same functio
 		link=row.site_domain&"/z/inquiries/admin/import-leads/import";
 		rs=application.zcore.functions.zdownloadlink(link, 10000, true); 
 		echo("Ran import: "&link&": "&rs.success&"<br>");
-		echo(rs.filecontent&"<hr>");
+		echo(rs.cfhttp.filecontent&"<hr>");
 		// ignore failures to avoid flooding logs with double the errors.
 	}
 	echo("done");
@@ -920,6 +924,9 @@ not important yet: create contacts at same time as create lead (use same functio
 					inquiries_session_id:createUUID(),
 					inquiries_optin:1
 				};
+				if(importRow.inquiries_import_file_disable_reminders EQ 1){
+					ts.inquiries_reminder_count=99;
+				}
 				ts2={};
 				for(field in request.fieldMap){
 					if(request.fieldMap[field] EQ "inquiries_custom_json"){
