@@ -1,11 +1,18 @@
 <cfcomponent>
+<cfoutput>
 <!--- 
+need image to work in html editor fields (absolute url them before sending and test it)
+
+
+multiple locations
+	have to get county from the lead
+
+
 
 inquiries_rating_setting_id
-	inquiries_type_id
-	inquiries_type_id_siteidtype
 	inquiries_rating_setting_id
 	site_id
+	inquiries_rating_inquiries_type_id varchar 255 (in format 1|1,2|1 )
 	inquiries_rating_setting_email_subject
 	inquiries_rating_setting_header_text
 	inquiries_rating_setting_body_text
@@ -13,8 +20,9 @@ inquiries_rating_setting_id
 	inquiries_rating_setting_email_delay_in_minutes
 	inquiries_rating_setting_email_resend_limit
 	inquiries_rating_setting_type (0= every inquiries_id (default), 1=every day, 2=once)
-	inquiries_rating_setting_thanks_heading # used if thanks_cfc_object is not
-	inquiries_rating_setting_thanks_body
+	inquiries_rating_setting_low_rating_number int (default 3)
+	inquiries_rating_setting_low_rating_thanks_heading # used if thanks_cfc_object is not
+	inquiries_rating_setting_low_rating_thanks_body
 	inquiries_rating_setting_thanks_cfc_object # used to write the custom logic needed for showing google/etc reviews.
 	inquiries_rating_setting_thanks_cfc_method
 	inquiries_rating_setting_deleted
@@ -56,8 +64,8 @@ reviewCom=createObject("component", "zcorerootmapping.mvc.z.inquiries.controller
 reviewCom.sendEmail(inquiries_type_id, inquiries_type_id_siteIDType);
  --->
 <cffunction name="sendEmail" localmode="modern" access="public">
-	<cfargument type="inquiries_type_id" type="string" required="yes">
-	<cfargument type="inquiries_type_id_siteIDType" type="string" required="yes">
+	<cfargument name="inquiries_type_id" type="string" required="yes">
+	<cfargument name="inquiries_type_id_siteIDType" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
@@ -158,4 +166,5 @@ reviewCom.sendEmail(inquiries_type_id, inquiries_type_id_siteIDType);
 	}
 	</cfscript>
 </cffunction>
+</cfoutput>
 </cfcomponent>
