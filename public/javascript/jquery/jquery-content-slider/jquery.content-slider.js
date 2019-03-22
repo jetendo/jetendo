@@ -480,13 +480,14 @@
 						console.log( "--- SLIDER NEXT PREVIOUS BUTTONS ATTACHED ---" );
 					}
 				},
+				
 				resetInterval: function( doAnimation ) { 
 					if ( settings.auto ) {
 						clearInterval( sliderInterval );
 
 						var timeout=settings.timeout; 
 						var slideTimeout=$( slides[ activeSlideIndex ] ).attr("data-slide-timeout");
-						if(slideTimeout != ""){
+						if(typeof slideTimeout != "undefined" && slideTimeout != "" && slideTimeout != "0"){
 							timeout=parseInt(slideTimeout);
 						}
 
