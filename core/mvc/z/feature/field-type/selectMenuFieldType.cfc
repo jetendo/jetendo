@@ -664,9 +664,6 @@
 		selectStruct.listValues=ts.selectmenu_values;
 		local.enabled=true;
 	}
-	if(arguments.row.site_option_required EQ 1){
-		selectStruct.required=true;
-	}
 	selectStruct.onchange="";
 	if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 		selectStruct.listLabelsDelimiter = ts.selectmenu_delimiter;
@@ -692,6 +689,9 @@
 	} 
 
 	selectStruct.onchange&=arguments.onChangeJavascript;
+	if(arguments.required){
+		selectStruct.required=true;
+	}
 	if(local.enabled){
 
 		selectStruct.multiple=false;
@@ -701,6 +701,7 @@
 		}else{
 			if(application.zcore.functions.zso(ts, 'selectmenu_multipleselection', true, 0) EQ 1){
 				selectStruct.multiple=true;
+				selectStruct.required=false;
 				selectStruct.hideSelect=true;
 				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'feature_data_id'), arguments.required);
 			}
