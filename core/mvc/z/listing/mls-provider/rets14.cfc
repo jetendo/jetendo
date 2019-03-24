@@ -3,25 +3,25 @@
 	this.mls_id=14;
 	this.useRetsFieldName="long";
 	this.mls_provider="rets14";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="listingid";
-	resourceStruct["office"]=structnew();
-	resourceStruct["office"].resource="office";
-	resourceStruct["office"].id="officeid";
-	resourceStruct["agent"]=structnew();
-	resourceStruct["agent"].resource="activeagent";
-	resourceStruct["agent"].id="agentid";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="listingid";
+	variables.resourceStruct["office"]=structnew();
+	variables.resourceStruct["office"].resource="office";
+	variables.resourceStruct["office"].id="officeid";
+	variables.resourceStruct["agent"]=structnew();
+	variables.resourceStruct["agent"].resource="activeagent";
+	variables.resourceStruct["agent"].id="agentid";
 	if(request.zos.istestserver){
 		this.mlspath="#request.zos.sharedPath#mls-data/#this.mls_id#/";
 	}else{
 		this.mlspath="#request.zos.sharedPath#mls-data/#this.mls_id#/";
 	}
 	if(request.zos.istestserver){
-		hqPhotoPath="#request.zos.sharedPath#mls-images/14/";
+		variables.hqPhotoPath="#request.zos.sharedPath#mls-images/14/";
 	}else{
-		hqPhotoPath="#request.zos.sharedPath#mls-images/14/";
+		variables.hqPhotoPath="#request.zos.sharedPath#mls-images/14/";
 	}
 	</cfscript> 
     

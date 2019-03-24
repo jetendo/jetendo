@@ -4876,7 +4876,7 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	application.zcore.template.setTag("menu",tempMenu);
 	</cfscript>
 	<cfif qList.recordcount lt 1>
-		Sorry, there are no news entries from #dateformat(archive, "mmmm yyyy")#.
+		Sorry, there are no news entries from #dateformat(form.archive, "mmmm yyyy")#.
 	<cfelse>
 		<cfloop query="qList">
 			<cfif qList.blog_title NEQ ''>

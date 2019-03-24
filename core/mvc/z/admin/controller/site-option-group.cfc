@@ -398,7 +398,7 @@ KEY `site_x_option_group_set_id` (`site_x_option_group_set_id`)
 	#cfcOutput#
 </cffunction>
 
-<!-- To debug without live data, uncomment this index function and comment out the other index function: --->
+<!--- To debug without live data, uncomment this index function and comment out the other index function: --->
 <!---
 <cffunction name="index" access="remote" localmode="modern">
 	#cfcDebugOutput#

@@ -1555,7 +1555,7 @@ Example usage:
 		if ( address['Zip'] NEQ '' ) addressString &= ' ' & address['Zip'];
 
 		// Encode the address string to be used in the URL.
-		addressString = encodeForUrl( addressString );
+		addressString = urlencodedformat( addressString );
 
 		// Build the Google Maps URL.
 		var googleMapsURL = 'https://www.google.com/maps/place/';

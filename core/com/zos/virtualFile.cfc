@@ -1387,7 +1387,7 @@ virtualFileCom.serveVirtualFile();
 	form.virtual_file_download_secret=application.zcore.functions.zso(form, 'virtual_file_download_secret');
 	rs=getFileById(form.virtual_file_id);
 	if(not rs.success) {
-		application.zcore.functions.z404('File not found (##' & virtual_file_id & ')');
+		application.zcore.functions.z404('File not found (##' & form.virtual_file_id & ')');
 	}
 	if(not hasFileAccess(rs.data)){
 		application.zcore.status.setStatus(request.zsid, "You must login with an account that has access to view this file", form, true);

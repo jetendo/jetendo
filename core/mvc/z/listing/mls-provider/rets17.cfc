@@ -11,16 +11,16 @@
 		variables.hqPhotoPath="#request.zos.sharedPath#mls-images/17/";
 	}
 	this.mls_provider="rets17";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="mls_acct";
-	resourceStruct["office"]=structnew();
-	resourceStruct["office"].resource="office";
-	resourceStruct["office"].id="lo_lo_code";
-	resourceStruct["agent"]=structnew();
-	resourceStruct["agent"].resource="agent";
-	resourceStruct["agent"].id="la_la_code";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="mls_acct";
+	variables.resourceStruct["office"]=structnew();
+	variables.resourceStruct["office"].resource="office";
+	variables.resourceStruct["office"].id="lo_lo_code";
+	variables.resourceStruct["agent"]=structnew();
+	variables.resourceStruct["agent"].resource="agent";
+	variables.resourceStruct["agent"].id="la_la_code";
 	</cfscript> 
     
     

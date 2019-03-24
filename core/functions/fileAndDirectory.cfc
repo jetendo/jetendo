@@ -221,9 +221,8 @@
 	<cfargument name="path" required="yes" type="string">
 	<cfargument name="filter" required="no" type="string" default="">
 	<cfscript>
-	var qdir=0;
 	if(directoryexists(arguments.path) EQ false){
-		application.zcore.template.fail('zReadDirectory: arguments.path, #arguments.path#, doesn''t exist');
+		throw('zReadDirectory: arguments.path, #arguments.path#, doesn''t exist');
 	}
 	</cfscript>
 	<cfdirectory name="qDir" directory="#getDirectoryFromPath(arguments.path)#" filter="#arguments.filter#" action="list">

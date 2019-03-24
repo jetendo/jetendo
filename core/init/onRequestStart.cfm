@@ -346,6 +346,13 @@
 				}
 			} 
 		}
+
+		if(not structkeyexists(application, 'zcoreIsInit') and not structkeyexists(application, 'zcoreFirstInitStarted')){
+			form.zcoreRunFirstInit=true;
+			application.zcoreFirstInitStarted=true;
+			form.zforce=1;
+			structdelete(application,'onInternalApplicationStartRunning');
+		}
 		if(structkeyexists(form, 'zcoreRunFirstInit')){ 
 			application.serverStartTickCount=gettickcount();
 			if(structkeyexists(application,'onInternalApplicationStartRunning') and not structkeyexists(form, 'zforce')){

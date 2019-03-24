@@ -337,7 +337,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	#cfcOutput#
 </cffunction>
 
-<!-- To debug without live data, uncomment this index function and comment out the other index function: --->
+<!--- To debug without live data, uncomment this index function and comment out the other index function: --->
 <!---
 <cffunction name="index" access="remote" localmode="modern">
 	#cfcDebugOutput#

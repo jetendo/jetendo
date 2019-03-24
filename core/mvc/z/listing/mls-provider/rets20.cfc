@@ -17,16 +17,16 @@ unlimited between 7pm and 5am hawaii time
 	}
 	this.arrTypeLoop=listtoarray("COMM,MULT,LAND,RESI");
 	this.mls_provider="rets20";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="mlsnumber";
-	resourceStruct["office"]=structnew();
-	resourceStruct["office"].resource="office";
-	resourceStruct["office"].id="mlsid";
-	resourceStruct["agent"]=structnew();
-	resourceStruct["agent"].resource="agent";
-	resourceStruct["agent"].id="mlsid";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="mlsnumber";
+	variables.resourceStruct["office"]=structnew();
+	variables.resourceStruct["office"].resource="office";
+	variables.resourceStruct["office"].id="mlsid";
+	variables.resourceStruct["agent"]=structnew();
+	variables.resourceStruct["agent"].resource="agent";
+	variables.resourceStruct["agent"].id="mlsid";
 	/*resourceStruct["media"]=structnew();
 	resourceStruct["media"].id="matrix_unique_id";
 	resourceStruct["media"].resource="media";

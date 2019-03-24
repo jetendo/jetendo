@@ -14,10 +14,10 @@
 	this.arrFieldLookupFields=arraynew(1);
 	this.mls_provider="rets21";
 	//this.sysidfield="";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="MLnumber";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="MLnumber";
 	this.emptyStruct=structnew();
 	</cfscript> 
     

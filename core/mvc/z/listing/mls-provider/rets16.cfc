@@ -13,10 +13,10 @@
 	this.arrFieldLookupFields=listtoarray("54	81	82	84	85	87	95	108	114	122	124	131	146	196	211	379	383	384	389	390	391	395	398	399	400	401	402	404	405	410	423	425	428	429	431	436	438 444	478	480	481	513	514	114	146	1465	1473	1488	150	164	19	195	22	227	246	267	365	39	590	594	595	600	601	602	606	609	61	610	613	615	617	618 623	650	652	655	656	658	662	664	675	709	713	73	922	924",",");
 	this.mls_provider="rets16";
 	this.sysidfield="rets16_sysid";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="157";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="157";
 	this.emptyStruct=structnew();
 	
 	</cfscript> 

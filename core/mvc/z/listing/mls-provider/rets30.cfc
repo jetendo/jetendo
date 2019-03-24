@@ -5,9 +5,9 @@
 	
 	this.mls_id=30;
 	if(request.zos.istestserver){
-		hqPhotoPath="#request.zos.sharedPath#mls-images/30/";
+		variables.hqPhotoPath="#request.zos.sharedPath#mls-images/30/";
 	}else{
-		hqPhotoPath="#request.zos.sharedPath#mls-images/30/";
+		variables.hqPhotoPath="#request.zos.sharedPath#mls-images/30/";
 	}
 	this.useRetsFieldName="system";
 
@@ -16,16 +16,16 @@
 	this.arrFieldLookupFields=arraynew(1);
 	this.mls_provider="rets30";
 	this.sysidfield="rets30_matrix_unique_id";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="mlsnumber";
-	resourceStruct["office"]=structnew();
-	resourceStruct["office"].resource="office";
-	resourceStruct["office"].id="mlsid";
-	resourceStruct["agent"]=structnew();
-	resourceStruct["agent"].resource="agent";
-	resourceStruct["agent"].id="mlsid";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="mlsnumber";
+	variables.resourceStruct["office"]=structnew();
+	variables.resourceStruct["office"].resource="office";
+	variables.resourceStruct["office"].id="mlsid";
+	variables.resourceStruct["agent"]=structnew();
+	variables.resourceStruct["agent"].resource="agent";
+	variables.resourceStruct["agent"].id="mlsid";
 	this.emptyStruct=structnew();
 	
 	

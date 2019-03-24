@@ -13,10 +13,10 @@
 	this.arrFieldLookupFields=arraynew(1);
 	this.mls_provider="rets19";
 	this.sysidfield="rets19_sysid";
-	resourceStruct=structnew();
-	resourceStruct["property"]=structnew();
-	resourceStruct["property"].resource="property";
-	resourceStruct["property"].id="157";
+	variables.resourceStruct=structnew();
+	variables.resourceStruct["property"]=structnew();
+	variables.resourceStruct["property"].resource="property";
+	variables.resourceStruct["property"].id="157";
 	this.emptyStruct=structnew();
 	</cfscript> 
     

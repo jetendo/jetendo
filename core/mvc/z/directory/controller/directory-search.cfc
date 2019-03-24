@@ -1035,44 +1035,44 @@ This is the structure of the renderMethod function
 		// we can sort multiple columns at once with custom callback function
 		if(arrayLen(arrSort) EQ 1){
 			if(arrSort[1].direction EQ "asc"){
-				arraySort( members, function() {  
-					return comparenocase( arguments[ 1 ][arrSort[1].key], arguments[ 2 ][arrSort[1].key] ); 
+				arraySort( members, function(a1, a2) {  
+					return comparenocase( a1[arrSort[1].key], a2[arrSort[1].key] ); 
 				} );
 			}else{ // desc
-				arraySort( members, function() {  
-					return comparenocase( arguments[ 2 ][arrSort[1].key], arguments[ 1 ][arrSort[1].key] ); 
+				arraySort( members, function(a1, a2) {  
+					return comparenocase( a2[arrSort[1].key], a1[arrSort[1].key] ); 
 				} );
 			}
 		}else if(arrayLen(arrSort) EQ 2){
-			arraySort( members, function() {  
+			arraySort( members, function(a1, a2) {  
 				if(arrSort[1].direction EQ "asc"){
-					if(comparenocase(arguments[ 1 ][arrSort[1].key], arguments[ 2 ][arrSort[1].key]) > 0){
+					if(comparenocase(a1[arrSort[1].key], a2[arrSort[1].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 1 ][arrSort[1].key], arguments[ 2 ][arrSort[1].key]) < 0){
+					if(comparenocase(a1[arrSort[1].key], a2[arrSort[1].key]) < 0){
 						return -1;
 					}
 				}else{
-					if(comparenocase(arguments[ 2 ][arrSort[1].key], arguments[ 1 ][arrSort[1].key]) > 0){
+					if(comparenocase(a2[arrSort[1].key], a1[arrSort[1].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 2 ][arrSort[1].key], arguments[ 1 ][arrSort[1].key]) < 0){
+					if(comparenocase(a2[arrSort[1].key], a1[arrSort[1].key]) < 0){
 						return -1;
 					}
 
 				}
 				if(arrSort[2].direction EQ "asc"){
-					if(comparenocase(arguments[ 1 ][arrSort[2].key], arguments[ 2 ][arrSort[2].key]) > 0){
+					if(comparenocase(a1[arrSort[2].key], a2[arrSort[2].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 1 ][arrSort[2].key], arguments[ 2 ][arrSort[2].key]) < 0){
+					if(comparenocase(a1[arrSort[2].key], a2[arrSort[2].key]) < 0){
 						return -1;
 					}
 				}else{
-					if(comparenocase(arguments[ 2 ][arrSort[2].key], arguments[ 1 ][arrSort[2].key]) > 0){
+					if(comparenocase(a2[arrSort[2].key], a1[arrSort[2].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 2 ][arrSort[2].key], arguments[ 1 ][arrSort[2].key]) < 0){
+					if(comparenocase(a2[arrSort[2].key], a1[arrSort[2].key]) < 0){
 						return -1;
 					}
 
@@ -1080,51 +1080,51 @@ This is the structure of the renderMethod function
 				return 0;
 			} ); 
 		}else if(arrayLen(arrSort) EQ 3){
-			arraySort( members, function() {  
+			arraySort( members, function(a1, a2) {  
 				if(arrSort[1].direction EQ "asc"){
-					if(comparenocase(arguments[ 1 ][arrSort[1].key], arguments[ 2 ][arrSort[1].key]) > 0){
+					if(comparenocase(a1[arrSort[1].key], a2[arrSort[1].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 1 ][arrSort[1].key], arguments[ 2 ][arrSort[1].key]) < 0){
+					if(comparenocase(a1[arrSort[1].key], a2[arrSort[1].key]) < 0){
 						return -1;
 					}
 				}else{
-					if(comparenocase(arguments[ 2 ][arrSort[1].key], arguments[ 1 ][arrSort[1].key]) > 0){
+					if(comparenocase(a2[arrSort[1].key], a1[arrSort[1].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 2 ][arrSort[1].key], arguments[ 1 ][arrSort[1].key]) < 0){
+					if(comparenocase(a2[arrSort[1].key], a1[arrSort[1].key]) < 0){
 						return -1;
 					}
 
 				}
 				if(arrSort[2].direction EQ "asc"){
-					if(comparenocase(arguments[ 1 ][arrSort[2].key], arguments[ 2 ][arrSort[2].key]) > 0){
+					if(comparenocase(a1[arrSort[2].key], a2[arrSort[2].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 1 ][arrSort[2].key], arguments[ 2 ][arrSort[2].key]) < 0){
+					if(comparenocase(a1[arrSort[2].key], a2[arrSort[2].key]) < 0){
 						return -1;
 					}
 				}else{
-					if(comparenocase(arguments[ 2 ][arrSort[2].key], arguments[ 1 ][arrSort[2].key]) > 0){
+					if(comparenocase(a2[arrSort[2].key], a1[arrSort[2].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 2 ][arrSort[2].key], arguments[ 1 ][arrSort[2].key]) < 0){
+					if(comparenocase(a2[arrSort[2].key], a1[arrSort[2].key]) < 0){
 						return -1;
 					}
 
 				}
 				if(arrSort[3].direction EQ "asc"){
-					if(comparenocase(arguments[ 1 ][arrSort[3].key], arguments[ 2 ][arrSort[3].key]) > 0){
+					if(comparenocase(a1[arrSort[3].key], a2[arrSort[3].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 1 ][arrSort[3].key], arguments[ 2 ][arrSort[3].key]) < 0){
+					if(comparenocase(a1[arrSort[3].key], a2[arrSort[3].key]) < 0){
 						return -1;
 					}
 				}else{
-					if(comparenocase(arguments[ 2 ][arrSort[3].key], arguments[ 1 ][arrSort[3].key]) > 0){
+					if(comparenocase(a2[arrSort[3].key], a1[arrSort[3].key]) > 0){
 						return 1;
 					}
-					if(comparenocase(arguments[ 2 ][arrSort[3].key], arguments[ 1 ][arrSort[3].key]) < 0){
+					if(comparenocase(a2[arrSort[3].key], a1[arrSort[3].key]) < 0){
 						return -1;
 					}
 

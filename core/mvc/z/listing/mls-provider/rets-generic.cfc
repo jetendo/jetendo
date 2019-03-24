@@ -592,7 +592,8 @@ variables.typeStruct["text"]="text";
 	<cfargument name="allowSold" type="boolean" required="yes">
 	<cfscript>
 	var i=0;
-	var path=request.zos.sharedPath&"mls-data/"&arguments.ss.row.mls_id&"/";
+	var path=request.zos.sharedPath&"mls-data/"&arguments.ss.row.mls_id&"/"; 
+
 	var qD=application.zcore.functions.zReadDirectory(path, "listings-*.txt");
 	for(i=1;i LTE qD.recordcount;i++){
 		if(datecompare(qD.dateLastModified[i],dateadd("n",-1,now())) GTE 0){

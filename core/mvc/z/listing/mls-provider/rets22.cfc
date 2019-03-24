@@ -5,9 +5,9 @@ this.retsVersion="1.7";
 
 this.mls_id=22;
 if(request.zos.istestserver){
-	hqPhotoPath="#request.zos.sharedPath#mls-images/22/";
+	variables.hqPhotoPath="#request.zos.sharedPath#mls-images/22/";
 }else{
-	hqPhotoPath="#request.zos.sharedPath#mls-images/22/";
+	variables.hqPhotoPath="#request.zos.sharedPath#mls-images/22/";
 }
 this.useRetsFieldName="system";
 this.arrTypeLoop=["A","B","C","D","E"];

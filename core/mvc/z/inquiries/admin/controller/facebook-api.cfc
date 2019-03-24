@@ -14,12 +14,12 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	facebookConfig = arguments.facebookConfig;
 
 	variables.apiEndpoint   = 'https://graph.facebook.com/v2.8';
-	variables.environment   = this.determineEnvironment();
+	variables.environment   = determineEnvironment();
 	variables.batchRequests = [];
 	variables.appId         = facebookConfig.appId;
 	variables.appSecret     = facebookConfig.appSecret;
 
-	this.setAccessToken( facebookConfig.accessToken );
+	setAccessToken( facebookConfig.accessToken );
 	</cfscript>
 </cffunction>
 
@@ -46,7 +46,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	pageId    = arguments.pageId;
 	pageLikes = arguments.pageLikes;
 
-	pageLikes.access_token = this.getAccessToken();
+	pageLikes.access_token = getAccessToken();
 
 	ts={
 		requestURL:'/' & pageId & '/insights/page_fans',
@@ -82,7 +82,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	pageId    = arguments.pageId;
 	pageReach = arguments.pageReach;
 
-	pageReach.access_token = this.getAccessToken();
+	pageReach.access_token = getAccessToken();
 
 	ts={
 		requestURL:'/' & pageId & '/insights/page_impressions',
@@ -100,7 +100,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	<cfscript>
 	pageId    = arguments.pageId;
 	ps = {
-		'access_token': this.getAccessToken()
+		'access_token': getAccessToken()
 	};
 
 	ts={
@@ -119,7 +119,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	<cfscript>
 	pageId    = arguments.pageId;
 	ps = {
-		'access_token': this.getAccessToken()
+		'access_token': getAccessToken()
 	};
 
 	ts={
@@ -136,7 +136,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 <cffunction name="getAllPages" localmode="modern" access="public">
 	<cfscript>
 	allPages = {
-		'access_token': this.getAccessToken()
+		'access_token': getAccessToken()
 	};
 
 	ts={
@@ -160,7 +160,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	pageId          = arguments.pageId;
 	pageImpressions = arguments.pageImpressions;
 
-	pageImpressions.access_token = this.getAccessToken();
+	pageImpressions.access_token = getAccessToken();
 
 	ts={
 		requestURL:'/' & pageId & '/insights',
@@ -214,7 +214,7 @@ if(rs.success){
 			throw( 'Too many batch requests at once. Maximum of 50 per API call (found ' & arrayLen( variables.batchRequests ) & ').' );
 		} 
 		requestParams = {
-			'access_token':    this.getAccessToken(),
+			'access_token':    getAccessToken(),
 			'batch':           serializeJson(variables.batchRequests),
 			'include_headers': false
 		};
@@ -250,7 +250,7 @@ if(rs.success){
 	<cfscript> 
 	ss=arguments.ss;
 	requestParams = {
-		'access_token':    this.getAccessToken(), 
+		'access_token':    getAccessToken(), 
 		'include_headers': false
 	};
 	if(structkeyexists(ss, 'requestParams')){
@@ -386,7 +386,7 @@ if(rs.success){
 
 		try{
 			http method=ss.method, charset="utf-8", timeout=ss.timeout, url=tempLink, result="result" {
-				httpparam name="appsecret_proof", type="url", value=this.getAppSecretProof();
+				httpparam name="appsecret_proof", type="url", value=getAppSecretProof();
 
 				if ( isStruct( ss.params ) AND NOT structIsEmpty( ss.params ) ) {
 					for ( param in ss.params ) {

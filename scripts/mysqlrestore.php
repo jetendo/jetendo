@@ -12,6 +12,14 @@ $host=get_cfg_var("jetendo_mysql_default_host");
 $user=get_cfg_var("jetendo_mysql_default_user");
 $pw=get_cfg_var("jetendo_mysql_default_password");
 
+if($pw==""){
+	echo "database config is missing:\n";
+	echo "path:".$mp."\n";
+	echo "host:".$host."\n";
+	echo "user:".$user."\n";
+	echo "password:".$pw."\n";
+	exit;	
+}
 
 parse_str(implode('&', array_slice($argv, 1)), $_GET);
 $arrSkip2=array();
@@ -70,7 +78,7 @@ if ($handle = opendir($mp)) {
 				while (false !== ($entry2 = readdir($handle2))) {
 					echo $entry."/".$entry2."\n";
 					if(strstr($entry2, ".sql") !== FALSE && $entry2 != "schema.sql"){
-						if(isset($arrSkip[$entry2])){
+						if(isset($arrSkip[str_replace(".sql", "", $entry2)])){
 							continue;
 						}
 						// sql file, do import:

@@ -580,7 +580,7 @@ used to do search for a list of values
 					for(n=1;n LTE arrayLen(arrChild);n++){
 						c2=arrChild[n]; 
 						if(debugOn){ /* writedump(c); writedump(c2); */ 	}
-						lastMatch=this.processSearchGroup(c, c2, multipleValues, delimiter); 
+						lastMatch=processSearchGroup(c, c2, multipleValues, delimiter); 
 						if(lastMatch){
 							// always return true if at least one child group matches. I.e. If a product has a "color" sub-group.  User searches for "red", then the product would be valid even if it has other options like "blue".
 							break;
@@ -608,7 +608,7 @@ used to do search for a list of values
 				if(debugOn){
 					echo("before processSearchGroup:<br />");
 				}
-				lastMatch=this.processSearchGroup(c, row, multipleValues, delimiter); 
+				lastMatch=processSearchGroup(c, row, multipleValues, delimiter); 
 				if(debugOn){
 					echo("processSearchGroup lastMatch:"&lastMatch&"<br>");
 				}
