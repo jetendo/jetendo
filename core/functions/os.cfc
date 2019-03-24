@@ -2321,7 +2321,7 @@ not used
 	        	abort;
         	}
 	    } 
-		structappend(arguments.ss, ts, true);
+		structappend(arguments.ss, ts, true); 
 	}else{
 		ts.hookAppCom=application.zcore.hookAppCom;
 		ts.cfcMetaDataCache=application.zcore.functions.zso(application.zcore, 'cfcMetaDataCache', false, {});

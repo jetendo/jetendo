@@ -1014,7 +1014,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 		<div class="stylePreviewCSS"></div>
 	</div>
 	<script type="text/javascript">
-	var iframeDocumentContents="#encodeForJavascript(iframeHTML)#";
+	var iframeDocumentContents="#jsStringFormat(iframeHTML)#";
 	</script>
 </cffunction>
 

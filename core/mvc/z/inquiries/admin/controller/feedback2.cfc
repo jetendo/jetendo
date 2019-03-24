@@ -1839,7 +1839,7 @@ zArrDeferredFunctions.push(function(){
 	iframe_#fbID# = iframe_#fbID#.contentWindow || ( iframe_#fbID#.contentDocument.document || iframe_#fbID#.contentDocument );
 
 	iframe_#fbID#.document.open();
-	iframe_#fbID#.document.write( '#encodeForJavaScript( messageHTML, true )#' );
+	iframe_#fbID#.document.write( '#jsStringFormat( messageHTML )#' );
 	iframe_#fbID#.document.close();
 
 

@@ -333,7 +333,7 @@
 									'inquiries_autoresponder_drip_log_status': 'dripfailed'
 								};
 
-								this.logEmailStatus( logStruct ); 
+								logEmailStatus( logStruct ); 
  
 								db.sql = 'UPDATE #db.table( 'inquiries_autoresponder_subscriber', request.zos.zcoreDatasource )#
 								SET inquiries_autoresponder_subscriber_fail_count=#db.param(subscriber.inquiries_autoresponder_subscriber_fail_count+1)#,
@@ -366,7 +366,7 @@
 									'inquiries_autoresponder_drip_log_status': 'complete'
 								};
 
-								this.logEmailStatus( logStruct ); 
+								logEmailStatus( logStruct ); 
 							} else { 
 								// Update the subscriber last_drip_id and last_drip_datetime
 								// so that next time the cron runs, we send them the next drip
@@ -388,7 +388,7 @@
 									'inquiries_autoresponder_drip_log_status': 'dripsent'
 								};
 
-								this.logEmailStatus( logStruct );
+								logEmailStatus( logStruct );
 							} 
 
 						} // End if drip ready to send

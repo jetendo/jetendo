@@ -824,7 +824,7 @@ zdoc css style documentation
 	var curTitle2=0;
 	var theParent=0;
 	init();
-	manualStruct=this.findDoc(arguments.id, arguments.docLink);
+	manualStruct=findDoc(arguments.id, arguments.docLink);
 	curTitle=manualStruct.docStruct.id&". "&manualStruct.docStruct.title;
 	curTitle2=manualStruct.docStruct.id&". "&manualStruct.docStruct.title;
 	if(manualStruct.docStruct.id EQ 0){
@@ -843,10 +843,10 @@ zdoc css style documentation
         <div class="zdoc-main-column ieWidthDivClass4">
 		<h3>The documentation features were just added 2/8/2014, and we hope to fill them in over time.  
 		For now, if you need help that isn't here, please contact the web developer for assistance.</h3>
-            <cfsavecontent variable="theParent"><a href="/z/admin/help/index">Help</a> / #this.getParentLinks(manualStruct)#</cfsavecontent>
+            <cfsavecontent variable="theParent"><a href="/z/admin/help/index">Help</a> / #getParentLinks(manualStruct)#</cfsavecontent>
             <cfscript>request.zos.template.setTag("pagenav", theParent);</cfscript>
             
-            #this.getContentsBox(manualStruct)#
+            #getContentsBox(manualStruct)#
             
             #manualStruct.html#
             <cfif structkeyexists(form, 'generateDocs')>
@@ -858,7 +858,7 @@ zdoc css style documentation
 	        }
 	        </cfscript> --->
         </div>
-        #this.getSectionBox(manualStruct)#
+        #getSectionBox(manualStruct)#
         </div>
 	</cfif>
 </cffunction>

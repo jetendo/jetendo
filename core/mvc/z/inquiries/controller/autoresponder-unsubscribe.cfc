@@ -71,7 +71,7 @@
 			'inquiries_autoresponder_drip_log_status': 'unsubscribed'
 		};
 
-		this.logEmailStatus( logStruct );
+		logEmailStatus( logStruct );
 	</cfscript>
 
 	<div class="z-float z-pv-40 z-text-center">
