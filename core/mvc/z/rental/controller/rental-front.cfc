@@ -1421,7 +1421,7 @@ application.zcore.template.appendTag("meta",tempMeta);
 	arrImages=application.zcore.imageLibraryCom.displayImages(ts);
 	if(arraylen(arrImages) NEQ 0){
 		title=arrImages[1].caption&" | "&qRental.rental_name&" Photo "&arrImages[1].id;
-		if(compare(zURLName, application.zcore.functions.zURLEncode(title,"-")) NEQ 0){
+		if(compare(form.zURLName, application.zcore.functions.zURLEncode(title,"-")) NEQ 0){
 			link=application.zcore.app.getAppCFC("rental").getPhotoLink(qRental.rental_id, title, qRental.rental_url, arrImages[1].id);
 			application.zcore.functions.z301Redirect(link);
 		}

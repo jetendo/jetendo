@@ -196,7 +196,7 @@
 
 <cffunction name="accountcreated" localmode="modern" access="remote" output="yes">
 	<cfscript>
-	this.init();
+	init();
 	
 	application.zcore.template.setTag("title","Account Created");
 	application.zcore.template.setTag("pagetitle","Account Created");
@@ -220,7 +220,7 @@
 	var db=request.zos.queryObject;
 	
 	var qcheckemail10=0;
-	this.init();
+	init();
 	form.submitPref=application.zcore.functions.zso(form, 'submitPref',false,'Update Communication Preferences');
 	form.returnurl=application.zcore.functions.zso(form, 'returnurl');
 
@@ -302,9 +302,9 @@
 		}
 	}else */
 	if(form.submitPref EQ "Update Communication Preferences"){ 
-		this.updatePreferences();
+		updatePreferences();
 	}else if(form.submitPref EQ "Unsubscribe"){
-		this.unsubscribeUpdate();
+		unsubscribeUpdate();
 	}
 	</cfscript>
 </cffunction>
@@ -760,7 +760,7 @@ If the link does not work, please copy and paste the entire link in your browser
 
 <cffunction name="unsubscribed" localmode="modern" access="remote">
 	<cfscript>
-	this.init();
+	init();
 	</cfscript>
 	<h2>You have been unsubscribed from our mailing list.</h2>
 	<p>If you submit your contact information on our web site again or have used a different email account in the past to contact us, you may continue to receive mailings from us.  We won't know to remove you unless you click the opt-out link in the email or enter your email addresses in the <a href="/z/user/out/index">opt out form</a>.</p>
@@ -768,7 +768,7 @@ If the link does not work, please copy and paste the entire link in your browser
 
 <cffunction name="logout" localmode="modern" access="remote">
 	<cfscript>
-	this.init();
+	init();
 	</cfscript>
 	<h2>You have been logged out, you may close your browser or continue browsing.</h2>
 	<hr />
@@ -779,7 +779,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	<cfscript>
 	var loginCom=0;
 	// init must run first because reset password and other features rely on this!
-        this.init();
+        init();
         application.zcore.functions.zStatusHandler(request.zsid);
 	if(application.zcore.user.checkGroupAccess("user")){
 
@@ -833,7 +833,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	<cfscript>
 	var c2=0;
 	var openIdCom=0;
-	this.init();
+	init();
 	
 	if(isdefined('variables.qcheckemail')){
 		application.zcore.functions.zquerytostruct(variables.qcheckemail, form);
@@ -1153,7 +1153,7 @@ If the link does not work, please copy and paste the entire link in your browser
 		application.zcore.functions.z301redirect(application.zcore.functions.zURLAppend(customURL, "modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced', true)#&redirectOnLogin=#urlencodedformat(application.zcore.functions.zso(form, 'redirectOnLogin'))#&reloadOnNewAccount=#application.zcore.functions.zso(form, 'reloadOnNewAccount')#"));
 	}
 
-	this.init();
+	init();
 	
 
 	textMissing=false;
