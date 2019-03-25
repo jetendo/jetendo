@@ -2,13 +2,9 @@
 var zLoadAndCropImagesIndex=0;
 var zArrSlideshowIds=[];
 var zArrGalleryViewSlideshowTemplate=[];
-var zGalleryReloadTimeoutId=0;
-
-
+var zGalleryReloadTimeoutId=0; 
 (function($, window, document, undefined){
 	"use strict";
-
-
 	function zLoadAndCropImages(){
 		var debug=false;
 		var e=zGetElementsByClassName("zLoadAndCropImage");
@@ -39,13 +35,14 @@ var zGalleryReloadTimeoutId=0;
 	function zLoadAndCropImagesDefer(){
 		setTimeout(zLoadAndCropImages, 1);
 	}
+
 	zArrLoadFunctions.push({functionName:zLoadAndCropImagesDefer});
 	function zLoadAndCropImage(obj, imageURL, debug, width, height, crop, style){ 
-		if(zMSIEBrowser!==-1 && zMSIEVersion<=9){
+		if((zMSIEBrowser!==-1 && zMSIEVersion<=9) || window.location.href.indexOf("disableCanvasCrop=") != -1){
 			if(height===10000){
-				obj.innerHTML='<img src="'+imageURL+'" />';
+				obj.innerHTML='<img src="'+imageURL+'" style="max-width:100%;" />';
 			}else{
-				obj.innerHTML='<img src="'+imageURL+'" width="'+width+'" height="'+height+'" />';
+				obj.innerHTML='<img src="'+imageURL+'" width="'+width+'" style="max-width:100%;" />';
 			}
 			return;	
 		}
@@ -72,6 +69,9 @@ var zGalleryReloadTimeoutId=0;
 		canvas.width=width;
 		canvas.height=height;
 		canvas.style.cssText=style;
+
+		var tempWidth=width;
+		var tempHeight=height;
 		var context = canvas.getContext('2d');
 		var imageObj = new Image();
 		imageObj.startTime=new Date().getTime();
@@ -83,10 +83,11 @@ var zGalleryReloadTimeoutId=0;
 			var end = new Date().getTime();
 			var time2 = end - this.startTime;
 			//if(debug) 
-			if(debug) console.log((time2/1000)+" seconds to load image");
+			if(debug) console.log(imageObj.src+": "+(time2/1000)+" seconds to load image");
 			var time=new Date().getTime();
-			if(this.width <= 10 || this.width >= 2000 || this.height <= 10 || this.height >= 2000){
-				if(debug) console.log("Failed to draw canvas because computed width x height was invalid: "+this.width+"x"+this.height);
+
+			if(this.width <= 10 || this.width >= 10000 || this.height <= 10 || this.height >= 10000){
+				if(debug) console.log(imageObj.src+": Failed to draw canvas because the image width x height was too large: "+this.width+"x"+this.height);
 				return;
 			}
 			if(this.src.indexOf('/z/a/listing/images/image-not-available.gif') !== -1){
@@ -97,7 +98,7 @@ var zGalleryReloadTimeoutId=0;
 				obj.appendChild(canvas);
 				return;
 			}
-			if(debug) console.log("image loaded:"+this.src);
+			if(debug) console.log(imageObj.src+": image loaded");
 			var start=new Date();
 			canvas.width=this.width;
 			canvas.height=this.height;
@@ -106,7 +107,7 @@ var zGalleryReloadTimeoutId=0;
 			var end = new Date().getTime();
 			var time2 = end - time;
 			//if(debug) 
-			if(debug) console.log((time2/1000)+" seconds to getimagedata");
+			if(debug) console.log(imageObj.src+": "+(time2/1000)+" seconds to getimagedata");
 			var time=new Date().getTime();
 			var xCheck=Math.round(this.width/5);
 			var yCheck=Math.round(this.height/5);
@@ -118,7 +119,7 @@ var zGalleryReloadTimeoutId=0;
 			var newy=0;
 			var newx=0;
 			var ycrop2=0;
-			if(debug) console.log("top side");
+			if(debug) console.log(imageObj.src+": "+"top side");
 			for (var y=0;y<this.height;y++){
 				var p=(xmiddle*4)+(y*4*this.width);
 				var rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
@@ -135,9 +136,9 @@ var zGalleryReloadTimeoutId=0;
 					for(y=Math.max(0,y-9);y<=newy;y++){
 						var p=(xmiddle*4)+(y*4*this.width);
 						rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
-						if(debug) console.log(y+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
+						if(debug) console.log(imageObj.src+": "+y+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
 						if(rgb1<16400000){
-							if(debug) console.log("final y:"+y);
+							if(debug) console.log(imageObj.src+": "+"final y:"+y);
 							ycrop=y+6;
 							break;
 						}
@@ -145,7 +146,7 @@ var zGalleryReloadTimeoutId=0;
 					break;
 				}
 			}
-			if(debug) console.log("bottom side");
+			if(debug) console.log(imageObj.src+": "+"bottom side");
 			for (var y=0;y<this.height;y++){
 				var curY=((this.height-1)*4*this.width)-(y*4*this.width);
 				var p=(xmiddle*4)+(curY);
@@ -163,9 +164,9 @@ var zGalleryReloadTimeoutId=0;
 					for(y=Math.max(0,y-9);y<=newy;y++){
 						var p=(xmiddle*4)+(y*4*this.width);
 						rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
-						if(debug) console.log(y+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
+						if(debug) console.log(imageObj.src+": "+y+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
 						if(rgb1<16400000){
-							if(debug) console.log("final y:"+y);
+							if(debug) console.log(imageObj.src+": "+"final y:"+y);
 							ycrop2=y+6;
 							break;
 						}
@@ -175,7 +176,7 @@ var zGalleryReloadTimeoutId=0;
 			}
 			
 			
-			if(debug) console.log("left side");
+			if(debug) console.log(imageObj.src+": "+"left side");
 			for (var x=0;x<this.width;x++){
 				var p=(x*4)+(ymiddle*4*this.width);
 				rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
@@ -192,9 +193,9 @@ var zGalleryReloadTimeoutId=0;
 					for(x=Math.max(0,x-9);x<=newx;x++){
 						var p=(x*4)+(ymiddle*4*this.width);
 						rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
-						if(debug) console.log(x+" | refining x: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
+						if(debug) console.log(imageObj.src+": "+x+" | refining x: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
 						if(rgb1<16400000){
-							if(debug) console.log("final x:"+x);
+							if(debug) console.log(imageObj.src+": "+"final x:"+x);
 							xcrop=x+6;
 							break;
 						}
@@ -202,7 +203,7 @@ var zGalleryReloadTimeoutId=0;
 					break;
 				}
 			}
-			if(debug) console.log("right side");
+			if(debug) console.log(imageObj.src+": "+"right side");
 			for (var x=0;x<this.width;x++){
 				//var curX=((this.width-1)*4)-(ymiddle*4*this.width);
 				var curX2=(((this.width-1)-x)*4);
@@ -222,9 +223,9 @@ var zGalleryReloadTimeoutId=0;
 					for(x=Math.max(0,x-9);x<=newx;x++){
 						var p=(xmiddle*4)+(curY);
 						rgb1=imageData.data[p]*imageData.data[p+1]*imageData.data[p+2];
-						if(debug) console.log(x+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
+						if(debug) console.log(imageObj.src+": "+x+" | refining y: "+rgb1+" | red: "+imageData.data[p]+" | green: "+imageData.data[p+1]+" | blue: "+imageData.data[p+2]);
 						if(rgb1<16400000){
-							if(debug) console.log("final x:"+x);
+							if(debug) console.log(imageObj.src+": "+"final x:"+x);
 							xcrop2=x+6;
 							break;
 						}
@@ -232,11 +233,11 @@ var zGalleryReloadTimeoutId=0;
 					break;
 				}
 			}
-			if(debug) console.log("left:"+xcrop+" | top:"+ycrop+" | right:"+xcrop2+" | bottom:"+ycrop2);
+			if(debug) console.log(imageObj.src+": "+"left:"+xcrop+" | top:"+ycrop+" | right:"+xcrop2+" | bottom:"+ycrop2);
 			
 			var originalWidth=this.width;
 			var originalHeight=this.height;
-			if(debug) console.log("original size:"+this.width+"x"+this.height);
+			if(debug) console.log(imageObj.src+": "+"original size:"+this.width+"x"+this.height);
 			var newWidth=this.width-(xcrop+xcrop2);
 			var newHeight=this.height-(ycrop+ycrop2);
 			if(newHeight < 10 || newWidth < 10){
@@ -265,7 +266,7 @@ var zGalleryReloadTimeoutId=0;
 				newWidth=this.width;
 				newHeight=this.height;
 			}
-			if(debug) console.log("size without whitespace:"+newWidth+"x"+newHeight);
+			if(debug) console.log(imageObj.src+": "+"size without whitespace:"+newWidth+"x"+newHeight);
 			
 			var x2crop=0;
 			var x2crop2=0;
@@ -274,6 +275,7 @@ var zGalleryReloadTimeoutId=0;
 			if(width === 10000 && height === 10000){
 				nw=newWidth;
 				nh=newHeight;
+				if(debug) console.log(imageObj.src+": type 1| nw:"+nw+" nh:"+nh);
 				width=newWidth;
 				height=newHeight;
 			}else{
@@ -298,7 +300,8 @@ var zGalleryReloadTimeoutId=0;
 					}
 					xcrop+=(x2crop/2)/ratio;
 					ycrop+=(y2crop/2)/ratio;
-					if(debug) console.log("crop | left:"+x2crop+" | top:"+y2crop+" | right:"+x2crop2+" | bottom:"+y2crop2);
+					if(debug) console.log(imageObj.src+": type 2| nw:"+nw+" nh:"+nh);
+					if(debug) console.log(imageObj.src+": "+"crop | left:"+x2crop+" | top:"+y2crop+" | right:"+x2crop2+" | bottom:"+y2crop2);
 				}else{
 					// resize preserving scale	
 					var ratio=width/newWidth;
@@ -308,12 +311,15 @@ var zGalleryReloadTimeoutId=0;
 						ratio=height/newHeight;
 						nw=Math.ceil(newWidth*ratio);
 						nh=height;
+						if(debug) console.log(imageObj.src+": type 3| nw:"+nw+" nh:"+nh);
+					}else{
+						if(debug) console.log(imageObj.src+": type 4| nw:"+nw+" nh:"+nh);
 					}
 				}
 			}
 			
 			if(this.width<nw){
-				if(debug) console.log("width exceeded original");
+				if(debug) console.log(imageObj.src+": "+"width exceeded original");
 				ratio=this.width/nw;
 				width=this.width;
 				nw=this.width;
@@ -325,7 +331,7 @@ var zGalleryReloadTimeoutId=0;
 				y2crop=0;
 			}
 			if(this.height<nh){
-				if(debug) console.log("height exceeded original");
+				if(debug) console.log(imageObj.src+": "+"height exceeded original");
 				ratio=this.height/nh;
 				height=this.height;
 				nh=this.height;
@@ -338,29 +344,35 @@ var zGalleryReloadTimeoutId=0;
 			/*newWidth+=10;
 			newHeight+=10;
 			*/
-			if(debug) console.log("final size:"+nw+"x"+nh);
-			if(debug) console.log("sizes:"+width+"x"+height+":"+this.width+"x"+this.height);
+			if(debug) console.log(imageObj.src+": "+"final size:"+nw+"x"+nh);
+			if(debug) console.log(imageObj.src+": "+"sizes:"+width+"x"+height+":"+this.width+"x"+this.height);
 			
 			var end = new Date().getTime();
 			var time2 = end - time;
 			//if(debug) 
-			if(debug) console.log((time2/1000)+" seconds to detect crop");
+			if(debug) console.log(imageObj.src+": "+(time2/1000)+" seconds to detect crop");
 			var time=new Date().getTime();
 			
-			if(debug) console.log(Math.ceil(xcrop)+" | "+Math.ceil(ycrop)+" | "+Math.floor(newWidth-(x2crop))+" | "+Math.floor(newHeight-(y2crop))+" | "+-Math.ceil(x2crop/2)+" | "+-Math.ceil(y2crop/2)+" | "+Math.ceil(nw)+" | "+Math.ceil(nh));
-			if(width <= 10 || width >= 1000 || height <= 10 || height >= 1000){
-				if(debug) console.log("Failed to draw canvas because computed width x height was invalid: "+width+"x"+height);
+			// x2crop -15
+			if(debug) console.log(imageObj.src+": "+Math.ceil(xcrop)+" | "+Math.ceil(ycrop)+" | "+Math.floor(newWidth-(x2crop))+" | "+Math.floor(newHeight-(y2crop))+" | "+-Math.ceil(x2crop/2)+" | "+-Math.ceil(y2crop/2)+" | "+Math.ceil(nw)+" | "+Math.ceil(nh));
+			if(tempWidth <= 10 || tempWidth >= 1000 || tempHeight <= 10 || tempHeight >= 1000){
+				if(debug) console.log(imageObj.src+": "+"Failed to draw canvas because width x height must be >= 10x10 and <= 1000: "+tempWidth+"x"+tempHeight);
 				return;
 			}
-			canvas.width=width;
-			canvas.height=height;
-			if(debug) console.log(newWidth+":"+newHeight+":"+canvas.height+":"+Math.ceil(nh)+":"+Math.ceil(y2crop));
-			context.drawImage(imageObj, Math.ceil(xcrop), Math.ceil(ycrop), Math.floor(newWidth-(xcrop*2)), Math.floor(newHeight-(ycrop*2)),-Math.ceil(x2crop/2), -Math.ceil(y2crop/2), Math.ceil(nw), Math.ceil(nh));
+
+
+
+			canvas.width=tempWidth;
+			canvas.height=tempHeight;
 			obj.appendChild(canvas);
+			if(debug) console.log("canvas.width: "+canvas.width+" height:"+canvas.height);
+
+			if(debug) console.log(imageObj.src+": newWidth:"+newWidth+" newHeight:"+newHeight+" canvas.height:"+canvas.height+" nh:"+Math.ceil(nh)+" y2crop:"+Math.ceil(y2crop));
+			context.drawImage(imageObj, Math.ceil(xcrop), Math.ceil(ycrop), Math.floor(newWidth-(xcrop*2)), Math.floor(newHeight-(ycrop*2)),-Math.ceil(x2crop/2), -Math.ceil(y2crop/2), Math.ceil(nw), Math.ceil(nh));
 			var end = new Date().getTime();
 			var time = end - start;
 			//if(debug) 
-			if(debug) console.log((time/1000)+" seconds to crop image");
+			if(debug) console.log(imageObj.src+": "+(time/1000)+" seconds to crop image");
 		};
 		imageObj.src = imageURL;
 	}

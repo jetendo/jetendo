@@ -463,7 +463,7 @@ used to do search for a list of values
 	for(i=1;i LTE length;i++){
 		c=arguments.arrSearch[i]; 
 		if(isArray(c)){
-			sql=this.processSearchArraySQL(c, arguments.fieldStruct, arguments.tableCount, arguments.option_group_id);
+			sql=processSearchArraySQL(c, arguments.fieldStruct, arguments.tableCount, arguments.option_group_id);
 			arrayAppend(arrSQL, sql); 
 		}else if(isStruct(c)){
 			if(structkeyexists(c, 'subGroup')){
@@ -836,7 +836,7 @@ used to do search for a list of values
 	var childGroup=duplicate(t9.optionGroupSetId[arguments.setId&"_childGroup"]); 
 	for(var f in childGroup){
 		for(var g=1;g LTE arraylen(childGroup[f]);g++){ 
-			this.deleteOptionGroupSetIdCacheInternal(arguments.site_id, childGroup[f][g], true);
+			deleteOptionGroupSetIdCacheInternal(arguments.site_id, childGroup[f][g], true);
 		}
 	}
 	for(var n in t9.optionGroupFieldLookup[groupId]){ 
@@ -903,7 +903,7 @@ used to do search for a list of values
 	arrayAppend(arguments.arrChild, arguments.currentStruct.id);
 	if(structkeyexists(arguments.struct, arguments.currentStruct.id)){
 		for(i in arguments.struct[arguments.currentStruct.id]){
-			arguments.arrChild=this.getChildValues(arguments.struct, arguments.struct[arguments.currentStruct.id][i], arguments.arrChild, arguments.level+1);
+			arguments.arrChild=getChildValues(arguments.struct, arguments.struct[arguments.currentStruct.id][i], arguments.arrChild, arguments.level+1);
 		}
 	}
 	return arguments.arrChild;

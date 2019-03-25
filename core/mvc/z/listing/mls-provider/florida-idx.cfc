@@ -331,7 +331,7 @@
 		var photo=0;
 		var db=request.zos.queryObject;
 		 db.sql="SELECT listing_data_json FROM #db.table("listing_data", request.zos.zcoreDatasource)#
-		 WHERE listing_id = #db.param(this.mls_id&"-"&arguments.mls_pid)#";
+		 WHERE listing_id = #db.param(this.mls_id&"-"&arguments.mls_pid)# and listing_data_deleted =#db.param(0)# ";
 		 qP=db.execute("qP");
 		if(qP.recordcount EQ 0){
 			return "";
