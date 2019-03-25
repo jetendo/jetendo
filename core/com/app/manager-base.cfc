@@ -314,7 +314,7 @@ a version of index list with divs for the table instead of <table>
 <cffunction name="index" localmode="modern" access="private"> 
 	<cfscript> 
 	var db=request.zos.queryObject; 
-	init();
+	this.init();
 	form.searchOn=application.zcore.functions.zso(form, 'searchOn', true, 0);
 	if(variables.columnSortingEnabled){
 		variables.sortColumnSQL=variables.qSortCom.getorderby(false);  
@@ -674,7 +674,7 @@ displayAdminEditMenu(ts);
 
 <cffunction name="delete" localmode="modern" access="private">
 	<cfscript>
-	init();
+	this.init();
 	var db=request.zos.queryObject; 
 	
 	request.zArrErrorMessages=["#variables.methods.getDeleteData#() function was called."];
@@ -746,7 +746,7 @@ displayAdminEditMenu(ts);
 <cffunction name="update" localmode="modern" access="private">
 	<cfscript>
 	db=request.zos.queryObject;
-	init();
+	this.init();
 
 	if(form.method EQ "insert"){
 		if(variables.disableAddButton){
@@ -1144,7 +1144,7 @@ deleteSearchIndex(ts);
 <cffunction name="edit" localmode="modern" access="private">
 	<cfscript>
 	var db=request.zos.queryObject;
-	init(); 
+	this.init(); 
 
 	var currentMethod=form.method;
 
