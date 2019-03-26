@@ -2454,7 +2454,7 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 			<cfsavecontent variable="db.sql">
 			SELECT * FROM #db.table("inquiries", request.zos.zcoreDatasource)# inquiries 
 			WHERE inquiries_email <> #db.param('')# and 
-			inquiries_email =#db.param(saved_search_email)# and 
+			inquiries_email =#db.param(form.saved_search_email)# and 
 			site_id = #db.param(request.zos.globals.id)# and 
 			inquiries_deleted = #db.param(0)#
 			</cfsavecontent><cfscript>qinquiry=db.execute("qInquiry");</cfscript>
