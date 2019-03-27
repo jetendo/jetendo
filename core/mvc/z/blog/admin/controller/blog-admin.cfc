@@ -1785,6 +1785,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		}
 		</cfscript></td>
 	<td style="width:145px;">#dateformat(row.blog_datetime, 'm/d/yyyy')# @ #timeformat(row.blog_datetime, 'h:mm tt')#</td>
+	<td style="width:50px;"><cfif row.blog_sticky EQ 1>Yes<cfelse>No</cfif></td>
 	<td class="z-manager-admin z-manager-blog-admin">
 		<cfscript>
 		if(row.blog_unique_name NEQ ''){
@@ -2157,6 +2158,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 			<th >Title</th> 
 			<th class="z-hide-at-767">Category</th>
 			<th style="width:145px;">Date &amp; Time</th>
+			<th class="z-hide-at-767">Sticky?</th>
 			<th style="width:200px;">Admin</th>
 		</tr>
 		

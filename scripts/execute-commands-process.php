@@ -2628,7 +2628,7 @@ function httpDownload($a){
 	$ch = curl_init();
  
 	curl_setopt($ch, CURLOPT_URL, $link); 
-	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_HEADER, 0); 
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
