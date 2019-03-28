@@ -30,6 +30,7 @@ ts={
 	currentSection:currentSection, // required
 	bodyHTML:"Body", // optional, can be empty string
 	sidebarEnabled:true, // set to false to turn off sidebar for certain pages
+	sidebarPosition:"left", // left or right
 	sidebarTopHTML:"Top", // optional, can be empty string
 	sidebarBottomHTML:"Bottom" // optional, can be empty string
 	/*
@@ -189,6 +190,7 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 		bodyHTML:"",
 		afterSectionHTML:"",
 		sidebarEnabled:true,
+		sidebarPosition:"left",
 		enableContentContainer:true
 	};
 	structappend(ss, ts, false);
@@ -268,37 +270,97 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 			<div class="z-container"> 
 				<div class="z-default-subpage-subpage">
 					<div class="z-default-subpage-row">
-						<div class="z-default-subpage-right-panel">
-							<div class="z-default-subpage-subcontent">
-								#ss.bodyHTML#
+						<cfif ss.sidebarPosition EQ "left">
+							<div class="z-default-subpage-right-panel">
+								<div class="z-default-subpage-subcontent">
+									#ss.bodyHTML#
+								</div>
 							</div>
-						</div>
-						<div class="z-default-subpage-left-panel">
-							<cfif ss.sidebarHeading NEQ "">
-								<div class="z-default-subpage-left-panel-heading">
-									#ss.sidebarHeading#
+							<div class="z-default-subpage-left-panel">
+								<cfif ss.sidebarHeading NEQ "">
+									<div class="z-default-subpage-left-panel-heading">
+										#ss.sidebarHeading#
+									</div>
+								</cfif>
+								<cfif ss.sidebarTopHTML NEQ "">
+									<div class="z-default-subpage-left-panel-top">
+										#ss.sidebarTopHTML#
+									</div>
+								</cfif> 
+								<cfif arrayLen(arrSide) NEQ 0>
+									<div class="z-default-subpage-left-panel-menu">
+										<ul> 
+											<cfscript> 
+											echo(arrayToList(arrSide, ''));
+											</cfscript>  
+										</ul>  
+									</div>
+								</cfif>
+								<cfif ss.sidebarBottomHTML NEQ "">
+									<div class="z-default-subpage-left-panel-bottom">
+										#ss.sidebarBottomHTML#
+									</div>
+								</cfif> 
+							</div> 
+						<cfelse>
+							<div class="z-default-subpage-left-panel z-hide-at-992">
+								<cfif ss.sidebarHeading NEQ "">
+									<div class="z-default-subpage-left-panel-heading">
+										#ss.sidebarHeading#
+									</div>
+								</cfif>
+								<cfif ss.sidebarTopHTML NEQ "">
+									<div class="z-default-subpage-left-panel-top">
+										#ss.sidebarTopHTML#
+									</div>
+								</cfif> 
+								<cfif arrayLen(arrSide) NEQ 0>
+									<div class="z-default-subpage-left-panel-menu">
+										<ul> 
+											<cfscript> 
+											echo(arrayToList(arrSide, ''));
+											</cfscript>  
+										</ul>  
+									</div>
+								</cfif>
+								<cfif ss.sidebarBottomHTML NEQ "">
+									<div class="z-default-subpage-left-panel-bottom">
+										#ss.sidebarBottomHTML#
+									</div>
+								</cfif> 
+							</div> 
+							<div class="z-default-subpage-right-panel">
+								<div class="z-default-subpage-subcontent">
+									#ss.bodyHTML#
 								</div>
-							</cfif>
-							<cfif ss.sidebarTopHTML NEQ "">
-								<div class="z-default-subpage-left-panel-top">
-									#ss.sidebarTopHTML#
-								</div>
-							</cfif> 
-							<cfif arrayLen(arrSide) NEQ 0>
-								<div class="z-default-subpage-left-panel-menu">
-									<ul> 
-										<cfscript> 
-										echo(arrayToList(arrSide, ''));
-										</cfscript>  
-									</ul>  
-								</div>
-							</cfif>
-							<cfif ss.sidebarBottomHTML NEQ "">
-								<div class="z-default-subpage-left-panel-bottom">
-									#ss.sidebarBottomHTML#
-								</div>
-							</cfif> 
-						</div> 
+							</div>
+							<div class="z-default-subpage-left-panel z-show-at-992">
+								<cfif ss.sidebarHeading NEQ "">
+									<div class="z-default-subpage-left-panel-heading">
+										#ss.sidebarHeading#
+									</div>
+								</cfif>
+								<cfif ss.sidebarTopHTML NEQ "">
+									<div class="z-default-subpage-left-panel-top">
+										#ss.sidebarTopHTML#
+									</div>
+								</cfif> 
+								<cfif arrayLen(arrSide) NEQ 0>
+									<div class="z-default-subpage-left-panel-menu">
+										<ul> 
+											<cfscript> 
+											echo(arrayToList(arrSide, ''));
+											</cfscript>  
+										</ul>  
+									</div>
+								</cfif>
+								<cfif ss.sidebarBottomHTML NEQ "">
+									<div class="z-default-subpage-left-panel-bottom">
+										#ss.sidebarBottomHTML#
+									</div>
+								</cfif> 
+							</div> 
+						</cfif>
 					</div>
 				</div>
 			</div> 
