@@ -221,12 +221,17 @@ ownerid	month	new_subscribers	total_subscribers	bounces	unsubscribes
 	arrColumn=listToArray(arrLine[1], chr(9), true);
 	arrayDeleteAt(arrLine, 1);
 
+
 	for(line in arrLine){
 		arrRow=listToArray(line, chr(9), true);
 		ts={};
 		for(i=1;i<=arraylen(arrColumn);i++){
 			ts[arrColumn[i]]=arrRow[i];
 		} 
+		if(not structkeyexists(ts, "ownerid")){
+			echo("Invalid row: "&line&"<br>");
+			continue;
+		}
 
 		site_id=siteLookup[ts.ownerid];
 		
