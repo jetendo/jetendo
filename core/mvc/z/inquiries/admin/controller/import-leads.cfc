@@ -924,15 +924,14 @@ not important yet: create contacts at same time as create lead (use same functio
 					inquiries_session_id:createUUID(),
 					inquiries_optin:1
 				};
-				if(importRow.inquiries_import_file_disable_reminders EQ 1){
-					ts.inquiries_reminder_count=99;
-				}
 				ts2={};
 				for(field in request.fieldMap){
-					if(request.fieldMap[field] EQ "inquiries_custom_json"){
-						ts2[field]=trim(row.data[field]);
-					}else{
-						ts[request.fieldMap[field]]=trim(row.data[field]);
+					if(not structkeyexists(ts, field)){
+						if(request.fieldMap[field] EQ "inquiries_custom_json"){
+							ts2[field]=trim(row.data[field]);
+						}else{
+							ts[request.fieldMap[field]]=trim(row.data[field]);
+						}
 					}
 				} 
 				assignStruct=structnew();    
@@ -961,6 +960,10 @@ not important yet: create contacts at same time as create lead (use same functio
 				// abort;
 				if(importRow.inquiries_autoresponder_id NEQ 0){
 					ts.sendAutoresponder=true;
+				}
+				if(importRow.inquiries_import_file_disable_reminders EQ 1){
+					ts.inquiries_reminder_count=99;
+					ts.inquiries_reminder_sent_datetime=request.zos.mysqlnow;
 				}
 				form.inquiries_id=application.zcore.functions.zImportLead(ts);     
 				if(form.inquiries_id EQ false){

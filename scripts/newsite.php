@@ -18,7 +18,7 @@ if($host=="jetendodev.farbeyondcode.com"){
 
 if((int)date("i") % 4 == 0){
 	$avgLoad=explode(" ", `cat /proc/loadavg`);
-	$cpuLimit=3;
+	$cpuLimit=6;
 	if($avgLoad[1] >$cpuLimit){ 
 		$to      = get_cfg_var('jetendo_developer_email_to'); 
 		$subject = 'CPU load is very high on '.$host;
