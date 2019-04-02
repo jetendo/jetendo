@@ -471,7 +471,7 @@ function zLoadAddThisJsDeferred(){
 	setTimeout(zLoadAddThisJs, 300);
 }
 function zLoadAddThisJs(){
-	if(zIsTestServer()) return;
+	//if(zIsTestServer()) return;
 	var a1=[];
 	var found=false;
 	for(var i=1;i<=5;i++){
@@ -481,18 +481,11 @@ function zLoadAddThisJs(){
 		} 
 		if(d1){
 			found=true;
-			d1.innerHTML='<div style="float:left; padding-right:5px;padding-bottom:5px;"><div class="g-plus" data-action="share" data-annotation="bubble"></div></div><div style="float:left; padding-right:5px; padding-bottom:5px;"><iframe style="overflow: hidden; border: 0px none; width: 90px; height: 25px; " src="//www.facebook.com/plugins/like.php?href='+escape(window.location.href)+'&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font=arial&amp;layout=button_count"></iframe></div><div style="float:left; padding-right:5px; padding-bottom:5px;"><a href="https://www.facebook.com/sharer/sharer.php?u='+escape(window.location.href)+'" target="_blank" title="Share on Facebook"><img src="/z/images/blog/facebook-share.png" width="54" height="20" alt="Share on Facebook" /></a></div><div style="float:left; padding-right:5px; padding-bottom:5px;"><script type="IN/Share" data-counter="right"></script></div><div style="float:left; padding-right:5px;padding-bottom:5px;"><a class="twitter-share-button" href="https://twitter.com/share">Tweet</a></div>';
+			d1.innerHTML='<div style="float:left; padding-right:5px; padding-bottom:5px;"><a href="https://www.facebook.com/sharer/sharer.php?u='+escape(window.location.href)+'" target="_blank" title="Share on Facebook"><img src="/z/images/blog/facebook-share.png" width="54" height="20" alt="Share on Facebook" style="vertical-align:top;" /></a></div><div style="float:left; padding-right:5px; padding-bottom:5px;"><a href="http://www.linkedin.com/shareArticle?mini=true&amp;url='+escape(window.location.href)+'"><img src="/z/images/blog/linkedin-share.png" width="58" height="20" alt="Share on LinkedIn" style="vertical-align:top;" /></a></div><div style="float:left; padding-right:5px;padding-bottom:5px;"><a class="twitter-share-button" href="https://twitter.com/share?url='+escape(window.location.href)+'"><img src="/z/images/blog/tweet.png" width="60" height="20" alt="Share on Twitter" style="vertical-align:top;" /></a></div><div style="float:left; padding-right:5px; padding-bottom:5px;"><iframe style="overflow: hidden; border: 0px none; width: 90px; height: 25px; " src="//www.facebook.com/plugins/like.php?href='+escape(window.location.href)+'&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font=arial&amp;layout=button_count"></iframe></div>';
 
 			d1.id="zaddthisbox"+i+"_loaded";
 			a1.push(d1);
 		}
-	}
-	if(found){
-		zLoadFile("//platform.twitter.com/widgets.js","js");
-		zLoadFile("//platform.linkedin.com/in.js","js");
-	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-	    po.src = 'https://apis.google.com/js/platform.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
 	}
 }
 zArrLoadFunctions.push({functionName:zLoadAddThisJsDeferred});
