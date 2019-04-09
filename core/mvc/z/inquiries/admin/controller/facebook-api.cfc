@@ -13,7 +13,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 	<cfscript>
 	facebookConfig = arguments.facebookConfig;
 
-	variables.apiEndpoint   = 'https://graph.facebook.com/v2.8';
+	variables.apiEndpoint   = 'https://graph.facebook.com/v3.2';
 	variables.environment   = determineEnvironment();
 	variables.batchRequests = [];
 	variables.appId         = facebookConfig.appId;
@@ -151,7 +151,7 @@ api call is each id in a single http request.   batch doesn't bypass api limits
 </cffunction> 
 
 <!--- INSIGHTS --->
-<!--- https://developers.facebook.com/docs/graph-api/reference/v2.8/insights --->
+<!--- https://developers.facebook.com/docs/graph-api/reference/v3.2/insights --->
 
 <cffunction name="getPageImpressions" localmode="modern" access="public">
 	<cfargument name="pageId" type="string" required="yes">
@@ -399,6 +399,10 @@ if(rs.success){
 				}
 			}
 			form.lastSuccessfulRequestHTTP=result;
+			if(structkeyexists(form, 'dumpResponse')){
+				writedump(ss.params);
+				writedump(result);
+			}
 			// lets never cache anything for now:
 			//application.zcore.functions.zwritefile(filepath, serializeJson(result));
 			sleep(400); // avoid api limits

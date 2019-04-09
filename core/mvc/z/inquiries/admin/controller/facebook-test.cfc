@@ -492,12 +492,12 @@ these tables are done:
 			// grab page fans and age groups separately on the last day of the month only
 			ts={
 				method:'GET',
-				link:'/#page.id#/insights',//?metric=page_fans,page_fans_gender_age,page_views_total&period=lifetime&since=' & endDateRemote & '&until=' & endDateRemote,
+				link:'/#page.id#/insights',//?metric=page_fans,page_fans_gender_age,page_views_total&period=day&since=' & endDateRemote & '&until=' & endDateRemote,
 				throwOnError:false,
 				requestParams:{
 					//tab:"app_customTab1",
 					metric:"page_fans,page_fans_gender_age,page_views_total",
-					period:"lifetime",
+					period:"day",
 					since:endDateRemote,
 					until:endDateRemote,
 					access_token:pageAccessToken
@@ -570,6 +570,9 @@ these tables are done:
 					access_token:pageAccessToken
 				}
 			};
+			if(structkeyexists(form, 'dumpResponse')){
+				writedump(pageInfo);
+			}
 				echo('<p>'&ts.link&'</p>');
 			if(request.debug){
 				rs2=request.debugRS.pageInsightsDaily;
@@ -1039,7 +1042,7 @@ getPostDetails
 			// post clicks and others come from insight api instead - consumption was measured on page, is it measured on post too?
 			ts2={
 				method:"GET",
-				link:'/' & row.facebook_post_external_id & '/insights?metric='&urlencodedformat("post_stories,post_video_views,post_negative_feedback,post_consumptions,post_consumptions_by_type,post_impressions,post_impressions_unique,post_engaged_users,post_engaged_fan,post_fan_reach")&'&period=lifetime'
+				link:'/' & row.facebook_post_external_id & '/insights?metric='&urlencodedformat("post_stories,post_video_views,post_negative_feedback,post_consumptions,post_consumptions_by_type,post_impressions,post_impressions_unique,post_engaged_users,post_engaged_fan,post_fan_reach")&'&period=day'
 			}; 
 			application.facebookImportStatus="Post API call #ts2.link#";
 
