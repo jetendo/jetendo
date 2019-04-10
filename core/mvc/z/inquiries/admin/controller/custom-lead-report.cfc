@@ -1736,7 +1736,7 @@ leadchart
 	keyword_ranking_deleted=#db.param(0)# and 
 	keyword_ranking_source<> #db.param(4)# 
 	GROUP BY keyword_ranking_source_id, keyword_ranking_keyword";
-	qKeywordList=db.execute("qKeywordList");   
+	qKeywordList=db.execute("qKeywordList", "", 10000, "query", false);   
 
 	db.sql="select *,
 	DATE_FORMAT(keyword_ranking_run_datetime, #db.param('%Y-%m')#) date, 
@@ -2520,12 +2520,26 @@ leadchart
 	db.sql&="
 	ORDER BY inquiries_datetime ASC ";
 	request.leadData.qWebLead=db.execute("qWebLead", "", 10000, "query", false);
+	request.leadData.phoneSourceGroup={};
+	request.leadData.phoneSourceGroupOffset={};
 	request.leadData.phoneGroup={};
 	request.leadData.phoneGroupOffset={};
 	request.leadData.webFormGroup={};
 	request.leadData.webFormGroupOffset={};
 	count=0;
 	hasData=false;
+
+
+	searchStruct={
+		"google.":"Google Organic",
+		"bing.":"Bing Organic",
+		"yahoo.":"Yahoo",
+		"aol.":"AOL.com",
+		"facebook.":"Facebook",
+		".ask.":"Ask.com",
+		".live.com":"Live.com"
+	};
+	request.leadData.phoneStruct={Other:{label:"Other", count:0}};
 	for(row in request.leadData.qPhone){
 		js=deserializeJson(row.inquiries_custom_json);
 		fs={
@@ -2534,7 +2548,9 @@ leadchart
 			"source":"",
 			"city":"",
 			"tracking_label":"",
-			"called_at":""
+			"called_at":"",
+			"web_source":"",
+			"referrer":""
 		};
 		if(isStruct(js) and structkeyexists(js, 'arrCustom')){
 			for(field in js.arrCustom){
@@ -2546,6 +2562,49 @@ leadchart
 		if(label EQ ""){
 			label=source;
 		}
+
+		webSource=fs.web_source;
+		if(webSource EQ ""){
+			webSource=fs.referrer;
+		}
+		// process webSource
+		webSource=REPLACE(replacenocase(replacenocase(webSource, 'http://', ""), 'https://', ""), "www.", "");
+		pos=find("/", webSource);
+		if(pos GT 1){
+			webSource=left(webSource, pos-1);
+		}
+		if(webSource EQ ""){
+			request.leadData.phoneStruct["Other"].count+=1;
+		}else{
+			match=false;
+			for(search in searchStruct){
+				if(webSource CONTAINS search){
+					match=true;
+					if(structkeyexists(request.leadData.phoneStruct, searchStruct[search])){
+						request.leadData.phoneStruct[searchStruct[search]].count+=1;
+					}else{
+						request.leadData.phoneStruct[searchStruct[search]]={label:searchStruct[search], count:1};
+					}
+				}
+			}
+			if(not match){
+				if(structkeyexists(request.leadData.phoneStruct, searchStruct[search])){
+					request.leadData.phoneStruct[searchStruct[search]].count+=1;
+				}else{
+					request.leadData.phoneStruct[searchStruct[search]]={label:searchStruct[search], count:1};
+				}
+			}
+		}
+
+		if(not structkeyexists(request.leadData.phoneSourceGroupOffset, webSource)){
+			request.leadData.phoneSourceGroupOffset[webSource]=count;
+			request.leadData.phoneSourceGroup[count]={
+				label:webSource, 
+				count:0
+			};
+		}
+		request.leadData.phoneSourceGroup[request.leadData.phoneSourceGroupOffset[webSource]].count++;
+
 		if(not structkeyexists(request.leadData.phoneGroupOffset, label)){
 			request.leadData.phoneGroupOffset[label]=count;
 			request.leadData.phoneGroup[count]={
@@ -2557,6 +2616,8 @@ leadchart
 		count++;
 		hasData=true;
 	}
+	request.leadData.arrPhone=structsort(request.leadData.phoneStruct, "numeric", "desc", "count");
+
 
 	count=0;
 	for(row in request.leadData.qWebLead){
@@ -2823,9 +2884,9 @@ track_user_first_page
 		</cfscript> 
 		#request.leadData.footerSummaryOut#
 		<cfif request.leadData.qPhone.recordcount or request.leadData.qWebLead.recordcount> 
-			<h2 style="margin-top:0px;">Lead Summary By Type</h2>
+			<h2 style="margin-top:0px;">Lead Summary</h2>
 			<cfif request.leadData.qPhone.recordcount>  
-				<h3>Phone Calls by <cfif request.leadData.qSite.site_phone_tracking_label_text EQ "">Tracking Label<cfelse>#request.leadData.qSite.site_phone_tracking_label_text#</cfif></h3>
+				<h3>Phone Calls by <cfif request.leadData.qSite.site_phone_tracking_label_text EQ "">Source<cfelse>#request.leadData.qSite.site_phone_tracking_label_text#</cfif></h3>
 				<cfscript> 
 				echo('<table style="font-size:12px;">'); 
 				arrGroupSort=structsort(request.leadData.phoneGroup, "numeric", "desc", "count");
@@ -2857,65 +2918,219 @@ track_user_first_page
 				echo('</table>');
 				</cfscript>
 			</cfif> 
-			<cfscript>
-			db.sql="SELECT track_user_source, COUNT(track_user_id) `count` 
-			FROM #db.table("track_user", request.zos.zcoreDatasource)# 
-			WHERE track_user_source<>#db.param('')# AND 
-			site_id = #db.param(request.zos.globals.id)#
-			AND  
-			track_user_deleted=#db.param(0)# and 
-			(DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
-			DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#) 
-			GROUP BY track_user_source 
-			ORDER BY track_user_source ASC ";
-			 qTrack=db.execute("qTrack"); 
 
-			db.sql="SELECT COUNT(track_user_id) `count` 
-			FROM #db.table("track_user", request.zos.zcoreDatasource)# 
-			WHERE  
-			site_id = #db.param(request.zos.globals.id)# 
-			AND  
-			(DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
-			DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
-			track_user_deleted=#db.param(0)# and 
-			track_user_referer NOT LIKE #db.param('%doubleclick%')# AND 
-			track_user_referer NOT LIKE #db.param('%/aclk%')# AND 
-			(track_user_referer LIKE #db.param('%search.%')# OR 
-			track_user_referer LIKE #db.param('%google%')# OR 
-			track_user_referer LIKE #db.param('%bing%')# OR 
-			track_user_referer LIKE #db.param('%android%')# )";
-			 qTrack2=db.execute("qTrack2"); 
 
-			if(qTrack.recordcount NEQ 0){
-				echo('
-					<br>
-				<h3>Web Form Leads By Tracking Label</h3>
-				<table style="font-size:12px;">
-					<tr>
-						<th style="text-align:left;">Label</th>
-						<th style="text-align:left;">## of Leads</th>
-					</tr>');
+			<cfif request.leadData.qPhone.recordcount GT 0>  
+				<br>
+				<h3>Phone Calls By Source</h3>
+				<cfscript> 
+				echo('<table style="font-size:12px;">'); 
+
 				rowCount+=3;
-				for(row in qTrack){
-					if(row.count NEQ 0){
+				for(i=1;i<=arraylen(request.leadData.arrPhone);i++){
+					source=request.leadData.phoneStruct[request.leadData.arrPhone[i]];
+					if(source.count NEQ 0){
 						echo('<tr>
-							<td>#row.track_user_source#</td>
-							<td>#row.count#</td>
+							<td>#source.count# leads</td>
+							<td>#source.label#</td>
 						</tr>'); 
 						rowCount++;
 					}
 				}
-				for(row in qTrack2){
-					if(row.count NEQ 0){
-						echo('<tr>
-							<td>Organic Search</td>
-							<td>#row.count#</td>
-						</tr>');
-						rowCount++;
+				// arrGroupSort=structsort(request.leadData.phoneGroup, "numeric", "desc", "count");
+				// for(i=1;i<=arraylen(arrGroupSort);i++){
+				// 	c=request.leadData.phoneGroup[arrGroupSort[i]];
+				// 	if(rowCount > 30){
+				// 		if(structkeyexists(form, 'print')){
+				// 			echo('</table>');
+
+				// 			showFooter();
+				// 			echo('<h3>Phone Calls by Source</h3><table style="font-size:12px;">'); 
+				// 		}else{
+				// 			request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
+				// 		}
+				// 		rowCount=0;
+				// 	}
+				// 	echo('<tr><td style="width:1%; white-space:nowrap;">');
+				// 	echo(numberformat(c.count));
+				// 	echo(' calls</td>');
+
+				// 	if(c.label EQ ""){ 
+				// 		echo('<td style=" padding-left:10px;">(No Label)</td>');
+				// 	}else{
+				// 		echo('<td style=" padding-left:10px;">#c.label#</td>');
+				// 	}
+				// 	echo('</tr>');
+				// 	rowCount++;
+				// }
+				echo('</table>');
+				</cfscript>
+			</cfif> 
+			<cfscript>
+			// db.sql="SELECT track_user_source, COUNT(track_user_id) `count` 
+			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
+			// WHERE track_user_source<>#db.param('')# AND 
+			// site_id = #db.param(request.zos.globals.id)#
+			// AND  
+			// track_user_deleted=#db.param(0)# and 
+			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
+			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#) 
+			// GROUP BY track_user_source 
+			// ORDER BY track_user_source ASC ";
+			//  qTrack=db.execute("qTrack"); 
+
+			// db.sql="SELECT COUNT(track_user_id) `count` 
+			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
+			// WHERE  
+			// site_id = #db.param(request.zos.globals.id)# 
+			// AND  
+			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
+			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
+			// track_user_deleted=#db.param(0)# and 
+			// track_user_referer NOT LIKE #db.param('%doubleclick%')# AND 
+			// track_user_referer NOT LIKE #db.param('%/aclk%')# AND 
+			// (track_user_referer LIKE #db.param('%search.%')# OR 
+			// track_user_referer LIKE #db.param('%google%')# OR 
+			// track_user_referer LIKE #db.param('%bing%')# OR 
+			// track_user_referer LIKE #db.param('%android%')# )";
+			//  qTrack2=db.execute("qTrack2"); 
+
+
+			// db.sql="SELECT track_user_referer, COUNT(track_user_id) `count` 
+			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
+			// WHERE  
+			// site_id = #db.param(request.zos.globals.id)# 
+			// AND  
+			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
+			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
+			// track_user_deleted=#db.param(0)#  group by track_user_referer";
+			//  qTrackForm=db.execute("qTrackForm"); 
+
+			db.sql="SELECT replace(SUBSTRING_INDEX(SUBSTRING_INDEX(track_user_referer, #db.param('/')#, #db.param(3)#), #db.param('/')#, #db.param(-1)#), #db.param("www.")#, #db.param("")#) domain, track_user_ppc as ppc FROM #db.table("track_user", request.zos.zcoreDatasource)# 
+			LEFT JOIN #db.table("track_user_x_convert", request.zos.zcoreDatasource)# ON 
+			track_user_x_convert.site_id = track_user.site_id and 
+			track_user_x_convert.track_user_id=track_user.track_user_id and 
+			track_user_x_convert_deleted=#db.param(0)# 
+			where track_user.site_id = #db.param(request.zos.globals.id)# AND  
+			(DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
+			DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
+			track_user_deleted=#db.param(0)#  
+			ORDER BY domain asc";
+			qTrackForm=db.execute("qTrackForm", "", 10000, "query", false); 
+			// writedump(qTrackForm);
+
+
+			searchStruct={
+				"google.":"Google Organic",
+				"bing.":"Bing Organic",
+				"yahoo.":"Yahoo",
+				"aol.":"AOL.com",
+				"facebook.":"Facebook",
+				".ask.":"Ask.com",
+				".live.com":"Live.com"
+			};
+			formStruct={Direct:{label:"Direct", count:0}};
+			for(row in qTrackForm){
+				if(row.ppc EQ 1){
+					if(structkeyexists(formStruct, "Google Ads")){
+						formStruct["Google Ads"].count+=1;
+					}else{
+						formStruct["Google Ads"]={label:"Google Ads", count:1};
+					}
+				}else if(row.domain EQ ""){
+					formStruct["Direct"].count+=1;
+				}else{
+					match=false;
+					for(search in searchStruct){
+						if(row.domain CONTAINS search){
+							match=true;
+							if(structkeyexists(formStruct, searchStruct[search])){
+								formStruct[searchStruct[search]].count+=1;
+							}else{
+								formStruct[searchStruct[search]]={label:searchStruct[search], count:1};
+							}
+						}
+					}
+					if(not match){
+						if(structkeyexists(formStruct, "Other")){
+							formStruct["Other"].count+=1;
+						}else{
+							formStruct["Other"]={label:"Other", count:1};
+						}
 					}
 				}
-				echo('</table>');
 			}
+			arrForm=structsort(formStruct, "numeric", "desc", "count");
+			// writedump(qTrackForm);
+			// writedump(formStruct);
+			// abort;
+			/*
+track_user_source has these values:
+	"newsletter"
+	"quote-email"
+	"adwords,adwords"
+	"google1"
+	"ppc-daytona"
+	"googleppc"
+	"google"
+	"visitcocoabeach"
+	"mycampaign2"
+	"adwords"
+			*/
+
+			// if(qTrack.recordcount NEQ 0){
+			// 	echo('
+			// 		<br>
+			// 	<h3>Web Form Leads By Tracking Label</h3>
+			// 	<table style="font-size:12px;">
+			// 		');
+			// <tr>
+			// 			<th style="text-align:left;">## of Leads</th>
+			// 			<th style="text-align:left;">Label</th>
+			// 		</tr>
+			// 	rowCount+=3;
+			// 	for(row in qTrack){
+			// 		if(row.count NEQ 0){
+			// 			echo('<tr>
+			// 				<td>#row.count# leads</td>
+			// 				<td>#row.track_user_source#</td>
+			// 			</tr>'); 
+			// 			rowCount++;
+			// 		}
+			// 	}
+			// 	for(row in qTrack2){
+			// 		if(row.count NEQ 0){
+			// 			echo('<tr>
+			// 				<td>#row.count# leads</td>
+			// 				<td>Organic Search</td>
+			// 			</tr>');
+			// 			rowCount++;
+			// 		}
+			// 	}
+			// 	echo('</table>');
+			// }
+
+			echo('
+				<br>
+			<h3>Web Form Leads By Source</h3>
+			<table style="font-size:12px;">
+				');
+			// <tr>
+				// 	<th style="text-align:left;">## of Leads</th>
+				// 	<th style="text-align:left;">Source</th>
+				// </tr>
+			rowCount+=3;
+			for(i=1;i<=arraylen(arrForm);i++){
+				source=formStruct[arrForm[i]];
+				if(source.count NEQ 0){
+					echo('<tr>
+						<td>#source.count# leads</td>
+						<td>#source.label#</td>
+					</tr>'); 
+					rowCount++;
+				}
+			}
+			echo('</table>');
 			</cfscript>
 			 
 			<cfif request.leadData.qWebLead.recordcount>
@@ -2931,7 +3146,7 @@ track_user_first_page
 							echo('</table>');
 
 							showFooter();
-							echo('<h3>Phone Calls by Tracking Label</h3><table style="font-size:12px;">');
+							echo('<h3>Web Form Leads by Lead Type</h3><table style="font-size:12px;">');
 						}else{
 							request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
 						}
