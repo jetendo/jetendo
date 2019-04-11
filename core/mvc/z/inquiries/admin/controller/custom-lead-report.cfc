@@ -2897,9 +2897,18 @@ track_user_first_page
 							echo('</table>');
 
 							showFooter();
-							echo('<h3>Phone Calls by Tracking Label</h3><table style="font-size:12px;">'); 
+							echo('<h3>Phone Calls by ');
+							if(request.leadData.qSite.site_phone_tracking_label_text EQ ""){
+								echo('Source');
+							}else{
+								echo(request.leadData.qSite.site_phone_tracking_label_text);
+							}
+							echo('</h3><table style="font-size:12px;">'); 
 						}else{
-							request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
+							request.leadData.pageCount++; 
+							if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ 
+								echo('page: #request.leadData.pageCount#<br>'); 
+							}
 						}
 						rowCount=0;
 					}
@@ -2928,6 +2937,17 @@ track_user_first_page
 
 				rowCount+=3;
 				for(i=1;i<=arraylen(request.leadData.arrPhone);i++){
+					if(rowCount > 30){
+						if(structkeyexists(form, 'print')){
+							echo('</table>');
+
+							showFooter();
+							echo('<h3>Phone Calls by Source</h3><table style="font-size:12px;">'); 
+						}else{
+							request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
+						}
+						rowCount=0;
+					}
 					source=request.leadData.phoneStruct[request.leadData.arrPhone[i]];
 					if(source.count NEQ 0){
 						echo('<tr>
@@ -2937,75 +2957,10 @@ track_user_first_page
 						rowCount++;
 					}
 				}
-				// arrGroupSort=structsort(request.leadData.phoneGroup, "numeric", "desc", "count");
-				// for(i=1;i<=arraylen(arrGroupSort);i++){
-				// 	c=request.leadData.phoneGroup[arrGroupSort[i]];
-				// 	if(rowCount > 30){
-				// 		if(structkeyexists(form, 'print')){
-				// 			echo('</table>');
-
-				// 			showFooter();
-				// 			echo('<h3>Phone Calls by Source</h3><table style="font-size:12px;">'); 
-				// 		}else{
-				// 			request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
-				// 		}
-				// 		rowCount=0;
-				// 	}
-				// 	echo('<tr><td style="width:1%; white-space:nowrap;">');
-				// 	echo(numberformat(c.count));
-				// 	echo(' calls</td>');
-
-				// 	if(c.label EQ ""){ 
-				// 		echo('<td style=" padding-left:10px;">(No Label)</td>');
-				// 	}else{
-				// 		echo('<td style=" padding-left:10px;">#c.label#</td>');
-				// 	}
-				// 	echo('</tr>');
-				// 	rowCount++;
-				// }
 				echo('</table>');
 				</cfscript>
 			</cfif> 
 			<cfscript>
-			// db.sql="SELECT track_user_source, COUNT(track_user_id) `count` 
-			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
-			// WHERE track_user_source<>#db.param('')# AND 
-			// site_id = #db.param(request.zos.globals.id)#
-			// AND  
-			// track_user_deleted=#db.param(0)# and 
-			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
-			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#) 
-			// GROUP BY track_user_source 
-			// ORDER BY track_user_source ASC ";
-			//  qTrack=db.execute("qTrack"); 
-
-			// db.sql="SELECT COUNT(track_user_id) `count` 
-			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
-			// WHERE  
-			// site_id = #db.param(request.zos.globals.id)# 
-			// AND  
-			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
-			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
-			// track_user_deleted=#db.param(0)# and 
-			// track_user_referer NOT LIKE #db.param('%doubleclick%')# AND 
-			// track_user_referer NOT LIKE #db.param('%/aclk%')# AND 
-			// (track_user_referer LIKE #db.param('%search.%')# OR 
-			// track_user_referer LIKE #db.param('%google%')# OR 
-			// track_user_referer LIKE #db.param('%bing%')# OR 
-			// track_user_referer LIKE #db.param('%android%')# )";
-			//  qTrack2=db.execute("qTrack2"); 
-
-
-			// db.sql="SELECT track_user_referer, COUNT(track_user_id) `count` 
-			// FROM #db.table("track_user", request.zos.zcoreDatasource)# 
-			// WHERE  
-			// site_id = #db.param(request.zos.globals.id)# 
-			// AND  
-			// (DATE_FORMAT(track_user_recent_datetime,#db.param("%Y-%m-%d")#) >= #db.param(dateformat(request.leadData.startMonthDate, "yyyy-mm-dd"))# AND 
-			// DATE_FORMAT(track_user_datetime,#db.param("%Y-%m-%d")#) <= #db.param(dateformat(request.leadData.endDate, "yyyy-mm-dd"))#)  AND 
-			// track_user_deleted=#db.param(0)#  group by track_user_referer";
-			//  qTrackForm=db.execute("qTrackForm"); 
-
 			db.sql="SELECT replace(SUBSTRING_INDEX(SUBSTRING_INDEX(track_user_referer, #db.param('/')#, #db.param(3)#), #db.param('/')#, #db.param(-1)#), #db.param("www.")#, #db.param("")#) domain, track_user_ppc as ppc FROM #db.table("track_user", request.zos.zcoreDatasource)# 
 			LEFT JOIN #db.table("track_user_x_convert", request.zos.zcoreDatasource)# ON 
 			track_user_x_convert.site_id = track_user.site_id and 
@@ -3017,7 +2972,6 @@ track_user_first_page
 			track_user_deleted=#db.param(0)#  
 			ORDER BY domain asc";
 			qTrackForm=db.execute("qTrackForm", "", 10000, "query", false); 
-			// writedump(qTrackForm);
 
 
 			searchStruct={
@@ -3078,38 +3032,6 @@ track_user_source has these values:
 	"adwords"
 			*/
 
-			// if(qTrack.recordcount NEQ 0){
-			// 	echo('
-			// 		<br>
-			// 	<h3>Web Form Leads By Tracking Label</h3>
-			// 	<table style="font-size:12px;">
-			// 		');
-			// <tr>
-			// 			<th style="text-align:left;">## of Leads</th>
-			// 			<th style="text-align:left;">Label</th>
-			// 		</tr>
-			// 	rowCount+=3;
-			// 	for(row in qTrack){
-			// 		if(row.count NEQ 0){
-			// 			echo('<tr>
-			// 				<td>#row.count# leads</td>
-			// 				<td>#row.track_user_source#</td>
-			// 			</tr>'); 
-			// 			rowCount++;
-			// 		}
-			// 	}
-			// 	for(row in qTrack2){
-			// 		if(row.count NEQ 0){
-			// 			echo('<tr>
-			// 				<td>#row.count# leads</td>
-			// 				<td>Organic Search</td>
-			// 			</tr>');
-			// 			rowCount++;
-			// 		}
-			// 	}
-			// 	echo('</table>');
-			// }
-
 			echo('
 				<br>
 			<h3>Web Form Leads By Source</h3>
@@ -3123,6 +3045,17 @@ track_user_source has these values:
 			for(i=1;i<=arraylen(arrForm);i++){
 				source=formStruct[arrForm[i]];
 				if(source.count NEQ 0){
+					if(rowCount > 30){
+						if(structkeyexists(form, 'print')){
+							echo('</table>');
+
+							showFooter();
+							echo('<h3>Web Form Leads By Source</h3><table style="font-size:12px;">'); 
+						}else{
+							request.leadData.pageCount++; if(request.zos.isdeveloper and structkeyexists(form, 'debugpage')){ echo('page: #request.leadData.pageCount#<br>'); }
+						}
+						rowCount=0;
+					}
 					echo('<tr>
 						<td>#source.count# leads</td>
 						<td>#source.label#</td>
