@@ -1878,6 +1878,7 @@ if(rs.success){
 	<cfscript>
 	ts={
 		passive:"yes",  // "yes" or "no"
+		port:21,
 		transfermode: "ASCII", // "auto", "ASCII" or "binary"
 		timeout:20 // number of seconds before failing
 	}
@@ -1887,7 +1888,7 @@ if(rs.success){
 	application.zcore.functions.zdeletefile(tempPath);
 	
 	try{
-		ftp action="GETFILE" username="#ss.username#" password="#ss.password#" server="#ss.server#"  localfile="#tempPath#" remotefile="#ss.remoteFilePath#" connection="conn" transfermode="#ss.transfermode#" failifexists="No" timeout="#ss.timeout#" passive="#ss.passive#" stoponerror="No"; 
+		ftp action="GETFILE" username="#ss.username#" port="#ss.port#" password="#ss.password#" server="#ss.server#"  localfile="#tempPath#" remotefile="#ss.remoteFilePath#" connection="conn" transfermode="#ss.transfermode#" failifexists="No" timeout="#ss.timeout#" passive="#ss.passive#" stoponerror="No"; 
 	}catch(Any e){
 		application.zcore.functions.zdeletefile(tempPath);
 		savecontent variable="out"{
