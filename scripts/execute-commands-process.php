@@ -1992,7 +1992,12 @@ function saveFaviconSet($a){
 		$found=true;
 	} 
 	if($found){
-		$cmd="/usr/bin/identify -quiet -format '%w,%h,%[colorspace],%Q' ".escapeshellarg($sourceFilePath)." 2>&1";
+		$ext=strtolower(substr($sourceFilePath, -4));
+		$identifyPath=$sourceFilePath;
+		if($ext == ".gif"){
+			$identifyPath.="[0]";
+		}
+		$cmd="/usr/bin/identify -quiet -format '%w,%h,%[colorspace],%Q' ".escapeshellarg($identifyPath)." 2>&1";
 		$r=`$cmd`;
 
 		$a=explode(",", trim($r));
@@ -2132,6 +2137,10 @@ function getImageMagickIdentify($a){
 			$found=true;
 		}
 		if($found){
+			$ext=strtolower(substr($path, -4));
+			if($ext == ".gif"){
+				$path.="[0]";
+			}
 			$cmd	= "/usr/bin/identify -quiet -format '%w|%h|%[colorspace]|%Q|%[exif:orientation]|%[exif:GPSLatitude],%[exif:GPSLatitudeRef]|%[exif:GPSLongitude],%[exif:GPSLongitudeRef]|%[exif:GPSAltitude]|%[exif:DateTime]' ".escapeshellarg($path)." 2>&1";
 			$r		= `$cmd`;
 			//$a	= explode("|", trim($r));
