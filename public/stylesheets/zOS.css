@@ -1159,8 +1159,9 @@ a.z-manager-assign:hover span{ color:#369;}
 .zDesktopOnly{display:block;}
 .zImageLibraryImageRight{float:right; margin-left:20px; margin-bottom:20px;}
 .zImageLibraryImageLeft{float:left; margin-right:20px; margin-bottom:20px;}
-.zImageLibraryImageLeft img{max-width:100%;}
-.zImageLibraryImageRight img{max-width:100%;}
+.zImageLibraryImageLeft img{max-width:100% !important;}
+.zImageLibraryImageRight img{max-width:100% !important;}
+
 @media only screen and (max-width: 1362px) {
 	.zImageLibraryImageRight{width:60% !important;}
 	.zImageLibraryImageLeft{width:60% !important;}
