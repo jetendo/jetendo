@@ -1296,7 +1296,7 @@ displaySchemaCom.ajaxInsert();
 		<cfloop query="qProp">
 		<tr <cfif qProp.currentrow MOD 2 EQ 0>class="row1"<cfelse>class="row2"</cfif>>
 			<td>#qProp.feature_schema_id#</td>
-			<td>#qProp.feature_schema_variable_name#</td>
+			<td>#qProp.feature_schema_display_name#</td>
 			<td><cfif qProp.feature_schema_disable_admin EQ 1>
 					Yes
 				<cfelse>
