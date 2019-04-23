@@ -266,6 +266,9 @@
 
 <cffunction name="thank-you" localmode="modern" access="remote">
 	<cfscript>
+	if(not application.zcore.app.siteHasApp( 'job' )){
+		application.zcore.functions.z404("Job application not enabled");
+	}
 	if(application.zcore.functions.zso(application.zcore.app.getAppData( 'job' ).optionStruct, 'job_config_disable_apply_online', true, 0) EQ 1){
 		application.zcore.functions.z404("Apply online is disabled");
 	}

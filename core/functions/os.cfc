@@ -146,17 +146,28 @@
 	var qSite=db.execute("qSite");
 	var arrTemp=[];
 	arrTemp3=[];
+	uniqueStruct={};
 	for(var row in qSite){
 		var arrTemp2=listToArray(row.site_domainaliases,",");
 		var primaryPath=replace(application.zcore.functions.zGetDomainInstallPath(row.site_short_domain), request.zos.installPath&"sites/", "");
 		primaryPath=left(primaryPath, len(primaryPath)-1);
 		var primaryDomain=replace(replace(row.site_domain, 'http://', ''), 'https://', '');
-		arrayAppend(arrTemp, primaryDomain&' "'&primaryPath&'"; ## primary'&chr(10));
+
+		if(not structkeyexists(uniqueStruct, primaryDomain)){
+			uniqueStruct[primaryDomain]=true;
+			arrayAppend(arrTemp, primaryDomain&' "'&primaryPath&'"; ## primary'&chr(10));
+		}
 		for(var i=1;i LTE arrayLen(arrTemp2);i++){
-			arrayAppend(arrTemp, trim(arrTemp2[i])&' "'&primaryPath&'";'&chr(10));
+			if(not structkeyexists(uniqueStruct, arrTemp2[i])){
+				uniqueStruct[arrTemp2[i]]=true;
+				arrayAppend(arrTemp, trim(arrTemp2[i])&' "'&primaryPath&'";'&chr(10));
+			}
 		}
 		if(row.site_ssl_manager_domain NEQ ""){
-			arrayAppend(arrTemp, trim(row.site_ssl_manager_domain)&' "'&primaryPath&'";'&chr(10));
+			if(not structkeyexists(uniqueStruct, row.site_ssl_manager_domain)){
+				uniqueStruct[row.site_ssl_manager_domain]=true;
+				arrayAppend(arrTemp, trim(row.site_ssl_manager_domain)&' "'&primaryPath&'";'&chr(10));
+			}
 		}
 		arrayAppend(arrTemp, chr(10));
 		if(row["site_enable_nginx_proxy_cache"] == "1"){
@@ -2423,10 +2434,10 @@ not used
 			if(left(row.site_domain, 8) EQ "https://"){
 				p="https://";
 			}
-			StructInsert(tempStruct, p&trim(arrTemp[i]), row.site_id, false);
+			tempStruct[p&trim(arrTemp[i])]=row.site_id;
 		}
 		if(row.site_ssl_manager_domain NEQ ""){
-			StructInsert(tempStruct, 'https://'&trim(row.site_ssl_manager_domain), row.site_id, false);
+			tempStruct['https://'&trim(row.site_ssl_manager_domain)]=row.site_id;
 		}
 	}
 	application.zcore.functions.zWriteFile(request.zos.globals.serverprivatehomedir&'_cache/scripts/sites.json', serializeJson(tempStruct));

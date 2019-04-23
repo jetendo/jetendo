@@ -624,16 +624,6 @@
 			zos.zreset="";
 			form.zdebugurl=false;
 		}
-		if(not zos.enableSiteTemplateCache and zos.zreset EQ ""){
-			application.zcore.functions.zUpdateSiteMVCData(application.sitestruct[zos.globals.id]);
-			if(structkeyexists(application.zcore, 'compiledSiteTemplatePathCache')){
-				structdelete(application.zcore.compiledSiteTemplatePathCache, zos.globals.id);
-			}
-			if(structkeyexists(application.zcore, 'templateCFCCache')){
-				structdelete(application.zcore.templateCFCCache, zos.globals.id);
-			}
-		}
-
 
 		ts2={
 			enableCache:"everything", // One of these values: disabled, folders, everything |  keeps database record in memory for all operations
@@ -876,7 +866,7 @@
 				request.zRootSecurePath=replace(zos.globals.privatehomedir, zos.sitesWritablePath, '');
 				request.zOSHomeDir=zos.sitesPath&request.zRootPath; 
 				request.zRootPath="/"&request.zRootPath;
-				request.zRootCfcPath="jetendo-sites-writable."&replace(replace(request.zRootSecurePath,".","_","all"),"/",".","ALL")&".";  
+				request.zRootCfcPath="jetendo-sites-writable."&replace(replace(request.zRootSecurePath,".","_","all"),"/",".","ALL")&".";
 				zos.sslManagerEnabled=true;
 			}else{
 				redirectURL='https://'&lcase(zos.globals.sslManagerDomain)&zos.originalURL&"?"&zos.cgi.query_string;  
@@ -910,7 +900,7 @@
 					zos.domainAliasMatchFound=false;
 					for(zos.__t99=1;zos.__t99 LTE arraylen(zos.arrDomainAliases);zos.__t99++){
 						if(zos.cgi.http_host EQ zos.arrDomainAliases[zos.__t99]){
-							zos.domainAliasMatchFound=true;
+							zos.domainAliasMatchFound=true; 
 							break;	
 						}
 					}
@@ -936,7 +926,7 @@
 					if(zos.cgi.http_host EQ zos.arrDomainAliases[zos.__t99]){
 						zos.domainAliasMatchFound=true;
 						zos.currentHostName='http://'&lcase(zos.cgi.http_host); 
-						    request.zRootDomain=replace(replace(lcase(replace(replace(zos.globals.domain, "http://",""), "https://", "")),"www.",""),"."&zos.testDomain,"");
+						    request.zRootDomain=replace(replace(lcase(replace(replace(zos.globals.domain, "http://",""), "https://", "")),"www.",""),"."&zos.testDomain,""); 
 						    request.zCookieDomain=replace(lcase(request.zRootDomain),"www.","");
 						    request.zRootPath="/"&replace(request.zRootDomain,".","_","all")&"/";
 						    request.zOSHomeDir=zos.sitesPath&replace(request.zRootDomain,".","_","all")&"/"; 
@@ -951,6 +941,16 @@
 			}else{
 				application.zcore.functions.z404("System domain (#replace(replace(zos.globals.domain,"http://",""),"https://","")# doesn't match host name (#zos.cgi.http_host#).");	
 			}
+		}
+	} 
+
+	if(not zos.enableSiteTemplateCache and zos.zreset EQ ""){ 
+		application.zcore.functions.zUpdateSiteMVCData(application.sitestruct[zos.globals.id]);
+		if(structkeyexists(application.zcore, 'compiledSiteTemplatePathCache')){
+			structdelete(application.zcore.compiledSiteTemplatePathCache, zos.globals.id);
+		}
+		if(structkeyexists(application.zcore, 'templateCFCCache')){
+			structdelete(application.zcore.templateCFCCache, zos.globals.id);
 		}
 	}
 	application.zcore.template.init2(); 
