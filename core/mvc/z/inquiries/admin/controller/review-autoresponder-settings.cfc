@@ -72,12 +72,19 @@
 	myForm.inquiries_rating_setting_email_subject.required = true;
 	myForm.inquiries_rating_setting_email_subject.friendlyName = "Email Subject";
 	myForm.inquiries_rating_setting_type_id_list.required=true;
+	myForm.inquiries_rating_setting_type_id_list.friendlyName = "Lead Types";
 	myForm.inquiries_rating_setting_header_text.required=true;
+	myForm.inquiries_rating_setting_header_text.friendlyName="Header Text";
 	myForm.inquiries_rating_setting_footer_text.required=true;
+	myForm.inquiries_rating_setting_footer_text.friendlyName="Footer Text";
 	myForm.inquiries_rating_setting_email_delay_in_minutes.required=true;
+	myForm.inquiries_rating_setting_email_delay_in_minutes.friendlyName="Email Delay In Minutes";
 	myForm.inquiries_rating_setting_email_resend_limit.required=true;
+	myForm.inquiries_rating_setting_email_resend_limit.friendlyName="## of Times To Resend";
 	myForm.inquiries_rating_setting_type.required=true;
+	myForm.inquiries_rating_setting_type.friendlyName="Send On";
 	myForm.inquiries_rating_setting_low_rating_number.required=true;
+	myForm.inquiries_rating_setting_low_rating_number.friendlyName="Low Rating Threshold";
 
 	typeStruct=getTypeStruct();
 
@@ -87,6 +94,9 @@
 	WHERE
 	site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_rating_setting_deleted=#db.param(0)# ";
+	if(form.method EQ "update"){
+		db.sql&=" and inquiries_rating_setting_id <> #db.param(form.inquiries_rating_setting_id)# ";
+	}
 	qRating=db.execute("qRating");
 	arrId=listToArray(form.inquiries_rating_setting_type_id_list, ",");
 	if(qRating.recordcount NEQ 0){
@@ -437,14 +447,16 @@
 					}
 					arraySort(arrTypeName, "text", "asc");
 					echo(arrayToList(arrTypeName, ", "));
+
+					inquiries_type_id=listGetAt(arrType[1], 1, "|");
+					inquiries_type_id_siteidtype=listGetAt(arrType[1], 2, "|");
 					</cfscript>
 
 				</td>
 				<td class="z-manager-admin">
 					<div class="z-manager-button-container">
-						<a href="/z/inquiries/admin/review-autoresponder-settings/edit?inquiries_rating_setting_id=#qSetting.inquiries_rating_setting_id#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
-					</div>
-					<div class="z-manager-button-container">
+						<a href="/z/inquiries/review-autoresponder/testAutoresponder?inquiries_type_id=#inquiries_type_id#&inquiries_type_id_siteidtype=#inquiries_type_id_siteidtype#" class="z-manager-edit" title="View Autoresponder Email" target="_blank"><i class="fa fa-eye" aria-hidden="true"></i></a> 
+						<a href="/z/inquiries/admin/review-autoresponder-settings/edit?inquiries_rating_setting_id=#qSetting.inquiries_rating_setting_id#" class="z-manager-edit" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a> 
 						<a href="/z/inquiries/admin/review-autoresponder-settings/delete?inquiries_rating_setting_id=#qSetting.inquiries_rating_setting_id#" class="z-manager-delete" title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></a>
 					</div>
 				</td>
