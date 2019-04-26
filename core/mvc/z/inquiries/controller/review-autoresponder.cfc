@@ -71,8 +71,7 @@ reviewCom.sendEmail(inquiries_type_id, inquiries_type_id_siteIDType);
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
-	WHERE inquiries_type_id=#db.param(form.inquiries_type_id)# and 
-	inquiries_type_id_siteidtype=#db.param(form.inquiries_type_id_siteidtype)# and 
+	WHERE concat(#db.param(",")#, inquiries_rating_setting_type_id_list, #db.param(",")#) LIKE #db.param(","&form.inquiries_type_id&"|"&arguments.inquiries_type_id_siteIDType&",")# and 
 	site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_deleted=#db.param(0)# ";
 	qRating=db.execute("qRating");

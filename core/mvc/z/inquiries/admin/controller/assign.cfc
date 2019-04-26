@@ -662,9 +662,9 @@
 		if(qMember.recordcount EQ 0){
 			request.zsid = application.zcore.status.setStatus(Request.zsid, "User doesn't exist.",form,true);
 			if(form.method EQ "userAssign"){
-				application.zcore.functions.zRedirect("/z/inquiries/admin/assign/userIndex?inquiries_id=#inquiries_id#&zPageId=#form.zPageId#&zsid="&request.zsid);
+				application.zcore.functions.zRedirect("/z/inquiries/admin/assign/userIndex?inquiries_id=#form.inquiries_id#&zPageId=#form.zPageId#&zsid="&request.zsid);
 			}else{
-				application.zcore.functions.zRedirect("/z/inquiries/admin/assign/index?inquiries_id=#inquiries_id#&zPageId=#form.zPageId#&zsid="&request.zsid);
+				application.zcore.functions.zRedirect("/z/inquiries/admin/assign/index?inquiries_id=#form.inquiries_id#&zPageId=#form.zPageId#&zsid="&request.zsid);
 			}
 		}
 		form.assign_name=qMember.user_first_name&" "&qMember.user_last_name;

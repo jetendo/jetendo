@@ -71,8 +71,40 @@
 	}
 	myForm.inquiries_rating_setting_email_subject.required = true;
 	myForm.inquiries_rating_setting_email_subject.friendlyName = "Email Subject";
-	result = application.zcore.functions.zValidateStruct(form, myForm, Request.zsid,true);
-	if(result){	
+	myForm.inquiries_rating_setting_type_id_list.required=true;
+	myForm.inquiries_rating_setting_header_text.required=true;
+	myForm.inquiries_rating_setting_footer_text.required=true;
+	myForm.inquiries_rating_setting_email_delay_in_minutes.required=true;
+	myForm.inquiries_rating_setting_email_resend_limit.required=true;
+	myForm.inquiries_rating_setting_type.required=true;
+	myForm.inquiries_rating_setting_low_rating_number.required=true;
+
+	typeStruct=getTypeStruct();
+
+	hasErrors = application.zcore.functions.zValidateStruct(form, myForm, Request.zsid,true);
+
+	db.sql="select group_concat(inquiries_rating_setting_type_id_list SEPARATOR #db.param(",")#) idlist from #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
+	WHERE
+	site_id = #db.param(request.zos.globals.id)# and 
+	inquiries_rating_setting_deleted=#db.param(0)# ";
+	qRating=db.execute("qRating");
+	arrId=listToArray(form.inquiries_rating_setting_type_id_list, ",");
+	if(qRating.recordcount NEQ 0){
+		arrExistingId=listToArray(qRating.idlist, ",");
+		for(existingId in arrExistingId){
+			for(id in arrId){
+				if(existingId EQ id){
+					typeName="Missing Lead Type";
+					if(structkeyexists(typeStruct, id)){
+						typeName=typeStruct[id].inquiries_type_name;
+					}
+					application.zcore.status.setStatus(request.zsid, "Lead type, ""#typeName#"", already has a Review Autoresponder, and there can be only one per lead type.", form, true);
+					hasErrors=true;
+				}
+			}
+		}
+	}
+	if(hasErrors){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true);
 		if(form.method EQ 'insert'){
 			application.zcore.functions.zRedirect("/z/inquiries/admin/review-autoresponder-settings/add?zsid=#Request.zsid#");
@@ -141,10 +173,196 @@
 		Lead Review Autoresponder</h2>
 	<form class="zFormCheckDirty" action="/z/inquiries/admin/review-autoresponder-settings/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?inquiries_rating_setting_id=#form.inquiries_rating_setting_id#" method="post">
 		<table style="border-spacing:0px;" class="table-list">
+			
+			<cfscript>
+			if(form.inquiries_rating_setting_type EQ ""){
+				form.inquiries_rating_setting_type=0;
+			}
+			if(form.inquiries_rating_setting_low_rating_number EQ "" or form.inquiries_rating_setting_low_rating_number EQ 0){
+				form.inquiries_rating_setting_low_rating_number=3;
+			}
+			if(form.inquiries_rating_setting_email_resend_limit EQ "" or form.inquiries_rating_setting_email_resend_limit EQ 0){
+				form.inquiries_rating_setting_email_resend_limit=3;
+			}
+			if(form.inquiries_rating_setting_email_delay_in_minutes EQ "" or form.inquiries_rating_setting_email_delay_in_minutes EQ "0"){
+				form.inquiries_rating_setting_email_delay_in_minutes=86400;
+			}
+			if(form.inquiries_rating_setting_start_date EQ "" and form.method EQ "add"){
+				form.inquiries_rating_setting_start_date=dateadd("d", -30, now());
+			}
+			</cfscript>
 			<tr>
-				<th>Email Subject:</th>
-				<td><input type="text" name="inquiries_rating_setting_email_subject" value="#form.inquiries_rating_setting_email_subject#" /></td>
+				<th>Lead Types: *</th>
+				<td>
+					<cfscript> 
+					typeStruct=getTypeStruct();
+					arrType=[];
+					for(typeId in typeStruct){
+						arrayAppend(arrType, typeStruct[typeId]);
+					}
+					ts = StructNew();
+					ts.name = "inquiries_rating_setting_type_id_list"; 
+					ts.query = arrType; // this can be an array of structs or a query
+					ts.queryLabelField = "##inquiries_type_name##"; 
+					ts.queryParseLabelVars = true;
+					ts.queryParseValueVars = true;
+					ts.queryValueField = "##inquiries_type_id##|##siteidtype##";  
+					ts.multiple=true;
+					application.zcore.functions.zSetupMultipleSelect(ts.name, application.zcore.functions.zso(form, 'inquiries_rating_setting_type_id_list'));
+					application.zcore.functions.zInputSelectBox(ts);
+					</cfscript> 
+				</td>
 			</tr>
+			<tr>
+				<th>Send On:</th>
+				<td>
+					<cfscript>
+					ts = StructNew();
+					ts.name = "inquiries_rating_setting_type";
+					ts.labelList = "Every Lead|Every Day|First Lead Only";
+					ts.valueList = "0|1|2";
+					ts.delimiter="|";
+					ts.output=true;
+					ts.struct=form;
+					application.zcore.functions.zInput_RadioGroup(ts);
+					</cfscript>
+				</td>
+			</tr>
+			<tr>
+				<th>Email Subject: *</th>
+				<td><input type="text" name="inquiries_rating_setting_email_subject" value="#htmleditformat(form.inquiries_rating_setting_email_subject)#" /></td>
+			</tr>
+			<tr>
+				<th>Header:</th>
+				<td>
+					<cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "inquiries_rating_setting_header_text";
+					htmlEditor.value			= form.inquiries_rating_setting_header_text;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 350;
+					htmlEditor.create();
+					</cfscript>
+				</td>
+			</tr>
+			<tr>
+				<th>Body:</th>
+				<td>
+					<cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "inquiries_rating_setting_body_text";
+					htmlEditor.value			= form.inquiries_rating_setting_body_text;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 350;
+					htmlEditor.create();
+					</cfscript>
+				</td>
+			</tr>
+			<tr>
+				<th>Footer:</th>
+				<td>
+					<cfscript>
+					htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+					htmlEditor.instanceName	= "inquiries_rating_setting_footer_text";
+					htmlEditor.value			= form.inquiries_rating_setting_footer_text;
+					htmlEditor.width			= "100%";
+					htmlEditor.height		= 350;
+					htmlEditor.create();
+					</cfscript>
+				</td>
+			</tr>
+			<tr>
+				<th>Delay In Minutes: *</th>
+				<td>
+					<input type="number" name="inquiries_rating_setting_email_delay_in_minutes" value="#htmleditformat(form.inquiries_rating_setting_email_delay_in_minutes)#" /><br>
+					I.e. 1 Day would be 86400 minutes
+				</td>
+			</tr>
+			<tr>
+				<th>## of Times To Resend: *</th>
+				<td>
+					<input type="number" name="inquiries_rating_setting_email_resend_limit" value="#htmleditformat(form.inquiries_rating_setting_email_resend_limit)#" /><br>
+					Note: 0 will send forever until they unsubscribe or post a review.
+				</td>
+			</tr>
+			<tr>
+				<th>Start Date:</th>
+				<td>
+					<input type="date" name="inquiries_rating_setting_start_date" value="#htmleditformat(dateformat(form.inquiries_rating_setting_start_date, "yyyy-mm-dd"))#" />
+					<br>
+					Note: Review autoresponders will only be sent to leads created on or after the date specified.  Leaving this field blank will send the email to all existing leads.
+				</td>
+			</tr>
+			<tr>
+				<th>Low Rating Threshold:</th>
+				<td>
+					<input type="number" name="inquiries_rating_setting_low_rating_number" value="#htmleditformat(form.inquiries_rating_setting_low_rating_number)#" /><br>
+					Reviews at or below this number will see the Low Rating confirmation page instead of the High Rating confirmation page.
+				</td>
+			</tr>
+			<cfsavecontent variable="out">
+				<tr>
+					<th>Low Rating Heading:</th>
+					<td>
+						<input type="text" name="inquiries_rating_setting_low_rating_thanks_heading" value="#htmleditformat(form.inquiries_rating_setting_low_rating_thanks_heading)#" />
+					</td>
+				</tr>
+				<tr>
+					<th>Low Rating Body:</th>
+					<td>
+						<cfscript>
+						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+						htmlEditor.instanceName	= "inquiries_rating_setting_low_rating_thanks_body";
+						htmlEditor.value			= form.inquiries_rating_setting_low_rating_thanks_body;
+						htmlEditor.width			= "100%";
+						htmlEditor.height		= 350;
+						htmlEditor.create();
+						</cfscript>
+					</td>
+				</tr>
+				<tr>
+					<th>High Rating Heading:</th>
+					<td>
+						<input type="text" name="inquiries_rating_setting_high_rating_thanks_heading" value="#htmleditformat(form.inquiries_rating_setting_high_rating_thanks_heading)#" />
+					</td>
+				</tr>
+				<tr>
+					<th>High Rating Body:</th>
+					<td>
+						<cfscript>
+						htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+						htmlEditor.instanceName	= "inquiries_rating_setting_high_rating_thanks_body";
+						htmlEditor.value			= form.inquiries_rating_setting_high_rating_thanks_body;
+						htmlEditor.width			= "100%";
+						htmlEditor.height		= 350;
+						htmlEditor.create();
+						</cfscript>
+					</td>
+				</tr>
+			</cfsavecontent>
+			<cfif not request.zos.isDeveloper>
+				<cfif form.inquiries_rating_setting_thanks_cfc_object NEQ "">
+					<tr><th>Confirmation Page</th><td>Overridden by the developer</td></tr>
+				<cfelse>
+					#out#
+
+				</cfif>
+			<cfelse>
+				#out#
+				<tr>
+					<th>Confirmation CFC Object:</th>
+					<td>
+						<input type="text" name="inquiries_rating_setting_thanks_cfc_object" value="#htmleditformat(form.inquiries_rating_setting_thanks_cfc_object)#" /><br>
+						Note: If these fields are specified, the low/high rating confirmation information page be overriden with the output of the CFC Object/Method (i.e. root.mvc.controller.reviewThanks)
+					</td>
+				</tr>
+				<tr>
+					<th>Confirmation CFC Method:</th>
+					<td>
+						<input type="text" name="inquiries_rating_setting_thanks_cfc_method" value="#htmleditformat(form.inquiries_rating_setting_thanks_cfc_method)#" />
+					</td>
+				</tr>
+			</cfif>
 			<tr>
 				<th>&nbsp;</th>
 				<td><button type="submit" name="submitForm" class="z-manager-search-button">Save</button>
@@ -170,9 +388,10 @@
 	}
 	db.sql&=" ORDER BY inquiries_type_name ASC ";
 	qTypes=db.execute("qTypes");
-	typeStruct={};
+	typeStruct=structnew("linked");
 	for(row in qTypes){
-		typeStruct[row.inquiries_type_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id)]=row;
+		row.siteidtype=application.zcore.functions.zGetSiteIdType(row.site_id);
+		typeStruct[row.inquiries_type_id&"|"&row.siteidtype]=row;
 	}
 	return typeStruct;
 	</cfscript>
