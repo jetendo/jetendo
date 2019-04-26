@@ -166,7 +166,7 @@
 	</cfif>
 		Lead Type</h2>
 	<p>Please enter a unique type name.</p>
-	<form class="zFormCheckDirty" action="/z/inquiries/admin/types/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>&amp;inquiries_type_id=#form.inquiries_type_id#&siteIdType=#form.siteIdType#" method="post">
+	<form class="zFormCheckDirty" action="/z/inquiries/admin/types/<cfif currentMethod EQ 'add'>insert<cfelse>update</cfif>?inquiries_type_id=#form.inquiries_type_id#&siteIdType=#form.siteIdType#" method="post">
 		<table style="border-spacing:0px;" class="table-list">
 			<tr>
 				<th>Type:</th>

@@ -9,7 +9,7 @@ multiple locations
 
 
 
-inquiries_rating_setting_id
+inquiries_rating_setting
 	inquiries_rating_setting_id
 	site_id
 	inquiries_rating_inquiries_type_id varchar 255 (in format 1|1,2|1 )
@@ -31,6 +31,8 @@ inquiries_rating_setting_id
 inquiries
 	inquiries_rating_email_sent_count int 0
 	inquiries_rating_email_set char(1) 0
+	inquiries_rating
+	inquiries_rating_hash
 
 inquiries_rating_setting_thanks_cfc_method
 	the callback needs to receive the inquiries_rating data as a struct, so we can show different info based on which rating was given.
