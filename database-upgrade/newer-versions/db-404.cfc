@@ -17,7 +17,7 @@
 	ADD COLUMN `inquiries_rating_hash` VARCHAR(64) NOT NULL AFTER `inquiries_rating`")){		return false;	}  
 	
 	if(!arguments.dbUpgradeCom.executeQuery(this.datasource, "CREATE TABLE `inquiries_rating_setting` (
-	  `inquiries_rating_setting_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+	  `inquiries_rating_setting_id` int(11) unsigned NOT NULL,
 	  `site_id` int(11) NOT NULL,
 	  `inquiries_rating_inquiries_type_id` int(11) NOT NULL DEFAULT 0,
 	  `inquiries_rating_setting_email_subject` varchar(255) NOT NULL,
