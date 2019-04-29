@@ -200,6 +200,9 @@
 			if(form.inquiries_rating_setting_start_date EQ "" and form.method EQ "add"){
 				form.inquiries_rating_setting_start_date=dateadd("d", -30, now());
 			}
+			if(form.inquiries_rating_setting_active EQ ""){
+				form.inquiries_rating_setting_active=1;
+			}
 			</cfscript>
 			<tr>
 				<th>Lead Types: *</th>
@@ -374,6 +377,39 @@
 				</tr>
 			</cfif>
 			<tr>
+				<th>From Email</th>
+				<td>
+					<input type="text" name="inquiries_rating_setting_from_email" value="#htmleditformat(form.inquiries_rating_setting_from_email)#" /><br> 
+					Warning: If SPF record for the above email's domain is not correctly defined in DNS, these emails will likely be blocked as spam. Please contact the web developer to verify this.
+				</td>
+			</tr>
+			<tr>
+				<th>Send Feedback Email</th>
+				<td>
+					<input type="text" name="inquiries_rating_setting_comments_email" value="#htmleditformat(form.inquiries_rating_setting_comments_email)#" /><br> 
+					When a user fills in the comments form, the email will be sent to this email. If left blank it will go to the office email, i.e. #application.zcore.functions.zvarso("zofficeemail")# 
+				</td>
+			</tr>
+			<tr>
+				<th>Low Rating Comments Form?</th>
+				<td>
+					#application.zcore.functions.zInput_Boolean("inquiries_rating_setting_low_rating_comments_form", form.inquiries_rating_setting_low_rating_comments_form)#
+				</td>
+			</tr>
+			<tr>
+				<th>High Rating Comments Form?</th>
+				<td>
+					#application.zcore.functions.zInput_Boolean("inquiries_rating_setting_high_rating_comments_form", form.inquiries_rating_setting_high_rating_comments_form)#
+				</td>
+			</tr>
+			<tr>
+				<th>Active:</th>
+				<td>
+					#application.zcore.functions.zInput_Boolean("inquiries_rating_setting_active", form.inquiries_rating_setting_active)#<br>
+					Note: Automated sending will not begin until Active is set to Yes.
+				</td>
+			</tr>
+			<tr>
 				<th>&nbsp;</th>
 				<td><button type="submit" name="submitForm" class="z-manager-search-button">Save</button>
 				<button type="button" name="cancel" class="z-manager-search-button" onclick="window.location.href = '/z/inquiries/admin/review-autoresponder-settings/index';">Cancel</button></td>
@@ -413,9 +449,9 @@
 	init();
 	//application.zcore.functions.zSetPageHelpId("4.3");
 	db.sql="SELECT * from #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
-	WHERE  inquiries_rating_setting.site_id IN (#db.param(0)#,#db.param(request.zOS.globals.id)#) and 
-	inquiries_rating_setting_deleted = #db.param(0)# "; 
-	db.sql&=" ORDER BY inquiries_rating_setting_email_subject ASC ";
+	WHERE  inquiries_rating_setting.site_id =#db.param(request.zOS.globals.id)# and 
+	inquiries_rating_setting_deleted = #db.param(0)#  
+	ORDER BY inquiries_rating_setting_email_subject ASC ";
 	qSetting=db.execute("qSetting");
 
 	typeStruct=getTypeStruct();
@@ -424,15 +460,37 @@
 	</cfscript>
 	<h2 style="display:inline; ">Lead Review Autoresponders</h2> &nbsp;&nbsp;
 	<a href="/z/inquiries/admin/review-autoresponder-settings/add" class="z-manager-search-button">Add Review Autoresponder</a> <br />
+	<h2>Note: The automated sending is currently disabled while we test this new feature.</h2>
+	This feature allows you to automate asking your customers to review their recent interaction with you via email.<br>
 	<br />
 	<table style="border-spacing:0px;" class="table-list">
 		<tr>
 			<th>ID</th>
 			<th>Email Subject</th> 
 			<th>Lead Types</th> 
+			<th>Unique Emails Sent</th> 
+			<th>Leads Reviewed</th> 
+			<th>Active</th> 
 			<th>Admin</th>
 		</tr>
 		<cfloop query="qSetting">
+			<cfscript>
+			db.sql="select count(inquiries_id) count from 
+			#db.table("inquiries", request.zos.zcoreDatasource)# WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
+			inquiries_rating <> #db.param(0)# and 
+			inquiries_deleted=#db.param(0)# and 
+			#db.param(",#qSetting.inquiries_rating_setting_type_id_list#,")# LIKE concat(#db.param("%,")#, inquiries_type_id, #db.param("|")#, inquiries_type_id_siteIDType, #db.param(",%")#)  ";
+			qRated=db.execute("qRated");
+
+			db.sql="select count(inquiries_id) count from 
+			#db.table("inquiries", request.zos.zcoreDatasource)# WHERE
+			inquiries_deleted=#db.param(0)# and 
+			inquiries_rating_email_sent_count>#db.param(0)# and 
+			site_id=#db.param(request.zos.globals.id)# and 
+			#db.param(",#qSetting.inquiries_rating_setting_type_id_list#,")# LIKE concat(#db.param("%,")#, inquiries_type_id, #db.param("|")#, inquiries_type_id_siteIDType, #db.param(",%")#)  ";
+			qInquiry=db.execute("qInquiry");
+			</cfscript>
 			<tr <cfif qSetting.currentRow mod 2 EQ 0>style="background-color:##EEEEEE;"</cfif>>
 				<td>#qSetting.inquiries_rating_setting_id#</td> 
 				<td>#qSetting.inquiries_rating_setting_email_subject#</td> 
@@ -452,6 +510,11 @@
 					inquiries_type_id_siteidtype=listGetAt(arrType[1], 2, "|");
 					</cfscript>
 
+				</td>
+				<td><cfif qInquiry.recordcount EQ 0>0<cfelse>#qInquiry.count#</cfif></td>
+				<td><cfif qRated.recordcount EQ 0>0<cfelse>#qRated.count#</cfif></td>
+				<td>
+					<cfif qSetting.inquiries_rating_setting_active EQ 1>Yes<cfelse>No</cfif>
 				</td>
 				<td class="z-manager-admin">
 					<div class="z-manager-button-container">

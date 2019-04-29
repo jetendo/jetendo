@@ -15,6 +15,154 @@ inquiries
 sendEmail
 rate
  --->
+
+<!--- 
+on live server only, this should run once a day or a minute
+/z/inquiries/review-autoresponder/cron
+ --->
+<cffunction name="cron" localmode="modern" access="remote">
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
+	setting requesttimeout="80000";
+	request.ignoreSlowScript=true;
+	db=request.zos.queryobject; 
+	form.sid=application.zcore.functions.zso(form, 'sid', true, 0);
+
+	db.sql="select site.site_id, site_domain, if(inquiries_rating_setting_id IS NULL, #db.param(0)#, #db.param(1)#) hasAutoresponder from #db.table("site", request.zos.zcoreDatasource)#, #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_rating_setting.site_id = site.site_id and 
+	inquiries_rating_setting_deleted=#db.param(0)# and 
+	site.site_id <> #db.param(-1)# and 
+	site_deleted = #db.param(0)# and 
+	site_active = #db.param(1)#";
+	if(form.sid NEQ 0){
+		db.sql&=" and site.site_id = #db.param(form.sid)# ";
+	}
+	db.sql&=" GROUP BY site.site_id ";
+	qSite=db.execute("qSite");
+	for(row in qSite){
+		u=row.site_domain&"/z/inquiries/review-autoresponder/cronSend";
+		rs=application.zcore.functions.zdownloadlink(u, 5000);
+		if(not rs.success){ 
+			throw("Failed to download: #u#");
+		}else{
+			echo("Downloaded: #u#<br />");
+			echo(rs.cfhttp.filecontent&"<hr />");
+		}
+	}
+	echo('Send Lead Review Autoresponders complete');
+	abort;
+	</cfscript>
+</cffunction>
+
+<!--- 
+// this is called on each site that has autoresponders and that has them ready to send
+/z/inquiries/review-autoresponder/cronSend
+ --->
+<cffunction name="cronSend" localmode="modern" access="remote">
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
+	setting requesttimeout="80000";
+	request.ignoreSlowScript=true;
+	db=request.zos.queryobject; 
+	form.sid=application.zcore.functions.zso(form, 'sid', true, 0);
+
+	db.sql="select * FROM #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# 
+	WHERE 
+	inquiries_rating_setting_deleted=#db.param(0)# and 
+	inquiries_rating_setting_active=#db.param(1)# and 
+	site_id = #db.param(request.zos.globals.id)#";
+	qSetting=db.execute("qSetting");
+
+	sentCount=0;
+	errorCount=0;
+	// find inquiries that need a rating email sent
+	for(setting in qSetting){
+		arrType=listToArray(setting.inquiries_rating_setting_type_id_list, ",");
+		for(type in arrType){
+			inquiries_type_id=listGetAt(type, 1, "|");
+			inquiries_type_id_siteIDType=listGetAt(type, 2, "|");
+			db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
+			WHERE inquiries_type_id=#db.param(inquiries_type_id)# and 
+			inquiries_type_id_siteIDType=#db.param(inquiries_type_id_siteIDType)# and 
+			site_id=#db.param(request.zos.globals.id)# and 
+			inquiries_email <> #db.param("")# and 
+			inquiries_rating = #db.param(0)# and 
+			inquiries_rating_email_sent_count<>#db.param(10000)# and 
+			inquiries_deleted=#db.param(0)# ";
+			if(setting.inquiries_rating_setting_email_resend_limit > 0){
+				db.sql&=" and inquiries_rating_email_sent_count < #db.param(setting.inquiries_rating_setting_email_resend_limit)# ";
+			}
+			if(setting.inquiries_rating_setting_start_date NEQ ""){
+				db.sql&=" and inquiries_datetime >= #db.param(dateformat(setting.inquiries_rating_setting_start_date, "yyyy-mm-dd")&" 00:00:00")# ";
+			}
+			if(request.zos.isTestServer){
+				db.sql&=" LIMIT #db.param(0)#, #db.param(5)# ";
+			}
+			qInquiry=db.execute("qInquiry");
+			if(request.zos.isTestServer){
+				echo("Limited to sending 5 emails on the test server<br>");
+			}
+			// inquiries_rating_email_set because you can get the email from phone json sometimes?
+			for(inquiry in qInquiry){
+				// check if user was unsubscribed already
+				db.sql="SELECT * FROM #db.table("contact", request.zos.zcoreDatasource)# WHERE 
+				contact_email =#db.param(qInquiry.inquiries_email)# and 
+				site_id = #db.param(request.zos.globals.id)# and 
+				contact_opt_out=#db.param(1)# and 
+				contact_deleted=#db.param(0)# ";
+				qContact=db.execute("qContact");
+				if(qContact.recordcount NEQ 0){
+					db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+					SET 
+					inquiries_rating_email_sent_count=#db.param(10000)#
+					WHERE inquiries_id=#db.param(inquiry.inquiries_id)# and 
+					site_id=#db.param(request.zos.globals.id)# and 
+					inquiries_deleted=#db.param(0)#  ";
+					continue; // this user has unsubscribed, stop trying to send the email
+				}
+				tempHash=inquiry.inquiries_rating_hash;
+				if(tempHash EQ ""){
+					tempHash=hash(application.zcore.functions.zGenerateStrongPassword(80,200), 'sha-256');
+				}
+				db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+				SET 
+				inquiries_rating_email_sent_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))#,
+				inquiries_rating_email_sent_count=#db.param(inquiry.inquiries_rating_email_sent_count+1)#, 
+				inquiries_rating_hash=#db.param(tempHash)#
+				WHERE inquiries_id=#db.param(inquiry.inquiries_id)# and 
+				site_id=#db.param(request.zos.globals.id)# and 
+				inquiries_deleted=#db.param(0)#  ";
+				db.execute("qUpdate");
+				fromEmail=request.fromEmail;
+				if(setting.inquiries_rating_setting_from_email NEQ ""){
+					fromEmail=setting.inquiries_rating_setting_from_email;
+				}
+				toEmail=inquiry.inquiries_email;
+				if(request.zos.isTestServer){
+					email=request.zos.developerEmailTo;
+				}
+				echo("sendEmail: "&inquiries_type_id&", "& inquiries_type_id_siteIDType&", "& false&", "&fromEmail&", "& email&", "& inquiry.inquiries_id&", "& false&", "& false&"<br>");
+				result=0;
+				//result=sendEmail(inquiries_type_id, inquiries_type_id_siteIDType, false, fromEmail, email, inquiry.inquiries_id, false, false);
+				if(result NEQ 0){
+					errorCount++;
+					echo("Error for inquiries_id: #inquiry.inquiries_id# | #result#<br>");
+				}else{
+					sentCount++;
+				}
+			}
+		}
+	}
+	echo("#sentCount# emails sent | #errorCount# errors");
+	abort;
+	</cfscript>
+</cffunction>
+
 <cffunction name="sendTest" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	form.inquiries_type_id=application.zcore.functions.zso(form, "inquiries_type_id");
@@ -119,6 +267,8 @@ reviewCom.sendEmail(inquiries_type_id, inquiries_type_id_siteIDType, true, reque
 		}
 		echo('</p>');
 		echo(qRating.inquiries_rating_setting_footer_text);
+
+		echo('<p><a href="/z/user/out/index?e=#urlencodedformat(arguments.toEmail)#">Unsubscribe</a></p>');
 		if(not arguments.enableTestMode){
 			echo('</body></html>');
 		}
@@ -215,25 +365,138 @@ reviewCom.sendEmail(inquiries_type_id, inquiries_type_id_siteIDType, true, reque
 	site_id = #db.param(request.zos.globals.id)# and 
 	inquiries_deleted=#db.param(0)# ";
 
+	savecontent variable="formHTML"{
+		echo('<form action="/z/inquiries/review-autoresponder/saveComments" method="post">
+			<input type="hidden" name="inquiries_id" value="#form.id#">
+			<input type="hidden" name="inquiries_rating_hash" value="#form.key#">
+			<p><textarea cols="100" rows="5" style="width:100%;" name="comments"></textarea></p>
+			<p><input type="submit" name="submit" value="Send Comments"></p>
+		</form>');
+	}
 	for(row in qSetting){
 		if(row.inquiries_rating_setting_thanks_cfc_object NEQ "" and row.inquiries_rating_setting_thanks_cfc_method NEQ	""){
 			// custom callback for thank you page.
 			objectPath=replace(row.inquiries_rating_setting_thanks_cfc_object, "root.", request.zRootCFCPath&".");
 			objectCom=createobject("component", objectPath);
 			objectCom[row.inquiries_rating_setting_thanks_cfc_method]();
+			if(qSetting.inquiries_rating_setting_low_rating_number GTE form.rating){
+				if(qSetting.inquiries_rating_setting_low_rating_comments_form EQ 1){
+					echo(formHTML);
+				}
+			}else{
+				if(qSetting.inquiries_rating_setting_high_rating_comments_form EQ 1){
+					echo(formHTML);
+				}
+			}
 		}else{
 			// display the 2 fields instead
 			if(qSetting.inquiries_rating_setting_low_rating_number GTE form.rating){
 				application.zcore.template.setTag("title", row.inquiries_rating_setting_low_rating_thanks_heading);
 				application.zcore.template.setTag("pagetitle", row.inquiries_rating_setting_low_rating_thanks_heading);
 				echo(row.inquiries_rating_setting_low_rating_thanks_body);
+
+				if(qSetting.inquiries_rating_setting_low_rating_comments_form EQ 1){
+					echo(formHTML);
+				}
 			}else{
 				application.zcore.template.setTag("title", row.inquiries_rating_setting_high_rating_thanks_heading);
 				application.zcore.template.setTag("pagetitle", row.inquiries_rating_setting_high_rating_thanks_heading);
 				echo(row.inquiries_rating_setting_high_rating_thanks_body);
+				if(qSetting.inquiries_rating_setting_high_rating_comments_form EQ 1){
+					echo(formHTML);
+				}
 			}
 		}
 	}
+	</cfscript>
+</cffunction>
+
+
+<!--- 
+/z/inquiries/review-autoresponder/saveComments?id=0&key=1&comments=Testing
+ --->
+<cffunction name="saveComments" localmode="modern" access="remote">
+	<cfscript>
+	db=request.zos.queryObject;
+	form.id=application.zcore.functions.zso(form, "id", true); // inquiries_id
+	form.key=application.zcore.functions.zso(form, "key");
+	if(form.id EQ 0){
+		echo("Comments are not saved when in test mode.");
+		return;
+	}
+	// avoid html attacks
+	form.comments=application.zcore.functions.zRemoveHTMLForSearchIndexer(form.comments);
+	if(form.comments NEQ ""){
+		db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
+		WHERE inquiries_id=#db.param(form.id)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		inquiries_deleted=#db.param(0)# ";
+		qInquiry=db.execute("qInquiry");
+
+		if(qInquiry.recordcount EQ 0){
+			application.zcore.functions.z404("Invalid inquiries_id: #form.id#");
+		}else{
+			// append new comments to old comments
+			if(qInquiry.inquiries_rating_comments NEQ ""){
+				form.comments=qInquiry.inquiries_rating_comments&chr(10)&chr(10)&form.comments;
+			}
+		}
+		if(qInquiry.inquiries_rating_hash EQ "" or form.key NEQ qInquiry.inquiries_rating_hash){
+			application.zcore.functions.z404("Invalid key for inquiries_id: #form.id#");
+		}
+
+		ts={};
+		ts.subject="Feedback for lead ###form.id#";
+		savecontent variable="ts.html"{
+			echo('<!DOCTYPE html><html><head><title></title></head><body>');
+			echo('<h2>Feedback for lead ###form.id#</h2>');
+			if(qInquiry.recordcount NEQ 0){
+				echo("<p>Rating: "&qInquiry.inquiries_rating&"</p>");
+			}
+			echo(application.zcore.functions.zParagraphFormat(form.comments));
+			echo('</body></html>');
+		}
+		// continue to send email
+		ts.from=request.fromEmail;
+		ts.to=application.zcore.functions.zvarso("zofficeemail");
+		if(qInquiry.recordcount NEQ 0){
+			db.sql="select * from #db.table("inquiries_rating_setting", request.zos.zcoreDatasource)# WHERE 
+			concat(#db.param(",")#, inquiries_rating_setting_type_id_list, #db.param(",")#) LIKE #db.param("%,"&qInquiry.inquiries_type_id&"|"&qInquiry.inquiries_type_id_siteIDType&",%")# and 
+			";
+			qSetting=db.execute("qSetting");
+			if(qSetting.recordcount EQ 0){
+				if(qSetting.inquiries_rating_setting_from_email NEQ ""){
+					ts.from=qSetting.inquiries_rating_setting_from_email;
+				}
+				if(qSetting.inquiries_rating_setting_comments_email NEQ ""){
+					ts.to=qSetting.inquiries_rating_setting_comments_email;
+				}
+			}
+		}
+		if(request.zos.isTestServer){
+			ts.from=request.zos.developerEmailFrom;
+			ts.to=request.zos.developerEmailTo;
+		}
+		rCom=application.zcore.email.send(ts);
+		if(rCom.isOK() EQ false){
+			// ignore
+		}
+		db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+		SET 
+		inquiries_rating_comments=#db.param(form.comments)# 
+		WHERE inquiries_id=#db.param(form.id)# and 
+		site_id = #db.param(request.zos.globals.id)# and 
+		inquiries_deleted=#db.param(0)# ";
+		db.execute("qUpdate");
+	}
+	application.zcore.functions.zRedirect("/z/inquiries/review-autoresponder/commentsThanks");
+	</cfscript>
+</cffunction>
+
+<cffunction name="commentsThanks" localmode="modern" access="remote">
+	<cfscript>
+	application.zcore.template.setTag("title", "Thank you for your feedback.");
+	application.zcore.template.setTag("pagetitle", "Thank you for your feedback.");
 	</cfscript>
 </cffunction>
 

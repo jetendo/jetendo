@@ -32,6 +32,13 @@ function getTasks(){
 	$t->url=$adminDomain."/z/server-manager/tasks/site-backup/deleteOldBackups";
 	array_push($arrTask, $t); 
 
+	// $t=new stdClass();
+	// $t->logName="send-lead-review-autoresponders.html"; // this also verifies all sites are loaded on init.
+	// $t->interval=3600; 
+	// $t->startTimeOffsetSeconds=1050; 
+	// $t->url=$adminDomain."/z/inquiries/review-autoresponder/cron";
+	// array_push($arrTask, $t); 
+
 	$t=new stdClass();
 	$t->logName="renew-lets-encrypt-ssl.html"; // this also verifies all sites are loaded on init.
 	$t->interval=7200; 
