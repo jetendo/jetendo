@@ -3,6 +3,7 @@
 <cffunction name="index" localmode="modern" access="remote" output="yes">
  	<cfscript>
 	var zpagenav='<a href="/">Home</a> /';
+	form.e=application.zcore.functions.zso(form, 'e');
 	application.zcore.template.setTag("title","Unsubscribe From Our Mailing List");
 	application.zcore.template.setTag("pagetitle","Unsubscribe From Our Mailing List");
 	application.zcore.template.setTag("pagenav",zpagenav);
