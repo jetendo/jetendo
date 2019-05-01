@@ -550,8 +550,13 @@ application.zcore.featureCom.rebuildFeatureStructCache(cacheStruct);
 	t9.mapStruct.urlTitle="zURLName";
 	t9.mapStruct.dataId="feature_data_id";
 	arrayappend(ts2.reservedAppUrlIdStruct[50], t9);
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# feature_data
-	WHERE feature_id=#db.param(form.feature_id)# and 
+	db.sql="select * from #db.table("feature_data", "jetendofeature")#, 
+	#db.table("feature_schema", "jetendofeature")#
+	WHERE feature_data.feature_id=#db.param(form.feature_id)# and 
+	feature_data.feature_id = feature_schema.feature_id and 
+	feature_data.feature_schema_id = feature_schema.feature_schema_id and 
+	feature_schema_enable_unique_url=#db.param(1)# and 
+	feature_schema_deleted=#db.param(0)# and 
 	feature_data_override_url<> #db.param('')# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	feature_data_deleted = #db.param(0)# and

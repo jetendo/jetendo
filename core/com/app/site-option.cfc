@@ -498,8 +498,13 @@
 		t9.mapStruct.urlTitle="zURLName";
 		t9.mapStruct.dataId="site_x_option_group_set_id";
 		arrayappend(ts2.reservedAppUrlIdStruct[request.zos.globals.optionGroupURLid], t9);
-		db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoredatasource)# site_x_option_group_set
-		WHERE site_id = #db.param(request.zos.globals.id)# and 
+		db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoredatasource)#, 
+		#db.table("site_option_group", request.zos.zcoreDatasource)# 
+		WHERE site_x_option_group_set.site_id = #db.param(request.zos.globals.id)# and 
+		site_option_group_enable_unique_url=#db.param(1)# and 
+		site_x_option_group_set.site_id = site_option_group.site_id and 
+		site_option_group_deleted=#db.param(0)# and 
+		site_x_option_group_set.site_option_group_id=site_option_group.site_option_group_id and 
 		site_x_option_group_set_override_url<> #db.param('')# and 
 		site_x_option_group_set_master_set_id = #db.param(0)# and 
 		site_x_option_group_set_deleted = #db.param(0)# and

@@ -153,6 +153,9 @@
 			<cfscript> 
 			if(not request.zos.inServerManager){
 				sharedMenuStruct=structnew();
+				if(structkeyexists(application.sitestruct[request.zos.globals.id].zcorecustomfunctions, "getAdminMenu")){
+					sharedMenuStruct=application.sitestruct[request.zos.globals.id].zcorecustomfunctions.getAdminMenu(sharedMenuStruct); 
+				}
 				
 				sharedMenuStruct=application.zcore.app.getAdminMenu(sharedMenuStruct); 
 				if(application.zcore.app.siteHasApp("content") EQ false){
@@ -173,6 +176,7 @@
 				}
 				// remove links to the old system
 				tmp=trim(application.zcore.functions.zso(request, 'adminTemplateLinks'));
+
 				/*
 				if(trim(tmp) NEQ ""){
 					tmp='<li>'&rereplacenocase(tmp,'</a>(.*?)<a','</a></li> <li><a','ALL')&'</li>';
