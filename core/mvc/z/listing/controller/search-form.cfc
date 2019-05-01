@@ -276,7 +276,6 @@ SELECT zipcode.*,
 
 	// inputStruct should contain all search parameters. (on daytona beach page, this would only be city_name and state_abbr)
 	theHTML =propDisplayCom.displayTop();
-	
 	jsonText='{"loadtime":"#((gettickcount()-start)/1000)# seconds","COUNT":#returnStruct.count#,"success":true,"link":"#request.currentmappropertylink#","html":"#jsstringformat(theHTML)#"}';
 	savecontent variable="out"{
 		echo(jsonText);

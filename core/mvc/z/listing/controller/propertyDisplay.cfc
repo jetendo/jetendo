@@ -685,7 +685,7 @@ propertyDisplayCom.init(ts);
 </cffunction>
 
 <!--- propertyDisplayCom.displayTop(); --->
-<cffunction name="displayTop" localmode="modern" output="false" returntype="any">
+<cffunction name="displayTop" localmode="modern" output="yes" returntype="any">
 	<cfscript>
 	var arrOrder=arraynew(1); 
 	for(i=1;i LTE arrayLen(this.dataStruct.arrData);i++){
@@ -711,7 +711,7 @@ propertyDisplayCom.init(ts);
 			}
 		}
 		arrayAppend(arrOrder, outNow);
-		writeoutput(row.listing_id);
+		//writeoutput(row.listing_id);
 	}
 	return this.checkNav()&arraytolist(arrOrder,"")&this.checkNav(true);
 	</cfscript>
@@ -724,7 +724,7 @@ propertyDisplayCom.init(ts);
 	<cfscript>
 	var searchNav="";
 	var tempOutput="";
-	var i=0;
+	var i=0; 
 	</cfscript>
 	<cfif this.optionStruct.rss EQ false>
 		<cfscript>
@@ -779,7 +779,7 @@ propertyDisplayCom.init(ts);
 			</span>
 		</cfif>
 		</cfsavecontent>
-	</cfif>
+	</cfif> 
 	<cfreturn tempOutput>
 </cffunction>
 

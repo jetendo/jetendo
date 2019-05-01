@@ -612,7 +612,7 @@
 		All references to it on the site will be updated to the new image.<br />
 		If you want to add an image instead, <a href="/z/admin/files/add?virtual_folder_id=#form.virtual_folder_id#">click here</a><br /> 
     </cfif>  
-	<p>Select a .jpg, .png or .gif image<cfif currentMethod NEQ 'edit'> or a .zip archive with .jpg, .png and/or .gif files inside</cfif>.</p>
+	<p>Select a .jpg, .png or .gif image to upload<!--- <cfif currentMethod NEQ 'edit'> or a .zip archive with .jpg, .png and/or .gif files inside</cfif> --->.</p>
 
 	<p>Select File: <input type="file" name="image_file"></p>
 

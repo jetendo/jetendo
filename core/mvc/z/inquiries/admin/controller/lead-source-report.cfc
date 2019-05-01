@@ -283,7 +283,7 @@
 	inquiries.site_id = #db.param(request.zos.globals.id)#
 	GROUP BY inquiries.inquiries_type_id, inquiries.inquiries_type_id_siteIDType, DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) 
 	ORDER BY date, inquiries_type_name asc ";
-	qType=db.execute("qType");
+	qType=db.execute("qType", "", 10000, "query", false);
 
 
 	db.sql="SELECT  inquiries.inquiries_type_id, DATE_FORMAT(inquiries_datetime, #db.param('%Y-%m')#) date, COUNT(DISTINCT inquiries.inquiries_id) count 

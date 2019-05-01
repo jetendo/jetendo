@@ -359,7 +359,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			city_distance_deleted = #db.param(0)# and 
 			city_id NOT IN (#db.trustedSQL("'#listingSharedData.sharedStruct.optionStruct.mls_option_exclude_city_list#'")#) 
             
-           </cfsavecontent><cfscript>qC=db.execute("qC");
+           </cfsavecontent><cfscript>qC=db.execute("qC", "", 10000, "query", false);
 		   if(qC.recordcount NEQ 0 and qC.idlist NEQ ""){
 		   		this.searchCriteria["search_city_id"]=qC.idlist;
 		   } 
@@ -576,7 +576,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			content_deleted=#db.param('0')# and 
 			content.site_id = #db.param(request.zos.globals.id)# and 
 			content.content_id IN (#db.trustedSQL("'#arraytolist(arguments.ss.arrExcludeContentId,"','")#'")#) 
-	        </cfsavecontent><cfscript>qC2732=db.execute("qC2732");
+	        </cfsavecontent><cfscript>qC2732=db.execute("qC2732", "", 10000, "query", false);
 	        if(qC2732.recordcount and qC2732.idlist NEQ ""){
 	        	echo(" and listing.listing_id NOT IN ('#qC2732.idlist#')  ");
 	        }
@@ -992,7 +992,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
         #(zselectsql)#
         </cfsavecontent>
         <cfscript>
-        qZselect=db2.execute("qZselect");
+        qZselect=db2.execute("qZselect", "", 10000, "query", false);
     	</cfscript>
 		<!--- <cfif arguments.ss.debug>
         <span style="border:1px solid ##999999; padding:5px;font-size:10px; line-height:11px; display:block; "><strong>;qZSelect;</strong><br />
@@ -1139,7 +1139,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 		where mls_dir_hash IN (#db.trustedSQL("'#arraytolist(structkeyarray(hashStruct),"','")#'")#) and 
 		site_id=#db.param(request.zos.globals.id)# and 
 		mls_dir_deleted = #db.param(0)# ";
-		qdir=db.execute("qdir");
+		qdir=db.execute("qdir", "", 10000, "query", false);
 		//application.zcore.functions.zdump(qdir);
 		perfect=false;
 		//writeoutput('qdir:'&qdir.recordcount&' NEQ qzselect:'&qzselect.recordcount&'<br />');
@@ -1182,7 +1182,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			//application.zcore.functions.zabort();
 			newId=0;
 			db2.sql=savedSQL;
-			local.rs=db2.execute("q");
+			local.rs=db2.execute("q", "", 10000, "query", false);
 			if(local.rs.success){
 				newId=local.rs.result;
 			}else{
@@ -1255,10 +1255,10 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	    try{
 	    	if(arguments.ss.enableThreading){
 		        db2.sql=countSQL;
-			    qPropertyCount=db2.execute("qPropertyCount", request.zos.zcoreDatasource, 5);
+			    qPropertyCount=db2.execute("qPropertyCount", "", 5, "query", false);
 	        }else{
 		        db2.sql=countSQL;
-		        qPropertyCount=db2.execute("qPropertyCount", request.zos.zcoreDatasource, 5);
+		        qPropertyCount=db2.execute("qPropertyCount", "", 5, "query", false);
 	        }
 		}catch(Any e){
 
@@ -1294,7 +1294,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
     	qProperty={recordcount:0};
     	if(not cancelNextSearch){
 		    try{
-	    		qProperty=db2.execute("qProperty", request.zos.zcoreDatasource, 5);
+	    		qProperty=db2.execute("qProperty", "", 5, "query", false);
 			}catch(Any e){
 
 				if(e.type EQ "database" and e.detail CONTAINS "Statement cancelled"){
@@ -1387,7 +1387,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 					echo('mls '&i654&';'&tsql232&';<hr />');
 				}
 				db.sql=tsql232;
-				r1=db.execute("r1");
+				r1=db.execute("r1", "", 10000, "query", false);
 				local.a1=listtoarray(r1.columnlist, ",");
 				arrayappend(arrQuery,r1);
 			}
@@ -1694,7 +1694,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	db.sql="select * from #db.table("mls_filter", request.zos.zcoreDatasource)# mls_filter 
 	where mls_filter.site_id = #db.param(request.zos.globals.id)# and 
 	mls_filter_deleted = #db.param(0)#";
-	qMLSFilter=db.execute("qMLSFilter");
+	qMLSFilter=db.execute("qMLSFilter", "", 10000, "query", false);
 	rs.whereSQL="";
 	rs.whereOptionsSQL="";
 	rs.citySQL="";
@@ -1747,7 +1747,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 			mls_filter_updated_datetime=#db.param(request.zos.mysqlnow)# 
 			where site_id = #db.param(request.zos.globals.id)# and 
 			mls_filter_deleted = #db.param(0)#";
-			db.execute("q");
+			db.execute("q", "", 10000, "query", false);
 		}
 	}
 	flen=len("filter_");
@@ -1780,7 +1780,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	where mls_saved_search_id=#db.param(qMLSFilter.mls_saved_search_id)# and 
 	site_id=#db.param(request.zos.globals.id)# and 
 	mls_saved_search_deleted =#db.param(0)# " ;
-	qMLSFilter2=db.execute("qMLSFilter2");
+	qMLSFilter2=db.execute("qMLSFilter2", "", 10000, "query", false);
 	if(qMLSFilter2.recordcount EQ 0){
 		return rs;
 	}
