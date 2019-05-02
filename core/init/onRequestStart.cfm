@@ -426,6 +426,16 @@
 			if(zos.isDeveloperIpMatch and zos.cgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and zos.cgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){ 
 				showInitStatus();
 			}
+			// can't figure out how to force it to always load correctly.
+			// if(not structkeyexists(application, "zcoreIsInitMinute") or application.zcoreIsInitMinute NEQ timeformat(now(), "HHmm")){
+			// 	application.zcoreIsInitMinute=timeformat(now(), "HHmm");
+			// 	lock name="forceInitOnRequestStartOncePerMinute" type="exclusive" timeout="180"{
+			// 		onApplicationStart(); 
+			// 		OnInternalApplicationStart();
+			// 		OnApplicationListingStart();
+			// 	}
+			// }
+
 			header statuscode="503" statustext="Service Temporarily Unavailable";
 	    	header name="retry-after" value="60";
 			echo('<h1>Service Temporarily Unavailable</h1>');

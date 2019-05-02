@@ -2151,7 +2151,7 @@ not used
 	mvcFilesChanged=false;
 	arrLocalFile=[]; 
 	if(directoryexists(request.zos.installPath&"core/mvc/")){
-		if(fileexists("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc")){
+		if(fileexists("#arguments.ss.serverglobals.serverprivatehomedir#_cache/mvc-cache.cfc") and not structkeyexists(form, "zforce")){
 			output1=application.zcore.functions.zSecureCommand("getNewerCoreMVCFiles", 50); 
 		}else{
 			output1=1;
