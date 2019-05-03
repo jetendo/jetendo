@@ -1440,6 +1440,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	ts.image_id="";
 	ts.offset=0;
 	ts.limit=0;
+	ts.site_id=request.zos.globals.id;
 	structappend(arguments.ss,ts,false);
 	arrT=listtoarray(arguments.ss.size,"x");
 	if(arguments.ss.layoutType EQ "custom"){
@@ -1472,7 +1473,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	<cfif arguments.ss.image_id NEQ ""> 
 		and image_id=#db.param(arguments.ss.image_id)# 
 	</cfif> 
-	and site_id = #db.param(request.zos.globals.id)# and 
+	and site_id = #db.param(arguments.ss.site_id)# and 
 	image_deleted = #db.param(0)#
 	ORDER BY image_sort <cfif arguments.ss.reverse>DESC</cfif>, image_caption, image_id 
 	<cfif arguments.ss.offset NEQ 0 or arguments.ss.limit NEQ 0>LIMIT #db.param(arguments.ss.offset)# 

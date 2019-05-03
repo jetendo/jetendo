@@ -430,6 +430,9 @@
 	if(structkeyexists(form, 'site_enable_send_to_friend') EQ false){
 		form.site_enable_send_to_friend=0;
 	}
+	if(form.site_semrush_last_import_datetime NEQ ""){
+		form.site_semrush_last_import_datetime=dateformat(form.site_semrush_last_import_datetime, "yyyy-mm-dd");
+	}
 
 	if(structkeyexists(form, 'site_disable_cfml') EQ false){
 		form.site_disable_cfml=0;
@@ -1954,6 +1957,12 @@
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_seomoz_id_list", "table-error","")#>
 				<input name="site_seomoz_id_list" type="text" size="70" value="#htmleditformat(form.site_seomoz_id_list)#"><br />
 				The project/account id for moz.com.  Separate multiple profile ids by commas. I.e. 251246.96649
+			</td>
+		</tr>
+		<tr >
+			<td style="vertical-align:top; width:140px;">Semrush.com Last Import:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_semrush_last_import_datetime", "table-error","")#>
+				<input name="site_semrush_last_import_datetime" type="date" value="#htmleditformat(dateformat(form.site_semrush_last_import_datetime, "yyyy-mm-dd"))#">
 			</td>
 		</tr>
 		<tr >
