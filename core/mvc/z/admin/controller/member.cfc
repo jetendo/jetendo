@@ -4,7 +4,7 @@
 	<cfscript>
 	var db=request.zos.queryObject;
 
-	if(structkeyexists(request.zsession.user, "sync_site_id_list") and request.zsession.user.sync_site_id_list NEQ ""){
+	if(structkeyexists(request.zsession.user, "sync_site_id_list") and request.zsession.user.sync_site_id_list NEQ "" and request.zsession.user.sync_site_id_list NEQ ",,"){
 		if(request.zsession.user.site_id EQ request.zos.globals.id){
 			application.zcore.status.setStatus(request.zsid, "You may not manage users on this site, please contact the supervisor.", form, true);
 			application.zcore.functions.zRedirect("/z/admin/admin-home/index?zsid=#request.zsid#");
