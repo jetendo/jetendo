@@ -326,7 +326,7 @@
 		// only on test server for now.
 		zos.enableNewLeadManagement=true;
 	}
-	if((zos.isDeveloperIpMatch or zos.isServer)){
+	if(zos.isDeveloperIpMatch or zos.isServer){
 		if(structkeyexists(form, 'zForceReset')){
 			structdelete(application,'onInternalApplicationStartRunning');
 		}
@@ -345,6 +345,14 @@
 					form.zcoreRunFirstInit=true;  
 				}
 			} 
+		}
+		if(zos.isServer){
+			if(not structkeyexists(application, 'zcoreIsInit') and request.zos.originalURL EQ "/z/misc/system/index"){
+				form.zReset="app";
+				form.zforce=1;
+				form.zcoreRunFirstInit=true;
+				structdelete(application, 'onInternalApplicationStartRunning');
+			}
 		}
 
 		if(not structkeyexists(application, 'zcoreIsInit') and not structkeyexists(application, 'zcoreFirstInitStarted')){
