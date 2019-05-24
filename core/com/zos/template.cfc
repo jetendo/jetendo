@@ -593,7 +593,7 @@ for(row in qSite){
 	if(not structkeyexists(application.zcore.templateCFCCache, request.zos.globals.id)){
 		application.zcore.templateCFCCache[request.zos.globals.id]={};
 	}
-	if(request.zosTemplateData.isFile){
+	if(structkeyexists(request.zosTemplateData, "isFile") and request.zosTemplateData.isFile){
 		request.zosTemplateData.templatePath=false; 
 		if(right(request.zosTemplateData.template, 4) NEQ ".cfm"){
 			runCFCTemplate=true;
