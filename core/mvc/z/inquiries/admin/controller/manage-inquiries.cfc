@@ -1350,7 +1350,7 @@ zArrDeferredFunctions.push(function(){
 			if(et.checked){
 				format="csv";	
 			}
-			window.open("<cfif form.method EQ "index">/z/inquiries/admin/export/index<cfelse>/z/inquiries/admin/manage-inquiries/userExport</cfif>?search_office_id=#form.search_office_id#&search_keyword=#urlencodedformat(form.inquiries_search)#&search_email=#urlencodedformat(form.search_email)#&search_phone=#urlencodedformat(form.search_phone)#&uid=#form.uid#&inquiries_status_id=#form.inquiries_status_id#&inquiries_type_id=#application.zcore.functions.zso(form, 'inquiries_type_id')#&inquiries_name=#urlencodedformat(application.zcore.functions.zso(form, 'inquiries_name'))#&inquiries_start_date=#urlencodedformat(dateformat(form.inquiries_start_date,'yyyy-mm-dd'))#&inquiries_end_date=#urlencodedformat(dateformat(form.inquiries_end_date,'yyyy-mm-dd'))#&format="+format+"&exporttype="+exporttype+"&whichfields="+whichfields);
+			window.open("<cfif form.method EQ "index">/z/inquiries/admin/export/index<cfelse>/z/inquiries/admin/manage-inquiries/userExport</cfif>?search_office_id=#form.search_office_id#&search_keyword=#urlencodedformat(form.inquiries_search)#&inquiries_priority=#urlencodedformat(form.inquiries_priority)#&search_email=#urlencodedformat(form.search_email)#&search_phone=#urlencodedformat(form.search_phone)#&uid=#form.uid#&inquiries_status_id=#form.inquiries_status_id#&inquiries_type_id=#application.zcore.functions.zso(form, 'inquiries_type_id')#&inquiries_name=#urlencodedformat(application.zcore.functions.zso(form, 'inquiries_name'))#&inquiries_start_date=#urlencodedformat(dateformat(form.inquiries_start_date,'yyyy-mm-dd'))#&inquiries_end_date=#urlencodedformat(dateformat(form.inquiries_end_date,'yyyy-mm-dd'))#&format="+format+"&exporttype="+exporttype+"&whichfields="+whichfields);
 		}
 		/* ]]> */
 		</script> 
@@ -2014,7 +2014,7 @@ zArrDeferredFunctions.push(function(){
 	var db=request.zos.queryObject; 
 	rs={};
 	loadListLookupData();
-
+	form.inquiries_priority=application.zcore.functions.zso(form, "inquiries_priority");
 	form.search_office_id=application.zcore.functions.zso(form, 'search_office_id');
 	if(application.zcore.functions.zso(request.zsession, "selectedofficeid", true, 0) NEQ 0){
 		form.search_office_id=request.zsession.selectedofficeid;
@@ -2143,6 +2143,9 @@ zArrDeferredFunctions.push(function(){
 		db.sql&=" and (inquiries_datetime >= #db.param(dateformat(form.inquiries_start_date, "yyyy-mm-dd")&' 00:00:00')# and 
 		inquiries_datetime <= #db.param(dateformat(form.inquiries_end_date, "yyyy-mm-dd")&' 23:59:59')#) ";
 	}
+	if(application.zcore.functions.zso(form, "inquiries_priority") NEQ ""){
+		db.sql&=" and inquiries_priority=#db.param(form.inquiries_priority)# ";
+	}
 	if(application.zcore.functions.zso(form, 'inquiries_name') NEQ ""){
 		db.sql&=" and concat(inquiries_first_name, #db.param(" ")#, inquiries_last_name) LIKE #db.param('%#form.inquiries_name#%')# ";
 	}
@@ -2220,6 +2223,9 @@ zArrDeferredFunctions.push(function(){
 	}
 	if(application.zcore.functions.zso(form, 'inquiries_name') NEQ ""){
 		db.sql&=" and concat(inquiries_first_name, #db.param(" ")#, inquiries_last_name) LIKE #db.param('%#form.inquiries_name#%')#";
+	}
+	if(application.zcore.functions.zso(form, "inquiries_priority") NEQ ""){
+		db.sql&=" and inquiries_priority=#db.param(form.inquiries_priority)# ";
 	}
 	if(application.zcore.functions.zso(form, 'inquiries_type_id') NEQ "" and form.inquiries_type_id CONTAINS "|"){
 		db.sql&=" and inquiries.inquiries_type_id = #db.param(listgetat(form.inquiries_type_id, 1, "|"))# and 
@@ -2305,6 +2311,15 @@ zArrDeferredFunctions.push(function(){
 			fieldStyle:'width:200px;'
 		}]
 	});
+	savecontent variable="prioritySelect"{
+		var ts= StructNew();
+		ts.name = "inquiries_priority";
+		ts.listLabels = "0,1,2,3,4,5,6,7,8,9";
+		ts.listValues = "0,1,2,3,4,5,6,7,8,9";
+		ts.listLabelsDelimiter = ",";
+		ts.listValuesDelimiter = ",";
+		application.zcore.functions.zInputSelectBox(ts);
+	}
 	arrayAppend(rs.searchFields, {
 		groupStyle:'width:280px; max-width:100%; ',
 		fields:[{
@@ -2329,6 +2344,12 @@ zArrDeferredFunctions.push(function(){
 			label:"End",
 			formField:'<input type="date" name="inquiries_end_date" value="#dateformat(form.inquiries_end_date, 'yyyy-mm-dd')#">',
 			field:"inquiries_end_date",
+			labelStyle:'width:60px;',
+			fieldStyle:'width:200px;'
+		},{
+			label:"Priority",
+			formField:prioritySelect,
+			field:"inquiries_priority",
 			labelStyle:'width:60px;',
 			fieldStyle:'width:200px;'
 		}]

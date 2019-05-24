@@ -13,7 +13,7 @@
 	}else if(application.zcore.user.checkGroupAccess("member") EQ false){
 		application.zcore.functions.z404("Only manager members can export leads.");	
 	}
-
+	form.inquiries_priority=application.zcore.functions.zso(form, "inquiries_priority");
 	form.search_keyword=application.zcore.functions.zso(form, "search_keyword");
 	searchTextOriginal=replace(replace(replace(form.search_keyword, '+', ' ', 'all'), '@', '_', 'all'), '"', '', "all");
 	form.search_email=application.zcore.functions.zso(form, "search_email");
@@ -190,17 +190,20 @@
 							user_id_siteIDType=#db.param(application.zcore.user.getSiteIdTypeFromLoggedOnUser())#');
 						}
 						if(form.search_phone NEQ ""){
-							db.sql&=" and inquiries.inquiries_phone1 like #db.param("%"&form.search_phone&"%")# ";
+							echo(" and inquiries.inquiries_phone1 like #db.param("%"&form.search_phone&"%")# ");
 						}
 						if(form.search_email NEQ ""){
-							db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+							echo(" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ");
+						}
+						if(application.zcore.functions.zso(form, "inquiries_priority") NEQ ""){
+							echo(" and inquiries_priority=#db.param(form.inquiries_priority)# ");
 						}
 						if(searchTextOriginal NEQ ''){
-							db.sql&=" and 
+							echo(" and 
 							(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
 							MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.search_keyword)#) 
 							or inquiries.inquiries_search like #db.param('%#replace(form.search_keyword,' ','%','ALL')#%')# 
-							) ";
+							) ");
 						}
 						if(form.selected_user_id NEQ 0){
 							writeoutput(' and inquiries.user_id = #db.param(form.selected_user_id)# and 
@@ -236,17 +239,20 @@
 							echo(' and inquiries.office_id = #db.param(form.search_office_id)# ');
 						} 
 						if(form.search_phone NEQ ""){
-							db.sql&=" and inquiries.inquiries_phone1 like #db.param("%"&form.search_phone&"%")# ";
+							echo(" and inquiries.inquiries_phone1 like #db.param("%"&form.search_phone&"%")# ");
 						}
 						if(form.search_email NEQ ""){
-							db.sql&=" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ";
+							echo(" and inquiries.inquiries_email like #db.param("%"&form.search_email&"%")# ");
+						}
+						if(application.zcore.functions.zso(form, "inquiries_priority") NEQ ""){
+							echo(" and inquiries_priority=#db.param(form.inquiries_priority)# ");
 						}
 						if(searchTextOriginal NEQ ''){
-							db.sql&=" and 
+							echo(" and 
 							(inquiries.inquiries_id = #db.param(searchTextOriginal)# or 
 							MATCH(inquiries.inquiries_search) AGAINST (#db.param(form.search_keyword)#) 
 							or inquiries.inquiries_search like #db.param('%#replace(form.search_keyword,' ','%','ALL')#%')# 
-							) ";
+							) ");
 						}
 						if(form.method EQ "userExport"){ 
 							echo(inquiriesCom.getUserLeadFilterSQL(db)); 
