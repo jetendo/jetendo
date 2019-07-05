@@ -333,7 +333,9 @@
 				<div class="zEventView1-1">Share:</div>
 				<div class="zEventView1-2"> 
 					<div class="z-float">
-						<a href="##"  data-ajax="false" onclick="zShowModalStandard('/z/misc/share-with-friend/index?title=#urlencodedformat(struct.event_name)#&amp;link=#urlencodedformat(request.zos.currentHostName&struct.__url)#', 540, 630);return false;" rel="nofollow" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_03.jpg" alt="Share by email" width="30" height="30" /></a>
+						<cfif request.zos.globals.enableSendTOFriend>
+							<a href="##"  data-ajax="false" onclick="zShowModalStandard('/z/misc/share-with-friend/index?title=#urlencodedformat(struct.event_name)#&amp;link=#urlencodedformat(request.zos.currentHostName&struct.__url)#', 540, 630);return false;" rel="nofollow" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_03.jpg" alt="Share by email" width="30" height="30" /></a>
+						</cfif>
 						<a href="https://www.facebook.com/sharer/sharer.php?u=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_05.jpg" alt="Share on facebook" width="30" height="30" /></a>
 						<a href="https://twitter.com/share?url=#urlencodedformat(request.zos.currentHostName&struct.__url)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_07.jpg" alt="Share on twitter" width="30" height="30" /></a>
 						<a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=#urlencodedformat(request.zos.currentHostName&struct.__url)#&amp;title=#urlencodedformat(struct.event_name)#&amp;summary=&amp;source=#urlencodedformat(request.zos.globals.shortDomain)#" target="_blank" style="display:block; float:left; margin-right:10px;"><img src="/z/images/event/share_09.jpg" alt="Share on linkedin" width="30" height="30" /></a> 
