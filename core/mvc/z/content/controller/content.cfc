@@ -2958,7 +2958,7 @@ configCom.includeContentByName(ts);
 		request.zos.zcontentshowinactive=false;
 	}
 	request.zos.requestLogEntry('content.cfc viewPage 1');
-	savecontent variable="output"{
+	//savecontent variable="output"{
 		// you must have a group by in your query or it may miss rows
 		ts =structnew();
 		ts.image_library_id_field="content.content_image_library_id";
@@ -3229,7 +3229,7 @@ configCom.includeContentByName(ts);
 			if(structkeyexists(request.zos,'listingApp') and structkeyexists(request.zos,'listingApp') and application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_compliantidx',false,true) EQ true and ts994824713.content_firm_name NEQ ''){
 				echo('<br />Listing courtesy of #ts994824713.content_firm_name#');
 			}
-	}
+	//}
 	// }
 	// if(structkeyexists(form, 'zsearchtexthighlight') AND contentConfig.searchincludebars EQ false and form[request.zos.urlRoutingParameter] NEQ "/z/misc/search-site/results"){
 	// 	t99=application.zcore.functions.zHighlightHTML(form.zsearchtexthighlight,theContentHTMLSection);
@@ -3336,7 +3336,7 @@ configCom.includeContentByName(ts);
 		endEditLink(contentConfig);
 		this.resetContentIncludeConfig();
 	}
-	writeoutput(output);
+	//writeoutput(output);
 	//application.sitestruct[request.zos.globals.id].contentPageCache[cacheString]=output;
 	return returnCountTotal;
 	</cfscript>
