@@ -3020,8 +3020,10 @@ configCom.includeContentByName(ts);
 	
 		form.content_parent_id = ts994824713.content_parent_id;
 
-		request.zos.requestLogEntry('content.cfc viewPage 2');
-		savecontent variable="theImageOutputHTML"{
+		request.zos.requestLogEntry('content.cfc viewPage 2'); 
+		// savecontent variable="theContentHTMLSection"{
+			beginEditLink(contentConfig, ts994824713.content_id, true);
+			if(not application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout)){
 				ts =structnew();
 				ts.image_library_id=ts994824713.content_image_library_id;
 				ts.size="#request.zos.globals.maximagewidth#x2000";
@@ -3032,12 +3034,7 @@ configCom.includeContentByName(ts);
 					ts.limit=1;
 				}
 				ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
-				application.zcore.imageLibraryCom.displayImages(ts);
-		}
-		savecontent variable="theContentHTMLSection"{
-			beginEditLink(contentConfig, ts994824713.content_id, true);
-			if(not application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout)){
-				echo(theImageOutputHTML);
+				application.zcore.imageLibraryCom.displayImages(ts); 
 			}
 			if(ts994824713.content_slideshow_id NEQ 0){
 				echo('<table style="width:100%;" class="zContentSlideShowDiv"><tr><td style="text-align:center;">');
@@ -3210,9 +3207,19 @@ configCom.includeContentByName(ts);
 					ts.crop=0;  
 					ts.offset=1;
 					ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
-					application.zcore.imageLibraryCom.displayImages(ts); 
+					application.zcore.imageLibraryCom.displayImages(ts);  
 				}else{
-					echo(theImageOutputHTML);
+					ts =structnew();
+					ts.image_library_id=ts994824713.content_image_library_id;
+					ts.size="#request.zos.globals.maximagewidth#x2000";
+					ts.crop=0; 
+					ts.top=true;
+					ts.offset=0;
+					if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){
+						ts.limit=1;
+					}
+					ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
+					application.zcore.imageLibraryCom.displayImages(ts);
 				}
 				echo('</div>');
 			}
@@ -3222,14 +3229,14 @@ configCom.includeContentByName(ts);
 			if(structkeyexists(request.zos,'listingApp') and structkeyexists(request.zos,'listingApp') and application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_compliantidx',false,true) EQ true and ts994824713.content_firm_name NEQ ''){
 				echo('<br />Listing courtesy of #ts994824713.content_firm_name#');
 			}
-		}
 	}
-	if(structkeyexists(form, 'zsearchtexthighlight') AND contentConfig.searchincludebars EQ false and form[request.zos.urlRoutingParameter] NEQ "/z/misc/search-site/results"){
-		t99=application.zcore.functions.zHighlightHTML(form.zsearchtexthighlight,theContentHTMLSection);
-	}else{
-		t99=theContentHTMLSection;
-	}
-	writeoutput(t99);
+	// }
+	// if(structkeyexists(form, 'zsearchtexthighlight') AND contentConfig.searchincludebars EQ false and form[request.zos.urlRoutingParameter] NEQ "/z/misc/search-site/results"){
+	// 	t99=application.zcore.functions.zHighlightHTML(form.zsearchtexthighlight,theContentHTMLSection);
+	// }else{
+	// 	t99=theContentHTMLSection;
+	// }
+	// writeoutput(t99);
 	if(request.zos.currentContentIncludeConfigStruct.contentWasIncluded EQ false and application.zcore.functions.zIsExternalCommentsEnabled()){
 		 // display external comments
 		 writeoutput(application.zcore.functions.zDisplayExternalComments(application.zcore.app.getAppData("content").optionstruct.app_x_site_id&"-"&ts994824713.content_id, ts994824713.content_name, request.zos.globals.domain&currentContentURL));

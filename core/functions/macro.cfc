@@ -255,7 +255,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 	</cfscript>
 </cffunction>
 
-<cffunction name="zDisplayExternalComments" localmode="modern" output="yes" returntype="any">
+<cffunction name="zDisplayExternalComments" localmode="modern">
 	<cfargument name="pageId" type="string" required="yes">
     <cfargument name="pageTitle" type="string" required="yes">
     <cfargument name="pageAbsoluteURL" type="string" required="yes">

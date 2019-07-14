@@ -1410,7 +1410,7 @@ ts.reverse=false; // true will sort them in the opposite direction
 ts.limit=0; // zero will return all images
 application.zcore.imageLibraryCom.displayImages(ts);
  --->
-<cffunction name="displayImages" localmode="modern" returntype="any" output="yes">
+<cffunction name="displayImages" localmode="modern">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	var topMeta="";
