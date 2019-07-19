@@ -1234,6 +1234,26 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="unblockUser" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	db=request.zos.queryObject;
+	oldDate=dateadd("h",-4,now());
+	oldDate=DateFormat(oldDate,'yyyy-mm-dd')&' '&TimeFormat(oldDate,'HH:mm:ss');
+	db.sql="delete FROM #db.table("login_log", request.zos.zcoreDatasource)# 
+	WHERE 
+	login_log_datetime > #db.param(oldDate)# and 
+	login_log_deleted = #db.param(0)# and  
+	login_log_status NOT IN (#db.param('1')#,#db.param('3')#) and  
+	login_log_username=#db.param(form.email)# and 
+	site_id <> #db.param(-1)# ";
+	db.execute("qDelete");
+	application.zcore.status.setStatus(request.zsid, "User unblocked.");
+	application.zcore.functions.zRedirect("/z/admin/member/index?zsid=#request.zsid#&returnMethod=#form.returnMethod#");
+	</cfscript>
+</cffunction>
+
+
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	var db=request.zos.queryObject;
@@ -1282,9 +1302,18 @@
 		user_first_name,#db.param(' ')#,user_last_name,#db.param(' ')#,user_username) like #db.param("%#form.searchtext#%")#";
 	} 
 	qCount=db.execute("qCount");  
-	db.sql="SELECT *, user.site_id usersiteid, user.site_id membersiteid 
-	FROM #db.table("user", request.zos.zcoreDatasource)# user , 
-	#db.table("user_group", request.zos.zcoreDatasource)# user_group 
+	oldDate=dateadd("h",-4,now());
+	oldDate=DateFormat(oldDate,'yyyy-mm-dd')&' '&TimeFormat(oldDate,'HH:mm:ss');
+	db.sql="SELECT *, user.site_id usersiteid, user.site_id membersiteid, count(login_log_id) loginfailures
+	FROM (#db.table("user", request.zos.zcoreDatasource)# user , 
+	#db.table("user_group", request.zos.zcoreDatasource)# user_group)
+	LEFT JOIN #db.table("login_log", request.zos.zcoreDatasource)#
+	ON
+	login_log_datetime > #db.param(oldDate)# and 
+	login_log_deleted = #db.param(0)# and  
+	login_log_status NOT IN (#db.param('1')#,#db.param('3')#) and 
+	login_log_username=user.user_username and 
+	login_log.site_id <> #db.param(-1)#  
 	WHERE  
 	user_deleted = #db.param(0)# and 
 	user_group_deleted = #db.param(0)# and 
@@ -1311,7 +1340,9 @@
 		db.sql&=" and concat(user.user_id,#db.param(' ')#, #db.param(' ')#, member_company, #db.param(' ')#,
 		user_first_name,#db.param(' ')#,user_last_name,#db.param(' ')#,user_username) like #db.param("%#form.searchtext#%")#";
 	}
-	db.sql&=" ORDER BY member_sort asc, user_first_name, user_last_name ";
+	db.sql&=" 
+	GROUP BY user.user_id 
+	ORDER BY member_sort asc, user_first_name, user_last_name ";
 	if(form.showall EQ 0){
 		db.sql&=" LIMIT #db.param((form.zIndex-1)*perpage)#,#db.param(perpage)# ";
 	}
@@ -1526,6 +1557,11 @@
 				<td>#dateformat(qMember.user_last_login_datetime, "m/d/yyyy")&" "&timeformat(qMember.user_last_login_datetime, "h:mm tt")#</td>  
 				<td>#application.zcore.functions.zTimeSinceDate(qMember.user_updated_datetime)#</td>
 				<td class="z-manager-admin">
+					<cfif qMember.loginfailures GTE 10>
+						<div class="z-manager-button-container" style="padding-top:5px;">
+							Blocked <a href="/z/admin/member/unblockUser?email=#urlencodedformat(qMember.user_username)#" class="z-manager-search-button">Unblock</a>
+						</div> 
+					</cfif>
 					<cfif (qCount.count LTE perpage or form.showall EQ 1) and qMember.member_public_profile EQ 1 and qMember.user_group_id NEQ variables.userUserGroupId>#variables.queueSortCom.getAjaxHandleButton(qMember.user_id)#</cfif> 
 					<cfif variables.userUserGroupIdCopy EQ qMember.user_group_id>
 						<cfif qMember.user_active EQ 1> 
