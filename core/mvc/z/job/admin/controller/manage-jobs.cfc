@@ -171,14 +171,14 @@
 		}
 	}
 	form.job_closed_datetime=application.zcore.functions.zso(form, "job_closed_datetime");
-	if(form.job_closed_datetime NEQ ""){
-		if(form.job_posted_datetime_date NEQ "" and isdate(form.job_posted_datetime_date)){
-			form.job_posted_datetime=dateformat(form.job_posted_datetime_date, 'yyyy-mm-dd');
-		}
-		if(form.job_posted_datetime_time NEQ "" and isdate(form.job_posted_datetime_time)){
-			form.job_posted_datetime=form.job_posted_datetime&" "&timeformat(form.job_posted_datetime_time, 'HH:mm:ss');
-		}
+	if(form.job_posted_datetime_date NEQ "" and isdate(form.job_posted_datetime_date)){
+		form.job_posted_datetime=dateformat(form.job_posted_datetime_date, 'yyyy-mm-dd');
+	}
+	if(form.job_posted_datetime_time NEQ "" and isdate(form.job_posted_datetime_time)){
+		form.job_posted_datetime=form.job_posted_datetime&" "&timeformat(form.job_posted_datetime_time, 'HH:mm:ss');
+	}
 
+	if(form.job_closed_datetime NEQ ""){
 		if(form.job_closed_datetime_date NEQ "" and isdate(form.job_closed_datetime_date)){
 			form.job_closed_datetime=dateformat(form.job_closed_datetime_date, 'yyyy-mm-dd');
 		}
