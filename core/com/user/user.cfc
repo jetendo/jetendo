@@ -1777,7 +1777,7 @@ formString = userCom.loginForm(inputStruct);
 		}
 	}
 	db.sql="SELECT * FROM  #db.table("user_group_x_group", request.zos.zcoreDatasource)# 
-	WHERE user_group_child_id = #db.param(memberGroupId)# and 
+	WHERE (user_group_id =#db.param(memberGroupId)# or user_group_child_id = #db.param(memberGroupId)#) and 
 	user_group_x_group_deleted = #db.param(0)# and ";
 	if(not arguments.excludeParentSite and parentSiteId NEQ 0){
 		db.sql&=" site_id in (#db.param(request.zos.globals.id)#, #db.param(request.zos.globals.parentId)#) ";
