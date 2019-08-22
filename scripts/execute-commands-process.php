@@ -1628,10 +1628,10 @@ function getImageMagickMergeImages($a){
 		echo "images was an empty string\n";
 		return "0|Images was an empty string";
 	} 
-	if(count($arrInput) <= 1){
+	/*if(count($arrInput) <= 1){
 		echo "You must input at least 2 images separated by *.\n";
 		return "0|You must input at least 2 images separated by *";
-	} 
+	} */
 	$absImageOutputPath=getAbsolutePath($absImageOutputPath);
 	$outputDir=getAbsolutePath(dirname($absImageOutputPath)); 
 	if($outputDir == "" || !is_dir($outputDir)){
