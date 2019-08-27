@@ -105,6 +105,7 @@
 		application.zcore.functions.zwritefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-preview.txt', '1');
 	}
 	application.zcore.functions.zwritefile(application.zcore.functions.zvar("privatehomedir", form.sid)&'__zdeploy-executed.txt', form.deploy_server_group);
+	application.zcore.functions.zwritefile(request.zos.sharedPath&'__zdeploysite-executed.txt', "1");
 	
 	var start=gettickcount();
 	while(true){

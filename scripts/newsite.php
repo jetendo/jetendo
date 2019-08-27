@@ -111,10 +111,10 @@ if(trim($result) != "1"){
 }
 */
 $sharePath=get_cfg_var("jetendo_share_path");
+$wwwUser=get_cfg_var("jetendo_www_user");
 
 for($i4=0;$i4 < 62;$i4++){
 	if($isSharedTestServer || !$isTestServer){
-		$wwwUser=get_cfg_var("jetendo_www_user");
 		if(file_exists($sharePath."__zdeploy-core-complete.txt")){ 
 			@unlink($sharePath."__zdeploy-core-complete.txt");
 			$result=zCheckDirectoryPermissions(get_cfg_var("jetendo_root_path")."core/", $wwwUser, $wwwUser, "440", "550", true, false, array(), $isTestServer);
@@ -228,14 +228,18 @@ for($i4=0;$i4 < 62;$i4++){
 		}
 	}
 	
-	
+	$checkSites=false;
+	if(file_exists($sharePath.'__zdeploysite-executed.txt')){
+		$checkSites=true;
+	}
+
 	for($i=0;$i<count($arrSite);$i++){
 		$row=$arrSite[$i];
 		$siteInstallPath=zGetDomainInstallPath($row["site_short_domain"]);
 		$siteWritableInstallPath=zGetDomainWritableInstallPath($row["site_short_domain"]);
 		// only run on test
 		if($isTestServer){
-			if(file_exists($siteWritableInstallPath."__zdeploy-executed.txt")){ 
+			if($checkSites && file_exists($siteWritableInstallPath."__zdeploy-executed.txt")){ 
 				$deploy_server_group=file_get_contents($siteWritableInstallPath."__zdeploy-executed.txt");
 				unlink($siteWritableInstallPath."__zdeploy-executed.txt"); 
 				@unlink($siteWritableInstallPath."__zdeploy-complete.txt.temp"); 
@@ -384,6 +388,9 @@ for($i4=0;$i4 < 62;$i4++){
 			@unlink($siteInstallPath."__zdeploy-complete.txt"); 
 		}
 	} 
+	if($checkSites){
+		@unlink($sharePath."__zdeploysite-executed.txt"); 
+	}
 	
 	$sharePath=get_cfg_var("jetendo_share_path");
 	if(file_exists($sharePath."hostmap-execute-reload.txt")){
@@ -451,7 +458,6 @@ for($i4=0;$i4 < 62;$i4++){
 	}
 		
 	$r=$cmysql->query($sql, MYSQLI_STORE_RESULT);
-	
 	
 	$arrNew=array();
 	while($row=$r->fetch_assoc()){
