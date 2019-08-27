@@ -124,6 +124,8 @@
 	} */
 	form.user_pref_list=1;
 	form.inquiries_email_opt_in=1;
+	form.user_first_name=application.zcore.functions.zso(form, 'user_first_name');
+	form.user_last_name=application.zcore.functions.zso(form, 'user_last_name');
 	form.user_username=application.zcore.functions.zso(form, 'user_username');
 	if(form.user_username EQ "" or application.zcore.functions.zEmailValidate(form.user_username) EQ false){
 		if(form.returnJson EQ 1){
@@ -146,7 +148,7 @@
 		to:form.user_username,
 		from:request.officeEmail,
 		dataStruct:{
-			firstName:"",
+			firstName:form.user_first_name,
 			email:form.user_username,
 			interestedInModel:"",  
 			officeId:application.zcore.functions.zso(request, 'autoresponderOfficeId'),
@@ -205,7 +207,12 @@
 this is for custom mailing-list forms
 <cfscript>
 mailingListCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.mailing-list");
-mailingListCom.outputStartForm();
+ss={
+	enableAjax:true,
+	successURL:"/z/misc/thank-you/index",
+	errorURL:"/z/misc/thank-you/error"
+};
+mailingListCom.outputStartForm(ss);
 </cfscript>
 <p>Your Email Address: 
 <input type="text" name="user_username" size="40" value="#htmleditformat(application.zcore.functions.zso(form, 'email'))#" />

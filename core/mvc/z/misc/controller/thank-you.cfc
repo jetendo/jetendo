@@ -51,5 +51,13 @@
 		#application.zcore.functions.zVarSO("Lead Conversion Tracking Code")#
 	</cfif>
 </cffunction>
+
+<cffunction name="error" localmode="modern" access="remote" output="yes">
+	<cfscript>
+		application.zcore.template.setTag("title", "Sorry, your inquiry couldn't be processed");
+		application.zcore.template.setTag("pagetitle", "Sorry, your inquiry couldn't be processed");
+	</cfscript>
+	<p>Please go back and try again, or contact us another way.</p>
+</cffunction>
 </cfoutput>
 </cfcomponent>
