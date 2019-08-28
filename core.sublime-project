@@ -1,0 +1,52 @@
+{
+	"mappings": [
+		{"mapping": "/zcorerootmapping", "path": "C:/ServerData/jetendo-server/jetendo/core"},
+	
+	],
+	"cfc_folders": [
+		{
+			"path": "C:/ServerData/jetendo-server/jetendo/core",
+			"variable_names": ["{cfc}", "{cfc}{cfc_folder}"],
+			"accessors": false 
+		}
+	],
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "core"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "public",
+			 "binary_file_patterns": ["*.svg", "*.woff", "*.woff2", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.ttf", "*.tga", "*.dds", "*.ico", "*.eot", "*.pdf", "*.swf", "*.jar", "*.zip"],
+
+			"folder_exclude_patterns":
+			[
+				"public/javascript/jquery/jquery.mobile-1.3.2/demos",
+				"public/a/scripts/tiny_mce",
+				"public/javascript/history.js/scripts/bundled",
+				"public/javascript/history.js/scripts/compressed",
+				"public/**/vendor",
+				"public/javascript/angularjs",
+				"public/javascript-compiled",
+				"public/javascript-compiled2", 
+				"themes", 
+				"public/javascript/jquery/balupton-history/scripts/bundled",
+				"public/javascript/jquery/balupton-history/scripts/compressed",
+				"public/javascript/jquery/balupton-history/vendor"
+			],
+			"file_exclude_patterns":
+			[
+				"public/javascript/*.html",
+				"public/javascript/*.css",
+				"public/javascript/*.htm",
+				"public/javascript/jquery/jquery-*.js"
+			]
+		},
+		{
+			"follow_symlinks": true,
+			"path": "scripts"
+		}
+	]
+}
