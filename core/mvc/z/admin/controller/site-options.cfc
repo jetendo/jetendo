@@ -1260,7 +1260,7 @@
 					<th>Use for URL/Nav Title:</th>
 					<td>#application.zcore.functions.zInput_Boolean("site_option_url_title_field")#</td>
 				</tr>
-				<cfif qOptionGroup.site_option_group_enable_unique_url EQ 1>
+				<cfif qOptionGroup.recordcount NEQ 0 and qOptionGroup.site_option_group_enable_unique_url EQ 1>
 					<tr>
 						<th>Use for Search Summary:</th>
 						<td>#application.zcore.functions.zInput_Boolean("site_option_search_summary_field")#</td>
@@ -1273,7 +1273,7 @@
 				<tr>
 					<th>Sort (admin):</th>
 					<td>
-						<cfif qOptionGroup.site_option_group_enable_sorting EQ 1>
+						<cfif qOptionGroup.recordcount NEQ 0 and qOptionGroup.site_option_group_enable_sorting EQ 1>
 						
 							<input name="site_option_admin_sort_field" id="site_option_admin_sort_field0" style="border:none; background:none;" value="0" type="hidden"> Can't be used when group sorting is enabled.
 						<cfelse>

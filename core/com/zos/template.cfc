@@ -682,6 +682,9 @@ for(row in qSite){
 		} 
 	}
 	retrytemplatecompile=false;
+	if(not request.zos.inMemberArea and not request.zos.inServerManager){
+		application.zcore.functions.zLoadTopMessage();
+	}
 	if(runCFCTemplate){
 		if(structkeyexists(tempIO, 'init')){
 			tempIO.init();

@@ -1031,6 +1031,82 @@ function zStopRollOverMessage(){
 	</cfif>
 </cffunction>
 
+<cffunction name="zLoadTopMessage" localmode="modern" access="public">
+	<cfscript>
+	message={
+		"Top Message Text":application.zcore.functions.zvarso("Top Message Text"),
+		"Top Message Background Color": application.zcore.functions.zvarso("Top Message Background Color"),
+		"Top Message Text Color": application.zcore.functions.zvarso("Top Message Text Color")
+	};
+	if(message["Top Message Text"] EQ ""){
+		return;
+	}
+	</cfscript>
+
+	<cfsavecontent variable="out">
+		<div id="z-top-message-bar" class="z-top-message-bar">
+			<div class="z-container">
+				#message["Top Message Text"]#
+			</div>
+		</div>
+	</cfsavecontent>
+	<cfsavecontent variable="scriptOut">
+		<style type="text/css">
+		.z-top-message-bar{
+			background-color:##<cfif message["Top Message Background Color"] NEQ "">#message["Top Message Background Color"]#<cfelse>000000</cfif>;
+			color:##<cfif message["Top Message Text Color"] NEQ "">#message["Top Message Text Color"]#<cfelse>FFFFFF</cfif>;
+			width:100%; 
+			float:left;
+			padding:10px;
+			top:0px;
+			left:0px;
+			position:relative;
+		}
+		.z-top-message-bar a:link, .z-top-message-bar a:visited{
+			color:##<cfif message["Top Message Text Color"] NEQ "">#message["Top Message Text Color"]#<cfelse>FFFFFF</cfif>;
+		}
+		.z-top-message-body{ width:100%; float:left; position:relative; top:0px; left:0px;}
+		</style>
+		<script type="text/javascript">
+		zArrDeferredFunctions.push(function(){
+    		$('body').wrapInner('<div id="z-top-message-body" class="z-top-message-body" />');
+    		$('body').prepend('#jsstringformat(out)#');
+			$(".z-top-message-bar").css({
+
+			});
+			function fixFixed(){
+				var scrollTop=$(window).scrollTop();
+				var p=zGetAbsPosition(document.getElementById("z-top-message-bar"));
+				var fixedElements = $('*').filter(function () { 
+			        return $(this).css('position') == 'fixed';
+			    });
+				for(var i=0;i<fixedElements.length;i++){
+			    	var e=fixedElements[i];
+			    	var top=e.getAttribute("data-original-top-position");
+			    	if(top == null || top == ""){
+			    		top=parseInt(e.style.top);
+			    		e.setAttribute("data-original-top-position", top);
+			    	}else{
+			    		top=parseInt(top);
+			    	}
+			    	if(scrollTop>0){
+			    		e.style.top=top+"px";
+			    	}else if(!isNaN(top)){
+			    		console.log("n", top, parseInt(p.height));
+			    		e.style.top=(parseInt(top)+parseInt(p.height))+"px";
+			    	}
+			    }
+			}
+			zArrScrollFunctions.push({functionName:fixFixed});
+			fixFixed();
+		    
+		});
+		</script> 
+	</cfsavecontent>
+	<cfscript>
+	application.zcore.template.appendTag("scripts", scriptOut);
+	</cfscript>
+</cffunction>
 
 </cfoutput>
 </cfcomponent>

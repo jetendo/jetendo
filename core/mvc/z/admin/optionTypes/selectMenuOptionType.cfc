@@ -473,7 +473,7 @@
 			}
 			arrGroup=[];
 			mainGroupID="";
-			if(arrayLen(gs[form.site_option_group_id].arrParentID) NEQ 0){
+			if(structkeyexists(gs, form.site_option_group_id) and arrayLen(gs[form.site_option_group_id].arrParentID) NEQ 0){
 				mainGroupID=gs[form.site_option_group_id].arrParentID[1];
 			}
 			for(group in qGroup2){
