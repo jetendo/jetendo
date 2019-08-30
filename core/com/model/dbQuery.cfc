@@ -40,7 +40,7 @@
 			arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:arguments.cfsqltype});
 		}else{
 			if(isnumeric(arguments.value) and len(arguments.value) LT 10){
-				if(arguments.value CONTAINS "00" or (len(arguments.value) GT 1 and left(arguments.value, 1) EQ 0)){
+				if(len(arguments.value) GT 1 and left(arguments.value, 1) EQ 0){
 					arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:"cf_sql_varchar"});
 				}else{
 					if(find(".", arguments.value)){
