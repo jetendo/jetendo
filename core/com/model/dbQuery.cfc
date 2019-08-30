@@ -40,10 +40,14 @@
 			arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:arguments.cfsqltype});
 		}else{
 			if(isnumeric(arguments.value) and len(arguments.value) LT 10){
-				if(find(".", arguments.value)){
-					arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:'cf_sql_float'});
+				if(arguments.value CONTAINS "00" or (len(arguments.value) GT 1 and left(arguments.value, 1) EQ 0)){
+					arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:"cf_sql_varchar"});
 				}else{
-					arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:'cf_sql_bigint'});
+					if(find(".", arguments.value)){
+						arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:'cf_sql_float'});
+					}else{
+						arrayappend(variables.config.arrParam, {value:arguments.value, cfsqltype:'cf_sql_bigint'});
+					}
 				}
 			}else{
 				arrayappend(variables.config.arrParam, {value:arguments.value});
