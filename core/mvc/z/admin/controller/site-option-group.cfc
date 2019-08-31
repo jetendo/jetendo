@@ -2065,7 +2065,14 @@ displayGroupCom.ajaxInsert();
 					Update Method: <input type="text" name="site_option_group_change_cfc_update_method" id="site_option_group_change_cfc_update_method" value="#htmleditformat(form.site_option_group_change_cfc_update_method)#" /><br /><br />
 					Delete Method: <input type="text" name="site_option_group_change_cfc_delete_method" id="site_option_group_change_cfc_delete_method" value="#htmleditformat(form.site_option_group_change_cfc_delete_method)#" /><br /><br />
 					Sort Method: <input type="text" name="site_option_group_change_cfc_sort_method" id="site_option_group_change_cfc_sort_method" value="#htmleditformat(form.site_option_group_change_cfc_sort_method)#" /><br />
-					 (Each function should exist in the CFC with access="public")
+					 (Each function should exist in the CFC with access="public")<br><br>
+					<cfscript>
+					if(form.site_option_group_change_cfc_children EQ ""){
+						form.site_option_group_change_cfc_children=0;
+					}
+					</cfscript>
+					 Execute on child record changes? 
+					 #application.zcore.functions.zInput_Boolean("site_option_group_change_cfc_children")#
 					</td>
 				</tr>
 				<tr>

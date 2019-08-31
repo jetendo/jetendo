@@ -2067,21 +2067,24 @@
 		if(row.site_option_primary_field EQ 1 and currentCFC.isSearchable()){
 			hasPrimaryField=true;
 		}
-		nv=currentCFC.getFormValue(row, 'newvalue', form);
-		if(row.site_option_required EQ 1){
-			if(nv EQ ""){
+
+		if(methodBackup NEQ "internalGroupUpdate"){
+			nv=currentCFC.getFormValue(row, 'newvalue', form);
+			if(row.site_option_required EQ 1){
+				if(nv EQ ""){
+					application.zcore.status.setFieldError(request.zsid, "newvalue"&row.site_option_id, true);
+					application.zcore.status.setStatus(request.zsid, row.site_option_display_name&" is a required field.", false, true);
+					errors=true;
+					continue;
+				}
+			}
+			var rs=currentCFC.validateFormField(row, optionStruct, 'newvalue', form); 
+			if(not rs.success){
 				application.zcore.status.setFieldError(request.zsid, "newvalue"&row.site_option_id, true);
-				application.zcore.status.setStatus(request.zsid, row.site_option_display_name&" is a required field.", false, true);
+				application.zcore.status.setStatus(request.zsid, rs.message, form, true);
 				errors=true;
 				continue;
 			}
-		}
-		var rs=currentCFC.validateFormField(row, optionStruct, 'newvalue', form); 
-		if(not rs.success){
-			application.zcore.status.setFieldError(request.zsid, "newvalue"&row.site_option_id, true);
-			application.zcore.status.setStatus(request.zsid, rs.message, form, true);
-			errors=true;
-			continue;
 		}
 	}  
 	if(application.zcore.functions.zso(form,'site_x_option_group_set_override_url') NEQ "" and not application.zcore.functions.zValidateURL(application.zcore.functions.zso(form,'site_x_option_group_set_override_url'), true, true)){
@@ -2495,6 +2498,69 @@
 			application.zcore.siteOptionCom.searchReindexSet(form.site_x_option_group_set_id, request.zos.globals.id, [qCheck.site_option_group_display_name]);
 		}
 	}
+
+	// If one of the parent groups has a change cfc defined, we need to execute the update function on that cfc here
+	parentId=qCheck.site_option_group_parent_id; 
+	loopCount=0;
+	while(true){
+		if(parentId EQ 0){
+			break;
+		}
+		loopCount++;
+		if(loopCount GT 50){
+			throw("Possible infinite loop detected for site_option_group_id: #parentId# - must change the site_option_group_parent_id value manually.");
+		}
+		groupStruct=application.zcore.functions.zGetSiteOptionGroupById(parentId);
+		if(groupStruct.site_option_group_change_cfc_path NEQ "" and groupStruct.site_option_group_change_cfc_children EQ 1){
+			// execute the change cfc path with the parent data, not current record.
+
+			// get the data for the right site_x_option_group_set_id based on loop of site_x_option_group_set_parent_id?
+			setParentId=form.site_x_option_group_set_parent_id;
+			loopCount2=0;
+			while(true){
+				if(setParentId EQ 0){
+					break;
+				} 
+				loopCount2++;
+				if(loopCount GT 50){
+					throw("Possible infinite loop detected for site_x_option_group_set_id: #setParentId# - must change the site_x_option_group_parent_id value manually.");
+				}
+				db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# WHERE 
+				site_x_option_group_set_deleted=#db.param(0)# and 
+				site_id = #db.param(qCheck.site_id)# and 
+				site_x_option_group_set_id=#db.param(setParentId)#";
+				qSet=db.execute("qSet");
+				if(qSet.recordcount EQ 0){
+					break;
+				}
+				for(row in qSet){
+					if(groupStruct.site_option_group_id EQ row.site_option_group_id){
+						// this is the right record, execute here
+						path=groupStruct.site_option_group_change_cfc_path;
+						if(left(path, 5) EQ "root."){
+							path=request.zRootCFCPath&removeChars(path, 1, 5);
+						}
+						changeCom=application.zcore.functions.zcreateObject("component", path); 
+						arrGroupName=application.zcore.siteOptionCom.getOptionGroupNameArrayById(groupStruct.site_option_group_id);
+						dataStruct=application.zcore.siteOptionCom.getOptionGroupSetById(arrGroupName, row.site_x_option_group_set_id, request.zos.globals.id, true);
+						coreStruct={
+							site_x_option_group_set_sort:dataStruct.__sort,
+							// NOT USED YET: site_x_option_group_set_active:dataStruct.__active,
+							site_option_group_id:dataStruct.__groupId,
+							site_x_option_group_set_approved:dataStruct.__approved,
+							site_x_option_group_set_override_url:application.zcore.functions.zso(dataStruct, '__url'),
+							site_x_option_group_set_parent_id:dataStruct.__parentId,
+							site_x_option_group_set_image_library_id:application.zcore.functions.zso(dataStruct, '__image_library_id', true),
+							site_x_option_group_set_id:dataStruct.__setId
+						};  
+						changeCom[groupStruct.site_option_group_change_cfc_update_method](dataStruct, coreStruct);
+					}
+					setParentId=row.site_x_option_group_set_parent_id;
+				}
+			}
+		}
+		parentId=groupStruct.site_option_group_parent_id; 
+	} 
 
 	if(qCheck.site_option_group_change_cfc_path NEQ ""){ 
 		path=qCheck.site_option_group_change_cfc_path;
