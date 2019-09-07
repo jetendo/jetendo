@@ -715,7 +715,8 @@
 
 	loadDbCFC(ts);
 	if(request.zos.isTestServer){
-		ts.componentObjectCache.featureCom.rebuildFeaturesCache(ts, true);
+		// causes to fail to hang lucee on startup
+		//ts.componentObjectCache.featureCom.rebuildFeaturesCache(ts, true);
 	}
 	/*
 	request.zos.globals=structnew();

@@ -1948,6 +1948,7 @@ not used
 <cffunction name="zOS_cacheSiteAndUserSchemas" localmode="modern" output="false" returntype="any">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfscript>
+	application.zcore.featureCom.internalUpdateOptionAndGroupCache(tempStruct);
 	</cfscript>
 </cffunction>
 

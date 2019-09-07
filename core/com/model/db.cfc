@@ -322,7 +322,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		<cfscript>
 		var cfcatch=0;
 		var errorStruct=0;
-		var cacheStruct=structget(arguments.configStruct.cacheStructKey);
+		// var cacheStruct=structget(arguments.configStruct.cacheStructKey);
 		if(not structkeyexists(arguments.configStruct, 'sql') or not len(arguments.configStruct.sql)){
 			throw("The sql statement must be set before executing the query;", "database");
 		}
@@ -333,13 +333,13 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		}else{
 			tempCacheEnabled=false;
 		}
-		if(tempCacheEnabled){ 
-			nowDate=now();
-			cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, processedSQL, nowDate); 
-			if(cacheResult.success){
-				return {success:true, result:cacheResult.result};
-			}
-		}
+		// if(tempCacheEnabled){ 
+		// 	nowDate=now();
+		// 	cacheResult=variables.checkQueryCache(cacheStruct, arguments.configStruct, processedSQL, nowDate); 
+		// 	if(cacheResult.success){
+		// 		return {success:true, result:cacheResult.result};
+		// 	}
+		// }
 		try{
 			result=variables.runQuery(arguments.configStruct, arguments.name, processedSQL, arguments.timeout, arguments.returnType, arguments.lazy);
 		}catch(database errorStruct){
@@ -350,9 +350,9 @@ Copyright (c) 2013 Far Beyond Code LLC.
 		if(isSimpleValue(result)){
 		  	return {success:true, result: true};
 		}else{
-			if(tempCacheEnabled){
-				cacheStruct[cacheResult.hashCode]={date:nowDate, result:result};
-			}
+			// if(tempCacheEnabled){
+			// 	cacheStruct[cacheResult.hashCode]={date:nowDate, result:result};
+			// }
 			return {success:true, result:result};
 		}
 		</cfscript>
