@@ -1945,6 +1945,11 @@ not used
 	return application.zcore.siteOptionCom.appendOptionGroupDefaults(arguments.dataStruct, arguments.site_option_group_id); 
 	</cfscript>
 </cffunction> --->
+<cffunction name="zOS_cacheSiteAndUserSchemas" localmode="modern" output="false" returntype="any">
+	<cfargument name="site_id" type="string" required="yes">
+	<cfscript>
+	</cfscript>
+</cffunction>
 
 <!--- re-create the site globals and user group cache --->
 <cffunction name="zOS_cacheSiteAndUserGroups" localmode="modern" output="false" returntype="any">

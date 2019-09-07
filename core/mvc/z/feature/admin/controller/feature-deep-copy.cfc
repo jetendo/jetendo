@@ -603,7 +603,7 @@ When making a version the primary record, it will have option to preserve the or
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
 	application.zcore.functions.zStatusHandler(request.zsid);
-	siteFieldCom=createObject("component", "zcorerootmapping.mvc.z.feature.features");
+	siteFieldCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	defaultStruct=siteFieldCom.getDefaultStruct(); 
 	structappend(arguments.struct, defaultStruct, false);
 	qSet=getSet(); 

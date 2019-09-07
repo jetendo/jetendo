@@ -190,7 +190,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		<p>Schema Name: <input type="text" name="groupName" value="#application.zcore.functions.zso(form, 'groupName')#" /></p>
 		<p>Public Form #application.zcore.functions.zInput_Boolean("publicForm")#</p>
 		<p>Schema/Field Field JSON:<br><textarea name="fieldData" cols="100" rows="10">#application.zcore.functions.zso(form, 'fieldData')#</textarea></p> 
-		<p><input type="submit" name="Submit1" value="Import Schema"> <input type="button" name="cancel1" value="Cancel" onclick="window.location.href='/z/feature/admin/feature-schema/index';"></p> 
+		<p><input type="submit" name="Submit1" value="Import Schema" class="z-manager-search-button"> <input type="button" name="cancel1" value="Cancel" onclick="window.location.href='/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#';" class="z-manager-search-button"></p> 
 	</form>
 </cffunction>
 

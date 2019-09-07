@@ -208,7 +208,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		<p>Group Name: <input type="text" name="groupName" value="#application.zcore.functions.zso(form, 'groupName')#" /></p>
 		<p>Public Form #application.zcore.functions.zInput_Boolean("publicForm")#</p>
 		<p>Group/Option Field JSON:<br><textarea name="fieldData" cols="100" rows="10">#application.zcore.functions.zso(form, 'fieldData')#</textarea></p> 
-		<p><input type="submit" name="Submit1" value="Import Group"> <input type="button" name="cancel1" value="Cancel" onclick="window.location.href='/z/admin/site-option-group/index';"></p> 
+		<p><input type="submit" name="Submit1" value="Import Group" class="z-manager-search-button"> <input type="button" name="cancel1" value="Cancel" onclick="window.location.href='/z/admin/site-option-group/index';" class="z-manager-search-button"></p> 
 	</form>
 </cffunction>
 

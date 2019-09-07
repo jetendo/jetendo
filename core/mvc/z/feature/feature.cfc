@@ -81,6 +81,9 @@
 <!--- application.zcore.featureCom.reloadFeatureCache() --->
 <cffunction name="reloadFeatureCache" localmode="modern" access="public">
 	<cfscript>
+
+	application.zcore.featureCom.rebuildFeaturesCache(ts, false);
+
 	onSiteStart(application.siteStruct[request.zos.globals.id]);
 	</cfscript>
 </cffunction>
@@ -209,10 +212,35 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="rebuildFeaturesCache" localmode="modern" access="public">
+	<cfargument name="cacheStruct" type="struct" required="yes">
+	<cfargument name="rebuildSchemaCache" type="boolean" required="yes">
+	<cfscript>	
+	featureData={
+		featureDataLookup:{},
+		featureIdLookup:{},
+		featureSchemaData:{}
+	};
+	db=request.zos.queryObject;
+	db.sql="select * from #db.table("feature", "jetendofeature")# where 
+	feature_deleted=#db.param(0)#";
+	qFeature=db.execute("qFeature");
+	for(row in qFeature){
+		featureData.featureIdLookup[row.feature_variable_name]=row.feature_id;
+		featureData.featureDataLookup[row.feature_id]=row;
+		if(arguments.rebuildSchemaCache){
+			rebuildFeatureStructCache(row.feature_id, arguments.cacheStruct);
+		}
+	}
+	structappend(arguments.cacheStruct, featureData);
+	</cfscript>
+</cffunction>
+
 <!--- 
-application.zcore.featureCom.rebuildFeatureStructCache(cacheStruct);
+application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStruct);
  --->
 <cffunction name="rebuildFeatureStructCache" access="public" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="cacheStruct" type="struct" required="yes">
 	<cfscript> 
 	db=request.zos.queryObject;
@@ -227,6 +255,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(cacheStruct);
 
 	 db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
 	WHERE  
+	feature_id=#db.param(arguments.feature_id)# and 
 	feature_field_deleted = #db.param(0)#";
 	qS=db.execute("qS");
 	for(row in qS){
@@ -251,19 +280,24 @@ application.zcore.featureCom.rebuildFeatureStructCache(cacheStruct);
 	}
 	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
 	WHERE  
+	feature_id=#db.param(arguments.feature_id)# and 
 	feature_schema_deleted = #db.param(0)#";
 	qSchema=db.execute("qSchema");  
 	for(row in qSchema){
 		row.count=0;
 		fs.featureSchemaLookup[row.feature_schema_id]=row;
 		fs.featureSchemaIdLookup[row.feature_schema_parent_id&chr(9)&row.feature_schema_variable_name]=row.feature_schema_id;
-	} 
-	arguments.cacheStruct.featureSchemaData=fs;
+	}
+	if(not structkeyexists(arguments.cacheStruct, "featureSchemaData")){
+		arguments.cacheStruct.featureSchemaData={};
+	}
+	arguments.cacheStruct.featureSchemaData[arguments.feature_id]=fs;
 	</cfscript>
 </cffunction>
 
 <cffunction name="internalUpdateSchemaCacheBySchemaId" access="public" localmode="modern">
 	<cfargument name="siteStruct" type="struct" required="yes">
+	<cfargument name="feature_id" type="string" required="no" default="">
 	<cfargument name="feature_schema_id" type="string" required="no" default="">
 	<cfscript> 
 	db=request.zos.queryObject;
@@ -277,12 +311,16 @@ application.zcore.featureCom.rebuildFeatureStructCache(cacheStruct);
 	site_id=arguments.siteStruct.id;
 	feature_schema_id=arguments.feature_schema_id;
 
- 	fsd=application.zcore.featureSchemaData;
+
+ 	fsd=application.zcore.featureSchemaData[arguments.feature_id];
 	
 	fs.featureSchemaSetId[0&"_groupId"]=0;
 	fs.featureSchemaSetId[0&"_parentId"]=0;
 	fs.featureSchemaSetId[0&"_appId"]=0;
 	fs.featureSchemaSetId[0&"_childSchema"]=structnew();
+	if(not structkeyexists(fsd.featureSchemaLookup, arguments.feature_schema_id)){
+		throw("fsd.featureSchemaLookup didn't have the arguments.feature_schema_id, #arguments.feature_schema_id# - caching is incomplete.");
+	}
 	featureSchema=fsd.featureSchemaLookup[arguments.feature_schema_id];
 
 	if(request.zos.enableSiteOptionGroupCache and featureSchema.feature_schema_enable_cache EQ 1){ 
@@ -648,6 +686,7 @@ ts=[
 application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
  --->
 <cffunction name="searchSchema" access="public" output="no" returntype="struct" localmode="modern">
+	<cfargument name="featureVariableName" type="string" required="yes">
 	<cfargument name="groupName" type="string" required="yes">
 	<cfargument name="arrSearch" type="array" required="yes">
 	<cfargument name="parentSchemaId" type="string" required="yes">
@@ -663,7 +702,8 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 	rs={count:0, arrResult:[], hasMoreRecords:false};
 	arguments.offset=application.zcore.functions.zso(arguments, 'offset', true, 0);
 	arguments.limit=application.zcore.functions.zso(arguments, 'limit', true, 10); 
-	fsd=application.zcore.featureSchemaData; 
+	feature_id=application.zcore.featureIdLookup[arguments.featureVariableName];
+	fsd=application.zcore.featureSchemaData[feature_id]; 
 	t9=getTypeData(request.zos.globals.id);
 	currentOffset=0;
 	if(arguments.orderBy NEQ ""){
@@ -1701,7 +1741,6 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 						t9.featureSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id]=arrTemp;
 					}catch(Any e){
 						application.zcore.featureCom.updateSchemaCacheBySchemaId(row.feature_schema_id);
-						//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 						ts={};
 						ts.subject="Feature Schema update resort failed";
 						savecontent variable="output"{
@@ -2185,7 +2224,7 @@ if(not rs.success){
 	<cfargument name="struct" type="struct" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	var optionsCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.features"); 
+	var optionsCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features"); 
 	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# feature_field,
 	 #db.table("feature_schema", "jetendofeature")# feature_schema 
 	 WHERE 
@@ -2317,9 +2356,11 @@ if(not rs.success){
 		arrField=listToArray(row.feature_data_field_order, chr(13));
 		arrData=listToArray(row.feature_data_data, chr(13));
 		for(i=1;i<=arrayLen(arrField);i++){
-			field=fieldStruct[arrField[i]];
-			if(field.hasCustomDelete){
-				field.cfc.onDelete(arrData[i], row.site_id, field.typeStruct);
+			if(structkeyexists(fieldStruct, arrField[i])){
+				field=fieldStruct[arrField[i]];
+				if(field.hasCustomDelete){
+					field.cfc.onDelete(arrData[i], row.site_id, field.typeStruct);
+				}
 			}
 		}
 	}
@@ -2358,7 +2399,7 @@ if(not rs.success){
 	WHERE  feature_schema_parent_id=#db.param(arguments.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
-	qSchemas=db.execute("qSchemas");
+	qSchemas=db.execute("qSchemas", "", 10000, "query", false); 
 	for(row in qSchemas){
 		deleteSchemaRecursively(row.feature_schema_id, false);	
 	}
@@ -2383,18 +2424,20 @@ if(not rs.success){
 	}
 	db.sql="SELECT * FROM 
 	#db.table("feature_data", "jetendofeature")#  
-	WHERE  feature_schema_id=#db.param(arguments.feature_schema_id)# an
+	WHERE  feature_schema_id=#db.param(arguments.feature_schema_id)# and
 	site_id<>#db.param(-1)# and 
-	feature_data_value <> #db.param('')# and 
+	feature_data_data <> #db.param('')# and 
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
 	for(row in qData){
 		arrField=listToArray(row.feature_data_field_order, chr(13));
 		arrData=listToArray(row.feature_data_data, chr(13));
 		for(i=1;i<=arrayLen(arrField);i++){
-			field=fieldStruct[arrField[i]];
-			if(field.hasCustomDelete){
-				field.cfc.onDelete(arrData[i], row.site_id, field.typeStruct);
+			if(structkeyexists(fieldStruct, arrField[i])){
+				field=fieldStruct[arrField[i]];
+				if(field.hasCustomDelete){
+					field.cfc.onDelete(arrData[i], row.site_id, field.typeStruct);
+				}
 			}
 		}
 	} 
@@ -2425,7 +2468,7 @@ if(not rs.success){
 		site.site_id = feature_x_site.site_id and 
 		site_active=#db.param(1)# and 
 		site_deleted=#db.param(0)# and 
-		feature_x_site.feature_id=#db.param(qSchemas.feature_id)# and 
+		feature_x_site.feature_id=#db.param(form.feature_id)# and 
 		feature_x_site_deleted = #db.param(0)# and 
 		feature_x_site.site_id<>#db.param(-1)# ";
 		qSite=db.execute("qSite"); 
@@ -2658,6 +2701,7 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 <cffunction name="getTypeData" returntype="struct" localmode="modern" access="public">
 	<cfargument name="key" type="string" required="yes" hint="site_id, theme_id or widget_id">
 	<cfscript>
+		throw("this is returning components instead of type data, why?");
 	return application.zcore.featureData.fieldTypeStruct[arguments.key];
 	</cfscript>
 </cffunction>

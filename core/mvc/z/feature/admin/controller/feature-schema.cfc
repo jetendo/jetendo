@@ -3,6 +3,7 @@
 <cffunction name="init" localmode="modern" access="private" roles="member">
 	<cfscript>
 	var theTitle=0;
+	db=request.zos.queryObject;
 	variables.allowGlobal=false; 
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	if(application.zcore.user.checkServerAccess()){
@@ -16,7 +17,24 @@
 	if(not application.zcore.functions.zIsWidgetBuilderEnabled()){
 		application.zcore.functions.z301Redirect('/member/');
 	}
-	echo('<p><a href="/z/feature/admin/feature-manage/index">Features</a> / </p>');
+
+	db.sql="select * from #db.table("feature", "jetendofeature")# feature_schema 
+	where feature_id=#db.param(form.feature_id)# and 
+	feature_deleted = #db.param(0)# and
+	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
+	request.qFeature=db.execute("qFeature", "", 10000, "query", false);
+	if(request.qFeature.recordcount EQ 0){
+		application.zcore.status.setStatus(request.zsid, "Invalid feature id", form, true);
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	}
+
+	echo('<p><a href="/z/feature/admin/feature-manage/index">Features</a> / ');
+	if(form.method EQ "index"){
+		echo(request.qFeature.feature_display_name);
+	}else{
+		echo('<a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">#request.qFeature.feature_display_name#</a>');
+	}
+	echo(' /</p>');
 	theTitle="Manage Feature Schemas";
 	application.zcore.template.setTag("title",theTitle); 
 	echo('<h2>Feature Schemas</h2>');
@@ -34,9 +52,11 @@
 		<cfif application.zcore.user.checkServerAccess()>
 			<a href="/z/feature/admin/features/searchReindex">Search Reindex</a> | 
 		</cfif>
-		<a href="/z/feature/admin/feature-sync/index">Sync</a> | 
-		<a href="/z/feature/admin/feature-schema/index">Schemas</a> | 
-		<a href="/z/feature/admin/feature-schema/add?returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a>
+		<a href="/z/feature/admin/feature-sync/index">Sync</a>
+		<cfif structkeyexists(form, "feature_id")>
+			 | <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Schemas</a>
+			 | <a href="/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a>
+		</cfif>
 	</div>
 </cffunction> 
 
@@ -683,7 +703,7 @@ displaySchemaCom.ajaxInsert();
 <cffunction name="export" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 
-	content type="text/plain";
+	// content type="text/plain";
 	setting requesttimeout="10000";
 	var db=request.zos.queryObject;
 	currentSchemaId=application.zcore.functions.zso(form, 'feature_schema_id'); 
@@ -697,7 +717,7 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
 	}
 	header name="Content-Disposition" value="attachment; filename=#dateformat(now(), "yyyy-mm-dd-")&qSchema.feature_schema_variable_name#.csv";
-	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.features");
+	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 
 	db.sql="SELECT * FROM  
 	#db.table("feature_field", "jetendofeature")# WHERE 
@@ -865,7 +885,7 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.status.setStatus(request.zsid, "Feature Schema no longer exists.", form, true);
 		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
 	}
-	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.features");
+	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 
 	doffset=0;
 	while(true){
@@ -1065,7 +1085,7 @@ displaySchemaCom.ajaxInsert();
 		writeoutput('</table><br /><br />
 		<input type="hidden" name="fieldcount" value="#local.index-1#" />
 		<input type="submit" name="submit1" value="Save" /> 
-		<input type="button" name="cancel1" value="Cancel" onclick="window.location.href=''/z/feature/admin/feature-schema/index'';" />
+		<input type="button" name="cancel1" value="Cancel" onclick="window.location.href=''/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#'';" />
 		</form>');
 	}
 	</cfscript>
@@ -1091,6 +1111,7 @@ displaySchemaCom.ajaxInsert();
 	<h2>Copy Schema: #local.qSchema.feature_schema_display_name#</h2>
 	<p>Please note that the "select menu" type, and group / inquiries mapping data are not copied.  You will need to verify those are setup correctly after copying this Feature Schema.</p>
 	<form class="zFormCheckDirty" action="/z/feature/admin/feature-schema/copySchema" method="post">
+		<input type="hidden" name="feature_id" value="#form.feature_id#" />
 		<input type="hidden" name="feature_schema_id" value="#form.feature_schema_id#" />
 		<table style="border-spacing:0px; padding:5px;">
 			<tr>
@@ -1119,7 +1140,7 @@ displaySchemaCom.ajaxInsert();
 			<tr><td>&nbsp;</td>
 			<td>
 				<input type="submit" name="submit1" value="Copy" class="z-manager-search-button" /> 
-				<input type="button" name="cancel1" value="Cancel" class="z-manager-search-button" onclick="window.location.href='/z/feature/admin/feature-schema/index';" />
+				<input type="button" name="cancel1" value="Cancel" class="z-manager-search-button" onclick="window.location.href='/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#';" />
 			</td></tr>
 		</table>
 	</form>
@@ -1151,7 +1172,7 @@ displaySchemaCom.ajaxInsert();
 	local.newfeatureSchemaId=application.zcore.functions.zInsert(ts);
 	arguments.groupStruct[arguments.feature_schema_id]=local.newfeatureSchemaId;
 	db.sql="select * from #db.table("feature_field", "jetendofeature")# 
-	where #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
+	where #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_field")# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id = #db.param(arguments.feature_schema_id)# ";
 	local.qFields=db.execute("qFields");
@@ -1187,6 +1208,7 @@ displaySchemaCom.ajaxInsert();
 	var typeStruct={};
 	var groupStruct={};
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
+	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true);
 	form.newSchemaName=application.zcore.functions.zso(form, 'newSchemaName');
 	form.newSiteId=application.zcore.functions.zso(form, 'newSiteId', true, 0);
 	if(form.newSiteId EQ 0){
@@ -1213,7 +1235,7 @@ displaySchemaCom.ajaxInsert();
 	application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
 		
 	application.zcore.status.setStatus(request.zsid, "Feature Schema Copied.");
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
  
@@ -1242,15 +1264,16 @@ displaySchemaCom.ajaxInsert();
 	feature_schema.feature_schema_id = child1.feature_schema_parent_id and 
 	child1.feature_id = feature_schema.feature_id and 
 	child1.feature_schema_deleted = #db.param(0)# 
-	WHERE
+	WHERE 
+	feature_schema.feature_id = #db.param(form.feature_id)# and 
 	feature_schema.feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 	feature_schema.feature_schema_parent_id = #db.param(form.feature_schema_parent_id)# 
 	group by feature_schema.feature_schema_id 
 	order by feature_schema.feature_schema_display_name ASC ";
-	qProp=db.execute("qProp", "", 10000, "query", false);
+	qProp=db.execute("qProp", "", 10000, "query", false); 
 	if(form.feature_schema_parent_id NEQ 0){
-		writeoutput('<p><a href="/z/feature/admin/feature-schema/index">Manage Schemas</a> / ');
+		writeoutput('<p><a href="/z/feature/admin/feature-manage/index">Features</a> / <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">#request.qFeature.feature_display_name#</a> / ');
 		curParentId=form.feature_schema_parent_id;
 		arrParent=arraynew(1);
 		loop from="1" to="25" index="i"{
@@ -1261,7 +1284,7 @@ displaySchemaCom.ajaxInsert();
 			#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
 			q1=db.execute("q1", "", 10000, "query", false);
 			loop query="q1"{
-				arrayappend(arrParent, '<a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#q1.feature_schema_id#">
+				arrayappend(arrParent, '<a href="/z/feature/admin/feature-schema/index?feature_id=#q1.feature_id#&feature_schema_parent_id=#q1.feature_schema_id#">
 				#application.zcore.functions.zFirstLetterCaps(q1.feature_schema_display_name)#</a> / ');
 				curParentId=q1.feature_schema_parent_id;
 			}
@@ -1278,14 +1301,14 @@ displaySchemaCom.ajaxInsert();
 		writeoutput('</p>');
 	}
 	</cfscript>
-	<p><a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>">Add Schema</a> 
+	<p><a href="/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&feature_schema_parent_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>">Add Schema</a> 
 
-	 | <a href="/z/feature/admin/feature-import/importSchema">Import Schema</a>
+	<!---  | <a href="/z/feature/admin/feature-import/importSchema?feature_id=#form.feature_id#">Import Schema</a> --->
 	 
 	<cfif isquery(qSchema) and qSchema.feature_schema_id NEQ 0>
 		| <a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_schema_id=<cfif isquery(qSchema)>#qSchema.feature_schema_id#</cfif>" target="_blank">Display Schema Code</a>
 	</cfif>
-	<cfif isquery(qSchema)> | <a href="/z/feature/admin/features/manageFields?feature_schema_id=#qSchema.feature_schema_id#&feature_schema_parent_id=#qSchema.feature_schema_parent_id#">Manage Fields</a></cfif></p>
+	<cfif isquery(qSchema)> | <a href="/z/feature/admin/features/manageFields?feature_id=#qSchema.feature_id#&feature_schema_id=#qSchema.feature_schema_id#&feature_schema_parent_id=#qSchema.feature_schema_parent_id#">Manage Fields</a></cfif></p>
 	<table style="border-spacing:0px;" class="table-list" >
 		<tr>
 			<th>ID</th>
@@ -1306,32 +1329,32 @@ displaySchemaCom.ajaxInsert();
 			<td>
 				<cfif qProp.feature_schema_parent_id EQ 0>
 
-					<a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
-					<a href="/z/feature/admin/features/import?feature_schema_id=#qProp.feature_schema_id#">Import</a> | 
+					<a href="/z/feature/admin/features/manageSchema?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
+					<a href="/z/feature/admin/features/import?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Import</a> | 
 				</cfif>
 				<cfif variables.allowGlobal>
-					<a href="/z/feature/admin/feature-schema/add?feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
-					<a href="/z/feature/admin/features/manageFields?feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#">Fields</a> | 
+					<a href="/z/feature/admin/feature-schema/add?feature_id=#qProp.feature_id#&feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
+					<a href="/z/feature/admin/features/manageFields?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#">Fields</a> | 
 					<cfif qProp.feature_schema_allow_public NEQ 0>
 						<cfif qProp.feature_schema_public_form_url NEQ "">
 							<a href="#htmleditformat(qProp.feature_schema_public_form_url)#" target="_blank">Public Form</a> | 
 						<cfelse>
-							<a href="/z/feature/feature-display/add?feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a> | 
+							<a href="/z/feature/feature-display/add?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a> | 
 						</cfif>
 					</cfif>
 					<cfif application.zcore.user.checkServerAccess()>
-						<a href="/z/feature/admin/feature-schema/export?feature_schema_id=#qProp.feature_schema_id#" target="_blank">Export CSV</a> | 
-						<a href="/z/feature/admin/feature-schema/reindex?feature_schema_id=#qProp.feature_schema_id#" title="Will update Feature Schema table for all records.  Useful after a config change.">Reprocess</a> | 
-						<a href="/z/_com/app/siteSchemaFormGenerator?method=index&amp;feature_schema_id=#qProp.feature_schema_id#" target="_blank">Generate Custom DB Form</a> | 
+						<a href="/z/feature/admin/feature-schema/export?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Export CSV</a> | 
+						<a href="/z/feature/admin/feature-schema/reindex?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" title="Will update Feature Schema table for all records.  Useful after a config change.">Reprocess</a> | 
+						<!--- <a href="/z/_com/app/siteSchemaFormGenerator?method=index&amp;feature_schema_id=#qProp.feature_schema_id#" target="_blank">Generate Custom DB Form</a> |  --->
 					</cfif>
 	
 					<cfif qProp.hasChildren EQ 1>
-						<a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#qProp.feature_schema_id#">Child Schemas</a> |
+						<a href="/z/feature/admin/feature-schema/index?feature_id=#qProp.feature_id#&feature_schema_parent_id=#qProp.feature_schema_id#">Child Schemas</a> |
 					</cfif>
-					<a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#" target="_blank">Display Code</a> |
+					<a href="/z/feature/admin/feature-schema/displaySchemaCode?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#" target="_blank">Display Code</a> |
 					
 					<cfif qProp.feature_schema_map_fields_type NEQ 0>
-						<a href="/z/feature/admin/feature-schema/mapFields?feature_schema_id=#qProp.feature_schema_id#">Map Fields</a>
+						<a href="/z/feature/admin/feature-schema/mapFields?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Map Fields</a>
 						<cfscript>
 						db.sql="select count(feature_map_id) count 
 						from #db.table("feature_map", "jetendofeature")# feature_map WHERE 
@@ -1344,11 +1367,11 @@ displaySchemaCom.ajaxInsert();
 						}
 						</cfscript> | 
 					</cfif>
-					<a href="/z/feature/admin/feature-schema/edit?feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Edit</a> | 
+					<a href="/z/feature/admin/feature-schema/edit?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Edit</a> | 
 					<cfif qProp.feature_schema_parent_id EQ 0>
-						<a href="/z/feature/admin/feature-schema/copySchemaForm?feature_schema_id=#qProp.feature_schema_id#">Copy</a> | 
+						<a href="/z/feature/admin/feature-schema/copySchemaForm?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Copy</a> | 
 					</cfif>
-					<a href="/z/feature/admin/feature-schema/delete?feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Delete</a>
+					<a href="/z/feature/admin/feature-schema/delete?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Delete</a>
 				</cfif></td>
 		</tr>
 		</cfloop>
@@ -1373,10 +1396,10 @@ displaySchemaCom.ajaxInsert();
 	qCheck=db.execute("qCheck");
 	if(qCheck.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "group is missing");
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid="&request.zsid);
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid="&request.zsid);
 	}
 	if(qCheck.site_id EQ 0 and variables.allowGlobal EQ false){
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#");
 	}
 	</cfscript>
 	<cfif structkeyexists(form,'confirm')>
@@ -1387,13 +1410,12 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.featureCom.updateSchemaCacheBySchemaId(qCheck.feature_schema_id);
 
 		structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
-		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
 		if(structkeyexists(request.zsession, "feature_schema_return"&form.feature_schema_id) and request.zsession['feature_schema_return'&form.feature_schema_id] NEQ ""){
 			tempLink=request.zsession["feature_schema_return"&form.feature_schema_id];
 			structdelete(request.zsession,"feature_schema_return"&form.feature_schema_id);
 			application.zcore.functions.z301Redirect(replace(tempLink, "zsid=", "ztv=", "all"));
 		}else{
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
 		}
 		</cfscript>
 	<cfelse>
@@ -1406,7 +1428,7 @@ displaySchemaCom.ajaxInsert();
 		<br />
 		Schema: #qcheck.feature_schema_display_name#<br />
 		<br />
-		<a href="/z/feature/admin/feature-schema/delete?confirm=1&feature_schema_id=#form.feature_schema_id#&zrand=#gettickcount()#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_parent_id#">No</a> </h2>
+		<a href="/z/feature/admin/feature-schema/delete?feature_id=#form.feature_id#&confirm=1&feature_schema_id=#form.feature_schema_id#&zrand=#gettickcount()#">Yes</a>&nbsp;&nbsp;&nbsp;<a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#">No</a> </h2>
 	</cfif>
 </cffunction>
 
@@ -1506,7 +1528,6 @@ displaySchemaCom.ajaxInsert();
 	
 	
 	application.zcore.featureCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
-	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 	application.zcore.routing.initRewriteRuleApplicationStruct(application.sitestruct[request.zos.globals.id]);
 	
@@ -1554,9 +1575,9 @@ displaySchemaCom.ajaxInsert();
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
 	qRate=db.execute("qRate");
 	if(structkeyexists(form, 'feature_schema_parent_id')){
-		application.zcore.functions.zQueryToStruct(qRate,form,'feature_schema_id,feature_schema_parent_id'); 
+		application.zcore.functions.zQueryToStruct(qRate,form,'feature_id,feature_schema_id,feature_schema_parent_id'); 
 	}else{
-		application.zcore.functions.zQueryToStruct(qRate,form,'feature_schema_id'); 
+		application.zcore.functions.zQueryToStruct(qRate,form,'feature_id,feature_schema_id'); 
 	}
 	application.zcore.functions.zStatusHandler(request.zsid, true);
 	
@@ -1575,7 +1596,7 @@ displaySchemaCom.ajaxInsert();
 		tabCom.init();
 		tabCom.setTabs(["Basic","Public Form", "Landing Page", "Email & Mapping"]);//,"Plug-ins"]);
 		tabCom.setMenuName("member-feature-schema-edit");
-		cancelURL="/z/feature/admin/feature-schema/index"; 
+		cancelURL="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#"; 
 		tabCom.setCancelURL(cancelURL);
 		tabCom.enableSaveButtons();
 		</cfscript>

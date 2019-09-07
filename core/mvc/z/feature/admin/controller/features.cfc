@@ -20,7 +20,7 @@
 		}
 	}
 	if(not application.zcore.functions.zIsWidgetBuilderEnabled()){
-		if(form.method EQ "manageoptions" or form.method EQ "add" or form.method EQ "edit"){
+		if(form.method EQ "manageFields" or form.method EQ "add" or form.method EQ "edit"){
 			application.zcore.functions.z301Redirect('/member/');
 		}
 	}
@@ -85,16 +85,16 @@
 			DevTools:
 			<cfif application.zcore.functions.zso(form, 'feature_schema_id') NEQ "">
 				Current Schema:
-				<a href="/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#">Edit Schema</a> | 
-				<a href="/z/feature/admin/features/manageFields?feature_schema_id=#form.feature_schema_id#">Edit Fields</a> | 
+				<a href="/z/feature/admin/feature-schema/edit?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#">Edit Schema</a> | 
+				<a href="/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#">Edit Fields</a> | 
 				Manage: 
 			</cfif> 
 			<cfif application.zcore.user.checkServerAccess()>
 				<a href="/z/feature/admin/features/searchReindex">Search Reindex</a> | 
 			</cfif>
 			<a href="/z/feature/admin/feature-sync/index">Sync</a> | 
-			<a href="/z/feature/admin/feature-schema/index">Schemas</a> | 
-			<a href="/z/feature/admin/feature-schema/add?returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a> 
+			<a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Schemas</a> | 
+			<a href="/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a> 
 		</div> 
 	</cfif>
 </cffunction>
@@ -362,7 +362,7 @@
 			tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
 			application.zcore.functions.zRedirect(tempURL, true);
 		}else{
-			application.zcore.functions.zRedirect('/z/feature/admin/features/manageoptions?feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#');
 		}
 	}
 	</cfscript>
@@ -430,7 +430,7 @@
 			tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
 			application.zcore.functions.zRedirect(tempURL, true);
 		}else{
-			application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#');
+			application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#');
 		}
 		</cfscript>
 	<cfelse>
@@ -453,16 +453,16 @@
 			function confirmDelete(){
 				var r=confirm("Are you sure you want to permanently delete this feature?");
 				if(r){
-					window.location.href='/z/feature/admin/features/delete?confirm=1&feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&feature_field_id=#form.feature_field_id#<cfif structkeyexists(form, 'globalvar')>&globalvar=1</cfif>';	
+					window.location.href='/z/feature/admin/features/delete?feature_id=#form.feature_id#&confirm=1&feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&feature_field_id=#form.feature_field_id#<cfif structkeyexists(form, 'globalvar')>&globalvar=1</cfif>';	
 				}else{
-					window.location.href='/z/feature/admin/features/manageFields?feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#';
+					window.location.href='/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#';
 				}
 			}
 			/* ]]> */
 			</script> 
 			<a href="##" onclick="confirmDelete();return false;">Yes, delete this feature</a><br />
 			<br />
-			<a href="/z/feature/admin/features/manageFields?feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#form.feature_schema_parent_id#">No, don't delete this feature</a></span>
+			<a href="/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#form.feature_schema_parent_id#">No, don't delete this feature</a></span>
 		</div>
 	</cfif>
 </cffunction>
@@ -592,7 +592,7 @@
 		tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
 		application.zcore.functions.zRedirect(tempURL, true);
 	}else{	
-		application.zcore.functions.zRedirect('/z/feature/admin/features/manageoptions?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#');
+		application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#');
 	}
 	</cfscript>
 </cffunction>
@@ -1182,7 +1182,7 @@
 			<tr>
 				<th>&nbsp;</th>
 				<td><input type="submit" name="submitForm" value="Submit" class="z-manager-search-button" />
-					<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onClick="window.location.href = '/z/feature/admin/features/manageFields?feature_schema_id=#application.zcore.functions.zso(form, 'feature_schema_id')#&amp;feature_schema_parent_id=#application.zcore.functions.zso(form, 'feature_schema_parent_id')#';" /></td>
+					<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onClick="window.location.href = '/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#application.zcore.functions.zso(form, 'feature_schema_id')#&amp;feature_schema_parent_id=#application.zcore.functions.zso(form, 'feature_schema_parent_id')#';" /></td>
 			</tr>
 		</table>
 		<cfif variables.allowGlobal EQ false>
@@ -1208,6 +1208,19 @@
 		application.zcore.functions.zredirect("/z/feature/admin/features/index");
 	}  
 	  
+	form.feature_id=qSchema.feature_id;
+
+	db.sql="select * from #db.table("feature", "jetendofeature")# feature_schema 
+	where feature_id=#db.param(form.feature_id)# and 
+	feature_deleted = #db.param(0)# and
+	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
+	request.qFeature=db.execute("qFeature", "", 10000, "query", false);
+	if(request.qFeature.recordcount EQ 0){
+		application.zcore.status.setStatus(request.zsid, "Invalid feature id", form, true);
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	}
+
+
 	theTitle="Schema Fields: "&qSchema.feature_schema_display_name;
 	application.zcore.template.setTag("title",theTitle);
 	application.zcore.template.setTag("pagetitle",theTitle);
@@ -1248,7 +1261,7 @@
 	feature_field.feature_schema_id = #db.param(form.feature_schema_id)# 
 	ORDER BY feature_schema.feature_schema_display_name asc, feature_field.feature_field_sort ASC, feature_field.feature_field_variable_name ASC";
 	qS=db.execute("qS");
-	writeoutput('<p><a href="/z/feature/admin/feature-schema/index">Manage Schemas</a> / ');
+	writeoutput('<p><a href="/z/feature/admin/feature-schema/index">Manage Schemas</a> / <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">#request.qFeature.feature_display_name#</a> /');
 	if(qSchema.recordcount NEQ 0 and qSchema.feature_schema_parent_id NEQ 0){
 		curParentId=qSchema.feature_schema_parent_id;
 		arrParent=arraynew(1);
@@ -1258,7 +1271,7 @@
 			feature_schema_deleted = #db.param(0)#";
 			q1=db.execute("q1", "", 10000, "query", false);
 			loop query="q1"{
-				arrayappend(arrParent, '<a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#q1.feature_schema_id#">#application.zcore.functions.zFirstLetterCaps(q1.feature_schema_display_name)#</a> / ');
+				arrayappend(arrParent, '<a href="/z/feature/admin/feature-schema/index?feature_id=#q1.feature_id#&feature_schema_parent_id=#q1.feature_schema_id#">#application.zcore.functions.zFirstLetterCaps(q1.feature_schema_display_name)#</a> / ');
 				curParentId=q1.feature_schema_parent_id;
 			}
 			if(q1.recordcount EQ 0 or q1.feature_schema_parent_id EQ 0){
@@ -1275,7 +1288,7 @@
 	writeoutput('</p>');
 	</cfscript>
 	<cfif qSchema.recordcount NEQ 0>
-		<p><a href="/z/feature/admin/features/add?feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#qSchema.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Field</a> | <a href="/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_id#">Manage Child Schemas</a></p>
+		<p><a href="/z/feature/admin/features/add?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&amp;feature_schema_parent_id=#qSchema.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Field</a> | <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_id#">Manage Child Schemas</a></p>
 	</cfif>
 	<table id="sortRowTable" class="table-list" style="width:100%;">
 		<thead>
@@ -1353,8 +1366,8 @@
 					if(qS.site_id EQ 0){
 						globalTemp="&amp;globalvar=1";
 					}
-					writeoutput('<a href="/z/feature/admin/features/edit?feature_field_id=#qS.feature_field_id#&amp;feature_schema_id=#qS.feature_schema_id#&amp;feature_schema_parent_id=#qS.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)##globalTemp#">Edit</a> | 
-					<a href="/z/feature/admin/features/delete?feature_field_id=#qS.feature_field_id#&amp;feature_schema_id=#qS.feature_schema_id#&amp;feature_schema_parent_id=#qS.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)##globalTemp#">Delete</a>');
+					writeoutput('<a href="/z/feature/admin/features/edit?feature_id=#qS.feature_id#&feature_field_id=#qS.feature_field_id#&amp;feature_schema_id=#qS.feature_schema_id#&amp;feature_schema_parent_id=#qS.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)##globalTemp#">Edit</a> | 
+					<a href="/z/feature/admin/features/delete?feature_id=#qS.feature_id#&feature_field_id=#qS.feature_field_id#&amp;feature_schema_id=#qS.feature_schema_id#&amp;feature_schema_parent_id=#qS.feature_schema_parent_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)##globalTemp#">Delete</a>');
 				}
 				writeoutput('</td>
 			</tr>');
@@ -2779,6 +2792,16 @@ Define this function in another CFC to override the default email format
 	manageSchema(arguments.struct);
 	</cfscript>
 </cffunction>
+<cffunction name="debugCacheRebuild" localmode="modern" access="remote" roles="member">
+	<cfscript>	
+	form.feature_id=application.zcore.functions.zso(form, "feature_id", true);
+	ts={};
+	application.zcore.featureCom.rebuildFeaturesCache(ts, false);
+	application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, ts);
+	application.zcore.featureSchemaData=ts;
+	writedump(ts);
+	</cfscript>
+</cffunction>
 		
 
 <cffunction name="manageSchema" localmode="modern" access="remote" roles="member">
@@ -3475,22 +3498,9 @@ Define this function in another CFC to override the default email format
 
 
 		if(mainSchemaStruct.feature_schema_limit GT 0){
-			db.sql="SELECT feature_schema.*,  feature_data.*";
-			for(i=1;i LTE arraylen(arrVal);i++){
-				db.sql&=" , s#i#.feature_data_value sVal#i# ";
-			}
-			db.sql&=" FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
-			#db.table("feature_data", "jetendofeature")# feature_data) ";
-			for(i=1;i LTE arraylen(arrVal);i++){
-				db.sql&="LEFT JOIN #db.table("feature_data", "jetendofeature")# s#i# on 
-				s#i#.feature_data_id = feature_data.feature_data_id and 
-				s#i#.feature_field_id = #db.param(arrVal[i])# and 
-				s#i#.feature_schema_id = feature_schema.feature_schema_id and 
-				s#i#.site_id = feature_schema.site_id and 
-				s#i#.feature_id = #db.param(form.feature_id)# and 
-				s#i#.feature_data_deleted = #db.param(0)# ";
-			}
-			db.sql&="
+			db.sql="SELECT feature_schema.*,  feature_data.* 
+			FROM (#db.table("feature_schema", "jetendofeature")# feature_schema, 
+			#db.table("feature_data", "jetendofeature")# feature_data) 
 			WHERE  
 			feature_schema_deleted = #db.param(0)# and
 			feature_data_master_set_id = #db.param(0)# and 
@@ -4325,9 +4335,9 @@ Define this function in another CFC to override the default email format
 		<table style="border-spacing:0px;" class="table-list">
 
 			<cfscript>
-			cancelLink="#defaultStruct.listURL#?feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#";
+			cancelLink="#defaultStruct.listURL#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#";
 			if(methodBackup EQ "editSchema" and qSet.feature_data_master_set_id NEQ 0){
-				cancelLink="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qSet.feature_data_master_set_id#";
+				cancelLink="/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#qSet.feature_data_master_set_id#";
 			}
 			</cfscript>
 			<cfif methodBackup EQ "addSchema" or methodBackup EQ "editSchema" or 
@@ -4351,6 +4361,7 @@ Define this function in another CFC to override the default email format
 			var dataStruct={};
 			var labelStruct={};
 			posted=false;
+			throw("Need to replace feature_data_value");
 			for(row in qS){
 				currentRowIndex++;
 				if(form.jumpto EQ "soid_#application.zcore.functions.zurlencode(row.feature_field_variable_name,"_")#"){

@@ -1,14 +1,14 @@
 <cfcomponent>
 <cffunction name="insert" localmode="modern" access="remote">
 	<cfscript>
-	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.features");
+	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	featureCom.publicInsertSchema();
 	</cfscript>
 </cffunction>
 
 <cffunction name="insertAndReturn" localmode="modern" access="remote">
 	<cfscript>
-	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.features");
+	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	rs=featureCom.publicAjaxInsertSchema();
 	return rs;
 	</cfscript>
@@ -17,7 +17,7 @@
 
 <cffunction name="ajaxInsert" localmode="modern" access="remote">
 	<cfscript>
-	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.features");
+	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	rs=featureCom.publicAjaxInsertSchema();
     if(not rs.success){
     	arrError=application.zcore.status.getErrors(rs.zsid);
@@ -31,7 +31,7 @@
 <cffunction name="add" localmode="modern" access="remote">
 	<cfscript>
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true);
-	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.features");
+	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	featureCom.publicAddSchema();
 	</cfscript>
 </cffunction>

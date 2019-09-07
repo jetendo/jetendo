@@ -715,7 +715,7 @@
 
 	loadDbCFC(ts);
 	if(request.zos.isTestServer){
-		ts.componentObjectCache.featureCom.rebuildFeatureStructCache(ts);
+		ts.componentObjectCache.featureCom.rebuildFeaturesCache(ts, true);
 	}
 	/*
 	request.zos.globals=structnew();
