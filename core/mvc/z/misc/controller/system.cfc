@@ -131,7 +131,7 @@
 	
 		<tr>
 		<th>&nbsp;</th>
-			<td><button type="submit" name="submit">Submit</button</td>
+			<td><button type="submit" name="submit">Submit</button></td>
 	        </tr>
 		</table>
 		</form>

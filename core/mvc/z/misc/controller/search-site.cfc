@@ -244,7 +244,7 @@ search sql generator has to be able to search on child group data for paging to 
 					echo('<div class="z-search-link-summary">#(qSearch.search_summary)#</div>');
 				}
 				if(qSearch.search_content_datetime NEQ "" and qSearch.search_content_datetime NEQ "0000-00-00 00:00:00"){
-					echo('<div style="z-search-link-date">Updated #dateformat(qSearch.search_content_datetime, "m/d/yy")#</div>');
+					echo('<div class="z-search-link-date">Updated #dateformat(qSearch.search_content_datetime, "m/d/yy")#</div>');
 				}
 				if(hasImage){
 					echo('</div>');
@@ -411,7 +411,7 @@ search sql generator has to be able to search on child group data for paging to 
 								echo('<div class="z-search-link-summary">#htmleditformat(c.__summary)#</div>');
 							}
 							if(c.__dateModified NEQ "" and c.__dateModified NEQ "0000-00-00 00:00:00"){
-								echo('<div style="z-search-link-date">Updated #dateformat(c.__dateModified, "m/d/yy")#</div>');
+								echo('<div class="z-search-link-date">Updated #dateformat(c.__dateModified, "m/d/yy")#</div>');
 							}
 							if(hasImage){
 								echo('</div>');
