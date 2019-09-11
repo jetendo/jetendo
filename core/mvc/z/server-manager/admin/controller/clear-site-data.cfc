@@ -161,13 +161,14 @@
 	}
 
 	if(form.clearSiteOptions EQ 1){
-		db.sql="UPDATE #db.table("site_option", request.zos.zcoreDatasource)#,
-		#db.table("site_x_option", request.zos.zcoreDatasource)# 
+		db.sql="UPDATE (#db.table("site_option", request.zos.zcoreDatasource)#,
+		#db.table("site_x_option", request.zos.zcoreDatasource)#) 
 		SET site_x_option_value=site_option_default_value, 
 		site_option_updated_datetime=#db.param(request.zos.mysqlnow)# 
 		WHERE site_x_option.site_id=#db.param(form.sid)# and 
 		site_x_option.site_option_id = site_option.site_option_id and 
-		site_x_option_deleted = #db.param(0)# and
+		site_x_option.site_x_option_deleted = #db.param(0)# and 
+		site_option.site_option_deleted=#db.param(0)# and 
 		site_option.site_id = #db.trustedSQL(application.zcore.functions.zGetSiteIdTypeSQL("site_x_option.site_option_id_siteIDType"))# and 
 		site_option_deleted = #db.param(0)#";
 		db.execute("qUpdate");
