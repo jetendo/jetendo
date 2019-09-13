@@ -1216,7 +1216,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			<cfreturn>
 		</cfif>
 
-		<cfif request.zos.globals.disableOpenID EQ 0 or (request.zos.globals.parentID NEQ 0 and application.zcore.functions.zvar('disableOpenId', request.zos.globals.parentID) EQ 0)>
+		<cfif request.zos.globals.disableOpenID EQ 0 and (request.zos.globals.parentID NEQ 0 and application.zcore.functions.zvar('disableOpenId', request.zos.globals.parentID) EQ 0)>
 	
 			<h2>Sign in with OpenID</h2>
 			<p>Click the button to register with an existing account.</p>
@@ -1264,14 +1264,20 @@ If the link does not work, please copy and paste the entire link in your browser
 	
 				<h2 style="margin-top:0px; padding-top:0px;">Create a new account</h2>
 				<div class="zmember-openid-buttons" style="width:100%; float:left;">
+					<div class="z-float"><strong>First Name</strong><br />
+						<input type="text" name="user_first_name" required="required" style=" width:260px;" value="" />
+					</div>
+					<div class="z-float"><strong>Last Name</strong><br />
+						<input type="text" name="user_last_name" required="required" style=" width:260px;" value="" />
+					</div>
 					<div class="z-float"><strong>Email</strong><br />
-						<input type="text" name="user_email" style=" width:260px;" value="<cfif structkeyexists(form, 'e')>#htmleditformat(form.e)#</cfif>" />
+						<input type="text" name="user_email" required="required" style=" width:260px;" value="<cfif structkeyexists(form, 'e')>#htmleditformat(form.e)#</cfif>" />
 					</div>
 					<div class="z-float"><strong>Password</strong> <span style="display:block;width:187px; float:right; height:20px;"><span id="passwordMatchBox" style="display:none; background-color:##900; margin-left:0px; padding:7px; font-size:14px; line-height:14px; border:1px solid ##000; color:##FFF; float:left;border-radius:5px;">Passwords don't match</span></span> <br />
-						<input type="password" id="passwordPwd" onkeyup="chkPass(this.value);zLogin.checkIfPasswordsMatch();" style=" width:260px;" onclick="tempValue=this.value;this.value='';" name="user_password" value="" />
+						<input type="password" id="passwordPwd" required="required" onkeyup="chkPass(this.value);zLogin.checkIfPasswordsMatch();" style=" width:260px;" onclick="tempValue=this.value;this.value='';" name="user_password" value="" />
 					</div>
 					<div class="z-float"><strong>Confirm Password</strong><br />
-						<input type="password" id="passwordPwd2" style=" width:260px;" onclick="tempValue=this.value;this.value='';" onkeyup="zLogin.checkIfPasswordsMatch();" name="user_password" value="" />
+						<input type="password" id="passwordPwd2" required="required" style=" width:260px;" onclick="tempValue=this.value;this.value='';" onkeyup="zLogin.checkIfPasswordsMatch();" name="user_password" value="" />
 					</div>
 					<div class="z-float" style="width:100%; float:left; padding-top:5px;">
 						<input type="hidden" name="returnurl" value="" />
