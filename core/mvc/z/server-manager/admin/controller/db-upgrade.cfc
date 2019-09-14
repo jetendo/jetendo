@@ -912,15 +912,6 @@
 			for(row in qCreate){
 				arrayAppend(arrSQL, replace(replace(row['Create Table'], chr(10), ' ', 'all'), chr(13), '', 'all'));
 			}
-			db.sql="SHOW TRIGGERS FROM `#arguments.schema#`";
-			qTrigger=db.execute("qTrigger");
-			for(row in qTrigger){
-				if(row.table EQ table){
-					curTrigger=variables.siteBackupCom.getCreateTriggerSQLFromStruct(arguments.schema, row);
-					arrayAppend(arrSQL, replace(replace(curTrigger.dropTriggerSQL, chr(10), ' ', 'all'), chr(13), '', 'all'));
-					arrayAppend(arrSQL, replace(replace(curTrigger.createTriggerSQL, chr(10), ' ', 'all'), chr(13), '', 'all'));  
-				}
-			} 
 			mysqlTsvPath="#variables.mysqlDatabaseBackupPath##arguments.schema#-#application.zcore.functions.zURLEncode(table,"-")#-data-backup.tsv";
 			tsvPath="#variables.databaseBackupPath##arguments.schema#-#application.zcore.functions.zURLEncode(table,"-")#-data-backup.tsv";
 			db.sql="select * from `#table#` 

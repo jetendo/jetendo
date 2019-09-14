@@ -364,7 +364,7 @@ KEY `feature_data_id` (`feature_data_id`)
 </cffunction>
 ---> 
 
-<!--- Fieldal functions used to integrate with search site feature
+<!--- Optional functions used to integrate with search site feature
 <cffunction name="searchResult" access="public" roles="member" localmode="modern">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfscript>
@@ -1776,7 +1776,7 @@ displaySchemaCom.ajaxInsert();
 				</tr>
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Parent Field","member.feature-schema.edit feature_schema_parent_field")#</th>
-					<td><input type="text" name="feature_schema_parent_field" id="feature_schema_parent_field" value="#htmleditformat(form.feature_schema_parent_field)#" /> (Fieldal, enables indented heirarchy on list view)</td>
+					<td><input type="text" name="feature_schema_parent_field" id="feature_schema_parent_field" value="#htmleditformat(form.feature_schema_parent_field)#" /> (Optional, enables indented heirarchy on list view)</td>
 				</tr>
 				<tr>
 					<th>#application.zcore.functions.zOutputHelpToolTip("Enable List Recurse","member.feature-schema.edit feature_schema_enable_list_recurse")#</th>

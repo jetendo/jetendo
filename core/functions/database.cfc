@@ -656,15 +656,9 @@ if(table_id EQ false){
 				return true;
 			}
 			query name="qId" datasource="#ss.datasource#"{
-				echo('SELECT @zLastInsertId id2, LAST_INSERT_ID() as id');
+				echo('SELECT LAST_INSERT_ID() as id');
 			}
-			if(structkeyexists(application.zcore, 'tablesWithSiteIdStruct') and structkeyexists(application.zcore.tablesWithSiteIdStruct, ss.datasource&"."&ss.table) and ss.datasource&"."&ss.table NEQ request.zos.zcoredatasource&".site"){
-				newId=qId.id2;
-			}else if(structkeyexists(request, 'tablesWithSiteIdStruct') and structkeyexists(request.tablesWithSiteIdStruct, ss.datasource&"."&ss.table) and ss.datasource&"."&ss.table NEQ request.zos.zcoredatasource&".site"){
-				newId=qId.id2;
-			}else{
-				newId=qId.id;
-			}
+			newId=qId.id;
 
 			if(newId EQ 0){
 				ts={
@@ -1306,7 +1300,6 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		arguments.rs.allTableStruct=structnew();
 		arguments.rs.fieldStruct=structnew();
 		arguments.rs.keyStruct=structnew();
-		arguments.rs.triggerStruct=structnew();
 		arguments.rs.globalTableStruct=structnew();
 		arguments.rs.siteTableStruct=structnew();
 		arguments.rs.tableStruct=structnew();
@@ -1329,22 +1322,12 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		if(not structkeyexists(ts, qC5.name[n2])){
 			arguments.rs.fieldStruct[arguments.ds&"."&qC5.name[n2]]={};
 			arguments.rs.keyStruct[arguments.ds&"."&qC5.name[n2]]={};
-			arguments.rs.triggerStruct[arguments.ds&"."&qC5.name[n2]]={};
 			arguments.rs.tableStruct[arguments.ds&"."&qC5.name[n2]]={engine=qC5.engine[n2],create_options=qC5.create_options[n2],collation=qC5.collation[n2],charset=""};
 		}
 	}
 	for(n2=1;n2 LTE qC6.recordcount;n2++){
 		if(not structkeyexists(ts, qC6.table_name[n2])){
 			arguments.rs.tableStruct[arguments.ds&"."&qC6.table_name[n2]].charset=qC6.character_set_name[n2];
-		}
-	}
-	query name="qT" datasource="#arguments.ds#"{
-		echo("SHOW TRIGGERS FROM `"&application.zcore.functions.zescape(arguments.ds)&"`");
-	}
-	arguments.rs.triggerStruct[arguments.ds]=structnew();
-	for(i=1;i LTE qT.recordcount;i++){
-		if(not structkeyexists(ts, qT.table[i])){
-			arguments.rs.triggerStruct[arguments.ds&"."&qT.table[i]][qT.trigger[i]]={event=qT.event[i],statement=qT.statement[i],timing=qT.timing[i]};
 		}
 	}
 	for(row in q2){
@@ -1391,69 +1374,6 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 	}
 	return arguments.rs;
 	</cfscript>
-</cffunction>
-
-
-<!--- application.zcore.functions.zCreateSiteIdPrimaryKeyTrigger("jetendo", "table", "table_id"); --->
-<cffunction name="zCreateSiteIdPrimaryKeyTrigger" localmode="modern">
-	<cfargument name="datasource" type="string" required="yes">
-	<cfargument name="table" type="string" required="yes">
-	<cfargument name="primaryKeyFieldName" type="string" required="yes">
-	<cfscript>
-	db=request.zos.noVerifyQueryObject;
-
-	db.sql="DROP TRIGGER /*!50032 IF EXISTS */ `"&arguments.datasource&"`.`#arguments.table#_auto_inc`";
-	db.execute("q");
-	db.sql="CREATE TRIGGER `"&arguments.datasource&"`.`#arguments.table#_auto_inc` BEFORE INSERT ON `#arguments.table#` 
-	    FOR EACH ROW BEGIN 
-		IF (NEW.`#arguments.primaryKeyFieldName#` > 0) THEN
-			SET @zLastInsertId = NEW.`#arguments.primaryKeyFieldName#`;
-		ELSE 
-			SET @zLastInsertId=(
-				SELECT table_increment_table_id 
-				FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-				WHERE `table_increment`.site_id = NEW.site_id and 
-				table_increment_table = '#arguments.table#' FOR UPDATE
-			) ;
-			IF (@zLastInsertId IS NULL) THEN
-				INSERT INTO `jetendo`.`table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
-				NEW.site_id, 
-				'#arguments.table#', 
-				IFNULL(MAX(`#arguments.primaryKeyFieldName#`), 0)  as value
-				FROM `#arguments.table#` 
-				WHERE `#arguments.table#`.site_id = NEW.site_id;
-				SET @zLastInsertId=(
-					SELECT table_increment_table_id
-					FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-					WHERE `table_increment`.site_id = NEW.site_id and 
-					table_increment_table = '#arguments.table#' FOR UPDATE
-				) ; 
-			END IF;
-			SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-			UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
-			WHERE `table_increment`.site_id = NEW.site_id and 
-			table_increment_table = '#arguments.table#';
-			SET NEW.`#arguments.primaryKeyFieldName#`=@zLastInsertId;
-		END IF; 
-	END";
-	// This version caused deadlocks and was not allowing simultaneous inserts
-	// db.sql="CREATE TRIGGER `"&arguments.datasource&"`.`#arguments.table#_auto_inc` BEFORE INSERT ON `#arguments.table#` 
-	//     FOR EACH ROW BEGIN 
-	// 		IF (NEW.`#arguments.primaryKeyFieldName#` > 0) THEN
-	// 			SET @zLastInsertId = NEW.`#arguments.primaryKeyFieldName#`;
-	// 		ELSE
-	// 			SET @zLastInsertId=(
-	// 				SELECT IFNULL(
-	// 				(MAX(`#arguments.primaryKeyFieldName#`) - (MAX(`#arguments.primaryKeyFieldName#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
-	// 				FROM `#arguments.table#` 
-	// 				WHERE `#arguments.table#`.site_id = NEW.site_id
-	// 			);
-	// 			SET NEW.`#arguments.primaryKeyFieldName#`=@zLastInsertId;
-	// 		END IF; 
-	// END";
-	db.execute("q");
-	</cfscript>
-	 
 </cffunction>
 
 </cfoutput>

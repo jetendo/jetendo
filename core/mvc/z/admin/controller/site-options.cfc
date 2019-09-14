@@ -721,7 +721,7 @@
 	if(form.method EQ 'insert'){ 
 		form.site_option_id=application.zcore.functions.zInsert(ts); 
 		if(form.site_option_id EQ false){
-			application.zcore.status.setStatus(request.zsid,"Failed to create site option because ""#form.site_option_name#"" already exists or table_increment value is wrong because the insert query failed.",form);
+			application.zcore.status.setStatus(request.zsid,"Failed to create site option because ""#form.site_option_name#"" already exists or the insert query failed.",form);
 			application.zcore.functions.zRedirect("/z/admin/site-options/#formaction#?zsid=#request.zsid#"&returnAppendString);
 		}
 	}else{

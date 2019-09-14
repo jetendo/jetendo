@@ -48,18 +48,7 @@ TODO: figure out why site backup doesn't get compressed.
 	content type="application/binary" deletefile="no" file="#fp#";
 	abort;
 	</cfscript>
-</cffunction>
-
-<cffunction name="getCreateTriggerSQLFromStruct" localmode="modern" output="no" access="public">
-	<cfargument name="schema" type="string" required="yes">
-	<cfargument name="row" type="struct" required="yes"> 
-	<cfscript>
-	return { 
-		dropTriggerSQL: "DROP TRIGGER IF EXISTS `"&arguments.row.trigger&"`", 
-		createTriggerSQL: "CREATE TRIGGER `"&arguments.row.table&"_auto_inc` "&arguments.row.timing&" "&arguments.row.event&" ON `"&arguments.row.table&"` FOR EACH ROW "&arguments.row.statement&";"
-	};
-	</cfscript>
-</cffunction>
+</cffunction> 
 
 <cffunction name="getExcludedTableStruct" localmode="modern" access="public" returntype="struct">
 	<cfscript>
@@ -117,33 +106,19 @@ TODO: figure out why site backup doesn't get compressed.
 			}
 			arrayAppend(arrSchema, qC["Create Table"]&";");
 		}
-	} 
-	query name="qT" datasource="#i2#"{
-		echo("SHOW TRIGGERS FROM `"&application.zcore.functions.zescape(i2)&"`");
-	}
-
-	for(row in qT){
-		if(not structkeyexists(ts, n)){
-			local.curTrigger=this.getCreateTriggerSQLFromStruct(i2, row);
-			arrayAppend(arrSchema, local.curTrigger.dropTriggerSQL);
-			arrayAppend(arrSchema, local.curTrigger.createTriggerSQL); 
-		}
-	} 
-	
+	}  
 	tempStruct=structnew();
 	tempStruct.databaseVersion=application.zcore.databaseVersion;
 	tempStruct.fieldStruct=structnew();
 	tempStruct.keyStruct=structnew();
 	tempStruct.tableStruct=structnew();
 	for(n in arguments.dsStruct.globalTableStruct[i2]){
-		tempStruct.tableStruct[i2&"."&n]=arguments.dsStruct.tableStruct[i2&"."&n];
-		tempStruct.triggerStruct[i2&"."&n]=arguments.dsStruct.triggerStruct[i2&"."&n];
+		tempStruct.tableStruct[i2&"."&n]=arguments.dsStruct.tableStruct[i2&"."&n]; 
 		tempStruct.keyStruct[i2&"."&n]=arguments.dsStruct.keyStruct[i2&"."&n];
 		tempStruct.fieldStruct[i2&"."&n]=arguments.dsStruct.fieldStruct[i2&"."&n];
 	}
 	for(n in arguments.dsStruct.siteTableStruct[i2]){
-		tempStruct.tableStruct[i2&"."&n]=arguments.dsStruct.tableStruct[i2&"."&n];
-		tempStruct.triggerStruct[i2&"."&n]=arguments.dsStruct.triggerStruct[i2&"."&n];
+		tempStruct.tableStruct[i2&"."&n]=arguments.dsStruct.tableStruct[i2&"."&n]; 
 		tempStruct.keyStruct[i2&"."&n]=arguments.dsStruct.keyStruct[i2&"."&n];
 		tempStruct.fieldStruct[i2&"."&n]=arguments.dsStruct.fieldStruct[i2&"."&n];
 	} 

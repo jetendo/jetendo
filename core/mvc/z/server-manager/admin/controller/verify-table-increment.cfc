@@ -7,6 +7,7 @@
 	<cfscript>
 	setting requesttimeout="5000";
 	request.ignoreSlowScript=true;
+	echo("disabled");abort;
 	form.deleteZero=application.zcore.functions.zso(form, 'deleteZero', true, 0);
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("table_increment", request.zos.zcoreDatasource)# 

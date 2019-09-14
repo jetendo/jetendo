@@ -8,10 +8,8 @@
 		var row=0;
 		var arrError=[];
 		var db=request.zos.noVerifyQueryObject;
-		var triggerRow=0;
 		var fieldRow=0;
 		var qTable=0;
-		var qTrigger=0;
 		var curStatement=0;
 		var qKey=0;
 		var keyRow=0;
@@ -23,55 +21,8 @@
 		if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
 			application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
 		}
-		
-		// var triggerTemplate="BEGIN    
-		// 	IF (NEW.`##keyName##` > 0) THEN
-		// 		SET @zLastInsertId = NEW.`##keyName##`;
-		// 	ELSE
-		// 		SET @zLastInsertId=(
-		// 				SELECT IFNULL(
-		// 				(MAX(`##keyName##`) - (MAX(`##keyName##`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
-		// 				FROM `##tableName##` 
-		// 				WHERE `##tableName##`.site_id = NEW.site_id
-		// 			);
-		// 		SET NEW.`##keyName##`=@zLastInsertId;
-		// 	END IF;
-		// END";
-		var triggerTemplate="BEGIN    
-		IF (NEW.`##keyName##` > 0) THEN
-			SET @zLastInsertId = NEW.`##keyName##`;
-		ELSE 
-			SET @zLastInsertId=(
-				SELECT table_increment_table_id 
-				FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-				WHERE `table_increment`.site_id = NEW.site_id and 
-				table_increment_table = '##tableName##' FOR UPDATE
-			) ;
-			IF (@zLastInsertId IS NULL) THEN
-				INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
-				NEW.site_id, 
-				'##tableName##', 
-				IFNULL(MAX(`##keyName##`), 0)  as value
-				FROM `##tableName##` 
-				WHERE `##tableName##`.site_id = NEW.site_id;
-				SET @zLastInsertId=(
-					SELECT table_increment_table_id
-					FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-					WHERE `table_increment`.site_id = NEW.site_id and 
-					table_increment_table = '##tableName##' FOR UPDATE
-				) ; 
-			END IF;
-			SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-			UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
-			WHERE `table_increment`.site_id = NEW.site_id and 
-			table_increment_table = '##tableName##';
-			SET NEW.`##keyName##`=@zLastInsertId;
-		END IF; 
-		END";
+		 
 		setting requesttimeout="3000";
-		triggerTemplate=rereplace(triggerTemplate, "\s+", "", "all");
-
-		//writeoutput(triggerTemplate);
 		//for(i=1;i LTE arraylen(application.zcore.arrGlobalDatasources);i++){
 			//local.curDatasource=application.zcore.arrGlobalDatasources[i];
 			local.curDatasource=arguments.datasource;
@@ -80,8 +31,6 @@
 			local.c.datasource=local.curDatasource;
 			local.c.verifyQueriesEnabled=false;
 			db=application.zcore.db.newQuery(local.c);
-			db.sql="SHOW TRIGGERS FROM `#local.curDatasource#`";
-			qTrigger=db.execute("qTrigger");
 			db.sql="SHOW TABLES IN `#local.curDatasource#`";
 			qTable=db.execute("qTable");
 			for(row in qTable){
@@ -106,7 +55,7 @@
 				}
 				for(fieldRow in local.qFields){
 					if(fieldRow.extra CONTAINS "auto_increment"){
-						local.autoIncrementFixSQL="CHANGE `#fieldRow.field#` `#fieldRow.field#` INT(11) UNSIGNED DEFAULT 0  NOT NULL";
+						local.autoIncrementFixSQL="CHANGE `#fieldRow.field#` `#fieldRow.field#` INT(11) UNSIGNED  NOT NULL AUTO_INCREMENT";
 						local.autoIncrementFound=true;
 					}
 					if(fieldRow.field EQ "site_id"){
@@ -125,12 +74,29 @@
 					db.sql="SHOW KEYS FROM `"&local.curDatasource&"`.`"&local.curTableName&"`";
 					qKey=db.execute("qKey");
 					local.uniqueStruct=structnew();
+					nonUniqueKeys={};
 					for(keyRow in qKey){
+						if(keyRow.non_unique EQ 1){
+							if(not structkeyexists(local.uniqueStruct, keyRow.key_name)){
+								nonUniqueKeys[keyRow.key_name]=structnew();
+							}
+							nonUniqueKeys[keyRow.key_name][keyRow.column_name]=true;
+						}
 						if(keyRow.non_unique EQ 0 and keyRow.key_name NEQ "primary"){
 							if(not structkeyexists(local.uniqueStruct, keyRow.key_name)){
 								local.uniqueStruct[keyRow.key_name]=structnew();
 							}
 							local.uniqueStruct[keyRow.key_name][keyRow.column_name]=true;
+						}
+					}
+					foundTableIdKey=false;
+					for(keyName in nonUniqueKeys){
+						if(structcount(nonUniqueKeys[keyName]) EQ 1){
+							for(columnName in nonUniqueKeys[keyName]){
+								if(columnName EQ local.curPrimaryKeyId){
+									foundTableIdKey=true;
+								}
+							}
 						}
 					}
 					for(local.k IN local.uniqueStruct){
@@ -157,10 +123,6 @@
 						arrayAppend(arrError, "The #local.curTable#  table may not be following the naming convention of ""tableName"" + ""_id"" for it's unique key field and this MUST be manually corrected by changing the table or adding an exception to the application.zcore.primaryKeyMapStruct struct.");
 						continue;
 					}
-						
-					if(local.autoIncrementFound){
-						arrayAppend(arrError, local.curDatasource&"."&local.curTableName&" had auto_increment enabled for the primary key index and it shouldn't have in this table because the trigger increments it based on the site_id.  This has been auto-corrected.");
-					}
 					if(not local.primaryIdKeyFound and not local.siteIdKeyFound){
 						// compound primary key index must be created
 						if(local.autoIncrementFound){
@@ -183,97 +145,20 @@
 						ADD PRIMARY KEY (`site_id`, `#local.curPrimaryKeyId#`)";
 						if(not debug) db.execute("qRecreatePrimaryKey");
 						arrayAppend(arrError, local.curDatasource&"."&local.curTableName&" didn't contain a site_id column in the primary key index and this has been auto-corrected.");
-					}else if(local.autoIncrementFound){
+					}else if(not local.autoIncrementFound){
+						keyString="";
+						if(not foundTableIdKey){
+							keyString=", ADD KEY(`#local.curPrimaryKeyId#`)";
+						}
+						// arrayAppend(arrError, "ALTER TABLE`"&local.curDatasource&"`.`"&local.curTableName&"` 
+						// CHANGE `#local.curPrimaryKeyId#` `#local.curPrimaryKeyId#` INT(11) UNSIGNED  NOT NULL AUTO_INCREMENT #keyString#;");
 						db.sql="ALTER TABLE`"&local.curDatasource&"`.`"&local.curTableName&"` 
-						#local.autoIncrementFixSQL#";
+						CHANGE `#local.curPrimaryKeyId#` `#local.curPrimaryKeyId#` INT(11) UNSIGNED  NOT NULL AUTO_INCREMENT #keyString#;";
 						if(not debug) db.execute("qFix");
 					}
+					db.sql="DROP TRIGGER IF EXISTS `"&local.curTableName&"_auto_inc`";
+					if(not debug) db.execute("qDropTrigger");
 					
-					// this table must have a trigger, verify it exists
-					local.triggerFound=false;
-					local.triggerMatch=false;
-					for(triggerRow in qTrigger){
-						if(triggerRow.table EQ local.curTableName){
-							// verify trigger is correct
-							local.curTriggerTemplate=replace(replace(replace(triggerTemplate, "##keyName##", local.curPrimaryKeyId, "all"), "##tableName##", local.curTableName, "all"), "##databaseName##", local.curDatasource, "all");
-							curStatement=rereplace(triggerRow.statement, "\s+", "", "all");
-							if(compare(curStatement, local.curTriggerTemplate) NEQ 0){
-								local.triggerMatch=false;
-								arrayAppend(arrError, "Trigger for #local.curTable# table doesn't match template:<br />"&local.curTriggerTemplate&"<br /><br />"&curStatement);
-							}else{
-								local.triggerMatch=true;
-							}
-							local.triggerFound=true;	
-							break;
-						}
-					}
-					if((not local.triggerFound or not local.triggerMatch)){
-							// create new trigger
-							db.sql="DROP TRIGGER /*!50032 IF EXISTS */ `"&local.curDatasource&"`.`#local.curTableName#_auto_inc`";
-							if(not debug) db.execute("q");
-							db.sql="CREATE TRIGGER `"&local.curDatasource&"`.`#local.curTableName#_auto_inc` BEFORE INSERT ON `#local.curTableName#` 
-							    FOR EACH ROW BEGIN
-								IF (NEW.`#local.curPrimaryKeyId#` > 0) THEN
-									SET @zLastInsertId = NEW.`#local.curPrimaryKeyId#`;
-								ELSE 
-									SET @zLastInsertId=(
-										SELECT table_increment_table_id 
-										FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-										WHERE `table_increment`.site_id = NEW.site_id and 
-										table_increment_table = '#local.curTableName#' FOR UPDATE
-									) ;
-									IF (@zLastInsertId IS NULL) THEN
-										INSERT INTO `table_increment` (site_id, table_increment_table, table_increment_table_id) SELECT 
-										NEW.site_id, 
-										'#local.curTableName#', 
-										IFNULL(MAX(`#local.curPrimaryKeyId#`), 0)  as value
-										FROM `#local.curTableName#` 
-										WHERE `#local.curTableName#`.site_id = NEW.site_id;
-										SET @zLastInsertId=(
-											SELECT table_increment_table_id
-											FROM `#request.zos.zcoreDatasource#`.`table_increment` 
-											WHERE `table_increment`.site_id = NEW.site_id and 
-											table_increment_table = '#local.curTableName#' FOR UPDATE
-										) ; 
-									END IF;
-									SET @zLastInsertId=(@zLastInsertId - (@zLastInsertId MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1);
-									UPDATE `#request.zos.zcoreDatasource#`.`table_increment` SET table_increment_table_id=@zLastInsertId 
-									WHERE `table_increment`.site_id = NEW.site_id and 
-									table_increment_table = '#local.curTableName#';
-									SET NEW.`#local.curPrimaryKeyId#`=@zLastInsertId;
-								END IF;
-							END";
-							// old version was broken
-							// db.sql="CREATE TRIGGER `"&local.curDatasource&"`.`#local.curTableName#_auto_inc` BEFORE INSERT ON `#local.curTableName#` 
-							//     FOR EACH ROW BEGIN
-							// 		IF (NEW.`#local.curPrimaryKeyId#` > 0) THEN
-							// 			SET @zLastInsertId = NEW.`#local.curPrimaryKeyId#`;
-							// 		ELSE
-							// 			SET @zLastInsertId=(
-							// 				SELECT IFNULL(
-							// 				(MAX(`#local.curPrimaryKeyId#`) - (MAX(`#local.curPrimaryKeyId#`) MOD @@auto_increment_increment))+@@auto_increment_increment+(@@auto_increment_offset-1), @@auto_increment_offset)  
-							// 				FROM `#local.curTableName#` 
-							// 				WHERE `#local.curTableName#`.site_id = NEW.site_id
-							// 			);
-							// 			SET NEW.`#local.curPrimaryKeyId#`=@zLastInsertId;
-							// 		END IF;
-							// END";
-							/* old simple method:
-									ELSE
-									SET @zLastInsertId=(
-										SELECT IFNULL(MAX(`#local.curPrimaryKeyId#`)+1,1) 
-										FROM `#local.curTableName#` 
-										WHERE `#local.curTableName#`.site_id = NEW.site_id
-										);
-*/
-							if(not debug) db.execute("q");
-							
-						if(not local.triggerMatch){
-							arrayAppend(arrError, "Trigger for #local.curTable# table was dropped and recreated.");
-						}else{
-							arrayAppend(arrError, "Trigger for #local.curTable# table was created.");
-						}
-					}
 				}
 			}
 			//break;

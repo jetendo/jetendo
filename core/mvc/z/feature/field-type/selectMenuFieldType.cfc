@@ -513,7 +513,7 @@
 			<td><input type="text" style="min-width:150px;" name="selectmenu_labelfield" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_labelfield'))#" /></td></tr>
 			<tr><td>Value Field: </td><td><input type="text" style="min-width:150px;" name="selectmenu_valuefield" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_valuefield'))#" /></td></tr>
 			<tr><td>Parent Field: </td><td>
-			<input type="text" name="selectmenu_parentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_parentfield'))#" /> (Fieldal, only use when this group will allow recursive heirarchy)</td></tr>
+			<input type="text" name="selectmenu_parentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_parentfield'))#" /> (Optional, only use when this group will allow recursive heirarchy)</td></tr>
 			
 			
 			
@@ -526,7 +526,7 @@
 			<td><input type="text" name="selectmenu_tablelabelfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablelabelfield'))#" /></td></tr>
 			<tr><td>Value Field: </td><td><input type="text" name="selectmenu_tablevaluefield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablevaluefield'))#" style="min-width:150px;" /></td></tr>
 			<tr><td>Parent Field: </td><td>
-			<input type="text" name="selectmenu_tableparentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tableparentfield'))#" /> (Fieldal, only use when this table has a parent_id field to allow recursive heirarchy)</td></tr>
+			<input type="text" name="selectmenu_tableparentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tableparentfield'))#" /> (Optional, only use when this table has a parent_id field to allow recursive heirarchy)</td></tr>
 			 --->
 			
 			</table>

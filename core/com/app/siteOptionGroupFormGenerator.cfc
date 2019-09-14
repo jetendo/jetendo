@@ -525,9 +525,6 @@ add options for:
 		group=ds.groupStruct[groupId];
 		ds.groupStruct[groupId].createTable=getCreateTable(ss, group); 
 	}
-	if(ss.enableSiteId){
-		ds.groupStruct[groupId].createTable&=chr(10)&chr(10)&'// you must also create the trigger for this table in the database upgrade script using the following code:'&chr(10)&' application.zcore.functions.zCreateSiteIdPrimaryKeyTrigger(#ss.datasource#, "#ss.tableName#", "#ss.tableName#_id"); ';
-	}
 	return ds.groupStruct[ss.site_option_group_id];
 	</cfscript> 
 </cffunction>

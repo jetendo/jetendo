@@ -435,7 +435,7 @@
 		verifyQueriesEnabled=false;
 	}
 	ts.dbInitConfigStruct={
-		insertIdSQL:"select @zLastInsertId id2, last_insert_id() id",
+		insertIdSQL:"select last_insert_id() id",
 		datasource:request.zos.globals.serverdatasource,
 		parseSQLFunctionStruct:{
 			checkSiteId:application.zcore.functions.zVerifySiteIdsInDBCFCQuery
@@ -727,7 +727,7 @@
 		verifyQueriesEnabled=false;
 	}
 	ts.dbInitConfigStruct={
-		insertIdSQL:"select @zLastInsertId id2, last_insert_id() id",
+		insertIdSQL:"select last_insert_id() id",
 		datasource:request.zos.globals.serverdatasource,
 		parseSQLFunctionStruct:{
 			checkSiteId:application.zcore.functions.zVerifySiteIdsInDBCFCQuery

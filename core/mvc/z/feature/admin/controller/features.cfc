@@ -140,12 +140,12 @@
 	feature_id=#db.param(form.feature_id)# ";
 	qField=db.execute("qField");
 	arrRequired=arraynew(1);
-	arrFieldal=arraynew(1);
+	arrOptional=arraynew(1);
 	for(row in qField){
 		if(row.feature_field_required EQ 1){
 			arrayAppend(arrRequired, row.feature_field_variable_name);	
 		}else{
-			arrayAppend(arrFieldal, row.feature_field_variable_name);	
+			arrayAppend(arrOptional, row.feature_field_variable_name);	
 		}
 	}
 	application.zcore.functions.zStatusHandler(request.zsid);
@@ -154,7 +154,7 @@
 	<p>The first row of the CSV file should contain the required fields and as many optional fields as you wish.</p>
 	<p>If a value doesn't match the system, it will be left blank when imported.</p> 
 	<p>Required fields:<br /><textarea type="text" cols="100" rows="2" name="a1">#arrayToList(arrRequired, chr(9))#</textarea></p>
-	<p>Fieldal fields:<br /><textarea type="text" cols="100" rows="2" name="a2">#arrayToList(arrFieldal, chr(9))#</textarea></p>
+	<p>Optional fields:<br /><textarea type="text" cols="100" rows="2" name="a2">#arrayToList(arrOptional, chr(9))#</textarea></p>
 	<form class="zFormCheckDirty" action="/z/feature/admin/features/processImport?feature_schema_id=#form.feature_schema_id#" enctype="multipart/form-data" method="post">
 		<p><input type="file" name="filepath" value="" /></p>
 		<cfif request.zos.isDeveloper>
@@ -205,7 +205,7 @@
 	feature_id=#db.param(form.feature_id)# ";
 	qField=db.execute("qField");
 	arrRequired=arraynew(1);
-	arrFieldal=arraynew(1);
+	arrOptional=arraynew(1);
 	requiredStruct={};
 	optionalStruct={};
 	defaultStruct={};
@@ -551,7 +551,7 @@
 	if(form.method EQ 'insert'){ 
 		form.feature_field_id=application.zcore.functions.zInsert(ts); 
 		if(form.feature_field_id EQ false){
-			application.zcore.status.setStatus(request.zsid,"Failed to create Feature Field because ""#form.feature_field_variable_name#"" already exists or table_increment value is wrong because the insert query failed.",form);
+			application.zcore.status.setStatus(request.zsid,"Failed to create Feature Field because ""#form.feature_field_variable_name#"" already exists or  the insert query failed.",form);
 			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#"&returnAppendString);
 		}
 	}else{
@@ -2792,16 +2792,6 @@ Define this function in another CFC to override the default email format
 	manageSchema(arguments.struct);
 	</cfscript>
 </cffunction>
-<cffunction name="debugCacheRebuild" localmode="modern" access="remote" roles="member">
-	<cfscript>	
-	form.feature_id=application.zcore.functions.zso(form, "feature_id", true);
-	ts={};
-	application.zcore.featureCom.rebuildFeaturesCache(ts, false);
-	application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, ts);
-	application.zcore.featureSchemaData=ts;
-	writedump(ts);
-	</cfscript>
-</cffunction>
 		
 
 <cffunction name="manageSchema" localmode="modern" access="remote" roles="member">
@@ -2991,7 +2981,8 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(form, 'zQueueSort')){
 				// update cache
 				if(request.zos.enableSiteOptionGroupCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
-					application.zcore.featureCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
+					featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+					featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
 				}
 				//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 				// redirect with zqueuesort renamed

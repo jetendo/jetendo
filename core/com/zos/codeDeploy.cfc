@@ -126,7 +126,7 @@
 			local.verifyQueriesEnabled=false;
 		}
 		dbInitConfigStruct={
-			insertIdSQL:"select @zLastInsertId id2, last_insert_id() id",
+			insertIdSQL:"select last_insert_id() id",
 			datasource:zos.globals.serverdatasource,
 			parseSQLFunctionStruct:{checkSiteId:functions.zVerifySiteIdsInDBCFCQuery},
 			verifyQueriesEnabled:local.verifyQueriesEnabled,
