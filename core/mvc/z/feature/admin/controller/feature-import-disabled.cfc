@@ -128,7 +128,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		<h3>Add to existing group:</h3>
 		<p><cfscript>
 		// consider having all groups with parent -> child selection 
-		db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
+		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_deleted=#db.param(0)# and 
 		feature_id=#db.param(form.feature_id)# 
 		ORDER BY feature_schema_display_name";
@@ -171,7 +171,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 			arrayAppend(arrValue, groupPathStruct[key].id);
 		}
 
-		db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
+		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_deleted=#db.param(0)# and 
 		feature_schema_parent_id=#db.param(0)# and 
 		feature_id=#db.param(form.feature_id)# 
@@ -208,7 +208,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	}
 	if(form.feature_schema_id NEQ 0){
 
-		db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE 
 		feature_schema_deleted=#db.param(0)# and 
 		feature_schema_id=#db.param(form.feature_schema_id)# and 
@@ -221,7 +221,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 		parentId=qG.feature_schema_parent_id;
 		form.groupName=qG.feature_schema_display_name;
 	}else{
-		db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE 
 		feature_schema_parent_id=#db.param(0)# and 
 		feature_schema_deleted=#db.param(0)# and 
@@ -240,7 +240,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	if(form.feature_schema_id NEQ 0){
 		for(i=1;i<=arrayLen(gs.arrSchema);i++){
 			currentSchemaName=gs.arrSchema[i].groupName; 
-			db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+			db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 			WHERE 
 			feature_schema_parent_id=#db.param(form.feature_schema_id)# and 
 			feature_schema_deleted=#db.param(0)# and 
@@ -282,7 +282,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	for(option in gs.arrField){
 		ts={
 			table:"feature_field",
-			datasource:"jetendofeature",
+			datasource:request.zos.zcoreDatasource,
 			struct:{
 				site_id:request.zos.globals.id,
 				feature_schema_id:mainSchemaId,
@@ -317,7 +317,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	gs=arguments.groupStruct;
 	ts={
 		table:"feature_schema",
-		datasource:"jetendofeature",
+		datasource:request.zos.zcoreDatasource,
 		struct:{
 			site_id:request.zos.globals.id,
 			feature_schema_parent_id:arguments.parentSchemaId,
@@ -339,7 +339,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	for(option in gs.arrField){
 		ts={
 			table:"feature_field",
-			datasource:"jetendofeature",
+			datasource:request.zos.zcoreDatasource,
 			struct:{
 				site_id:request.zos.globals.id,
 				feature_schema_id:mainSchemaId,

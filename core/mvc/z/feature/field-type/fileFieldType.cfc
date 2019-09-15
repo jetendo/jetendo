@@ -283,10 +283,10 @@
 	filename="";
 	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
 		form["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_group_value');	
+		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', request.zos.zcoreDatasource, '#variables.siteType#_x_option_group_value');	
 	}else{
 		form["#variables.siteType#_x_option_id"]=arguments.row["#variables.siteType#_x_option_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', "jetendofeature", '#variables.siteType#_x_option_value');	
+		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', request.zos.zcoreDatasource, '#variables.siteType#_x_option_value');	
 	}
 	if(not structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete') and (isNull(fileName) or fileName EQ "")){
 		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){

@@ -12,7 +12,7 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="SELECT * 
-	FROM #db.table("feature", "jetendofeature")# 
+	FROM #db.table("feature", request.zos.zcoreDatasource)# 
 	WHERE
 	feature.feature_deleted = #db.param(0)# and  
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature")# 
@@ -73,7 +73,7 @@
 	<cfscript>
 	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true);
 	db=request.zos.queryObject;
-	db.sql="DELETE FROM #db.table("feature_x_site", "jetendofeature")# WHERE 
+	db.sql="DELETE FROM #db.table("feature_x_site", request.zos.zcoreDatasource)# WHERE 
 	feature_id = #db.param(form.feature_id)# and 
 	site_id = #db.param(request.zos.globals.id)# ";
 	db.execute("qDelete");
@@ -88,7 +88,7 @@
 	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true);
 
 	ts={
-		datasource:"jetendofeature",
+		datasource:request.zos.zcoreDatasource,
 		table:"feature_x_site",
 		struct:{
 			feature_id:form.feature_id,
@@ -111,13 +111,13 @@
 	form.feature_category_id=application.zcore.functions.zso(form, "feature_category_id", true);
 
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_category", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_category", request.zos.zcoreDatasource)# WHERE 
 	feature_category_deleted=#db.param(0)# ";
 	qCategory=db.execute("qCategory");
 
 
-	db.sql="select * from #db.table("feature", "jetendofeature")#, 
-	#db.table("feature_category", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature", request.zos.zcoreDatasource)#, 
+	#db.table("feature_category", request.zos.zcoreDatasource)# WHERE 
 	feature_category.feature_category_id = feature.feature_category_id and 
 	feature_category_deleted=#db.param(0)# and 
 	feature_id NOT IN (#db.trustedSQL(featureIdList)#) and 
@@ -190,8 +190,8 @@
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
 	form.feature_id=application.zcore.functions.zso(form,'feature_id');
 	db.sql="SELECT feature.*, if(feature_schema_id IS NULL, #db.param(0)#, #db.param(1)#) hasSchema 
-	FROM #db.table("feature", "jetendofeature")# 
-	LEFT JOIN #db.table("feature_schema", "jetendofeature")# ON 
+	FROM #db.table("feature", request.zos.zcoreDatasource)# 
+	LEFT JOIN #db.table("feature_schema", request.zos.zcoreDatasource)# ON 
 	feature.feature_id = feature_schema.feature_id and 
 	feature_schema_deleted=#db.param(0)#  
 	WHERE 
@@ -213,12 +213,12 @@
 		application.zcore.status.setStatus(request.zsid, "Feature deleted successfully.");
 		form.site_id = request.zos.globals.id;
 
-		db.sql="delete from #db.table("feature_x_site", "jetendofeature")# WHERE 
+		db.sql="delete from #db.table("feature_x_site", request.zos.zcoreDatasource)# WHERE 
 		feature_x_site.feature_id=#db.param(form.feature_id)# and 
 		feature_x_site.site_id<>#db.param(-1)# and 
 		feature_x_site_deleted=#db.param(0)# ";
 		db.execute("qDelete");
-		application.zcore.functions.zDeleteRecord("feature", "feature_id,site_id", "jetendofeature");
+		application.zcore.functions.zDeleteRecord("feature", "feature_id,site_id", request.zos.zcoreDatasource);
 
 		application.zcore.featureCom.reloadFeatureCache();
 
@@ -261,8 +261,8 @@
 	if(form.method EQ "update"){
 		db.sql="select feature.*, 
 		if(feature_schema_id IS NULL, #db.param(0)#, #db.param(1)#) hasSchema 
-		FROM #db.table("feature", "jetendofeature")# 
-		LEFT JOIN #db.table("feature_schema", "jetendofeature")# ON 
+		FROM #db.table("feature", request.zos.zcoreDatasource)# 
+		LEFT JOIN #db.table("feature_schema", request.zos.zcoreDatasource)# ON 
 		feature.feature_id = feature_schema.feature_id and 
 		feature_schema_deleted=#db.param(0)# 
 		where 
@@ -333,11 +333,11 @@
 	} 
 
 	// TODO: remove this later when feature is part of main database
-	// request.tablesWithSiteIdStruct["jetendofeature"&"."&"feature"]=true;
+	// request.tablesWithSiteIdStruct[request.zos.zcoreDatasource&"."&"feature"]=true;
 	ts=StructNew();
 	ts.table="feature";
 	ts.struct=form;
-	ts.datasource="jetendofeature";
+	ts.datasource=request.zos.zcoreDatasource;
 	if(form.method EQ "insert"){
 		form.feature_id = application.zcore.functions.zInsert(ts);
 		if(form.feature_id EQ false){
@@ -357,14 +357,14 @@
 			redirecturl=("/z/feature/admin/feature-manage/index?zsid="&request.zsid);
 		}
 	}
-	db.sql="select * from #db.table("feature_x_site", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_x_site", request.zos.zcoreDatasource)# WHERE 
 	site_id=#db.param(request.zos.globals.id)# and 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_x_site_deleted=#db.param(0)# ";
 	qCheck=db.execute("qCheck");
 	if(qCheck.recordcount EQ 0){
 		ts={
-			datasource:"jetendofeature",
+			datasource:request.zos.zcoreDatasource,
 			table:"feature_x_site",
 			struct:{
 				feature_id:form.feature_id,
@@ -407,8 +407,8 @@
 	init();
 	form.feature_id=application.zcore.functions.zso(form,'feature_id',true);
 	db.sql="SELECT feature.*, if(feature_schema_id IS NULL, #db.param(0)#, #db.param(1)#) hasSchema 
-	FROM #db.table("feature", "jetendofeature")# 
-	LEFT JOIN #db.table("feature_schema", "jetendofeature")# ON 
+	FROM #db.table("feature", request.zos.zcoreDatasource)# 
+	LEFT JOIN #db.table("feature_schema", request.zos.zcoreDatasource)# ON 
 	feature.feature_id = feature_schema.feature_id and 
 	feature_schema_deleted=#db.param(0)# 
 	WHERE 

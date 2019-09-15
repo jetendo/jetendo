@@ -47,8 +47,8 @@
 	if(structkeyexists(sog, 'featureSchemaSetQueryCache') and structkeyexists(sog.featureSchemaSetQueryCache, form.feature_data_id)){
 		setStruct=duplicate(sog.featureSchemaSetQueryCache[form.feature_data_id]); 
 	}else{
-		db.sql="select * from #db.table("feature_data", "jetendofeature")# feature_data,
-		#db.table("feature_schema", "jetendofeature")# 
+		db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data,
+		#db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE feature_data_id = #db.param(form.feature_data_id)# and 
 		feature_schema_deleted = #db.param(0)# and 
 		feature_data_master_set_id = #db.param(0)# and 

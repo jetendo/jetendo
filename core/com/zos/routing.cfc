@@ -1424,7 +1424,7 @@
 	<cfargument name="feature_data_id" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_data_master_set_id = #db.param(0)# and 
@@ -1443,7 +1443,7 @@
 	<cfargument name="feature_data_id" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# feature_data
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_data_master_set_id = #db.param(0)# and 

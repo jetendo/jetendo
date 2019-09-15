@@ -1,18 +1,18 @@
 <cfcomponent>
 <cfoutput>
 <!--- /z/feature/admin/feature-test/index --->
-<cffunction name="index" localmode="modern" access="remote">
+<cffunction name="index" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
 	setId=1;
 	schemaId=1;
 	fieldId=2;
-	writedump(application.zcore.featureData);abort;
-	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
-	ts={};
-	featureCacheCom.rebuildFeaturesCache(ts, true);
-	structappend(application.zcore.featureData, ts, true); 
-	echo('cool');
-	abort;
+	// writedump(application.zcore.featureData);abort;
+	// featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	// ts={};
+	// featureCacheCom.rebuildFeaturesCache(ts, true);
+	// structappend(application.zcore.featureData, ts, true); 
+	// echo('cool');
+	// abort;
 
 	application.zcore.featureCom.onSiteStart(application.siteStruct[request.zos.globals.id]);
 

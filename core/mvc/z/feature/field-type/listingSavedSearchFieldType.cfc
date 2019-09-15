@@ -142,7 +142,7 @@
 		<!--- map picker needs to have ajax javascript in the getFormField that runs on the live data fields instead of requiring you to click on verify link. --->
 		<cfscript>
 		db=request.zos.queryObject;
-		db.sql="select * from #db.table("mls_saved_search", "jetendofeature")# WHERE 
+		db.sql="select * from #db.table("mls_saved_search", request.zos.zcoreDatasource)# WHERE 
 		feature_id=#db.param(form.feature_id)# and 
 		mls_saved_search_deleted = #db.param(0)# and
 		mls_saved_search_id = #db.param(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])# ";
@@ -176,7 +176,7 @@
 	return '
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select * from ##db.table("mls_saved_search", "jetendofeature")## WHERE 
+	db.sql="select * from ##db.table("mls_saved_search", request.zos.zcoreDatasource)## WHERE 
 	site_id = ##db.param(request.zos.globals.id)## and 
 	mls_saved_search_deleted = ##db.param(0)## and
 	mls_saved_search_id = ##db.param(form["#arguments.fieldName#"])## ";
@@ -229,7 +229,7 @@
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("mls_saved_search", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("mls_saved_search", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	mls_saved_search_deleted = #db.param(0)# and
 	mls_saved_search_id = #db.param(arguments.value)# ";

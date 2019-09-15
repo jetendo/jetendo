@@ -18,7 +18,7 @@
 		application.zcore.functions.z301Redirect('/member/');
 	}
 
-	db.sql="select * from #db.table("feature", "jetendofeature")# feature_schema 
+	db.sql="select * from #db.table("feature", request.zos.zcoreDatasource)# feature_schema 
 	where feature_id=#db.param(form.feature_id)# and 
 	feature_deleted = #db.param(0)# and
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
@@ -681,7 +681,7 @@ displaySchemaCom.ajaxInsert();
 		form.feature_field_id=application.zcore.functions.zso(form, 'option'&local.i);
 		form.mapField=application.zcore.functions.zso(form, 'mapField'&local.i);
 		if(form.mapField NEQ ""){
-			db.sql="INSERT INTO #db.table("feature_map", "jetendofeature")# 
+			db.sql="INSERT INTO #db.table("feature_map", request.zos.zcoreDatasource)# 
 			SET feature_map_updated_datetime = #db.param(request.zos.mysqlnow)#, 
 			feature_field_id=#db.param(form.feature_field_id)#,
 			feature_map_fieldname=#db.param(form.mapField)#,
@@ -692,7 +692,7 @@ displaySchemaCom.ajaxInsert();
 			db.execute("qInsert");
 		}
 	}
-	db.sql="delete from #db.table("feature_map", "jetendofeature")# 
+	db.sql="delete from #db.table("feature_map", request.zos.zcoreDatasource)# 
 	where feature_schema_id=#db.param(form.feature_schema_id)# and 
 	feature_map_deleted = #db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
@@ -710,7 +710,7 @@ displaySchemaCom.ajaxInsert();
 	setting requesttimeout="10000";
 	var db=request.zos.queryObject;
 	currentSchemaId=application.zcore.functions.zso(form, 'feature_schema_id'); 
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(currentSchemaId)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -723,7 +723,7 @@ displaySchemaCom.ajaxInsert();
 	optionCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 
 	db.sql="SELECT * FROM  
-	#db.table("feature_field", "jetendofeature")# WHERE 
+	#db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
 	feature_field.feature_schema_id = #db.param(currentSchemaId)# and  
 	feature_field_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_field")#
@@ -813,13 +813,13 @@ displaySchemaCom.ajaxInsert();
 
 		// process x groups at a time.
 		xlimit=20;
-		db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and  
 		feature_field_deleted = #db.param(0)# 
 		ORDER BY feature_field_sort ASC";
 		qField=db.execute("qField", "", 10000, "query", false);
 
-		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and 
 		feature_data_master_set_id = #db.param(0)# and 
 		feature_data_deleted = #db.param(0)# and 
@@ -887,7 +887,7 @@ displaySchemaCom.ajaxInsert();
 	currentSchemaId=application.zcore.functions.zso(form, 'feature_schema_id'); 
 	variables.init();
 	// get group
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(currentSchemaId)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -904,7 +904,7 @@ displaySchemaCom.ajaxInsert();
 		// process x groups at a time.
 		xlimit=20;
 
-		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and 
 		feature_data_deleted = #db.param(0)# and 
 		feature_data_master_set_id = #db.param(0)# and 
@@ -962,7 +962,7 @@ displaySchemaCom.ajaxInsert();
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id'); 
 	variables.init();
 	// get group
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -974,7 +974,7 @@ displaySchemaCom.ajaxInsert();
 	echo("<h2>Map Fields For Feature Schema: #qSchema.feature_schema_display_name#</h2>");
 	
 	if(qSchema.feature_map_group_id NEQ 0){
-		db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+		db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
 		feature_schema_deleted = #db.param(0)# and 
 		feature_id=#db.param(qSchema.feature_id)# ";
@@ -987,7 +987,7 @@ displaySchemaCom.ajaxInsert();
 	}else{
 		echo("<p>Mapping to Inquiries Table.</p>");
 	}
-	db.sql="SELECT * FROM #db.table("feature_map", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_map", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_map_deleted = #db.param(0)# and 
 	feature_id=#db.param(qSchema.feature_id)# ";
@@ -996,7 +996,7 @@ displaySchemaCom.ajaxInsert();
 	for(row in local.qMap){
 		local.mapStruct[row.feature_field_id]=row.feature_map_fieldname;
 	}
-	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_id=#db.param(qSchema.feature_id)# and 
 	feature_field_deleted = #db.param(0)#
@@ -1006,7 +1006,7 @@ displaySchemaCom.ajaxInsert();
 	mappingEnabled=true;
 	if(qSchema.feature_schema_map_fields_type EQ "2"){ // group
 		// get second group
-		db.sql="SELECT feature_field_display_name, feature_field_id FROM #db.table("feature_field", "jetendofeature")# 
+		db.sql="SELECT feature_field_display_name, feature_field_id FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 		WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
 		feature_field_deleted = #db.param(0)# and
 		feature_id=#db.param(qSchema.feature_id)# and
@@ -1031,7 +1031,7 @@ displaySchemaCom.ajaxInsert();
 		// manually remove sensitive ones
 		// structdelete
 		// force some default values for new table
-		local.tempColumns=duplicate(application.zcore.tableColumns["#"jetendofeature"#.inquiries"]);
+		local.tempColumns=duplicate(application.zcore.tableColumns["#request.zos.zcoreDatasource#.inquiries"]);
 		//writedump(local.tempColumns);
 		arrTemp=structkeyarray(local.tempColumns);
 		arraySort(arrTemp, "text", "asc");
@@ -1109,7 +1109,7 @@ displaySchemaCom.ajaxInsert();
 
 	application.zcore.functions.zSetPageHelpId("2.11.1.2");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	where feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -1178,11 +1178,11 @@ displaySchemaCom.ajaxInsert();
 	row.site_id = arguments.site_id;
 	ts=structnew();
 	ts.struct=row;
-	ts.datasource="jetendofeature";
+	ts.datasource=request.zos.zcoreDatasource;
 	ts.table="feature_schema";
 	local.newfeatureSchemaId=application.zcore.functions.zInsert(ts);
 	arguments.groupStruct[arguments.feature_schema_id]=local.newfeatureSchemaId;
-	db.sql="select * from #db.table("feature_field", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# 
 	where #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_field")# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id = #db.param(arguments.feature_schema_id)# ";
@@ -1193,12 +1193,12 @@ displaySchemaCom.ajaxInsert();
 		// row2.featureidlist     
 		ts=structnew();
 		ts.struct=row2;
-		ts.datasource="jetendofeature";
+		ts.datasource=request.zos.zcoreDatasource;
 		ts.table="feature_field";
 		local.newoptionId=application.zcore.functions.zInsert(ts);
 		arguments.typeStruct[row2.feature_field_id]=local.newoptionId;
 	}
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	where feature_schema_parent_id = #db.param(arguments.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -1227,7 +1227,7 @@ displaySchemaCom.ajaxInsert();
 	}
 	form.copyData=application.zcore.functions.zso(form, 'copyData', true, 0);
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0); 
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	where feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -1260,7 +1260,7 @@ displaySchemaCom.ajaxInsert();
 	application.zcore.functions.zstatushandler(request.zsid);
 	form.feature_schema_parent_id=application.zcore.functions.zso(form, 'feature_schema_parent_id',true);
 	if(form.feature_schema_parent_id NEQ 0){
-		db.sql="select * from #db.table("feature_schema", "jetendofeature")# feature_schema 
+		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
 		where feature_schema_id=#db.param(form.feature_schema_parent_id)# and 
 		feature_schema_deleted = #db.param(0)# and
 		#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
@@ -1270,8 +1270,8 @@ displaySchemaCom.ajaxInsert();
         }
 	}
 	db.sql="SELECT feature_schema.*, if(child1.feature_schema_id IS NULL, #db.param(0)#,#db.param(1)#) hasChildren 
-	FROM #db.table("feature_schema", "jetendofeature")# feature_schema
-	LEFT JOIN #db.table("feature_schema", "jetendofeature")# child1 ON 
+	FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema
+	LEFT JOIN #db.table("feature_schema", request.zos.zcoreDatasource)# child1 ON 
 	feature_schema.feature_schema_id = child1.feature_schema_parent_id and 
 	child1.feature_id = feature_schema.feature_id and 
 	child1.feature_schema_deleted = #db.param(0)# 
@@ -1289,7 +1289,7 @@ displaySchemaCom.ajaxInsert();
 		arrParent=arraynew(1);
 		loop from="1" to="25" index="i"{
 			db.sql="select * 
-			from #db.table("feature_schema", "jetendofeature")# feature_schema 
+			from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
 			where feature_schema_id = #db.param(curParentId)# and 
 			feature_schema_deleted = #db.param(0)# and
 			#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
@@ -1368,7 +1368,7 @@ displaySchemaCom.ajaxInsert();
 						<a href="/z/feature/admin/feature-schema/mapFields?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Map Fields</a>
 						<cfscript>
 						db.sql="select count(feature_map_id) count 
-						from #db.table("feature_map", "jetendofeature")# feature_map WHERE 
+						from #db.table("feature_map", request.zos.zcoreDatasource)# feature_map WHERE 
 						site_id = #db.param(qProp.site_id)# AND 
 						feature_map_deleted = #db.param(0)# and
 						feature_schema_id = #db.param(qProp.feature_schema_id)# ";
@@ -1400,7 +1400,7 @@ displaySchemaCom.ajaxInsert();
 	variables.init();
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
 	form.feature_schema_id=application.zcore.functions.zso(form,'feature_schema_id');
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# feature_schema WHERE 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema WHERE 
 	feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
@@ -1472,7 +1472,7 @@ displaySchemaCom.ajaxInsert();
 	form.feature_schema_change_email_usergrouplist=application.zcore.functions.zso(form, 'feature_schema_change_email_usergrouplist');
 
 	if(form.method EQ "update"){
-		db.sql="select * from #db.table("feature_schema", "jetendofeature")# feature_schema 
+		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
 		where feature_schema_id = #db.param(form.feature_schema_id)# and 
 		feature_schema_deleted = #db.param(0)# and
 		#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")#";
@@ -1517,7 +1517,7 @@ displaySchemaCom.ajaxInsert();
 	ts=StructNew();
 	ts.table="feature_schema";
 	ts.struct=form;
-	ts.datasource="jetendofeature";
+	ts.datasource=request.zos.zcoreDatasource;
 	if(form.method EQ "insert"){
 		form.feature_schema_id = application.zcore.functions.zInsert(ts);
 		if(form.feature_schema_id EQ false){
@@ -1582,7 +1582,7 @@ displaySchemaCom.ajaxInsert();
 	var currentMethod=form.method;
 	variables.init();
 	form.feature_schema_id=application.zcore.functions.zso(form,'feature_schema_id',true);
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# feature_schema 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# ";
@@ -1620,7 +1620,7 @@ displaySchemaCom.ajaxInsert();
 				<th style="vertical-align:top; white-space:nowrap;">Feature *</th>
 				<td><cfscript>
 				db.sql="SELECT * 
-				FROM #db.table("feature", "jetendofeature")# 
+				FROM #db.table("feature", request.zos.zcoreDatasource)# 
 				WHERE
 				feature.feature_deleted = #db.param(0)# and  
 				#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature")#
@@ -1638,7 +1638,7 @@ displaySchemaCom.ajaxInsert();
 				</td>
 			</tr>
 			<cfscript>
-				db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# WHERE 
+				db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 			#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 			feature_schema_deleted = #db.param(0)# ";
 			if(form.feature_schema_id NEQ 0 and form.feature_schema_id NEQ ""){

@@ -62,7 +62,7 @@
 	<cfscript> 
 	db=request.zos.queryObject;
 	db.sql="SELECT * 
-	FROM #db.table("office", "jetendofeature")# 
+	FROM #db.table("office", request.zos.zcoreDatasource)# 
 	WHERE feature_id=#db.param(form.feature_id)# and 
 	office_deleted = #db.param(0)#
 	ORDER BY office_name";
@@ -182,7 +182,7 @@
 	<cfscript> 
 	db=request.zos.queryObject;
 	db.sql="SELECT * 
-	FROM #db.table("office", "jetendofeature")# 
+	FROM #db.table("office", request.zos.zcoreDatasource)# 
 	WHERE feature_id=#db.param(form.feature_id)# and 
 	office_deleted = #db.param(0)# 
 	ORDER BY office_name";
@@ -227,7 +227,7 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="SELECT * 
-	FROM ##db.table("office", "jetendofeature")## 
+	FROM ##db.table("office", request.zos.zcoreDatasource)## 
 	WHERE site_id = ##db.param(request.zos.globals.id)## and 
 	office_deleted = ##db.param(0)## 
 	ORDER BY office_name";
@@ -279,7 +279,7 @@
 	returnValue="";
 	arrOffice=listToArray(arguments.value, ","); 
 	if(arguments.value NEQ ""){
-		db.sql="select group_concat(office_name separator #db.param(", ")#) officeName from #db.table("office", "jetendofeature")# 
+		db.sql="select group_concat(office_name separator #db.param(", ")#) officeName from #db.table("office", request.zos.zcoreDatasource)# 
 		where feature_id=#db.param(form.feature_id)# and 
 		office_id IN (";
 		for(i=1;i<=arraylen(arrOffice);i++){

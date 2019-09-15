@@ -286,7 +286,7 @@
 	var db=request.zos.queryObject;
 	var output="";
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
-	db.sql="select * from #db.table("feature_field", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_field_deleted = #db.param(0)# and
 	feature_schema_id = #db.param(arguments.dataStruct["feature_schema_id"])# 	

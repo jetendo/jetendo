@@ -67,13 +67,13 @@ When making a version the primary record, it will have option to preserve the or
 	}
 	ts=structnew();
 	ts.struct=row;
-	ts.datasource="jetendofeature";
+	ts.datasource=request.zos.zcoreDatasource;
 	ts.table="feature_data";
 	newSetId=application.zcore.functions.zInsert(ts);
 
 	logCopyMessage('Copying set ###arguments.option_group_set_id#');
 	db.sql="select * from 
-	#db.table("feature_data", "jetendofeature")# WHERE 
+	#db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
 	feature_data_id = #db.param(arguments.option_group_set_id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	site_id = #db.param(arguments.site_id)# ";
@@ -103,7 +103,7 @@ When making a version the primary record, it will have option to preserve the or
 				}else if(typeId EQ 23){ 
 					row2.feature_data_value=application.zcore.imageLibraryCom.copyImageLibrary(row2.feature_data_value, row2.site_id);
 				}else if(typeId EQ 21){
-					db.sql="select * from #db.table("mls_saved_search", "jetendofeature")# WHERE 
+					db.sql="select * from #db.table("mls_saved_search", request.zos.zcoreDatasource)# WHERE 
 					site_id = #db.param(row2.site_id)# and 
 					mls_saved_search_id=#db.param(row2.feature_data_value)# and 
 					mls_saved_search_deleted=#db.param(0)# ";
@@ -113,7 +113,7 @@ When making a version the primary record, it will have option to preserve the or
 						r2.mls_saved_search_updated_datetime=request.zos.mysqlnow;
 						ts=structnew();
 						ts.struct=r2;
-						ts.datasource="jetendofeature";
+						ts.datasource=request.zos.zcoreDatasource;
 						ts.table="mls_saved_search";
 						row2.feature_data_value=application.zcore.functions.zInsert(ts);
 					}
@@ -137,7 +137,7 @@ When making a version the primary record, it will have option to preserve the or
 		}
 		ts=structnew();
 		ts.struct=row2;
-		ts.datasource="jetendofeature";
+		ts.datasource=request.zos.zcoreDatasource;
 		ts.table="feature_data";
 		newValueId=application.zcore.functions.zInsert(ts);
 
@@ -145,7 +145,7 @@ When making a version the primary record, it will have option to preserve the or
 
 
 	db.sql="select * from 
-	#db.table("feature_data", "jetendofeature")# WHERE 
+	#db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
 	feature_data_parent_id = #db.param(arguments.option_group_set_id)# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	feature_data_deleted=#db.param(0)#  and 
@@ -163,7 +163,7 @@ When making a version the primary record, it will have option to preserve the or
 	<cfscript>
 	var db=request.zos.queryObject;
 	groupStruct={};
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_schema_deleted=#db.param(0)#";
 	qSchema=db.execute("qSchema");
@@ -181,7 +181,7 @@ When making a version the primary record, it will have option to preserve the or
 	<cfscript>
 	var db=request.zos.queryObject;
 	typeStruct={};
-	db.sql="select * from #db.table("feature_field", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_field_deleted=#db.param(0)# and 
 	feature_schema_id <> #db.param(0)#";
@@ -238,7 +238,7 @@ When making a version the primary record, it will have option to preserve the or
 		for(row in qSet){
 			tempSchema=groupStruct[row.feature_schema_id];
 			if(tempSchema.data.feature_schema_enable_sorting EQ 1){
-				db.sql="select max(feature_data_sort) maxSort from #db.table("feature_data", "jetendofeature")# 
+				db.sql="select max(feature_data_sort) maxSort from #db.table("feature_data", request.zos.zcoreDatasource)# 
 				WHERE feature_data_parent_id = #db.param(row.feature_data_parent_id)# and 
 				site_id = #db.param(row.site_id)# and 
 				feature_data_deleted=#db.param(0)# and 
@@ -255,7 +255,7 @@ When making a version the primary record, it will have option to preserve the or
 					application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
 				}
 				if(tempSchema.data.feature_schema_version_limit NEQ 0){
-					db.sql="select count(feature_data_id) count from #db.table("feature_data", "jetendofeature")# 
+					db.sql="select count(feature_data_id) count from #db.table("feature_data", request.zos.zcoreDatasource)# 
 					WHERE feature_data_master_set_id = #db.param(row.feature_data_id)# and 
 					site_id = #db.param(row.site_id)# and 
 					feature_data_deleted=#db.param(0)# ";
@@ -265,7 +265,7 @@ When making a version the primary record, it will have option to preserve the or
 						application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#row.feature_data_id#&zsid=#request.zsid#");
 					}
 				}
-				db.sql="select feature_data_id from #db.table("feature_data", "jetendofeature")# 
+				db.sql="select feature_data_id from #db.table("feature_data", request.zos.zcoreDatasource)# 
 				WHERE feature_data_master_set_id = #db.param(row.feature_data_id)# and 
 				site_id = #db.param(row.site_id)# and 
 				feature_data_deleted=#db.param(0)# and 
@@ -325,7 +325,7 @@ When making a version the primary record, it will have option to preserve the or
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select feature_schema_id, count(site_id) count from #db.table("feature_data", "jetendofeature")# WHERE 
+	db.sql="select feature_schema_id, count(site_id) count from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
 	site_id = #db.param(arguments.site_id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_data_master_set_id=#db.param(arguments.setId)#";
@@ -336,7 +336,7 @@ When making a version the primary record, it will have option to preserve the or
 		if(qVersion.count EQ 0){
 			return false;
 		}
-		db.sql="select feature_schema_version_limit from #db.table("feature_schema", "jetendofeature")# WHERE 
+		db.sql="select feature_schema_version_limit from #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 		site_id = #db.param(arguments.site_id)# and 
 		feature_schema_deleted=#db.param(0)# and 
 		feature_schema_id=#db.param(qVersion.feature_schema_id)#";
@@ -362,7 +362,7 @@ When making a version the primary record, it will have option to preserve the or
 		<input type="hidden" name="feature_data_id" value="#form.feature_data_id#" />
 		<input type="hidden" name="feature_data_master_set_id" value="#form.feature_data_master_set_id#" />
 		<cfscript>
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	where feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
@@ -406,13 +406,13 @@ When making a version the primary record, it will have option to preserve the or
 	form.preserveURL=application.zcore.functions.zso(form, 'preserveURL', true, 1);
 	form.preserveMeta=application.zcore.functions.zso(form, 'preserveMeta', true, 1);
 
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	where feature_data_id = #db.param(form.feature_data_master_set_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qMaster=db.execute("qMaster");
 
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	where feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
@@ -446,7 +446,7 @@ When making a version the primary record, it will have option to preserve the or
 	}
 	ts={
 		table:"feature_data",
-		datasource:"jetendofeature",
+		datasource:request.zos.zcoreDatasource,
 		struct:tempMaster
 	};
 	tempVersion.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
@@ -463,7 +463,7 @@ When making a version the primary record, it will have option to preserve the or
 	newMasterId=application.zcore.functions.zInsert(ts);
 	transaction action="begin"{
 		try{
-			db.sql="delete from #db.table("feature_data", "jetendofeature")# where 
+			db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# where 
 			site_id = #db.param(tempMaster.site_id)# and 
 			feature_data_id = #db.param(backupMasterSetId)# and 
 			feature_data_deleted=#db.param(0)#";
@@ -510,14 +510,14 @@ When making a version the primary record, it will have option to preserve the or
 
 			ts={
 				table:"feature_data",
-				datasource:"jetendofeature",
+				datasource:request.zos.zcoreDatasource,
 				struct:tempVersion
 			};
 			application.zcore.functions.zUpdate(ts);
 
 		}catch(Any e){
 			transaction action="rollback";
-			db.sql="delete from #db.table("feature_data", "jetendofeature")# where 
+			db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# where 
 			site_id = #db.param(tempMaster.site_id)# and 
 			feature_data_id = #db.param(newMasterId)# and 
 			feature_data_deleted=#db.param(0)#";
@@ -546,7 +546,7 @@ When making a version the primary record, it will have option to preserve the or
 	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 
 	// verify the set is a version
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	WHERE feature_id=#db.param(form.feature_id)# and 
 	feature_data_id= #db.param(form.feature_data_id)# and 
 	feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
@@ -561,7 +561,7 @@ When making a version the primary record, it will have option to preserve the or
 	transaction action="begin"{
 		try{
 			if(form.statusValue EQ 1){
-				db.sql="update #db.table("feature_data", "jetendofeature")# 
+				db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# 
 				SET 
 				feature_data_version_status=#db.param(0)#, 
 				feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
@@ -570,7 +570,7 @@ When making a version the primary record, it will have option to preserve the or
 				feature_data_deleted=#db.param(0)# ";
 				qUpdate=db.execute("qUpdate");
 			}
-			db.sql="update #db.table("feature_data", "jetendofeature")# 
+			db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# 
 			SET 
 			feature_data_version_status=#db.param(form.statusValue)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
@@ -609,8 +609,8 @@ When making a version the primary record, it will have option to preserve the or
 	structappend(arguments.struct, defaultStruct, false);
 	qSet=getSet(); 
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_data", "jetendofeature")#,
-	#db.table("feature_schema", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)#,
+	#db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 	feature_schema_deleted=#db.param(0)# and 
 	feature_data.feature_id=#db.param(form.feature_id)# and 
@@ -621,7 +621,7 @@ When making a version the primary record, it will have option to preserve the or
 		application.zcore.status.setStatus(request.zsid, "Invalid request", form, true);
 		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
 	}
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_schema_deleted=#db.param(0)# and 
 	feature_schema_id=#db.param(qMaster.feature_schema_id)# ";
@@ -630,7 +630,7 @@ When making a version the primary record, it will have option to preserve the or
 	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 	echo('<p><a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qMaster.feature_schema_id#">Manage #qSchema.feature_schema_display_name#</a> /</p>');
 	echo('<h2>Showing versions for "'&qSet.feature_data_title&'"</h2>');
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# WHERE 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_data_master_set_id=#db.param(form.feature_data_id)#";
@@ -703,7 +703,7 @@ When making a version the primary record, it will have option to preserve the or
 	application.zcore.functions.zSetPageHelpId("2.11.1.2");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# 
+	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	where feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";

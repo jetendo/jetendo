@@ -7,8 +7,8 @@
 	<cfscript>
 	db=request.zos.queryObject; 
 	db.sql="SELECT feature_x_site.site_id, feature_schema.feature_id, feature_schema.feature_schema_id 
-	FROM #db.table("feature_schema", "jetendofeature")#
-	LEFT JOIN #db.table("feature_x_site", "jetendofeature")# ON 
+	FROM #db.table("feature_schema", request.zos.zcoreDatasource)#
+	LEFT JOIN #db.table("feature_x_site", request.zos.zcoreDatasource)# ON 
 	feature_x_site.feature_id = feature_schema.feature_id and 
 	feature_x_site_deleted=#db.param(0)# 
 	WHERE #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
@@ -39,10 +39,18 @@
 	<cfargument name="rebuildSchemaCache" type="boolean" required="yes">
 	<cfscript>	
 	db=request.zos.queryObject; 
-	arguments.cacheStruct2.atest=true;
-	db.sql="select * from #db.table("feature", "jetendofeature")# where 
-	feature_deleted=#db.param(0)#";
-	qFeature=db.execute("qFeature");
+	try{
+		db.sql="select * from #db.table("feature", request.zos.zcoreDatasource)# where 
+		feature_deleted=#db.param(0)#";
+		qFeature=db.execute("qFeature");
+	}catch(Any e){
+		// ignore missing feature table for first time upgrade
+		return;
+	}
+	if(not structkeyexists(arguments.cacheStruct.featureData, "featureIdLookup")){
+		arguments.cacheStruct.featureData.featureIdLookup={};
+		arguments.cacheStruct.featureData.featureDataLookup={};
+	}
 	for(row in qFeature){
 		arguments.cacheStruct.featureData.featureIdLookup[row.feature_variable_name]=row.feature_id;
 		arguments.cacheStruct.featureData.featureDataLookup[row.feature_id]=row;
@@ -70,7 +78,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	featureData.featureSchemaDefaults=structnew();
 	fs=featureData; 
 
-	 db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
+	 db.sql="SELECT * FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 	WHERE  
 	feature_id=#db.param(arguments.feature_id)# and 
 	feature_field_deleted = #db.param(0)#";
@@ -98,7 +106,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 			fs.featureSchemaFieldLookup[row.feature_schema_id][row.feature_field_id]=true;
 		}
 	}
-	db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")# 
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE  
 	feature_id=#db.param(arguments.feature_id)# and 
 	feature_schema_deleted = #db.param(0)#";
@@ -154,7 +162,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	}
 	if(versioningEnabled or cacheEnabled){
 		db.sql="SELECT s1.* 
-		FROM #db.table("feature_data", "jetendofeature")# s1   
+		FROM #db.table("feature_data", request.zos.zcoreDatasource)# s1   
 		WHERE s1.site_id = #db.param(site_id)#  and 
 		s1.feature_data_deleted = #db.param(0)# and 
 		feature_data_master_set_id = #db.param(0)# and ";
@@ -406,7 +414,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	<cfargument name="feature_data_parent_id" type="numeric" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	db.sql="select feature_data_id from #db.table("feature_data", "jetendofeature")#
+	db.sql="select feature_data_id from #db.table("feature_data", request.zos.zcoreDatasource)#
 	WHERE 
 	feature_data_deleted = #db.param(0)# and 
 	feature_data_master_set_id = #db.param(0)# and 
@@ -464,8 +472,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
 
 	db.sql="SELECT * FROM 
-	(#db.table("feature_schema", "jetendofeature")# s2, 
-	#db.table("feature_data", "jetendofeature")# s1) WHERE 
+	(#db.table("feature_schema", request.zos.zcoreDatasource)# s2, 
+	#db.table("feature_data", request.zos.zcoreDatasource)# s1) WHERE 
 	s1.site_id = #db.param(arguments.site_id)# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
@@ -491,7 +499,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	}
 
 	db.sql="SELECT *
-	FROM #db.table("feature_field", "jetendofeature")# 
+	FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id=#db.param(qS.feature_schema_id)# and 
 	feature_field_deleted = #db.param(0)# 
 	ORDER BY feature_field_sort ASC ";
@@ -531,7 +539,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 					} 
 					//writedump(resort);
 					if(resort){
-						db.sql="select feature_data_id from #db.table("feature_data", "jetendofeature")#
+						db.sql="select feature_data_id from #db.table("feature_data", request.zos.zcoreDatasource)#
 						WHERE 
 						feature_data_deleted = #db.param(0)# and 
 						feature_data_master_set_id = #db.param(0)# and 

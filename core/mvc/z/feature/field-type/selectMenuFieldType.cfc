@@ -446,7 +446,7 @@
 			<td>
 			<cfscript>
 			// and 	feature_schema_parent_id=#db.param(0)# 
-			db.sql="SELECT * FROM #db.table("feature_schema", "jetendofeature")#
+			db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)#
 			WHERE feature_id=#db.param(arguments.dataStruct.feature_id)#  and 
 			feature_schema_deleted = #db.param(0)# 
 			ORDER BY feature_schema_display_name"; 
@@ -558,8 +558,8 @@
 	}
 	if(structkeyexists(ts2, 'selectmenu_groupid') and ts2.selectmenu_groupid NEQ ""){
 		// grab all the group values and ids
-		db.sql="select * from #db.table("#variables.siteType#_x_option_group", "jetendofeature")# s1, 
-		#db.table("feature_field", "jetendofeature")# s2
+		db.sql="select * from #db.table("#variables.siteType#_x_option_group", request.zos.zcoreDatasource)# s1, 
+		#db.table("feature_field", request.zos.zcoreDatasource)# s2
 		WHERE 
 		s1.#variables.siteType#_x_option_group_deleted = #db.param(0)# and
 		s2.feature_field_deleted = #db.param(0)# and
