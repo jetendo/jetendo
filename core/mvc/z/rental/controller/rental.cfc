@@ -168,6 +168,7 @@
 		site_id <> #db.param(-1)# and 
 		app_id = #db.param(this.app_id)# and 
 		search_table_id LIKE #db.param("rental-category-%")# and 
+		search_deleted=#db.param(0)# and 
 		search_updated_datetime < #db.param(startDate)#";
 		db.execute("qDelete");
 	}

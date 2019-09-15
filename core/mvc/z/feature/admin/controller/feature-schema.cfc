@@ -52,9 +52,9 @@
 		<cfif application.zcore.user.checkServerAccess()>
 			<a href="/z/feature/admin/features/searchReindex">Search Reindex</a> | 
 		</cfif>
-		<a href="/z/feature/admin/feature-sync/index">Sync</a>
+		<!--- <a href="/z/feature/admin/feature-sync/index">Sync</a> |  --->
 		<cfif structkeyexists(form, "feature_id")>
-			 | <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Schemas</a>
+			<a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Schemas</a>
 			 | <a href="/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a>
 		</cfif>
 	</div>
@@ -84,6 +84,7 @@
 	for(i=1;i LTE arguments.depth;i++){
 		indent&=chr(9);
 	}
+	feature_variable_name=application.zcore.featureCom.getFeatureNameById(arguments.feature_id);
 
 
 	for(i in fsd.featureSchemaLookup){
@@ -112,9 +113,9 @@
 					parentSchemaName="Schema"&parentSchemaName;
 				}
 				parentSchemaNameInstance=lcase(left(parentSchemaName, 1))&removeChars(parentSchemaName,1,1);
-				echo(indent&'arr#groupName#=application.zcore.featureCom.featureSchemaStruct("#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
 			}else{
-				echo(indent&'arr#groupName#=application.zcore.featureCom.featureSchemaStruct("#groupStruct.feature_schema_variable_name#");'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
 		}
 		if(not arguments.disableDebugOutput and structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
@@ -303,7 +304,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	echo('<h2>Source code generated below.</h2>
 	<p>Note: searchSchema() retrieves all the records.  If "Enable Memory Caching" is disabled for the group, it will perform a query to select all the data.  This can be very slow if you are working with hundreds or thousands of records and it may cause nested queries to run if the sub-groups also have "Enable Memory Caching" disabled.   Conversely, for small datasets, this feature is much faster then running a query.</p>
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
-	<p>Example: arr1=application.zcore.featureCom.featureSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
+	<p>Example: arr1=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
 	<p>fullStruct=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["Schema Name"], dataStruct.__setId);</p>
 

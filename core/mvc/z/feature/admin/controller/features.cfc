@@ -88,7 +88,7 @@
 			<cfif application.zcore.user.checkServerAccess()>
 				<a href="/z/feature/admin/features/searchReindex">Search Reindex</a> | 
 			</cfif>
-			<a href="/z/feature/admin/feature-sync/index">Sync</a> | 
+			<!--- <a href="/z/feature/admin/feature-sync/index">Sync</a> |  --->
 			<a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">Schemas</a> | 
 			<a href="/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#">Add Schema</a> 
 		</div> 
@@ -4226,8 +4226,8 @@ Define this function in another CFC to override the default email format
 			posted=false;
 			valueStruct={};
 			for(row in qS){
-				arrField=listToArray(row.feature_data_field_order, chr(13));
-				arrData=listToArray(row.feature_data_data, chr(13));
+				arrField=listToArray(row.feature_data_field_order, chr(13), true);
+				arrData=listToArray(row.feature_data_data, chr(13), true);
 				for(i=1;i<=arrayLen(arrField);i++){
 					valueStruct[arrField[i]]=arrData[i];
 				}

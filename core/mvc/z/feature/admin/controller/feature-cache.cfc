@@ -201,8 +201,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				}
 			} 
 			if(cacheEnabled or (versioningEnabled and arraylen(arrVersionSetId))){
-				arrField=listToArray(row.feature_data_field_order, chr(13));
-				arrData=listToArray(row.feature_data_data, chr(13));
+				arrField=listToArray(row.feature_data_field_order, chr(13), true);
+				arrData=listToArray(row.feature_data_data, chr(13), true);
 				for(i=1;i<=arraylen(arrField);i++){
 					fieldId=arrField[i];
 					value=arrData[i];

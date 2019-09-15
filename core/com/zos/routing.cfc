@@ -1337,6 +1337,7 @@
 	
 
 	application.zcore.siteOptionCom.setURLRewriteStruct(ts2);
+	application.zcore.featureCom.setURLRewriteStruct(ts2);
 
 	
 	// loop apps and call the function with ts sharedstruct

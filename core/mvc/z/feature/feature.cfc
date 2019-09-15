@@ -223,8 +223,13 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	ts2=arguments.struct;
-	db.sql="select * from #db.table("feature_schema", "jetendofeature")# feature_schema
-	WHERE feature_id=#db.param(form.feature_id)# and 
+	db.sql="select * from 
+	#db.table("feature_schema", "jetendofeature")#,
+	#db.table("feature_x_site", "jetendofeature")#
+	WHERE 
+	feature_x_site.site_id=#db.param(request.zos.globals.id)# and 
+	feature_x_site_deleted=#db.param(0)# and 
+	feature_x_site.feature_id=feature_schema.feature_id and 
 	feature_schema_allow_public=#db.param(1)# and 
 	feature_schema_deleted = #db.param(0)# and
 	feature_schema_public_form_url<> #db.param('')# ";
@@ -249,7 +254,8 @@
 	arrayappend(ts2.reservedAppUrlIdStruct[50], t9);
 	db.sql="select * from #db.table("feature_data", "jetendofeature")#, 
 	#db.table("feature_schema", "jetendofeature")#
-	WHERE feature_data.feature_id=#db.param(form.feature_id)# and 
+	WHERE 
+	feature_data.site_id=#db.param(request.zos.globals.id)# and 
 	feature_data.feature_id = feature_schema.feature_id and 
 	feature_data.feature_schema_id = feature_schema.feature_schema_id and 
 	feature_schema_enable_unique_url=#db.param(1)# and 
@@ -383,7 +389,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentSchemaId&chr(9)&arguments.groupName];
 		var groupStruct=fsd.featureSchemaLookup[featureSchemaId];
 		if(request.zos.enableSiteOptionGroupCache and groupStruct.feature_schema_enable_cache EQ 1){
-			arrSchema=featureSchemaStruct(arguments.groupName);
+			arrSchema=getFeatureSchemaArray(arguments.featureVariableName, arguments.groupName);
 			if(arguments.orderBy NEQ ""){
 				tempStruct={};
 				for(i=1;i LTE arrayLen(arrSchema);i++){
@@ -752,7 +758,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			db.sql="select s1.*, s2.feature_data_title, s2.feature_data_id d2, s2.feature_data_parent_id d3 
 			from #db.table("feature_schema", "jetendofeature")# s1, 
 			#db.table("feature_data", "jetendofeature")# s2
-			where s1.site_id = s2.site_id and 
+			where  
 			s1.feature_schema_deleted = #db.param(0)# and 
 			s2.feature_data_master_set_id = #db.param(0)# and 
 			s2.feature_data_deleted = #db.param(0)# and 
@@ -1054,7 +1060,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=featureSchemaStruct(row.feature_schema_variable_name, 0, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
+		arr1=getFeatureSchemaArray(row.feature_schema_variable_name, 0, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
@@ -1078,8 +1084,11 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	setting requesttimeout="5000";
 	startDatetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	db.sql="select feature_schema_id, feature_schema_parent_id, feature_schema_variable_name, site_id FROM
-	#db.table("feature_schema", "jetendofeature")# feature_schema WHERE 
-	site_id <> #db.param(-1)# and 
+	#db.table("feature_schema", "jetendofeature")# feature_schema, 
+	#db.table("feature_x_site", "jetendofeature")# WHERE 
+	feature_x_site.site_id <> #db.param(-1)# and 
+	feature_x_site_deleted=#db.param(0)# and 
+	feature_x_site.feature_id=feature_schema.feature_id and 
 	feature_schema_deleted = #db.param(0)# 
 	ORDER BY feature_schema_parent_id";
 	qSchema=db.execute("qSchema");
@@ -1095,7 +1104,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	}
 	while(true){
 		db.sql="select feature_data.feature_id, feature_data_id, feature_schema.feature_schema_parent_id, site.site_id, feature_schema.feature_schema_variable_name FROM
-		#db.table("site", "jetendofeature")# site, 
+		#db.table("site", request.zos.zcoreDatasource)# site, 
 		#db.table("feature_data", "jetendofeature")# feature_data,
 		#db.table("feature_schema", "jetendofeature")# feature_schema
 		where 
@@ -1104,8 +1113,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		feature_data_deleted = #db.param(0)# and 
 		feature_schema_deleted = #db.param(0)# and 
 		feature_schema.feature_schema_id = feature_data.feature_schema_id and 
-		feature_data.site_id = site.site_id and 
-		feature_schema.site_id = feature_data.site_id and 
+		feature_data.site_id = site.site_id and  
 		feature_schema_enable_unique_url = #db.param(1)# and 
 		feature_data.feature_data_active = #db.param(1)# and 
 		feature_data.feature_data_approved = #db.param(1)# and 
@@ -1560,8 +1568,8 @@ if(not rs.success){
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
 	for(row in qData){
-		arrField=listToArray(row.feature_data_field_order, chr(13));
-		arrData=listToArray(row.feature_data_data, chr(13));
+		arrField=listToArray(row.feature_data_field_order, chr(13), true);
+		arrData=listToArray(row.feature_data_data, chr(13), true);
 		for(i=1;i<=arrayLen(arrField);i++){
 			if(structkeyexists(fieldStruct, arrField[i])){
 				field=fieldStruct[arrField[i]];
@@ -1637,8 +1645,8 @@ if(not rs.success){
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
 	for(row in qData){
-		arrField=listToArray(row.feature_data_field_order, chr(13));
-		arrData=listToArray(row.feature_data_data, chr(13));
+		arrField=listToArray(row.feature_data_field_order, chr(13), true);
+		arrData=listToArray(row.feature_data_data, chr(13), true);
 		for(i=1;i<=arrayLen(arrField);i++){
 			if(structkeyexists(fieldStruct, arrField[i])){
 				field=fieldStruct[arrField[i]];
@@ -2412,7 +2420,7 @@ used to do search for a list of values
 			if(debugOn){
 				echo("before processSearchArray<br>");
 			}
-			lastMatch=processSearchArray(c, row, arguments.option_group_id); 
+			lastMatch=processSearchArray(application.zcore.featureCom.getFeatureNameById(c.feature_id), c, row, arguments.option_group_id); 
 			if(debugOn){
 				echo("processSearchArray lastMatch:"&lastMatch&"<br>");
 			}
@@ -2428,7 +2436,7 @@ used to do search for a list of values
 			}
 			if(structkeyexists(c, 'subSchema')){
 				if(debugOn){ echo('in subgroup<br>');	}
-				arrChild=featureSchemaStruct(c.subSchema, 0, request.zos.globals.id, row);
+				arrChild=getFeatureSchemaArray(application.zcore.featureCom.getFeatureNameById(c.subSchema.feature_id), c.subSchema, 0, request.zos.globals.id, row);
 				lastMatch=false;
 				if(arrayLen(arrChild)){
 					//writedump(arrChild); 
@@ -2926,7 +2934,7 @@ used to do search for a list of values
 	<cfargument name="fieldList" type="string" required="no" default="">
 	<cfscript>  
 	feature_id=getFeatureIDByName(arguments.featureVariableName);
-
+	t9=getSiteData(arguments.site_id);
 	fsd=application.zcore.featureData.featureSchemaData[feature_id];
 	if(structkeyexists(fsd, 'featureSchemaIdLookup') and structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
 		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
