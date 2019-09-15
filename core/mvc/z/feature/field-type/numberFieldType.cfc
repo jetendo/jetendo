@@ -154,7 +154,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	required="";
-	if(arguments.row.site_option_required EQ 1){
+	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
 	v='<input type="text" #required# onkeyup="if(this.value != '''' && isNaN(this.value)){ this.value=''''; alert(''You must enter a number with no punctuation.''); }" name="#arguments.prefixString##arguments.row["feature_field_id"]#" id="#arguments.prefixString##arguments.row["feature_field_id"]#" ';

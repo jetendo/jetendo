@@ -139,7 +139,7 @@
 	');
 	
 	required="";
-	if(arguments.row.site_option_required EQ 1){
+	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
 	return { label: true, hidden: false, value:'<input #required# type="text" name="#arguments.prefixString&arguments.row["feature_field_id"]#_time" id="#arguments.prefixString##arguments.row["feature_field_id"]#_time" value="#htmleditformat(curTime)#" size="10" style="width:auto; min-width:auto;" />'};

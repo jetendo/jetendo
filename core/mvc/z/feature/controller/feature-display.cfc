@@ -30,6 +30,7 @@
 
 <cffunction name="add" localmode="modern" access="remote">
 	<cfscript>
+	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true);
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true);
 	featureCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	featureCom.publicAddSchema();
@@ -53,8 +54,7 @@
 		feature_data_master_set_id = #db.param(0)# and 
 		feature_data_deleted = #db.param(0)# and 
 		feature_schema_enable_unique_url=#db.param(1)# and 
-		feature_schema.feature_schema_id = feature_data.feature_schema_id and 
-		feature_data.site_id = feature_schema.site_id and 
+		feature_schema.feature_schema_id = feature_data.feature_schema_id and  
 		feature_data.feature_id=#db.param(form.feature_id)# ";
 		if(not structkeyexists(form, 'zpreview')){
 			db.sql&=" and feature_data.feature_data_approved=#db.param(1)#";

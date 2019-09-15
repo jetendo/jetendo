@@ -61,6 +61,7 @@
 </cffunction> 
 
 <cffunction name="generateSchemaCode" access="public" localmode="modern">
+	<cfargument name="feature_id" type="numeric" required="yes"> 
 	<cfargument name="groupId" type="numeric" required="yes"> 
 	<cfargument name="parentIndex" type="numeric" required="yes"> 
 	<cfargument name="parentSchemaId" type="numeric" required="yes"> 
@@ -77,7 +78,7 @@
 	}else{
 		ss.curIndex++;
 	}
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
 	indent="";
 	for(i=1;i LTE arguments.depth;i++){
@@ -202,7 +203,7 @@
 				echo(indent&chr(9)&'</cfscript>'&chr(10));
 			}
 			savecontent variable="childOutput"{
-				generateSchemaCode(0, ss.curIndex, groupStruct.feature_schema_id, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput);
+				generateSchemaCode(arguments.feature_id, 0, ss.curIndex, groupStruct.feature_schema_id, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput);
 			}
 			childOutput=trim(childOutput);
 			if(len(childOutput)){
@@ -219,10 +220,11 @@
 
 
 <cffunction name="generateCreateTable" access="public" localmode="modern">
+	<cfargument name="feature_id" type="numeric" required="yes">
 	<cfargument name="groupId" type="numeric" required="yes">  
 	<cfscript>
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id]; 
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
 
 
@@ -259,12 +261,13 @@ KEY `feature_data_id` (`feature_data_id`)
 	</cfscript>
 </cffunction>
  
-<cffunction name="generateUpdateTable" access="public" localmode="modern">
+<cffunction name="generateUpdateTable" access="public" localmode="modern"> 
+	<cfargument name="feature_id" type="numeric" required="yes">
 	<cfargument name="groupId" type="numeric" required="yes">  
 	<cfscript>
  
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id]; 
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
 
 
@@ -290,12 +293,11 @@ KEY `feature_data_id` (`feature_data_id`)
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	request.zos.whiteSpaceEnabled=true;
 	application.zcore.template.setPlainTemplate();
+	form.feature_id=application.zcore.functions.zso(form, 'feature_id', true, 0);
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0);
 	form.feature_schema_parent_id=application.zcore.functions.zso(form, 'feature_schema_parent_id', true, 0);
 
-	// TODO: remove when site cache automatically updates...
-
-
+	feature_variable_name=application.zcore.featureCom.getFeatureNameById(form.feature_id);
 	
 	echo('<div style="width:98% !important; float:left;margin:1%;">');
 	echo('<h2>Source code generated below.</h2>
@@ -303,7 +305,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
 	<p>Example: arr1=application.zcore.featureCom.featureSchemaStruct("Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
-	<p>fullStruct=application.zcore.featureCom.getSchemaSetById(["Schema Name"], dataStruct.__setId);</p>
+	<p>fullStruct=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["Schema Name"], dataStruct.__setId);</p>
 
 	<p>Warning: The data returned from these function calls is the original copy.  Make sure not to modify the object or it will be modified for all requests until the database is read again.  Also make a new variable first or use the duplicate() function to make a copy.   If the datatype is not able to be converted to a string automatically, then it will always be accessed as a reference to the original instead of a copy.  i.e. struct/array/components are references.  String/boolean/number are copied when you set a variable.</p>
 	');
@@ -312,21 +314,21 @@ KEY `feature_data_id` (`feature_data_id`)
 		<textarea name="a222" cols="100" rows="10" style="width:70%;">');
 
 	savecontent variable="cfcOutput"{
-		generateSchemaCode(form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, false, true);
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, false, true);
 	}
 	cfcOutput=trim(cfcOutput);
 
 	request.zos.forceAbsoluteImagePlaceholderURL=true;
 	savecontent variable="cfcDebugOutput"{
-		generateSchemaCode(form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, true, false);
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, true, false);
 	}
 	structdelete(request.zos, 'forceAbsoluteImagePlaceholderURL');
 	cfcDebugOutput=trim(cfcDebugOutput);
 	savecontent variable="output"{
-		generateSchemaCode(form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, false, false, false);
-		
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, false, false, false);
+
 		 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData.featureSchemaData[form.feature_id]; 
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
 	if(not structkeyexists(fsd.featureSchemaLookup, form.feature_schema_id)){
 		application.zcore.functions.z404("#form.feature_schema_id# is not a valid feature_schema_id");
@@ -339,7 +341,7 @@ KEY `feature_data_id` (`feature_data_id`)
 		}
 		groupNameInstance=lcase(left(groupName, 1))&removeChars(groupName,1,1);
 
-		groupNameArray=arrayToList(application.zcore.featureCom.getSchemaNameArrayById(groupStruct.feature_schema_id), '","');
+		groupNameArray=arrayToList(application.zcore.featureCom.getSchemaNameArrayById(groupStruct.feature_id, groupStruct.feature_schema_id), '","');
 		
 	}
 	echo(trim(output));
@@ -352,7 +354,7 @@ KEY `feature_data_id` (`feature_data_id`)
 <cffunction name="index" access="public" localmode="modern">
 	<cfargument name="query" type="query" required="yes">
 	<cfscript>
-	#groupNameInstance#=application.zcore.featureCom.getSchemaSetById(["#groupNameArray#"], arguments.query.feature_data_id);  
+	#groupNameInstance#=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["#groupNameArray#"], arguments.query.feature_data_id);  
 	</cfscript> 
 	#cfcOutput#
 </cffunction>
@@ -431,8 +433,8 @@ KEY `feature_data_id` (`feature_data_id`)
 	<h2>Miscellaneous Code</h2>
 	<p>To select a single group set, use one of the following:</p>
 	<ul>
-	<li>Memory Cache Enabled: struct=application.zcore.featureCom.getSchemaSetById(["#groupNameArray#"], feature_data_id);</li>
-	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.featureCom.getSchemaSetByID(["#groupNameArray#"], feature_data_id, request.zos.globals.id, showUnapproved); </li>
+	<li>Memory Cache Enabled: struct=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["#groupNameArray#"], feature_data_id);</li>
+	<li>Memory Cache Disabled: showUnapproved=false; struct=application.zcore.featureCom.getSchemaSetByID("#feature_variable_name#", ["#groupNameArray#"], feature_data_id, request.zos.globals.id, showUnapproved); </li>
 	</ul>');
 	if(groupStruct.feature_schema_allow_public NEQ 0){
 		if(groupStruct.feature_schema_public_form_url NEQ ""){
@@ -570,14 +572,14 @@ displaySchemaCom.ajaxInsert();
 		<p>Start with the example code below, and further customize it, add column indexes, and different table column names, etc to build your custom application.</p>');
 	echo('<pre><blockquote>');
 	savecontent variable="out"{
-	generateCreateTable(form.feature_schema_id);
+	generateCreateTable(form.feature_id, form.feature_schema_id);
 	}
 	echo(trim(out));
 	echo('</blockquote></pre>');
 	echo('<h2>Example Functions For Updating the Custom Table</h2>'); 
 
 	savecontent variable="out"{
-		generateUpdateTable(form.feature_schema_id);
+		generateUpdateTable(form.feature_id, form.feature_schema_id);
 	}
 	echo('<blockquote>'&htmlcodeformat(trim(out))&'</blockquote>');
 
@@ -588,7 +590,7 @@ displaySchemaCom.ajaxInsert();
 	echo('cs={};'&chr(10));
  	echo('cs.dataFields=[');
 	count=0; 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData.featureSchemaData[form.feature_id]; 
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
 	if(structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
 		for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
@@ -633,7 +635,7 @@ displaySchemaCom.ajaxInsert();
 	<cfscript>
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true, 0);
 	
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData; 
 	for(i in fsd.featureSchemaLookup){
 		groupStruct=fsd.featureSchemaLookup[i];
@@ -810,12 +812,17 @@ displaySchemaCom.ajaxInsert();
 
 		// process x groups at a time.
 		xlimit=20;
+		db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
+		WHERE feature_schema_id = #db.param(currentSchemaId)# and  
+		feature_field_deleted = #db.param(0)# 
+		ORDER BY feature_field_sort ASC";
+		qField=db.execute("qField", "", 10000, "query", false);
 
 		db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
 		WHERE feature_schema_id = #db.param(currentSchemaId)# and 
 		feature_data_master_set_id = #db.param(0)# and 
 		feature_data_deleted = #db.param(0)# and 
-		#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
+		#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_data")# and 
 		site_id = #db.param(request.zos.globals.id)# 
 		LIMIT #db.param(doffset)#, #db.param(xlimit)#";
 		qSchemas=db.execute("qSchemas");
@@ -825,29 +832,32 @@ displaySchemaCom.ajaxInsert();
 		doffset+=xlimit;
 
 		for(row in qSchemas){
-			db.sql="SELECT * FROM 
-			#db.table("feature_data", "jetendofeature")# 
-			WHERE  
-			feature_schema_id = #db.param(currentSchemaId)# and 
-			feature_data_id = #db.param(row.feature_data_id)# and 
-			feature_data_deleted = #db.param(0)# and 
-			feature_id=#db.param(row.feature_id)# and 
-			site_id=#db.param(request.zos.globals.id)#  ";
-			qValues=db.execute("qValues");
- 
 
 			arrRow=duplicate(arrRowDefault);
 			userStructRow={};
 			arrAddUser=[];
-			for(value in qValues){
-				if(structkeyexists(typeStruct, value.feature_field_id)){
-					offset=typeStruct[value.feature_field_id]; 
-					if(typeStructType[value.feature_field_id] EQ 16){ 
-						if(structkeyexists(userStruct, value.feature_data_value)){
-							arrayAppend(arrAddUser, userStruct[value.feature_data_value]); 
+
+			fieldStruct={};
+			if(row.feature_data_field_order NEQ ""){
+				arrFieldOrder=listToArray(row.feature_data_field_order, chr(13), true);
+				arrFieldData=listToArray(row.feature_data_data, chr(13), true);
+				for(i=1;i<=arraylen(arrFieldOrder);i++){
+					fieldStruct[arrFieldOrder[i]]=arrFieldData[i];
+				}
+			}
+			loop query="qField"{
+				value="";
+				if(structkeyexists(fieldStruct, qField.feature_field_id)){
+					value=fieldStruct[qField.feature_field_id];
+				}
+				if(structkeyexists(typeStruct, qField.feature_field_id)){
+					offset=typeStruct[qField.feature_field_id]; 
+					if(typeStructType[qField.feature_field_id] EQ 16){ 
+						if(structkeyexists(userStruct, value)){
+							arrayAppend(arrAddUser, userStruct[value]); 
 						} 
 					}
-					arrRow[offset]=value.feature_data_value;
+					arrRow[offset]=value;
 				}
 			}
 			for(i2=1;i2 LTE arraylen(arrRow);i2++){
@@ -921,7 +931,7 @@ displaySchemaCom.ajaxInsert();
 
 			//throw("warning: this will delete unique url and image gallery id - because internalSchemaUpdate is broken.");
 
-			arrSchemaName =application.zcore.featureCom.getSchemaNameArrayById(qSchema.feature_schema_id); 
+			arrSchemaName =application.zcore.featureCom.getSchemaNameArrayById(qSchema.feature_id, qSchema.feature_schema_id); 
 			application.zcore.featureCom.setSchemaImportStruct(arrSchemaName, 0, 0, ts, form); 
 			structappend(form, row, true);
 			// writedump(form);abort;
@@ -1407,7 +1417,8 @@ displaySchemaCom.ajaxInsert();
 		// TODO: fix group delete that has no options - it leaves a remnant in memory that breaks the application
 		application.zcore.featureCom.deleteSchemaRecursively(form.feature_schema_id, true);
 		application.zcore.status.setStatus(request.zsid, "Schema deleted successfully.");
-		application.zcore.featureCom.updateSchemaCacheBySchemaId(qCheck.feature_schema_id);
+		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+		featureCacheCom.updateSchemaCacheBySchemaId(qCheck.feature_id, qCheck.feature_schema_id);
 
 		structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 		if(structkeyexists(request.zsession, "feature_schema_return"&form.feature_schema_id) and request.zsession['feature_schema_return'&form.feature_schema_id] NEQ ""){
@@ -1527,7 +1538,8 @@ displaySchemaCom.ajaxInsert();
 	}
 	
 	
-	application.zcore.featureCom.updateSchemaCacheBySchemaId(form.feature_schema_id);
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.updateSchemaCacheBySchemaId(form.feature_id, form.feature_schema_id);
 	structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 	application.zcore.routing.initRewriteRuleApplicationStruct(application.sitestruct[request.zos.globals.id]);
 	
@@ -1838,11 +1850,7 @@ displaySchemaCom.ajaxInsert();
 					 Execute on child record changes? 
 					 #application.zcore.functions.zInput_Boolean("feature_schema_change_cfc_children")#
 					</td>
-				</tr> 
-				<tr>
-					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Section?","member.feature-schema.edit feature_schema_enable_section")#</th>
-					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_section")# Deprecated DO NOT USE (Requires Enable Unique URL to be set to Yes)</td>
-				</tr>
+				</tr>  
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">
 						#application.zcore.functions.zOutputHelpToolTip("Allow Locked Delete?","member.feature-schema.edit feature_schema_enable_locked_delete")#

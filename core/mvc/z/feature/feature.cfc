@@ -81,8 +81,10 @@
 <!--- application.zcore.featureCom.reloadFeatureCache() --->
 <cffunction name="reloadFeatureCache" localmode="modern" access="public">
 	<cfscript>
-
-	application.zcore.featureCom.rebuildFeaturesCache(ts, false);
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	ts={};
+	featureCacheCom.rebuildFeaturesCache(ts, false);
+	application.zcore.featureData=ts;
 
 	onSiteStart(application.siteStruct[request.zos.globals.id]);
 	</cfscript>
@@ -360,7 +362,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 	arguments.offset=application.zcore.functions.zso(arguments, 'offset', true, 0);
 	arguments.limit=application.zcore.functions.zso(arguments, 'limit', true, 10); 
 	feature_id=application.zcore.featureIdLookup[arguments.featureVariableName];
-	fsd=application.zcore.featureSchemaData[feature_id]; 
+	fsd=application.zcore.featureData.featureSchemaData[feature_id]; 
 	t9=getTypeData(request.zos.globals.id);
 	currentOffset=0;
 	if(arguments.orderBy NEQ ""){
@@ -620,7 +622,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	if(not structkeyexists(ts, 'arrSchemaName')){
 		throw("arguments.searchStruct.arrSchemaName is required. It must be an array of feature_schema_variable_name values.");
 	}
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	db=request.zos.queryObject;//  SEPARATOR #db.param("','")#) idlist
 	 db.sql="SELECT feature_data_id FROM 
 	 #db.table("feature_data", "jetendofeature")# s1
@@ -726,6 +728,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 
 
 <cffunction name="getSetParentLinks" access="public" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="feature_schema_id" type="string" required="yes">
 	<cfargument name="feature_schema_parent_id" type="string" required="yes">
 	<cfargument name="feature_data_parent_id" type="string" required="yes">
@@ -736,7 +739,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	curSchemaId=arguments.feature_schema_id;
 	curParentId=arguments.feature_schema_parent_id;
 	curParentSetId=arguments.feature_data_parent_id;
-	groupStruct=getSchemaById(curSchemaId); 
+	groupStruct=getSchemaById(arguments.feature_id, curSchemaId); 
 	if(arguments.linkCurrentPage){
 		manageAction="manageSchema";
 		if(form.method EQ "userManageSchema"){
@@ -837,26 +840,20 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfargument name="showUnapproved" type="boolean" required="no" default="#false#">
 	<cfscript>
 	db=request.zos.noVerifyQueryObject;
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	 db.sql="SELECT * FROM 
-	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`), 
-	 #db.table("feature_data", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
+	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`)
 	WHERE s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.feature_data_deleted = #db.param(0)# and 
 	s1.feature_id=#db.param(arguments.feature_id)# and 
 	feature_data_master_set_id = #db.param(0)# and 
-	feature_data_value <> #db.param('')# and 
-	s1.site_id = s2.site_id and 
-	s1.feature_schema_id = s2.feature_schema_id and 
-	s1.feature_data_id = s2.feature_data_id and 
 	s1.feature_schema_id=#db.param(arguments.groupId)# and ";
 	if(not arguments.showUnapproved){
 		db.sql&=" s1.feature_data_approved=#db.param(1)# and ";
 	}
 	db.sql&=" s1.feature_data_id = #db.param(arguments.setId)# 
 	";
-	groupStruct=fsd.featureSchemaLookup[arguments.groupId];
+	groupStruct=fsd.featureSchemaData[arguments.feature_id].featureSchemaLookup[arguments.groupId];
 	if(groupStruct.feature_schema_enable_sorting EQ 1){
 		db.sql&=" ORDER BY s1.feature_data_sort asc ";
 	}
@@ -929,22 +926,16 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfscript>
 	db=request.zos.noVerifyQueryObject;
 	 db.sql="SELECT * FROM 
-	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`), 
-	 #db.table("feature_data", "jetendofeature")# s2 FORCE INDEX(`PRIMARY`)
+	 #db.table("feature_data", "jetendofeature")# s1 FORCE INDEX(`PRIMARY`)
 	WHERE s1.site_id = #db.param(arguments.site_id)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s2.feature_data_deleted = #db.param(0)# and 
-	s1.site_id = s2.site_id and 
-	s1.feature_schema_id = s2.feature_schema_id and 
 	s1.feature_id = #db.param(arguments.feature_id)# and 
-	s1.feature_data_id = s2.feature_data_id and 
 	s1.feature_data_parent_id = #db.param(arguments.parentStruct.__setId)# and 
 	s1.feature_data_approved=#db.param(1)# and 
-	s2.feature_data_value <> #db.param('')# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_schema_id = #db.param(arguments.groupId)# ";
 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	disableDefaults=false;
 	defaultStruct={};
 	if(arguments.fieldList NEQ ""){
@@ -1053,7 +1044,6 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	db.sql="select * from #db.table("feature_schema", "jetendofeature")#, 
 	#db.table("feature_field", "jetendofeature")#
 	where 
-	feature_schema.site_id = feature_field.site_id and 
 	feature_schema.feature_schema_id = feature_field.feature_schema_id and 
 	feature_field_deleted=#db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and 
@@ -1104,7 +1094,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		};
 	}
 	while(true){
-		db.sql="select feature_data_id, feature_schema.feature_schema_parent_id, site.site_id, feature_schema.feature_schema_variable_name FROM
+		db.sql="select feature_data.feature_id, feature_data_id, feature_schema.feature_schema_parent_id, site.site_id, feature_schema.feature_schema_variable_name FROM
 		#db.table("site", "jetendofeature")# site, 
 		#db.table("feature_data", "jetendofeature")# feature_data,
 		#db.table("feature_schema", "jetendofeature")# feature_schema
@@ -1115,7 +1105,6 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		feature_schema_deleted = #db.param(0)# and 
 		feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 		feature_data.site_id = site.site_id and 
-		feature_schema.site_id = site.site_id and 
 		feature_schema.site_id = feature_data.site_id and 
 		feature_schema_enable_unique_url = #db.param(1)# and 
 		feature_data.feature_data_active = #db.param(1)# and 
@@ -1144,11 +1133,11 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 					arrayAppend(arrSchema, tempStruct.name);
 				}
 				arrayAppend(arrSchema, row.feature_schema_variable_name);
-				indexSchemaRow(row.feature_data_id, row.site_id, arrSchema); 
+				indexSchemaRow(row.feature_id, row.feature_data_id, row.site_id, arrSchema); 
 			}
 		}
 	}
-	db.sql="delete from #db.table("search", "jetendofeature")# WHERE 
+	db.sql="delete from #db.table("search", request.zos.zcoreDatasource)# WHERE 
 	site_id <> #db.param(-1)# and 
 	app_id = #db.param(21)# and 
 	search_deleted = #db.param(0)#";
@@ -1168,7 +1157,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfscript>
 	// note: deactivateSchemaSet also calls this function
 	var db=request.zos.queryObject;
-	db.sql="DELETE FROM #db.table("search", "jetendofeature")# 
+	db.sql="DELETE FROM #db.table("search", request.zos.zcoreDatasource)# 
 	WHERE site_id =#db.param(arguments.site_id)# and 
 	app_id = #db.param(21)# and 
 	search_deleted = #db.param(0)# and 
@@ -1479,7 +1468,6 @@ if(not rs.success){
 	db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# feature_field,
 	 #db.table("feature_schema", "jetendofeature")# feature_schema 
 	 WHERE 
-	 feature_field.site_id = feature_schema.site_id and 
 	 feature_field.feature_schema_id = feature_schema.feature_schema_id and 
 	feature_schema.feature_schema_id = #db.param(arguments.struct.feature_schema_id)# and 
 	feature_field_deleted = #db.param(0)# and 
@@ -1496,41 +1484,6 @@ if(not rs.success){
 	form.feature_field_id=arrayToList(arroption, ','); 
 	var rs=optionsCom.internalSchemaUpdate(); 
 	return rs;
-	</cfscript>
-</cffunction>
-
-
-<cffunction name="getEditableSchemaSetById" localmode="modern" access="public">
-	<cfargument name="arrSchemaName" type="array" required="yes">
-	<cfargument name="feature_data_id" type="numeric" required="yes">
-	<cfargument name="site_id" type="numeric" required="no" default="#request.zos.globals.id#">  
-	<cfscript>
-	var s=getSchemaSetById(arguments.arrSchemaName, arguments.feature_data_id);
-	var db=request.zos.queryObject;
-	if(arguments.site_id NEQ request.zos.globals.id){
-		throw("zGetEditableSchemaSetById() doesn't support other site ids yet.");
-	}
-	if(structcount(s) EQ 0){
-		throw("feature_data_id, #arguments.feature_data_id#, doesn't exist, so it can't be edited.");
-	}
-	db.sql="select * from #db.table("feature_data", "jetendofeature")# WHERE 
-	feature_data_id= #db.param(arguments.feature_data_id)# and 
-	feature_data_deleted = #db.param(0)# and 
-	site_id = #db.param(arguments.site_id)# ";
-	var qS=db.execute("qS");
-	if(qS.recordcount EQ 0){
-		throw("feature_data_id, #arguments.feature_data_id#, doesn't exist, so it can't be edited.");
-	}
-	var n={};
-	for(var i in s){
-		if(s[i] EQ "/zupload/site-option/0"){
-			n[i]="";
-		}else if(left(i, 2) NEQ "__"){
-			n[i]=s[i];
-		}
-	} 
-	structappend(n, qS, false);
-	return n;
 	</cfscript>
 </cffunction>
 
@@ -1560,6 +1513,9 @@ if(not rs.success){
 		}
 	}else{
 		row=arguments.rowData;
+	}
+	if(row.feature_data_override_url NEQ ""){
+		structdelete(application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct, trim(row.feature_data_override_url));
 	}
 	//writeLogEntry("deleteSchemaSetRecursively set id:"&arguments.feature_data_id);
 	db.sql="SELECT * FROM #db.table("feature_data", "jetendofeature")# 
@@ -1600,7 +1556,7 @@ if(not rs.success){
 	#db.table("feature_data", "jetendofeature")#  
 	WHERE  feature_schema_id=#db.param(row.feature_schema_id)# and  
 	site_id<>#db.param(-1)# and 
-	feature_data_value <> #db.param('')# and 
+	feature_data_field_order <> #db.param('')# and 
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
 	for(row in qData){
@@ -1624,8 +1580,8 @@ if(not rs.success){
 	site_id<>#db.param(-1)# ";
 	result =db.execute("result");
 	//writeLogEntry("deleted set values for set id:"&arguments.feature_data_id);
-	fsd=application.zcore.featureSchemaData;
 	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
+	fsd=application.zcore.featureData.featureSchemaData[row.feature_id];
 	groupStruct=fsd.featureSchemaLookup[row.feature_schema_id]; 
 	
 	if(structkeyexists(groupStruct, 'feature_schema_change_cfc_path') and groupStruct.feature_schema_change_cfc_path NEQ ""){
@@ -1918,7 +1874,7 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 	qSet=db.execute("qSet"); 
 	rs={ success:true, deleteCount:0 };
 	for(row in qSet){
-		deleteSchemaSetRecursively(row.feature_data_id, row);
+		deleteSchemaSetRecursively(row.feature_data_id, row.site_id, row);
 		rs.deleteCount++;
 	}
 	return rs;
@@ -1937,24 +1893,24 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 	
 
 <cffunction name="getTypeCFC" returntype="struct" localmode="modern" access="public" output="no">
-	<cfargument name="typeId" type="string" required="yes" hint="site_id, theme_id or widget_id">
+	<cfargument name="typeId" type="string" required="yes" hint="site_id">
 	<cfscript>
 	return application.zcore["featureData"].fieldTypeStruct[arguments.typeID];
 	</cfscript>
 </cffunction>
 
 <cffunction name="getSiteData" returntype="struct" localmode="modern" access="public">
-	<cfargument name="key" type="string" required="yes" hint="site_id, theme_id or widget_id">
+	<cfargument name="key" type="string" required="yes" hint="site_id">
 	<cfscript>
-	return application.siteStruct[arguments.key].globals["featureData"];
+	return application.siteStruct[arguments.key].globals["featureSchemaData"];
 	</cfscript>
 </cffunction>
 
 <cffunction name="getTypeData" returntype="struct" localmode="modern" access="public">
-	<cfargument name="key" type="string" required="yes" hint="site_id, theme_id or widget_id">
+	<cfargument name="key" type="string" required="yes" hint="site_id">
 	<cfscript>
-		throw("this is returning components instead of type data, why?");
-	return application.zcore.featureData.fieldTypeStruct[arguments.key];
+	//	throw("this is returning components instead of type data, why?");
+	return application.zcore.featureData;//.fieldTypeStruct[arguments.key];
 	</cfscript>
 </cffunction>
 
@@ -2369,6 +2325,7 @@ used to do search for a list of values
 	length=arraylen(arguments.arrSearch);
 	lastMatch=true;
 	arrSQL=[' ( '];
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	t9=getSiteData(request.zos.globals.id);
 	for(i=1;i LTE length;i++){
 		c=arguments.arrSearch[i]; 
@@ -2379,14 +2336,14 @@ used to do search for a list of values
 			if(structkeyexists(c, 'subSchema')){
 				throw("subSchema, ""#c.subSchema#"", has caching disabled. subSchema search is not supported yet when caching is disabled (i.e. option_group_enable_cache = 0).");
 			}else{
-				optionId=t9.fieldIdLookup[arguments.option_group_id&chr(9)&c.field];
+				optionId=fsd.fieldIdLookup[arguments.option_group_id&chr(9)&c.field];
 				if(not structkeyexists(arguments.fieldStruct, optionId)){
 					arguments.fieldStruct[optionId]=arguments.tableCount;
 					arguments.tableCount++;
 				} 
-				if(application.zcore.functions.zso(t9.fieldLookup[optionId].typeStruct,'selectmenu_multipleselection', true, 0) EQ 1){
+				if(application.zcore.functions.zso(fsd.fieldLookup[optionId].typeStruct,'selectmenu_multipleselection', true, 0) EQ 1){
 					multipleValues=true;
-					if(t9.fieldLookup[optionId].typeStruct.selectmenu_delimiter EQ "|"){
+					if(fsd.fieldLookup[optionId].typeStruct.selectmenu_delimiter EQ "|"){
 						delimiter=',';
 					}else{
 						delimiter='|';
@@ -2402,8 +2359,8 @@ used to do search for a list of values
 				}
 				tableName="sSchema"&arguments.fieldStruct[optionId];
 				field='sVal'&optionId;
-				currentCFC=getTypeCFC(t9.fieldLookup[optionId].type);
-				fieldName=currentCFC.getSearchFieldName('s1', tableName, t9.fieldLookup[optionId].typeStruct);
+				currentCFC=getTypeCFC(fsd.fieldLookup[optionId].type);
+				fieldName=currentCFC.getSearchFieldName('s1', tableName, fsd.fieldLookup[optionId].typeStruct);
 				arrayAppend(arrSQL, processSearchSchemaSQL(c, fieldName, multipleValues, delimiter, concatAppendPrepend));// "`"&tableName&"`.`"&field&"`"));
 				if(i NEQ length and not isSimpleValue(arguments.arrSearch[i+1])){
 					arrayAppend(arrSQL, ' and ');
@@ -2566,9 +2523,10 @@ used to do search for a list of values
 </cffunction>
 
 <cffunction name="getSchemaById" access="public" returntype="struct" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="option_group_id" type="string" required="yes">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	if(structkeyexists(fsd.featureSchemaLookup, arguments.option_group_id)){
 		return fsd.featureSchemaLookup[arguments.option_group_id];
 	}else{
@@ -2578,9 +2536,10 @@ used to do search for a list of values
 </cffunction>
 
 <cffunction name="getSchemaNameById" access="public" returntype="string" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="option_group_id" type="string" required="yes">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	if(structkeyexists(fsd.featureSchemaLookup, arguments.option_group_id)){
 		return fsd.featureSchemaLookup[arguments.option_group_id]["feature_schema_variable_name"];
 	}else{
@@ -2589,10 +2548,22 @@ used to do search for a list of values
 	</cfscript>
 </cffunction>
 
+<cffunction name="getFeatureNameById" access="public" returntype="string" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
+	<cfscript>
+	if(structkeyexists(application.zcore.featureData.featureDataLookup, arguments.feature_id)){
+		return application.zcore.featureData.featureDataLookup[arguments.feature_id].feature_variable_name;
+	}else{
+		throw("Invalid feature_id, #arguments.feature_id#");
+	}
+	</cfscript>
+</cffunction>
+
 <cffunction name="getSchemaNameArrayById" access="public" returntype="array" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="option_group_id" type="string" required="yes">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	arrSchemaName=[];
 	i=0;
 	groupID=arguments.option_group_id;
@@ -2616,11 +2587,12 @@ used to do search for a list of values
 </cffunction>
 
 <cffunction name="getFieldFieldById" access="public" returntype="struct" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="option_id" type="string" required="yes">
 	<cfscript>
-	t9=getTypeData(request.zos.globals.id);
-	if(structkeyexists(t9.fieldLookup, arguments.option_id)){
-		return t9.fieldLookup[arguments.option_id];
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
+	if(structkeyexists(fsd.fieldLookup, arguments.option_id)){
+		return fsd.fieldLookup[arguments.option_id];
 	}else{
 		return {};
 	}
@@ -2636,11 +2608,12 @@ used to do search for a list of values
 </cffunction>
  
 <cffunction name="getFieldFieldNameById" access="public" returntype="string" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="option_id" type="string" required="yes">
 	<cfscript>
-	t9=getTypeData(request.zos.globals.id);
-	if(structkeyexists(t9.fieldLookup, arguments.option_id)){
-		return t9.fieldLookup[arguments.option_id]["feature_field_variable_name"];
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
+	if(structkeyexists(fsd.fieldLookup, arguments.option_id)){
+		return fsd.fieldLookup[arguments.option_id]["feature_field_variable_name"];
 	}else{
 		return "";
 	}
@@ -2648,22 +2621,23 @@ used to do search for a list of values
 </cffunction> 
 
 <cffunction name="deleteSchemaSetIdCache" localmode="modern" access="public">
+	<cfargument name="feature_id" type="numeric" required="yes">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes"> 
 	<cfscript>
-	deleteSchemaSetIdCacheInternal(arguments.site_id, arguments.setId, false);
+	deleteSchemaSetIdCacheInternal(arguments.feature_id, arguments.site_id, arguments.setId, false);
 	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
 	</cfscript>
 </cffunction>
 
 <cffunction name="deleteSchemaSetIdCacheInternal" localmode="modern" access="private">
+	<cfargument name="feature_id" type="numeric" required="yes">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes">
 	<cfargument name="disableFileUpdate" type="boolean" required="yes">
 	<cfscript>
 	var row=0;
 	var tempValue=0; 
-	fsd=application.zcore.featureSchemaData;
 	t9=getSiteData(arguments.site_id);
 	var db=request.zos.queryObject; 
 	// remove only the keys I need to and then publish  
@@ -2693,9 +2667,10 @@ used to do search for a list of values
 	var childSchema=duplicate(t9.featureSchemaSetId[arguments.setId&"_childSchema"]); 
 	for(var f in childSchema){
 		for(var g=1;g LTE arraylen(childSchema[f]);g++){ 
-			this.deleteSchemaSetIdCacheInternal(arguments.site_id, childSchema[f][g], true);
+			this.deleteSchemaSetIdCacheInternal(arguments.feature_id, arguments.site_id, childSchema[f][g], true);
 		}
 	}
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	for(var n in fsd.featureSchemaFieldLookup[groupId]){ 
 		structdelete(t9.featureSchemaSetId, arguments.setId&"_f"&n);
 	}
@@ -2714,13 +2689,14 @@ used to do search for a list of values
 </cffunction>
 
 <cffunction name="searchReindexSet" localmode="modern" access="public">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="setId" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="arrSchemaName" type="array" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
 	var row=0;
-	indexSchemaRow(arguments.setId, arguments.site_id, arguments.arrSchemaName);
+	indexSchemaRow(arguments.feature_id, arguments.setId, arguments.site_id, arguments.arrSchemaName);
 	</cfscript>
 </cffunction>
 
@@ -2769,6 +2745,7 @@ used to do search for a list of values
 
 
 <cffunction name="indexSchemaRow" localmode="modern" access="public">
+	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="setId" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="arrSchemaName" type="array" required="yes">
@@ -2776,8 +2753,8 @@ used to do search for a list of values
 	var db=request.zos.queryObject;
 	var ts=0;
 	var i=0;
-	dataStruct=getSchemaSetById(arguments.arrSchemaName, arguments.setId, arguments.site_id); 
-	fsd=application.zcore.featureSchemaData; 
+	dataStruct=getSchemaSetById(application.zcore.featureCom.getFeatureNameById(arguments.feature_id), arguments.arrSchemaName, arguments.setId, arguments.site_id); 
+	fsd=application.zcore.featureData; 
 	if(not structkeyexists(dataStruct, '__approved') or dataStruct.__approved NEQ 1){
 		deleteSchemaSetIndex(arguments.setId, arguments.site_id);
 
@@ -2848,7 +2825,7 @@ used to do search for a list of values
 	<cfargument name="arrSchemaName" type="array" required="yes" hint="An array of feature_schema_variable_name">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData;
 	count=arrayLen(arguments.arrSchemaName);
 	if(count EQ 0){
 		throw("You must specify one or more group names in arguments.arrSchemaName");
@@ -2856,7 +2833,7 @@ used to do search for a list of values
 	curSchemaId=0;
 	featureSchemaId=0;
 	for(i=1;i LTE count;i++){
-		featureSchemaId=fsd[arguments.feature_id].featureSchemaIdLookup[curSchemaId&chr(9)&arguments.arrSchemaName[i]];
+		featureSchemaId=fsd.featureSchemaData[arguments.feature_id].featureSchemaIdLookup[curSchemaId&chr(9)&arguments.arrSchemaName[i]];
 		curSchemaId=featureSchemaId;
 	}
 	return featureSchemaId;
@@ -2867,7 +2844,7 @@ used to do search for a list of values
 	<cfargument name="option_group_id" type="string" required="no" default="">
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData;
 	if(structkeyexists(t9, "featureSchemaLookup") and structkeyexists(fsd.featureSchemaLookup, arguments.option_group_id)){
 		return fsd.featureSchemaLookup[arguments.option_group_id];
 	}
@@ -2878,8 +2855,8 @@ used to do search for a list of values
 <cffunction name="getFeatureIDByName" localmode="modern" output="yes" returntype="struct">
 	<cfargument name="featureVariableName" type="string" required="yes">
 	<cfscript>
-	if(structkeyexists(application.zcore.featureSchemaData.featureIdLookup, arguments.featureVariableName)){
-		return application.zcore.featureSchemaData.featureIdLookup[arguments.featureVariableName];
+	if(structkeyexists(application.zcore.featureData.featureIdLookup, arguments.featureVariableName)){
+		return application.zcore.featureData.featureIdLookup[arguments.featureVariableName];
 	}else{
 		throw("Feature, ""#arguments.featureVariableName#"", doesn't exist. Remember to use the variable name and not the display name.");
 	}
@@ -2895,12 +2872,12 @@ used to do search for a list of values
 	<cfscript> 
 	feature_id=getFeatureIDByName(arguments.featureVariableName);
 
-	typeStruct=application.zcore.featureSchemaData;
+	typeStruct=application.zcore.featureData;
 	t9=getSiteData(arguments.site_id);
 
 	if(arraylen(arguments.arrSchemaName)){
 		var groupId=getSchemaIdWithNameArray(feature_id, arguments.arrSchemaName, arguments.site_id);
-		var groupStruct=typeStruct.featureSchemaLookup[feature_id][groupId];  
+		var groupStruct=typeStruct.featureSchemaData[feature_id].featureSchemaLookup[groupId];  
 		if(request.zos.enableSiteOptionGroupCache and not arguments.showUnapproved and groupStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.feature_data_id)){
 			groupStruct=t9.featureSchemaSet[arguments.feature_data_id];
 			if(groupStruct.__groupID NEQ groupID){
@@ -2931,7 +2908,7 @@ used to do search for a list of values
 	<cfargument name="option_group_parent_id" type="numeric" required="no" default="#0#">
 	<cfargument name="site_id" type="numeric" required="no" default="#request.zos.globals.id#">
 	<cfscript>
-	fsd=application.zcore.featureSchemaData;
+	fsd=application.zcore.featureData;
 	if(structkeyexists(fsd, "featureSchemaIdLookup") and structkeyexists(fsd.featureSchemaIdLookup, arguments.option_group_parent_id&chr(9)&arguments.groupName)){
 		return fsd.featureSchemaIdLookup[arguments.option_group_parent_id&chr(9)&arguments.groupName];
 	}else{
@@ -2948,14 +2925,12 @@ used to do search for a list of values
 	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
 	<cfscript>  
-	throw("lookup featureVariableName");
-	t9=application.siteStruct[arguments.site_id].globals["featureData"];
-	typeStruct=t9;
-	// t9=getSiteData(arguments.site_id);
-	// typeStruct=getTypeData(arguments.site_id); 
-	if(structkeyexists(typeStruct, 'featureSchemaIdLookup') and structkeyexists(typeStruct.featureSchemaIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
-		featureSchemaId=typeStruct.featureSchemaIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
-		groupStruct=typeStruct.featureSchemaLookup[featureSchemaId];
+	feature_id=getFeatureIDByName(arguments.featureVariableName);
+
+	fsd=application.zcore.featureData.featureSchemaData[feature_id];
+	if(structkeyexists(fsd, 'featureSchemaIdLookup') and structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
+		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
+		groupStruct=fsd.featureSchemaLookup[featureSchemaId];
 		if(request.zos.enableSiteOptionGroupCache and groupStruct["feature_schema_enable_cache"] EQ 1){
 			if(structkeyexists(t9.featureSchemaSetArrays, arguments.option_app_id&chr(9)&featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
 				return t9.featureSchemaSetArrays[arguments.option_app_id&chr(9)&featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
@@ -2974,7 +2949,7 @@ used to do search for a list of values
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="option_group_id" type="string" required="yes">
 	<cfscript> 
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	if(structkeyexists(fsd, 'featureSchemaDefaults') and structkeyexists(fsd.featureSchemaDefaults, arguments.option_group_id)){
 		structappend(arguments.dataStruct, fsd.featureSchemaDefaults[arguments.option_group_id], false);
 	}

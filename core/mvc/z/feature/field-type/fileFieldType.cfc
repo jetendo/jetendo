@@ -187,7 +187,7 @@
 				title="#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])#">Download File</a></p>');*/
 			}
 		}else{
-			if(arguments.row.site_option_required EQ 1){	
+			if(arguments.row.feature_field_required EQ 1){	
 				ts3.required=true;
 			}
 		}

@@ -2,41 +2,35 @@
 <cfoutput>
 
 
-<!--- /z/feature/admin/features/debugCacheRebuild --->
-<cffunction name="debugCacheRebuild" localmode="modern" access="remote" roles="member">
-	<cfscript>	
-	form.feature_id=application.zcore.functions.zso(form, "feature_id", true);
-	ts={};
-	rebuildFeaturesCache(ts, false);
-	rebuildFeatureStructCache(form.feature_id, ts);
-	application.zcore.featureSchemaData=ts;
-	//writedump(ts);
-	</cfscript>
-</cffunction>
-
-
 <cffunction name="updateSchemaCache" access="public" localmode="modern">
-	<cfargument name="siteStruct" type="struct" required="yes">
+	<cfargument name="cacheStruct" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject; 
-	db.sql="SELECT feature_schema_id FROM #db.table("feature_schema", "jetendofeature")# 
+	db.sql="SELECT feature_x_site.site_id, feature_schema.feature_id, feature_schema.feature_schema_id 
+	FROM #db.table("feature_schema", "jetendofeature")#
+	LEFT JOIN #db.table("feature_x_site", "jetendofeature")# ON 
+	feature_x_site.feature_id = feature_schema.feature_id and 
+	feature_x_site_deleted=#db.param(0)# 
 	WHERE #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 	feature_schema_deleted = #db.param(0)# 
 	ORDER BY feature_schema_parent_id asc";
-	qS=db.execute("qS"); 
+	qS=db.execute("qS");  
 	for(row in qS){
-		internalUpdateSchemaCacheBySchemaId(arguments.siteStruct, row.feature_schema_id);
+		if(structkeyexists(application.siteStruct, row.site_id)){
+			internalUpdateSchemaCacheBySchemaId(application.siteStruct[row.site_id].globals, row.feature_id, row.feature_schema_id);
+		}
 	} 
 	</cfscript>
 </cffunction>
 
-<!--- application.zcore.featureCom.updateSchemaCacheBySchemaId(featureSchemaId); --->
+<!--- application.zcore.featureCom.updateSchemaCacheBySchemaId(feature_id, feature_schema_id); --->
 <cffunction name="updateSchemaCacheBySchemaId" access="public" localmode="modern">
-	<cfargument name="featureSchemaId" type="string" required="yes">
+	<cfargument name="feature_id" type="string" required="yes">
+	<cfargument name="feature_schema_id" type="string" required="yes">
 	<cfscript>
-	siteStruct=application.zcore.functions.zGetSiteGlobals(request.zos.globals.id);
-	internalUpdateSchemaCacheBySchemaId(siteStruct, arguments.featureSchemaId);
-	application.zcore.functions.zCacheJsonSiteAndUserGroup(request.zos.globals.id, siteStruct);
+	rebuildFeatureStructCache(arguments.feature_id, application.zcore.featureData);
+	internalUpdateSchemaCacheBySchemaId(application.siteStruct[request.zos.globals.id].globals,  arguments.feature_id, arguments.feature_schema_id);
+	application.zcore.functions.zCacheJsonSiteAndUserGroup(request.zos.globals.id, application.zcore.siteGlobals[request.zos.globals.id]);
 	</cfscript>
 </cffunction>
 
@@ -46,8 +40,7 @@
 	<cfscript>	
 	featureData={
 		featureDataLookup:{},
-		featureIdLookup:{},
-		featureSchemaData:{}
+		featureIdLookup:{}
 	};
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("feature", "jetendofeature")# where 
@@ -60,7 +53,8 @@
 			rebuildFeatureStructCache(row.feature_id, arguments.cacheStruct);
 		}
 	}
-	structappend(arguments.cacheStruct, featureData);
+	arguments.cacheStruct.featureDataLookup=featureData.featureDataLookup;
+	arguments.cacheStruct.featureIdLookup=featureData.featureIdLookup;
 	</cfscript>
 </cffunction>
 
@@ -72,20 +66,23 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	<cfargument name="cacheStruct" type="struct" required="yes">
 	<cfscript> 
 	db=request.zos.queryObject;
-	featureSchemaData={};
-	featureSchemaData.fieldLookup=structnew();
-	featureSchemaData.fieldIdLookup=structnew();
-	featureSchemaData.featureSchemaFieldLookup=structnew();
-	featureSchemaData.featureSchemaLookup=structnew();
-	featureSchemaData.featureSchemaIdLookup=structnew();
-	featureSchemaData.featureSchemaDefaults=structnew();
-	fs=featureSchemaData; 
+	featureData={};
+	featureData.fieldLookup=structnew();
+	featureData.fieldIdLookup=structnew();
+	featureData.featureSchemaFieldLookup=structnew();
+	featureData.featureSchemaLookup=structnew();
+	featureData.featureSchemaIdLookup=structnew();
+	featureData.featureSchemaDefaults=structnew();
+	fs=featureData; 
 
 	 db.sql="SELECT * FROM #db.table("feature_field", "jetendofeature")# 
 	WHERE  
 	feature_id=#db.param(arguments.feature_id)# and 
 	feature_field_deleted = #db.param(0)#";
 	qS=db.execute("qS");
+// 	if(arguments.feature_id EQ 4){
+// 	writedump(QS);abort;
+// }
 	for(row in qS){
 		fs.fieldLookup[row.feature_field_id]=row;
 		structappend(fs.fieldLookup[row.feature_field_id], {
@@ -138,9 +135,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	fs=featureSchemaData;
 	site_id=arguments.siteStruct.id;
 	feature_schema_id=arguments.feature_schema_id;
-
-
- 	fsd=application.zcore.featureSchemaData[arguments.feature_id];
+ 
+ 	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id];
 	
 	fs.featureSchemaSetId[0&"_groupId"]=0;
 	fs.featureSchemaSetId[0&"_parentId"]=0;
@@ -188,7 +184,6 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 			}
 			if(structkeyexists(fs.featureSchemaSetId, id) EQ false){
 				if(structkeyexists(fs.featureSchemaSetId, id&"_appId") EQ false){
-					//fs.featureSchemaLookup[row.feature_schema_id].count++;
 					fs.featureSchemaSetId[id&"_groupId"]=row.feature_schema_id;
 					fs.featureSchemaSetId[id&"_appId"]=row.feature_id;
 					fs.featureSchemaSetId[id&"_parentId"]=row.feature_data_parent_id;
@@ -320,7 +315,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 					}
 					fs.featureSchemaSetVersion[row.feature_data_master_set_id]=ts.__setId;
 				}else{
-					arrayappend(fs.featureSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id], ts);
+					arrayappend(fs.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id], ts);
 				}
 			}
 		}
@@ -340,30 +335,13 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	</cfscript>
 </cffunction>
  
-	
-
-<cffunction name="internalUpdateFieldAndSchemaCache" access="public" localmode="modern">
-	<cfargument name="siteStruct" type="struct" required="yes">
-	<cfscript>
-	db=request.zos.queryObject;
-	tempStruct=arguments.siteStruct;
-	site_id=tempStruct.id;
-	
-	if(not structkeyexists(tempStruct, 'featureSchemaData')){
-		tempStruct.featureSchemaData={};
-	}
-	updateSchemaCache(tempStruct);
-	
-	</cfscript>
-	
-</cffunction>
 
 
 <cffunction name="buildSchemaSetIdField" access="private" localmode="modern">
 	<cfargument name="row" type="struct" required="yes"> 
 	<cfargument name="curStruct" type="struct" required="yes"> 
 	<cfscript>
-	var t9=getTypeData(arguments.row.site_id);
+	var t9=application.zcore.featureCom.getTypeData(arguments.row.site_id);
 	if(arguments.row.feature_field_id NEQ ""){
 		typeId=t9.fieldLookup[arguments.row.feature_field_id].type;
 		if(typeId EQ 2){
@@ -395,7 +373,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	<cfargument name="disableDefaults" type="boolean" required="yes">
 	<cfscript>
 	row=arguments.row;  
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData; 
 	ts=structnew();
 	ts.__sort=row.feature_data_sort;
 	ts.__setId=row.feature_data_id;
@@ -447,7 +425,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	sortStruct={};
 	i=1;
  
-	fsd=application.zcore.featureSchemaData; 
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id]; 
 	var groupStruct=fsd.featureSchemaLookup[arguments.feature_schema_id];
 
 	for(var row2 in qSort){
@@ -465,16 +443,16 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		}
 		i++;
 	}
-	t9=getSiteData(arguments.site_id);
+	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
 	t9.featureSchemaSetId[arguments.feature_data_parent_id&"_childSchema"][arguments.feature_schema_id]=arrTemp;
 
-	arrData=t9.featureSchemaSetArrays[arguments.feature_id&chr(9)&arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id];
+	arrData=t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id];
 	arrDataNew=[];
 	for(i=1;i LTE arraylen(arrData);i++){
 		sortIndex=sortStruct[arrData[i].__setId];
 		arrDataNew[sortIndex]=arrData[i];
 	}
-	t9.featureSchemaSetArrays[arguments.feature_id&chr(9)&arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id]=arrDataNew;
+	t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id]=arrDataNew;
 	</cfscript>
 </cffunction>
 	
@@ -488,69 +466,81 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	var debug=false;
 	var startTime=gettickcount(); 
 
-	fsd=application.zcore.featureSchemaData; 
-	t9=getSiteData(arguments.site_id);
-	typeStruct=getTypeData(arguments.site_id);
-	db.sql="SELECT s1.*, s3.feature_field_id groupSetFieldId, s4.feature_field_type_id typeId, s3.feature_data_value groupSetValue 
-	FROM #db.table("feature_data", "jetendofeature")# s1  
-	LEFT JOIN #db.table("feature_data", "jetendofeature")# s3  ON 
-	s1.feature_schema_id = s3.feature_schema_id AND 
-	s1.feature_data_id = s3.feature_data_id and 
-	s1.site_id = s3.site_id
-	LEFT JOIN #db.table("feature_field", "jetendofeature")# s4 ON 
-	s4.feature_schema_id = s3.feature_schema_id and 
-	s4.feature_field_id = s3.feature_field_id and 
-	s4.site_id = s3.site_id 
-	WHERE s1.site_id = #db.param(arguments.site_id)#  and 
+	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
+
+	db.sql="SELECT * FROM 
+	(#db.table("feature_schema", "jetendofeature")# s2, 
+	#db.table("feature_data", "jetendofeature")# s1) WHERE 
+	s1.site_id = #db.param(arguments.site_id)# and 
+	feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s3.feature_data_deleted = #db.param(0)# and 
-	s4.feature_field_deleted = #db.param(0)# and 
-	s1.feature_data_approved=#db.param(1)# and 
-	s1.feature_data_id=#db.param(arguments.feature_data_id)#
-	ORDER BY s1.feature_data_parent_id ASC, s1.feature_data_sort ASC ";
-	//s1.feature_data_master_set_id = #db.param(0)# and 
-	//if(debug) writedump(db.sql);
-	var qS=db.execute("qS"); 
+	s1.feature_schema_id = s2.feature_schema_id and 
+	s1.feature_data_id = #db.param(arguments.feature_data_id)# and 
+	s2.feature_schema_deleted = #db.param(0)#";
+	var qS=db.execute("qS", "", 10000, "query", false);  
+	if(qS.recordcount EQ 0){
+		throw("feature_data_id, #arguments.feature_data_id#, doesn't exist.");
+	}
+	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-3<br>'); startTime=gettickcount();
 	if(debug) writedump(qS);
+
+	fsd=application.zcore.featureData.featureSchemaData[qS.feature_id];
+
+	fieldStruct={};
+	if(qS.feature_data_field_order NEQ ""){
+		arrFieldOrder=listToArray(qS.feature_data_field_order, chr(13), true);
+		arrFieldData=listToArray(qS.feature_data_data, chr(13), true);
+		for(i=1;i<=arraylen(arrFieldOrder);i++){
+			fieldStruct[arrFieldOrder[i]]=arrFieldData[i];
+		}
+	}
+
+	db.sql="SELECT *
+	FROM #db.table("feature_field", "jetendofeature")# 
+	WHERE feature_schema_id=#db.param(qS.feature_schema_id)# and 
+	feature_field_deleted = #db.param(0)# 
+	ORDER BY feature_field_sort ASC ";
+	var qField=db.execute("qField", "", 10000, "query", false);
+
+	if(debug) writedump(qField);
 	var tempUniqueStruct=structnew();
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-1<br>'); startTime=gettickcount();
 	var newRecord=false;
-	for(row in qS){
-		var id=row.feature_data_id;
+	for(row in qField){
+		var id=qS.feature_data_id;
 		if(structkeyexists(t9.featureSchemaSetId, id&"_appId") EQ false){
 			newRecord=true;
-			typeStruct.featureSchemaLookup[row.feature_schema_id].count++;
 			t9.featureSchemaSetId[id&"_groupId"]=row.feature_schema_id;
 			t9.featureSchemaSetId[id&"_appId"]=row.feature_id;
-			t9.featureSchemaSetId[id&"_parentId"]=row.feature_data_parent_id;
+			t9.featureSchemaSetId[id&"_parentId"]=qS.feature_data_parent_id;
 			t9.featureSchemaSetId[id&"_childSchema"]=structnew();
 		}
-		if(row.feature_data_master_set_id EQ 0 and structkeyexists(t9.featureSchemaSetId, row.feature_data_parent_id&"_childSchema")){
-			if(structkeyexists(t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"], row.feature_schema_id) EQ false){
-				t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"][row.feature_schema_id]=arraynew(1);
+		if(qS.feature_data_master_set_id EQ 0 and structkeyexists(t9.featureSchemaSetId, qS.feature_data_parent_id&"_childSchema")){
+			if(structkeyexists(t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"], row.feature_schema_id) EQ false){
+				t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id]=arraynew(1);
 			}
-			if(typeStruct.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
-				if(structkeyexists(tempUniqueStruct, row.feature_data_parent_id&"_"&id) EQ false){
-					var arrChild=t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"][row.feature_schema_id];
+			if(fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
+				if(structkeyexists(tempUniqueStruct, qS.feature_data_parent_id&"_"&id) EQ false){
+					var arrChild=t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id];
 					var resort=false;
-					if(arrayLen(arrChild) LT row.feature_data_sort){
+					if(qS.feature_data_sort EQ 0){
 						resort=true;
-					}else if(arrayLen(arrChild) GTE row.feature_data_sort){
-						if(arrChild[row.feature_data_sort] NEQ id){
+					}else if(arrayLen(arrChild) LT qS.feature_data_sort){
+						resort=true;
+					}else if(arrayLen(arrChild) GTE qS.feature_data_sort){
+						if(arrChild[qS.feature_data_sort] NEQ id){
 							resort=true;
 						}
-					/*}else if(arrayLen(arrChild)+1 EQ row.feature_data_sort){
-						arrayAppend(arrChild, id);*/
 					}else{
 						resort=true;
 					} 
-			//writedump(resort);
+					//writedump(resort);
 					if(resort){
 						db.sql="select feature_data_id from #db.table("feature_data", "jetendofeature")#
 						WHERE 
 						feature_data_deleted = #db.param(0)# and 
 						feature_data_master_set_id = #db.param(0)# and 
-						feature_data_parent_id= #db.param(row.feature_data_parent_id)# and 
+						feature_data_parent_id= #db.param(qS.feature_data_parent_id)# and 
 						feature_schema_id = #db.param(row.feature_schema_id)# and 
 						feature_id = #db.param(row.feature_id)# and 
 						site_id = #db.param(arguments.site_id)# 
@@ -560,36 +550,40 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 						for(var row2 in qSort){
 							arrayAppend(arrTemp, row2.feature_data_id);
 						}
-						t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"][row.feature_schema_id]=arrTemp;
+						t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id]=arrTemp;
 					}
-					//writedump(t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"][row.feature_schema_id]);
-					tempUniqueStruct[row.feature_data_parent_id&"_"&id]=true;
+					//writedump(t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id]);
+					tempUniqueStruct[qS.feature_data_parent_id&"_"&id]=true;
 				}
 			}else if(newRecord){
 				// if i get an undefined error here, it is probably because memory caching is disable on the parent feature_schema_id
-				var arrChild=t9.featureSchemaSetId[row.feature_data_parent_id&"_childSchema"][row.feature_schema_id];
+				var arrChild=t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id];
 				var found=false;
 				for(var i=1;i LTE arrayLen(arrChild);i++){
-					if(row.feature_data_id EQ arrChild[i]){
+					if(qS.feature_data_id EQ arrChild[i]){
 						found=true;
 						break;
 					}
 				}
 				if(not found){
-					arrayAppend(arrChild, row.feature_data_id);
+					arrayAppend(arrChild, qS.feature_data_id);
 				}
 			}
 		}
-		if(row.typeId EQ 2){
-			if(row.groupSetValue EQ ""){
+		fieldValue="";
+		if(structkeyexists(fieldStruct, row.feature_field_id)){
+			fieldValue=fieldStruct[row.feature_field_id];
+		}
+		if(row.feature_field_type_id EQ 2){
+			if(fieldValue EQ ""){
 				tempValue="";
 			}else{
-				tempValue='<div class="zEditorHTML">'&row.groupSetValue&'</div>';
+				tempValue='<div class="zEditorHTML">'&fieldValue&'</div>';
 			}
-		}else if(row.typeId EQ 3){
-			arrValue=listToArray(row.groupSetValue, chr(9));
+		}else if(row.feature_field_type_id EQ 3){
+			arrValue=listToArray(fieldValue, chr(9));
 			if(arrValue[1] NEQ ""){
-				typeStruct=typeStruct.fieldLookup[row.groupSetFieldId].typeStruct;
+				typeStruct=typeStruct.fieldLookup[row.feature_field_id].typeStruct;
 				if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
 					tempValue="/zuploadsecure/feature-options/"&arrValue[1];
 				}else{
@@ -599,40 +593,27 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				tempValue="";
 			}
 			if(arrayLen(arrValue) EQ 2 and arrValue[2] NEQ ""){
-				t9.featureSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="/zupload/feature-options/"&arrValue[2];
+				t9.featureSchemaSetId["__original "&id&"_f"&row.feature_field_id]="/zupload/feature-options/"&arrValue[2];
 			}else{
-				t9.featureSchemaSetId["__original "&id&"_f"&row.groupSetFieldId]="";
+				t9.featureSchemaSetId["__original "&id&"_f"&row.feature_field_id]="";
 			}
-		}else if(row.typeId EQ 9){
-			if(row.groupSetValue NEQ "" and row.groupSetValue NEQ "0"){
-				typeStruct=typeStruct.fieldLookup[row.groupSetFieldId].typeStruct;
+		}else if(row.feature_field_type_id EQ 9){
+			if(fieldValue NEQ "" and fieldValue NEQ "0"){
+				typeStruct=typeStruct.fieldLookup[row.feature_field_id].typeStruct;
 				if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
-					tempValue="/zuploadsecure/feature-options/"&row.groupSetValue;
+					tempValue="/zuploadsecure/feature-options/"&fieldValue;
 				}else{
-					tempValue="/zupload/feature-options/"&row.groupSetValue;
+					tempValue="/zupload/feature-options/"&fieldValue;
 				}
 			}else{
 				tempValue="";
 			}
 		}else{
-			tempValue=row.groupSetValue;
+			tempValue=fieldValue;
 		}
-		t9.featureSchemaSetId[id&"_f"&row.groupSetFieldId]=tempValue;
+		t9.featureSchemaSetId[id&"_f"&row.feature_field_id]=tempValue;
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-2<br>'); startTime=gettickcount();
-	 db.sql="SELECT * FROM 
-	 #db.table("feature_data", "jetendofeature")# s1, 
-	 #db.table("feature_schema", "jetendofeature")# s2
-	WHERE s1.site_id = #db.param(arguments.site_id)# and 
-	feature_data_master_set_id = #db.param(0)# and 
-	s1.feature_data_deleted = #db.param(0)# and 
-	s2.feature_schema_deleted = #db.param(0)# and 
-	s1.site_id = s2.site_id and 
-	s1.feature_schema_id = s2.feature_schema_id and 
-	s1.feature_data_id = #db.param(arguments.feature_data_id)# ";
-	var qS=db.execute("qS"); 
-	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-3<br>'); startTime=gettickcount();
-	if(debug) writedump(qS);
 	for(row in qS){
 		if(not structkeyexists(t9, 'featureSchemaSetQueryCache')){
 			t9.featureSchemaSetQueryCache={};
@@ -640,8 +621,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		if(request.zos.enableSiteOptionGroupCache and row.feature_schema_enable_cache EQ 1){
 			t9.featureSchemaSetQueryCache[row.feature_data_id]=row;
 		}
-		if(structkeyexists(t9.featureSchemaSetArrays, row.feature_id&chr(9)&row.feature_schema_id&chr(9)&row.feature_data_parent_id) EQ false){
-			t9.featureSchemaSetArrays[row.feature_id&chr(9)&row.feature_schema_id&chr(9)&row.feature_data_parent_id]=arraynew(1);
+		if(structkeyexists(t9.featureSchemaSetArrays, row.feature_schema_id&chr(9)&row.feature_data_parent_id) EQ false){
+			t9.featureSchemaSetArrays[row.feature_schema_id&chr(9)&row.feature_data_parent_id]=arraynew(1);
 		}
 		var ts=structnew();
 		ts.__sort=row.feature_data_sort;
@@ -666,9 +647,9 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		} 
 		var fieldStruct=fsd.featureSchemaFieldLookup[ts.__groupId];
 		
-		var defaultStruct=t9.featureSchemaDefaults[row.feature_schema_id];
+		var defaultStruct=fsd.featureSchemaDefaults[row.feature_schema_id];
 		for(var i2 in fieldStruct){
-			var cf=t9.fieldLookup[i2];
+			var cf=fsd.fieldLookup[i2];
 			if(structkeyexists(t9.featureSchemaSetId, "__original "&ts.__setId&"_f"&i2)){
 				ts["__original "&cf.name]=t9.featureSchemaSetId["__original "&ts.__setId&"_f"&i2];
 			}
@@ -687,10 +668,12 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 
 		// don't sort versions
 		if(row.feature_data_master_set_id EQ 0){
-			if(typeStruct.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
-				var arrChild=t9.featureSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id];
+			if(fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
+				var arrChild=t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id];
 				var resort=false;
-				if(arrayLen(arrChild) GTE row.feature_data_sort){
+				if(row.feature_data_sort EQ 0){
+						resort=true;
+				}else if(arrayLen(arrChild) GTE row.feature_data_sort){
 					if(arrayLen(arrChild) LT row.feature_data_sort){
 						resort=true;
 					}else if(arrChild[row.feature_data_sort].__setId NEQ row.feature_data_id){
@@ -715,9 +698,9 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 						for(var i=1;i LTE arraylen(arrChild2);i++){
 							arrayAppend(arrTemp, t9.featureSchemaSet[arrChild2[i]]);
 						}
-						t9.featureSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id]=arrTemp;
+						t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id]=arrTemp;
 					}catch(Any e){
-						application.zcore.featureCom.updateSchemaCacheBySchemaId(row.feature_schema_id);
+						updateSchemaCacheBySchemaId(row.feature_id, row.feature_schema_id);
 						ts={};
 						ts.subject="Feature Schema update resort failed";
 						savecontent variable="output"{
@@ -746,7 +729,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 					}
 				}
 			}else{
-				var arrChild=t9.featureSchemaSetArrays[row.feature_id&chr(9)&ts.__groupId&chr(9)&row.feature_data_parent_id];
+				var arrChild=t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id];
 				var found=false;
 				for(var i=1;i LTE arrayLen(arrChild);i++){
 					if(row.feature_data_id EQ arrChild[i].__setID){

@@ -282,8 +282,7 @@ When making a version the primary record, it will have option to preserve the or
 		if(form.newSiteID NEQ request.zos.globals.id){
 			application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
 		}else{
-			siteStruct=application.zcore.functions.zGetSiteGlobals(form.newSiteId);
-			application.zcore.featureCom.updateSchemaCache(siteStruct);
+			application.zcore.featureCom.updateSchemaCache(application.zcore.featureData);
 		}
 
 	}catch(Any e){
@@ -528,7 +527,8 @@ When making a version the primary record, it will have option to preserve the or
 		transaction action="commit";
 	}
 
-	application.zcore.featureCom.updateSchemaCacheBySchemaId(qMaster.feature_schema_id);
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.updateSchemaCacheBySchemaId(qMaster.feature_id, qMaster.feature_schema_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
@@ -588,7 +588,8 @@ When making a version the primary record, it will have option to preserve the or
 
 
 	// TODO: consider removing the version data from memory using structdelete instead of full rebuild:
-	application.zcore.featureCom.updateSchemaCacheBySchemaId(qArchive.feature_schema_id);
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.updateSchemaCacheBySchemaId(qArchive.feature_id, qArchive.feature_schema_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	if(form.statusValue EQ 1){
 		application.zcore.status.setStatus(request.zsid, "Version preview enabled.");
@@ -612,7 +613,6 @@ When making a version the primary record, it will have option to preserve the or
 	#db.table("feature_schema", "jetendofeature")# WHERE 
 	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 	feature_schema_deleted=#db.param(0)# and 
-	feature_schema.site_id = feature_data.site_id and 
 	feature_data.feature_id=#db.param(form.feature_id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_data_id=#db.param(form.feature_data_id)#";

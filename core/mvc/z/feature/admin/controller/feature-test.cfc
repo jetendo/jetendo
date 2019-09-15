@@ -1,37 +1,52 @@
 <cfcomponent>
 <cfoutput>
+<!--- /z/feature/admin/feature-test/index --->
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	setId=1;
-	groupId=1;
+	schemaId=1;
+	fieldId=2;
+
+	application.zcore.featureCom.onSiteStart(application.siteStruct[request.zos.globals.id]);
+
+	writedump(application.siteStruct[request.zos.globals.id].featureStruct.featureIdList);
+	// application.siteStruct[arguments.key].globals["featureData"]={};
+
+	echo("application.zcore.featureData");
+	//writedump(application.zcore.featureData);abort;
+
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("untest", "jetendofeature")#";
-	qT=db.execute("qT");
-	for(row in qT){
-		id=row.untest_uuid;
-		echo(id&" | "&"<br>");
-	}
-	abort;
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
-	featureCacheCom.debugCacheRebuild();
+	ts={};
+	featureCacheCom.rebuildFeaturesCache(ts, true);
+	structappend(application.zcore.featureData, ts, true); 
+
+	featureCacheCom.updateSchemaCache(ts);
+	//writedump(ts);
+
+	// for debugging new caching
+	featureCacheCom.updateSchemaSetIdCache(23, 1); 
+
 	homePage=application.zcore.featureCom.getSchemaSetById("coolFeature", ["Code123"], setId);
-	writedump(homePage);
-	abort;
+	writedump(homePage); 
 
 	arrFeature=application.zcore.featureCom.getFeatureSchemaArray("coolFeature", "Feature");
 	writedump(arrFeature);
 
-	s=application.zcore.featureCom.getSchemaById(groupId);
+	feature_id=application.zcore.featureCom.getFeatureIDByName("coolFeature");
+
+	s=application.zcore.featureCom.getSchemaById(feature_id, schemaId);
 	writedump(s);
-	s=application.zcore.featureCom.getSchemaNameById(groupId);
+	s=application.zcore.featureCom.getSchemaNameById(feature_id, schemaId);
 	writedump(s);
-	s=application.zcore.featureCom.getSchemaNameArrayById(groupId);
+	s=application.zcore.featureCom.getSchemaNameArrayById(feature_id, schemaId);
 	writedump(s);
 
-	s=application.zcore.featureCom.getFieldFieldById(fieldId);
+
+	s=application.zcore.featureCom.getFieldFieldById(feature_id, fieldId);
 	writedump(s);
 	
-	s=application.zcore.featureCom.getFieldFieldNameById(fieldId);
+	s=application.zcore.featureCom.getFieldFieldNameById(feature_id, fieldId);
 	writedump(s);
 	
 	</cfscript>

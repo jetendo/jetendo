@@ -677,9 +677,10 @@
  	ts.cloudVendor=ts.componentObjectCache.cloudFile.getCloudVendors();
 
 	if(request.zos.isTestServer){ 
-		ts.featureData={
-			fieldTypeStruct:ts.componentObjectCache.featureCom.getFieldTypes()
-		};
+		if(not structkeyexists(ts, "featureData")){
+			ts.featureData={};
+		}
+		ts.featureData.fieldTypeStruct=ts.componentObjectCache.featureCom.getFieldTypes();
 		ts.featureData.arrCustomDelete=ts.componentObjectCache.featureCom.getTypeCustomDeleteArray(ts.featureData);
 	}
 	ts.soGroupData={
@@ -780,8 +781,7 @@
 	}
 
 	ts.verifyTablesExcludeStruct={};
-	ts.verifyTablesExcludeStruct[request.zos.zcoreDatasource]={
-		"table_increment":true
+	ts.verifyTablesExcludeStruct[request.zos.zcoreDatasource]={ 
 	};
 	
 	ts.primaryKeyMapStruct={};

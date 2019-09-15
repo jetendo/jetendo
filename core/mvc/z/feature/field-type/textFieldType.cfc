@@ -150,7 +150,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	required="";
-	if(arguments.row.site_option_required EQ 1){
+	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
 	

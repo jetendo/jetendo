@@ -153,7 +153,7 @@
 	ts.delimiter = arguments.typeStruct.radio_delimiter;
 	ts.struct=arguments.dataStruct; 
 	ts.output=false;
-	if(arguments.row.site_option_required EQ 1){
+	if(arguments.row.feature_field_required EQ 1){
 		ts.required=true;
 	}
 	return { label: true, hidden: false, value: application.zcore.functions.zInput_RadioGroup(ts)};   

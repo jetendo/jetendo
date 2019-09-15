@@ -73,9 +73,6 @@
 	echo('<h2>Database usage summary</h2><p>This shows the total number of records for this site in all tables, except ones that are empty.</p>');
 	for(t in arrKey){
 		arrT=listToArray(t, ".");
-		if(arrT[2] EQ "table_increment"){
-			continue;
-		}
 		db.sql="SELECT count(*) count from #db.table(arrT[2], arrT[1])# WHERE site_id = #db.param(form.sid)# and #arrT[2]#_deleted=#db.param(0)#";
 		qCount=db.execute("qCount");
 		if(qCount.count NEQ 0){

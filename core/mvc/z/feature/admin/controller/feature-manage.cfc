@@ -357,6 +357,23 @@
 			redirecturl=("/z/feature/admin/feature-manage/index?zsid="&request.zsid);
 		}
 	}
+	db.sql="select * from #db.table("feature_x_site", "jetendofeature")# WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_id=#db.param(form.feature_id)# and 
+	feature_x_site_deleted=#db.param(0)# ";
+	qCheck=db.execute("qCheck");
+	if(qCheck.recordcount EQ 0){
+		ts={
+			datasource:"jetendofeature",
+			table:"feature_x_site",
+			struct:{
+				feature_id:form.feature_id,
+				feature_x_site_active:1,
+				site_id:request.zos.globals.id
+			}
+		};
+		feature_x_site_id=application.zcore.functions.zInsert(ts);
+	}
 
 	application.zcore.featureCom.reloadFeatureCache();
 	

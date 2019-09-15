@@ -139,7 +139,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">  
 	<cfscript>
 	required="";
-	if(arguments.row.site_option_required EQ 1){
+	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
 	return { label: true, hidden: false, value:'<textarea #required# cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.typeStruct, 'editorheight2',false,200)#px;" name="#arguments.prefixString##arguments.row["feature_field_id"]#">#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])#</textarea>'};  

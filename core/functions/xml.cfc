@@ -185,7 +185,7 @@ weatherHTML=zGetWeather(ts);
 			return request.zLastWeatherLookup.weatherHTML;
 		}
 		savecontent variable="weatherHTML"{
-			if(image NEQ false){
+			if(image1 NEQ false){
 				echo('<img src="#image#" class="zweather-image">');
 			}
 			/*echo('<div class="zweather-current">Current Conditions:<br />

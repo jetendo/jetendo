@@ -242,7 +242,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	if(row.feature_field_type_id EQ 7){
 		typeStruct=deserializeJson(row.feature_field_type_json);
 		if(structkeyexists(typeStruct, 'selectmenu_groupid') and typeStruct.selectmenu_groupid NEQ ""){
-			rs=getSchemaById(sourceStruct, typeStruct.selectmenu_groupid);
+			rs=getSchemaById(row.feature_id, sourceStruct, typeStruct.selectmenu_groupid);
 			
 			if(rs.success){
 				groupNameList=arrayToList(getFullSchemaPath(sourceStruct, rs.struct.feature_schema_parent_id, rs.struct.feature_schema_variable_name), chr(9));
@@ -320,14 +320,14 @@ This allows avoiding remaps more easily.  Less code when importing.
 		//row.zinquiries_type_id = qType.inquiries_type_id;
 	}
 	if(not arguments.skipSchemaIdRemap){
-		groupStruct=getSchemaById(sourceStruct, row.feature_schema_id);
+		groupStruct=getSchemaById(row.feature_id, sourceStruct, row.feature_schema_id);
 		if(groupStruct.success){
 			groupNameList=arrayToList(getFullSchemaPath(sourceStruct, groupStruct.struct.feature_schema_parent_id, row.feature_schema_variable_name), chr(9));
 		}else{
 			groupNameList=row.feature_schema_variable_name;
 		}
 		if(row.feature_schema_parent_id NEQ 0){
-			parentSchemaStruct=getSchemaById(sourceStruct, row.feature_schema_parent_id);
+			parentSchemaStruct=getSchemaById(row.feature_id, sourceStruct, row.feature_schema_parent_id);
 			if(parentSchemaStruct.success){
 				
 				parentSchemaNameList=arrayToList(getFullSchemaPath(sourceStruct, parentSchemaStruct.struct.feature_schema_parent_id, parentSchemaStruct.struct.feature_schema_variable_name), chr(9));
