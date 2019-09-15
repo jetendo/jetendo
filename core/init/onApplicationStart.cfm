@@ -676,13 +676,10 @@
 	ts.componentObjectCache.siteOptionCom.init("site", "site");
  	ts.cloudVendor=ts.componentObjectCache.cloudFile.getCloudVendors();
 
-	if(request.zos.isTestServer){ 
-		if(not structkeyexists(ts, "featureData")){
-			ts.featureData={};
-		}
-		ts.featureData.fieldTypeStruct=ts.componentObjectCache.featureCom.getFieldTypes();
-		ts.featureData.arrCustomDelete=ts.componentObjectCache.featureCom.getTypeCustomDeleteArray(ts.featureData);
-	}
+	ts.featureData={};
+	ts.featureData.fieldTypeStruct=ts.componentObjectCache.featureCom.getFieldTypes();
+	ts.featureData.arrCustomDelete=ts.componentObjectCache.featureCom.getTypeCustomDeleteArray(ts.featureData);
+
 	ts.soGroupData={
 		optionTypeStruct:ts.componentObjectCache.siteOptionCom.getOptionTypes()
 	};
@@ -715,10 +712,10 @@
 	*/
 
 	loadDbCFC(ts);
-	if(request.zos.isTestServer){
-		// causes to fail to hang lucee on startup
-		//ts.componentObjectCache.featureCom.rebuildFeaturesCache(ts, true);
-	}
+	// if(request.zos.isTestServer){
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.rebuildFeaturesCache(ts, true); 
+	// }
 	/*
 	request.zos.globals=structnew();
 	structappend(request.zos.globals,duplicate(ts.serverGlobals));

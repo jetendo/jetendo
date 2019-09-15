@@ -38,23 +38,18 @@
 	<cfargument name="cacheStruct" type="struct" required="yes">
 	<cfargument name="rebuildSchemaCache" type="boolean" required="yes">
 	<cfscript>	
-	featureData={
-		featureDataLookup:{},
-		featureIdLookup:{}
-	};
-	db=request.zos.queryObject;
+	db=request.zos.queryObject; 
+	arguments.cacheStruct2.atest=true;
 	db.sql="select * from #db.table("feature", "jetendofeature")# where 
 	feature_deleted=#db.param(0)#";
 	qFeature=db.execute("qFeature");
 	for(row in qFeature){
-		featureData.featureIdLookup[row.feature_variable_name]=row.feature_id;
-		featureData.featureDataLookup[row.feature_id]=row;
+		arguments.cacheStruct.featureData.featureIdLookup[row.feature_variable_name]=row.feature_id;
+		arguments.cacheStruct.featureData.featureDataLookup[row.feature_id]=row;
 		if(arguments.rebuildSchemaCache){
-			rebuildFeatureStructCache(row.feature_id, arguments.cacheStruct);
+			rebuildFeatureStructCache(row.feature_id, arguments.cacheStruct); 
 		}
 	}
-	arguments.cacheStruct.featureDataLookup=featureData.featureDataLookup;
-	arguments.cacheStruct.featureIdLookup=featureData.featureIdLookup;
 	</cfscript>
 </cffunction>
 
@@ -113,10 +108,10 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		fs.featureSchemaLookup[row.feature_schema_id]=row;
 		fs.featureSchemaIdLookup[row.feature_schema_parent_id&chr(9)&row.feature_schema_variable_name]=row.feature_schema_id;
 	}
-	if(not structkeyexists(arguments.cacheStruct, "featureSchemaData")){
-		arguments.cacheStruct.featureSchemaData={};
+	if(not structkeyexists(arguments.cacheStruct.featureData, "featureSchemaData")){
+		arguments.cacheStruct.featureData.featureSchemaData={};
 	}
-	arguments.cacheStruct.featureSchemaData[arguments.feature_id]=fs;
+	arguments.cacheStruct.featureData.featureSchemaData[arguments.feature_id]=fs;
 	</cfscript>
 </cffunction>
 

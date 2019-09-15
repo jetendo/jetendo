@@ -6,6 +6,13 @@
 	setId=1;
 	schemaId=1;
 	fieldId=2;
+	writedump(application.zcore.featureData);abort;
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	ts={};
+	featureCacheCom.rebuildFeaturesCache(ts, true);
+	structappend(application.zcore.featureData, ts, true); 
+	echo('cool');
+	abort;
 
 	application.zcore.featureCom.onSiteStart(application.siteStruct[request.zos.globals.id]);
 
@@ -19,7 +26,7 @@
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	ts={};
 	featureCacheCom.rebuildFeaturesCache(ts, true);
-	structappend(application.zcore.featureData, ts, true); 
+	structappend(application.zcore, ts, true); 
 
 	featureCacheCom.updateSchemaCache(ts);
 	//writedump(ts);

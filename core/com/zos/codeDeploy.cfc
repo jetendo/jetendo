@@ -136,10 +136,9 @@
 		
 		zcore.componentObjectCache=componentObjectCache;
 		structappend(application.zcore, zcore.componentObjectCache);
-		if(request.zos.isTestServer){ 
-			zcore.featureData.fieldTypeStruct=componentObjectCache.featureCom.getFieldTypes();
-			zcore.featureData.arrCustomDelete=componentObjectCache.featureCom.getTypeCustomDeleteArray(zcore.featureData);
-		}
+		zcore.featureData.fieldTypeStruct=componentObjectCache.featureCom.getFieldTypes();
+		zcore.featureData.arrCustomDelete=componentObjectCache.featureCom.getTypeCustomDeleteArray(zcore.featureData);
+		
 		soGroupData={
 			optionTypeStruct:componentObjectCache.siteOptionCom.getOptionTypes()
 		};
