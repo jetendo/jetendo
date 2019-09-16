@@ -870,6 +870,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfargument name="destinationStruct" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
+	throw("form.feature_id is required, and not implemented here yet.");
 	fieldChangeStruct=arguments.fieldChangeStruct;
 	sourceStruct=arguments.sourceStruct;
 	destinationStruct=arguments.destinationStruct;
@@ -1053,8 +1054,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 		// remove the json file from shared memory
 		statusStruct=application.zcore.status.getStruct(form.importId);
 		structclear(statusStruct.varStruct);
-		
-		application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
+		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+		featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
+
 		application.zcore.status.setStatus(request.zsid, "Import completed successfully.");
 		application.zcore.functions.zRedirect("/z/admin/sync/index?zsid=#request.zsid#");
 	}

@@ -326,7 +326,6 @@
 	// update cache only once for better performance.
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	featureCacheCom.updateSchemaCacheBySchemaId(form.feature_id, form.feature_schema_id);
-	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	application.zcore.status.setStatus(request.zsid, "Import complete.");
 	application.zcore.functions.zRedirect("/z/feature/admin/features/import?feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#");
 	 
@@ -1245,7 +1244,6 @@
 		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 		featureCacheCom.updateSchemaCacheBySchemaId(qSchema.feature_id, qSchema.feature_schema_id);
 		if(structkeyexists(form, 'zQueueSort')){
-			//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 			application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
 		}
 		if(structkeyexists(form, 'zQueueSortAjax')){
@@ -1859,6 +1857,7 @@
 			from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data 
 			WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 			feature_data_deleted = #db.param(0)# and
+			feature_data.site_id=#db.param(request.zos.globals.id)# and 
 			feature_id=#db.param(form.feature_id)#";
 			qG2=db.execute("qG2");
 			if(qG2.recordcount EQ 0 or qG2.sortid EQ ""){
@@ -1928,7 +1927,6 @@
 	if(request.zos.enableSiteOptionGroupCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.feature_schema_enable_cache EQ 1){ 
 		featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 		featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
-		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds4<br>'); startTime=gettickcount();
 	if(qCheck.feature_schema_enable_unique_url EQ 1 and qCheck.feature_schema_public_searchable EQ 1){
@@ -2859,7 +2857,6 @@ Define this function in another CFC to override the default email format
 				if(request.zos.enableSiteOptionGroupCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
 					featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
 				}
-				//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 				// redirect with zqueuesort renamed
 				application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
 			}
@@ -3316,6 +3313,7 @@ Define this function in another CFC to override the default email format
 		// }
 		db.sql&="
 		WHERE  
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
 		feature_schema_deleted = #db.param(0)# and
 		feature_data_master_set_id = #db.param(0)# and 
 		feature_data_deleted = #db.param(0)# and 
@@ -3993,6 +3991,7 @@ Define this function in another CFC to override the default email format
 	}*/
 	db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
 	WHERE
+	feature_data.site_id=#db.param(request.zos.globals.id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_data_id=#db.param(form.feature_data_id)# and 
 	feature_id=#db.param(form.feature_id)#  ";
@@ -4753,7 +4752,6 @@ Define this function in another CFC to override the default email format
 		if((request.zos.enableSiteOptionGroupCache and qCheck.feature_schema_enable_cache EQ 1) or (qCheck.feature_schema_enable_versioning EQ 1 and qCheck.feature_data_master_set_id NEQ 0)){
 			application.zcore.featureCom.deleteSchemaSetIdCache(qCheck.feature_id, request.zos.globals.id, form.feature_data_id);
 		}
-		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 		application.zcore.status.setStatus(request.zsid, "Deleted successfully.");
 		if(form.method EQ "autoDeleteSchema"){
 			return true;
@@ -4790,15 +4788,7 @@ Define this function in another CFC to override the default email format
 
 <cffunction name="index" localmode="modern" access="remote" roles="member">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var qS=0;
-	var qSchema=0;
-	var qU9=0;
-	var theTitle=0;
-	var htmlEditor=0;
-	var lastSchema=0;
-	var ts=0;
-	var feature_schema_id=0;
+	var db=request.zos.queryObject; 
 	variables.init();
 	application.zcore.functions.zSetPageHelpId("2.11");
 	application.zcore.functions.zStatusHandler(request.zsid); 
@@ -4822,8 +4812,13 @@ Define this function in another CFC to override the default email format
 	ORDER BY feature_schema.feature_schema_display_name ASC ";
 	qSchema=db.execute("qSchema");
 	if(qSchema.recordcount NEQ 0){
-		writeoutput('<h2>Custom Admin Features</h2>
-		<table style="border-spacing:0px;" class="table-list">');
+		writeoutput('<h2>Theme Features</h2>
+		<table style="border-spacing:0px;" class="table-list">
+			<tr>
+				<th>Feature</th>
+				<th>Sub-Feature</th>
+				<th>Admin</th>
+			</tr>');
 		var row=0;
 		for(row in qSchema){
 			writeoutput('<tr ');
@@ -4833,9 +4828,11 @@ Define this function in another CFC to override the default email format
 				writeoutput('class="row1"');
 			}
 			writeoutput('>
+				<td>#application.zcore.featureCom.getFeatureNameById(qSchema.feature_id)#</td>
 				<td>#qSchema.feature_schema_display_name#</td>
-				<td><a href="/z/feature/admin/features/manageSchema?feature_id=#qSchema.feature_id#&feature_schema_id=#qSchema.feature_schema_id#" class="z-manager-search-button">List/Edit</a> 
-					 <a href="/z/feature/admin/features/import?feature_id=#qSchema.feature_id#&feature_schema_id=#qSchema.feature_schema_id#" class="z-manager-search-button">Import</a> ');
+				<td><a href="/z/feature/admin/features/manageSchema?feature_id=#qSchema.feature_id#&feature_schema_id=#qSchema.feature_schema_id#" class="z-manager-search-button">List/Edit</a> ');
+				// TODO: need to verify if import works before enabling
+					 // <a href="/z/feature/admin/features/import?feature_id=#qSchema.feature_id#&feature_schema_id=#qSchema.feature_schema_id#" class="z-manager-search-button">Import</a> ');
 				
 					if(qSchema.feature_schema_allow_public NEQ 0){
 						writeoutput(' ');

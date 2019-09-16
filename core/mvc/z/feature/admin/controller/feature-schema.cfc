@@ -1243,7 +1243,8 @@ displaySchemaCom.ajaxInsert();
 		}
 		this.copySchemaRecursive(form.feature_schema_id, form.newSiteId, row, groupStruct, typeStruct);
 	}
-	application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
 		
 	application.zcore.status.setStatus(request.zsid, "Feature Schema Copied.");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
@@ -1269,13 +1270,17 @@ displaySchemaCom.ajaxInsert();
             application.zcore.functions.z301redirect("/z/feature/admin/feature-schema/index");	
         }
 	}
-	db.sql="SELECT feature_schema.*, if(child1.feature_schema_id IS NULL, #db.param(0)#,#db.param(1)#) hasChildren 
-	FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema
+	db.sql="SELECT feature_schema.*, feature.*, if(child1.feature_schema_id IS NULL, #db.param(0)#,#db.param(1)#) hasChildren 
+	FROM 
+	(#db.table("feature", request.zos.zcoreDatasource)#, 
+	#db.table("feature_schema", request.zos.zcoreDatasource)#) 
 	LEFT JOIN #db.table("feature_schema", request.zos.zcoreDatasource)# child1 ON 
 	feature_schema.feature_schema_id = child1.feature_schema_parent_id and 
 	child1.feature_id = feature_schema.feature_id and 
 	child1.feature_schema_deleted = #db.param(0)# 
 	WHERE 
+	feature.feature_id=feature_schema.feature_id and 
+	feature.feature_deleted=#db.param(0)# and
 	feature_schema.feature_id = #db.param(form.feature_id)# and 
 	feature_schema.feature_schema_deleted = #db.param(0)# and 
 	#application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
@@ -1338,13 +1343,18 @@ displaySchemaCom.ajaxInsert();
 				</cfif>
 			</td>
 			<td>
+				<cfscript>
+				isFeatureHost=true;
+				if((request.zos.isTestServer and qProp.feature_test_domain NEQ request.zos.globals.domain) or (not request.zos.isTestServer and qProp.feature_live_domain NEQ request.zos.globals.domain)){
+					isFeatureHost=false;
+				}
+				</cfscript>
 				<cfif qProp.feature_schema_parent_id EQ 0>
-
 					<a href="/z/feature/admin/features/manageSchema?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
-					<a href="/z/feature/admin/features/import?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Import</a> | 
+					<!--- <a href="/z/feature/admin/features/import?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Import</a> --->
 				</cfif>
-				<cfif variables.allowGlobal>
-					<a href="/z/feature/admin/feature-schema/add?feature_id=#qProp.feature_id#&feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
+				<cfif variables.allowGlobal and isFeatureHost>
+					 | <a href="/z/feature/admin/feature-schema/add?feature_id=#qProp.feature_id#&feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
 					<a href="/z/feature/admin/features/manageFields?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#">Fields</a> | 
 					<cfif qProp.feature_schema_allow_public NEQ 0>
 						<cfif qProp.feature_schema_public_form_url NEQ "">
@@ -1356,7 +1366,6 @@ displaySchemaCom.ajaxInsert();
 					<cfif application.zcore.user.checkServerAccess()>
 						<a href="/z/feature/admin/feature-schema/export?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Export CSV</a> | 
 						<a href="/z/feature/admin/feature-schema/reindex?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" title="Will update Feature Schema table for all records.  Useful after a config change.">Reprocess</a> | 
-						<!--- <a href="/z/_com/app/siteSchemaFormGenerator?method=index&amp;feature_schema_id=#qProp.feature_schema_id#" target="_blank">Generate Custom DB Form</a> |  --->
 					</cfif>
 	
 					<cfif qProp.hasChildren EQ 1>
@@ -1419,7 +1428,7 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.featureCom.deleteSchemaRecursively(form.feature_schema_id, true);
 		application.zcore.status.setStatus(request.zsid, "Schema deleted successfully.");
 		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
-		featureCacheCom.updateSchemaCacheBySchemaId(qCheck.feature_id, qCheck.feature_schema_id);
+		featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
 
 		structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 		if(structkeyexists(request.zsession, "feature_schema_return"&form.feature_schema_id) and request.zsession['feature_schema_return'&form.feature_schema_id] NEQ ""){
@@ -1501,10 +1510,10 @@ displaySchemaCom.ajaxInsert();
 	if(errors){
 		if(form.method EQ 'insert'){
 			application.zcore.status.setStatus(request.zsid, false, form,true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/add?feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#");
 		}else{
 			application.zcore.status.setStatus(request.zsid, false, form,true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#");
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#&feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#");
 		}
 	} 
 	
@@ -1522,19 +1531,19 @@ displaySchemaCom.ajaxInsert();
 		form.feature_schema_id = application.zcore.functions.zInsert(ts);
 		if(form.feature_schema_id EQ false){
 			application.zcore.status.setStatus(request.zsid, "Schema couldn't be added at this time.",form,true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/add?feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/add?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
 		}else{ 
 			application.zcore.status.setStatus(request.zsid, "Schema added successfully.");
-			redirecturl=("/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
+			redirecturl=("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
 		}
 	
 	}else{
 		if(application.zcore.functions.zUpdate(ts) EQ false){
 			application.zcore.status.setStatus(request.zsid, "Schema failed to update.",form,true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#&feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
 		}else{
 			application.zcore.status.setStatus(request.zsid, "Schema updated successfully.");
-			redirecturl=("/z/feature/admin/feature-schema/index?feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
+			redirecturl=("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid="&request.zsid);
 		}
 	}
 	

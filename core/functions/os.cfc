@@ -1935,23 +1935,6 @@ User's IP: #request.zos.cgi.remote_addr#
 	</cfscript>
 </cffunction>
 
-<!--- 
-not used
- application.zcore.functions.zAppendSiteOptionGroupDefaults(dataStruct, site_option_group_id); --->
-<!--- <cffunction name="zAppendSiteOptionGroupDefaults" localmode="modern" output="false" returntype="any">
-	<cfargument name="dataStruct" type="struct" required="yes">
-	<cfargument name="site_option_group_id" type="string" required="yes">
-	<cfscript> 
-	return application.zcore.siteOptionCom.appendOptionGroupDefaults(arguments.dataStruct, arguments.site_option_group_id); 
-	</cfscript>
-</cffunction> --->
-<cffunction name="zOS_cacheSiteAndUserSchemas" localmode="modern" output="false" returntype="any">
-	<cfargument name="site_id" type="string" required="yes">
-	<cfscript>
-	application.zcore.featureCom.internalUpdateOptionAndGroupCache(tempStruct);
-	</cfscript>
-</cffunction>
-
 <!--- re-create the site globals and user group cache --->
 <cffunction name="zOS_cacheSiteAndUserGroups" localmode="modern" output="false" returntype="any">
 	<cfargument name="site_id" type="string" required="yes">

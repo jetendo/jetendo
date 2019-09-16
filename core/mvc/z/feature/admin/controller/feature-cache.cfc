@@ -3,13 +3,13 @@
 
 
 <cffunction name="updateSchemaCache" access="public" localmode="modern">
-	<cfargument name="cacheStruct" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject; 
 	db.sql="SELECT feature_x_site.site_id, feature_schema.feature_id, feature_schema.feature_schema_id 
 	FROM #db.table("feature_schema", request.zos.zcoreDatasource)#
 	LEFT JOIN #db.table("feature_x_site", request.zos.zcoreDatasource)# ON 
 	feature_x_site.feature_id = feature_schema.feature_id and 
+	feature_x_site.site_id<>#db.param(-1)# and 
 	feature_x_site_deleted=#db.param(0)# 
 	WHERE #application.zcore.featureCom.filterSiteFeatureSQL(db, "feature_schema")# and 
 	feature_schema_deleted = #db.param(0)# 
@@ -28,7 +28,7 @@
 	<cfargument name="feature_id" type="string" required="yes">
 	<cfargument name="feature_schema_id" type="string" required="yes">
 	<cfscript>
-	rebuildFeatureStructCache(arguments.feature_id, application.zcore.featureData);
+	rebuildFeatureStructCache(arguments.feature_id, application.zcore);
 	internalUpdateSchemaCacheBySchemaId(application.siteStruct[request.zos.globals.id].globals,  arguments.feature_id, arguments.feature_schema_id);
 	application.zcore.functions.zCacheJsonSiteAndUserGroup(request.zos.globals.id, application.zcore.siteGlobals[request.zos.globals.id]);
 	</cfscript>

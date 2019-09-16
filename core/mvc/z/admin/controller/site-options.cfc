@@ -5542,7 +5542,7 @@ Define this function in another CFC to override the default email format
 	ORDER BY site_option_group.site_option_group_display_name ASC ";
 	qGroup=db.execute("qGroup");
 	if(qGroup.recordcount NEQ 0){
-		writeoutput('<h2>Custom Admin Features</h2>
+		writeoutput('<h2>Site Features</h2>
 		<table style="border-spacing:0px;" class="table-list">');
 		var row=0;
 		for(row in qGroup){
@@ -5576,6 +5576,10 @@ Define this function in another CFC to override the default email format
 		writeoutput('</table>
 		<br />');
 	}
+
+	featuresCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
+	featuresCom.index();
+
 	writeoutput('<h2>Global Site Options</h2>');
 	db.sql="SELECT * FROM #db.table("user", request.zos.zcoreDatasource)# user 
 	where user_id = #db.param(request.zsession.user.id)# and 

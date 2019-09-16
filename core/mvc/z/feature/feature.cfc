@@ -37,30 +37,19 @@
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.sharedStruct;
-	if(not request.zos.isTestServer){
-		return;
-	}
 	// if(structkeyexists(arguments.sharedStruct, 'featureStruct')){
 	// 	return; // TODO: remove this when I properly integrate this later.
 	// }
 	db=request.zos.queryObject;
 	db.sql="SELECT * 
-	FROM #db.table("feature", request.zos.zcoreDatasource)# 
-	LEFT JOIN #db.table("feature_x_site", request.zos.zcoreDatasource)# ON 
+	FROM #db.table("feature", request.zos.zcoreDatasource)#, 
+	#db.table("feature_x_site", request.zos.zcoreDatasource)# 
+	WHERE
 	feature.feature_id = feature_x_site.feature_id and 
 	feature_x_site.site_id = #db.param(ss.globals.id)# and 
 	feature_x_site_active=#db.param(1)# and 
-	feature_x_site_deleted=#db.param(0)#
-	WHERE
-	feature.feature_deleted = #db.param(0)# and  
-	( 
-		feature_x_site_id IS NOT NULL or ";
-	if(request.zos.isTestServer){
-		db.sql&=" feature_test_domain = #db.param(ss.globals.domain)# ";
-	}else{
-		db.sql&=" feature_live_domain = #db.param(ss.globals.domain)# ";
-	}
-	db.sql&=" ) 
+	feature_x_site_deleted=#db.param(0)# and 
+	feature.feature_deleted = #db.param(0)# 
 	ORDER BY feature_display_name ASC ";
 	qFeature=db.execute("qFeature");  
 	arrFeatureId=[-1]; // force -1 to avoid having sql like "feature_id in ()" throw error
@@ -82,9 +71,8 @@
 <cffunction name="reloadFeatureCache" localmode="modern" access="public">
 	<cfscript>
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
-	ts={};
+	ts=application.zcore;
 	featureCacheCom.rebuildFeaturesCache(ts, false);
-	application.zcore.featureData=ts;
 
 	onSiteStart(application.siteStruct[request.zos.globals.id]);
 	</cfscript>
@@ -280,22 +268,27 @@
 	<cfargument name="linkStruct" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
-	WHERE feature_schema_parent_id= #db.param(0)# and 
-	feature_id=#db.param(form.feature_id)# and 
+	db.sql="select * from 
+	(#db.table("feature_schema", request.zos.zcoreDatasource)#,
+	#db.table("feature_x_site", request.zos.zcoreDatasource)#)
+	WHERE 
+	feature_x_site.site_id=#db.param(request.zos.globals.id)# and 
+	feature_x_site.feature_id=feature_schema.feature_id and 
+	feature_x_site_deleted=#db.param(0)# and 
+	feature_schema_parent_id= #db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	feature_schema.feature_schema_disable_admin=#db.param(0)# 
 	ORDER BY feature_schema_display_name ";
 	qfeatureSchema=db.execute("qfeatureSchema"); 
-	for(i=1;i LTE qfeatureSchema.recordcount;i++){
+	for(row in qFeatureSchema){
 		ts=structnew();
-		ts.featureName="Custom: "&qfeatureSchema.feature_schema_display_name[i];
-		ts.link="/z/feature/admin/features/manageSchema?feature_schema_id="&qfeatureSchema.feature_schema_id[i];
+		ts.featureName="Custom: "&row.feature_schema_display_name;
+		ts.link="/z/feature/admin/features/manageSchema?feature_id=#row.feature_id#&feature_schema_id=#row.feature_schema_id#";
 		ts.children=structnew();
-		if(qfeatureSchema.feature_schema_menu_name[i] EQ ""){
+		if(row.feature_schema_menu_name EQ ""){
 			curMenu="Custom";
 		}else{
-			curMenu=qfeatureSchema.feature_schema_menu_name[i];
+			curMenu=row.feature_schema_menu_name;
 		}
 		
 		if(structkeyexists(arguments.linkStruct, curMenu) EQ false){
@@ -306,10 +299,10 @@
 			};
 		}
 		plural="(s)";
-		if(qSchema.feature_schema_limit[i] EQ 1 or right(qSchema.feature_schema_display_name[i], 1) EQ "s"){
+		if(row.feature_schema_limit EQ 1 or right(row.feature_schema_display_name, 1) EQ "s"){
 			plural="";
 		}
-		arguments.linkStruct[curMenu].children[qfeatureSchema.feature_schema_display_name[i]&plural]=ts;
+		arguments.linkStruct[curMenu].children[row.feature_schema_display_name&plural]=ts;
 	}
 	return arguments.linkStruct;
 	</cfscript>
@@ -1588,7 +1581,7 @@ if(not rs.success){
 	site_id<>#db.param(-1)# ";
 	result =db.execute("result");
 	//writeLogEntry("deleted set values for set id:"&arguments.feature_data_id);
-	t9=application.zcore.siteGlobals[request.zos.globals.id].featureSchemaData;
+	t9=getSiteData(request.zos.globals.id);
 	fsd=application.zcore.featureData.featureSchemaData[row.feature_id];
 	groupStruct=fsd.featureSchemaLookup[row.feature_schema_id]; 
 	
@@ -1618,16 +1611,6 @@ if(not rs.success){
 	for(row in qSchemas){
 		deleteSchemaRecursively(row.feature_schema_id, false);	
 	}
-	db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
-	WHERE  feature_data.feature_schema_id=#db.param(arguments.feature_schema_id)# and  
-	feature_data_deleted = #db.param(0)# and 
-	feature_data_image_library_id<>#db.param(0)# and 
-	feature_data.feature_id=#db.param(form.feature_id)#  ";
-	qSets=db.execute("qSets");
-	for(row in qSets){
-		application.zcore.imageLibraryCom.deleteImageLibraryId(row.feature_data_image_library_id, row.site_id);
-	}
-
 	db.sql="SELECT * FROM #db.table("feature_field", request.zos.zcoreDatasource)# 
 	WHERE  feature_field.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
 	feature_field_deleted = #db.param(0)#";
@@ -1645,6 +1628,9 @@ if(not rs.success){
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
 	for(row in qData){
+		if(row.feature_data_image_library_id NEQ 0){
+			application.zcore.imageLibraryCom.deleteImageLibraryId(row.feature_data_image_library_id, row.site_id);
+		}
 		arrField=listToArray(row.feature_data_field_order, chr(13), true);
 		arrData=listToArray(row.feature_data_data, chr(13), true);
 		for(i=1;i<=arrayLen(arrField);i++){
@@ -1675,22 +1661,6 @@ if(not rs.success){
 	feature_schema_deleted = #db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# ";
 	result =db.execute("result"); 
-
-	if(arguments.rebuildSiteCache){
-		db.sql="SELECT * FROM #db.table("feature_x_site", request.zos.zcoreDatasource)#, 
-		#db.table("site", request.zos.zcoreDatasource)#   
-		WHERE 
-		site.site_id = feature_x_site.site_id and 
-		site_active=#db.param(1)# and 
-		site_deleted=#db.param(0)# and 
-		feature_x_site.feature_id=#db.param(form.feature_id)# and 
-		feature_x_site_deleted = #db.param(0)# and 
-		feature_x_site.site_id<>#db.param(-1)# ";
-		qSite=db.execute("qSite"); 
-		for(row in qSite){
-			application.zcore.functions.zOS_cacheSiteAndUserSchemas(row.site_id);
-		}
-	}
 
 	</cfscript>
 </cffunction>
@@ -1910,6 +1880,10 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 <cffunction name="getSiteData" returntype="struct" localmode="modern" access="public">
 	<cfargument name="key" type="string" required="yes" hint="site_id">
 	<cfscript>
+	if(not structkeyexists(application.siteStruct[arguments.key].globals, "featureSchemaData")){
+		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+		featureCacheCom.updateSchemaCache();
+	}
 	return application.siteStruct[arguments.key].globals["featureSchemaData"];
 	</cfscript>
 </cffunction>

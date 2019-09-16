@@ -280,9 +280,11 @@ When making a version the primary record, it will have option to preserve the or
 		}
 
 		if(form.newSiteID NEQ request.zos.globals.id){
-			application.zcore.functions.zOS_cacheSiteAndUserSchemas(form.newSiteId);
+			featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+			featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
 		}else{
-			application.zcore.featureCom.updateSchemaCache(application.zcore.featureData);
+			featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+			featureCacheCom.updateSchemaCache();
 		}
 
 	}catch(Any e){
@@ -529,7 +531,6 @@ When making a version the primary record, it will have option to preserve the or
 
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	featureCacheCom.updateSchemaCacheBySchemaId(qMaster.feature_id, qMaster.feature_schema_id);
-	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#backupMasterSetId#");
@@ -590,7 +591,6 @@ When making a version the primary record, it will have option to preserve the or
 	// TODO: consider removing the version data from memory using structdelete instead of full rebuild:
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	featureCacheCom.updateSchemaCacheBySchemaId(qArchive.feature_id, qArchive.feature_schema_id);
-	//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id);
 	if(form.statusValue EQ 1){
 		application.zcore.status.setStatus(request.zsid, "Version preview enabled.");
 	}else{

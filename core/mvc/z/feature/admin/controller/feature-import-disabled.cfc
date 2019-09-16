@@ -198,6 +198,7 @@ fieldName:type:required=1&option1=value1&option2=value2
 	<cfscript>
 	db=request.zos.queryObject;
 	init();
+	throw("form.feature_id is required and not implemented yet");
 	form.publicForm=application.zcore.functions.zso(form, 'publicForm', true, 0);
 	form.groupName=application.zcore.functions.zso(form, 'groupName');
 	form.fieldData=application.zcore.functions.zso(form, 'fieldData');
@@ -262,7 +263,8 @@ fieldName:type:required=1&option1=value1&option2=value2
 
 	//echo('stop');	abort;
 	 
-	application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
+	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
 
 	application.zcore.status.setStatus(request.zsid, "Schema, ""#form.groupName#"", was imported successfully");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");

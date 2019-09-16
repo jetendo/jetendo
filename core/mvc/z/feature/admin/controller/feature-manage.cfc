@@ -51,6 +51,7 @@
 				<td>#qFeature.feature_display_name#</td> 
 				<td><cfif qFeature.feature_active EQ 1>Yes<cfelse>No</cfif></td>
 				<td>
+					<a href="/z/feature/admin/feature-schema/index?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Schemas</a> 
 					<cfif (request.zos.isTestServer and qFeature.feature_test_domain NEQ request.zos.globals.domain) or (not request.zos.isTestServer and qFeature.feature_live_domain NEQ request.zos.globals.domain)>
 						<a href="##" onclick="if(confirm('Are you sure you want to unassign this feature?')){ window.location.href='/z/feature/admin/feature-manage/unassignSave?feature_id=#qFeature.feature_id#'; } return false;" target="_blank" class="z-manager-search-button">Unassign</a>
 						<cfif request.zos.isTestServer>
@@ -60,7 +61,6 @@
 						</cfif>
 					<cfelse>
 						<a href="/z/feature/admin/feature-manage/edit?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Edit</a> 
-						<a href="/z/feature/admin/feature-schema/index?feature_id=#qFeature.feature_id#" class="z-manager-search-button">Schemas</a> 
 						<a href="/z/feature/admin/feature-manage/delete?feature_id=#qFeature.feature_id#&amp;returnURL=#urlencodedformat(request.zos.originalURL&"?"&request.zos.cgi.query_string)#" class="z-manager-search-button">Delete</a>
 					</cfif>
 				</td>
@@ -114,6 +114,15 @@
 	db.sql="select * from #db.table("feature_category", request.zos.zcoreDatasource)# WHERE 
 	feature_category_deleted=#db.param(0)# ";
 	qCategory=db.execute("qCategory");
+	foundCustom=false;
+	for(row in qCategory){
+		if(row.feature_category_name EQ "Custom"){
+			foundCustom=true;
+		}
+	}
+	if(not foundCustom){
+		throw("There must be a Feature Catgory with name=Custom and id=1, please add this to database manually and refresh.");
+	}
 
 
 	db.sql="select * from #db.table("feature", request.zos.zcoreDatasource)#, 
@@ -223,7 +232,10 @@
 		application.zcore.featureCom.reloadFeatureCache();
 
 		structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
-		//application.zcore.functions.zOS_cacheSiteAndUserSchemas(request.zos.globals.id); 
+
+		featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+		featureCacheCom.rebuildFeaturesCache(application.zcore, false); 
+
 		if(structkeyexists(request.zsession, "feature_return"&form.feature_id) and request.zsession['feature_return'&form.feature_id] NEQ ""){
 			tempLink=request.zsession["feature_return"&form.feature_id];
 			structdelete(request.zsession,"feature_return"&form.feature_id);

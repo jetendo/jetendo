@@ -48,6 +48,7 @@
 			if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
 				ms={};
 				ms=application.zcore.siteOptionCom.getAdminLinks(ms);
+				ms=application.zcore.featureCom.getAdminLinks(ms);
 				count=0;
 				savecontent variable="out"{ 
 					linkStruct={};

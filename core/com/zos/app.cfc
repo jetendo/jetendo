@@ -280,6 +280,7 @@
 
 		if(structkeyexists(request.zos.userSession.groupAccess, "administrator")){
 			arguments.sharedStruct=application.zcore.siteOptionCom.getAdminLinks(arguments.sharedStruct);
+			arguments.sharedStruct=application.zcore.featureCom.getAdminLinks(arguments.sharedStruct);
 		}
 	}
 	if(structkeyexists(arguments.sharedStruct, "Help") EQ false){
