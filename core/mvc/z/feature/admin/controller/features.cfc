@@ -1259,7 +1259,7 @@
 	feature_field.feature_schema_id = #db.param(form.feature_schema_id)# 
 	ORDER BY feature_schema.feature_schema_display_name asc, feature_field.feature_field_sort ASC, feature_field.feature_field_variable_name ASC";
 	qS=db.execute("qS"); 
-	writeoutput('<p><a href="/z/feature/admin/feature-schema/index">Manage Schemas</a> / <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">#request.qFeature.feature_display_name#</a> /');
+	writeoutput('<p><a href="/z/feature/admin/feature-manage/index">Features</a> / <a href="/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#">#request.qFeature.feature_display_name#</a> /');
 	if(qSchema.recordcount NEQ 0 and qSchema.feature_schema_parent_id NEQ 0){
 		curParentId=qSchema.feature_schema_parent_id;
 		arrParent=arraynew(1);
@@ -1791,7 +1791,7 @@
 		if(qCheck.feature_schema_user_id_field NEQ "" and row.feature_field_variable_name EQ qCheck.feature_schema_user_id_field){
 				// allow
 		}else if(methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "publicUpdateSchema" or methodBackup EQ "userInsertSchema" or methodBackup EQ "userUpdateSchema"){
-			if(row.feature_field_public EQ 0){
+			if(row.feature_field_allow_public EQ 0){
 				// force original value
 				if(structkeyexists(originalValueStruct, row.feature_field_id)){
 					nv=originalValueStruct[row.feature_field_id];
@@ -1978,14 +1978,14 @@
 	mapRecord=false;
 	if(not structkeyexists(form, 'disableSiteSchemaMap')){
 		if(structkeyexists(request.zos, 'debugleadrouting')){
-			echo('disableSiteSchemaMap doesn''t exist (not an error) | #qCheck.feature_schema_variable_name# | qCheck.feature_map_insert_type=#qCheck.feature_map_insert_type# | methodBackup = #methodBackup#<br />');
+			echo('disableSiteSchemaMap doesn''t exist (not an error) | #qCheck.feature_schema_variable_name# | qCheck.feature_schema_map_insert_type=#qCheck.feature_schema_map_insert_type# | methodBackup = #methodBackup#<br />');
 		}
 		form.disableSiteSchemaMap=true;
-		if(qCheck.feature_map_insert_type EQ 1){
+		if(qCheck.feature_schema_map_insert_type EQ 1){
 			if(methodBackup EQ "publicInsertSchema" or methodBackup EQ "publicAjaxInsertSchema"){
 				mapRecord=true;
 			}
-		}else if(qCheck.feature_map_insert_type EQ 2){
+		}else if(qCheck.feature_schema_map_insert_type EQ 2){
 			if((methodBackup EQ "updateSchema" or methodBackup EQ "userUpdateSchema" or methodBackup EQ "internalSchemaUpdate") and form.feature_data_approved EQ 1){
 				// only if this record was just approved
 				mapRecord=true;
@@ -2036,7 +2036,7 @@
 				}
 				 
 			}
-		}else if(qCheck.feature_schema_map_fields_type EQ 0 or qCheck.feature_schema_map_fields_type EQ 2){
+		}else if(qCheck.feature_schema_map_fields_type EQ 0){
 			if(qCheck.feature_schema_email_cfc_path NEQ "" and qCheck.feature_schema_email_cfc_method NEQ ""){
 				tempCom=application.zcore.functions.zcreateobject("component", cfcpath);
 				emailStruct=tempCom[qCheck.feature_schema_email_cfc_method](newDataStruct, arrDataStructKeys);
@@ -2069,16 +2069,6 @@
 				echo('mapDataToInquiries<br />');
 			}
 			form.inquiries_id=mapDataToInquiries(newDataMappedStruct, form, disableSendEmail); 
-		}else if(qCheck.feature_schema_map_fields_type EQ 2){
-			if(qCheck.feature_map_group_id NEQ 0){
-				groupIdBackup2=qCheck.feature_map_group_id;
-				newDataStruct.feature_schema_id =form.feature_schema_id;
-				newDataStruct.feature_map_group_id=qCheck.feature_map_group_id;
-				if(structkeyexists(request.zos, 'debugleadrouting')){
-					echo('mapDataToSchema<br />');
-				}
-				mapDataToSchema(newDataStruct, form, disableSendEmail); 
-			}
 		}
 		setIdBackup2=form.feature_data_id; 
 		if(qCheck.feature_schema_delete_on_map EQ 1){
@@ -2265,7 +2255,6 @@ Define this function in another CFC to override the default email format
 	feature_map_deleted = #db.param(0)# and 
 	s2.feature_field_deleted = #db.param(0)# and
 	feature_map.feature_id=#db.param(form.feature_id)# and  
-	feature_map.site_id = s2.site_id and 
 	feature_map.feature_field_id = s2.feature_field_id and 
 	feature_map.feature_schema_id =s2.feature_schema_id 
 	ORDER BY s2.feature_field_sort asc";
@@ -2344,7 +2333,7 @@ Define this function in another CFC to override the default email format
 	form.site_id = request.zOS.globals.id; 
 	if(application.zcore.functions.zso(form, 'inquiries_email') NEQ ""){ 
 		application.zcore.tracking.setUserEmail(form.inquiries_email);
-	} 
+	}  
 	form.inquiries_id=application.zcore.functions.zInsertLead();
 	
 	application.zcore.tracking.setConversion('inquiry',form.inquiries_id);
@@ -2381,80 +2370,6 @@ Define this function in another CFC to override the default email format
 	</cfscript>
 </cffunction>
 
-<!--- variables.mapDataToSchema(form); --->
-<cffunction name="mapDataToSchema" localmode="modern" access="public">
-	<cfargument name="newDataStruct" type="struct" required="yes">
-	<cfargument name="sourceStruct" type="struct" required="yes">
-	<cfargument name="disableEmail" type="boolean" required="no" default="#false#">
-	<cfscript>
-	var ts=arguments.newDataStruct;
-	var row=0;
-	var db=request.zos.queryObject;
-	if(ts.feature_map_group_id EQ ts.feature_schema_id){
-		// can't map to the same group
-		return;
-	}
-	db.sql="select feature_field.*, s2.feature_field_variable_name originalFieldName from 
-	#db.table("feature_map", request.zos.zcoreDatasource)# feature_map, 
-	#db.table("feature_field", request.zos.zcoreDatasource)# feature_field, 
-	#db.table("feature_field", request.zos.zcoreDatasource)# s2
-	WHERE feature_map.feature_schema_id = #db.param(ts.feature_schema_id)# and 
-	feature_map.feature_id=#db.param(form.feature_id)# and 
-	feature_map.site_id = feature_field.site_id and 
-	feature_map.feature_map_fieldname = feature_field.feature_field_id and 
-	feature_field.feature_schema_id = #db.param(ts.feature_map_group_id)# and
-	feature_field_deleted = #db.param(0)# and 
-	s2.feature_field_deleted = #db.param(0)# and 
-	feature_map_deleted = #db.param(0)# and
-	feature_map.site_id = s2.site_id and 
-	feature_map.feature_field_id = s2.feature_field_id and 
-	feature_map.feature_schema_id =s2.feature_schema_id
-	";
-	qMap=db.execute("qMap");
-	if(qMap.recordcount EQ 0){
-		throw('feature_schema_id, "#ts.feature_schema_id#", on site_id, "#request.zos.globals.id#" isn''t mapped 
-		yet so the data can''t be stored in feature_schema table or emailed. 
-		The form data below must be manually forwarded to the web site owner or resubmitted.');
-		return;
-	}
-	arrId=[];
-	countStruct=structnew();
-	for(row in qMap){
-		if(not structkeyexists(countStruct, row.feature_field_variable_name)){
-			countStruct[row.feature_field_variable_name]=0;
-		}else{
-			countStruct[row.feature_field_variable_name]++;
-		}
-	}
-	for(row in qMap){
-		// new newValue
-		if(structkeyexists(ts, row.originalFieldName)){
-			tempString="";
-			if(structkeyexists(form, row.feature_field_variable_name)){
-				tempString=form[row.feature_field_variable_name];
-			}
-			form["newValue"&row.feature_field_id]=ts[row.originalFieldName]; 
-			if(countStruct[row.feature_field_variable_name] GT 1){
-				ts[row.feature_field_variable_name]=tempString&row.originalFieldName&": "&ts[row.originalFieldName]&" "&chr(10); 
-			}else{
-				ts[row.feature_field_variable_name]=ts[row.originalFieldName]; 
-			}  
-		}else if(not structkeyexists(form, "newValue"&row.feature_field_id)){
-			form["newValue"&row.feature_field_id]="";
-			ts[row.feature_field_variable_name]="";
-		}
-		arrayAppend(arrId, row.feature_field_id);
-	}
-	form.feature_field_id=arrayToList(arrId, ",");
-	form.site_id=request.zos.globals.id;
-	form.feature_schema_id=ts.feature_map_group_id;
-	form.feature_data_id=0;
-	form.disableSchemaEmail=arguments.disableEmail;
-
-	variables.publicMapInsertSchema(); 
-	structdelete(form, 'disableSchemaEmail');
-	</cfscript>
-</cffunction>
 	
 <cffunction name="generateSchemaEmailTemplate" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
@@ -3263,6 +3178,7 @@ Define this function in another CFC to override the default email format
 				// 	}
 				// }
 				db.sql&="WHERE  
+				feature_data.site_id=#db.param(request.zos.globals.id)# and 
 				feature_data_deleted = #db.param(0)# and 
 				feature_schema_deleted = #db.param(0)# and 
 				feature_data.feature_id = #db.param(form.feature_id)# and 

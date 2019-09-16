@@ -128,11 +128,11 @@
 	searchType=application.zcore.functions.zso(arguments.typeStruct, 'datetime_range_search_type', true, 0);
 	if(searchType EQ 1){
 		// start date
-		request.zos.siteFieldSearchDateRangeSortEnabled=true;
+		request.zos.featureFieldSearchDateRangeSortEnabled=true;
 		return arguments.setTableName&".#variables.siteType#_x_option_group_set_start_date";
 	}else if(searchType EQ 2){
 		// end date
-		request.zos.siteFieldSearchDateRangeSortEnabled=true;
+		request.zos.featureFieldSearchDateRangeSortEnabled=true;
 		return arguments.setTableName&".#variables.siteType#_x_option_group_set_end_date";
 	}else{ 
 		return arguments.groupTableName&".#variables.siteType#_x_option_group_date_value";

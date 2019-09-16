@@ -1277,6 +1277,7 @@ displayGroupCom.ajaxInsert();
 		this.copyGroupRecursive(form.site_option_group_id, form.newSiteId, row, groupStruct, optionStruct);
 	}
 	application.zcore.functions.zOS_cacheSiteAndUserGroups(form.newSiteId);
+	structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 		
 	application.zcore.status.setStatus(request.zsid, "Site Option Group Copied.");
 	application.zcore.functions.zRedirect("/z/admin/site-option-group/index?zsid=#request.zsid#");

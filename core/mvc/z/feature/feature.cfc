@@ -88,6 +88,7 @@
 <cffunction name="getFeatureIdForSchema" localmode="modern" access="public">
 	<cfargument name="feature_schema_id" type="string" required="yes">
 	<cfscript>
+	db=request.zos.queryObject;
 	db.sql="select feature_id from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id =#db.param(arguments.feature_schema_id)# and 
 	feature_schema_deleted=#db.param(0)# ";
@@ -507,7 +508,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 				}else{
 					throw("arguments.orderBy, ""#arguments.orderBy#"" is not a valid field in the feature_schema_id=#groupId# | ""#groupStruct.feature_schema_variable_name#""");
 				}
-			}else if(structkeyexists(request.zos, '#variables.type#FieldSearchDateRangeSortEnabled')){
+			}else if(structkeyexists(request.zos, 'featureFieldSearchDateRangeSortEnabled')){
 				orderByStatement=" ORDER BY s1.feature_data_start_date ASC ";
 			}else{
 				orderByStatement=" ORDER BY s1.feature_data_id ASC ";
@@ -993,8 +994,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="importStruct" type="struct" required="yes">
 	<cfscript>
-	if(not structkeyexists(request.zos, '#variables.type#SchemaImportTable')){
-		request.zos["#variables.type#SchemaImportTable"]={};
+	if(not structkeyexists(request.zos, 'featureSchemaImportTable')){
+		request.zos["featureSchemaImportTable"]={};
 	}
 	var groupId=getSchemaIdWithNameArray(arguments.feature_id, arguments.arrSchemaName, request.zos.globals.id);
 	//var groupStruct=typeStruct.featureSchemaLookup[groupId]; 
@@ -1003,8 +1004,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	form.feature_id=arguments.feature_id;
 	form.feature_schema_id=groupId;//featureSchemaIDByName(arguments.feature_schema_variable_name, arguments.feature_schema_parent_id);
 
-	if(structkeyexists(request.zos["#variables.type#SchemaImportTable"], form.feature_schema_id)){
-		ts=request.zos["#variables.type#SchemaImportTable"][form.feature_schema_id];
+	if(structkeyexists(request.zos["featureSchemaImportTable"], form.feature_schema_id)){
+		ts=request.zos["featureSchemaImportTable"][form.feature_schema_id];
 	}else{
 		db=request.zos.queryObject;
 		db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
@@ -1020,7 +1021,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			ts[row.feature_field_variable_name]=row.feature_field_id;
 		} 
 		ts.feature_field_id=arrayToList(arroptionId, ",");
-		request.zos["#variables.type#SchemaImportTable"][form.feature_schema_id]=ts;
+		request.zos["featureSchemaImportTable"][form.feature_schema_id]=ts;
 	}
 	arguments.importStruct.feature_field_id=ts.feature_field_id;
 	for(i in arguments.dataStruct){

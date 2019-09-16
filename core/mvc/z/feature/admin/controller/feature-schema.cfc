@@ -699,7 +699,7 @@ displaySchemaCom.ajaxInsert();
 	feature_map_updated_datetime < #db.param(request.zos.mysqlnow)#";
 	db.execute("qDelete");
 	application.zcore.status.setStatus(request.zsid, "Map fields saved.");
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
 
@@ -922,8 +922,15 @@ displaySchemaCom.ajaxInsert();
 			structclear(form);
 
 
-			ts={};
-			throw("need to convert json into ts field struct");
+			ts={}; 
+			fieldStruct={};
+			if(row.feature_data_field_order NEQ ""){
+				arrFieldOrder=listToArray(row.feature_data_field_order, chr(13), true);
+				arrFieldData=listToArray(row.feature_data_data, chr(13), true);
+				for(i=1;i<=arraylen(arrFieldOrder);i++){
+					form["newvalue"&arrFieldOrder[i]]=arrFieldData[i];
+				}
+			}
 			// for(value in qValues){
 			// 	ts[value.feature_field_variable_name]=value.feature_data_value;
 			// 	//form['newvalue'&value.feature_field_id]=form[value.feature_data_value];
@@ -933,7 +940,7 @@ displaySchemaCom.ajaxInsert();
 			//throw("warning: this will delete unique url and image gallery id - because internalSchemaUpdate is broken.");
 
 			arrSchemaName =application.zcore.featureCom.getSchemaNameArrayById(qSchema.feature_id, qSchema.feature_schema_id); 
-			application.zcore.featureCom.setSchemaImportStruct(arrSchemaName, 0, 0, ts, form); 
+			application.zcore.featureCom.setSchemaImportStruct(qSchema.feature_id, arrSchemaName, 0, ts, form); 
 			structappend(form, row, true);
 			// writedump(form);abort;
  
@@ -948,7 +955,7 @@ displaySchemaCom.ajaxInsert();
 		}
 	}
 	application.zcore.status.setStatus(request.zsid, "Schema, ""#qSchema.feature_schema_variable_name#"", was reprocessed successfully.");
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	</cfscript>
 </cffunction>
 
@@ -973,20 +980,20 @@ displaySchemaCom.ajaxInsert();
 	}
 	echo("<h2>Map Fields For Feature Schema: #qSchema.feature_schema_display_name#</h2>");
 	
-	if(qSchema.feature_map_group_id NEQ 0){
-		db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
-		WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
-		feature_schema_deleted = #db.param(0)# and 
-		feature_id=#db.param(qSchema.feature_id)# ";
-		qMapSchema=db.execute("qMapSchema");
-		if(qMapSchema.recordcount EQ 0){
-			application.zcore.status.setStatus(request.zsid, "You must add an option to the group before you can use this feature.", form, true);
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
-		}
-		echo("<p>Mapping to Feature Schema: ""#qMapSchema.feature_schema_display_name#""</p>");
-	}else{
+	// if(qSchema.feature_map_group_id NEQ 0){
+	// 	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
+	// 	WHERE feature_schema_id = #db.param(qSchema.feature_map_group_id)# and 
+	// 	feature_schema_deleted = #db.param(0)# and 
+	// 	feature_id=#db.param(qSchema.feature_id)# ";
+	// 	qMapSchema=db.execute("qMapSchema");
+	// 	if(qMapSchema.recordcount EQ 0){
+	// 		application.zcore.status.setStatus(request.zsid, "You must add an option to the group before you can use this feature.", form, true);
+	// 		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+	// 	}
+	// 	echo("<p>Mapping to Feature Schema: ""#qMapSchema.feature_schema_display_name#""</p>");
+	// }else{
 		echo("<p>Mapping to Inquiries Table.</p>");
-	}
+	// }
 	db.sql="SELECT * FROM #db.table("feature_map", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id = #db.param(form.feature_schema_id)# and 
 	feature_map_deleted = #db.param(0)# and 
@@ -1072,8 +1079,8 @@ displaySchemaCom.ajaxInsert();
 	local.index=1;
 	if(mappingEnabled){
 		writeoutput('<p>Map as many fields as you wish. You can map an option to the same field multiple times to automatically combine those values.</p>
-			<p>To save time, try clicking <a href="##" class="zSchemaAutoMap">auto-map</a> first.</p>
-		<form class="zFormCheckDirty" id="featureSchemaMapForm" action="/z/feature/admin/feature-schema/saveMapFields?feature_schema_id=#form.feature_schema_id#" method="post">
+			<p>To save time, try clicking <a href="##" class="zOptionGroupAutoMap">auto-map</a> first.</p>
+		<form class="zFormCheckDirty" id="optionGroupMapForm" action="/z/feature/admin/feature-schema/saveMapFields?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#" method="post">
 		<table class="table-list"><tr><th>Field Field</th><th>Map To Field</th></tr>');
 		for(row in qField){
 			writeoutput('<tr><td><input type="hidden" name="option#local.index#" value="#row.feature_field_id#" /><div id="fieldLabel#local.index#" class="fieldLabelDiv" data-id="#local.index#">'&htmleditformat(row.feature_field_display_name)&'</div></td><td>');
@@ -1174,7 +1181,7 @@ displaySchemaCom.ajaxInsert();
 	// TODO: we would need to guarantee inquiries_type_id is cloned first by checking for same new on the new site - then i could copy the map table too.  For now, it just removes these.
 	row.inquiries_type_id=0;
 	row.inquiries_type_id_siteIDType=0;
-	row.feature_map_group_id=0;
+	row.feature_schema_map_group_id=0;
 	row.site_id = arguments.site_id;
 	ts=structnew();
 	ts.struct=row;
@@ -1245,6 +1252,7 @@ displaySchemaCom.ajaxInsert();
 	}
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	featureCacheCom.rebuildFeatureStructCache(form.feature_id, application.zcore); 
+	structclear(application.sitestruct[request.zos.globals.id].administratorTemplateMenuCache);
 		
 	application.zcore.status.setStatus(request.zsid, "Feature Schema Copied.");
 	application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
@@ -1350,19 +1358,20 @@ displaySchemaCom.ajaxInsert();
 				}
 				</cfscript>
 				<cfif qProp.feature_schema_parent_id EQ 0>
-					<a href="/z/feature/admin/features/manageSchema?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">List/Edit</a> | 
-					<!--- <a href="/z/feature/admin/features/import?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Import</a> --->
+					<a href="/z/feature/admin/features/manageSchema?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">List/Edit</a>
+					<cfif qProp.feature_schema_allow_public NEQ 0>
+						|
+						<cfif qProp.feature_schema_public_form_url NEQ "">
+							<a href="#htmleditformat(qProp.feature_schema_public_form_url)#" target="_blank">Public Form</a> 
+						<cfelse>
+							 <a href="/z/feature/feature-display/add?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a>
+						</cfif>
+					</cfif>
+					<!--- |  <a href="/z/feature/admin/features/import?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#">Import</a> --->
 				</cfif>
 				<cfif variables.allowGlobal and isFeatureHost>
 					 | <a href="/z/feature/admin/feature-schema/add?feature_id=#qProp.feature_id#&feature_schema_parent_id=#qProp.feature_schema_id#">Add Child Schema</a> | 
 					<a href="/z/feature/admin/features/manageFields?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#&amp;feature_schema_parent_id=#qProp.feature_schema_parent_id#">Fields</a> | 
-					<cfif qProp.feature_schema_allow_public NEQ 0>
-						<cfif qProp.feature_schema_public_form_url NEQ "">
-							<a href="#htmleditformat(qProp.feature_schema_public_form_url)#" target="_blank">Public Form</a> | 
-						<cfelse>
-							<a href="/z/feature/feature-display/add?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Public Form</a> | 
-						</cfif>
-					</cfif>
 					<cfif application.zcore.user.checkServerAccess()>
 						<a href="/z/feature/admin/feature-schema/export?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" target="_blank">Export CSV</a> | 
 						<a href="/z/feature/admin/feature-schema/reindex?feature_id=#qProp.feature_id#&feature_schema_id=#qProp.feature_schema_id#" title="Will update Feature Schema table for all records.  Useful after a config change.">Reprocess</a> | 
@@ -1378,7 +1387,6 @@ displaySchemaCom.ajaxInsert();
 						<cfscript>
 						db.sql="select count(feature_map_id) count 
 						from #db.table("feature_map", request.zos.zcoreDatasource)# feature_map WHERE 
-						site_id = #db.param(qProp.site_id)# AND 
 						feature_map_deleted = #db.param(0)# and
 						feature_schema_id = #db.param(qProp.feature_schema_id)# ";
 						qMap=db.execute("qMap");
@@ -2079,15 +2087,15 @@ displaySchemaCom.ajaxInsert();
 					form.feature_schema_map_fields_type=application.zcore.functions.zso(form, 'feature_schema_map_fields_type', true, 0);
 					ts = StructNew();
 					ts.name = "feature_schema_map_fields_type";
-					ts.listLabels = "Disabled,Inquiries,Schema";
-					ts.listValues = "0,1,2";
+					ts.listLabels = "Disabled,Inquiries";
+					ts.listValues = "0,1";
 					ts.radio=true;
 					ts.listLabelsDelimiter = ","; // tab delimiter
 					ts.listValuesDelimiter = ",";
 					writeoutput(application.zcore.functions.zInput_Checkbox(ts));
 					</cfscript></td>
 				</tr>
-				<tr>
+				<!--- <tr>
 					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map Schema","member.feature-schema.edit feature_map_group_id")#</th>
 					<td><cfscript>
 					selectStruct=structnew();
@@ -2098,7 +2106,7 @@ displaySchemaCom.ajaxInsert();
 					selectStruct.queryValueField = "feature_schema_id";
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					</cfscript></td>
-				</tr>
+				</tr> --->
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Map To Lead Type","member.feature-schema.edit inquiries_type_id")#</th>
 					<td><cfscript>
@@ -2126,11 +2134,11 @@ displaySchemaCom.ajaxInsert();
 					</cfscript></td>
 				</tr>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.feature-schema.edit feature_map_insert_type")#</th>
+					<th>#application.zcore.functions.zOutputHelpToolTip("Map Insert Type","member.feature-schema.edit feature_schema_map_insert_type")#</th>
 					<td><cfscript>
-					form.feature_map_insert_type=application.zcore.functions.zso(form, 'feature_map_insert_type', true, 0);
+					form.feature_schema_map_insert_type=application.zcore.functions.zso(form, 'feature_schema_map_insert_type', true, 0);
 					ts = StructNew();
-					ts.name = "feature_map_insert_type";
+					ts.name = "feature_schema_map_insert_type";
 					ts.listLabels = "Disabled,Immediately on Insert,After Manual Approval";
 					ts.listValues = "0,1,2";
 					ts.radio=true;
