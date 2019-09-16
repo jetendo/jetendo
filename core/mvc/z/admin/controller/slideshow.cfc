@@ -1677,19 +1677,19 @@
 				<table id="tabtexttable" <cfif form.slideshow_tabistext EQ 0>style="display:none;"</cfif>>
 					<tr>
 						<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Background Color","member.slideshow.edit slideshow_tabbgcolor")#</th>
-						<td style="vertical-align:top; "><input type="text" class="zColorInput" name="slideshow_tabbgcolor" value="<cfif form.slideshow_tabbgcolor EQ "">FFFFFF<cfelse>#HTMLEditFormat(form.slideshow_tabbgcolor)#</cfif>" size="10" /></td>
+						<td style="vertical-align:top; "><input type="text" class="zColorInput {required:false}" name="slideshow_tabbgcolor" value="<cfif form.slideshow_tabbgcolor EQ "">FFFFFF<cfelse>#HTMLEditFormat(form.slideshow_tabbgcolor)#</cfif>" size="10" /></td>
 					</tr>
 					<tr>
 						<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Text Color","member.slideshow.edit slideshow_tabtextcolor")#</th>
-						<td style="vertical-align:top; "><input type="text" class="zColorInput" name="slideshow_tabtextcolor" value="<cfif form.slideshow_tabtextcolor EQ "">000000<cfelse>#HTMLEditFormat(form.slideshow_tabtextcolor)#</cfif>" size="10" /></td>
+						<td style="vertical-align:top; "><input type="text" class="zColorInput {required:false}" name="slideshow_tabtextcolor" value="<cfif form.slideshow_tabtextcolor EQ "">000000<cfelse>#HTMLEditFormat(form.slideshow_tabtextcolor)#</cfif>" size="10" /></td>
 					</tr>
 					<tr>
 						<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Over Background Color","member.slideshow.edit slideshow_taboverbgcolor")#</th>
-						<td style="vertical-align:top; "><input type="text" class="zColorInput" name="slideshow_taboverbgcolor" value="<cfif form.slideshow_taboverbgcolor EQ "">000000<cfelse>#HTMLEditFormat(form.slideshow_taboverbgcolor)#</cfif>" size="10" /></td>
+						<td style="vertical-align:top; "><input type="text" class="zColorInput {required:false}" name="slideshow_taboverbgcolor" value="<cfif form.slideshow_taboverbgcolor EQ "">000000<cfelse>#HTMLEditFormat(form.slideshow_taboverbgcolor)#</cfif>" size="10" /></td>
 					</tr>
 					<tr>
 						<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Over Text Color","member.slideshow.edit slideshow_tabovertextcolor")#</th>
-						<td style="vertical-align:top; "><input type="text" class="zColorInput" name="slideshow_tabovertextcolor" value="<cfif form.slideshow_tabovertextcolor EQ "">FFFFFF<cfelse>#HTMLEditFormat(form.slideshow_tabovertextcolor)#</cfif>" size="10" /></td>
+						<td style="vertical-align:top; "><input type="text" class="zColorInput {required:false}" name="slideshow_tabovertextcolor" value="<cfif form.slideshow_tabovertextcolor EQ "">FFFFFF<cfelse>#HTMLEditFormat(form.slideshow_tabovertextcolor)#</cfif>" size="10" /></td>
 					</tr>
 					<tr>
 						<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Padding","member.slideshow.edit slideshow_tabpadding")#</th>

@@ -155,7 +155,7 @@
 	if(arguments.row.site_option_required EQ 1){
 		required="required";
 	}
-	v='##<input type="text" class="zColorInput" #required# name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" onkeyup="this.value.replace(''##'', '''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#'))#" />'
+	v='##<input type="text" class="zColorInput {required:false}" #required# name="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#" onkeyup="this.value.replace(''##'', '''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(arguments.dataStruct, '#arguments.prefixString##arguments.row["#variables.type#_option_id"]#'))#" />'
 	return { label: true, hidden: false, value:v};  
 	</cfscript>
 </cffunction>
@@ -168,7 +168,7 @@
 	return '
 	<cfscript>
 	application.zcore.functions.zIncludeJsColor();
-	echo(''<input type="text" class="zColorInput" name="#arguments.fieldName#" id="#arguments.fieldName#" onkeyup="this.value.replace(''''####'''', '''''''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))#" />'');
+	echo(''<input type="text" class="zColorInput {required:false}" name="#arguments.fieldName#" id="#arguments.fieldName#" onkeyup="this.value.replace(''''####'''', '''''''');" size="7" style="width:auto; min-width:auto;" value="#htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))#" />'');
 	</cfscript>
 	';
 	</cfscript>

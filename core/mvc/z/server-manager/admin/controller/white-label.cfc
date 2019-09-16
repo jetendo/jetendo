@@ -655,11 +655,11 @@
 			</tr>
 			<tr>
 				<th class="table-white" style="width:1%; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Admin Header Background Color","member.whitelabel.edit whitelabel_dashboard_header_background_color")#</th>
-				<td style="vertical-align:top; "><input class="zColorInput" type="text" name="whitelabel_dashboard_header_background_color" value="#HTMLEditFormat(form.whitelabel_dashboard_header_background_color)#" style="width:90px;"></td>
+				<td style="vertical-align:top; "><input class="zColorInput {required:false}" type="text" name="whitelabel_dashboard_header_background_color" value="#HTMLEditFormat(form.whitelabel_dashboard_header_background_color)#" style="width:90px;"></td>
 			</tr>
 			<tr>
 				<th class="table-white" style="width:1%; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Login Header Background Color","member.whitelabel.edit whitelabel_login_header_background_color")#</th>
-				<td style="vertical-align:top; "><input class="zColorInput" type="text" name="whitelabel_login_header_background_color" value="#HTMLEditFormat(form.whitelabel_login_header_background_color)#" style="width:90px;"></td>
+				<td style="vertical-align:top; "><input class="zColorInput {required:false}" type="text" name="whitelabel_login_header_background_color" value="#HTMLEditFormat(form.whitelabel_login_header_background_color)#" style="width:90px;"></td>
 			</tr>
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Admin Header Image 960","member.whitelabel.edit whitelabel_dashboard_header_image_960")#</th>

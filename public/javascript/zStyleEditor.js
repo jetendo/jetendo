@@ -961,7 +961,7 @@ var zStyleEditor=function(options){
 			}
 			arrHTML.push('"></span>');
 			arrHTML.push('<input type="hidden" class="'+fc.name+suffix+'" name="'+fc.name+suffix+'" id="'+fc.name+suffix+'" data-base-value="'+fc.baseValue+'" data-original-value="'+htmlEntities.encode(currentValue)+'" value="'+htmlEntities.encode(currentValue)+'">');
-			arrHTML.push('<input type="text" class="zColorInput '+fc.name+suffix+'_color" onkeyup="this.value.replace(\'#\', \'\');" data-field="'+fc.name+suffix+'" name="'+fc.name+suffix+'_color" id="'+fc.name+suffix+'_color" style="display:none; float:left; '+style+bgStyle+'" value="'+htmlEntities.encode(currentValue)+'">'); 
+			arrHTML.push('<input type="text" class="zColorInput {required:false} '+fc.name+suffix+'_color" onkeyup="this.value.replace(\'#\', \'\');" data-field="'+fc.name+suffix+'" name="'+fc.name+suffix+'_color" id="'+fc.name+suffix+'_color" style="display:none; float:left; '+style+bgStyle+'" value="'+htmlEntities.encode(currentValue)+'">'); 
 			arrHTML.push('<a href="#" class="zColorResetLink '+fc.name+suffix+'_color_reset" title="Click to reset value to default" data-field="'+fc.name+suffix+'" style="display:none; padding:3px; padding-left:7px; padding-right:7px;margin-left:3px; border-radius:5px; text-decoration:none; background-color:#369; color:#FFF; float:left;">X</a>');
 		}else if(fc.type == "marginPaddingBorder"){
 			var arrValue=fc.value.split(",");
