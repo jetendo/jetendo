@@ -57,8 +57,8 @@
 				indentScale:1,
 				textMinimumFontSize:16,
 				headingMinimumFontSize:16,
-				columnGapSidePercent:7,
-				columnGapBottomPercent:4,
+				columnGapSidePercent:2,
+				columnGapBottomPercent:2,
 				columnPaddingTopPercent:2,
 				columnPaddingSidePercent:2,
 				columnPaddingBottomPercent:2
@@ -66,8 +66,8 @@
 			"767":{
 				headingScale:0.8,
 				indentScale:1, 
-				columnGapSidePercent:10,
-				columnGapBottomPercent:6,
+				columnGapSidePercent:2,
+				columnGapBottomPercent:2,
 				columnPaddingTopPercent:3,
 				columnPaddingSidePercent:3,
 				columnPaddingBottomPercent:3,
@@ -77,8 +77,8 @@
 				indentScale:1,
 				textMinimumFontSize:16,
 				headingMinimumFontSize:16,
-				columnGapSidePercent:15,
-				columnGapBottomPercent:10,
+				columnGapSidePercent:2,
+				columnGapBottomPercent:2,
 				columnPaddingTopPercent:4,
 				columnPaddingSidePercent:4,
 				columnPaddingBottomPercent:4,
@@ -402,9 +402,27 @@
 			arrayAppend(arrCSS, v);
 		} 
 		if(n EQ arrayLen(breakStruct.arrBreak)){
-	 		v='.z-column, .z-1of1{ float:left; min-height:1px; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%; padding-left:#dataStruct.boxPaddingSidePercent#%; padding-right:#dataStruct.boxPaddingSidePercent#%; padding-top:#dataStruct.boxPaddingTopPercent#%; padding-bottom:#dataStruct.boxPaddingBottomPercent#%; }';
+	 		v='.z-column, .z-1of1{ float:left; min-height:1px; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%;  padding-left:#dataStruct.boxPaddingSidePercent#%; padding-right:#dataStruct.boxPaddingSidePercent#%; padding-top:#dataStruct.boxPaddingTopPercent#%; padding-bottom:#dataStruct.boxPaddingBottomPercent#%; }';
 		}else{
-	 		v='.z-column, .z-1of1{ float:left; min-height:1px; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%; padding-left:#dataStruct.boxPaddingSidePercent#%; padding-right:#dataStruct.boxPaddingSidePercent#%; padding-top:#dataStruct.boxPaddingTopPercent#%; padding-bottom:#dataStruct.boxPaddingBottomPercent#%; }';
+	 		v='.z-column, .z-1of1{ float:left; min-height:1px; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%;  padding-left:#dataStruct.boxPaddingSidePercent#%; padding-right:#dataStruct.boxPaddingSidePercent#%; padding-top:#dataStruct.boxPaddingTopPercent#%; padding-bottom:#dataStruct.boxPaddingBottomPercent#%; }';
+	 	}
+		if(not structkeyexists(uniqueStruct, v)){
+			uniqueStruct[v]=true;
+			arrayAppend(arrCSS, v);
+		} 
+		if(n EQ arrayLen(breakStruct.arrBreak)){
+	 		v='.z-column.z-m-0, .z-1of1.z-m-0{ width:100%; margin-left:0px;  margin-right:0px; margin-bottom:0px; }';
+		}else{
+	 		v='.z-column.z-m-0, .z-1of1.z-m-0{ width:100%; margin-left:0px;  margin-right:0px; margin-bottom:0px; }';
+	 	}
+		if(not structkeyexists(uniqueStruct, v)){
+			uniqueStruct[v]=true;
+			arrayAppend(arrCSS, v);
+		} 
+		if(n EQ arrayLen(breakStruct.arrBreak)){
+	 		v='.z-column.z-mh-0, .z-1of1.z-mh-0{ width:100%; margin-left:0px;  margin-right:0px; }';
+		}else{
+	 		v='.z-column.z-mh-0, .z-1of1.z-mh-0{ width:100%; margin-left:0px;  margin-right:0px; }';
 	 	}
 		if(not structkeyexists(uniqueStruct, v)){
 			uniqueStruct[v]=true;
@@ -463,7 +481,7 @@
 			} 
 			for(n2=1;n2<=limit;n2++){
 				width=percent*n2; 
-
+				widthNoMargin=width;
 
 				// need to calculate the total margin based on number of columns.  i.e. 3 column with 3% column gap is (3-1)*3
 				if(breakpoint > 992){
@@ -493,6 +511,7 @@
 					}
 					disableFirstLast=true;
 					width=n2*percent;
+					widthNoMargin=width;
 					margin=dataStruct.columnGapSidePercent/2; 
 					totalMargin=dataStruct.columnGapSidePercent*columnCount;
 					maxWidth=100-totalMargin;
@@ -509,6 +528,7 @@
 					}
 					disableFirstLast=true;
 					width=n2*percent;
+					widthNoMargin=width;
 					margin=dataStruct.columnGapSidePercent/2; 
 					totalMargin=dataStruct.columnGapSidePercent*columnCount;
 					maxWidth=100-totalMargin;
@@ -530,15 +550,44 @@
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS, v);
 				}   
+				if(isSingleColumn){
+					v='.z-#n2#of#limit#.z-m-0{ float:left; margin-left:0px; margin-right:0px; margin-bottom:0px; width:100%; }'; 
+				}else{    
+					if(breakpoint LTE 992){
+						v=".z-#n2#of#limit#.z-m-0{ float:left; margin-left:0px; margin-right:0px; margin-bottom:0px; width:#numberformat(widthNoMargin, '_.___')#%; }";
+					}else{
+						v=".z-#n2#of#limit#.z-m-0{ float:left; margin-left:0px; margin-right:0px; margin-bottom:0px; width:#numberformat(widthNoMargin, '_.___')#%; }";
+					} 
+				}
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				}   
+				if(isSingleColumn){
+					v='.z-#n2#of#limit#.z-mh-0{ float:left; margin-left:0px; margin-right:0px; width:100%; }'; 
+				}else{    
+					if(breakpoint LTE 992){
+						v=".z-#n2#of#limit#.z-mh-0{ float:left; margin-left:0px; margin-right:0px; width:#numberformat(widthNoMargin, '_.___')#%; }";
+					}else{
+						v=".z-#n2#of#limit#.z-mh-0{ float:left; margin-left:0px; margin-right:0px; width:#numberformat(widthNoMargin, '_.___')#%; }";
+					} 
+				}
+				if(not structkeyexists(uniqueStruct, v)){
+					uniqueStruct[v]=true;
+					arrayAppend(arrCSS, v);
+				}   
 				if(structkeyexists(breakExtraStruct, breakpoint)){
 					fullpercent=100/limit;
 					fullcolumnCount=round(100/fullpercent);
 					fullcolumnCount=n2;
 					fullmargin=int(dataStruct.columnGapSidePercent/2/2);  
 					fullmarginTemp=dataStruct.columnGapSidePercent;
+					fullwidthNoMargin=(fullpercent*n2);
 					fullwidth=(fullpercent*n2)-dataStruct.columnGapSidePercent;
 					fullmaxWidth=100;  
 					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#{ float:left; margin-left:#numberformat(fullmargin, '_.___')#%; margin-right:#numberformat(fullmargin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-width:auto; max-width:#fullmaxWidth#%; width:#numberformat(fullwidth, '_.___')#%; }");
+					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#.z-m-0{ margin-left:0px; margin-right:0px; margin-bottom:0px; width:#numberformat(fullwidthNoMargin, '_.___')#%; }");
+					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#.z-mh-0{ margin-left:0px; margin-right:0px; width:#numberformat(fullwidthNoMargin, '_.___')#%; }");
 				}  
 				// offset classes
 				if(isSingleColumn){

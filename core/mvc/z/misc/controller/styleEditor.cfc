@@ -828,6 +828,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 			data-style-editor-fonts="1" 
 			data-style-editor-sizes="1" 
 			data-style-editor-colors="1"
+			data-style-editor-spaces="1" 
 			data-style-editor-breakpoints="1"
 			data-style-editor-external-stylesheet="0"
 		 />
@@ -836,10 +837,11 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 	/* <![CDATA[ */
 	zArrDeferredFunctions.push(function(){ 
 		<cfif form.debug EQ 1>
-		if(typeof window.parent.zStylestyleBaseConfig == "undefined"){
+		if(typeof window.parent.zStylestyleDefaultConfig == "undefined"){
 			window.parent.zStylestyleDefaultConfig={};
 		} 
 		window.parent.zStylestyleDefaultConfig["#form.field#"]=#serializeJson(defaultConfig)#;
+		if(typeof window.parent.zStylestyleBaseConfig == "undefined"){
 			window.parent.zStylestyleBaseConfig={};
 		} 
 		window.parent.zStylestyleBaseConfig["#form.field#"]=#serializeJson(defaultConfig)#;
@@ -965,15 +967,10 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 			<div class="stylePreviewHTML z-float-left" <!--- style="display:none;" --->>
 				<div class="styleIframeContainer"></div>
 				<cfsavecontent variable="iframeHTML">
-					<html>
-					<head>
-						<title>Preview</title>
-						<link rel="stylesheet" type="text/css" href="/z/stylesheets/zOS.css" />
-						<link rel="stylesheet" type="text/css" href="/z/stylesheets/css-framework.css" />
-						<link rel="stylesheet" type="text/css" href="/zupload/layout-global.css" />
-						<style type="text/css" id="stylePreviewStyle"></style>
-					</head>
-					<body>
+					<link rel="stylesheet" type="text/css" href="/z/stylesheets/zOS.css" />
+					<link rel="stylesheet" type="text/css" href="/z/stylesheets/css-framework.css" />
+					<link rel="stylesheet" type="text/css" href="/zupload/layout-global.css" />
+					<style type="text/css" id="stylePreviewStyle"></style>
 					<div class="section1 z-float"> 
 						<div class="z-float">
 							<div class="z-container">
@@ -1002,9 +999,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 								</div>
 							</div>
 						</div>
-					</div>
-					</body>
-					</html>
+					</div> 
 				</cfsavecontent>
 			</div>
 		</div> 
@@ -1014,7 +1009,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 		<div class="stylePreviewCSS"></div>
 	</div>
 	<script type="text/javascript">
-	var iframeDocumentContents="#jsStringFormat(iframeHTML)#";
+	var iframeDocumentContents="#jsStringFormat(replace(replace(iframeHTML, chr(13), "", "all"), chr(10), " ", "all"))#";
 	</script>
 </cffunction>
 
