@@ -476,9 +476,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	.z-show-at-992{display:block !important;}
 
 	.z-center-children-at-992{ text-align:center; font-size:0px;}
-	.z-center-children-at-992 > div, .z-center-children-at-992 > a{ display:inline-block; text-align:left; vertical-align:top; float:none; }
-
-
+	.z-center-children-at-992 > div, .z-center-children-at-992 > a{ display:inline-block; text-align:left; vertical-align:top; float:none !important; }
 	.zMenuBarDiv { width:100% !important;}
 	.z-mobileMenuDiv ul{ padding-left:0px;}
 	.z-mobileMenuDiv li{list-style:none;}
@@ -515,7 +513,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	.z-show-at-767{display:block !important;}
 
 	.z-center-children-at-767{ text-align:center; font-size:0px;}
-	.z-center-children-at-767 > div, .z-center-children-at-767 > a{ display:inline-block; text-align:left; vertical-align:top; float:none; }
+	.z-center-children-at-767 > div, .z-center-children-at-767 > a{ display:inline-block; text-align:left; vertical-align:top; float:none !important; }
 
 	.z-mobileMenuDiv nav{width:auto;}
 	.z-mobileMenuDiv nav div{float:left;clear:both;}

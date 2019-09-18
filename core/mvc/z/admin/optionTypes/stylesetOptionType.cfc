@@ -132,7 +132,8 @@
 		editBreakpoints:arguments.optionStruct.styleset_breakpoints,
 		externalStylesheet:arguments.optionStruct.styleset_external_stylesheet
 	};
-	return { label: true, hidden: false, value: application.zcore.functions.zStylesetEditor(ts)};  
+	styleEditorCom=createObject("component", "zcorerootmapping.mvc.z.misc.controller.styleEditor");
+	return { label: true, hidden: false, value: styleEditorCom.zStylesetEditor(ts)};   
 	</cfscript>
 </cffunction>
 

@@ -223,7 +223,7 @@ dataImportCom.init(ts);
 					storeField=false;
 				}
 				if(storeField){
-					field = trim(mid(line,fStart,(i-fStart-1))); 
+					field = trim(mid(line,fStart,(i-fStart))); 
 					ArrayAppend(arrFields, field); 
 				}
 				arrayAppend(this.arrLines, arrFields);
@@ -338,6 +338,7 @@ dataImportCom.init(ts);
 	}else if(len(line) EQ fStart){ 
 		ArrayAppend(arrFields, trim(right(line,1)));
 	} 
+
 	return arrFields;
 	</cfscript>
 </cffunction>

@@ -10,7 +10,7 @@ if i store as tableName_meta_json longtext, then i don't need all the extra quer
 onSiteStart:
 	
 	// enforces current version and correct structure
-	metaStruct=getMetaData("office", row.office_meta_json);
+	metaStruct=getData("office", row.office_meta_json);
 	dealerId=metaStruct.dealerId;
 
 
