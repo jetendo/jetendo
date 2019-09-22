@@ -1934,7 +1934,7 @@
 		WHERE site_option_group_id=#db.param(form.site_option_group_id)# and 
 		site_option_group_deleted = #db.param(0)# and
 		site_id = #db.param(request.zos.globals.id)# ";
-		qCheck=db.execute("qCheck");
+		qCheck=db.execute("qCheck", "", 10000, "query", false); 
 		if(qCheck.recordcount EQ 0){
 			application.zcore.functions.z404("Invalid site_option_group_id, #form.site_option_group_id#");	
 		}
@@ -2473,6 +2473,15 @@
 	q=db.execute("q");
 	*/
 	application.zcore.routing.updateSiteOptionGroupSetUniqueURL(form.site_x_option_group_set_id);
+
+
+	if(qCheck.site_option_group_parent_field NEQ ""){
+		// resort all records
+		for(row in qCheck){
+			mainGroupStruct=row;
+		}
+		resortSetByParentField(mainGroupStruct);
+	}
 	
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
 	if(request.zos.enableSiteOptionGroupCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.site_option_group_enable_cache EQ 1){ 
@@ -2798,6 +2807,11 @@
 		}else{
 			newRecord=false;
 		}
+		if(qCheck.site_option_group_parent_field NEQ ""){				
+
+			// tell parent page to reload, instead of displaying the row html
+			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
+		}
 		form.site_x_option_group_set_id=setIdBackup;
 		if(methodBackup EQ "userUpdateGroup" or methodBackup EQ "userInsertGroup"){ 
 			form.method="userGetRowHTML";
@@ -2822,6 +2836,92 @@
 			//application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&site_option_app_id=#form.site_option_app_id#&site_option_group_id=#form.site_option_group_id#&site_x_option_group_set_parent_id=#form.site_x_option_group_set_parent_id#&modalpopforced=#form.modalpopforced#");
 		}
 		application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink: tempLink});
+	}
+	</cfscript>
+</cffunction>
+
+<cffunction name="getSortedData" localmode="modern" access="public">
+	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="select 
+	site_x_option_group_set.site_x_option_group_set_id, 
+	site_x_option_group_value, 
+	site_x_option_group_set_sort from 
+	#db.table("site_option", request.zos.zcoreDatasource)#,
+	#db.table("site_x_option_group", request.zos.zcoreDatasource)#,
+	#db.table("site_x_option_group_set", request.zos.zcoreDatasource)#
+	 WHERE 
+	site_option_name=#db.param(arguments.groupQuery.site_option_group_parent_field)# and 
+	site_option.site_option_group_id=#db.param(arguments.groupQuery.site_option_group_id)# and 
+	site_option.site_id=#db.param(request.zos.globals.id)# and 
+	site_x_option_group.site_option_id=site_option.site_option_id and 
+	site_x_option_group.site_id=site_option.site_id and 
+	site_x_option_group.site_x_option_group_deleted=#db.param(0)# and 
+
+	site_x_option_group_set.site_x_option_group_set_id=site_x_option_group.site_x_option_group_set_id and 
+	site_x_option_group_set.site_id=site_option.site_id and 
+	site_x_option_group_set.site_x_option_group_set_deleted=#db.param(0)# and 
+	site_option_deleted=#db.param(0)# 
+	ORDER BY site_x_option_group_set_sort ASC ";
+	qOption=db.execute("qOption", "", 10000, "query", false); 
+	rs={
+		arrOrder:[],
+		arrLevel:[]
+	};
+	if(qOption.recordcount NEQ 0){
+		addChildrenToParentOrder(qOption, rs.arrOrder, rs.arrLevel, "", 0);
+	}
+	return rs;
+	</cfscript>
+</cffunction>
+
+<cffunction name="resortSetByParentField" localmode="modern" access="public">
+	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	rs=getSortedData(arguments.groupQuery);
+	for(i=1;i<=arraylen(rs.arrOrder);i++){
+		db.sql="update #db.table("site_x_option_group_set", request.zos.zcoreDatasource)#
+		set 
+		site_x_option_group_set_sort=#db.param(i)#, 
+		site_x_option_group_set_level=#db.param(rs.arrLevel[i])# 
+		WHERE 
+		site_x_option_group_set.site_x_option_group_set_id=#db.param(rs.arrOrder[i])# and 
+		site_x_option_group_set.site_id=#db.param(request.zos.globals.id)# and 
+		site_x_option_group_set.site_x_option_group_set_deleted=#db.param(0)#";
+		db.execute("qUpdate");
+
+		// fire onChange com if there is one
+		if(arguments.groupQuery.site_option_group_change_cfc_path NEQ ""){
+			path=arguments.groupQuery.site_option_group_change_cfc_path;
+			if(left(path, 5) EQ "root."){
+				path=request.zRootCFCPath&removeChars(path, 1, 5);
+			}
+			changeCom=application.zcore.functions.zcreateObject("component", path); 
+			changeCom[arguments.groupQuery.site_option_group_change_cfc_sort_method](row.site_x_option_group_set_id, i); 
+		}
+	}
+	</cfscript>
+</cffunction>
+
+<cffunction name="addChildrenToParentOrder" localmode="modern" access="public">
+	<cfargument name="optionQuery" type="query" required="yes">
+	<cfargument name="arrOrder" type="array" required="yes">
+	<cfargument name="arrLevel" type="array" required="yes">
+	<cfargument name="parentId" type="string" required="yes">
+	<cfargument name="recursionCount" type="numeric" required="yes">
+	<cfscript>
+	arguments.recursionCount++;
+	if(arguments.recursionCount GT 100){
+		throw("Possible infinite recursion detected in parent/child relationships");
+	}
+	for(row in optionQuery){
+		if(arguments.parentID EQ row.site_x_option_group_value){ 
+			arrayAppend(arrOrder, row.site_x_option_group_set_id);
+			arrayAppend(arrLevel, arguments.recursionCount-1);
+			addChildrenToParentOrder(optionQuery, arrOrder, arrLevel, row.site_x_option_group_set_id, recursionCount);
+		}
 	}
 	</cfscript>
 </cffunction>
@@ -3527,43 +3627,48 @@ Define this function in another CFC to override the default email format
 				application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
 			}
 			if(structkeyexists(form, 'zQueueSortAjax')){
-				// update cache
-				if(request.zos.enableSiteOptionGroupCache and mainGroupStruct.site_option_group_enable_cache EQ 1){
-					application.zcore.siteOptionCom.resortOptionGroupSets(request.zos.globals.id, form.site_option_app_id, form.site_option_group_id, form.site_x_option_group_set_parent_id); 
+				if(mainGroupStruct.site_option_group_parent_field NEQ ""){
+					// resort all records
+					resortSetByParentField(mainGroupStruct);
 				}else{
 
-					t9=application.zcore.siteOptionCom.getTypeData(request.zos.globals.id);
-					var groupStruct=t9.optionGroupLookup[form.site_option_group_id];
- 
+					// update cache
+					if(request.zos.enableSiteOptionGroupCache and mainGroupStruct.site_option_group_enable_cache EQ 1){
+						application.zcore.siteOptionCom.resortOptionGroupSets(request.zos.globals.id, form.site_option_app_id, form.site_option_group_id, form.site_x_option_group_set_parent_id); 
+					}else{
 
-					if(groupStruct.site_option_group_change_cfc_path NEQ ""){
-						path=groupStruct.site_option_group_change_cfc_path;
-						if(left(path, 5) EQ "root."){
-							path=request.zRootCFCPath&removeChars(path, 1, 5);
-						}
-						changeCom=application.zcore.functions.zcreateObject("component", path); 
-						offset=0;
-						while(true){
-							db.sql="select site_x_option_group_set_id FROM #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# 
-							WHERE 
-							site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and  
-							site_option_group_id = #db.param(form.site_option_group_id)# and 
-							site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)# and 
-							site_id = #db.param(request.zos.globals.id)# and 
-							site_x_option_group_set_master_set_id = #db.param(0)# and 
-							site_x_option_group_set_deleted=#db.param(0)# ";
-							if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
-								db.sql&=" and site_x_option_group_set_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+						t9=application.zcore.siteOptionCom.getTypeData(request.zos.globals.id);
+						var groupStruct=t9.optionGroupLookup[form.site_option_group_id];
+	 
+						if(groupStruct.site_option_group_change_cfc_path NEQ ""){
+							path=groupStruct.site_option_group_change_cfc_path;
+							if(left(path, 5) EQ "root."){
+								path=request.zRootCFCPath&removeChars(path, 1, 5);
 							}
-							db.sql&=" ORDER BY site_x_option_group_set_sort ASC 
-							LIMIT #db.param(offset)#, #db.param(20)#";
-							qSorted=db.execute("qSorted");
-							if(qSorted.recordcount EQ 0){
-								break;
-							}
-							for(row in qSorted){
-								offset++;
-								changeCom[groupStruct.site_option_group_change_cfc_sort_method](row.site_x_option_group_set_id, offset); 
+							changeCom=application.zcore.functions.zcreateObject("component", path); 
+							offset=0;
+							while(true){
+								db.sql="select site_x_option_group_set_id FROM #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# 
+								WHERE 
+								site_x_option_group_set.site_option_app_id = #db.param(form.site_option_app_id)# and  
+								site_option_group_id = #db.param(form.site_option_group_id)# and 
+								site_x_option_group_set_parent_id=#db.param(form.site_x_option_group_set_parent_id)# and 
+								site_id = #db.param(request.zos.globals.id)# and 
+								site_x_option_group_set_master_set_id = #db.param(0)# and 
+								site_x_option_group_set_deleted=#db.param(0)# ";
+								if(methodBackup EQ "userManageGroup" and request.isUserPrimaryGroup){
+									db.sql&=" and site_x_option_group_set_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+								}
+								db.sql&=" ORDER BY site_x_option_group_set_sort ASC 
+								LIMIT #db.param(offset)#, #db.param(20)#";
+								qSorted=db.execute("qSorted");
+								if(qSorted.recordcount EQ 0){
+									break;
+								}
+								for(row in qSorted){
+									offset++;
+									changeCom[groupStruct.site_option_group_change_cfc_sort_method](row.site_x_option_group_set_id, offset); 
+								}
 							}
 						}
 					}
@@ -4177,29 +4282,30 @@ Define this function in another CFC to override the default email format
 			var currentRowIndex=0;
 			for(row in qS){
 				currentRowIndex++;
-				if(parentIndex){
-					curRowIndex=0;
-					curIndent=0;
-					curParentId=0;
-					// writedump(parentIndex);
-					// writedump(rs.arrLabel);
-					// writedump(rs.arrValue);abort;
-					for(n=1;n LTE arraylen(rs.arrValue);n++){
-						if(row.site_x_option_group_set_id EQ rs.arrValue[n]){
-							curRowIndex=n;
-							curParentId=rs.arrParent[n];
-							curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
-							break;
-						}
-					}
-					if(curRowIndex EQ 0){
-						curRowIndex="1000000"&rowIndexFix;
-						rowIndexFix++;
-					}
-				}else{
-					curRowIndex=qS.currentrow;
-					curParentId=0;
-				}
+				// if(parentIndex){
+				// 	curRowIndex=0;
+				// 	curIndent=0;
+				// 	curParentId=0;
+				// 	// writedump(parentIndex);
+				// 	// writedump(rs.arrLabel);
+				// 	// writedump(rs.arrValue);abort;
+				// 	for(n=1;n LTE arraylen(rs.arrValue);n++){
+				// 		if(row.site_x_option_group_set_id EQ rs.arrValue[n]){
+				// 			curRowIndex=n;
+				// 			curParentId=rs.arrParent[n];
+				// 			curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
+				// 			break;
+				// 		}
+				// 	}
+				// 	if(curRowIndex EQ 0){
+				// 		curRowIndex="1000000"&rowIndexFix;
+				// 		rowIndexFix++;
+				// 	}
+				// }else{
+				// 	curRowIndex=qS.currentrow;
+				// 	curParentId=0;
+				// }
+				curRowIndex=qS.currentrow;
 				firstDisplayed=true; 
 				// image is not being added to list view
 				savecontent variable="rowOutput"{ 
@@ -4209,8 +4315,8 @@ Define this function in another CFC to override the default email format
 							writeoutput('<td>');
 							if(firstDisplayed){
 								firstDisplayed=false;
-								if(parentIndex NEQ 0 and curIndent){
-									writeoutput(replace(ljustify(" ", curIndent*2), " ", "&nbsp;", "all"));
+								if(row.site_x_option_group_set_level GT 0){
+									writeoutput(replace(ljustify(" ", row.site_x_option_group_set_level*4), " ", "&nbsp;", "all"));
 								}
 							}
 							var currentCFC=application.zcore.siteOptionCom.getTypeCFC(arrType[i]);
@@ -4732,12 +4838,15 @@ Define this function in another CFC to override the default email format
 	WHERE site_option_group_id=#db.param(form.site_option_group_id)# and 
 	site_option_group_deleted = #db.param(0)# and
 	site_id = #db.param(request.zos.globals.id)# ";
-	qCheck=db.execute("qCheck");
+	qCheck=db.execute("qCheck", "", 10000, "query", false); 
 	if(qCheck.recordcount EQ 0){
 		application.zcore.functions.z404("This group doesn't allow public data entry.");	
 	}
 	if(qCheck.site_option_group_form_description NEQ ""){
 		writeoutput(qCheck.site_option_group_form_description);
+	}
+	for(row in qCheck){
+		mainGroupStruct=row;
 	}
 	if(methodBackup EQ "publicAddGroup" or methodBackup EQ "addGroup" or methodBackup EQ "userAddGroup"){
 		application.zcore.functions.zCheckIfPageAlreadyLoadedOnce();
@@ -4786,6 +4895,8 @@ Define this function in another CFC to override the default email format
 			}
 		}
 		arrEnd=arraynew(1);
+
+		resortSetByParentField(mainGroupStruct);
 		</cfscript>
 		<script type="text/javascript">
 		var zDisableBackButton=true;

@@ -1969,13 +1969,14 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 		 }
 		 db.sql&="
 		s2.site_id = #db.param(request.zos.globals.id)#
-		GROUP BY s2.site_id ";
+		GROUP BY s2.site_id";
 		qTemp=db.execute("qTemp", "", 10000, "query", false);  
 
 		if(qTemp.recordcount NEQ 0){
 			db.sql="select 
 			s1.site_x_option_group_set_id id, 
 			s1.site_x_option_group_value label,
+			set1.site_x_option_group_set_sort sort,
 			 s2.site_x_option_group_value value";
 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 				db.sql&=", s3.site_x_option_group_value parentId ";
@@ -2018,7 +2019,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 			}
 			db.sql&=" s2.site_id = #db.param(request.zos.globals.id)#
 			GROUP BY s1.site_x_option_group_set_id, s2.site_x_option_group_set_id
-			ORDER BY label asc ";
+			ORDER BY set1.site_x_option_group_set_sort ASC  ";
 			qTemp2=db.execute("qTemp2", "", 10000, "query", false); 
 			//writedump(qtemp2);abort;
 		}
@@ -2037,11 +2038,11 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 						ds[row2.parentId]={};
 						ds2[row2.parentId]=[];
 					}
-					ds[row2.parentId][row2.id]={ value: row2.value, label:row2.label, id:row2.id, parentId:row2.parentId };
+					ds[row2.parentId][row2.id]={ value: row2.value, sort:row2.sort, label:row2.label, id:row2.id, parentId:row2.parentId };
 				}
 			}
 			for(n in ds){
-				arrKey=structsort(ds[n], "text", "asc", "label");
+				arrKey=structsort(ds[n], "text", "asc", "sort");
 				for(f=1;f LTE arraylen(arrKey);f++){
 					arrayAppend(ds2[n], ds[n][arrKey[f]]);
 				}

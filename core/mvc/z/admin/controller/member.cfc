@@ -885,10 +885,10 @@
 					</cfscript></td>
 				</tr>
 			</cfif> --->
-			<tr>
+			<!--- <tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Google+ URL","member.member.edit user_googleplus_url")#</th>
 				<td><input type="text" name="user_googleplus_url" value="#form.user_googleplus_url#" size="30" /></td>
-			</tr>
+			</tr> --->
 			<tr>
 				<th>#application.zcore.functions.zOutputHelpToolTip("Twitter URL","member.member.edit user_twitter_url")#</th>
 				<td><input type="text" name="user_twitter_url" value="#form.user_twitter_url#" size="30" /></td>

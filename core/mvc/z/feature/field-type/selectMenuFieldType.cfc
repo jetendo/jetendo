@@ -25,7 +25,7 @@
 	<cfargument name="groupTableName" type="string" required="yes">
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	return arguments.groupTableName&".#variables.siteType#_x_option_group_value";
+	return arguments.groupTableName&".feature_data_value";
 	</cfscript>
 </cffunction>
 <cffunction name="onBeforeImport" localmode="modern" access="public">
@@ -500,7 +500,6 @@
 					}
 				}
 			} 
-
 			var selectStruct = StructNew();
 			form.selectmenu_groupid=application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_groupid');
 			selectStruct.name = "selectmenu_groupid";
@@ -514,21 +513,6 @@
 			<tr><td>Value Field: </td><td><input type="text" style="min-width:150px;" name="selectmenu_valuefield" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_valuefield'))#" /></td></tr>
 			<tr><td>Parent Field: </td><td>
 			<input type="text" name="selectmenu_parentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_parentfield'))#" /> (Optional, only use when this group will allow recursive heirarchy)</td></tr>
-			
-			
-			
-			<!--- 
-			This has not been implemented yet.
-			<tr><td colspan="2">Configure a database table as a datasource: </td></tr>
-			<tr><td>Table name: </td>
-			<td><input type="text" name="selectmenu_table" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_table'))#" /></td></tr>
-			<tr><td>Label Field: </td>
-			<td><input type="text" name="selectmenu_tablelabelfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablelabelfield'))#" /></td></tr>
-			<tr><td>Value Field: </td><td><input type="text" name="selectmenu_tablevaluefield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tablevaluefield'))#" style="min-width:150px;" /></td></tr>
-			<tr><td>Parent Field: </td><td>
-			<input type="text" name="selectmenu_tableparentfield" style="min-width:150px;" value="#htmleditformat(application.zcore.functions.zso(arguments.typeStruct, 'selectmenu_tableparentfield'))#" /> (Optional, only use when this table has a parent_id field to allow recursive heirarchy)</td></tr>
-			 --->
-			
 			</table>
 		
 		</div>
@@ -542,50 +526,42 @@
 	<cfscript>
 	var db=request.zos.queryObject;
 	var ts2=arguments.typeFields;
-	local.arrSelectMap=structnew();
+	arrSelectMap=structnew();
 	if(structkeyexists(ts2, 'selectmenu_labels') and ts2.selectmenu_labels NEQ ""){
 		// grab the label list and group data (if using a group)
-		local.arrLabelTemp=listToArray(ts2.selectmenu_labels, ts2.selectmenu_delimiter, true);
-		local.arrValueTemp=listToArray(ts2.selectmenu_values, ts2.selectmenu_delimiter, true);
+		arrLabelTemp=listToArray(ts2.selectmenu_labels, ts2.selectmenu_delimiter, true);
+		arrValueTemp=listToArray(ts2.selectmenu_values, ts2.selectmenu_delimiter, true);
 		// loop the label list
-		for(local.f=1;local.f LTE arraylen(local.arrLabelTemp);local.f++){
+		for(f=1;f LTE arraylen(arrLabelTemp);f++){
 			if(arguments.indexById){
-				local.arrSelectMap[local.arrValueTemp[local.f]]=local.arrLabelTemp[local.f];
+				arrSelectMap[arrValueTemp[f]]=arrLabelTemp[f];
 			}else{
-				local.arrSelectMap[local.arrLabelTemp[local.f]]=local.arrValueTemp[local.f];
+				arrSelectMap[arrLabelTemp[f]]=arrValueTemp[f];
 			}
 		}
 	}
-	if(structkeyexists(ts2, 'selectmenu_groupid') and ts2.selectmenu_groupid NEQ ""){
-		// grab all the group values and ids
-		db.sql="select * from #db.table("#variables.siteType#_x_option_group", request.zos.zcoreDatasource)# s1, 
-		#db.table("feature_field", request.zos.zcoreDatasource)# s2
+	if(structkeyexists(ts2, 'selectmenu_groupid') and ts2.selectmenu_groupid NEQ ""){ 
+		db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 		WHERE 
-		s1.#variables.siteType#_x_option_group_deleted = #db.param(0)# and
-		s2.feature_field_deleted = #db.param(0)# and
-		s2.feature_field_id = s1.feature_field_id and 
-		s2.feature_schema_id = s1.feature_schema_id and 
-		s2.feature_id = s1.feature_id and 
-		s1.feature_schema_id = #db.param(ts2.selectmenu_groupid)# and 
-		s1.feature_id=#db.param(form.feature_id)# ";
-		local.qSchemaData=db.execute("qSchemaData");
+		feature_data_deleted = #db.param(0)# and
+		feature_schema_id = #db.param(ts2.selectmenu_groupid)# and 
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
+		feature_id=#db.param(form.feature_id)# ";
+		qSchemaData=db.execute("qSchemaData");
 		// loop the group data
-		local.tempSet={};
-		for(local.row2 in local.qSchemaData){
-			if(not structkeyexists(local.tempSet, local.row2["feature_data_id"])){
-				local.tempSet[local.row2["feature_data_id"]]={};
+		tempSet={};
+		for(row2 in qSchemaData){
+			tempSet[row2["feature_data_id"]]=application.zcore.featureCom.parseFieldData(row2);
+			for(n in tempSet){
+				if(arguments.indexById){
+					arrSelectMap[n]=tempSet[n][ts2.selectmenu_labelfield];
+				}else{
+					arrSelectMap[tempSet[n][ts2.selectmenu_labelfield]]=n;
+				}
 			}
-			local.tempSet[local.row2["feature_data_id"]][local.row2["feature_field_variable_name"]]=local.row2["#variables.siteType#_x_option_group_value"];
-		}
-		for(local.n in local.tempSet){
-			if(arguments.indexById){
-				local.arrSelectMap[local.n]=local.tempSet[local.n][ts2.selectmenu_labelfield];
-			}else{
-				local.arrSelectMap[local.tempSet[local.n][ts2.selectmenu_labelfield]]=local.n;
-			}
-		}
+		} 
 	}
-	return local.arrSelectMap;
+	return arrSelectMap;
 	</cfscript>
 </cffunction>
 
@@ -597,38 +573,38 @@
 	var ts=0;
 	var row=0; 
 	var i=0;
-	local.selectedValue="";
+	selectedValue="";
 	if(structkeyexists(form, "newvalue"&arguments.option_id)){
-		local.selectedValue=form["newvalue"&arguments.option_id];
+		selectedValue=form["newvalue"&arguments.option_id];
 	}
 	
-	local.rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, false); 
-	ts=local.rs.ts; 
+	rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, false); 
+	ts=rs.ts; 
 	if(structkeyexists(ts,'selectmenu_labels') and ts.selectmenu_labels NEQ ""){ 
-		local.arrTemp=listToArray(ts.selectmenu_values, ts.selectmenu_delimiter, true);
-		local.arrLabelTemp=listToArray(ts.selectmenu_labels, ts.selectmenu_delimiter, true);
-		for(i=1;i LTE arraylen(local.arrTemp);i++){
-			if(compare(local.arrTemp[i], local.selectedValue) EQ 0){
-				return local.arrLabelTemp[i];
+		arrTemp=listToArray(ts.selectmenu_values, ts.selectmenu_delimiter, true);
+		arrLabelTemp=listToArray(ts.selectmenu_labels, ts.selectmenu_delimiter, true);
+		for(i=1;i LTE arraylen(arrTemp);i++){
+			if(compare(arrTemp[i], selectedValue) EQ 0){
+				return arrLabelTemp[i];
 			}
 		} 
 	}
 	if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-		for(i=1;i LTE arraylen(local.rs.arrValue);i++){
-			if(compare(local.rs.arrValue[i], local.selectedValue) EQ 0){
-				return local.rs.arrLabel[i];
+		for(i=1;i LTE arraylen(rs.arrValue);i++){
+			if(compare(rs.arrValue[i], selectedValue) EQ 0){
+				return rs.arrLabel[i];
 			}
 		}  
-	}else if(structkeyexists(local.rs, 'qTemp2')){
-		local.enabled=true; 
-		for(row in local.rs.qTemp2){
-			if(compare(row.value, local.selectedValue) EQ 0){
+	}else if(structkeyexists(rs, 'qTemp2')){
+		enabled=true; 
+		for(row in rs.qTemp2){
+			if(compare(row.value, selectedValue) EQ 0){
 				return row.label;
 			}
 		}
 	}
 	// return the value if label can't be found.
-	return local.selectedValue;
+	return selectedValue;
 	</cfscript>
 </cffunction>
 
@@ -643,10 +619,10 @@
 	<cfscript>
 	var selectStruct = StructNew();
 	var ts=0;
-	local.rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, arguments.enableSearchView);
+	rs=application.zcore.featureCom.prepareRecursiveData(arguments.option_id, arguments.option_group_id, arguments.setFieldStruct, arguments.enableSearchView);
 	selectStruct.name = "newvalue#arguments.option_id#";
-	ts=local.rs.ts;
-	local.enabled=false;
+	ts=rs.ts;
+	enabled=false;
 	selectStruct.size=application.zcore.functions.zso(ts, 'selectmenu_size', true, 1);
 	if(arguments.enableSearchView){
 		selectStruct.size=1;
@@ -662,28 +638,28 @@
 		selectStruct.listValuesDelimiter = ts.selectmenu_delimiter;
 		selectStruct.listLabels=ts.selectmenu_labels;
 		selectStruct.listValues=ts.selectmenu_values;
-		local.enabled=true;
+		enabled=true;
 	}
 	selectStruct.onchange="";
 	if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 		selectStruct.listLabelsDelimiter = ts.selectmenu_delimiter;
 		selectStruct.listValuesDelimiter = ts.selectmenu_delimiter;
 		if(structkeyexists(ts,'selectmenu_labels') and ts.selectmenu_labels NEQ ""){
-			selectStruct.listLabels=selectStruct.listLabels&ts.selectmenu_delimiter&arraytolist(local.rs.arrLabel, ts.selectmenu_delimiter);
-			selectStruct.listValues=selectStruct.listValues&ts.selectmenu_delimiter&arraytolist(local.rs.arrValue, ts.selectmenu_delimiter);
+			selectStruct.listLabels=selectStruct.listLabels&ts.selectmenu_delimiter&arraytolist(rs.arrLabel, ts.selectmenu_delimiter);
+			selectStruct.listValues=selectStruct.listValues&ts.selectmenu_delimiter&arraytolist(rs.arrValue, ts.selectmenu_delimiter);
 		}else{
-			selectStruct.listLabels=arraytolist(local.rs.arrLabel, ts.selectmenu_delimiter);
-			selectStruct.listValues=arraytolist(local.rs.arrValue, ts.selectmenu_delimiter);
+			selectStruct.listLabels=arraytolist(rs.arrLabel, ts.selectmenu_delimiter);
+			selectStruct.listValues=arraytolist(rs.arrValue, ts.selectmenu_delimiter);
 		}
 		if(structkeyexists(form, 'feature_data_id')){
 
 			selectStruct.onchange="for(var i in this.options){ if(this.options[i].selected && this.options[i].value != '' && this.options[i].value=='#form["feature_data_id"]#'){alert('You can\'t select the same item you are editing.');this.selectedIndex=0;}; } ";
 		}
-		local.enabled=true;
+		enabled=true;
 		// must use id as the value instead of "value" because parent_id can't be a string or uniqueness would be wrong.
-	}else if(structkeyexists(local.rs, 'qTemp2')){
-		local.enabled=true;
-		selectStruct.query = local.rs.qTemp2;
+	}else if(structkeyexists(rs, 'qTemp2')){
+		enabled=true;
+		selectStruct.query = rs.qTemp2;
 		selectStruct.queryLabelField = "label";
 		selectStruct.queryValueField = "id";
 	} 
@@ -692,7 +668,7 @@
 	if(arguments.required){
 		selectStruct.required=true;
 	}
-	if(local.enabled){
+	if(enabled){
 
 		selectStruct.multiple=false;
 		if(arguments.enableSearchView){
@@ -707,8 +683,8 @@
 			}
 		}
 		selectStruct.output=false;
-		local.tempOutput=application.zcore.functions.zInputSelectBox(selectStruct);
-		return replace(local.tempOutput, "_", "&nbsp;", "all");
+		tempOutput=application.zcore.functions.zInputSelectBox(selectStruct);
+		return replace(tempOutput, "_", "&nbsp;", "all");
 	}else{
 		return "";
 	}

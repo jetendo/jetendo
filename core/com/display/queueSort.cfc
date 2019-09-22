@@ -136,18 +136,21 @@ queueSortCom.init(inputStruct);
 	}
 	db.sql&=" ORDER BY `#this.sortFieldName#` asc";
 	qSort=db.execute("qSort");
-	if(qSort.recordcount NEQ arraylen(arrOriginalId)){
-		return {success:false, errorMessage:"Sort cancelled. Data has changed. Please refresh and try again."};
-	}
-	arrOldSort=[];
-	for(row in qSort){
-		arrayAppend(arrOldSort, row.id);
-	}
-	if(compare(arrayToList(arrOldSort, ","), arrayTOList(arrOriginalId, ",")) NEQ 0){
-		if(request.zos.istestserver){
-			return {success:false, errorMessage:"Sort cancelled. Sort order has changed. Please refresh and try again."&chr(10)&"old:"&arrayToList(arrOldSort, ",")&chr(10)&"new:"&arrayTOList(arrOriginalId, ",")};
-		}else{
-			return {success:false, errorMessage:"Sort cancelled. Sort order has changed. Please refresh and try again." };//&chr(10)&arrayToList(arrOldSort, ",")&chr(10)&arrayTOList(arrOriginalId, ",")&chr(10)&out};
+
+	if(not structkeyexists(form, "zDisableSortValidation")){
+		if(qSort.recordcount NEQ arraylen(arrOriginalId)){
+			return {success:false, errorMessage:"Sort cancelled. Data has changed. Please refresh and try again."};
+		}
+		arrOldSort=[];
+		for(row in qSort){
+			arrayAppend(arrOldSort, row.id);
+		}
+		if(compare(arrayToList(arrOldSort, ","), arrayTOList(arrOriginalId, ",")) NEQ 0){
+			if(request.zos.istestserver){
+				return {success:false, errorMessage:"Sort cancelled. Sort order has changed. Please refresh and try again."&chr(10)&"old:"&arrayToList(arrOldSort, ",")&chr(10)&"new:"&arrayTOList(arrOriginalId, ",")};
+			}else{
+				return {success:false, errorMessage:"Sort cancelled. Sort order has changed. Please refresh and try again." };//&chr(10)&arrayToList(arrOldSort, ",")&chr(10)&arrayTOList(arrOriginalId, ",")&chr(10)&out};
+			}
 		}
 	}
 	transaction action="begin"{

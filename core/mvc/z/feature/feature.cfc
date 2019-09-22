@@ -1229,186 +1229,319 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfscript>
 	var db=request.zos.queryObject;
 	var ts=arguments.setFieldStruct;
-	arrLabel=[];
-	arrValue=[];
-	arrParent=[];
+	rs2={
+		ts:ts,
+		arrLabel:[],
+		arrValue:[],
+		arrParent:[]
+	};
 	delimiter="|";
 	if(arguments.setFieldStruct.selectmenu_delimiter EQ "|"){
 		delimiter=",";
 	}
-	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
-		parentId=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
-		// need parent group of ts.selectmenu_groupid
-		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
-		WHERE feature_schema_id=#db.param(ts.selectmenu_groupid)# and 
-		feature_schema_deleted=#db.param(0)# and 
-		feature_id=#db.param(form.feature_id)# ";
-		qParentSchema=db.execute("qParentSchema", "", 10000, "query", false); 
-		found=false; 
-		if(qParentSchema.recordcount NEQ 0 and qParentSchema.feature_schema_parent_id NEQ 0 and form.feature_data_parent_id NEQ 0){ 
-			for(i=1;i<=50;i++){
-				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
-				 feature_data_deleted=#db.param(0)# and 
-				 feature_data_id=#db.param(parentId)# and 
-				 feature_id=#db.param(form.feature_id)#";
-				qParentSet=db.execute("qParentSet"); 
-				if(qParentSet.feature_schema_id EQ qParentSchema.feature_schema_parent_id){
-					parentId=qParentSet.feature_data_id;
-					found=true;
-					break;
-				}
-				if(qParentSet.feature_data_parent_id EQ 0){
-					break;
-				}else{
-					parentId=qParentSet.feature_data_parent_id;
-				}
-				if(i EQ 50){
-					throw("Infinite loop detected in group heirarchy");
-				}
-			}
-		}
-		if(not found){
-			parentId=0;
-		} 
-		db.sql="select s1.feature_field_id labelFieldId, s2.feature_field_id valueFieldId ";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=",  s3.feature_field_id parentFieldID ";
-		 }
-		 db.sql&="
-		from 
-		 #db.table("feature_field", request.zos.zcoreDatasource)# s1 , 
-		 #db.table("feature_field", request.zos.zcoreDatasource)# s2";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=",  #db.table("feature_field", request.zos.zcoreDatasource)# s3 ";
-		 }
-		 db.sql&=" WHERE 
-		 s1.feature_field_deleted = #db.param(0)# and 
-		 s2.feature_field_deleted = #db.param(0)# and
-		s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-		s1.feature_field_variable_name = #db.param(ts.selectmenu_labelfield)# and 
+// 	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
+// 		parentId=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
+// 		// need parent group of ts.selectmenu_groupid
+// 		db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
+// 		WHERE feature_schema_id=#db.param(ts.selectmenu_groupid)# and 
+// 		feature_schema_deleted=#db.param(0)# and 
+// 		feature_id=#db.param(form.feature_id)# ";
+// 		qParentSchema=db.execute("qParentSchema", "", 10000, "query", false); 
+// 		found=false; 
+// 		if(qParentSchema.recordcount NEQ 0 and qParentSchema.feature_schema_parent_id NEQ 0 and form.feature_data_parent_id NEQ 0){ 
+// 			for(i=1;i<=50;i++){
+// 				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+// 				 feature_data_deleted=#db.param(0)# and 
+// 				 feature_data_id=#db.param(parentId)# and 
+// 				 feature_id=#db.param(form.feature_id)#";
+// 				qParentSet=db.execute("qParentSet"); 
+// 				if(qParentSet.feature_schema_id EQ qParentSchema.feature_schema_parent_id){
+// 					parentId=qParentSet.feature_data_id;
+// 					found=true;
+// 					break;
+// 				}
+// 				if(qParentSet.feature_data_parent_id EQ 0){
+// 					break;
+// 				}else{
+// 					parentId=qParentSet.feature_data_parent_id;
+// 				}
+// 				if(i EQ 50){
+// 					throw("Infinite loop detected in group heirarchy");
+// 				}
+// 			}
+// 		}
+// 		if(not found){
+// 			parentId=0;
+// 		} 
+// 		db.sql="select s1.feature_field_id labelFieldId, s2.feature_field_id valueFieldId ";
+// 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 			db.sql&=",  s3.feature_field_id parentFieldID ";
+// 		 }
+// 		 db.sql&="
+// 		from 
+// 		 #db.table("feature_field", request.zos.zcoreDatasource)# s1 , 
+// 		 #db.table("feature_field", request.zos.zcoreDatasource)# s2";
+// 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 			db.sql&=",  #db.table("feature_field", request.zos.zcoreDatasource)# s3 ";
+// 		 }
+// 		 db.sql&=" WHERE 
+// 		 s1.feature_field_deleted = #db.param(0)# and 
+// 		 s2.feature_field_deleted = #db.param(0)# and
+// 		s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
+// 		s1.feature_field_variable_name = #db.param(ts.selectmenu_labelfield)# and 
 		
-		s2.site_id = s1.site_id and 
-		s2.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-		s2.feature_field_variable_name = #db.param(ts.selectmenu_valuefield)# and 
-		";
-		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			db.sql&=" s3.site_id = s1.site_id and 
-			s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-			s3.feature_field_variable_name = #db.param(ts.selectmenu_parentfield)# and 
-			s3.feature_field_deleted = #db.param(0)# and ";
-		 }
-		 db.sql&="
-		s2.feature_id=#db.param(form.feature_id)#
-		GROUP BY s2.site_id ";
-		qTemp=db.execute("qTemp", "", 10000, "query", false);  
+// 		s2.site_id = s1.site_id and 
+// 		s2.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
+// 		s2.feature_field_variable_name = #db.param(ts.selectmenu_valuefield)# and 
+// 		";
+// 		 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 			db.sql&=" s3.site_id = s1.site_id and 
+// 			s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
+// 			s3.feature_field_variable_name = #db.param(ts.selectmenu_parentfield)# and 
+// 			s3.feature_field_deleted = #db.param(0)# and ";
+// 		 }
+// 		 db.sql&="
+// 		s2.feature_id=#db.param(form.feature_id)#
+// 		GROUP BY s2.site_id ";
+// 		qTemp=db.execute("qTemp", "", 10000, "query", false);  
 
-		if(qTemp.recordcount NEQ 0){
-			db.sql="select 
-			s1.feature_data_id id, 
-			s1.feature_data_value label,
-			 s2.feature_data_value value";
-			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-				db.sql&=", s3.feature_data_value parentId ";
-			//	db.sql&=", s3.feature_data_value parentId ";
-			 }
-			 db.sql&=" from (
-			 #db.table("feature_data", request.zos.zcoreDatasource)# set1,
-			 #db.table("feature_data", request.zos.zcoreDatasource)# s1 , 
-			 #db.table("feature_data", request.zos.zcoreDatasource)# s2 ";
-			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-				db.sql&=" ,#db.table("feature_data", request.zos.zcoreDatasource)# s3";
-			 }
-			db.sql&=") WHERE ";
-			if(parentID NEQ 0){
-				db.sql&=" set1.feature_data_parent_id=#db.param(parentId)# and ";
-			}
-			db.sql&=" set1.feature_data_deleted=#db.param(0)# and 
-			set1.feature_data_id=s1.feature_data_id and
-			set1.site_id = s1.site_id and 
-			s1.feature_data_deleted = #db.param(0)# and 
-			s2.feature_data_deleted = #db.param(0)# and 
-			s1.feature_field_id = #db.param(qTemp.labelFieldId)# and 
-			s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-			s1.feature_data_id = s2.feature_data_id AND 
-			s2.site_id = s1.site_id and 
-			s2.feature_field_id = #db.param(qTemp.valueFieldId)# and 
-			s2.feature_schema_id = #db.param(ts.selectmenu_groupid)# and ";
-			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-				db.sql&=" s3.site_id = s1.site_id and 
-				s3.feature_field_id = #db.param(qTemp.parentFieldID)# and 
-				s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
-				s1.feature_data_id = s3.feature_data_id and 
-				s3.feature_data_deleted = #db.param(0)# and ";
-			 }
-			if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
-				if(arguments.feature_schema_id EQ ts.selectmenu_groupid){
-					// exclude current feature_data_id from query
-					db.sql&="  s1.feature_data_id <> #db.param(form.feature_data_id)# and ";
-				}
-			}
-			db.sql&=" s2.feature_id=#db.param(form.feature_id)#
-			GROUP BY s1.feature_data_id, s2.feature_data_id
-			ORDER BY label asc ";
-			qTemp2=db.execute("qTemp2", "", 10000, "query", false); 
-			//writedump(qtemp2);abort;
-		}
+// 		if(qTemp.recordcount NEQ 0){
+// 			db.sql="select 
+// 			s1.feature_data_id id, 
+// 			s1.feature_data_value label,
+// 			set1.feature_data_sort sort,
+// 			 s2.feature_data_value value";
+// 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 				db.sql&=", s3.feature_data_value parentId ";
+// 			//	db.sql&=", s3.feature_data_value parentId ";
+// 			 }
+// 			 db.sql&=" from (
+// 			 #db.table("feature_data", request.zos.zcoreDatasource)# set1,
+// 			 #db.table("feature_data", request.zos.zcoreDatasource)# s1 , 
+// 			 #db.table("feature_data", request.zos.zcoreDatasource)# s2 ";
+// 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 				db.sql&=" ,#db.table("feature_data", request.zos.zcoreDatasource)# s3";
+// 			 }
+// 			db.sql&=") WHERE ";
+// 			if(parentID NEQ 0){
+// 				db.sql&=" set1.feature_data_parent_id=#db.param(parentId)# and ";
+// 			}
+// 			db.sql&=" set1.feature_data_deleted=#db.param(0)# and 
+// 			set1.feature_data_id=s1.feature_data_id and
+// 			set1.site_id = s1.site_id and 
+// 			s1.feature_data_deleted = #db.param(0)# and 
+// 			s2.feature_data_deleted = #db.param(0)# and 
+// 			s1.feature_field_id = #db.param(qTemp.labelFieldId)# and 
+// 			s1.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
+// 			s1.feature_data_id = s2.feature_data_id AND 
+// 			s2.site_id = s1.site_id and 
+// 			s2.feature_field_id = #db.param(qTemp.valueFieldId)# and 
+// 			s2.feature_schema_id = #db.param(ts.selectmenu_groupid)# and ";
+// 			 if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 				db.sql&=" s3.site_id = s1.site_id and 
+// 				s3.feature_field_id = #db.param(qTemp.parentFieldID)# and 
+// 				s3.feature_schema_id = #db.param(ts.selectmenu_groupid)# and 
+// 				s1.feature_data_id = s3.feature_data_id and 
+// 				s3.feature_data_deleted = #db.param(0)# and ";
+// 			 }
+// 			if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
+// 				if(arguments.feature_schema_id EQ ts.selectmenu_groupid){
+// 					// exclude current feature_data_id from query
+// 					db.sql&="  s1.feature_data_id <> #db.param(form.feature_data_id)# and ";
+// 				}
+// 			}
+// 			db.sql&=" s2.feature_id=#db.param(form.feature_id)#
+// 			GROUP BY s1.feature_data_id, s2.feature_data_id
+// 			ORDER BY set1.feature_data_sort asc ";
+// 			qTemp2=db.execute("qTemp2", "", 10000, "query", false); 
+// 			//writedump(qtemp2);abort;
+// 		}
 
-		// ts.selectmenu_groupid
-		// feature_schema_id=9
-		if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
-			ds=structnew();
-			ds2=structnew();
-			if(qTemp.recordcount NEQ 0){
-				for(row2 in qTemp2){
-					if(row2.parentId EQ ""){
-						row2.parentId=0;
-					}
-					if(not structkeyexists(ds, row2.parentId)){
-						ds[row2.parentId]={};
-						ds2[row2.parentId]=[];
-					}
-					ds[row2.parentId][row2.id]={ value: row2.value, label:row2.label, id:row2.id, parentId:row2.parentId };
+// 		// ts.selectmenu_groupid
+// 		// feature_schema_id=9
+// 		if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+// 			ds=structnew();
+// 			ds2=structnew();
+// 			if(qTemp.recordcount NEQ 0){
+// 				for(row2 in qTemp2){
+// 					if(row2.parentId EQ ""){
+// 						row2.parentId=0;
+// 					}
+// 					if(not structkeyexists(ds, row2.parentId)){
+// 						ds[row2.parentId]={};
+// 						ds2[row2.parentId]=[];
+// 					}
+// 					ds[row2.parentId][row2.id]={ value: row2.value, sort:row2.sort, label:row2.label, id:row2.id, parentId:row2.parentId };
+// 				}
+// 			}
+// 			for(n in ds){
+// 				arrKey=structsort(ds[n], "text", "asc", "sort");
+// 				for(f=1;f LTE arraylen(arrKey);f++){
+// 					arrayAppend(ds2[n], ds[n][arrKey[f]]);
+// 				}
+// 			}
+// 			// all subcategories sorted, now do the combine + indent
+// 			if(structkeyexists(ds2, "0")){
+// 				arrCurrent=ds2["0"];
+// 			}
+// 			if(arguments.enableSearchView){
+// 				for(n in ds){
+// 					for(g in ds[n]){
+// 						arrChildValues=[];
+// 						arrChildValues=variables.getChildValues(ds, ds[n][g], arrChildValues, 1);
+// 						arraySort(arrChildValues, "text");
+// 						//ds[n][g].value=arrayToList(arrChildValues, delimiter);
+// 						ds[n][g].idChild=arrayToList(arrChildValues, delimiter);
+// 					}
+// 				}
+// 			}
+// 			if(structkeyexists(ds2, "0")){
+// //				writedump(arguments.settypeStruct);				writedump(ds2);				writedump(ds);				writedump(arrValue);				abort;/**/
+// 				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, arrParent, 0);
+// 			}
+// 		}
+// 	}
+	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
+		// get the group from memory cache
+		rs=getSortedData(ts.selectmenu_groupid);
+		for(i=1;i<=arraylen(rs.arrOrder);i++){
+			cs=rs.arrOrder[i];
+			// get the right label / value fields
+
+			
+			
+ 			if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
+				if(rs.arrLevel[i] > 0){
+					indent=ljustify("_", rs.arrLevel[i]*4);
+				}else{
+					indent="";
 				}
-			}
-			for(n in ds){
-				arrKey=structsort(ds[n], "text", "asc", "label");
-				for(f=1;f LTE arraylen(arrKey);f++){
-					arrayAppend(ds2[n], ds[n][arrKey[f]]);
-				}
-			}
-			// all subcategories sorted, now do the combine + indent
-			if(structkeyexists(ds2, "0")){
-				arrCurrent=ds2["0"];
-			}
-			if(arguments.enableSearchView){
-				for(n in ds){
-					for(g in ds[n]){
-						arrChildValues=[];
-						arrChildValues=variables.getChildValues(ds, ds[n][g], arrChildValues, 1);
-						arraySort(arrChildValues, "text");
-						//ds[n][g].value=arrayToList(arrChildValues, delimiter);
-						ds[n][g].idChild=arrayToList(arrChildValues, delimiter);
-					}
-				}
-			}
-			if(structkeyexists(ds2, "0")){
-//				writedump(arguments.settypeStruct);				writedump(ds2);				writedump(ds);				writedump(arrValue);				abort;/**/
-				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, arrParent, 0);
-			}
+ 			}else{
+ 				indent="";
+ 			}
+			arrayAppend(rs2.arrLabel, indent&cs.data[ts.selectmenu_labelfield]);
+			arrayAppend(rs2.arrValue, cs.row.feature_data_id); // ts.selectmenu_valuefield
+			arrayAppend(rs2.arrParent, cs.row.feature_data_parent_id);
 		}
+		// use the level
 	}
-	rs= { 
-		ts: ts, 
-		arrLabel: arrLabel, 
-		arrValue: arrValue
-	};
 	if(structkeyexists(local, 'qTemp2')){
-		rs.qTemp2=qTemp2;
+		rs2.qTemp2=qTemp2;
+	}
+	return rs2;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getSortedData" localmode="modern" access="public">
+	<cfargument name="feature_schema_id" type="string" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="select * from 
+	#db.table("feature_data", request.zos.zcoreDatasource)#
+	 WHERE 
+	feature_data.feature_schema_id=#db.param(arguments.feature_schema_id)# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_data_deleted=#db.param(0)# 
+	ORDER BY feature_data_sort ASC ";
+	qData=db.execute("qData", "", 10000, "query", false); 
+	rs={
+		arrOrder:[],
+		arrLevel:[]
+	}; 
+	if(qData.recordcount NEQ 0){
+		schemaStruct=application.zcore.featureData.featureSchemaData[qData.feature_id].featureSchemaLookup[arguments.feature_schema_id];
+		addChildrenToParentOrder(qData, schemaStruct.feature_schema_parent_field, rs.arrOrder, rs.arrLevel, "", 0);
 	}
 	return rs;
 	</cfscript>
 </cffunction>
 
+<cffunction name="resortSetByParentField" localmode="modern" access="public">
+	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	rs=getSortedData(arguments.groupQuery);
+	for(i=1;i<=arraylen(rs.arrOrder);i++){
+		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)#
+		set 
+		feature_data_sort=#db.param(i)#, 
+		feature_data_level=#db.param(rs.arrLevel[i])# 
+		WHERE 
+		feature_data.feature_data_id=#db.param(rs.arrOrder[i].row.feature_data_id)# and 
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
+		feature_data.feature_data_deleted=#db.param(0)#";
+		db.execute("qUpdate");
+
+		// fire onChange com if there is one
+		if(arguments.groupQuery.feature_schema_change_cfc_path NEQ ""){
+			path=arguments.groupQuery.feature_schema_change_cfc_path;
+			if(left(path, 5) EQ "root."){
+				path=request.zRootCFCPath&removeChars(path, 1, 5);
+			}
+			changeCom=application.zcore.functions.zcreateObject("component", path); 
+			changeCom[arguments.groupQuery.feature_schema_change_cfc_sort_method](row.feature_data_id, i); 
+		}
+	}
+	</cfscript>
+</cffunction>
+
+
+
+<cffunction name="parseFieldData" localmode="modern" access="public">
+	<cfargument name="row" type="struct" required="yes">
+	<cfscript>
+	if(not structkeyexists(request.zos, "featureFieldLookup"&row.feature_schema_id)){
+		db=request.zos.queryObject;
+		db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# 
+		WHERE 
+		feature_field_deleted = #db.param(0)# and
+		feature_schema_id = #db.param(row.feature_schema_id)# and 
+		feature_id = #db.param(form.feature_id)# ";
+		qField=db.execute("qField");
+		fieldLookup={};
+		for(field in qField){
+			fieldLookup[field.feature_field_id]=field.feature_field_variable_name;
+		}
+		request.zos["featureFieldLookup"&row.feature_schema_id]=fieldLookup;
+	}else{
+		fieldLookup=request.zos["featureFieldLookup"&row.feature_schema_id];
+	}
+	tempSet={};
+	arrField=listToArray(row.feature_data_field_order, chr(13), true);
+	arrData=listToArray(row.feature_data_data, chr(13), true);
+	for(i=1;i<=arraylen(arrField);i++){
+		fieldId=arrField[i];
+		if(structkeyexists(fieldLookup, fieldId)){
+			tempSet[fieldLookup[fieldId]]=arrData[i];
+		}
+	}
+	return tempSet;
+	</cfscript>
+</cffunction>
+
+<cffunction name="addChildrenToParentOrder" localmode="modern" access="public">
+	<cfargument name="optionQuery" type="query" required="yes">
+	<cfargument name="parentFieldName" type="string" required="yes">
+	<cfargument name="arrOrder" type="array" required="yes">
+	<cfargument name="arrLevel" type="array" required="yes">
+	<cfargument name="parentId" type="string" required="yes">
+	<cfargument name="recursionCount" type="numeric" required="yes">
+	<cfscript>
+	arguments.recursionCount++;
+	if(arguments.recursionCount GT 100){
+		throw("Possible infinite recursion detected in parent/child relationships");
+	}
+	for(row in optionQuery){
+		tempSet=parseFieldData(row);
+		if(arguments.parentID EQ tempSet[arguments.parentFieldName]){ 
+			arrayAppend(arrOrder, {row:row, data:tempSet});
+			arrayAppend(arrLevel, arguments.recursionCount-1);
+			addChildrenToParentOrder(optionQuery, arguments.parentFieldName, arrOrder, arrLevel, row.feature_data_id, recursionCount);
+		}
+	}
+	</cfscript>
+</cffunction>
 
 
 

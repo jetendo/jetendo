@@ -97,9 +97,6 @@
 			if(row.member_website NEQ ''){
 				echo('<strong>Web Site:</strong> <a href="#row.member_website#" target="_blank">Visit Web Site</a><br />');
 			}
-			if(row.user_googleplus_url NEQ ''){
-				echo('<a href="#row.user_googleplus_url#" target="_blank">Find me on Google+</a><br />');
-			}
 			if(row.user_twitter_url NEQ ''){
 				echo('<a href="#row.user_twitter_url#" target="_blank">Find me on Twitter</a><br />');
 			}

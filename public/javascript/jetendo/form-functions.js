@@ -326,14 +326,11 @@ var zLastAjaxVarName=""; */
 						}
 					} 
 
+					var reloadOnSuccess=false;
 					// when using parent field, we can't let use sort children outside their parent.
 					var parentId=$(e2.item[0]).attr("data-ztable-sort-parent-id");
-					var previousParentId=$(e2.item[0].previousSibling).attr("data-ztable-sort-parent-id");
-					if(parentId != "" || previousParentId !=""){
-						if(parentId != previousParentId){
-							$('#'+tableId+' tbody' ).sortable('cancel');
-							return;
-						}
+					if(parentId != null && parentId != ""){
+						reloadOnSuccess=true;
 					}
 
 					var sortOrderList=arrId2.join("|");
@@ -343,6 +340,9 @@ var zLastAjaxVarName=""; */
 					tempObj.url=zAjaxSortURLCache[tableId].url;
 					tempObj.method="post";
 					tempObj.postObj={};
+					if(reloadOnSuccess){
+						tempObj.postObj.zDisableSortValidation=1;
+					}
 					tempObj.postObj[ajaxVarName]=sortOrderList;
 					tempObj.postObj[ajaxVarNameOriginal]=originalSortOrderList; 
 					tempObj.callback=function(r){
@@ -369,6 +369,10 @@ var zLastAjaxVarName=""; */
 							originalSortOrderList=arrSort.join("|");
 							$("#"+tableId+" tbody").attr("data-original-sort", originalSortOrderList); 
 							ajaxCallback(tempObj);  
+
+							if(reloadOnSuccess){
+								window.location.reload();
+							}
 						}
 					};
 					tempObj.errorCallback=function(){

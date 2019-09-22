@@ -497,7 +497,7 @@
 		feature_field_deleted = #db.param(0)#"; 
 		qCheck=db.execute("qCheck");
 		if(qCheck.site_id EQ 0 and variables.allowGlobal EQ false){
-			application.zcore.functions.zRedirect("/z/feature/admin/features/index");
+			application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#");
 		}
 		// force code name to never change after initial creation
 		//form.feature_field_variable_name=qCheck.feature_field_variable_name;
@@ -509,7 +509,7 @@
 	result = application.zcore.functions.zValidateStruct(form, myForm, Request.zsid,true);
 	if(result eq true){	
 		application.zcore.status.setStatus(Request.zsid, false,form,true);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);
+		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);
 	}
 	var rs=0;
 	var currentCFC=application.zcore.featureCom.getTypeCFC(form.feature_field_type_id);
@@ -517,7 +517,7 @@
 	// need this here someday: var rs=currentCFC.validateFormField(row, typeStruct, 'newvalue', form);
 	rs=currentCFC.onUpdate(form);   
 	if(not rs.success){ 
-		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);	
+		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);	
 	}
 	db.sql="SELECT *
 	FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
@@ -526,7 +526,7 @@
 	qSchema=db.execute("qSchema");
 	if(qSchema.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Invalid Schema ID", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);
+		application.zcore.functions.zRedirect("/z/feature/admin/features/#formAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&zsid=#Request.zsid#&feature_field_id=#form.feature_field_id#"&returnAppendString);
 	}
 	form.feature_id=qSchema.feature_id;
 	db.sql="SELECT count(feature_field_id) count 
@@ -539,7 +539,7 @@
 	qDF=db.execute("qDF");
 	if(qDF.count NEQ 0){
 		application.zcore.status.setStatus(request.zsid,"Feature Field ""#form.feature_field_variable_name#"" already exists. Please make the name unique.",form);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#&zsid=#request.zsid#"&returnAppendString);	
+		application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#&zsid=#request.zsid#"&returnAppendString);	
 	}
 	ts=structnew();
 	ts.table="feature_field"; 
@@ -549,12 +549,12 @@
 		form.feature_field_id=application.zcore.functions.zInsert(ts); 
 		if(form.feature_field_id EQ false){
 			application.zcore.status.setStatus(request.zsid,"Failed to create Feature Field because ""#form.feature_field_variable_name#"" already exists or  the insert query failed.",form);
-			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#"&returnAppendString);
+			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#"&returnAppendString);
 		}
 	}else{
 		if(application.zcore.functions.zUpdate(ts) EQ false){
 			application.zcore.status.setStatus(request.zsid,"Failed to UPDATE #db.table("site", request.zos.zcoreDatasource)# Feature Field because ""#form.feature_field_variable_name#"" already exists. Please make the name unique.",form);
-			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#&zsid=#request.zsid#"&returnAppendString);	
+			application.zcore.functions.zRedirect("/z/feature/admin/features/#formaction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#&zsid=#request.zsid#"&returnAppendString);	
 		}
 	}
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
@@ -590,7 +590,7 @@
 		tempUrl=application.zcore.functions.zURLAppend(replacenocase(tempURL,"zsid=","ztv1=","ALL"),"zsid=#request.zsid#");
 		application.zcore.functions.zRedirect(tempURL, true);
 	}else{	
-		application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#');
+		application.zcore.functions.zRedirect('/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#');
 	}
 	</cfscript>
 </cffunction>
@@ -674,7 +674,7 @@
 		application.zcore.status.setStatus(request.zsid,"Feature Field doesn't exist.");
 		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");	
 	}
-    application.zcore.functions.zQueryToStruct(qS, form, 'feature_schema_id');
+    application.zcore.functions.zQueryToStruct(qS, form, 'feature_id,feature_schema_id');
     application.zcore.functions.zstatusHandler(request.zsid,true);
 	if(form.feature_schema_id NEQ "" and form.feature_schema_id NEQ 0){
 		variables.allowGlobal=false;
@@ -721,7 +721,7 @@
 	/* ]]> */
 	</script>
 
-	<form class="zFormCheckDirty" name="siteFieldTypeForm" id="siteFieldTypeForm" onsubmit="return validateFieldType();" action="/z/feature/admin/features/<cfif currentMethod EQ "add">insert<cfelse>update</cfif>?feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#<cfif structkeyexists(form, 'globalvar')>&amp;globalvar=1</cfif>" method="post">
+	<form class="zFormCheckDirty" name="siteFieldTypeForm" id="siteFieldTypeForm" onsubmit="return validateFieldType();" action="/z/feature/admin/features/<cfif currentMethod EQ "add">insert<cfelse>update</cfif>?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_field_id=#form.feature_field_id#<cfif structkeyexists(form, 'globalvar')>&amp;globalvar=1</cfif>" method="post">
 		<table style="border-spacing:0px;" class="table-list"> 
 			<tr>
 				<th>Schema:</th>
@@ -973,18 +973,18 @@
 					if(form.feature_field_type_id EQ ""){
 						form.feature_field_type_id=0;
 					}
-					var typeStruct={};
+					var typeLookupStruct={};
 					var i=0;
 					var count=0;
 					typeCFCStruct=application.zcore.featureCom.getTypeCFCStruct();
 					for(i in typeCFCStruct){
 						count++;
-						typeStruct[typeCFCStruct[i].getTypeName()]=i;
+						typeLookupStruct[typeCFCStruct[i].getTypeName()]=i;
 					}
-					var arrTemp=structkeyarray(typeStruct);
+					var arrTemp=structkeyarray(typeLookupStruct);
 					arraySort(arrTemp, "text", "asc");
 					for(i=1;i LTE arraylen(arrTemp);i++){
-						var currentCFC=application.zcore.featureCom.getTypeCFC(typeStruct[arrTemp[i]]);
+						var currentCFC=application.zcore.featureCom.getTypeCFC(typeLookupStruct[arrTemp[i]]);
 						writeoutput(currentCFC.getTypeForm(form, typeStruct, 'feature_field_type_id'));
 					}
 					</cfscript> 
@@ -1496,7 +1496,7 @@
 	WHERE feature_schema_id=#db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
-	qCheck=db.execute("qCheck");
+	qCheck=db.execute("qCheck", "", 10000, "query", false); 
 	if(qCheck.recordcount EQ 0){
 		application.zcore.functions.z404("Invalid feature_schema_id, #form.feature_schema_id#");	
 	}
@@ -1922,6 +1922,14 @@
         application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'feature_data_image_library_id'));
 	}
 	application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id);
+
+	if(qCheck.feature_schema_parent_field NEQ ""){
+		// resort all records
+		for(row in qCheck){
+			mainSchemaStruct=row;
+		}
+		resortSetByParentField(mainSchemaStruct);
+	}
 	
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
 	if(request.zos.enableSiteOptionGroupCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.feature_schema_enable_cache EQ 1){ 
@@ -2174,6 +2182,11 @@
 		}else{
 			newRecord=false;
 		}
+		if(qCheck.feature_schema_parent_field NEQ ""){				
+
+			// tell parent page to reload, instead of displaying the row html
+			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
+		}
 		form.feature_data_id=setIdBackup;
 		if(methodBackup EQ "userUpdateSchema" or methodBackup EQ "userInsertSchema"){ 
 			form.method="userGetRowHTML";
@@ -2202,6 +2215,35 @@
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="resortSetByParentField" localmode="modern" access="public">
+	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	rs=application.zcore.featureCom.getSortedData(arguments.groupQuery.feature_schema_id);
+	for(i=1;i<=arraylen(rs.arrOrder);i++){
+		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)#
+		set 
+		feature_data_sort=#db.param(i)#, 
+		feature_data_level=#db.param(rs.arrLevel[i])# 
+		WHERE 
+		feature_data.feature_data_id=#db.param(rs.arrOrder[i].row.feature_data_id)# and 
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
+		feature_data.feature_data_deleted=#db.param(0)#";
+		db.execute("qUpdate");
+
+		// fire onChange com if there is one
+		if(arguments.groupQuery.feature_schema_change_cfc_path NEQ ""){
+			path=arguments.groupQuery.feature_schema_change_cfc_path;
+			if(left(path, 5) EQ "root."){
+				path=request.zRootCFCPath&removeChars(path, 1, 5);
+			}
+			changeCom=application.zcore.functions.zcreateObject("component", path); 
+			changeCom[arguments.groupQuery.feature_schema_change_cfc_sort_method](row.feature_data_id, i); 
+		}
+	}
+	</cfscript>
+</cffunction>
 <!--- 
 Define this function in another CFC to override the default email format
 <cffunction name="publicEmailExample" localmode="modern" access="public">
@@ -2776,43 +2818,49 @@ Define this function in another CFC to override the default email format
 				application.zcore.functions.zredirect(request.cgi_script_name&"?"&replacenocase(request.zos.cgi.query_string,"zQueueSort=","ztv=","all"));
 			}
 			if(structkeyexists(form, 'zQueueSortAjax')){
-				// update cache
-				if(request.zos.enableSiteOptionGroupCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
-					featureCacheCom.resortSchemaSets(request.zos.globals.id, form.feature_id, form.feature_schema_id, form.feature_data_parent_id); 
+				if(mainSchemaStruct.feature_schema_parent_field NEQ ""){
+					// resort all records
+					resortSetByParentField(mainSchemaStruct);
 				}else{
 
-					t9=application.zcore.featureData;
-					var groupStruct=t9.featureSchemaLookup[form.feature_schema_id];
- 
+					// update cache
+					if(request.zos.enableSiteOptionGroupCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
+						featureCacheCom.resortSchemaSets(request.zos.globals.id, form.feature_id, form.feature_schema_id, form.feature_data_parent_id); 
+					}else{
 
-					if(groupStruct.feature_schema_change_cfc_path NEQ ""){
-						path=groupStruct.feature_schema_change_cfc_path;
-						if(left(path, 5) EQ "root."){
-							path=request.zRootCFCPath&removeChars(path, 1, 5);
-						}
-						changeCom=application.zcore.functions.zcreateObject("component", path); 
-						offset=0;
-						while(true){
-							db.sql="select feature_data_id FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
-							WHERE 
-							feature_data.feature_id = #db.param(form.feature_id)# and  
-							feature_schema_id = #db.param(form.feature_schema_id)# and 
-							feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
-							feature_id=#db.param(form.feature_id)# and 
-							feature_data_master_set_id = #db.param(0)# and 
-							feature_data_deleted=#db.param(0)# ";
-							if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-								db.sql&=" and feature_data_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+						t9=application.zcore.featureData;
+						var groupStruct=t9.featureSchemaLookup[form.feature_schema_id];
+	 
+
+						if(groupStruct.feature_schema_change_cfc_path NEQ ""){
+							path=groupStruct.feature_schema_change_cfc_path;
+							if(left(path, 5) EQ "root."){
+								path=request.zRootCFCPath&removeChars(path, 1, 5);
 							}
-							db.sql&=" ORDER BY feature_data_sort ASC 
-							LIMIT #db.param(offset)#, #db.param(20)#";
-							qSorted=db.execute("qSorted");
-							if(qSorted.recordcount EQ 0){
-								break;
-							}
-							for(row in qSorted){
-								offset++;
-								changeCom[groupStruct.feature_schema_change_cfc_sort_method](row.feature_data_id, offset); 
+							changeCom=application.zcore.functions.zcreateObject("component", path); 
+							offset=0;
+							while(true){
+								db.sql="select feature_data_id FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
+								WHERE 
+								feature_data.feature_id = #db.param(form.feature_id)# and  
+								feature_schema_id = #db.param(form.feature_schema_id)# and 
+								feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
+								feature_id=#db.param(form.feature_id)# and 
+								feature_data_master_set_id = #db.param(0)# and 
+								feature_data_deleted=#db.param(0)# ";
+								if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
+									db.sql&=" and feature_data_user = '#application.zcore.functions.zescape(currentUserIdValue)#'";
+								}
+								db.sql&=" ORDER BY feature_data_sort ASC 
+								LIMIT #db.param(offset)#, #db.param(20)#";
+								qSorted=db.execute("qSorted");
+								if(qSorted.recordcount EQ 0){
+									break;
+								}
+								for(row in qSorted){
+									offset++;
+									changeCom[groupStruct.feature_schema_change_cfc_sort_method](row.feature_data_id, offset); 
+								}
 							}
 						}
 					}
@@ -3447,7 +3495,7 @@ Define this function in another CFC to override the default email format
 							if(firstDisplayed){
 								firstDisplayed=false;
 								if(parentIndex NEQ 0 and curIndent){
-									writeoutput(replace(ljustify(" ", curIndent*2), " ", "&nbsp;", "all"));
+									writeoutput(replace(ljustify(" ", curIndent*4), " ", "&nbsp;", "all"));
 								}
 							}
 							var currentCFC=application.zcore.featureCom.getTypeCFC(arrType[i]);
