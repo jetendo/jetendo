@@ -1231,6 +1231,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	var ts=arguments.setFieldStruct;
 	arrLabel=[];
 	arrValue=[];
+	arrParent=[];
 	delimiter="|";
 	if(arguments.setFieldStruct.selectmenu_delimiter EQ "|"){
 		delimiter=",";
@@ -1392,7 +1393,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			}
 			if(structkeyexists(ds2, "0")){
 //				writedump(arguments.settypeStruct);				writedump(ds2);				writedump(ds);				writedump(arrValue);				abort;/**/
-				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, 0);
+				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, arrParent, 0);
 			}
 		}
 	}
@@ -2273,6 +2274,7 @@ used to do search for a list of values
 	<cfargument name="arrLabel" type="array" required="yes">
 	<cfargument name="arrValue" type="array" required="yes">
 	<cfargument name="arrCurrent" type="array" required="yes">
+	<cfargument name="arrParent" type="array" required="yes">
 	<cfargument name="level" type="numeric" required="yes">
 	<cfscript>
 	if(arguments.level GT 50){ 
@@ -2290,9 +2292,10 @@ used to do search for a list of values
 		}else{
 			arrayappend(arguments.arrValue, arguments.arrCurrent[local.f].id);
 		}
+		arrayAppend(arguments.arrParent, arguments.arrCurrent[local.f].parentId);
 		//writeoutput( arguments.arrCurrent[local.f].id&" | "& arguments.arrCurrent[local.f].label);
 		if(structkeyexists(arguments.parentStruct, arguments.arrCurrent[local.f].id) and arguments.arrCurrent[local.f].id NEQ 0){ 
-			variables.rebuildParentStructData(arguments.parentStruct, arguments.arrLabel, arguments.arrValue, arguments.parentStruct[arguments.arrCurrent[local.f].id], arguments.level+1);
+			variables.rebuildParentStructData(arguments.parentStruct, arguments.arrLabel, arguments.arrValue, arguments.parentStruct[arguments.arrCurrent[local.f].id], arguments.arrParent, arguments.level+1);
 		}
 	}
 	</cfscript>

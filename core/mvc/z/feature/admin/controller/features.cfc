@@ -3408,10 +3408,12 @@ Define this function in another CFC to override the default email format
 				currentRowIndex++;
 				if(parentIndex){
 					curRowIndex=0;
+					curParentId=0;
 					curIndent=0;
 					for(n=1;n LTE arraylen(rs.arrValue);n++){
 						if(row.feature_data_id EQ rs.arrValue[n]){
 							curRowIndex=n;
+							curParentId=rs.arrParent[n];
 							curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
 							break;
 						}
@@ -3421,6 +3423,7 @@ Define this function in another CFC to override the default email format
 						rowIndexFix++;
 					}
 				}else{
+					curParentId=0;
 					curRowIndex=qS.currentrow;
 				}
 				firstDisplayed=true; 
@@ -3629,6 +3632,7 @@ Define this function in another CFC to override the default email format
 				}
 				rowStruct[curRowIndex]={
 					index:curRowIndex,
+					parentId:curParentId,
 					row:rowOutput,
 					trHTML:"",
 					sublist:recurseOut
@@ -3644,7 +3648,7 @@ Define this function in another CFC to override the default email format
 			arrKey=structsort(rowStruct, "numeric", "asc", "index");
 			arraysort(arrKey, "numeric", "asc");
 			for(i=1;i LTE arraylen(arrKey);i++){
-				writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&' ');
+				writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&'  data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#" ');
 				if(i MOD 2 EQ 0){
 					writeoutput('class="row2"');
 				}else{

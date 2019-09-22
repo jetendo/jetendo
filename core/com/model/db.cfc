@@ -293,7 +293,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 							errorHTML:'Insert ID was 0, and shouldn''t be.',
 							scriptName:request.zos.originalURL,
 							url:request.zos.originalURL,
-							exceptionMessage:db.sql,
+							exceptionMessage:arguments.configStruct.sql&";<br><br>"&arguments.configStruct.insertIDSQL,
 							// optional
 							lineNumber:''
 						}

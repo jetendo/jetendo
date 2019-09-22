@@ -325,6 +325,17 @@ var zLastAjaxVarName=""; */
 							arrId2.push(v); 
 						}
 					} 
+
+					// when using parent field, we can't let use sort children outside their parent.
+					var parentId=$(e2.item[0]).attr("data-ztable-sort-parent-id");
+					var previousParentId=$(e2.item[0].previousSibling).attr("data-ztable-sort-parent-id");
+					if(parentId != "" || previousParentId !=""){
+						if(parentId != previousParentId){
+							$('#'+tableId+' tbody' ).sortable('cancel');
+							return;
+						}
+					}
+
 					var sortOrderList=arrId2.join("|");
 					//console.log("sorted list:"+sortOrderList);
 					var tempObj={};

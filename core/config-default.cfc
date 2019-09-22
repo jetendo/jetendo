@@ -73,7 +73,7 @@
 		// The database name MUST match the datasource name.
 		ts.zos.zcoreDatasource="jetendo"; 
 		ts.zos.zcoreTempDatasource="ztemp"; 
-		ts.zOS.insertIDColumnForSiteIDTable="id2";
+		ts.zOS.insertIDColumnForSiteIDTable="id";
 		ts.zOS.cfmlUser="www-data";
 		ts.zos.allowRequestCFC=true;
 		ts.zOS.cfmlAdminReadEnabled=true;
@@ -122,7 +122,7 @@
 		// The database name MUST match the datasource name.
 		ts.zos.zcoreDatasource="jetendo"; 
 		ts.zos.zcoreTempDatasource="ztemp";
-		ts.zOS.insertIDColumnForSiteIDTable="id2";
+		ts.zOS.insertIDColumnForSiteIDTable="id";
 		ts.zOS.cfmlUser="www-data";
 		ts.zOS.cfmlAdminReadEnabled=false;
 		ts.zos.googleMapsApiServerKeyTestDomain=""; // create a valid google maps api key for the test domain.

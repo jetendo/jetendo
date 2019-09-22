@@ -1901,6 +1901,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 	var ts=arguments.setOptionStruct;
 	arrLabel=[];
 	arrValue=[];
+	arrParent=[];
 	delimiter="|";
 	if(arguments.setOptionStruct.selectmenu_delimiter EQ "|"){
 		delimiter=",";
@@ -2062,14 +2063,15 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 			}
 			if(structkeyexists(ds2, "0")){
 //				writedump(arguments.setoptionstruct);				writedump(ds2);				writedump(ds);				writedump(arrValue);				abort;/**/
-				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, 0);
+				variables.rebuildParentStructData(ds2, arrLabel, arrValue, arrCurrent, arrParent, 0);
 			}
 		}
 	}
 	rs= { 
 		ts: ts, 
 		arrLabel: arrLabel, 
-		arrValue: arrValue
+		arrValue: arrValue,
+		arrParent: arrParent
 	};
 	if(structkeyexists(local, 'qTemp2')){
 		rs.qTemp2=qTemp2;
