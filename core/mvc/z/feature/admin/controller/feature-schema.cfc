@@ -1524,6 +1524,12 @@ displaySchemaCom.ajaxInsert();
 			application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/edit?feature_schema_id=#form.feature_schema_id#&feature_id=#form.feature_id#&feature_schema_parent_id=#form.feature_schema_parent_id#&zsid=#request.zsid#");
 		}
 	} 
+
+	fileName=application.zcore.functions.zUploadFileToDb("feature_schema_preview_image", application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/', 
+			'feature_schema', 'feature_schema_id', 'feature_schema_preview_image_delete', request.zos.zcoreDatasource, 'feature_schema_preview_image');	
+	if(fileName NEQ ""){
+		form.feature_schema_preview_image=fileName;
+	}
 	
 	if(form.inquiries_type_id NEQ ""){
 		local.arrTemp=listToArray(form.inquiries_type_id, '|');
@@ -1619,7 +1625,7 @@ displaySchemaCom.ajaxInsert();
 	application.zcore.template.setTag("title",theTitle);
 	application.zcore.template.setTag("pagetitle",theTitle);
 	</cfscript> 
-	<form class="zFormCheckDirty" name="myForm" id="myForm" action="/z/feature/admin/feature-schema/<cfif currentMethod EQ "edit">update<cfelse>insert</cfif>?feature_schema_id=#form.feature_schema_id#" method="post">
+	<form class="zFormCheckDirty" name="myForm" id="myForm" action="/z/feature/admin/feature-schema/<cfif currentMethod EQ "edit">update<cfelse>insert</cfif>?feature_schema_id=#form.feature_schema_id#" method="post" enctype="multipart/form-data">
 
 		<cfscript>
 		tabCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.com.display.tab-menu");
@@ -1876,6 +1882,52 @@ displaySchemaCom.ajaxInsert();
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_locked_delete")# 
 						(When a record is locked, setting this to yes will allow a non-developer to delete the record.)
 					</td>
+				</tr>
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Enable Merge Interface?","member.feature-schema.edit feature_schema_enable_merge_interface")#</th>
+					<td>#application.zcore.functions.zInput_Boolean("feature_schema_enable_merge_interface")#</td>
+				</tr>
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Merge Group","member.feature-schema.edit feature_schema_merge_group_id")#</th>
+					<td><cfscript>
+
+					selectStruct=structnew();
+					selectStruct.name="feature_schema_merge_group_id"; 
+					selectStruct.onchange="doParentCheck();";
+					if(form.feature_schema_id NEQ ""){
+						selectStruct.onchange="if(this.options[this.selectedIndex].value=='#form.feature_schema_id#'){alert('You can\'t select the same group you are editing.');this.selectedIndex=0;}"&selectStruct.onchange;
+					}
+					selectStruct.listValuesDelimiter=chr(9);
+					selectStruct.listLabelsDelimiter=chr(9);
+					selectStruct.listLabels=arrayToList(rs.arrLabel, chr(9));
+					selectStruct.listValues=arrayToList(rs.arrValue, chr(9)); 
+					application.zcore.functions.zInputSelectBox(selectStruct);
+					</cfscript> (Will override the child groups to the selected group.  Leave blank to use current group)</td>
+				</tr>
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Merge Child Title Field","member.feature-schema.edit feature_schema_merge_title_field")#</th>
+					<td><input type="text" name="feature_schema_merge_title_field" id="feature_schema_parent_field" value="#htmleditformat(form.feature_schema_merge_title_field)#" /></td>
+				</tr>
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Merge Child Image Field","member.feature-schema.edit feature_schema_merge_image_field")#</th>
+					<td><input type="text" name="feature_schema_merge_image_field" id="feature_schema_merge_image_field" value="#htmleditformat(form.feature_schema_merge_image_field)#" /></td>
+				</tr>
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Merge Category","member.feature-schema.edit feature_schema_category")#</th>
+					<td><input type="text" name="feature_schema_category" id="feature_schema_category" value="#htmleditformat(form.feature_schema_category)#" /></td>
+				</tr>
+
+				<tr>
+					<th style="vertical-align:top; white-space:nowrap;">#application.zcore.functions.zOutputHelpToolTip("Merge Preview Image","member.feature-schema.edit feature_schema_preview_image")#</th>
+					<td><cfscript>
+						var ts3=StructNew();
+						ts3.name="feature_schema_preview_image";
+						ts3.allowDelete=true;
+						if(form.feature_schema_preview_image NEQ ""){
+							ts3.downloadPath="/zupload/feature-options/";
+						}
+						application.zcore.functions.zInput_file(ts3);
+						</cfscript></td>
 				</tr>
 		</table>
 		#tabCom.endFieldSet()#

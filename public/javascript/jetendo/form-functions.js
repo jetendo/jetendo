@@ -2017,6 +2017,8 @@ var zLastAjaxVarName=""; */
 				//alert(r.reload + " " + r.redirect)
 				if(typeof r.reload != "undefined" && r.reload){
 					window.parent.location.reload();
+				}else if(typeof r.redirectFrame != "undefined" && r.redirectFrame){
+					window.location.href=r.redirectLink;
 				}else if(typeof r.redirect != "undefined" && r.redirect){
 					window.parent.location.href=r.redirectLink;
 				}else{

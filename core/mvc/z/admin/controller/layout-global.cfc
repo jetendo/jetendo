@@ -580,7 +580,7 @@
 					fullpercent=100/limit;
 					fullcolumnCount=round(100/fullpercent);
 					fullcolumnCount=n2;
-					fullmargin=int(dataStruct.columnGapSidePercent/2/2);  
+					fullmargin=int(dataStruct.columnGapSidePercent/2);  
 					fullmarginTemp=dataStruct.columnGapSidePercent;
 					fullwidthNoMargin=(fullpercent*n2);
 					fullwidth=(fullpercent*n2)-dataStruct.columnGapSidePercent;

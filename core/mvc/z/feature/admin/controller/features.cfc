@@ -1489,9 +1489,9 @@
 	var debug=false;
 	var startTime=0;
 	if(debug) startTime=gettickcount();
-	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
-	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id');
-	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
+	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id', true);
+	form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id', true);
+	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id', true);
 	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# 
 	WHERE feature_schema_id=#db.param(form.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
@@ -1500,6 +1500,7 @@
 	if(qCheck.recordcount EQ 0){
 		application.zcore.functions.z404("Invalid feature_schema_id, #form.feature_schema_id#");	
 	}
+
 
 	if(methodBackup EQ "userInsertSchema" or methodBackup EQ "userUpdateSchema"){ 
 		arrUserSchema=listToArray(qCheck.feature_schema_user_group_id_list, ",");
@@ -1699,6 +1700,13 @@
 		}else{
 			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', form);
 		}
+		if(qCheck.feature_schema_enable_merge_interface EQ 1){
+			if(form.feature_data_merge_schema_id EQ ""){
+				application.zcore.status.setStatus(request.zsid, "You must select a record type", form, true);
+				rs.success=false;
+				rs.message="You must select a record type";
+			}
+		}
 		if(not rs.success){
 			application.zcore.status.setFieldError(request.zsid, "newvalue"&row.feature_field_id, true);
 			application.zcore.status.setStatus(request.zsid, rs.message, form, true);
@@ -1893,8 +1901,13 @@
 	feature_data_metakey=#db.param(application.zcore.functions.zso(form, 'feature_data_metakey'))#,
 	feature_data_metadesc=#db.param(application.zcore.functions.zso(form, 'feature_data_metadesc'))#,
 	feature_data_deleted=#db.param(0)#, 
-	feature_data_field_order=#db.param(arrayToList(arrFieldOrder, chr(13)))#, 
-	feature_data_data=#db.param(arrayToList(arrFieldData, chr(13)))# ";
+	feature_data_field_order=#db.param(arrayToList(arrFieldOrder, chr(13)))#,
+	feature_data_data=#db.param(arrayToList(arrFieldData, chr(13)))# "; 
+	if(qCheck.feature_schema_enable_merge_interface EQ 1){
+		if(methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema" or methodBackup EQ "importInsertSchema"){
+			db.sql&=", feature_data_merge_schema_id=#db.param(form.feature_data_merge_schema_id)# ";
+		}
+	}
 	if(hasUserField){
 		db.sql&=", feature_data_user=#db.param(userFieldValue)# ";
 	}
@@ -1923,6 +1936,7 @@
 	}
 	application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id);
 
+
 	if(qCheck.feature_schema_parent_field NEQ ""){
 		// resort all records
 		for(row in qCheck){
@@ -1930,10 +1944,21 @@
 		}
 		resortSetByParentField(mainSchemaStruct);
 	}
+	featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	if(form.mergeRecord EQ 1 and form.feature_data_parent_id NEQ "0"){
+		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# 
+		SET 
+		feature_data_merge_data_id=#db.param(form.feature_data_id)#
+		WHERE 
+		feature_data_id=#db.param(form.feature_data_parent_id)# and 
+		site_id=#db.param(request.zos.globals.id)# and 
+		feature_data_deleted=#db.param(0)# ";
+		db.execute("qUpdate");
+		featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_parent_id); 
+	}
 	
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
 	if(request.zos.enableSiteOptionGroupCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.feature_schema_enable_cache EQ 1){ 
-		featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 		featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds4<br>'); startTime=gettickcount();
@@ -2160,6 +2185,18 @@
 	}
 	request.zsession.zLastSiteXSchemaSetId=setIdBackup;
 	request.zsession.zLastInquiriesID=application.zcore.functions.zso(form, 'inquiries_id');
+	if(qCheck.feature_schema_enable_merge_interface EQ 1){
+		if(methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema"){
+			// redirect to adding the child group
+			if(methodBackup EQ "userInsertSchema"){
+				newMethod="userAddSchema";
+			}else{
+				newMethod="addSchema";
+			}
+			link='/z/feature/admin/features/#newMethod#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_data_merge_schema_id#&feature_data_parent_id=#setIdBackup#&mergeRecord=1&modalpopforced=1'; 
+			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, redirectFrame:true, redirectLink:link, newRecord:true});
+		}
+	}
 	if(methodBackup EQ "publicMapInsertSchema" or methodBackup EQ "publicAjaxInsertSchema" or methodBackup EQ "internalSchemaUpdate" or methodBackup EQ "importInsertSchema"){
 		ts={success:true, zsid:request.zsid, feature_data_id:setIdBackup, formtoken:formtoken, inquiries_id: application.zcore.functions.zso(form, 'inquiries_id')};
 		return ts;
@@ -2182,7 +2219,7 @@
 		}else{
 			newRecord=false;
 		}
-		if(qCheck.feature_schema_parent_field NEQ ""){				
+		if(qCheck.feature_schema_parent_field NEQ "" or form.mergeRecord EQ 1){				
 
 			// tell parent page to reload, instead of displaying the row html
 			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
@@ -3901,7 +3938,7 @@ Define this function in another CFC to override the default email format
 		db.sql&=" and feature_field_allow_public=#db.param(1)#";
 	}
 	db.sql&=" ORDER BY feature_field.feature_field_sort asc, feature_field.feature_field_variable_name ASC";
-	qS=db.execute("qS", "", 10000, "query", false); 
+	qS=db.execute("qS", "", 10000, "query", false);  
 	if(qS.recordcount EQ 0){
 		application.zcore.functions.z404("No feature_fields have been set to allow public form data entry.");	
 	}
@@ -4120,6 +4157,7 @@ Define this function in another CFC to override the default email format
 
 	<div class="z-manager-edit-errors z-float"></div>
 	<cfscript>
+	form.mergeRecord=application.zcore.functions.zso(form, "mergeRecord", true, 0);
 	echo('<form class="zFormCheckDirty" id="siteSchemaForm#qCheck.feature_schema_id#" action="');
 	if(methodBackup EQ "publicAddSchema" or methodBackup EQ "publicEditSchema"){
 		echo(arguments.struct.action);
@@ -4134,7 +4172,7 @@ Define this function in another CFC to override the default email format
 		}else{
 			echo('updateSchema');
 		}
-	}
+	} 
 	echo('" method="post" enctype="multipart/form-data" ');
 	if(qCheck.feature_schema_public_thankyou_url NEQ ""){
 		echo(' data-thank-you-url="'&htmleditformat(qCheck.feature_schema_public_thankyou_url)&'" ');
@@ -4158,6 +4196,9 @@ Define this function in another CFC to override the default email format
 			#application.zcore.functions.zFakeFormFields()#
 		</cfif>
 		<input type="hidden" name="disableSorting" value="#application.zcore.functions.zso(form, 'disableSorting', true, 0)#" />
+		<cfif methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema">
+			<input type="hidden" name="mergeRecord" value="#htmleditformat(form.mergeRecord)#" />
+		</cfif>
 		<input type="hidden" name="feature_id" value="#htmleditformat(form.feature_id)#" />
 		<input type="hidden" name="feature_schema_id" value="#htmleditformat(form.feature_schema_id)#" />
 		<input type="hidden" name="feature_data_id" value="#htmleditformat(form.feature_data_id)#" />
@@ -4172,12 +4213,16 @@ Define this function in another CFC to override the default email format
 			</cfscript>
 			<cfif methodBackup EQ "addSchema" or methodBackup EQ "editSchema" or 
 			methodBackup EQ "userEditSchema" or methodBackup EQ "userAddSchema">
-				<tr><td>&nbsp;</td><td>
+				<tr><td colspan="2">
 					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton">Save</button>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1>Next<cfelse>Save</cfif></button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
-							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>
+							<cfif form.mergeRecord EQ 1>
+								<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.location.reload();">Cancel</button>
+							<cfelse>
+								<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>
+							</cfif>
 						<cfelse>
 							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.location.href='#cancelLink#';">Cancel</button>
 						</cfif>
@@ -4418,9 +4463,125 @@ Define this function in another CFC to override the default email format
 				</tr>
 				<cfset tempIndex++>
 			</cfif>
+
+
+			<cfif qCheck.feature_schema_enable_merge_interface EQ 1>
+				</table>
+				<cfscript>
+				if(qCheck.feature_schema_merge_group_id NEQ ""){
+					mergeGroupId=qCheck.feature_schema_merge_group_id;
+				}else{
+					mergeGroupId=qCheck.feature_schema_id;
+				}
+				db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# 
+				WHERE feature_schema_deleted=#db.param(0)# and 
+				feature_schema_parent_id=#db.param(mergeGroupId)# 
+				ORDER BY feature_schema_display_name ASC";
+				qChildSchema=db.execute("qChildSchema", "", 10000, "query", false); 
+				categoryStruct={};
+				hasImagePreview=false;
+				for(row in qChildSchema){
+					if(row.feature_schema_preview_image NEQ ""){
+						hasImagePreview=true;
+					}
+					if(row.feature_schema_category NEQ ""){
+						categoryStruct[row.feature_schema_category]="";
+					}
+				}
+				arrCategory=structkeyarray(categoryStruct);
+				arraySort(arrCategory, "text", "asc");
+				</cfscript>
+
+				<div style="width:100%; float:left; padding-top:5px; padding-bottom:5px;">
+					<div style="width:100%; padding-left:5px;" class="z-t-18">
+						Select A Record Type
+					</div>
+					<div style="float:left; padding:5px;">
+						<strong>Search</strong> | Name: <input type="text" name="featureNameSearch" id="featureNameSearch" value="">  
+						Category: 
+						<select size="1" name="featureCategorySearch" id="featureCategorySearch"><option value="">-- Select --</option>
+							<cfscript>
+							for(categoryName in arrCategory){
+								echo('<option value="#htmleditformat(categoryName)#">#categoryName#</option>');
+							}
+							</cfscript>
+						</select>
+					</div>
+					<!--- <div style="float:left; padding:5px;">
+						<input type="submit" name="search1" value="Search" class="z-manager-search-button">
+					</div> --->
+				</div>
+				<input type="hidden" name="feature_data_merge_schema_id" id="feature_data_merge_schema_id" value="">
+				<div id="lightboxChildContainer" style="width:100%; padding:5px; float:left;" class="z-equal-heights">
+					<cfscript> 
+					for(row in qChildSchema){
+						echo('<div class="childSchemaBox" data-name="#htmleditformat(row.feature_schema_display_name)#" data-category="#htmleditformat(row.feature_schema_category)#">');
+						if(hasImagePreview){
+							echo('
+							<div class="z-float z-index-2" style="padding:5px;">
+								<div style="display:inline-block; float:left;" data-schema-id="#row.feature_schema_id#" class="childSchemaLink">Select</div>');
+								if(row.feature_schema_preview_image NEQ ""){
+									echo('<a href="/zupload/feature-options/#row.feature_schema_preview_image#" target="_blank" style="display:inline-block; float:right;" data-schema-id="#row.feature_schema_id#" class="childSchemaLink lightboxChildPreview">Preview</a>');
+								}
+							echo('</div>');
+							echo('<div class="z-index-1"  style="margin-top:-32px; display:block; width:100%; float:left; margin-bottom:5px; height:120px; text-align:center; background-color:##000;');
+							if(row.feature_schema_preview_image NEQ ""){
+								echo(' background-image:url(/zupload/feature-options/#row.feature_schema_preview_image#); ');
+							}
+							echo(' background-size:cover;"></div>');
+							echo('<div class="z-float " style="padding:5px;">#row.feature_schema_display_name#</div>');
+						}else{
+							echo('<div class="z-float " style="padding:5px;">#row.feature_schema_display_name#</div>
+							<div class="z-float z-text-center" style="padding-bottom:5px;"><div style="display:inline-block; " data-schema-id="#row.feature_schema_id#" class="childSchemaLink">Select</div></div>');
+						}
+						echo('</div>');
+					}
+					</cfscript>
+				</div>
+				<cfscript>
+				if(hasImagePreview){
+					application.zcore.functions.zSetupLightbox("lightboxChildContainer", "lightboxChildPreview");
+				}
+				</cfscript>
+				<style>
+				.childSchemaLink, .childSchemaLink:link, .childSchemaLink:visited{ cursor:pointer; display:block; text-decoration:none; background-color:##FFF; border:1px solid ##999; color:##000 !important; border-radius:5px; padding:2px; font-weight:bold; }
+				.childSchemaLink:hover{ background-color:##000; color:##FFF !important;}
+				.childSchemaBox{width:200px; overflow:hidden; float:left; margin-right:10px; margin-bottom:10px; border-radius:10px; border:2px solid ##FFF; background-color:##FFF; text-align:center; color:##000;}
+				.childSchemaBox:hover{
+					background-color:##DFEFCF;
+				}
+				.childSchemaBox.selected{ background-color:##369;border:2px solid ##369;  color:##FFF;}
+				</style>
+				<script>
+				zArrDeferredFunctions.push(function(){
+					$(".childSchemaLink").on("click", function(e){
+						e.preventDefault();
+						$(".childSchemaBox").removeClass("selected");
+						$(this).parent().parent().addClass("selected");
+						$("##feature_data_merge_schema_id").val($(this).attr("data-schema-id"));
+					});
+					$("##featureNameSearch, ##featureCategorySearch").on("keyup paste change", function(){
+						var name=$("##featureNameSearch").val();
+						var category=$("##featureCategorySearch").val(); 
+						$(".childSchemaBox").each(function(){
+							if(name != "" && $(this).attr("data-name").indexOf(name) == -1){
+								$(this).hide();
+								return;
+							}
+							if(category != "" && $(this).attr("data-category") != category){
+								$(this).hide();
+								return;
+							}
+							$(this).show();
+						});
+					});
+				});
+				</script>
+ 
+				<table class="table-list"> 
+			</cfif>
 			<tr>
-				<th>&nbsp;</th>
-				<td>
+				<td colspan="2">
 				<cfif qS.feature_schema_is_home_page EQ 1>
 					<input type="hidden" name="feature_data_override_url" value="/" />
 				</cfif>
@@ -4445,10 +4606,14 @@ Define this function in another CFC to override the default email format
 					    </cfif>
 				<cfelse>
 					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton">Save</button>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1>Next<cfelse>Save</cfif></button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
-							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>
+							<cfif form.mergeRecord EQ 1>
+								<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.location.reload();">Cancel</button>
+							<cfelse>
+								<button type="button" name="cancel" class="z-manager-search-button" onclick="window.parent.zCloseModal();">Cancel</button>
+							</cfif>
 						<cfelse>
 
 							<button type="button" name="cancel" class="z-manager-search-button" onclick="window.location.href='#cancelLink#';">Cancel</button>

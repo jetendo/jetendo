@@ -1457,35 +1457,6 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	</cfscript>
 </cffunction>
 
-<cffunction name="resortSetByParentField" localmode="modern" access="public">
-	<cfargument name="groupQuery" type="struct" required="yes">
-	<cfscript>
-	db=request.zos.queryObject;
-	rs=getSortedData(arguments.groupQuery);
-	for(i=1;i<=arraylen(rs.arrOrder);i++){
-		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)#
-		set 
-		feature_data_sort=#db.param(i)#, 
-		feature_data_level=#db.param(rs.arrLevel[i])# 
-		WHERE 
-		feature_data.feature_data_id=#db.param(rs.arrOrder[i].row.feature_data_id)# and 
-		feature_data.site_id=#db.param(request.zos.globals.id)# and 
-		feature_data.feature_data_deleted=#db.param(0)#";
-		db.execute("qUpdate");
-
-		// fire onChange com if there is one
-		if(arguments.groupQuery.feature_schema_change_cfc_path NEQ ""){
-			path=arguments.groupQuery.feature_schema_change_cfc_path;
-			if(left(path, 5) EQ "root."){
-				path=request.zRootCFCPath&removeChars(path, 1, 5);
-			}
-			changeCom=application.zcore.functions.zcreateObject("component", path); 
-			changeCom[arguments.groupQuery.feature_schema_change_cfc_sort_method](row.feature_data_id, i); 
-		}
-	}
-	</cfscript>
-</cffunction>
-
 
 
 <cffunction name="parseFieldData" localmode="modern" access="public">
@@ -1639,6 +1610,7 @@ if(not rs.success){
 		db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
 		WHERE  feature_data_id=#db.param(arguments.feature_data_id)# and  
 		feature_data_deleted = #db.param(0)# and 
+		site_id=#db.param(arguments.site_id)# and 
 		feature_data.feature_id=#db.param(form.feature_id)#  ";
 		qSet=db.execute("qSet");
 		if(qSet.recordcount EQ 0){
@@ -1691,7 +1663,7 @@ if(not rs.success){
 	db.sql="SELECT * FROM 
 	#db.table("feature_data", request.zos.zcoreDatasource)#  
 	WHERE  feature_schema_id=#db.param(row.feature_schema_id)# and  
-	site_id<>#db.param(-1)# and 
+	site_id=#db.param(arguments.site_id)# and 
 	feature_data_field_order <> #db.param('')# and 
 	feature_data_deleted = #db.param(0)# ";
 	qData=db.execute("qData"); 
@@ -1712,8 +1684,8 @@ if(not rs.success){
 	deleteSchemaSetIndex(arguments.feature_data_id, request.zos.globals.id);
 	db.sql="DELETE FROM #db.table("feature_data", request.zos.zcoreDatasource)#  
 	WHERE  feature_data_id=#db.param(arguments.feature_data_id)# and  
-	feature_data_deleted = #db.param(0)# and 
-	site_id<>#db.param(-1)# ";
+	feature_data_deleted = #db.param(0)# and
+	site_id=#db.param(arguments.site_id)# ";
 	result =db.execute("result");
 	//writeLogEntry("deleted set values for set id:"&arguments.feature_data_id);
 	t9=getSiteData(request.zos.globals.id);
