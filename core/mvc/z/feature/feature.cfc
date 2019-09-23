@@ -757,6 +757,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			s2.feature_data_master_set_id = #db.param(0)# and 
 			s2.feature_data_deleted = #db.param(0)# and 
 			s1.feature_id=#db.param(form.feature_id)# and 
+			s2.site_id=#db.param(request.zos.globals.id)# and 
 			s1.feature_schema_id=s2.feature_schema_id and 
 			s2.feature_data_id=#db.param(curParentSetId)# and 
 			s1.feature_schema_id = #db.param(curParentId)# 
