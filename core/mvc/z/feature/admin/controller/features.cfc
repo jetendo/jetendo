@@ -2815,6 +2815,18 @@ Define this function in another CFC to override the default email format
 				}
 			}
 		}
+		
+		tempSchemaKey="#form.feature_id#-#form.feature_schema_id#";
+		if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
+			if(structkeyexists(request.zsession, 'siteSchemaSearch') and structkeyexists(request.zsession.siteSchemaSearch, tempSchemaKey)){
+				if(structkeyexists(form, 'clearSearch')){
+					structdelete(request.zsession.siteSchemaSearch, tempSchemaKey);
+				}else if(not structkeyexists(form, 'searchOn')){
+					form.searchOn=1;
+					structappend(form, request.zsession.siteSchemaSearch[tempSchemaKey], false);
+				}
+			}
+		}
 		if(application.zcore.functions.zso(form, 'disableSorting', true, 0) EQ 1){
 			sortEnabled=false;
 			subgroupRecurseEnabled=false;
@@ -3038,17 +3050,6 @@ Define this function in another CFC to override the default email format
 		searchStruct={};
 		searchFieldEnabledStruct={};
 	
-		tempSchemaKey="#form.feature_id#-#form.feature_schema_id#";
-		if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
-			if(structkeyexists(request.zsession, 'siteSchemaSearch') and structkeyexists(request.zsession.siteSchemaSearch, tempSchemaKey)){
-				if(structkeyexists(form, 'clearSearch')){
-					structdelete(request.zsession.siteSchemaSearch, tempSchemaKey);
-				}else if(not structkeyexists(form, 'searchOn')){
-					form.searchOn=1;
-					structappend(form, request.zsession.siteSchemaSearch[tempSchemaKey], false);
-				}
-			}
-		}
 		if(not structkeyexists(arguments.struct, 'recurse') and form.feature_schema_id NEQ 0 and arraylen(arrSearchTable)){ 
 			arrayAppend(arrSearch, '<form action="#arguments.struct.listURL#" method="get">
 			<input type="hidden" name="searchOn" value="1" />
@@ -3523,32 +3524,32 @@ Define this function in another CFC to override the default email format
 						echo('class="row1"');
 					}
 					echo('>
-						<td class="z-hide-at-767">#row.feature_data_id#</td>
-						<td>');
-						if(row.feature_data_level GT 0){
-							echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
-						}
-						echo('#rsData.name#</td>
-						<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
-						<td>'&application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime)&'</td>');
-						echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
-						ms={
-							sortEnabled:sortEnabled,
-							arrChildSchema:arrChildSchema,
-							methodBackup:methodBackup,
-							mainSchemaStruct:mainSchemaStruct,
-							qSCount:{},
-							struct:arguments.struct,
-							childRow:childRow
-						};
-						if(sortEnabled){
-							ms.queueSortCom=queueSortCom;
-						}
-						if(mainSchemaStruct.feature_schema_limit GT 0){
-							ms.qSCount.qSCount;
-						}
-						echo(getAdminHTML(row, ms));
-						echo('</td></tr>');
+					<td class="z-hide-at-767">#row.feature_data_id#</td>
+					<td>');
+					if(row.feature_data_level GT 0){
+						echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
+					}
+					echo('#rsData.name#</td>
+					<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
+					<td>'&application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime)&'</td>');
+					echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
+					ms={
+						sortEnabled:sortEnabled,
+						arrChildSchema:arrChildSchema,
+						methodBackup:methodBackup,
+						mainSchemaStruct:mainSchemaStruct,
+						qSCount:{},
+						struct:arguments.struct,
+						childRow:childRow
+					};
+					if(sortEnabled){
+						ms.queueSortCom=queueSortCom;
+					}
+					if(mainSchemaStruct.feature_schema_limit GT 0){
+						ms.qSCount.qSCount;
+					}
+					echo(getAdminHTML(row, ms));
+					echo('</td></tr>');
 				}
 				writeoutput('</tbody></table>');
 			}else{

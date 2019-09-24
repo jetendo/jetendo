@@ -3470,6 +3470,18 @@ Define this function in another CFC to override the default email format
 		}
 		form.enableSorting=application.zcore.functions.zso(form, 'enableSorting', true, 0);
 
+		tempGroupKey="#form.site_option_app_id#-#form.site_option_group_id#";
+		if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
+			if(structkeyexists(request.zsession, 'siteOptionGroupSearch') and structkeyexists(request.zsession.siteOptionGroupSearch, tempGroupKey)){
+				if(structkeyexists(form, 'clearSearch')){
+					structdelete(request.zsession.siteOptionGroupSearch, tempGroupKey);
+				}else if(not structkeyexists(form, 'searchOn')){
+					form.searchOn=1;
+					structappend(form, request.zsession.siteOptionGroupSearch[tempGroupKey], false);
+				}
+			}
+		}
+
 		if ( structKeyExists( form, 'searchOn' ) ) {
 			form.enableSorting = 0;
 			form.disableSorting = 1;
@@ -3555,7 +3567,6 @@ Define this function in another CFC to override the default email format
 		// GROUP BY site_option_group.site_option_group_id
 		// ORDER BY site_option_group.site_option_group_display_name";
 		// q1=db.execute("q1");
-
 
 		sortEnabled=true;
 		subgroupRecurseEnabled=false;
@@ -3808,17 +3819,6 @@ Define this function in another CFC to override the default email format
 		searchStruct={};
 		searchFieldEnabledStruct={};
 	
-		tempGroupKey="#form.site_option_app_id#-#form.site_option_group_id#";
-		if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
-			if(structkeyexists(request.zsession, 'siteOptionGroupSearch') and structkeyexists(request.zsession.siteOptionGroupSearch, tempGroupKey)){
-				if(structkeyexists(form, 'clearSearch')){
-					structdelete(request.zsession.siteOptionGroupSearch, tempGroupKey);
-				}else if(not structkeyexists(form, 'searchOn')){
-					form.searchOn=1;
-					structappend(form, request.zsession.siteOptionGroupSearch[tempGroupKey], false);
-				}
-			}
-		}
 		if(not structkeyexists(arguments.struct, 'recurse') and form.site_option_group_id NEQ 0 and arraylen(arrSearchTable)){ 
 			arrayAppend(arrSearch, '<form action="#arguments.struct.listURL#" method="get">
 			<input type="hidden" name="searchOn" value="1" />
@@ -3862,6 +3862,7 @@ Define this function in another CFC to override the default email format
 					if(not structkeyexists(request.zsession, 'siteOptionGroupSearch')){
 						request.zsession.siteOptionGroupSearch={};
 					}
+					searchStruct.searchOn=true;
 					request.zsession.siteOptionGroupSearch[tempGroupKey]=searchStruct;
 				}
 			}
