@@ -2197,6 +2197,29 @@ var zLastAjaxVarName=""; */
 		}
 		return true;
 	} 
+
+	function zReloadFeatureTableHTML(){
+		var tempObj={};
+		tempObj.id="zAjaxReloadFeatureHTMLTable";
+		tempObj.url=featureReloadLink;
+		tempObj.method="POST";
+		tempObj.callback=function(r){ 
+			var r=JSON.parse(r);
+			if(r.success){
+				$("#sortRowTable").replaceWith(r.tableHTML);
+				zSetupAjaxTableSortAgain();
+			}else{
+				window.location.reload();
+			}
+		};
+		tempObj.errorCallback=function(resp){
+			window.location.reload();
+		};
+		tempObj.cache=false; // set to true to disable ajax request when already downloaded same URL
+		tempObj.ignoreOldRequests=true; // causes only the most recent request to have its callback function called.
+		zAjax(tempObj);
+	}
+	window.zReloadFeatureTableHTML=zReloadFeatureTableHTML;
 	window.zEmailTokenInput=zEmailTokenInput;  
 	window.zSubmitManagerEditForm=zSubmitManagerEditForm;
 	window.zCalculateTableCells=zCalculateTableCells;

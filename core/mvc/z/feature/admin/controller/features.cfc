@@ -2574,11 +2574,10 @@ Define this function in another CFC to override the default email format
 	</cfscript>
 </cffunction>
 
-<cffunction name="debugGetTableHTML" localmode="modern" access="remote">
-	<cfargument name="struct" type="struct" required="no" default="#{}#">
+<cffunction name="getTableHTMLJSON" localmode="modern" access="remote">
 	<cfscript>
 	form.method="getTableHTML";
-	echo(this.manageSchema(arguments.struct));
+	application.zcore.functions.zReturnJson({success:true, id:0, tableHTML:this.manageSchema({}), newRecord:false});
 	abort;
 	</cfscript>
 </cffunction>
@@ -2896,6 +2895,7 @@ Define this function in another CFC to override the default email format
 			queueSortStruct.primaryKeyName = "feature_data_id";
 			queueSortStruct.datasource=request.zos.zcoreDatasource;
 			queueSortStruct.ajaxTableId='sortRowTable';
+			queueSortStruct.ajaxCallback="function(){ zReloadFeatureTableHTML(); }";
 			queueSortStruct.ajaxURL=application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#&enableSorting=1");
 			
 			queueSortStruct.where =" feature_data.feature_id = '#application.zcore.functions.zescape(form.feature_id)#' and  
@@ -2924,6 +2924,7 @@ Define this function in another CFC to override the default email format
 				if(mainSchemaStruct.feature_schema_parent_field NEQ ""){
 					// resort all records
 					resortSetByParentField(mainSchemaStruct);
+					// possibly return different json here that reloads table, and not entire page
 				}else{
 
 					// update cache
@@ -3534,10 +3535,14 @@ Define this function in another CFC to override the default email format
 			}
 
 		}
+		if(sortEnabled){
+			echo('<script>
+			var featureReloadLink="/z/feature/admin/features/getTableHTMLJSON?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#&enableSorting=1";
+			</script>');
+		}
 		if(qS.recordcount){
 			savecontent variable="tableHTML"{
 				if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
-
 					if(sortEnabled){
 						echo('<table id="sortRowTable" class="table-list" style="width:100%;">');
 					}else{
@@ -3570,7 +3575,7 @@ Define this function in another CFC to override the default email format
 
 
 
-						echo('<tr #trHTML# data-ztable-sort-parent-id="#childRow.feature_data_parent_id#" ');
+						echo('<tr #trHTML# ');// data-ztable-sort-parent-id="#childRow.feature_data_parent_id#"
 						if(currentRowIndex MOD 2 EQ 0){
 							echo('class="row2"');
 						}else{
