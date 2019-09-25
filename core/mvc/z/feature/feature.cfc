@@ -1714,6 +1714,15 @@ if(not rs.success){
 	<cfscript>
 	var db=request.zos.queryObject; 
 	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)#  
+	WHERE  feature_schema_id=#db.param(arguments.feature_schema_id)# and 
+	feature_schema_deleted = #db.param(0)# and
+	feature_id=#db.param(form.feature_id)# ";
+	qCheck=db.execute("qCheck", "", 10000, "query", false);
+	if(qCheck.feature_schema_preview_image NEQ ""){
+		application.zcore.functions.zDeleteFile(request.zos.globals.privateHomeDir&"zupload/feature-options/"&qCheck.feature_schema_preview_image);
+	}
+
+	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)#  
 	WHERE  feature_schema_parent_id=#db.param(arguments.feature_schema_id)# and 
 	feature_schema_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
@@ -1752,6 +1761,8 @@ if(not rs.success){
 			}
 		}
 	} 
+
+
 	db.sql="DELETE FROM #db.table("feature_data", request.zos.zcoreDatasource)#  
 	WHERE  feature_schema_id=#db.param(arguments.feature_schema_id)# and 
 	feature_data_deleted = #db.param(0)# and 
@@ -2625,6 +2636,22 @@ used to do search for a list of values
 		return fsd.featureSchemaLookup[arguments.option_group_id];
 	}else{
 		return {};
+	}
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="getFeatureDomain" access="public" returntype="string" localmode="modern">
+	<cfargument name="feature_id" type="string" required="yes">
+	<cfscript>
+	if(structkeyexists(application.zcore.featureData.featureDataLookup, arguments.feature_id)){
+		if(request.zos.isTestServer){
+			return application.zcore.featureData.featureDataLookup[arguments.feature_id].feature_test_domain;
+		}else{
+			return application.zcore.featureData.featureDataLookup[arguments.feature_id].feature_live_domain;
+		}
+	}else{
+		throw("Invalid feature_id, #arguments.feature_id#");
 	}
 	</cfscript>
 </cffunction>

@@ -204,7 +204,12 @@
 				echo(indent&chr(9)&'</cfscript>'&chr(10));
 			}
 			savecontent variable="childOutput"{
-				generateSchemaCode(arguments.feature_id, 0, ss.curIndex, groupStruct.feature_schema_id, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput);
+				if(groupStruct.feature_schema_enable_merge_interface EQ 1 and groupStruct.feature_schema_merge_group_id NEQ 0){
+					schemaId=groupStruct.feature_schema_merge_group_id;
+				}else{
+					schemaId=groupStruct.feature_schema_id;
+				}
+				generateSchemaCode(arguments.feature_id, 0, ss.curIndex, schemaId, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput);
 			}
 			childOutput=trim(childOutput);
 			if(len(childOutput)){
@@ -1924,7 +1929,7 @@ displaySchemaCom.ajaxInsert();
 						ts3.name="feature_schema_preview_image";
 						ts3.allowDelete=true;
 						if(form.feature_schema_preview_image NEQ ""){
-							ts3.downloadPath="/zupload/feature-options/";
+							ts3.downloadPath=application.zcore.featureCom.getFeatureDomain(form.feature_id)&"/zupload/feature-options/";
 						}
 						application.zcore.functions.zInput_file(ts3);
 						</cfscript></td>

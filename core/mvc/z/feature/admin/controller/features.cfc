@@ -1701,7 +1701,7 @@
 		}else{
 			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', form);
 		}
-		if(qCheck.feature_schema_enable_merge_interface EQ 1){
+		if(qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")){
 			if(form.feature_data_merge_schema_id EQ ""){
 				application.zcore.status.setStatus(request.zsid, "You must select a record type", form, true);
 				rs.success=false;
@@ -1904,7 +1904,7 @@
 	feature_data_deleted=#db.param(0)#, 
 	feature_data_field_order=#db.param(arrayToList(arrFieldOrder, chr(13)))#,
 	feature_data_data=#db.param(arrayToList(arrFieldData, chr(13)))# "; 
-	if(qCheck.feature_schema_enable_merge_interface EQ 1){
+	if(qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")){
 		if(methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema" or methodBackup EQ "importInsertSchema"){
 			db.sql&=", feature_data_merge_schema_id=#db.param(form.feature_data_merge_schema_id)# ";
 		}
@@ -2220,13 +2220,18 @@
 		}else{
 			newRecord=false;
 		}
-		// if(qCheck.feature_schema_parent_field NEQ "" or form.mergeRecord EQ 1){				
-
-		// 	// tell parent page to reload, instead of displaying the row html
-		// 	application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
-		// }
 		form.feature_data_id=setIdBackup;
-		// verify if parent record has feature_schema_enable_merge_interface EQ 1
+		if(qCheck.feature_schema_parent_field NEQ ""){
+			if(methodBackup EQ "userUpdateSchema"){ 
+				form.method="userGetTableHTML";
+				tableHTML=userGetTableHTML();
+			}else{
+				form.method="getTableHTML";
+				tableHTML=getTableHTML();
+			}
+			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, tableHTML:tableHTML, newRecord:newRecord});
+
+		}
 
 		// need to get the schema_id from the feature_data_parent_id instead
 		db.sql="select * from 
@@ -3937,20 +3942,21 @@ Define this function in another CFC to override the default email format
 				<a href="##" class="z-manager-edit" id="z-manager-edit#row.feature_data_id#" title="Edit"><i class="fa fa-cog" aria-hidden="true"></i></a>
 				<div class="z-manager-edit-menu">');
 
-				if(ms.mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
-					editLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#ms.childRow.feature_id#&feature_schema_id=#ms.childRow.feature_schema_id#&amp;feature_data_id=#ms.childRow.feature_data_id#&amp;feature_data_parent_id=#ms.childRow.feature_data_parent_id#&amp;modalpopforced=1");
-					if(not ms.sortEnabled){
-						editLink&="&amp;disableSorting=1";
-					}
-				}else{
-					editLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#row.feature_id#&feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#&amp;modalpopforced=1");
-					if(not ms.sortEnabled){
-						editLink&="&amp;disableSorting=1";
-					}
+				editLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#row.feature_id#&feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#&amp;modalpopforced=1");
+				if(not ms.sortEnabled){
+					editLink&="&amp;disableSorting=1";
 				}
-				echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;">Edit</a> ');
+				echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;">Edit #row.feature_schema_display_name#</a> ');
+
 				sog=application.zcore.featureData.featureSchemaData[form.feature_id];
 				if(ms.mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
+					group=sog.featureSchemaLookup[ms.childRow.feature_schema_id];
+					editChildLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#ms.childRow.feature_id#&feature_schema_id=#ms.childRow.feature_schema_id#&amp;feature_data_id=#ms.childRow.feature_data_id#&amp;feature_data_parent_id=#ms.childRow.feature_data_parent_id#&amp;modalpopforced=1");
+					if(not ms.sortEnabled){
+						editLink&="&amp;disableSorting=1";
+					}
+					echo('<a href="#editChildLink#" onclick="zTableRecordEdit(this);  return false;">Edit #group.feature_schema_display_name#</a> ');
+					hasMultipleEditFeatures=true;
 					// get the groups for this feature_data_merge_schema_id for each row instead
 					for(groupId in sog.featureSchemaLookup){
 						group=sog.featureSchemaLookup[groupId];
@@ -4412,7 +4418,7 @@ Define this function in another CFC to override the default email format
 			methodBackup EQ "userEditSchema" or methodBackup EQ "userAddSchema">
 				<tr><td colspan="2">
 					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1>Next<cfelse>Save</cfif></button>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")>Next<cfelse>Save</cfif></button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
 							<cfif form.mergeRecord EQ 1>
@@ -4662,7 +4668,7 @@ Define this function in another CFC to override the default email format
 			</cfif>
 
 
-			<cfif qCheck.feature_schema_enable_merge_interface EQ 1>
+			<cfif qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")>
 				</table>
 				<cfscript>
 				if(qCheck.feature_schema_merge_group_id NEQ "0"){
@@ -4803,7 +4809,7 @@ Define this function in another CFC to override the default email format
 					    </cfif>
 				<cfelse>
 					<div class="tabWaitButton zSiteOptionGroupWaitDiv" style="float:left; padding:5px; display:none; ">Please wait...</div>
-					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1>Next<cfelse>Save</cfif></button>
+					<button type="submit" name="submitForm" class="z-manager-search-button tabSaveButton zSiteOptionGroupSubmitButton"><cfif qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")>Next<cfelse>Save</cfif></button>
 						&nbsp;
 						<cfif form.modalpopforced EQ 1>
 							<cfif form.mergeRecord EQ 1>
