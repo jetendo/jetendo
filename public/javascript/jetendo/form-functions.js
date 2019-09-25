@@ -1862,7 +1862,19 @@ var zLastAjaxVarName=""; */
 		return false;
 		
 	}
- 
+	function zAddTableRecordTable(html){  
+		if(typeof zBodyBeingEdited == "boolean"){
+			window.location.reload();
+			return;
+		} 
+		$(zBodyBeingEdited).parent().replaceWith(html);
+		zBodyBeingEdited=false;
+		zSetupAjaxTableSortAgain();
+	}
+	function zReplaceTableRecordTable(html){
+		zRowBeingEdited.parentNode.parentNode.outerHTML=html;
+		zRowBeingEdited=false;
+	}
 
 	(function(){
 		// prevent losing work when navigating away from a page, except when submitting a form.
@@ -2021,6 +2033,13 @@ var zLastAjaxVarName=""; */
 					window.location.href=r.redirectLink;
 				}else if(typeof r.redirect != "undefined" && r.redirect){
 					window.parent.location.href=r.redirectLink;
+				}else if(typeof r.tableHTML != "undefined"){
+					if(r.newRecord){ 
+						window.parent.zAddTableRecordTable(r.tableHTML);
+					}else{
+						window.parent.zReplaceTableRecordTable(r.tableHTML);
+					}
+					window.parent.zCloseModal();
 				}else{
 					if(r.newRecord){ 
 						window.parent.zAddTableRecordRow(r.id, r.rowHTML);
@@ -2181,6 +2200,8 @@ var zLastAjaxVarName=""; */
 	window.zEmailTokenInput=zEmailTokenInput;  
 	window.zSubmitManagerEditForm=zSubmitManagerEditForm;
 	window.zCalculateTableCells=zCalculateTableCells;
+	window.zReplaceTableRecordTable=zReplaceTableRecordTable;
+	window.zAddTableRecordTable=zAddTableRecordTable;
 	window.zTableRecordEdit=zTableRecordEdit;
 	window.zTableRecordAdd=zTableRecordAdd;
 	window.zAddTableRecordRow=zAddTableRecordRow;

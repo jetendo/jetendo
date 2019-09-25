@@ -2220,12 +2220,41 @@
 		}else{
 			newRecord=false;
 		}
-		if(qCheck.feature_schema_parent_field NEQ "" or form.mergeRecord EQ 1){				
+		// if(qCheck.feature_schema_parent_field NEQ "" or form.mergeRecord EQ 1){				
 
-			// tell parent page to reload, instead of displaying the row html
-			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
-		}
+		// 	// tell parent page to reload, instead of displaying the row html
+		// 	application.zcore.functions.zReturnJson({success:true, id:setIdBackup, reload:true, newRecord:newRecord});
+		// }
 		form.feature_data_id=setIdBackup;
+		// verify if parent record has feature_schema_enable_merge_interface EQ 1
+
+		// need to get the schema_id from the feature_data_parent_id instead
+		db.sql="select * from 
+		#db.table("feature_schema", request.zos.zcoreDatasource)#, 
+		#db.table("feature_data", request.zos.zcoreDatasource)# 
+		WHERE 
+		feature_data_id=#db.param(form.feature_data_parent_id)# and 
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
+		feature_data_deleted = #db.param(0)# and 
+		feature_schema.feature_schema_id=feature_data.feature_schema_id and 
+		feature_data.feature_data_id=#db.param(form.feature_data_parent_id)# and 
+		feature_schema_deleted = #db.param(0)# and
+		feature_data.feature_id=#db.param(form.feature_id)# ";
+		qCheckParent=db.execute("qCheckParent", "", 10000, "query", false); 
+		if(qCheckParent.feature_schema_enable_merge_interface EQ 1){
+			form.feature_schema_id=qCheckParent.feature_schema_id;
+			form.feature_data_id=qCheckParent.feature_data_id;
+			form.feature_data_parent_id=qCheckParent.feature_data_parent_id;
+			if(methodBackup EQ "userUpdateSchema" or methodBackup EQ "userInsertSchema"){ 
+				form.method="userGetTableHTML";
+				tableHTML=userGetTableHTML();
+			}else{
+				form.method="getTableHTML";
+				tableHTML=getTableHTML();
+			}
+			application.zcore.functions.zReturnJson({success:true, id:setIdBackup, tableHTML:tableHTML, newRecord:newRecord});
+
+		}
 		if(methodBackup EQ "userUpdateSchema" or methodBackup EQ "userInsertSchema"){ 
 			form.method="userGetRowHTML";
 			rowHTML=userGetRowHTML();
@@ -2233,6 +2262,7 @@
 			form.method="getRowHTML";
 			rowHTML=getRowHTML();
 		}
+
 		application.zcore.functions.zReturnJson({success:true, id:setIdBackup, rowHTML:rowHTML, newRecord:newRecord});
  
 	}else{
@@ -2529,7 +2559,7 @@ Define this function in another CFC to override the default email format
 </cffunction>
 
 
-<cffunction name="userGetRowHTML" localmode="modern" access="remote">
+<cffunction name="userGetRowHTML" localmode="modern" access="public">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
 	validateUserSchemaAccess();
@@ -2537,13 +2567,36 @@ Define this function in another CFC to override the default email format
 	</cfscript>
 </cffunction>
 
-<cffunction name="getRowHTML" localmode="modern" access="remote" roles="member">
+<cffunction name="getRowHTML" localmode="modern" access="public">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
 	return this.manageSchema(arguments.struct);
 	</cfscript>
 </cffunction>
 
+<cffunction name="debugGetTableHTML" localmode="modern" access="remote">
+	<cfargument name="struct" type="struct" required="no" default="#{}#">
+	<cfscript>
+	form.method="getTableHTML";
+	echo(this.manageSchema(arguments.struct));
+	abort;
+	</cfscript>
+</cffunction>
+
+<cffunction name="userGetTableHTML" localmode="modern" access="remote">
+	<cfargument name="struct" type="struct" required="no" default="#{}#">
+	<cfscript>
+	validateUserSchemaAccess();
+	return this.manageSchema(arguments.struct);
+	</cfscript>
+</cffunction>
+
+<cffunction name="getTableHTML" localmode="modern" access="remote" roles="member">
+	<cfargument name="struct" type="struct" required="no" default="#{}#">
+	<cfscript>
+	return this.manageSchema(arguments.struct);
+	</cfscript>
+</cffunction>
 
 <cffunction name="validateUserSchemaAccess" localmode="modern" access="public">
 	<cfscript>
@@ -2815,7 +2868,7 @@ Define this function in another CFC to override the default email format
 				}
 			}
 		}
-		
+
 		tempSchemaKey="#form.feature_id#-#form.feature_schema_id#";
 		if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
 			if(structkeyexists(request.zsession, 'siteSchemaSearch') and structkeyexists(request.zsession.siteSchemaSearch, tempSchemaKey)){
@@ -3482,181 +3535,66 @@ Define this function in another CFC to override the default email format
 
 		}
 		if(qS.recordcount){
+			savecontent variable="tableHTML"{
+				if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
 
-			if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
-
-				if(sortEnabled){
-					echo('<table id="sortRowTable" class="table-list" style="width:100%;">');
-				}else{
-					echo('<table class="table-list" style="width:100%;" >');
-				}
-				echo('<thead>
-				<tr>
-					<th class="z-hide-at-767">ID</th>
-					<th>Name</th>
-					<th>Type</th>
-					<th>Last Updated</th>
-					<th>Admin</th>
-				</tr>
-				<tbody>');
-				currentRowIndex=0;
-				for(row in qS){
-					currentRowIndex++;
-					trHTML="";
 					if(sortEnabled){
-						if(row.site_id NEQ 0 or variables.allowGlobal){
-							trHTML=queueSortCom.getRowHTML(row.feature_data_id);
-						}
-					}
-					if(not structkeyexists(childStruct, row.feature_data_merge_data_id)){
-						// TODO: delete the orphaned row so it doesn't happen again
-						continue; // ignoring records with no proper child record.
-					}
-					childRow=childStruct[row.feature_data_merge_data_id];
-					rsData=application.zcore.featureCom.parseFieldData(row);
-
-
-
-					echo('<tr #trHTML# data-ztable-sort-parent-id="#childRow.feature_data_parent_id#" ');
-					if(currentRowIndex MOD 2 EQ 0){
-						echo('class="row2"');
+						echo('<table id="sortRowTable" class="table-list" style="width:100%;">');
 					}else{
-						echo('class="row1"');
+						echo('<table id="sortRowTable" class="table-list" style="width:100%;" >');
 					}
-					echo('>
-					<td class="z-hide-at-767">#row.feature_data_id#</td>
-					<td>');
-					if(row.feature_data_level GT 0){
-						echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
-					}
-					echo('#rsData.name#</td>
-					<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
-					<td>'&application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime)&'</td>');
-					echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
-					ms={
-						sortEnabled:sortEnabled,
-						arrChildSchema:arrChildSchema,
-						methodBackup:methodBackup,
-						mainSchemaStruct:mainSchemaStruct,
-						qSCount:{},
-						struct:arguments.struct,
-						childRow:childRow
-					};
-					if(sortEnabled){
-						ms.queueSortCom=queueSortCom;
-					}
-					if(mainSchemaStruct.feature_schema_limit GT 0){
-						ms.qSCount.qSCount;
-					}
-					echo(getAdminHTML(row, ms));
-					echo('</td></tr>');
-				}
-				writeoutput('</tbody></table>');
-			}else{
-
-				columnCount=0;
-				if(sortEnabled){
-					echo('<table id="sortRowTable" class="table-list" style="width:100%;">');
-				}else{
-					echo('<table class="table-list" style="width:100%;" >');
-				}
-				echo('<thead>
-				<tr>');
-				echo('<th class="z-hide-at-767">ID</th>');
-				columnCount++;
-				for(i=1;i LTE arraylen(arrVal);i++){
-					if(arrDisplay[i]){
-						writeoutput('<th>#arrLabel[i]#</th>');
-						columnCount++;
-					}
-				}
-				if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
-					echo('<th>Approval Status</th>');
-					columnCount++;
-				}
-				writeoutput('
-				<th>Last Updated</th>
-				<th style="white-space:nowrap;">Admin</th>
-				</tr>
-				</thead><tbody>');
-				columnCount+=2;
-				var row=0;
-				var currentRowIndex=0;
-				for(row in qS){
-					currentRowIndex++;
-					if(parentIndex){
-						curRowIndex=0;
-						curParentId=0;
-						curIndent=0;
-						for(n=1;n LTE arraylen(rs.arrValue);n++){
-							if(row.feature_data_id EQ rs.arrValue[n]){
-								curRowIndex=n;
-								curParentId=rs.arrParent[n];
-								curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
-								break;
+					echo('<thead>
+					<tr>
+						<th class="z-hide-at-767">ID</th>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Last Updated</th>
+						<th>Admin</th>
+					</tr>
+					<tbody>');
+					currentRowIndex=0;
+					for(row in qS){
+						currentRowIndex++;
+						trHTML="";
+						if(sortEnabled){
+							if(row.site_id NEQ 0 or variables.allowGlobal){
+								trHTML=queueSortCom.getRowHTML(row.feature_data_id);
 							}
 						}
-						if(curRowIndex EQ 0){
-							curRowIndex="1000000"&rowIndexFix;
-							rowIndexFix++;
+						if(not structkeyexists(childStruct, row.feature_data_merge_data_id)){
+							// TODO: delete the orphaned row so it doesn't happen again
+							continue; // ignoring records with no proper child record.
 						}
-					}else{
-						curParentId=0;
-						curRowIndex=qS.currentrow;
-					}
-					firstDisplayed=true; 
+						childRow=childStruct[row.feature_data_merge_data_id];
+						rsData=application.zcore.featureCom.parseFieldData(row);
 
-					// need to pull data from feature_data_data
-					fieldStruct={};
-					if(row.feature_data_field_order NEQ ""){
-						arrFieldOrder=listToArray(row.feature_data_field_order, chr(13), true);
-						arrFieldData=listToArray(row.feature_data_data, chr(13), true);
-						for(i=1;i<=arraylen(arrFieldOrder);i++){
-							fieldStruct[arrFieldOrder[i]]=arrFieldData[i];
-						}
-					}
 
-					// image is not being added to list view
-					savecontent variable="rowOutput"{ 
-						echo('<td class="z-hide-at-767">'&row.feature_data_id&'</td>');
-						for(var i=1;i LTE arraylen(arrVal);i++){
-							if(arrDisplay[i]){
-								writeoutput('<td>');
-								if(firstDisplayed){
-									firstDisplayed=false;
-									if(parentIndex NEQ 0 and curIndent){
-										writeoutput(replace(ljustify(" ", curIndent*4), " ", "&nbsp;", "all"));
-									}
-								}
-								var currentCFC=application.zcore.featureCom.getTypeCFC(arrType[i]);
-								value=currentCFC.getListValue(dataStruct[i], arrFieldStruct[i], application.zcore.functions.zso(fieldStruct, arrVal[i]));
-								if(arrType[i] EQ 1){
-									if(value EQ ""){
-										writeoutput(htmleditformat(arrRow[i].feature_field_default_value));
-									}else{
-										writeoutput(htmleditformat(value));
-									}
-								}else{
-									if(value EQ ""){
-										writeoutput(arrRow[i].feature_field_default_value);
-									}else{
-										writeoutput(value);
-									}
-								}
-								writeoutput('</td>');
-							}
+
+						echo('<tr #trHTML# data-ztable-sort-parent-id="#childRow.feature_data_parent_id#" ');
+						if(currentRowIndex MOD 2 EQ 0){
+							echo('class="row2"');
+						}else{
+							echo('class="row1"');
 						}
-						if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
-							echo('<td>'&application.zcore.featureCom.getStatusName(row.feature_data_approved)&'</td>');
+						echo('>
+						<td class="z-hide-at-767">#row.feature_data_id#</td>
+						<td>');
+						if(row.feature_data_level GT 0){
+							echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
 						}
-						echo('<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime)&'</td>');
-						writeoutput('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
+						echo('#rsData.name#</td>
+						<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
+						<td>'&application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime)&'</td>');
+						echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
 						ms={
 							sortEnabled:sortEnabled,
 							arrChildSchema:arrChildSchema,
 							methodBackup:methodBackup,
 							mainSchemaStruct:mainSchemaStruct,
-							struct:arguments.struct
+							qSCount:{},
+							struct:arguments.struct,
+							childRow:childRow,
+							subgroupStruct:subgroupStruct
 						};
 						if(sortEnabled){
 							ms.queueSortCom=queueSortCom;
@@ -3665,66 +3603,187 @@ Define this function in another CFC to override the default email format
 							ms.qSCount.qSCount;
 						}
 						echo(getAdminHTML(row, ms));
-						writeoutput('</td>'); 
+						echo('</td></tr>');
 					}
+					writeoutput('</tbody></table>');
+				}else{
 
-					sublistEnabled=false;
-					backupSiteFieldAppId=form.feature_id;
-					backupSiteSchemaId=form.feature_schema_id;
-					backupSiteXSchemaSetParentId=form.feature_data_parent_id;
-					savecontent variable="recurseOut"{
-						if(subgroupRecurseEnabled and form.enableSorting EQ 0 and arrayLen(arrChildSchema) NEQ 0){
-							for(var n in arrChildSchema){
-								if(n.feature_schema_enable_list_recurse EQ "1"){
-									form.feature_schema_app_id=row.feature_id;
-									form.feature_data_parent_id=row.feature_data_id;
-									form.feature_schema_id=n.feature_schema_id;
-									if(methodBackup EQ "userManageSchema"){
-										userManageSchema({recurse:true});
-									}else{
-										manageSchema({recurse:true});
+					columnCount=0;
+					if(sortEnabled){
+						echo('<table id="sortRowTable" class="table-list" style="width:100%;">');
+					}else{
+						echo('<table id="sortRowTable" class="table-list" style="width:100%;" >');
+					}
+					echo('<thead>
+					<tr>');
+					echo('<th class="z-hide-at-767">ID</th>');
+					columnCount++;
+					for(i=1;i LTE arraylen(arrVal);i++){
+						if(arrDisplay[i]){
+							writeoutput('<th>#arrLabel[i]#</th>');
+							columnCount++;
+						}
+					}
+					if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
+						echo('<th>Approval Status</th>');
+						columnCount++;
+					}
+					writeoutput('
+					<th>Last Updated</th>
+					<th style="white-space:nowrap;">Admin</th>
+					</tr>
+					</thead><tbody>');
+					columnCount+=2;
+					var row=0;
+					var currentRowIndex=0;
+					for(row in qS){
+						currentRowIndex++;
+						if(parentIndex){
+							curRowIndex=0;
+							curParentId=0;
+							curIndent=0;
+							for(n=1;n LTE arraylen(rs.arrValue);n++){
+								if(row.feature_data_id EQ rs.arrValue[n]){
+									curRowIndex=n;
+									curParentId=rs.arrParent[n];
+									curIndent=len(rs.arrLabel[n])-len(replace(rs.arrLabel[n], "_", "", "all"));
+									break;
+								}
+							}
+							if(curRowIndex EQ 0){
+								curRowIndex="1000000"&rowIndexFix;
+								rowIndexFix++;
+							}
+						}else{
+							curParentId=0;
+							curRowIndex=qS.currentrow;
+						}
+						firstDisplayed=true; 
+
+						// need to pull data from feature_data_data
+						fieldStruct={};
+						if(row.feature_data_field_order NEQ ""){
+							arrFieldOrder=listToArray(row.feature_data_field_order, chr(13), true);
+							arrFieldData=listToArray(row.feature_data_data, chr(13), true);
+							for(i=1;i<=arraylen(arrFieldOrder);i++){
+								fieldStruct[arrFieldOrder[i]]=arrFieldData[i];
+							}
+						}
+
+						// image is not being added to list view
+						savecontent variable="rowOutput"{ 
+							echo('<td class="z-hide-at-767">'&row.feature_data_id&'</td>');
+							for(var i=1;i LTE arraylen(arrVal);i++){
+								if(arrDisplay[i]){
+									writeoutput('<td>');
+									if(firstDisplayed){
+										firstDisplayed=false;
+										if(parentIndex NEQ 0 and curIndent){
+											writeoutput(replace(ljustify(" ", curIndent*4), " ", "&nbsp;", "all"));
+										}
 									}
-									sublistEnabled=true;
+									var currentCFC=application.zcore.featureCom.getTypeCFC(arrType[i]);
+									value=currentCFC.getListValue(dataStruct[i], arrFieldStruct[i], application.zcore.functions.zso(fieldStruct, arrVal[i]));
+									if(arrType[i] EQ 1){
+										if(value EQ ""){
+											writeoutput(htmleditformat(arrRow[i].feature_field_default_value));
+										}else{
+											writeoutput(htmleditformat(value));
+										}
+									}else{
+										if(value EQ ""){
+											writeoutput(arrRow[i].feature_field_default_value);
+										}else{
+											writeoutput(value);
+										}
+									}
+									writeoutput('</td>');
+								}
+							}
+							if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
+								echo('<td>'&application.zcore.featureCom.getStatusName(row.feature_data_approved)&'</td>');
+							}
+							echo('<td>'&application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime)&'</td>');
+							writeoutput('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
+							ms={
+								sortEnabled:sortEnabled,
+								arrChildSchema:arrChildSchema,
+								methodBackup:methodBackup,
+								mainSchemaStruct:mainSchemaStruct,
+								struct:arguments.struct,
+								subgroupStruct:subgroupStruct
+							};
+							if(sortEnabled){
+								ms.queueSortCom=queueSortCom;
+							}
+							if(mainSchemaStruct.feature_schema_limit GT 0){
+								ms.qSCount.qSCount;
+							}
+							echo(getAdminHTML(row, ms));
+							writeoutput('</td>'); 
+						}
+
+						sublistEnabled=false;
+						backupSiteFieldAppId=form.feature_id;
+						backupSiteSchemaId=form.feature_schema_id;
+						backupSiteXSchemaSetParentId=form.feature_data_parent_id;
+						savecontent variable="recurseOut"{
+							if(subgroupRecurseEnabled and form.enableSorting EQ 0 and arrayLen(arrChildSchema) NEQ 0){
+								for(var n in arrChildSchema){
+									if(n.feature_schema_enable_list_recurse EQ "1"){
+										form.feature_schema_app_id=row.feature_id;
+										form.feature_data_parent_id=row.feature_data_id;
+										form.feature_schema_id=n.feature_schema_id;
+										if(methodBackup EQ "userManageSchema"){
+											userManageSchema({recurse:true});
+										}else{
+											manageSchema({recurse:true});
+										}
+										sublistEnabled=true;
+									}
 								}
 							}
 						}
-					}
-					form.feature_data_parent_id=backupSiteXSchemaSetParentId;
-					form.feature_schema_id=backupSiteSchemaId;
-					form.feature_id=backupSiteFieldAppId;
-					if(not sublistEnabled){
-						recurseOut="";
-					}
-					rowStruct[curRowIndex]={
-						index:curRowIndex,
-						parentId:curParentId,
-						row:rowOutput,
-						trHTML:"",
-						sublist:recurseOut
-					};
-					lastRowStruct=rowStruct[curRowIndex];
+						form.feature_data_parent_id=backupSiteXSchemaSetParentId;
+						form.feature_schema_id=backupSiteSchemaId;
+						form.feature_id=backupSiteFieldAppId;
+						if(not sublistEnabled){
+							recurseOut="";
+						}
+						rowStruct[curRowIndex]={
+							index:curRowIndex,
+							parentId:curParentId,
+							row:rowOutput,
+							trHTML:"",
+							sublist:recurseOut
+						};
+						lastRowStruct=rowStruct[curRowIndex];
 
-					if(sortEnabled){
-						if(row.site_id NEQ 0 or variables.allowGlobal){
-							rowStruct[curRowIndex].trHTML=queueSortCom.getRowHTML(row.feature_data_id);
+						if(sortEnabled){
+							if(row.site_id NEQ 0 or variables.allowGlobal){
+								rowStruct[curRowIndex].trHTML=queueSortCom.getRowHTML(row.feature_data_id);
+							}
 						}
 					}
+					arrKey=structsort(rowStruct, "numeric", "asc", "index");
+					arraysort(arrKey, "numeric", "asc");
+					for(i=1;i LTE arraylen(arrKey);i++){
+						writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&'  data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#" ');
+						if(i MOD 2 EQ 0){
+							writeoutput('class="row2"');
+						}else{
+							writeoutput('class="row1"');
+						}
+						writeoutput('>'&rowStruct[arrKey[i]].row&'</tr>');
+						if(rowStruct[arrKey[i]].sublist NEQ ""){
+							echo('<tr><td colspan="#columnCount#" style="padding:20px;">'&rowStruct[arrKey[i]].sublist&'</td></tr>');
+						}
+					} 
+					writeoutput('</tbody></table>');
 				}
-				arrKey=structsort(rowStruct, "numeric", "asc", "index");
-				arraysort(arrKey, "numeric", "asc");
-				for(i=1;i LTE arraylen(arrKey);i++){
-					writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&'  data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#" ');
-					if(i MOD 2 EQ 0){
-						writeoutput('class="row2"');
-					}else{
-						writeoutput('class="row1"');
-					}
-					writeoutput('>'&rowStruct[arrKey[i]].row&'</tr>');
-					if(rowStruct[arrKey[i]].sublist NEQ ""){
-						echo('<tr><td colspan="#columnCount#" style="padding:20px;">'&rowStruct[arrKey[i]].sublist&'</td></tr>');
-					}
-				} 
-				writeoutput('</tbody></table>');
+			}
+			if((methodBackup NEQ "getTableHTML" and methodBackup NEQ "userGetTableHTML")){ 
+				echo(tableHTML);
 			}
 			if(form.feature_schema_id NEQ 0){
 				if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
@@ -3746,7 +3805,9 @@ Define this function in another CFC to override the default email format
 	}
 
 
-	if((methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML")){ 
+	if((methodBackup EQ "getTableHTML" or methodBackup EQ "userGetTableHTML")){ 
+		return tableHTML;
+	}else if((methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML")){ 
 		if(arraylen(rowStruct)){
 			return lastRowStruct.row;  
 		}else{
@@ -3883,16 +3944,29 @@ Define this function in another CFC to override the default email format
 						editLink&="&amp;disableSorting=1";
 					}
 				}
-				echo('<a href="#editLink#"  onclick="zTableRecordEdit(this);  return false;">Edit</a> ');
-				if(arrayLen(ms.arrChildSchema) NEQ 0){ 
-					for(n in ms.arrChildSchema){
-						if(structkeyexists(subgroupStruct, n.feature_schema_id)){
-							link=application.zcore.functions.zURLAppend(ms.struct.listURL, "feature_id=#row.feature_id#&feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_id#");
-							echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(n.feature_schema_display_name)#(s)</a>'); // n.childCount
+				echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;">Edit</a> ');
+				sog=application.zcore.featureData.featureSchemaData[form.feature_id];
+				if(ms.mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
+					// get the groups for this feature_data_merge_schema_id for each row instead
+					for(groupId in sog.featureSchemaLookup){
+						group=sog.featureSchemaLookup[groupId];
+						if(group.feature_schema_parent_id EQ row.feature_data_merge_schema_id){
+							link=application.zcore.functions.zURLAppend(ms.struct.listURL, "feature_id=#group.feature_id#&feature_schema_id=#group.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_id#");
+							echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(group.feature_schema_display_name)#(s)</a>'); // n.childCount
 							hasMultipleEditFeatures=true;
 						}
+					}
+				}else{
+					if(arrayLen(ms.arrChildSchema) NEQ 0){ 
+						for(n in ms.arrChildSchema){
+							if(structkeyexists(ms.subgroupStruct, n.feature_schema_id)){
+								link=application.zcore.functions.zURLAppend(ms.struct.listURL, "feature_id=#row.feature_id#&feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_id#");
+								echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(n.feature_schema_display_name)#(s)</a>'); // n.childCount
+								hasMultipleEditFeatures=true;
+							}
+						} 
 					} 
-				} 
+				}
 				copyLink="";
 				if(ms.methodBackup NEQ "userManageSchema" and ms.methodBackup NEQ "userGetRowHTML"){
 					if(ms.mainSchemaStruct.feature_schema_limit EQ 0 or ms.qSCount.recordcount LT ms.mainSchemaStruct.feature_schema_limit){
