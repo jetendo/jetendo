@@ -747,6 +747,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		}
 		arrayAppend(arrParent, '<a href="/z/feature/admin/features/#manageAction#?feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#curParentSetId#">Manage #groupStruct.feature_schema_variable_name#(s)</a> / ');
 	}
+
+	// instead of getting the parent schema, get the parent data and use the schema id from that 
 	if(curParentSetId NEQ 0){
 		loop from="1" to="25" index="i"{
 			db.sql="select s1.*, s2.feature_data_title, s2.feature_data_id d2, s2.feature_data_parent_id d3 
@@ -759,20 +761,20 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			s1.feature_id=#db.param(form.feature_id)# and 
 			s2.site_id=#db.param(request.zos.globals.id)# and 
 			s1.feature_schema_id=s2.feature_schema_id and 
-			s2.feature_data_id=#db.param(curParentSetId)# and 
-			s1.feature_schema_id = #db.param(curParentId)# 
+			s2.feature_data_id=#db.param(curParentSetId)# 
 			LIMIT #db.param(0)#,#db.param(1)#";
+			//and s1.feature_schema_id = #db.param(curParentId)# 
 			q12=db.execute("q12");
 			loop query="q12"{
 				manageAction="manageSchema";
 				if(form.method EQ "userManageSchema"){
 					manageAction="userManageSchema";
 				}
-				out='<a href="#application.zcore.functions.zURLAppend("/z/feature/admin/features/#manageAction#", "feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#")#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / ';
+				out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / ';
 				if(not arguments.linkCurrentPage and curSchemaID EQ arguments.feature_schema_id){
 					out&=application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)&' /';
 				}else{ 
-					out&='<a href="/z/feature/admin/features/#manageAction#?feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#q12.d2#">#application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)#</a> /';
+					out&='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#q12.d2#">#application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)#</a> /';
 				}
 				arrayappend(arrParent, out);
 				curSchemaId=q12.feature_schema_id;

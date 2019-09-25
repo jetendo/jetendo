@@ -107,59 +107,59 @@ var zPagination=function(options){
 	render();
 
 }
+	function closeOtherMenus(){
+		$(".z-manager-quick-menu").removeClass("active");
+		if(typeof zCurrentEditButton =="object"){  
+			$(".z-manager-edit-menu").removeClass("active");
+			$(".z-manager-row-active").removeClass("z-manager-row-active"); 
+			if(typeof zCurrentEditButton != "boolean" && zMouseHitTest(zCurrentEditButton)){
 
+				$(".z-manager-edit-menu", $(zCurrentEditButton).parent()).addClass("active");
+				$(zCurrentEditButton).parent().parent().parent().addClass("z-manager-row-active");
+			}else{
+				zCurrentEditButton=false;
+			}
+		}
+	}
+
+	function zManagerBindTableEvents(){
+		// has to always be run because the gear links sometimes don't exist yet.
+		$(document).on("click", ".z-manager-quick-menu-links a", function(e){
+			e.stopPropagation(); 
+			return true;
+		});
+		$(document).on("click", ".z-manager-quick-menu", function(e){
+			e.preventDefault();
+			closeOtherMenus(); 
+			setTimeout(function(){
+				$(".z-manager-quick-menu").addClass("active");
+			},30);
+		});
+
+		$(document).on("click", ".z-manager-edit", function(e){
+			closeOtherMenus(); 
+			if($(".z-manager-edit-menu", $(this).parent()).length == 0){ 
+				return true;
+			}
+			e.preventDefault();
+			var self=this; 
+			setTimeout(function(){
+				zCurrentEditButton=self;
+			}, 30);
+			$(".z-manager-edit-menu", $(this).parent()).addClass("active");
+			$(this).parent().parent().parent().addClass("z-manager-row-active"); 
+		});
+		$(document).on("click", function(e){ 
+			closeOtherMenus();
+		});
+		$(document).on("click", ".z-manager-delete", function(e){
+
+		});
+	}
 
 	var zCurrentEditButton=false;
 	zArrDeferredFunctions.push(function(){
-		function closeOtherMenus(){
-			$(".z-manager-quick-menu").removeClass("active");
-			if(typeof zCurrentEditButton =="object"){  
-				$(".z-manager-edit-menu").removeClass("active");
-				$(".z-manager-row-active").removeClass("z-manager-row-active"); 
-				if(typeof zCurrentEditButton != "boolean" && zMouseHitTest(zCurrentEditButton)){
-
-					$(".z-manager-edit-menu", $(zCurrentEditButton).parent()).addClass("active");
-					$(zCurrentEditButton).parent().parent().parent().addClass("z-manager-row-active");
-				}else{
-					zCurrentEditButton=false;
-				}
-			}
-		}
-		
-		if($(".z-manager-edit").length != 0){
-
-			$(document).on("click", ".z-manager-quick-menu-links a", function(e){
-				e.stopPropagation(); 
-				return true;
-			});
-			$(document).on("click", ".z-manager-quick-menu", function(e){
-				e.preventDefault();
-				closeOtherMenus(); 
-				setTimeout(function(){
-					$(".z-manager-quick-menu").addClass("active");
-				},30);
-			});
-
-			$(document).on("click", ".z-manager-edit", function(e){
-				closeOtherMenus(); 
-				if($(".z-manager-edit-menu", $(this).parent()).length == 0){ 
-					return true;
-				}
-				e.preventDefault();
-				var self=this; 
-				setTimeout(function(){
-					zCurrentEditButton=self;
-				}, 30);
-				$(".z-manager-edit-menu", $(this).parent()).addClass("active");
-				$(this).parent().parent().parent().addClass("z-manager-row-active"); 
-			});
-			$(document).on("click", function(e){ 
-				closeOtherMenus();
-			});
-			$(document).on("click", ".z-manager-delete", function(e){
-
-			});
-		}
+		zManagerBindTableEvents();
 
 		$(".z-manager-list-tab-button").on("click", function(e){
 			e.preventDefault();

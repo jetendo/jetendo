@@ -3099,7 +3099,6 @@ Define this function in another CFC to override the default email format
 			}
 		}
 
-
 		arrSearchSQL=[];
 		searchStruct={};
 		searchFieldEnabledStruct={};
@@ -4666,7 +4665,7 @@ Define this function in another CFC to override the default email format
 			<cfif qCheck.feature_schema_enable_merge_interface EQ 1>
 				</table>
 				<cfscript>
-				if(qCheck.feature_schema_merge_group_id NEQ ""){
+				if(qCheck.feature_schema_merge_group_id NEQ "0"){
 					mergeGroupId=qCheck.feature_schema_merge_group_id;
 				}else{
 					mergeGroupId=qCheck.feature_schema_id;

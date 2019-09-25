@@ -2199,6 +2199,9 @@ var zLastAjaxVarName=""; */
 	} 
 
 	function zReloadFeatureTableHTML(){
+		if(typeof featureReloadLink=="undefined"){
+			window.location.reload();
+		}
 		var tempObj={};
 		tempObj.id="zAjaxReloadFeatureHTMLTable";
 		tempObj.url=featureReloadLink;
