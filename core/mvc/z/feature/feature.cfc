@@ -1473,7 +1473,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		WHERE 
 		feature_field_deleted = #db.param(0)# and
 		feature_schema_id = #db.param(row.feature_schema_id)# and 
-		feature_id = #db.param(form.feature_id)# ";
+		feature_id = #db.param(arguments.row.feature_id)# ";
 		qField=db.execute("qField");
 		fieldLookup={};
 		fieldStruct={};
@@ -1673,7 +1673,9 @@ if(not rs.success){
 	}
 	db.sql="SELECT * FROM 
 	#db.table("feature_data", request.zos.zcoreDatasource)#  
-	WHERE  feature_schema_id=#db.param(row.feature_schema_id)# and  
+	WHERE  
+	feature_data_id=#db.param(arguments.feature_data_id)# and  
+	feature_schema_id=#db.param(row.feature_schema_id)# and  
 	site_id=#db.param(arguments.site_id)# and 
 	feature_data_field_order <> #db.param('')# and 
 	feature_data_deleted = #db.param(0)# ";
@@ -1703,6 +1705,8 @@ if(not rs.success){
 	fsd=application.zcore.featureData.featureSchemaData[row.feature_id];
 	groupStruct=fsd.featureSchemaLookup[row.feature_schema_id]; 
 	
+	// TODO: remove from arrays / memory cache
+
 	if(structkeyexists(groupStruct, 'feature_schema_change_cfc_path') and groupStruct.feature_schema_change_cfc_path NEQ ""){
 		path=groupStruct.feature_schema_change_cfc_path;
 		if(left(path, 5) EQ "root."){

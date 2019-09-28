@@ -414,38 +414,35 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	<cfargument name="feature_data_parent_id" type="numeric" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
-	db.sql="select feature_data_id from #db.table("feature_data", request.zos.zcoreDatasource)#
-	WHERE 
-	feature_data_deleted = #db.param(0)# and 
-	feature_data_master_set_id = #db.param(0)# and 
-	feature_data_parent_id= #db.param(arguments.feature_data_parent_id)# and 
-	feature_schema_id = #db.param(arguments.feature_schema_id)# and 
-	feature_id = #db.param(arguments.feature_id)# and 
-	site_id = #db.param(arguments.site_id)# 
-	ORDER BY feature_data_sort";
-	var qSort=db.execute("qSort");
-	var arrTemp=[];
-	sortStruct={};
-	i=1;
- 
 	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id]; 
 	var groupStruct=fsd.featureSchemaLookup[arguments.feature_schema_id];
+	rs=application.zcore.featureCom.getSortedData(arguments.feature_schema_id);
+	var arrTemp=[];
+	sortStruct={};
+	for(i=1;i<=arraylen(rs.arrOrder);i++){
+		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)#
+		set 
+		feature_data_sort=#db.param(i)#, 
+		feature_data_level=#db.param(rs.arrLevel[i])# 
+		WHERE 
+		feature_data.feature_data_id=#db.param(rs.arrOrder[i].row.feature_data_id)# and 
+		feature_data.site_id=#db.param(request.zos.globals.id)# and 
+		feature_data.feature_data_deleted=#db.param(0)#";
+		db.execute("qUpdate");
+		arrayAppend(arrTemp, rs.arrOrder[i].row.feature_data_id);
+		sortStruct[rs.arrOrder[i].row.feature_data_id]=i;
 
-	for(var row2 in qSort){
-		arrayAppend(arrTemp, row2.feature_data_id);
-		sortStruct[row2.feature_data_id]=i;
-
-
-		if(structkeyexists(groupStruct, 'feature_schema_change_cfc_path') and groupStruct.feature_schema_change_cfc_path NEQ ""){
+		if(groupStruct.feature_schema_change_cfc_path NEQ ""){
 			path=groupStruct.feature_schema_change_cfc_path;
 			if(left(path, 5) EQ "root."){
 				path=request.zRootCFCPath&removeChars(path, 1, 5);
 			}
-			changeCom=application.zcore.functions.zcreateObject("component", path);
-			changeCom[groupStruct.feature_schema_change_cfc_sort_method](row2.feature_data_id, i);
-		}
-		i++;
+			changeCom=application.zcore.functions.zcreateObject("component", path); 
+			changeCom[groupStruct.feature_schema_change_cfc_sort_method](row.feature_data_id, i); 
+		} 
 	}
+ 
+
 	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
 	t9.featureSchemaSetId[arguments.feature_data_parent_id&"_childSchema"][arguments.feature_schema_id]=arrTemp;
 

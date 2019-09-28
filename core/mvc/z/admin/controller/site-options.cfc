@@ -4898,7 +4898,6 @@ Define this function in another CFC to override the default email format
 		}
 		arrEnd=arraynew(1);
 
-		resortSetByParentField(mainGroupStruct);
 		</cfscript>
 		<script type="text/javascript">
 		var zDisableBackButton=true;

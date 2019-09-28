@@ -387,7 +387,7 @@
 					arrayAppend(arrNewField, arrField[i]);
 					arrayAppend(arrNewData, arrData[i]);
 				}else if(arrData[i] NEQ ""){
-					typeCFC.onDelete(arrData[i], typeStruct); 
+					typeCFC.onDelete(arrData[i], row.site_id, typeStruct); 
 				}
 			}
 			db.sql="UPDATE #db.table("feature_data", request.zos.zcoreDatasource)# SET 
@@ -1909,10 +1909,8 @@
 	feature_data_deleted=#db.param(0)#, 
 	feature_data_field_order=#db.param(arrayToList(arrFieldOrder, chr(13)))#,
 	feature_data_data=#db.param(arrayToList(arrFieldData, chr(13)))# "; 
-	if(qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")){
-		if(methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema" or methodBackup EQ "importInsertSchema"){
-			db.sql&=", feature_data_merge_schema_id=#db.param(form.feature_data_merge_schema_id)# ";
-		}
+	if(qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "insertSchema" or methodBackup EQ "userInsertSchema" or methodBackup EQ "importInsertSchema")){
+		db.sql&=", feature_data_merge_schema_id=#db.param(form.feature_data_merge_schema_id)# ";
 	}
 	if(hasUserField){
 		db.sql&=", feature_data_user=#db.param(userFieldValue)# ";
@@ -1943,13 +1941,6 @@
 	application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id);
 
 
-	if(qCheck.feature_schema_parent_field NEQ ""){
-		// resort all records
-		for(row in qCheck){
-			mainSchemaStruct=row;
-		}
-		resortSetByParentField(mainSchemaStruct);
-	}
 	featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
 	if(form.mergeRecord EQ 1 and form.feature_data_parent_id NEQ "0"){
 		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# 
@@ -1966,6 +1957,13 @@
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
 	if(request.zos.enableSiteOptionGroupCache and not structkeyexists(request.zos, 'disableSiteCacheUpdate') and qCheck.feature_schema_enable_cache EQ 1){ 
 		featureCacheCom.updateSchemaSetIdCache(request.zos.globals.id, form.feature_data_id); 
+	}
+	if(qCheck.feature_schema_parent_field NEQ ""){
+		// resort all records
+		for(row in qCheck){
+			mainSchemaStruct=row;
+		}
+		resortSetByParentField(mainSchemaStruct, form.feature_data_parent_id);
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds4<br>'); startTime=gettickcount();
 	if(qCheck.feature_schema_enable_unique_url EQ 1 and qCheck.feature_schema_public_searchable EQ 1){
@@ -2295,31 +2293,11 @@
 
 
 <cffunction name="resortSetByParentField" localmode="modern" access="public">
-	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="feature_data_parent_id" type="string" required="yes">
 	<cfscript>
-	db=request.zos.queryObject;
-	rs=application.zcore.featureCom.getSortedData(arguments.groupQuery.feature_schema_id);
-	for(i=1;i<=arraylen(rs.arrOrder);i++){
-		db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)#
-		set 
-		feature_data_sort=#db.param(i)#, 
-		feature_data_level=#db.param(rs.arrLevel[i])# 
-		WHERE 
-		feature_data.feature_data_id=#db.param(rs.arrOrder[i].row.feature_data_id)# and 
-		feature_data.site_id=#db.param(request.zos.globals.id)# and 
-		feature_data.feature_data_deleted=#db.param(0)#";
-		db.execute("qUpdate");
-
-		// fire onChange com if there is one
-		if(arguments.groupQuery.feature_schema_change_cfc_path NEQ ""){
-			path=arguments.groupQuery.feature_schema_change_cfc_path;
-			if(left(path, 5) EQ "root."){
-				path=request.zRootCFCPath&removeChars(path, 1, 5);
-			}
-			changeCom=application.zcore.functions.zcreateObject("component", path); 
-			changeCom[arguments.groupQuery.feature_schema_change_cfc_sort_method](row.feature_data_id, i); 
-		}
-	}
+	featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
+	featureCacheCom.resortSchemaSets(request.zos.globals.id, arguments.row.feature_id, arguments.row.feature_schema_id, arguments.feature_data_parent_id);
 	</cfscript>
 </cffunction>
 <!--- 
@@ -2935,11 +2913,11 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(form, 'zQueueSortAjax')){
 				if(mainSchemaStruct.feature_schema_parent_field NEQ ""){
 					// resort all records
-					resortSetByParentField(mainSchemaStruct);
+					resortSetByParentField(mainSchemaStruct, form.feature_data_parent_id);
 					// possibly return different json here that reloads table, and not entire page
 				}else{
 
-					// update cache
+					// update cache 
 					if(request.zos.enableSiteOptionGroupCache and mainSchemaStruct.feature_schema_enable_cache EQ 1){
 						featureCacheCom.resortSchemaSets(request.zos.globals.id, form.feature_id, form.feature_schema_id, form.feature_data_parent_id); 
 					}else{
@@ -3583,7 +3561,7 @@ Define this function in another CFC to override the default email format
 							}
 						}
 						if(not structkeyexists(childStruct, row.feature_data_merge_data_id)){
-							// TODO: delete the orphaned row so it doesn't happen again
+							application.zcore.featureCom.deleteSchemaSetRecursively(row.feature_data_id, row.site_id, row);
 							continue; // ignoring records with no proper child record.
 						}
 						childRow=childStruct[row.feature_data_merge_data_id];
@@ -4932,15 +4910,7 @@ Define this function in another CFC to override the default email format
 <cffunction name="deleteSchema" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var queueSortStruct=0;
-	var queueSortCom=0;
-	var r1=0;
-	var qS=0;
-	var qCheck=0;
-	var theTitle=0;
-	var i=0;
-	var result=0;   
+	var db=request.zos.queryObject; 
 	setting requesttimeout="100000";
 
 	defaultStruct=getDefaultStruct();
@@ -4955,10 +4925,6 @@ Define this function in another CFC to override the default email format
 	structappend(arguments.struct, defaultStruct, false);
 	
 	variables.init();
-	if(form.method NEQ "autoDeleteSchema"){
-		// handled in init instead
-		//application.zcore.adminSecurityFilter.requireFeatureAccess("Features", true);	
-	}
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
 	form.feature_data_id=application.zcore.functions.zso(form, 'feature_data_id');
 	db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
