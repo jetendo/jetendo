@@ -1886,13 +1886,14 @@
 			form.feature_data_approved=1;
 		}
 		db.sql="INSERT INTO #db.table("feature_data", request.zos.zcoreDatasource)#  SET 
-		feature_data_sort=#db.param(form.feature_data_sort)#,";
+		feature_data_sort=#db.param(form.feature_data_sort)#,
+		feature_data_created_datetime=#db.param(request.zos.mysqlnow)#, ";
 	}else{
 		db.sql="UPDATE #db.table("feature_data", request.zos.zcoreDatasource)#  SET ";
 	}
 	db.sql&=" feature_id=#db.param(form.feature_id)#, 
-	feature_data_created_datetime=#db.param(request.zos.mysqlnow)#, 
 	 site_id=#db.param(request.zos.globals.id)#, 
+	 feature_data_updated_datetime=#db.param(request.zos.mysqlnow)#, 
 	 feature_schema_id=#db.param(form.feature_schema_id)#,  
 	 feature_data_start_date=#db.param(form.feature_data_start_date)#,
 	 feature_data_end_date=#db.param(form.feature_data_end_date)#,
@@ -1900,7 +1901,6 @@
 	feature_data_override_url=#db.param(application.zcore.functions.zso(form,'feature_data_override_url'))#,
 	feature_data_approved=#db.param(form.feature_data_approved)#, 
 	feature_data_image_library_id=#db.param(application.zcore.functions.zso(form, 'feature_data_image_library_id'))#, 
-	feature_data_updated_datetime=#db.param(request.zos.mysqlNow)# , 
 	feature_data_title=#db.param(form.siteFieldTitle)# , 
 	feature_data_summary=#db.param(form.siteFieldSummary)#,
 	feature_data_metatitle=#db.param(application.zcore.functions.zso(form, 'feature_data_metatitle'))#,
@@ -3591,7 +3591,7 @@ Define this function in another CFC to override the default email format
 
 
 
-						echo('<tr #trHTML# ');// data-ztable-sort-parent-id="#childRow.feature_data_parent_id#"
+						echo('<tr #trHTML# data-ztable-sort-disable-validation="1" ');// data-ztable-sort-parent-id="#childRow.feature_data_parent_id#"
 						if(currentRowIndex MOD 2 EQ 0){
 							echo('class="row2"');
 						}else{
@@ -3605,7 +3605,13 @@ Define this function in another CFC to override the default email format
 						}
 						echo('#rsData.name#</td>
 						<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
-						<td>'&application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime)&'</td>');
+						<td>');
+						if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){
+							echo(application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime));
+						}else{
+							echo(application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime));
+						}
+						echo('</td>');
 						echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
 						ms={
 							sortEnabled:sortEnabled,
@@ -3790,7 +3796,7 @@ Define this function in another CFC to override the default email format
 					arrKey=structsort(rowStruct, "numeric", "asc", "index");
 					arraysort(arrKey, "numeric", "asc");
 					for(i=1;i LTE arraylen(arrKey);i++){
-						writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&'  data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#" ');
+						writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&' data-ztable-sort-disable-validation="1" ');// data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#"
 						if(i MOD 2 EQ 0){
 							writeoutput('class="row2"');
 						}else{
@@ -4653,7 +4659,7 @@ Define this function in another CFC to override the default email format
 
 				<div style="width:100%; float:left; padding-top:5px; padding-bottom:5px;">
 					<div style="width:100%; padding-left:5px;" class="z-t-18">
-						Select A Record Type
+						Select A Record Type *
 					</div>
 					<div style="float:left; padding:5px;">
 						<strong>Search</strong> | Name: <input type="text" name="featureNameSearch" id="featureNameSearch" value="">  

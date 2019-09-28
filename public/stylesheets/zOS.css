@@ -843,12 +843,11 @@ a.z-manager-assign:hover span{ color:#369;}
 	overflow:hidden;
 	right:0px;
 	top:30px; 
-	height:0px;
-	opacity:0px;
+	height:0px; 
 	z-index:1000; 
 	border-radius:5px;
 }
-/*.z-manager-button-container:hover .z-manager-edit-menu, */
+
 .z-manager-edit-menu.active{
 	display:block; 
 	box-shadow: 1px 14px 24px rgba(0,0,0,0.4);

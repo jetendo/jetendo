@@ -332,6 +332,7 @@ var zLastAjaxVarName=""; */
 					if(parentId != null && parentId != ""){
 						reloadOnSuccess=true;
 					}
+					var disableSortValidation=$(e2.item[0]).attr("data-ztable-sort-disable-validation");
 
 					var sortOrderList=arrId2.join("|");
 					//console.log("sorted list:"+sortOrderList);
@@ -340,7 +341,7 @@ var zLastAjaxVarName=""; */
 					tempObj.url=zAjaxSortURLCache[tableId].url;
 					tempObj.method="post";
 					tempObj.postObj={};
-					if(reloadOnSuccess){
+					if(reloadOnSuccess || disableSortValidation=="1"){
 						tempObj.postObj.zDisableSortValidation=1;
 					}
 					tempObj.postObj[ajaxVarName]=sortOrderList;
@@ -1874,6 +1875,7 @@ var zLastAjaxVarName=""; */
 	function zReplaceTableRecordTable(html){
 		zRowBeingEdited.parentNode.parentNode.outerHTML=html;
 		zRowBeingEdited=false;
+		zSetupAjaxTableSortAgain();
 	}
 
 	(function(){
@@ -2009,6 +2011,10 @@ var zLastAjaxVarName=""; */
 			tinyMCE.triggerSave();
 		}
 		if(typeof obj.checkValidity != "undefined" && !obj.checkValidity()){
+			return false;
+		}
+		if($("#feature_data_merge_schema_id").length>0 && $("#feature_data_merge_schema_id").val()==""){
+			alert("You must select a record type.");
 			return false;
 		}
 		$(".zSiteOptionGroupWaitDiv").show();
