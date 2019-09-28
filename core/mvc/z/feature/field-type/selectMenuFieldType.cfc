@@ -314,6 +314,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>	
 	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	return { success: true, value: nv, dateValue: "" }; 
@@ -324,6 +325,7 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>
 	return application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	</cfscript>
@@ -632,7 +634,8 @@
 	}else{
 		selectStruct.inlineStyle="width:95%; min-width:auto;";
 	}
-	
+	selectStruct.listLabels="";
+	selectStruct.listValues="";
 	if(structkeyexists(ts,'selectmenu_labels') and ts.selectmenu_labels NEQ ""){
 		selectStruct.listLabelsDelimiter = ts.selectmenu_delimiter;
 		selectStruct.listValuesDelimiter = ts.selectmenu_delimiter;
@@ -662,8 +665,17 @@
 		selectStruct.query = rs.qTemp2;
 		selectStruct.queryLabelField = "label";
 		selectStruct.queryValueField = "id";
+	}else{
+		enabled=true;
+		selectStruct.listLabelsDelimiter = ts.selectmenu_delimiter;
+		selectStruct.listValuesDelimiter = ts.selectmenu_delimiter;
+		if(selectStruct.listValues NEQ ""){
+			selectStruct.listLabels&=ts.selectmenu_delimiter;
+			selectStruct.listValues&=ts.selectmenu_delimiter;
+		}
+		selectStruct.listLabels&=arrayToList(rs.arrLabel, ts.selectmenu_delimiter);
+		selectStruct.listValues&=arrayToList(rs.arrValue, ts.selectmenu_delimiter);
 	} 
-
 	selectStruct.onchange&=arguments.onChangeJavascript;
 	if(arguments.required){
 		selectStruct.required=true;
@@ -682,7 +694,7 @@
 				application.zcore.functions.zSetupMultipleSelect(selectStruct.name, application.zcore.functions.zso(form, 'feature_data_id'), arguments.required);
 			}
 		}
-		selectStruct.output=false;
+		selectStruct.output=false; 
 		tempOutput=application.zcore.functions.zInputSelectBox(selectStruct);
 		return replace(tempOutput, "_", "&nbsp;", "all");
 	}else{

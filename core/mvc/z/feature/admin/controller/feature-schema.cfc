@@ -70,6 +70,7 @@
 	<cfargument name="disableLoop" type="boolean" required="yes"> 
 	<cfargument name="debugMode" type="boolean" required="yes"> 
 	<cfargument name="disableDebugOutput" type="boolean" required="yes">
+	<cfargument name="originalParentSchemaId" type="boolean" required="yes">
 	<cfscript>
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	ss=arguments.sharedStruct;
@@ -107,13 +108,13 @@
 				echo(indent&'// comment out when debugging#chr(10)#');
 			}
 			if(groupStruct.feature_schema_parent_id NEQ 0){
-				parentSchemaStruct=fsd.featureSchemaLookup[groupStruct.feature_schema_parent_id];
+				parentSchemaStruct=fsd.featureSchemaLookup[arguments.originalParentSchemaId];
 				parentSchemaName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(parentSchemaStruct.feature_schema_variable_name), " ", "", "all"), "");
 				if(isNumeric(left(parentSchemaName, 1))){
 					parentSchemaName="Schema"&parentSchemaName;
 				}
 				parentSchemaNameInstance=lcase(left(parentSchemaName, 1))&removeChars(parentSchemaName,1,1);
-				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#", 0, request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
+				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#", request.zos.globals.id, #parentSchemaNameInstance#);'&chr(10));
 			}else{
 				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
@@ -209,7 +210,7 @@
 				}else{
 					schemaId=groupStruct.feature_schema_id;
 				}
-				generateSchemaCode(arguments.feature_id, 0, ss.curIndex, schemaId, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput);
+				generateSchemaCode(arguments.feature_id, 0, ss.curIndex, schemaId, arguments.sharedStruct, arguments.depth+2, false, arguments.debugMode, arguments.disableDebugOutput, groupStruct.feature_schema_id);
 			}
 			childOutput=trim(childOutput);
 			if(len(childOutput)){
@@ -309,7 +310,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	echo('<h2>Source code generated below.</h2>
 	<p>Note: searchSchema() retrieves all the records.  If "Enable Memory Caching" is disabled for the group, it will perform a query to select all the data.  This can be very slow if you are working with hundreds or thousands of records and it may cause nested queries to run if the sub-groups also have "Enable Memory Caching" disabled.   Conversely, for small datasets, this feature is much faster then running a query.</p>
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
-	<p>Example: arr1=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "Schema Name", 0, request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
+	<p>Example: arr1=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "Schema Name",  request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
 	<p>fullStruct=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["Schema Name"], dataStruct.__setId);</p>
 
@@ -320,18 +321,18 @@ KEY `feature_data_id` (`feature_data_id`)
 		<textarea name="a222" cols="100" rows="10" style="width:70%;">');
 
 	savecontent variable="cfcOutput"{
-		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, false, true);
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, false, true, form.feature_schema_parent_id);
 	}
 	cfcOutput=trim(cfcOutput);
 
 	request.zos.forceAbsoluteImagePlaceholderURL=true;
 	savecontent variable="cfcDebugOutput"{
-		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, true, false);
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, true, true, false, form.feature_schema_parent_id);
 	}
 	structdelete(request.zos, 'forceAbsoluteImagePlaceholderURL');
 	cfcDebugOutput=trim(cfcDebugOutput);
 	savecontent variable="output"{
-		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, false, false, false);
+		generateSchemaCode(form.feature_id, form.feature_schema_id, 1, form.feature_schema_parent_id, {}, 0, false, false, false, form.feature_schema_parent_id);
 
 		 
 	fsd=application.zcore.featureData.featureSchemaData[form.feature_id]; 

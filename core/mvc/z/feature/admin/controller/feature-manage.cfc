@@ -113,7 +113,7 @@
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("feature_category", request.zos.zcoreDatasource)# WHERE 
 	feature_category_deleted=#db.param(0)# ";
-	qCategory=db.execute("qCategory");
+	qCategory=db.execute("qCategory", "", 10000, "query", false);
 	foundCustom=false;
 	for(row in qCategory){
 		if(row.feature_category_name EQ "Custom"){

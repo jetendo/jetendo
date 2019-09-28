@@ -365,7 +365,10 @@ When making a version the primary record, it will have option to preserve the or
 		<input type="hidden" name="feature_data_master_set_id" value="#form.feature_data_master_set_id#" />
 		<cfscript>
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	where feature_data_id = #db.param(form.feature_data_id)# and 
+
+	where 
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qVersion=db.execute("qVersion");
@@ -409,13 +412,17 @@ When making a version the primary record, it will have option to preserve the or
 	form.preserveMeta=application.zcore.functions.zso(form, 'preserveMeta', true, 1);
 
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	where feature_data_id = #db.param(form.feature_data_master_set_id)# and 
+	where
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_data_id = #db.param(form.feature_data_master_set_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qMaster=db.execute("qMaster");
 
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	where feature_data_id = #db.param(form.feature_data_id)# and 
+	where 
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
 	feature_id=#db.param(form.feature_id)# ";
 	qVersion=db.execute("qVersion");
@@ -548,7 +555,9 @@ When making a version the primary record, it will have option to preserve the or
 
 	// verify the set is a version
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	WHERE feature_id=#db.param(form.feature_id)# and 
+	WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
+	feature_id=#db.param(form.feature_id)# and 
 	feature_data_id= #db.param(form.feature_data_id)# and 
 	feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
 	feature_data_deleted=#db.param(0)# ";
@@ -566,7 +575,9 @@ When making a version the primary record, it will have option to preserve the or
 				SET 
 				feature_data_version_status=#db.param(0)#, 
 				feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
-				WHERE feature_id=#db.param(form.feature_id)# and 
+				WHERE 
+				site_id=#db.param(request.zos.globals.id)# and 
+				feature_id=#db.param(form.feature_id)# and 
 				feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
 				feature_data_deleted=#db.param(0)# ";
 				qUpdate=db.execute("qUpdate");
@@ -575,7 +586,9 @@ When making a version the primary record, it will have option to preserve the or
 			SET 
 			feature_data_version_status=#db.param(form.statusValue)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))# 
-			WHERE feature_id=#db.param(form.feature_id)# and 
+			WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
+			feature_id=#db.param(form.feature_id)# and 
 			feature_data_id=#db.param(form.feature_data_id)# and 
 			feature_data_master_set_id=#db.param(form.feature_data_master_set_id)# and 
 			feature_data_deleted=#db.param(0)# ";
@@ -611,6 +624,7 @@ When making a version the primary record, it will have option to preserve the or
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)#,
 	#db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
 	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 	feature_schema_deleted=#db.param(0)# and 
 	feature_data.feature_id=#db.param(form.feature_id)# and 
@@ -631,6 +645,7 @@ When making a version the primary record, it will have option to preserve the or
 	echo('<p><a href="/z/feature/admin/features/manageSchema?feature_schema_id=#qMaster.feature_schema_id#">Manage #qSchema.feature_schema_display_name#</a> /</p>');
 	echo('<h2>Showing versions for "'&qSet.feature_data_title&'"</h2>');
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_data_master_set_id=#db.param(form.feature_data_id)#";

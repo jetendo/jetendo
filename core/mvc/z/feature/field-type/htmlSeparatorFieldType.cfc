@@ -174,6 +174,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>	
 	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	return { success: true, value: nv, dateValue: "" };
@@ -184,6 +185,7 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>
 	return application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	</cfscript>

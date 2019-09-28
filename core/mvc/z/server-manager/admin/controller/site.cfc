@@ -1994,6 +1994,13 @@
 			</td>
 		</tr> 
 		<tr >
+			<td style="vertical-align:top; width:140px;">Google Adwords<br>Account ID:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_adwords_account_id", "table-error","")#>
+				<input name="site_adwords_account_id" type="text" size="70" value="#htmleditformat(form.site_adwords_account_id)#"><br />
+				i.e. 123-123-1234
+			</td>
+		</tr> 
+		<tr >
 			<td style="vertical-align:top; width:140px;">Google Analytics<br>View ID:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_view_id", "table-error","")#>
 				<input name="site_google_analytics_view_id" type="text" size="70" value="#htmleditformat(form.site_google_analytics_view_id)#"><br />

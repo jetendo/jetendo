@@ -1613,7 +1613,7 @@
 		if(row.feature_field_primary_field EQ 1 and currentCFC.isSearchable()){
 			hasPrimaryField=true;
 		}
-		nv=currentCFC.getFormValue(row, 'newvalue', form);
+		nv=currentCFC.getFormValue(row, 'newvalue', form, originalValueStruct);
 		if(row.feature_field_required EQ 1){
 			if(nv EQ ""){
 				application.zcore.status.setFieldError(request.zsid, "newvalue"&row.feature_field_id, true);
@@ -1695,11 +1695,15 @@
 		form.site_id=request.zos.globals.id;
 		form.feature_data_disable_time=0;
 		var typeStruct=typeStructCache[row.feature_field_id]; 
+		dataFields=application.zcore.featureCom.parseFieldData(row);
 		var currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
 		if(row.feature_field_use_original_value EQ 1){
-			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', request.zos.originalFormScope);
+			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', request.zos.originalFormScope, dataFields);
 		}else{
-			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', form);
+			rs=currentCFC.onBeforeUpdate(row, typeStruct, 'newvalue', form, dataFields);
+		}
+		if(structkeyexists(rs, 'originalFile')){
+			rs.value&=chr(9)&rs.originalFile;
 		}
 		if(qCheck.feature_schema_enable_merge_interface EQ 1 and (methodBackup EQ "addSchema" or methodBackup EQ "userAddSchema")){
 			if(form.feature_data_merge_schema_id EQ ""){
@@ -1833,6 +1837,7 @@
 			if(methodBackup EQ "publicUpdateSchema" or methodBackup EQ "userUpdateSchema"){
 				// must force approval status to stay the same on updates.
 				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+				site_id=#db.param(request.zos.globals.id)# and 
 				feature_data_id = #db.param(form.feature_data_id)# and 
 				feature_data_deleted = #db.param(0)# and
 				feature_id=#db.param(form.feature_id)# ";
@@ -2636,6 +2641,7 @@ Define this function in another CFC to override the default email format
 			} 
 			first=false;
 			db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
 			feature_data_deleted=#db.param(0)# and 
 			feature_id=#db.param(form.feature_id)# and 
 			feature_data_id=#db.param(currentSetId)# ";
@@ -2676,6 +2682,7 @@ Define this function in another CFC to override the default email format
 				application.zcore.functions.z404("This feature_schema has an invalid feature_schema_user_id_field that doesn't exist: #qCheckSchema.feature_schema_user_id_field#");
 			}
 			db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
 			feature_field_id=#db.param(qField.feature_field_id)# and 
 			feature_data_deleted=#db.param(0)# and 
 			feature_id=#db.param(form.feature_id)# and 
@@ -2951,6 +2958,7 @@ Define this function in another CFC to override the default email format
 							while(true){
 								db.sql="select feature_data_id FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
 								WHERE 
+								site_id=#db.param(request.zos.globals.id)# and 
 								feature_data.feature_id = #db.param(form.feature_id)# and  
 								feature_schema_id = #db.param(form.feature_schema_id)# and 
 								feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
@@ -3202,7 +3210,8 @@ Define this function in another CFC to override the default email format
 			db.sql="SELECT count(feature_schema.feature_schema_id) count
 			FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
 			#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  "; 
-			db.sql&="WHERE  
+			db.sql&="WHERE   
+			feature_data.site_id=#db.param(request.zos.globals.id)# and 
 			feature_data_deleted = #db.param(0)# and 
 			feature_schema_deleted = #db.param(0)# and 
 			feature_data.feature_id = #db.param(form.feature_id)# and 
@@ -3241,6 +3250,7 @@ Define this function in another CFC to override the default email format
 			// 	}
 			// }
 			db.sql&="WHERE  
+			feature_data.site_id=#db.param(request.zos.globals.id)# and 
 			feature_data_deleted = #db.param(0)# and 
 			feature_schema_deleted = #db.param(0)# and 
 			feature_data.feature_id = #db.param(form.feature_id)# and 
@@ -3284,6 +3294,7 @@ Define this function in another CFC to override the default email format
 				// 	}
 				// }
 				db.sql&="WHERE  
+				feature_data.site_id=#db.param(request.zos.globals.id)# and 
 				feature_data_deleted = #db.param(0)# and 
 				feature_schema_deleted = #db.param(0)# and 
 				feature_data.feature_id = #db.param(form.feature_id)# and 
@@ -3419,6 +3430,7 @@ Define this function in another CFC to override the default email format
 			FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
 			#db.table("feature_data", request.zos.zcoreDatasource)# feature_data) 
 			WHERE  
+			feature_data.site_id=#db.param(request.zos.globals.id)# and 
 			feature_schema_deleted = #db.param(0)# and
 			feature_data_master_set_id = #db.param(0)# and 
 			feature_data_deleted = #db.param(0)# and 
@@ -3609,7 +3621,7 @@ Define this function in another CFC to override the default email format
 							ms.queueSortCom=queueSortCom;
 						}
 						if(mainSchemaStruct.feature_schema_limit GT 0){
-							ms.qSCount.qSCount;
+							ms.qSCount=qSCount;
 						}
 						echo(getAdminHTML(row, ms));
 						echo('</td></tr>');
@@ -3645,6 +3657,7 @@ Define this function in another CFC to override the default email format
 					columnCount+=2;
 					var row=0;
 					var currentRowIndex=0;
+					curParentId=0;
 					for(row in qS){
 						currentRowIndex++;
 						if(parentIndex){
@@ -3726,7 +3739,7 @@ Define this function in another CFC to override the default email format
 								ms.queueSortCom=queueSortCom;
 							}
 							if(mainSchemaStruct.feature_schema_limit GT 0){
-								ms.qSCount.qSCount;
+								ms.qSCount=qSCount;
 							}
 							echo(getAdminHTML(row, ms));
 							writeoutput('</td>'); 
@@ -4081,13 +4094,7 @@ Define this function in another CFC to override the default email format
 <cffunction name="editSchema" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
-	var db=request.zos.queryObject;
-	var qS=0;
-	var theTitle=0;
-	var htmlEditor=0;
-	var selectStruct=0;
-	var ts=0;
-
+	var db=request.zos.queryObject; 
 	defaultStruct=getDefaultStruct();
 	if(not structkeyexists(arguments.struct, 'action')){
 		arguments.struct.action='/z/feature/feature-display/insert';	
@@ -4121,14 +4128,8 @@ Define this function in another CFC to override the default email format
 	form.set9=application.zcore.functions.zGetHumanFieldIndex(); 
 
 	form.jumpto=application.zcore.functions.zso(form, 'jumpto');
-	db.sql="SELECT * FROM (#db.table("feature_field", request.zos.zcoreDatasource)# feature_field, 
+	db.sql="SELECT * FROM (#db.table("feature_field", request.zos.zcoreDatasource)#, 
 	#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema) 
-	LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# feature_data ON 
-	feature_data_deleted = #db.param(0)# and
-	feature_field.feature_schema_id = feature_data.feature_schema_id and 
-	feature_data.site_id = #db.param(request.zos.globals.id)# and 
-	feature_data_id=#db.param(form.feature_data_id)# and 
-	feature_data.feature_data_id<>#db.param(0)#
 	WHERE 
 	feature_field_deleted = #db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and 
@@ -4142,6 +4143,18 @@ Define this function in another CFC to override the default email format
 	}
 	db.sql&=" ORDER BY feature_field.feature_field_sort asc, feature_field.feature_field_variable_name ASC";
 	qS=db.execute("qS", "", 10000, "query", false);  
+	db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+	feature_data_deleted = #db.param(0)# and
+	feature_data.site_id = #db.param(request.zos.globals.id)# and 
+	feature_data_id=#db.param(form.feature_data_id)# and 
+	feature_schema_id=#db.param(form.feature_schema_id)# ";
+	qData=db.execute("qData");
+	if(methodBackup EQ "editSchema" or methodBackup EQ "userEditSchema"){
+		if(qData.recordcount EQ 0){
+			application.zcore.functions.z404("This Feature Schema no longer exists.");	
+		}
+	}
+	application.zcore.functions.zQueryToStruct(qData, form, "feature_data_parent_id,feature_schema_id,feature_id");
 	if(qS.recordcount EQ 0){
 		application.zcore.functions.z404("No feature_fields have been set to allow public form data entry.");	
 	}
@@ -4161,62 +4174,12 @@ Define this function in another CFC to override the default email format
 	}
 
 	curParentId=qS.feature_schema_parent_id;
-	curParentSetId=form.feature_data_parent_id;
-	/*
-	arrParent=arraynew(1);
-	if(not structkeyexists(arguments.struct, 'hideNavigation') or not arguments.struct.hideNavigation){
-		if(curParentSetId NEQ 0){
-			loop from="1" to="25" index="i"{
-				db.sql="select s1.*, s2.feature_data_title, s2.feature_data_id d2, s2.feature_data_parent_id d3 
-				from #db.table("feature_schema", request.zos.zcoreDatasource)# s1, 
-				#db.table("feature_data", request.zos.zcoreDatasource)# s2
-				where s1.site_id = s2.site_id and 
-				s1.feature_id=#db.param(form.feature_id)# and 
-				s1.feature_schema_id=s2.feature_schema_id and 
-				s2.feature_data_id=#db.param(curParentSetId)# and 
-				s1.feature_schema_id = #db.param(curParentId)# and 
-				s1.feature_schema_deleted = #db.param(0)# and 
-				s2.feature_data_deleted = #db.param(0)#
-				LIMIT #db.param(0)#,#db.param(1)#";
-				q12=db.execute("q12");
-				loop query="q12"{
-					arrayappend(arrParent, '<a href="#application.zcore.functions.zURLAppend("/z/feature/admin/features/#methodBackup#", "feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#")#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / #q12.feature_data_title# / ');
-					curParentId=q12.feature_schema_parent_id;
-					curParentSetId=q12.d3;
-				}
-				if(q12.recordcount EQ 0 or curParentSetId EQ 0){
-					break;
-				}
-			}
-		}
-		if(arraylen(arrParent)){
-			writeoutput('<p>');
-			for(i = arrayLen(arrParent);i GTE 1;i--){
-				writeOutput(arrParent[i]&' ');
-			}
-			writeoutput(" </p>");
-		}
-	}*/
-	db.sql="SELECT * FROM #db.table("feature_data", request.zos.zcoreDatasource)# 
-	WHERE
-	feature_data.site_id=#db.param(request.zos.globals.id)# and 
-	feature_data_deleted = #db.param(0)# and
-	feature_data_id=#db.param(form.feature_data_id)# and 
-	feature_id=#db.param(form.feature_id)#  ";
-	
-	qSet=db.execute("qSet");
-	if(methodBackup EQ "editSchema" or methodBackup EQ "userEditSchema"){
-		if(qSet.recordcount EQ 0){
-			application.zcore.functions.z404("This Feature Schema no longer exists.");	
-		}else{
-			application.zcore.functions.zQueryToStruct(qSet, form);
-			application.zcore.functions.zstatusHandler(request.zsid, true, true, form); 
-		}
-	} 
+	curParentSetId=form.feature_data_parent_id;  
 	
 	if(qS.feature_schema_limit NEQ 0){
 		if(methodBackup EQ "addSchema"){ 
 			db.sql="select site_id from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
 			feature_id=#db.param(form.feature_id)# and 
 			feature_data_deleted=#db.param(0)# and 
 			feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
@@ -4235,6 +4198,7 @@ Define this function in another CFC to override the default email format
 	if(qS.feature_schema_user_child_limit NEQ 0){
 		if(methodBackup EQ "userAddSchema"){
 			db.sql="select site_id from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
 			feature_id=#db.param(form.feature_id)# and 
 			feature_data_deleted=#db.param(0)# and 
 			feature_data_parent_id=#db.param(form.feature_data_parent_id)# and 
@@ -4410,8 +4374,8 @@ Define this function in another CFC to override the default email format
 
 			<cfscript>
 			cancelLink="#defaultStruct.listURL#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#";
-			if(methodBackup EQ "editSchema" and qSet.feature_data_master_set_id NEQ 0){
-				cancelLink="/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#qSet.feature_data_master_set_id#";
+			if(methodBackup EQ "editSchema" and form.feature_data_master_set_id NEQ 0){
+				cancelLink="/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_master_set_id#";
 			}
 			</cfscript>
 			<cfif methodBackup EQ "addSchema" or methodBackup EQ "editSchema" or 
@@ -4439,16 +4403,8 @@ Define this function in another CFC to override the default email format
 			var dataStruct={};
 			var labelStruct={};
 			posted=false;
-			valueStruct={};
+			valueStruct=application.zcore.featureCom.parseFieldData(form);
 			for(row in qS){
-				arrField=listToArray(row.feature_data_field_order, chr(13), true);
-				arrData=listToArray(row.feature_data_data, chr(13), true);
-				for(i=1;i<=arrayLen(arrField);i++){
-					valueStruct[arrField[i]]=arrData[i];
-				}
-			}
-			for(row in qS){
-				fieldValue=application.zcore.functions.zso(valueStruct, row.feature_field_id);
 				if(form.jumpto EQ "soid_#application.zcore.functions.zurlencode(row.feature_field_variable_name,"_")#"){
 					jumptoanchor="soid_#row.feature_field_id#";
 				}
@@ -4457,8 +4413,8 @@ Define this function in another CFC to override the default email format
 						posted=true;
 						form["newvalue"&row.feature_field_id]=form[row.feature_field_variable_name];
 					}else{
-						if(fieldValue NEQ ""){
-							form["newvalue"&row.feature_field_id]=fieldValue;
+						if(valueStruct[row.feature_field_variable_name] NEQ ""){
+							form["newvalue"&row.feature_field_id]=valueStruct[row.feature_field_variable_name];
 						}else{
 							form["newvalue"&row.feature_field_id]=row.feature_field_default_value;
 						}
@@ -4467,7 +4423,7 @@ Define this function in another CFC to override the default email format
 					posted=true;
 				}
 				form[row.feature_field_variable_name]=form["newvalue"&row.feature_field_id];
-				if(row.feature_data_id EQ ""){
+				if(form.feature_data_id EQ ""){
 					if(not structkeyexists(form, "newvalue"&row.feature_field_id)){
 						form["newvalue"&row.feature_field_id]=row.feature_field_default_value;
 					}
@@ -4550,10 +4506,12 @@ Define this function in another CFC to override the default email format
 				if(requiredEnabled and row.feature_field_required and row.feature_field_hide_label EQ 1){
 					writeoutput(' <span style="font-size:80%;">*</span> ');
 				}  
-				if(row.feature_field_type_id EQ 3){
-					// TODO: somehow get the row.feature_field_id, and the arrValue=listToArray(value, chr(9)); and then arrayLen(arrValue) EQ 2 and arrValue[2] NEQ "" goes below
-					if(row.feature_data_original NEQ ""){
-						echo('<p><a href="/zupload/feature-options/#row.feature_data_original#" target="_blank">View Original Image</a></p>');
+				if(row.feature_field_type_id EQ 3){ 
+					if(structkeyexists(valueStruct, row.feature_field_variable_name) and valueStruct[row.feature_field_variable_name] NEQ ""){
+						arrValue=listToArray(valueStruct[row.feature_field_variable_name], chr(9), true);
+						if(arrayLen(arrValue) EQ 2 and arrValue[2] NEQ ""){
+							echo('<p><a href="/zupload/feature-options/#arrValue[2]#" target="_blank">View Original Image</a></p>');
+						}
 					}
 				}
 
@@ -4574,7 +4532,7 @@ Define this function in another CFC to override the default email format
 			if(methodBackup EQ 'addSchema'){ 
 				if(not posted){
 					form.feature_data_override_url='';
-					qSet={ recordcount: 0};
+					qData={ recordcount: 0};
 					form.feature_data_image_library_id='';
 				}
 			}
@@ -4585,8 +4543,6 @@ Define this function in another CFC to override the default email format
 					<cfscript>
 					if(methodBackup EQ 'addSchema'){
 						form.feature_data_approved=1;
-					}else{
-						form.feature_data_approved=qSet.feature_data_approved;
 					}
 					</cfscript>
 					<tr class="siteFieldFormField#qS.feature_field_id# <cfif tempIndex MOD 2 EQ 0>row1<cfelse>row2</cfif>">
@@ -4923,19 +4879,13 @@ Define this function in another CFC to override the default email format
 	db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# SET 
 	feature_data_archived=#db.param(1)# 
 	WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_data_id=#db.param(form.feature_data_id)# ";
-	db.execute("qUpdate");/**/
+	db.execute("qUpdate");
 
-	application.zcore.functions.zReturnJson({success:true});
-	/*
-	application.zcore.status.setStatus(request.zsid, "Record archived.");
-	if(form.method EQ "userUnarchiveSchema"){
-		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#row.feature_schema_id#&feature_data_id=#row.feature_data_id#&feature_data_parent_id=#row.feature_data_parent_id#");
-	}else{
-		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#row.feature_schema_id#&feature_data_id=#row.feature_data_id#&feature_data_parent_id=#row.feature_data_parent_id#");
-	}*/
+	application.zcore.functions.zReturnJson({success:true}); 
 	</cfscript>
 </cffunction>
 
@@ -4949,6 +4899,7 @@ Define this function in another CFC to override the default email format
 	db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# SET 
 	feature_data_archived=#db.param(0)# 
 	WHERE 
+	site_id=#db.param(request.zos.globals.id)# and 
 	feature_data_deleted=#db.param(0)# and 
 	feature_id=#db.param(form.feature_id)# and 
 	feature_data_id=#db.param(form.feature_data_id)# ";

@@ -119,12 +119,14 @@
 	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 </cffunction>
 
 <cffunction name="getFormValue" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 </cffunction>
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">

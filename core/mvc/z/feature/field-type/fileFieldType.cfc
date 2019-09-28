@@ -151,7 +151,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
 	uploadPath=getUploadPath(arguments.typeStruct); 
-	if(arguments.value NEQ "" and fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&uploadPath&'/feature-options/'&arguments.value)){
+	if(arguments.value NEQ "" and fileexists(application.zcore.functions.zvar('privatehomedir',arguments.site_id)&uploadPath&'/feature-options/'&arguments.value)){
 		application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.site_id)&uploadPath&'/feature-options/'&arguments.value);
 	} 
 	</cfscript>
@@ -275,30 +275,30 @@
 	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>	
 	var nv=0;
 	uploadPath=getUploadPath(arguments.typeStruct);
-	arguments.dataStruct["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
 	nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
-	filename="";
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-		form["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option_group', '#variables.siteType#_x_option_group_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', request.zos.zcoreDatasource, '#variables.siteType#_x_option_group_value');	
-	}else{
-		form["#variables.siteType#_x_option_id"]=arguments.row["#variables.siteType#_x_option_id"];
-		fileName=application.zcore.functions.zUploadFileToDb(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', '#variables.siteType#_x_option', '#variables.siteType#_x_option_id', arguments.prefixString&arguments.row["feature_field_id"]&'_delete', request.zos.zcoreDatasource, '#variables.siteType#_x_option_value');	
+	justDeleted=false;
+	if(structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&"_delete") and arguments.dataFields[row.feature_field_variable_name] NEQ ""){
+		application.zcore.functions.zDeleteFile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/'&arguments.dataFields[row.feature_field_variable_name]);
+		nv="";
+		justDeleted=true;
 	}
-	if(not structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete') and (isNull(fileName) or fileName EQ "")){
-		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-			arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]=arguments.row["#variables.siteType#_x_option_group_value"];
-			nv=arguments.row["#variables.siteType#_x_option_group_value"];
+	if(nv NEQ ''){
+		nv=application.zcore.functions.zUploadFile(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/', false);
+		if(nv EQ false){
+			nv=arguments.dataFields[row.feature_field_variable_name];
 		}else{
-			arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]=arguments.row["#variables.siteType#_x_option_value"];
-			nv=arguments.row["#variables.siteType#_x_option_value"];
+			if(arguments.dataFields[row.feature_field_variable_name] NEQ ""){
+				application.zcore.functions.zDeleteFile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&uploadPath&'/feature-options/'&arguments.dataFields[row.feature_field_variable_name]);
+			}
 		}
 	}else{
-		arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]=fileName;
-		nv=fileName;
+		if(not justDeleted){
+			nv=arguments.dataFields[row.feature_field_variable_name];
+		}
 	}
 	return { success: true, value: nv, dateValue: "" };
 	</cfscript>
@@ -308,14 +308,11 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>
 	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	if(nv EQ ""){
-		if(structkeyexists(arguments.row,'#variables.siteType#_x_option_group_value')){
-			return arguments.row["#variables.siteType#_x_option_group_value"];
-		}else{
-			return arguments.row["#variables.siteType#_x_option_value"];
-		}
+		//return arguments.row["#variables.siteType#_x_option_group_value"];
 	}
 	return nv;
 	</cfscript>

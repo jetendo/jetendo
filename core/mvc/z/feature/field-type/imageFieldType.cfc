@@ -170,27 +170,6 @@
 	</cfscript>
 </cffunction>
 
-<!--- <cffunction name="onDelete" localmode="modern" access="public" output="no">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="typeStruct" type="struct" required="yes">
-	<cfscript>
-	if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_value')){
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_value"]);
-			if(arguments.row["#variables.siteType#_x_option_group_original"] NEQ ""){
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_original"]);	
-			}
-		}
-	}else{
-		if(fileexists(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_value"])){
-			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_value"]);
-			if(arguments.row["#variables.siteType#_x_option_original"] NEQ ""){
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',arguments.row.site_id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_original"]);	
-			}
-		}
-	}
-	</cfscript>
-</cffunction> --->
 
 <cffunction name="getFormField" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
@@ -202,6 +181,8 @@
 	if(arguments.row["feature_field_required"] EQ 1){
 		allowDelete=false;
 	}
+	arrValue=listToArray(form[arguments.prefixString&arguments.row["feature_field_id"]], chr(9), true);
+	form[arguments.prefixString&arguments.row["feature_field_id"]]=arrValue[1];
 	return { label: true, hidden: false, value:application.zcore.functions.zInputImage(arguments.prefixString&arguments.row["feature_field_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/', request.zos.currentHostName&'/zupload/feature-options/',250, allowDelete)&'<br /><br />
 	Note: The image will be resized to fit inside these pixel dimensions: '&
 	application.zcore.functions.zso(arguments.typeStruct, 'imagewidth',false,'1000')&' x '&
@@ -254,6 +235,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes"> 
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>	
 	var nv="";
 	var nvd=0;
@@ -272,15 +254,6 @@
 		}
 		photoresize=application.zcore.functions.zso(arguments.typeStruct, 'imagewidth',false,'1000')&"x"&application.zcore.functions.zso(arguments.typeStruct, 'imageHeight',false,'1000');
 		nvd=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete');
-		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-			arguments.dataStruct["#variables.siteType#_x_option_group_id"]=arguments.row["#variables.siteType#_x_option_group_id"];
-			arguments.dataStruct["#variables.siteType#_x_option_group_value"]=nv; 
-			arguments.dataStruct["#variables.siteType#_x_option_group_original"]=arguments.row["#variables.siteType#_x_option_group_original"]; 
-		}else{
-			arguments.dataStruct["#variables.siteType#_x_option_id"]=arguments.row["#variables.siteType#_x_option_id"];
-			arguments.dataStruct["#variables.siteType#_x_option_value"]=nv; 
-			arguments.dataStruct["#variables.siteType#_x_option_original"]=arguments.row["#variables.siteType#_x_option_original"]; 
-		}
 		destination=application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/';
 		//echo(form[arguments.prefixString&arguments.row["feature_field_id"]]);	abort;
 		if(application.zcore.functions.zso(arguments.typeStruct, 'imagecrop') EQ '1'){
@@ -296,43 +269,40 @@
 			nv=oldnv;
 		}else if(ArrayLen(arrList) NEQ 0){
 			originalFile=request.zos.lastUploadFileName;
-			if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_value"]);	
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_original"]);	
-			}else{
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_value"]);	
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_original"]);	
+
+			tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
+			if(tempSet[arguments.row.feature_field_variable_name] NEQ ""){
+				arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9), true);
+				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arrValue[1]);	
+				if(arrayLen(arrValue) EQ 2){
+					application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arrValue[2]);	
+				}
 			}
 			oldnv='';
-			if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-				nv=arguments.dataStruct["#variables.siteType#_x_option_group_value"];
-			}else{
-				nv=arguments.dataStruct["#variables.siteType#_x_option_value"];
-			}
 			nv=arrList[1];
-			local.tempPath9=application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'; 
+			tempPath9=application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'; 
 			arguments.typeStruct.imagemaskpath=application.zcore.functions.zso(arguments.typeStruct, 'imagemaskpath');
 			if(arguments.typeStruct.imagemaskpath NEQ ""){
-				local.absImageMaskPath=request.zos.globals.homedir&removechars(arguments.typeStruct.imagemaskpath, 1, 1);
+				absImageMaskPath=request.zos.globals.homedir&removechars(arguments.typeStruct.imagemaskpath, 1, 1);
 				
 				var ts=structnew();
-				ts.absImageMaskPath=local.absImageMaskPath;
-				ts.absImageInputPath=local.tempPath9&nv;
-				local.tempFileName=application.zcore.functions.zgetFileName(nv);
-				local.tempIndex=1;
+				ts.absImageMaskPath=absImageMaskPath;
+				ts.absImageInputPath=tempPath9&nv;
+				tempFileName=application.zcore.functions.zgetFileName(nv);
+				tempIndex=1;
 				while(true){
-					if(not fileexists(local.tempPath9&local.tempFileName&local.tempIndex&".png")){
+					if(not fileexists(tempPath9&tempFileName&tempIndex&".png")){
 						break;
 					}
-					local.tempIndex++;
-					if(local.tempIndex GTE 500){
+					tempIndex++;
+					if(tempIndex GTE 500){
 						throw("Infinite loop when applying image mask", "custom");
 					}
 				}
-				ts.absImageOutputPath=local.tempPath9&local.tempFileName&local.tempIndex&".png"; 
+				ts.absImageOutputPath=tempPath9&tempFileName&tempIndex&".png"; 
 				var result=application.zcore.functions.zApplyMaskToImage(ts); 
 				if(result){
-					nv=local.tempFileName&local.tempIndex&".png";
+					nv=tempFileName&tempIndex&".png";
 				}else{
 					nv=oldnv;
 					application.zcore.status.setStatus(request.zsid, 'Failed to apply mask to image.  Verify mask file is valid and still exists.');	
@@ -342,30 +312,27 @@
 				}
 			}
 			if(oldnv NEQ "" and nv NEQ oldnv){
-				application.zcore.functions.zdeletefile(local.tempPath9&oldnv);	
+				application.zcore.functions.zdeletefile(tempPath9&oldnv);	
 			}
 		}else{
 			nv=oldnv;
 		}
 	}else{
-		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-			nv=arguments.row["#variables.siteType#_x_option_group_value"];	
-			originalFile=arguments.row["#variables.siteType#_x_option_group_original"];
-		}else{
-			nv=arguments.row["#variables.siteType#_x_option_value"];
-			originalFile=arguments.row["#variables.siteType#_x_option_original"];
+		// retrieve from the database instead
+		tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
+		arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9), true);
+		nv=arrValue[1];
+		originalFile="";
+		if(arraylen(arrValue) EQ 2){
+			originalFile=arrValue[2];
 		}
 		structdelete(form, arguments.prefixString&arguments.row["feature_field_id"]);
 		nvd=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete');
 		if(nvd EQ 1){
-			if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_value"]);
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_group_original"]);
-			}else{
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_value"]);
-				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arguments.row["#variables.siteType#_x_option_original"]);
-			}
+			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&nv);
+			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&originalFile);
 			nv='';	
+			originalFile='';
 		}
 	}
 	rs={ success: true, value: nv, dateValue: "" };
@@ -380,16 +347,9 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>
-	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
-	if(nv EQ ""){
-		if(structkeyexists(arguments.row,'#variables.siteType#_x_option_group_value')){
-			return arguments.row["#variables.siteType#_x_option_group_value"];
-		}else{
-			return arguments.row["#variables.siteType#_x_option_value"];
-		}
-	}
-	return nv;
+	return application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	</cfscript>
 </cffunction>
 

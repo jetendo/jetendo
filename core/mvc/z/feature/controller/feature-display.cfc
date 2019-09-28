@@ -49,7 +49,9 @@
 	}else{
 		db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data,
 		#db.table("feature_schema", request.zos.zcoreDatasource)# 
-		WHERE feature_data_id = #db.param(form.feature_data_id)# and 
+		WHERE 
+		site_id=#db.param(request.zos.globals.id)# and 
+		feature_data_id = #db.param(form.feature_data_id)# and 
 		feature_schema_deleted = #db.param(0)# and 
 		feature_data_master_set_id = #db.param(0)# and 
 		feature_data_deleted = #db.param(0)# and 

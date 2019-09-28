@@ -205,6 +205,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes"> 
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>	 
 	var excpt=0;
 	var cfcatch=0;
@@ -246,6 +247,7 @@
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="dataFields" type="struct" required="yes">
 	<cfscript>
 	if(structkeyexists(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_time')){
 		curDate=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_time');

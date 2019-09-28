@@ -564,6 +564,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 			 #db.table("feature_data", request.zos.zcoreDatasource)# s1, 
 			 #db.table("feature_data", request.zos.zcoreDatasource)# s2
 			WHERE  s1.feature_id=#db.param(form.feature_id)# and 
+			s1.site_id=#db.param(request.zos.globals.id)# and 
 			s1.feature_data_deleted = #db.param(0)# and 
 			s2.feature_data_deleted = #db.param(0)# and 
 			s1.site_id = s2.site_id and 
@@ -921,8 +922,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 </cffunction>
 
 <cffunction name="featureSchemaSetFromDatabaseBySchemaId" access="public" localmode="modern">
-	<cfargument name="groupId" type="string" required="yes">
 	<cfargument name="feature_id" type="numeric" required="yes">
+	<cfargument name="groupId" type="string" required="yes">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
@@ -1044,9 +1045,13 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	var db=request.zos.queryObject;
 	var row=0;
 	var i=0;
-	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)#, 
+	db.sql="select * from 
+	#db.table("feature", request.zos.zcoreDatasource)#, 
+	#db.table("feature_schema", request.zos.zcoreDatasource)#, 
 	#db.table("feature_field", request.zos.zcoreDatasource)#
 	where 
+	feature.feature_id = feature_schema.feature_id and 
+	feature.feature_deleted=#db.param(0)# and 
 	feature_schema.feature_schema_id = feature_field.feature_schema_id and 
 	feature_field_deleted=#db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and 
@@ -1057,7 +1062,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=getFeatureSchemaArray(row.feature_schema_variable_name, 0, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
+		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
@@ -1169,7 +1174,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	search_table_id = #db.param(arguments.setId)# ";
 	db.execute("qDelete");
 
-	if(structkeyexists(application.siteStruct[request.zos.globals.id].globals.featureSchemaData, 'featureSchemaSetQueryCache')){
+	if(structkeyexists(application.siteStruct[request.zos.globals.id].globals, 'featureSchemaData') and structkeyexists(application.siteStruct[request.zos.globals.id].globals.featureSchemaData, 'featureSchemaSetQueryCache')){
 		structdelete(application.siteStruct[request.zos.globals.id].globals.featureSchemaData.featureSchemaSetQueryCache, arguments.setId);
 	}
 	</cfscript>
@@ -1406,13 +1411,10 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 // 	}
 	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){
 		// get the group from memory cache
-		rs=getSortedData(ts.selectmenu_groupid);
+		rs=getSortedData(ts.selectmenu_groupid); 
 		for(i=1;i<=arraylen(rs.arrOrder);i++){
 			cs=rs.arrOrder[i];
 			// get the right label / value fields
-
-			
-			
  			if(structkeyexists(ts, 'selectmenu_parentfield') and ts.selectmenu_parentfield NEQ ""){
 				if(rs.arrLevel[i] > 0){
 					indent=ljustify("_", rs.arrLevel[i]*4);
@@ -1474,14 +1476,17 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		feature_id = #db.param(form.feature_id)# ";
 		qField=db.execute("qField");
 		fieldLookup={};
+		fieldStruct={};
 		for(field in qField){
+			fieldStruct[field.feature_field_variable_name]="";
 			fieldLookup[field.feature_field_id]=field.feature_field_variable_name;
 		}
+		request.zos["featureFieldStruct"&row.feature_schema_id]=fieldStruct;
 		request.zos["featureFieldLookup"&row.feature_schema_id]=fieldLookup;
 	}else{
 		fieldLookup=request.zos["featureFieldLookup"&row.feature_schema_id];
 	}
-	tempSet={};
+	tempSet=duplicate(request.zos["featureFieldStruct"&row.feature_schema_id]);
 	arrField=listToArray(row.feature_data_field_order, chr(13), true);
 	arrData=listToArray(row.feature_data_data, chr(13), true);
 	for(i=1;i<=arraylen(arrField);i++){
@@ -1508,7 +1513,10 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	}
 	for(row in optionQuery){
 		tempSet=parseFieldData(row);
-		if(arguments.parentID EQ tempSet[arguments.parentFieldName]){ 
+		if(arguments.parentFieldName EQ ""){
+			arrayAppend(arrOrder, {row:row, data:tempSet});
+			arrayAppend(arrLevel, arguments.recursionCount-1);
+		}else if(arguments.parentID EQ tempSet[arguments.parentFieldName]){ 
 			arrayAppend(arrOrder, {row:row, data:tempSet});
 			arrayAppend(arrLevel, arguments.recursionCount-1);
 			addChildrenToParentOrder(optionQuery, arguments.parentFieldName, arrOrder, arrLevel, row.feature_data_id, recursionCount);
@@ -1817,7 +1825,9 @@ if(not rs.success){
 			if(row.feature_schema_user_child_limit EQ 1){
 				currentUserIdValue=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
 				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-				WHERE feature_id=#db.param(form.feature_id)# and 
+				WHERE 
+				site_id=#db.param(request.zos.globals.id)# and 
+				feature_id=#db.param(form.feature_id)# and 
 				feature_schema_id=#db.param(row.feature_schema_id)# and  
 				feature_data_deleted=#db.param(0)# and 
 				feature_data_user = #db.param(currentUserIdValue)# 
@@ -1868,6 +1878,7 @@ if(not rs.success){
 		} 
 		first=false;
 		db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
+		site_id=#db.param(request.zos.globals.id)# and 
 		feature_data_deleted=#db.param(0)# and 
 		feature_id=#db.param(form.feature_id)# and 
 		feature_data_id=#db.param(currentSetId)# ";
@@ -2533,7 +2544,7 @@ used to do search for a list of values
 			}
 			if(structkeyexists(c, 'subSchema')){
 				if(debugOn){ echo('in subgroup<br>');	}
-				arrChild=getFeatureSchemaArray(application.zcore.featureCom.getFeatureNameById(c.subSchema.feature_id), c.subSchema, 0, request.zos.globals.id, row);
+				arrChild=getFeatureSchemaArray(application.zcore.featureCom.getFeatureNameById(c.subSchema.feature_id), c.subSchema, request.zos.globals.id, row);
 				lastMatch=false;
 				if(arrayLen(arrChild)){
 					//writedump(arrChild); 
@@ -3040,8 +3051,7 @@ used to do search for a list of values
 
 <cffunction name="getFeatureSchemaArray" localmode="modern" output="yes" returntype="array">
 	<cfargument name="featureVariableName" type="string" required="yes">
-	<cfargument name="groupName" type="string" required="yes">
-	<cfargument name="option_app_id" type="string" required="no" default="0">
+	<cfargument name="groupName" type="string" required="yes"> 
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
 	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
@@ -3053,11 +3063,11 @@ used to do search for a list of values
 		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
 		groupStruct=fsd.featureSchemaLookup[featureSchemaId];
 		if(request.zos.enableSiteOptionGroupCache and groupStruct["feature_schema_enable_cache"] EQ 1){
-			if(structkeyexists(t9.featureSchemaSetArrays, arguments.option_app_id&chr(9)&featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
-				return t9.featureSchemaSetArrays[arguments.option_app_id&chr(9)&featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
+			if(structkeyexists(t9.featureSchemaSetArrays, featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
+				return t9.featureSchemaSetArrays[featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
 			}
 		}else{
-			return featureSchemaSetFromDatabaseBySchemaId(featureSchemaId, arguments.option_app_id, arguments.site_id, arguments.parentStruct, arguments.fieldList);
+			return featureSchemaSetFromDatabaseBySchemaId(feature_id, featureSchemaId, arguments.site_id, arguments.parentStruct, arguments.fieldList);
 		}
 	} 
 	return arraynew(1);

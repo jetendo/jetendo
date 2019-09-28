@@ -219,7 +219,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 								tempValue='<div class="zEditorHTML">'&value&'</div>';
 							}
 						}else if(typeId EQ 3){
-							arrValue=listToArray(value, chr(9));
+							arrValue=listToArray(value, chr(9), true);
 							if(arrValue[1] NEQ ""){
 								typeStruct=fsd.fieldLookup[fieldId].typeStruct;
 								if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
@@ -509,6 +509,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	var tempUniqueStruct=structnew();
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1-1<br>'); startTime=gettickcount();
 	var newRecord=false;
+	fsd=application.zcore.featureData.featureSchemaData[qS.feature_id]; 
 	for(row in qField){
 		var id=qS.feature_data_id;
 		if(structkeyexists(t9.featureSchemaSetId, id&"_appId") EQ false){
@@ -584,9 +585,19 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				tempValue='<div class="zEditorHTML">'&fieldValue&'</div>';
 			}
 		}else if(row.feature_field_type_id EQ 3){
-			arrValue=listToArray(fieldValue, chr(9));
+			arrValue=listToArray(fieldValue, chr(9), true);
+			/*
+
+		tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
+		arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9));
+		nv=arrValue[1];
+		originalFile="";
+		if(arraylen(arrValue) EQ 2){
+			originalFile=arrValue[2];
+		}
+			*/
 			if(arrValue[1] NEQ ""){
-				typeStruct=typeStruct.fieldLookup[row.feature_field_id].typeStruct;
+				typeStruct=fsd.fieldLookup[row.feature_field_id].typeStruct;
 				if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
 					tempValue="/zuploadsecure/feature-options/"&arrValue[1];
 				}else{
@@ -602,7 +613,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 			}
 		}else if(row.feature_field_type_id EQ 9){
 			if(fieldValue NEQ "" and fieldValue NEQ "0"){
-				typeStruct=typeStruct.fieldLookup[row.feature_field_id].typeStruct;
+				typeStruct=fsd.fieldLookup[row.feature_field_id].typeStruct;
 				if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
 					tempValue="/zuploadsecure/feature-options/"&fieldValue;
 				}else{

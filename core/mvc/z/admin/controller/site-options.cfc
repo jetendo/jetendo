@@ -3795,6 +3795,7 @@ Define this function in another CFC to override the default email format
 			dataStruct[i]=currentCFC.onBeforeListView(arrRow[i], optionStruct, form);
 		}
 		listDescription="";
+		curParentId=0;
 		if(not structkeyexists(arguments.struct, 'recurse')){
 			if(methodBackup EQ "userManageGroup"){ 
 				application.zcore.template.setTag('pagenav', '<p><a href="/z/user/home/index">User Home Page</a></p>');

@@ -898,7 +898,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 			}else{
 				db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data, 
 				#db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
-				where feature_data.feature_field_id = #db.param(optionId)# and 
+				where 
+				site_id=#db.param(request.zos.globals.id)# and 
+				feature_data.feature_field_id = #db.param(optionId)# and 
 				feature_data.feature_id = #db.param(form.feature_id)# and 
 				feature_data_deleted = #db.param(0)# and 
 				feature_field_deleted = #db.param(0)# and
@@ -914,7 +916,9 @@ This allows avoiding remaps more easily.  Less code when importing.
 					}
 				}
 				db.sql="delete from #db.table("feature_data", request.zos.zcoreDatasource)# 
-				where feature_field_id = #db.param(optionId)# and 
+				where 
+				site_id=#db.param(request.zos.globals.id)# and 
+				feature_field_id = #db.param(optionId)# and 
 				feature_data_deleted = #db.param(0)# and
 				feature_id = #db.param(form.feature_id)#";
 				db.execute("qDelete");
