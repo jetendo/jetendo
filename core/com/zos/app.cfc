@@ -1845,6 +1845,7 @@ if(rCom.isOK() EQ false){
 		arguments.arrUrl=application.sitestruct[request.zos.globals.id].zcorecustomfunctions.getSiteMap(arguments.arrUrl);
 	}
 	arguments.arrURL=application.zcore.siteOptionCom.getSiteMap(arguments.arrURL);
+	arguments.arrURL=application.zcore.featureCom.getSiteMap(arguments.arrURL);
 
 	//arguments.arrURL=getMVCLandingPages(arguments.arrURL);
 	

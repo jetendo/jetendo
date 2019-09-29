@@ -126,7 +126,7 @@
 	qS=db.execute("qS");
 	if(qS.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Feature Schema doesn't exist.", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
 	form.feature_schema_id=application.zcore.functions.zso(form, 'feature_schema_id');
 	// all options except for html separator
@@ -192,7 +192,7 @@
 	qS=db.execute("qS");
 	if(qS.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Feature Schema doesn't exist.", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
 	// all options except for html separator
 	db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
@@ -227,7 +227,7 @@
 	 
 	if(structkeyexists(form, 'filepath') EQ false or form.filepath EQ ""){
 		application.zcore.status.setStatus(request.zsid, "You must upload a CSV file", true);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/import?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/import?feature_id=#form.feature_id#&zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#");
 	}
 	f1=application.zcore.functions.zuploadfile("filepath", request.zos.globals.privatehomedir&"/zupload/user/",false);
 	fileContents=application.zcore.functions.zreadfile(request.zos.globals.privatehomedir&"/zupload/user/"&f1);
@@ -664,7 +664,7 @@
 	qSchema=db.execute("qSchema", "", 10000, "query", false);	
 	if(qSchema.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid,"Invalid Schema ID.");
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");	
+		application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#&zsid=#request.zsid#");	
 	}
 	db.sql="SELECT * FROM #db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
 	WHERE feature_field_id = #db.param(form.feature_field_id)# and 
@@ -673,7 +673,7 @@
 	request.zsession["feature_return"&form.feature_field_id]=application.zcore.functions.zso(form, 'returnURL');		
 	if(currentMethod EQ 'edit' and qS.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid,"Feature Field doesn't exist.");
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");	
+		application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#&zsid=#request.zsid#");	
 	}
     application.zcore.functions.zQueryToStruct(qS, form, 'feature_id,feature_schema_id');
     application.zcore.functions.zstatusHandler(request.zsid,true);
@@ -1216,7 +1216,7 @@
 	request.qFeature=db.execute("qFeature", "", 10000, "query", false);
 	if(request.qFeature.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Invalid feature id", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
 
 
@@ -1654,7 +1654,7 @@
 				if(qCheck.feature_schema_public_form_url NEQ ""){
 					application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(qCheck.feature_schema_public_form_url, "zsid=#request.zsid#&modalpopforced=#form.modalpopforced#"));
 				}else{
-					application.zcore.functions.zRedirect("/z/feature/feature-display/add?feature_schema_id=#form.feature_schema_id#&feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
+					application.zcore.functions.zRedirect("/z/feature/feature-display/add?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_schema_id=#form.feature_schema_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
 				}
 			}
 		}else{
@@ -1668,7 +1668,6 @@
 				newMethod="editSchema";
 			}
 			application.zcore.status.displayReturnJson(request.zsid);
-			//application.zcore.functions.zRedirect("/z/feature/admin/features/#newMethod#?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#");
 		}
 	}
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds1<br>'); startTime=gettickcount();
@@ -1734,7 +1733,7 @@
 				if(newAction NEQ ""){
 					application.zcore.status.displayReturnJson(request.zsid);
 				}else{
-					application.zcore.functions.zRedirect("/z/feature/admin/features/#newAction#?feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
+					application.zcore.functions.zRedirect("/z/feature/admin/features/#newAction#?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#&zsid=#request.zsid#&modalpopforced=#form.modalpopforced#");
 				}
 			}
 		}
@@ -2285,11 +2284,9 @@
 			tempLink=request.zsession.siteSchemaReturnURL;
 			structdelete(request.zsession, 'siteSchemaReturnURL');
 			tempLink=replace(tempLink, "zsid=", "ztv=", "all");
-			//application.zcore.functions.zRedirect(replace(tempLink, "zsid=", "ztv=", "all"));
 		}else{
 			application.zcore.status.setStatus(request.zsid,"Saved successfully.");
-			tempLink=defaultStruct.listURL&"?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#";
-			//application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#");
+			tempLink=defaultStruct.listURL&"?feature_id=#form.feature_id#&zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#form.modalpopforced#";
 		}
 		application.zcore.functions.zReturnJson({success:true, redirect:1, redirectLink: tempLink});
 	}
@@ -2757,7 +2754,7 @@ Define this function in another CFC to override the default email format
 		form.feature_data_parent_id=application.zcore.functions.zso(form, 'feature_data_parent_id',true);
 		mainSchemaStruct=application.zcore.functions.zso(sog.featureSchemaLookup, form.feature_schema_id, false, {});
 		if(structcount(mainSchemaStruct) EQ 0){
-			application.zcore.functions.zredirect("/z/feature/admin/features/index");
+			application.zcore.functions.zredirect("/z/feature/admin/features/index?feature_id=#form.feature_id#");
 		} 
 
 		if(mainSchemaStruct.feature_schema_enable_archiving EQ 1){
@@ -2948,6 +2945,8 @@ Define this function in another CFC to override the default email format
 		parentIndex=0;
 		arrSearchTable=[];
 		arrSortSQL=[];
+		sortDirection="asc";
+		arrSortColumn=[];
 		for(row in arrMainField){
 			if(row.feature_field_admin_searchable EQ 1){
 				arrayAppend(arrSearchTable, row);
@@ -2976,15 +2975,16 @@ Define this function in another CFC to override the default email format
 			}
 			if(added){
 				if(row.feature_field_admin_sort_field NEQ 0){ 
-					var currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
-					var sortDirection="asc";
+					// var currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
+					var sortDirection="asc"; // we're intentionally not supporting multiple sort directions at once to simplify the programming for now.
 					if(row.feature_field_admin_sort_field EQ 2){
-						sortDirection="desc";
+						sortDirection="desc"; 
 					}
-					tempSQL=currentCFC.getSortSQL(arraylen(arrVal), sortDirection);
-					if(tempSQL NEQ ""){
-						arrayAppend(arrSortSQL, tempSQL);
-					}
+					arrayAppend(arrSortColumn, row.feature_field_variable_name);
+					// tempSQL=currentCFC.getSortSQL(arraylen(arrVal), sortDirection);
+					// if(tempSQL NEQ ""){
+					// 	arrayAppend(arrSortSQL, tempSQL);
+					// }
 				}
 			}
 			if(row.feature_field_type_id EQ 0){
@@ -3390,14 +3390,14 @@ Define this function in another CFC to override the default email format
 			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
 			feature_schema.feature_schema_type=#db.param('1')# ";
 			//GROUP BY feature_data.feature_data_id
-			if(arraylen(arrSortSQL)){
-				db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
-			}else{
+			// if(arraylen(arrSortSQL)){
+			// 	db.sql&= "ORDER BY "&arraytolist(arrSortSQL, ", ");
+			// }else{
 				db.sql&=" ORDER BY feature_data_sort asc ";
-			}
-			if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
-				db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
-			}
+			// }
+			// if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
+			// 	db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
+			// }
 			qSCount=db.execute("qSCount");
 		}
 		//writedump(qS);abort;
@@ -3466,6 +3466,7 @@ Define this function in another CFC to override the default email format
 		matchCount=0;
 		matchStruct={};
 		visibleCount=0;
+		sortRowStruct={};
 		offset=(form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit;
 		for(row in qS){
 			rsData=application.zcore.featureCom.parseFieldData(row);
@@ -3498,6 +3499,13 @@ Define this function in another CFC to override the default email format
 				if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
 					arrayAppend(arrId, row.feature_data_merge_data_id);
 				}
+			}
+			if(arrayLen(arrSortColumn) NEQ 0){
+				arrTemp=[];
+				for(i=1;i<=arraylen(arrSortColumn);i++){
+					arrayAppend(arrTemp, rsData[arrSortColumn[i]]);
+				}
+				sortRowStruct[row.feature_data_id]={row:row, rsData:rsData, sortKey:arrayToList(arrTemp, "")};
 			}
 		}
 		if(arrayLen(arrId) GT 0){
@@ -3562,49 +3570,63 @@ Define this function in another CFC to override the default email format
 						}
 						rsData=matchStruct[row.feature_data_id];
 
+						savecontent variable="rowHTML"{
 
-
-						echo('<tr #trHTML# data-ztable-sort-disable-validation="1" ');// data-ztable-sort-parent-id="#childRow.feature_data_parent_id#"
-						if(currentRowIndex MOD 2 EQ 0){
-							echo('class="row2"');
+							echo('<tr #trHTML# data-ztable-sort-disable-validation="1" ');// data-ztable-sort-parent-id="#childRow.feature_data_parent_id#"
+							if(currentRowIndex MOD 2 EQ 0){
+								echo('class="row2"');
+							}else{
+								echo('class="row1"');
+							}
+							echo('>
+							<td class="z-hide-at-767">#row.feature_data_id#</td>
+							<td>');
+							if(row.feature_data_level GT 0){
+								echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
+							}
+							echo('#rsData.name#</td>
+							<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
+							<td>');
+							if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){
+								echo(application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime));
+							}else{
+								echo(application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime));
+							}
+							echo('</td>');
+							echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
+							ms={
+								sortEnabled:sortEnabled,
+								arrChildSchema:arrChildSchema,
+								methodBackup:methodBackup,
+								mainSchemaStruct:mainSchemaStruct,
+								qSCount:{},
+								struct:arguments.struct,
+								childRow:childRow,
+								subgroupStruct:subgroupStruct
+							};
+							if(sortEnabled){
+								ms.queueSortCom=queueSortCom;
+							}
+							if(mainSchemaStruct.feature_schema_limit GT 0){
+								ms.qSCount=qSCount;
+							}
+							echo(getAdminHTML(row, ms));
+							echo('</td></tr>');
+						}
+						if(arrayLen(arrSortColumn) NEQ 0){
+							sortRowStruct[row.feature_data_id].rowHTML=rowHTML;
 						}else{
-							echo('class="row1"');
+							echo(rowHTML);
 						}
-						echo('>
-						<td class="z-hide-at-767">#row.feature_data_id#</td>
-						<td>');
-						if(row.feature_data_level GT 0){
-							echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
-						}
-						echo('#rsData.name#</td>
-						<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
-						<td>');
-						if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){
-							echo(application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime));
-						}else{
-							echo(application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime));
-						}
-						echo('</td>');
-						echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
-						ms={
-							sortEnabled:sortEnabled,
-							arrChildSchema:arrChildSchema,
-							methodBackup:methodBackup,
-							mainSchemaStruct:mainSchemaStruct,
-							qSCount:{},
-							struct:arguments.struct,
-							childRow:childRow,
-							subgroupStruct:subgroupStruct
-						};
-						if(sortEnabled){
-							ms.queueSortCom=queueSortCom;
-						}
-						if(mainSchemaStruct.feature_schema_limit GT 0){
-							ms.qSCount=qSCount;
-						}
-						echo(getAdminHTML(row, ms));
-						echo('</td></tr>');
 					}
+					if(arrayLen(arrSortColumn) NEQ 0){
+					writedump(arrSortColumn);
+						arrRowOrder=structsort(sortRowStruct, "text", sortDirection, "sortKey");
+						for(id in arrRowOrder){
+							echo(sortRowStruct[id].rowHTML);
+						}
+					}
+
 					writeoutput('</tbody></table>');
 				}else{
 
@@ -3751,23 +3773,30 @@ Define this function in another CFC to override the default email format
 						if(not sublistEnabled){
 							recurseOut="";
 						}
-						rowStruct[curRowIndex]={
+						rowStruct[row.feature_data_id]={
 							index:curRowIndex,
 							parentId:curParentId,
 							row:rowOutput,
 							trHTML:"",
-							sublist:recurseOut
+							sublist:recurseOut,
+							sortKey:""
 						};
-						lastRowStruct=rowStruct[curRowIndex];
+						if(arrayLen(arrSortColumn) NEQ 0){
+							rowStruct[row.feature_data_id].sortKey=sortRowStruct[row.feature_data_id].sortKey;
+						}
+						lastRowStruct=rowStruct[row.feature_data_id];
 
 						if(sortEnabled){
 							if(row.site_id NEQ 0 or variables.allowGlobal){
-								rowStruct[curRowIndex].trHTML=queueSortCom.getRowHTML(row.feature_data_id);
+								rowStruct[row.feature_data_id].trHTML=queueSortCom.getRowHTML(row.feature_data_id);
 							}
 						}
 					}
-					arrKey=structsort(rowStruct, "numeric", "asc", "index");
-					arraysort(arrKey, "numeric", "asc");
+					if(arrayLen(arrSortColumn) NEQ 0){
+						arrKey=structsort(rowStruct, "text", sortDirection, "sortKey");
+					}else{
+						arrKey=structsort(rowStruct, "numeric", "asc", "index");
+					}
 					for(i=1;i LTE arraylen(arrKey);i++){
 						writeoutput('<tr '&rowStruct[arrKey[i]].trHTML&' data-ztable-sort-disable-validation="1" ');// data-ztable-sort-parent-id="#rowStruct[arrKey[i]].parentId#"
 						if(i MOD 2 EQ 0){
@@ -3974,7 +4003,7 @@ Define this function in another CFC to override the default email format
 					if(ms.mainSchemaStruct.feature_schema_limit EQ 0 or ms.qSCount.recordcount LT ms.mainSchemaStruct.feature_schema_limit){
 						if(ms.mainSchemaStruct.feature_schema_enable_versioning EQ 1 and row.feature_data_parent_id EQ 0){
 							copyLink=application.zcore.functions.zURLAppend(ms.struct.copyURL, "feature_id=#row.feature_id#&feature_data_id=#row.feature_data_id#"); 
-							echo('<a href="#application.zcore.functions.zURLAppend(ms.struct.versionURL, "feature_data_id=#row.feature_data_id#")#">Versions</a>');
+							// echo('<a href="#application.zcore.functions.zURLAppend(ms.struct.versionURL, "feature_id=#row.feature_id#&feature_data_id=#row.feature_data_id#")#">Versions</a>');
 							hasMultipleEditFeatures=true;
 						}else{
 							copyLink=application.zcore.functions.zURLAppend(ms.struct.addURL, "feature_id=#row.feature_id#&feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#");
@@ -4080,7 +4109,7 @@ Define this function in another CFC to override the default email format
 	}
 	if(application.zcore.functions.zso(form, 'feature_schema_id') EQ ""){
 		if(application.zcore.user.checkGroupAccess("member")){
-			application.zcore.functions.z301redirect("/z/feature/admin/features/index");
+			application.zcore.functions.z301redirect("/z/feature/admin/features/index?feature_id=#form.feature_id#");
 		}else{
 			application.zcore.functions.z301redirect("/");
 		}
@@ -4166,7 +4195,7 @@ Define this function in another CFC to override the default email format
 			qCountCheck=db.execute("qCountCheck");
 			if(qS.feature_schema_limit NEQ 0 and qCountCheck.recordcount GTE qS.feature_schema_limit){
 				application.zcore.status.setStatus(request.zsid, "You can't add another record of this type because you've reached the limit.", form, true);
-				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
+				application.zcore.functions.zRedirect(defaultStruct.listURL&"?feature_id=#form.feature_id#&zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
 			}
 		}
 	}
@@ -4186,7 +4215,7 @@ Define this function in another CFC to override the default email format
 			qCountCheck=db.execute("qCountCheck");
 			if(qS.feature_schema_user_child_limit NEQ 0 and qCountCheck.recordcount GTE qS.feature_schema_user_child_limit){
 				application.zcore.status.setStatus(request.zsid, "You can't add another record of this type because you've reached the limit.", form, true);
-				application.zcore.functions.zRedirect(defaultStruct.listURL&"?zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
+				application.zcore.functions.zRedirect(defaultStruct.listURL&"?feature_id=#form.feature_id#&zsid=#request.zsid#&feature_schema_id=#form.feature_schema_id#&feature_data_parent_id=#form.feature_data_parent_id#&modalpopforced=#application.zcore.functions.zso(form, 'modalpopforced')#");
 			}
 		}
 	}
@@ -4886,9 +4915,9 @@ Define this function in another CFC to override the default email format
 
 	application.zcore.status.setStatus(request.zsid, "Record unarchived.");
 	if(form.method EQ "userUnarchiveSchema"){
-		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/userManageSchema?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
 	}else{
-		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/manageSchema?feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#&feature_data_id=#form.feature_data_id#&feature_data_parent_id=#form.feature_data_parent_id#");
 	}
 	</cfscript>
 </cffunction>
@@ -5013,7 +5042,7 @@ Define this function in another CFC to override the default email format
 		}else if(form.returnJson EQ 1){
 			application.zcore.functions.zReturnJson({success:true});
 		}else if(qcheck.feature_data_master_set_id NEQ 0){
-			application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qcheck.feature_data_master_set_id#&zsid="&request.zsid);
+			application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#qcheck.feature_data_master_set_id#&zsid="&request.zsid);
 		}else{
 			application.zcore.functions.zRedirect(application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id="&form.feature_id&"&feature_schema_id="&form.feature_schema_id&"&feature_data_parent_id=#form.feature_data_parent_id#&zsid="&request.zsid));
 		}

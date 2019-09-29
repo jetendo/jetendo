@@ -1,54 +1,7 @@
 <cfcomponent>
 <cfoutput>
-<!--- 
-deep copy for Feature Schemas
-	two ways to handle this.
-		create a "linked record" that will replace the original and maintain the same URL and original parent record ID, but all feature_data_id ids will change, and the 
-			complications?
-				I should show modal window while version is being created, with loading animation, and maybe status feedback.   It might take a minute to copy some kinds of records.  Prevent double click.
-			
-				with versions, you could have multiple drafts, and one primary record that is "live".   
-				administrator needs to be able to preview a record temporarily for their session -  the retrieval of data across entire system would have to be able to swap in these temporary records without changing the site code.
-					non-primary records with "preview" session flag set must always be in memory, even if memory is disabled so it avoids extra queries to retrieve them.
-
-
-When making a version the primary record, it will have option to preserve the original URL, meta tags.   Also, an option to delete the original afterwards, so that old versions don't clutter or confuse you later.
-					
-				because versions are stored in memory, we must limit the number of active versions.  archived versions are not stored in memory, and can't be previewed.  Users must "archive" 1 or more versions, to bring an archived one back to active or draft state.
-					
-				they can only work on the groups with parent_id = 0 because relationships with other records would break if we didn't restrict this.
-				
-				a "Version" is an inactive copy of the data. 
-				feature_data_version
-					all the same fields as feature_data with feature_data_version prefix
-					plus:
-					feature_data_version_status char(1) default 0 | 0 is archived | 1 is primary | 2 is primary preview  - there can only be 1 record at a time that is value 1, and 1 that is value 2.   preview records are only visible for logged in user with manager privileges.
-					feature_data_id
-				feature_data
-					feature_data_master_set_id (refers to the main feature_data_id record)  
-						if this is 0, then it is the master, else it is a version, and should not be included in the main arrays and query results that are used for site output.   
-						when non-zero, the full tree of data for this record and its child records should ALWAYS be cached in memory if the version record for this id is not archived.
-				feature_data
-					no changes.
-				
-			versions can only be viewed/edited/deleted on the version page.   The version page could be made into a modal window instead of a separate page.  This makes it easier to stay where you where, similar to edit.
-			
-			new fields:
-				feature_schema_enable_versioning
-				feature_schema_enable_version_limit int(11) default 0,  0 is unlimited, default this to 10 to reduce wasted space usage.
-			
-			"Make Primary" link, opens modal window, that has options for preserving specific data.
-				i.e. Meta Tags, URL, more later.
-					
-					
-		OR I can create a full copy, but force the unique url field blank so it doesn't conflict.
-			simpler, but leads to SEO mistakes, and complications with losing relationships to other records.
-			
-		
- ---> 
-
 <cffunction name="copySchemaRecursive" localmode="modern" access="public" roles="member">
-	<cfargument name="option_group_set_id" type="numeric" required="yes">
+	<cfargument name="feature_data_id" type="numeric" required="yes">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="rowStruct" type="struct" required="yes">
 	<cfargument name="groupStruct" type="struct" required="yes">
@@ -59,35 +12,29 @@ When making a version the primary record, it will have option to preserve the or
 	row.feature_data_override_url="";
 	row.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
 	row.site_id = arguments.site_id;
+	mainSchema=arguments.groupStruct[row.feature_schema_id].data;
+	dataFields=application.zcore.featureCom.parseFieldData(row);
 
 	if(row.feature_data_image_library_id NEQ 0){
 
-		logCopyMessage('Copying image library for set ###arguments.option_group_set_id#');
+		logCopyMessage('Copying image library for set ###arguments.feature_data_id#');
 		row.feature_data_image_library_id=application.zcore.imageLibraryCom.copyImageLibrary(row.feature_data_image_library_id, row.site_id);
 	}
-	ts=structnew();
-	ts.struct=row;
-	ts.datasource=request.zos.zcoreDatasource;
-	ts.table="feature_data";
-	newSetId=application.zcore.functions.zInsert(ts);
 
-	logCopyMessage('Copying set ###arguments.option_group_set_id#');
+	logCopyMessage('Copying set ###arguments.feature_data_id#');
 	db.sql="select * from 
-	#db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
-	feature_data_id = #db.param(arguments.option_group_set_id)# and 
-	feature_data_deleted=#db.param(0)# and 
-	site_id = #db.param(arguments.site_id)# ";
-	qValue=db.execute("qValue");
+	#db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
+	feature_schema_id = #db.param(row.feature_schema_id)# and 
+	feature_field_deleted=#db.param(0)# 
+	ORDER BY feature_field_sort ASC";
+	qField=db.execute("qField");
 	typeCache={};
 	tempPath=application.zcore.functions.zvar('privatehomedir', arguments.site_id);
-	for(row2 in qValue){
-
-		structdelete(row2, 'feature_data_id');  
-		row2.feature_data_id=newSetId;
-		row2.site_id=arguments.site_id;
-		row2.feature_data_updated_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss');
-
-		if(row2.feature_data_value NEQ ""){
+	arrFieldOrder=[];
+	arrDataOrder=[];
+	for(row2 in qField){
+		value=dataFields[row2.feature_field_variable_name];
+		if(value NEQ ""){
 			if(structkeyexists(arguments.typeStruct, row2.feature_field_id)){
 				typeId=arguments.typeStruct[row2.feature_field_id].data.feature_field_type_id;
 				if(typeId EQ 9){
@@ -101,11 +48,11 @@ When making a version the primary record, it will have option to preserve the or
 				}else if(typeId EQ 3){
 					path=tempPath&'zupload/feature-options/';
 				}else if(typeId EQ 23){ 
-					row2.feature_data_value=application.zcore.imageLibraryCom.copyImageLibrary(row2.feature_data_value, row2.site_id);
+					dataFields[row2.feature_field_variable_name]=application.zcore.imageLibraryCom.copyImageLibrary(value, row2.site_id);
 				}else if(typeId EQ 21){
 					db.sql="select * from #db.table("mls_saved_search", request.zos.zcoreDatasource)# WHERE 
 					site_id = #db.param(row2.site_id)# and 
-					mls_saved_search_id=#db.param(row2.feature_data_value)# and 
+					mls_saved_search_id=#db.param(value)# and 
 					mls_saved_search_deleted=#db.param(0)# ";
 					qV=db.execute("qV");
 					for(r2 in qV){
@@ -115,11 +62,11 @@ When making a version the primary record, it will have option to preserve the or
 						ts.struct=r2;
 						ts.datasource=request.zos.zcoreDatasource;
 						ts.table="mls_saved_search";
-						row2.feature_data_value=application.zcore.functions.zInsert(ts);
+						dataFields[row2.feature_field_variable_name]=application.zcore.functions.zInsert(ts);
 					}
 				}
 				if(typeId EQ 3){
-					arrValue=listToArray(row2.feature_data_value, chr(9));
+					arrValue=listToArray(value, chr(9));
 					if(arrValue[1] NEQ ""){
 						newPath=application.zcore.functions.zcopyfile(path&arrValue[1]);
 						arrValue[1]=getfilefrompath(newPath); 
@@ -128,34 +75,50 @@ When making a version the primary record, it will have option to preserve the or
 						newPath=application.zcore.functions.zcopyfile(path&arrValue[2]);
 						arrValue[2]=getfilefrompath(newPath);
 					}
-					row2.feature_data_value=arrayToList(arrValue, chr(9));
+					dataFields[row2.feature_field_variable_name]=arrayToList(arrValue, chr(9));
 				}else if(typeId EQ 9){
-					newPath=application.zcore.functions.zcopyfile(path&row2.feature_data_value);
-					row2.feature_data_value=getfilefrompath(newPath); 
+					newPath=application.zcore.functions.zcopyfile(path&value);
+					dataFields[row2.feature_field_variable_name]=getfilefrompath(newPath); 
 				}
 			}
 		}
-		ts=structnew();
-		ts.struct=row2;
-		ts.datasource=request.zos.zcoreDatasource;
-		ts.table="feature_data";
-		newValueId=application.zcore.functions.zInsert(ts);
-
+		arrayAppend(arrFieldOrder, row2.feature_field_id);
+		arrayAppend(arrDataOrder, dataFields[row2.feature_field_variable_name]);
 	}
+	row.feature_data_field_order=arrayToList(arrFieldOrder, chr(13));
+	row.feature_data_data=arrayToList(arrDataOrder, chr(13));
+	ts=structnew();
+	ts.struct=row;
+	ts.datasource=request.zos.zcoreDatasource;
+	ts.table="feature_data";
+	newSetId=application.zcore.functions.zInsert(ts);
 
 
 	db.sql="select * from 
 	#db.table("feature_data", request.zos.zcoreDatasource)# WHERE 
-	feature_data_parent_id = #db.param(arguments.option_group_set_id)# and 
+	feature_data_parent_id = #db.param(arguments.feature_data_id)# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	feature_data_deleted=#db.param(0)#  and 
 	site_id = #db.param(arguments.site_id)# ";
-	typeCache={};
 	qChild=db.execute("qChild");
+	typeCache={};
 	for(row3 in qChild){
 		row3.feature_data_parent_id=newSetId;
-		this.copySchemaRecursive(row3.feature_data_id, arguments.site_id, row3, arguments.groupStruct, arguments.typeStruct);
+		childSetId=this.copySchemaRecursive(row3.feature_data_id, arguments.site_id, row3, arguments.groupStruct, arguments.typeStruct);
+		// if current record is merge, then update 
+		if(mainSchema.feature_schema_enable_merge_interface EQ 1){
+			db.sql="UPDATE #db.table("feature_data", request.zos.zcoreDatasource)# 
+			SET 
+			feature_data_merge_schema_id=#db.param(row3.feature_schema_id)#,
+			feature_data_merge_data_id=#db.param(childSetId)# 
+			WHERE 
+			site_id=#db.param(request.zos.globals.id)# and 
+			feature_data_id=#db.param(newSetId)# and 
+			feature_data_deleted=#db.param(0)# ";
+			db.execute("qUpdate");
+		}
 	}
+	return newSetId;
 	</cfscript>
 </cffunction>
 
@@ -252,7 +215,7 @@ When making a version the primary record, it will have option to preserve the or
 			if(form.createVersion EQ 1){
 				if(tempSchema.data.feature_schema_enable_versioning EQ 0){
 					application.zcore.status.setStatus(request.zsid, "Versioning is not allowed.", form, true);
-					application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
+					application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 				}
 				if(tempSchema.data.feature_schema_version_limit NEQ 0){
 					db.sql="select count(feature_data_id) count from #db.table("feature_data", request.zos.zcoreDatasource)# 
@@ -262,7 +225,7 @@ When making a version the primary record, it will have option to preserve the or
 					qVersionCount=db.execute("qVersionCount");
 					if(qVersionCount.recordcount NEQ 0 and tempSchema.data.feature_schema_version_limit LTE qVersionCount.count){
 						application.zcore.status.setStatus(request.zsid, "Version limit reached. You must delete a version before creating a new one.", form, true);
-						application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#row.feature_data_id#&zsid=#request.zsid#");
+						application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#row.feature_data_id#&zsid=#request.zsid#");
 					}
 				}
 				db.sql="select feature_data_id from #db.table("feature_data", request.zos.zcoreDatasource)# 
@@ -314,7 +277,7 @@ When making a version the primary record, it will have option to preserve the or
 		success:true
 	};
 	if(form.createVersion EQ 1){
-		rs.redirectURL="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qSet.feature_data_id#";
+		rs.redirectURL="/z/feature/admin/feature-deep-copy/versionList?feature_id=#qSet.feature_id#&feature_data_id=#qSet.feature_data_id#";
 	}else{
 		rs.redirectURL="/z/feature/admin/features/manageSchema?feature_data_parent_id=#qSet.feature_data_parent_id#&feature_id=#qSet.feature_id#&feature_schema_id=#qSet.feature_schema_id#&zsid=#request.zsid#";
 	}
@@ -338,8 +301,9 @@ When making a version the primary record, it will have option to preserve the or
 		if(qVersion.count EQ 0){
 			return false;
 		}
-		db.sql="select feature_schema_version_limit from #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
-		site_id = #db.param(arguments.site_id)# and 
+		db.sql="select feature_schema_version_limit from 
+		#db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
+		feature_id=#db.param(form.feature_id)# and 
 		feature_schema_deleted=#db.param(0)# and 
 		feature_schema_id=#db.param(qVersion.feature_schema_id)#";
 		qSchema=db.execute("qSchema");
@@ -356,11 +320,13 @@ When making a version the primary record, it will have option to preserve the or
 
 <cffunction name="confirmVersionActive" localmode="modern" access="remote" roles="member">
 	<cfscript>
+	application.zcore.functions.z404("feature disabled");
 	
 	db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	</cfscript>
 	<form class="zFormCheckDirty" action="/z/feature/admin/feature-deep-copy/setVersionActive" method="post">
+		<input type="hidden" name="feature_id" value="#form.feature_id#">
 		<input type="hidden" name="feature_data_id" value="#form.feature_data_id#" />
 		<input type="hidden" name="feature_data_master_set_id" value="#form.feature_data_master_set_id#" />
 		<cfscript>
@@ -396,13 +362,14 @@ When making a version the primary record, it will have option to preserve the or
 		#application.zcore.functions.zInput_Boolean("preserveMeta")#</h3>
 
 		<p><input type="submit" name="submit1" value="Make Primary" />
-		<input type="button" name="cancel1" onclick="window.location.href='/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#qVersion.feature_data_master_set_id#';" value="Cancel" /></p>
+		<input type="button" name="cancel1" onclick="window.location.href='/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#qVersion.feature_data_master_set_id#';" value="Cancel" /></p>
 	</form>
 </cffunction>
 
 <cffunction name="setVersionActive" localmode="modern" access="remote" roles="member">
 	<cfscript>
 	db=request.zos.queryObject;
+	application.zcore.functions.z404("feature disabled");
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	// TODO: consider more security checks here are necessary
 
@@ -437,7 +404,7 @@ When making a version the primary record, it will have option to preserve the or
 	}
 	if(structcount(tempVersion) EQ 0 or structcount(tempMaster) EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Invalid request", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
 
 
@@ -465,10 +432,6 @@ When making a version the primary record, it will have option to preserve the or
 		tempVersion.feature_data_metadesc=tempMaster.feature_data_metadesc;
 	}
 
-	writedump(ts);
-	writedump(tempVersion);
-	abort;
-
 	newMasterId=application.zcore.functions.zInsert(ts);
 	transaction action="begin"{
 		try{
@@ -477,14 +440,7 @@ When making a version the primary record, it will have option to preserve the or
 			feature_data_id = #db.param(backupMasterSetId)# and 
 			feature_data_deleted=#db.param(0)#";
 			db.execute("qDelete");
-			db.sql="update feature_data set 
-			feature_data_id = #db.param(newMasterId)#, 
-			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where feature_data_id = #db.param(backupMasterSetId)# and 
-			site_id = #db.param(tempMaster.site_id)# and 
-			feature_data_deleted=#db.param(0)# ";
-			db.execute("qUpdate");
-			db.sql="update feature_data set 
+			db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# SET 
 			feature_data_parent_id = #db.param(newMasterId)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_parent_id = #db.param(backupMasterSetId)# and 
@@ -492,21 +448,14 @@ When making a version the primary record, it will have option to preserve the or
 			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 
-			db.sql="update feature_data set 
+			db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# SET 
 			feature_data_id = #db.param(backupMasterSetId)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_id = #db.param(backupVersionSetId)# and 
 			site_id = #db.param(tempVersion.site_id)# and 
 			feature_data_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
-			db.sql="update feature_data set 
-			feature_data_id = #db.param(backupMasterSetId)#, 
-			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
-			where feature_data_id = #db.param(backupVersionSetId)# and 
-			site_id = #db.param(tempVersion.site_id)# and 
-			feature_data_deleted=#db.param(0)# ";
-			db.execute("qUpdate");
-			db.sql="update feature_data set 
+			db.sql="update #db.table("feature_data", request.zos.zcoreDatasource)# SET 
 			feature_data_parent_id = #db.param(backupMasterSetId)#, 
 			feature_data_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), 'HH:mm:ss'))#
 			where feature_data_parent_id = #db.param(backupVersionSetId)# and 
@@ -537,16 +486,17 @@ When making a version the primary record, it will have option to preserve the or
 	}
 
 	featureCacheCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
-	featureCacheCom.updateSchemaCacheBySchemaId(qMaster.feature_id, qMaster.feature_schema_id);
+	featureCacheCom.updateSchemaCacheBySchemaId(tempMaster.feature_id, tempMaster.feature_schema_id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#backupMasterSetId#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#backupMasterSetId#");
 	</cfscript>
 	
 </cffunction>
 
 <cffunction name="archiveVersion" localmode="modern" access="remote" roles="member">
 	<cfscript>
+	application.zcore.functions.z404("feature disabled");
 	db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Features");	
 	form.statusValue=application.zcore.functions.zso(form, 'statusValue', true, 0);
@@ -565,7 +515,7 @@ When making a version the primary record, it will have option to preserve the or
 
 	if(qArchive.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Version no longer exists.");
-		application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_master_set_id#");
+		application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_master_set_id#");
 	}
 
 	transaction action="begin"{
@@ -609,22 +559,23 @@ When making a version the primary record, it will have option to preserve the or
 	}else{
 		application.zcore.status.setStatus(request.zsid, "Version archived.");
 	}
-	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_master_set_id#");
+	application.zcore.functions.zRedirect("/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_master_set_id#");
 	</cfscript>
 </cffunction>
 
 <cffunction name="versionList" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
+	application.zcore.functions.z404("feature disabled");
 	application.zcore.functions.zStatusHandler(request.zsid);
 	siteFieldCom=createObject("component", "zcorerootmapping.mvc.z.feature.admin.controller.features");
 	defaultStruct=siteFieldCom.getDefaultStruct(); 
 	structappend(arguments.struct, defaultStruct, false);
 	qSet=getSet(); 
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)#,
-	#db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
-	site_id=#db.param(request.zos.globals.id)# and 
+	db.sql="select * from (#db.table("feature_data", request.zos.zcoreDatasource)#,
+	#db.table("feature_schema", request.zos.zcoreDatasource)#) WHERE 
+	feature_data.site_id=#db.param(request.zos.globals.id)# and 
 	feature_schema.feature_schema_id = feature_data.feature_schema_id and 
 	feature_schema_deleted=#db.param(0)# and 
 	feature_data.feature_id=#db.param(form.feature_id)# and 
@@ -633,7 +584,7 @@ When making a version the primary record, it will have option to preserve the or
 	qMaster=db.execute("qMaster");
 	if(qMaster.recordcount EQ 0){
 		application.zcore.status.setStatus(request.zsid, "Invalid request", form, true);
-		application.zcore.functions.zRedirect("/z/feature/admin/features/index?zsid=#request.zsid#");
+		application.zcore.functions.zRedirect("/z/feature/admin/features/index?feature_id=#form.feature_id#&zsid=#request.zsid#");
 	}
 	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# WHERE 
 	feature_id=#db.param(form.feature_id)# and 
@@ -654,7 +605,7 @@ When making a version the primary record, it will have option to preserve the or
 
 	limitReached=isVersionLimitReached(form.feature_data_id, request.zos.globals.id);
 	if(not limitReached){
-		echo('<p><a href="/z/feature/admin/feature-deep-copy/index?createVersion=1&amp;feature_data_id=#form.feature_data_id#">Create new version</a></p>');
+		echo('<p><a href="/z/feature/admin/feature-deep-copy/index?createVersion=1&amp;feature_id=#form.feature_id#&amp;feature_data_id=#form.feature_data_id#">Create new version</a></p>');
 	}else{
 		echo('<p>Version limit reached. To create a new version, please delete one of the previous versions.</p>');
 	}
@@ -685,7 +636,7 @@ When making a version the primary record, it will have option to preserve the or
 			<td>');
 		if(row.feature_data_version_status EQ 0){
 			// 0 is archived | 1 is primary
-			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=1">Enable Preview</a>');
+			// echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_id=#row.feature_id#&feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=1">Enable Preview</a> | ');
 		}else{
 			if(qMaster.feature_schema_enable_unique_url EQ 1){
 				if(row.feature_data_override_url NEQ ""){
@@ -695,9 +646,9 @@ When making a version the primary record, it will have option to preserve the or
 				}
 				echo('<a href="#link#" target="_blank">View</a> | ');
 			}
-			echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=0">Disable Preview</a>');
+			// echo('<a href="/z/feature/admin/feature-deep-copy/archiveVersion?feature_id=#form.feature_id#&feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#&amp;statusValue=0">Disable Preview</a> | ');
 		}
-		echo(' | <a href="/z/feature/admin/feature-deep-copy/confirmVersionActive?feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#">Make Primary</a>');
+		echo(' <a href="/z/feature/admin/feature-deep-copy/confirmVersionActive?feature_id=#form.feature_id#&feature_data_id=#row.feature_data_id#&feature_data_master_set_id=#row.feature_data_master_set_id#">Make Primary</a>');
 
 		editLink=application.zcore.functions.zURLAppend(arguments.struct.editURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#"); // &amp;modalpopforced=1&amp;disableSorting=1
 		deleteLink=application.zcore.functions.zURLAppend(arguments.struct.deleteURL, "feature_id=#row.feature_id#&amp;feature_schema_id=#row.feature_schema_id#&amp;feature_data_id=#row.feature_data_id#&amp;feature_data_parent_id=#row.feature_data_parent_id#");
@@ -721,8 +672,9 @@ When making a version the primary record, it will have option to preserve the or
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
 	where feature_data_id = #db.param(form.feature_data_id)# and 
 	feature_data_deleted = #db.param(0)# and
+	site_id=#db.param(request.zos.globals.id)# and 
 	feature_id=#db.param(form.feature_id)# ";
-	qSet=db.execute("qSet");
+	qSet=db.execute("qSet", "", 10000, "query", false);
 	if(qSet.recordcount EQ 0){
 		if(structkeyexists(form, 'x_ajax_id')){
 			rs={
@@ -732,7 +684,7 @@ When making a version the primary record, it will have option to preserve the or
 			application.zcore.functions.zReturnJSON(rs);
 		}
 		application.zcore.status.setStatus(request.zsid, "Invalid request.", form, true);
-		application.zcore.functions.zRedirect('/z/feature/admin/feature-schema/index?zsid=#request.zsid#');	
+		application.zcore.functions.zRedirect('/z/feature/admin/feature-schema/index?feature_id=#form.feature_id#&zsid=#request.zsid#');	
 	}
 	return qSet;
 	</cfscript>
@@ -744,23 +696,23 @@ When making a version the primary record, it will have option to preserve the or
 	</cfscript>
 
 	<h2>Select Copy Method</h2>
-	<p>Note: Creating a deep copy or a new version can take several seconds. Please be patient.</p>
+	<p>Note: Creating a deep copy <cfif request.zos.istestserver and false>or a new version</cfif> can take several seconds. Please be patient.</p>
 	<p>Selected Record ID###form.feature_data_id# | Title: #qSet.feature_data_title#</p>
 	<hr />
 	<div id="copyMessageDiv">
-		<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/copySchema?feature_data_id=#form.feature_data_id#'); return false;">Deep Copy</a></h3>
+		<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/copySchema?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_id#'); return false;">Deep Copy</a></h3>
 		<p>A deep copy will force the URL to be unique, but all other data including text, files And sub-records will be fully cloned.</p>
 		<h3><a href="/z/feature/admin/features/addSchema?feature_id=#qSet.feature_id#&amp;feature_schema_id=#qSet.feature_schema_id#&amp;feature_data_id=#form.feature_data_id#&amp;feature_data_parent_id=#qSet.feature_data_parent_id#">Shallow Copy</a></h3>
 		<p>Shallow copy prefills the form for creating a new record with only this record's text.  All files and sub-records will be left blank on the new record.</p>
-		<cfif request.zos.istestserver>
+		<!--- <cfif request.zos.istestserver>
 			<cfif isVersionLimitReached(form.feature_data_id, qSet.site_id)>
 				<h3>Version limit reached.  You must delete a previous version before creating a new one.</h3>
-				<p><a href="/z/feature/admin/feature-deep-copy/versionList?feature_data_id=#form.feature_data_id#">List versions</a></p>
+				<p><a href="/z/feature/admin/feature-deep-copy/versionList?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_id#">List versions</a></p>
 			<cfelse>
-				<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_data_id=#form.feature_data_id#'); return false;">Create new version</a></h3>
+				<h3><a href="##" onclick="doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_id#'); return false;">Create new version</a></h3>
 				<p>A version is a deep copy that is linked with the original record.  The new record will be invisible to the public until finalized.  You will be able to preserve the URL and existing relationships that the original record had when you set the version to be the primary record.</p>
 			</cfif>
-		</cfif>
+		</cfif> --->
 		<h3><a href="/z/feature/admin/features/manageSchema?feature_id=#qSet.feature_id#&amp;feature_schema_id=#qSet.feature_schema_id#">Cancel</a></h3>
 	</div>
 	 <!--- ajax for /z/feature/admin/feature-deep-copy/getCopyMessage until it returns "", then refresh page... --->
@@ -769,7 +721,7 @@ When making a version the primary record, it will have option to preserve the or
 		
 		<script type="text/javascript">
 		zArrDeferredFunctions.push(function(){
-			doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_data_id=#form.feature_data_id#');
+			doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_id#');
 		});
 		</script>
 	</cfif>

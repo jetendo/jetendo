@@ -51,11 +51,10 @@
 		WHERE 
 		site_id=#db.param(request.zos.globals.id)# and 
 		feature_data_id = #db.param(form.feature_data_id)# and 
-		feature_data_master_set_id = #db.param(0)# and 
-		feature_data_deleted = #db.param(0)# and 
-		feature_data.feature_id=#db.param(form.feature_id)# ";
+		feature_data_deleted = #db.param(0)#  ";
 		if(not structkeyexists(form, 'zpreview')){
-			db.sql&=" and feature_data_approved=#db.param(1)#";
+			db.sql&=" and feature_data_approved=#db.param(1)# and 
+			feature_data_master_set_id = #db.param(0)# ";
 		}
 		qSet=db.execute("qSet");
 		for(row in qSet){

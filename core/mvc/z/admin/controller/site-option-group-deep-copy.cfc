@@ -521,7 +521,7 @@ When making a version the primary record, it will have option to preserve the or
 		transaction action="commit";
 	}
 
-	application.zcore.siteOptionCom.updateOptionGroupCacheByGroupId(qMaster.site_option_group_id);
+	application.zcore.siteOptionCom.updateOptionGroupCacheByGroupId(tempMaster.site_option_group_id);
 	//application.zcore.functions.zOS_cacheSiteAndUserGroups(request.zos.globals.id);
 
 	application.zcore.status.setStatus(request.zsid, "Successfully changed selected version to be the primary record.");
@@ -704,7 +704,7 @@ When making a version the primary record, it will have option to preserve the or
 	where site_x_option_group_set_id = #db.param(form.site_x_option_group_set_id)# and 
 	site_x_option_group_set_deleted = #db.param(0)# and
 	site_id = #db.param(request.zos.globals.id)# ";
-	qSet=db.execute("qSet");
+	qSet=db.execute("qSet", "", 10000, "query", false);
 	if(qSet.recordcount EQ 0){
 		if(structkeyexists(form, 'x_ajax_id')){
 			rs={

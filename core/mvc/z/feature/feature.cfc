@@ -1048,23 +1048,26 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	var row=0;
 	var i=0;
 	db.sql="select * from 
-	#db.table("feature", request.zos.zcoreDatasource)#, 
+	(#db.table("feature", request.zos.zcoreDatasource)#, 
+	#db.table("feature_x_site", request.zos.zcoreDatasource)#, 
 	#db.table("feature_schema", request.zos.zcoreDatasource)#, 
-	#db.table("feature_field", request.zos.zcoreDatasource)#
+	#db.table("feature_field", request.zos.zcoreDatasource)#)
 	where 
+	feature_x_site.site_id=#db.param(request.zos.globals.id)# and 
+	feature_x_site.feature_id=feature.feature_id and 
+	feature_x_site_deleted=#db.param(0)# and 
 	feature.feature_id = feature_schema.feature_id and 
 	feature.feature_deleted=#db.param(0)# and 
 	feature_schema.feature_schema_id = feature_field.feature_schema_id and 
 	feature_field_deleted=#db.param(0)# and 
 	feature_schema_deleted = #db.param(0)# and 
 	feature_schema_parent_id = #db.param('0')# and 
-	feature_schema.feature_id=#db.param(form.feature_id)# and 
 	feature_schema_disable_site_map = #db.param(0)# and 
 	feature_schema.feature_schema_enable_unique_url = #db.param(1)# 
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__schemaId=0,__setId=0}, row.feature_field_variable_name);
+		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__mergeSchemaId:0,__schemaId:0,__setId:0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
