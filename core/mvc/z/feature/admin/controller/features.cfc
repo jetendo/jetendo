@@ -7,6 +7,7 @@
 	variables.allowGlobal=false;
 
 	form.site_id=request.zos.globals.id;
+	form.feature_id=application.zcore.functions.zso(form, "feature_id", true, 0);
 	variables.siteIdList="'"&request.zos.globals.id&"'";
 	variables.publicSiteIdList="'0','"&request.zos.globals.id&"'";
 	if(application.zcore.user.checkGroupAccess("user")){
@@ -2758,15 +2759,6 @@ Define this function in another CFC to override the default email format
 		if(structcount(mainSchemaStruct) EQ 0){
 			application.zcore.functions.zredirect("/z/feature/admin/features/index");
 		} 
-		// db.sql="SELECT * FROM #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema WHERE 
-		// feature_schema_id = #db.param(form.feature_schema_id)# and 
-		// feature_schema_deleted = #db.param(0)# and
-		// site_id =#db.trustedsql(request.zos.globals.id)# ";
-		// qSchema=db.execute("qSchema"); 
-		
-		// if(mainSchemaStruct.recordcount EQ 0){
-		// 	application.zcore.functions.zredirect("/z/feature/admin/features/index");
-		// }
 
 		if(mainSchemaStruct.feature_schema_enable_archiving EQ 1){
 			form.showArchived=application.zcore.functions.zso(form, 'showArchived');
@@ -2804,33 +2796,6 @@ Define this function in another CFC to override the default email format
 				arrayAppend(arrChildSchema, group);
 			}
 		}
-		// db.sql="select * 
-		// from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema  
-		// where 
-		// feature_schema_deleted = #db.param(0)# and
-		// feature_schema.feature_schema_parent_id = #db.param(form.feature_schema_id)# and 
-		// feature_schema.feature_id=#db.param(form.feature_id)# 
-		// GROUP BY feature_schema.feature_schema_id
-		// ORDER BY feature_schema.feature_schema_display_name";
-		// q1=db.execute("q1");
-		// this childCount wasn't used anymore
-		// db.sql="select *, count(s3.feature_schema_id) childCount 
-		// from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
-		// left join #db.table("feature_data", request.zos.zcoreDatasource)# s3 ON 
-		// feature_schema.feature_schema_id = s3.feature_schema_id and 
-		// s3.feature_data_master_set_id = #db.param(0)# and 
-		// s3.feature_data_deleted = #db.param(0)# ";
-		// if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-		// 	db.sql&=" and feature_data_id = #db.param(form.feature_data_id)# ";
-		// }
-		// db.sql&=" where 
-		// feature_schema_deleted = #db.param(0)# and
-		// feature_schema.feature_schema_parent_id = #db.param(form.feature_schema_id)# and 
-		// feature_schema.feature_id=#db.param(form.feature_id)# 
-		// GROUP BY feature_schema.feature_schema_id
-		// ORDER BY feature_schema.feature_schema_display_name";
-		// q1=db.execute("q1");
-
 
 		sortEnabled=true;
 		subgroupRecurseEnabled=false;
@@ -2967,23 +2932,6 @@ Define this function in another CFC to override the default email format
 				queueSortCom.returnJson();
 			}
 		}
-		// if(form.feature_schema_id NEQ 0){
-		// 	db.sql="select * from #db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema 
-		// 	where feature_schema_id = #db.param(form.feature_schema_id)# and 
-		// 	feature_schema_deleted = #db.param(0)# and
-		// 	feature_id=#db.param(form.feature_id)# 
-		// 	ORDER BY feature_schema_display_name";
-		// 	q12=db.execute("q12");
-		// 	if(q12.recordcount EQ 0){
-		// 		application.zcore.functions.z301redirect("/z/feature/admin/features/index");	
-		// 	}
-		// }
-		// db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# feature_field 
-		// where feature_schema_id = #db.param(form.feature_schema_id)# and 
-		// feature_field_deleted = #db.param(0)# and
-		// feature_id =#db.param(form.feature_id)# 
-		// ORDER BY feature_field_sort";
-		// qS2=db.execute("qS2");
 		arrMainField=[];
 		mainFieldStruct={};
 		if(not structkeyexists(sog.featureSchemaFieldLookup, form.feature_schema_id)){
@@ -3096,6 +3044,7 @@ Define this function in another CFC to override the default email format
 
 		arrSearchSQL=[];
 		searchStruct={};
+		arrSearchFilter=[];
 		searchFieldEnabledStruct={};
 	
 		if(not structkeyexists(arguments.struct, 'recurse') and form.feature_schema_id NEQ 0 and arraylen(arrSearchTable)){ 
@@ -3105,9 +3054,6 @@ Define this function in another CFC to override the default email format
 			<input type="hidden" name="feature_schema_id" value="#form.feature_schema_id#" />
 			<input type="hidden" name="feature_id" value="#form.feature_id#" />
 			<div class="z-float " style="border-bottom:1px solid ##CCC; padding-bottom:10px;">');
-			for(n=1;n LTE arraylen(arrVal);n++){
-				arrSearchSQL[n]="";
-			}
 			for(i=1;i LTE arraylen(arrSearchTable);i++){
 				row=arrSearchTable[i];
 				for(n=1;n LTE arraylen(arrVal);n++){
@@ -3123,14 +3069,25 @@ Define this function in another CFC to override the default email format
 				var currentCFC=application.zcore.featureCom.getTypeCFC(row.feature_field_type_id);
 				if(currentCFC.isSearchable()){
 					arrayAppend(arrSearch, '<div class="z-float-left z-pr-10 z-pb-10">'&row.feature_field_display_name&'<br />');
-					var tempValue=currentCFC.getSearchValue(row, typeStruct, 'newvalue', form, searchStruct);
+
 					if(structkeyexists(form, 'searchOn')){
-						arrSearchSQL[curValIndex]=currentCFC.getSearchSQL(row, typeStruct, 'newvalue', form, 's#curValIndex#.feature_data_value',  's#curValIndex#.feature_data_date_value', tempValue); 
-						if(arrSearchSQL[curValIndex] NEQ ""){
-							searchFieldEnabledStruct[curValIndex]=true;
-						}
-						arrSearchSQL[curValIndex]=replace(arrSearchSQL[curValIndex], "?", "", "all");
+						tempValue=currentCFC.getSearchValue(row, typeStruct, 'newvalue', form, searchStruct);
+						// searchString=currentCFC.getSearchSQL(row, typeStruct, 'newvalue', form, 's#curValIndex#.feature_data_value',  's#curValIndex#.feature_data_date_value', tempValue); 
+						// if(searchString NEQ ""){
+						// 	searchFieldEnabledStruct[curValIndex]=true;
+						// 	arrayAppend(arrSearchSQL, replace(searchString, "?", "", "all"));
+						// }
 						searchStruct['newvalue'&row.feature_field_id]=tempValue;
+
+						ts={
+							typeCFC:currentCFC,
+							typeStruct:typeStruct,
+							fieldName:row.feature_field_variable_name,
+							searchValue:tempValue
+						};
+						arrayAppend(arrSearchFilter, ts);
+					}else{
+						tempValue="";
 					}
 					arrayAppend(arrSearch, currentCFC.getSearchFormField(row, typeStruct, 'newvalue', form, tempValue, '')); 
 					arrayAppend(arrSearch, '</div>');
@@ -3144,13 +3101,6 @@ Define this function in another CFC to override the default email format
 					request.zsession.siteSchemaSearch[tempSchemaKey]=searchStruct;
 				}
 			}
-			arrNewSearchSQL=[];
-			for(n=1;n LTE arraylen(arrSearchSQL);n++){
-				if(arrSearchSQL[n] NEQ ""){
-					arrayappend(arrNewSearchSQL, arrSearchSQL[n]);
-				}
-			}
-			arrSearchSQL=arrNewSearchSQL; 
 			
 			if(mainSchemaStruct.feature_schema_enable_approval EQ 1){
 				if(methodBackup NEQ "getRowHTML" and methodBackup NEQ "userGetRowHTML"){
@@ -3174,9 +3124,11 @@ Define this function in another CFC to override the default email format
 				arrayAppend(arrSearch, application.zcore.functions.zInputSelectBox(ts));
 				arrayAppend(arrSearch, '</div>');
 			}
-			arrayAppend(arrSearch, '<div class="z-float-left">&nbsp;<br><input type="submit" name="searchSubmit1" value="Search" class="z-manager-search-button" /> 
-				 <input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >
-			</div></div></form>');
+			arrayAppend(arrSearch, '<div class="z-float-left">&nbsp;<br><input type="submit" name="searchSubmit1" value="Search" class="z-manager-search-button" /> ');
+			if(structkeyexists(form, "searchOn")){
+				arrayAppend(arrSearch, '<input type="button" onclick="window.location.href=''#application.zcore.functions.zURLAppend(arguments.struct.listURL, 'feature_id=#form.feature_id#&amp;feature_schema_id=#form.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_parent_id#&amp;clearSearch=1')#''; " value="Clear Search" class="z-manager-search-button" >');
+			}
+			arrayAppend(arrSearch, '</div></div></form>');
 
 			if ( mainSchemaStruct.feature_schema_enable_sorting EQ 1 ) {
 				if ( structKeyExists( form, 'searchOn' ) and form.searchOn) {
@@ -3188,167 +3140,6 @@ Define this function in another CFC to override the default email format
 		status=application.zcore.functions.zso(searchStruct, 'feature_data_approved');
 
 
-		if(mainSchemaStruct.feature_schema_limit GT 0){
-			db.sql="SELECT count(feature_schema.feature_schema_id) count
-			FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
-			#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  "; 
-			db.sql&="WHERE   
-			feature_data.site_id=#db.param(request.zos.globals.id)# and 
-			feature_data_deleted = #db.param(0)# and 
-			feature_schema_deleted = #db.param(0)# and 
-			feature_data.feature_id = #db.param(form.feature_id)# and 
-			feature_data_master_set_id = #db.param(0)# and 
-			feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
-			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
-			}
-			if(form.feature_data_parent_id NEQ 0){
-				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
-			} 
-			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-				db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
-			}
-			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and feature_data_archived =#db.param(0)# ";
-			}
-			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
-			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
-			feature_schema.feature_schema_type=#db.param('1')# ";
-			qCountAllLimit=db.execute("qCountAllLimit");
-		}
-
-		if(methodBackup EQ "userManageSchema"){
-			db.sql="SELECT count(feature_schema.feature_schema_id) count
-			FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
-			#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
-			// for(i=1;i LTE arraylen(arrVal);i++){
-			// 	if(structkeyexists(searchFieldEnabledStruct, i)){
-			// 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
-			// 		s#i#.feature_data_id = feature_data.feature_data_id and 
-			// 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
-			// 		s#i#.feature_schema_id = feature_schema.feature_schema_id and  
-			// 		s#i#.feature_id = #db.param(form.feature_id)# and 
-			// 		s#i#.feature_data_deleted = #db.param(0)# ";
-			// 	}
-			// }
-			db.sql&="WHERE  
-			feature_data.site_id=#db.param(request.zos.globals.id)# and 
-			feature_data_deleted = #db.param(0)# and 
-			feature_schema_deleted = #db.param(0)# and 
-			feature_data.feature_id = #db.param(form.feature_id)# and 
-			feature_data_master_set_id = #db.param(0)# and 
-			feature_schema.feature_schema_id=feature_data.feature_schema_id ";
-			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
-			}
-			if(form.feature_data_parent_id NEQ 0){
-				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
-			}
-			if(status NEQ ""){
-				db.sql&=" and feature_data_approved = #db.param(status)# ";
-			}
-			if(arraylen(arrSearchSQL)){
-				db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
-			}
-			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-				db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
-			}
-			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-				db.sql&=" and feature_data_archived =#db.param(0)# ";
-			}
-			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
-			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
-			feature_schema.feature_schema_type=#db.param('1')# ";
-			qCount=db.execute("qCount");
-
-			if(mainSchemaStruct.feature_schema_user_child_limit NEQ 0){
-				db.sql="SELECT count(feature_schema.feature_schema_id) count
-				FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
-				#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
-				// for(i=1;i LTE arraylen(arrVal);i++){
-				// 	if(structkeyexists(searchFieldEnabledStruct, i)){
-				// 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
-				// 		s#i#.feature_data_id = feature_data.feature_data_id and 
-				// 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
-				// 		s#i#.feature_schema_id = feature_schema.feature_schema_id and 
-				// 		s#i#.feature_id = #db.param(form.feature_id)# and 
-				// 		s#i#.feature_data_deleted = #db.param(0)# ";
-				// 	}
-				// }
-				db.sql&="WHERE  
-				feature_data.site_id=#db.param(request.zos.globals.id)# and 
-				feature_data_deleted = #db.param(0)# and 
-				feature_schema_deleted = #db.param(0)# and 
-				feature_data.feature_id = #db.param(form.feature_id)# and 
-				feature_data_master_set_id = #db.param(0)# and 
-				feature_schema.feature_schema_id=feature_data.feature_schema_id ";
-				if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-					db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
-				}
-				if(form.feature_data_parent_id NEQ 0){
-					db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
-				} 
-				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-					db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
-				}
-				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-					db.sql&=" and feature_data_archived =#db.param(0)# ";
-				}
-				db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
-				feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
-				feature_schema.feature_schema_type=#db.param('1')# ";
-				qCountLimit=db.execute("qCountLimit"); 
-			}
-		}else{ 
-			if(arraylen(arrSearchSQL) GT 0 or mainSchemaStruct.feature_schema_enable_cache EQ 0 or mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
-				db.sql="SELECT count(feature_schema.feature_schema_id) count
-				FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
-				#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
-				// for(i=1;i LTE arraylen(arrVal);i++){
-				// 	if(structkeyexists(searchFieldEnabledStruct, i)){
-				// 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
-				// 		s#i#.feature_data_id = feature_data.feature_data_id and 
-				// 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
-				// 		s#i#.feature_schema_id = feature_schema.feature_schema_id and 
-				// 		s#i#.site_id = feature_schema.site_id and 
-				// 		s#i#.feature_id = #db.param(form.feature_id)# and 
-				// 		s#i#.feature_data_deleted = #db.param(0)# ";
-				// 	}
-				// }
-				db.sql&="WHERE  
-				feature_data.site_id=#db.param(request.zos.globals.id)# and 
-				feature_data_deleted = #db.param(0)# and 
-				feature_schema_deleted = #db.param(0)# and 
-				feature_data.feature_id = #db.param(form.feature_id)# and 
-				feature_data_master_set_id = #db.param(0)# and  
-				feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
-				if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
-					db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
-				}
-				if(form.feature_data_parent_id NEQ 0){
-					db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
-				}
-				if(status NEQ ""){
-					db.sql&=" and feature_data_approved = #db.param(status)# ";
-				}
-				// if(arraylen(arrSearchSQL)){
-				// 	db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
-				// }
-				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
-					db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
-				}
-				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
-					db.sql&=" and feature_data_archived =#db.param(0)# ";
-				}
-				db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
-				feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
-				feature_schema.feature_schema_type=#db.param('1')# ";
-				qCount=db.execute("qCount");  
-			}else{
-				// get the things
-				qCount={recordcount:1, count: 0 }; 
-			}
-		} 
 
 
 		db.sql="SELECT feature_schema.*,  feature_data.*";
@@ -3401,11 +3192,173 @@ Define this function in another CFC to override the default email format
 		// }else{
 			db.sql&=" ORDER BY feature_data_sort asc ";
 		// }
-		if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
-			db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
-		}
+		// if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
+		// 	db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
+		// }
 		qS=db.execute("qS", "", 10000, "query", false);  
 
+		if(mainSchemaStruct.feature_schema_limit GT 0){
+			db.sql="SELECT count(feature_schema.feature_schema_id) count
+			FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
+			#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  "; 
+			db.sql&="WHERE   
+			feature_data.site_id=#db.param(request.zos.globals.id)# and 
+			feature_data_deleted = #db.param(0)# and 
+			feature_schema_deleted = #db.param(0)# and 
+			feature_data.feature_id = #db.param(form.feature_id)# and 
+			feature_data_master_set_id = #db.param(0)# and 
+			feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
+			if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
+				db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
+			}
+			if(form.feature_data_parent_id NEQ 0){
+				db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
+			} 
+			if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+				db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
+			}
+			if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
+				db.sql&=" and feature_data_archived =#db.param(0)# ";
+			}
+			db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
+			feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
+			feature_schema.feature_schema_type=#db.param('1')# ";
+			qCountAllLimit=db.execute("qCountAllLimit");
+		}
+
+		if(methodBackup EQ "userManageSchema"){
+			// db.sql="SELECT count(feature_schema.feature_schema_id) count
+			// FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
+			// #db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
+			// // for(i=1;i LTE arraylen(arrVal);i++){
+			// // 	if(structkeyexists(searchFieldEnabledStruct, i)){
+			// // 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
+			// // 		s#i#.feature_data_id = feature_data.feature_data_id and 
+			// // 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
+			// // 		s#i#.feature_schema_id = feature_schema.feature_schema_id and  
+			// // 		s#i#.feature_id = #db.param(form.feature_id)# and 
+			// // 		s#i#.feature_data_deleted = #db.param(0)# ";
+			// // 	}
+			// // }
+			// db.sql&="WHERE  
+			// feature_data.site_id=#db.param(request.zos.globals.id)# and 
+			// feature_data_deleted = #db.param(0)# and 
+			// feature_schema_deleted = #db.param(0)# and 
+			// feature_data.feature_id = #db.param(form.feature_id)# and 
+			// feature_data_master_set_id = #db.param(0)# and 
+			// feature_schema.feature_schema_id=feature_data.feature_schema_id ";
+			// if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
+			// 	db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
+			// }
+			// if(form.feature_data_parent_id NEQ 0){
+			// 	db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
+			// }
+			// if(status NEQ ""){
+			// 	db.sql&=" and feature_data_approved = #db.param(status)# ";
+			// }
+			// // if(arraylen(arrSearchSQL)){
+			// // 	db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
+			// // }
+			// if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+			// 	db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
+			// }
+			// if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
+			// 	db.sql&=" and feature_data_archived =#db.param(0)# ";
+			// }
+			// db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
+			// feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
+			// feature_schema.feature_schema_type=#db.param('1')# ";
+			// qCount=db.execute("qCount"); 
+
+			if(mainSchemaStruct.feature_schema_user_child_limit NEQ 0){
+				throw("feature_schema_user_child_limit not implemented, needs to use the fieldType's searchFilter function now");
+				db.sql="SELECT count(feature_schema.feature_schema_id) count
+				FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
+				#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
+				// for(i=1;i LTE arraylen(arrVal);i++){
+				// 	if(structkeyexists(searchFieldEnabledStruct, i)){
+				// 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
+				// 		s#i#.feature_data_id = feature_data.feature_data_id and 
+				// 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
+				// 		s#i#.feature_schema_id = feature_schema.feature_schema_id and 
+				// 		s#i#.feature_id = #db.param(form.feature_id)# and 
+				// 		s#i#.feature_data_deleted = #db.param(0)# ";
+				// 	}
+				// }
+				db.sql&="WHERE  
+				feature_data.site_id=#db.param(request.zos.globals.id)# and 
+				feature_data_deleted = #db.param(0)# and 
+				feature_schema_deleted = #db.param(0)# and 
+				feature_data.feature_id = #db.param(form.feature_id)# and 
+				feature_data_master_set_id = #db.param(0)# and 
+				feature_schema.feature_schema_id=feature_data.feature_schema_id ";
+				if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
+					db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
+				}
+				if(form.feature_data_parent_id NEQ 0){
+					db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
+				} 
+				if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+					db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
+				}
+				if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
+					db.sql&=" and feature_data_archived =#db.param(0)# ";
+				}
+				db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
+				feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
+				feature_schema.feature_schema_type=#db.param('1')# ";
+				qCountLimit=db.execute("qCountLimit"); 
+			}
+		}else{ 
+			// if(structkeyexists(form, "searchOn") or mainSchemaStruct.feature_schema_enable_cache EQ 0 or mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
+			// 	db.sql="SELECT count(feature_schema.feature_schema_id) count
+			// 	FROM (#db.table("feature_schema", request.zos.zcoreDatasource)# feature_schema, 
+			// 	#db.table("feature_data", request.zos.zcoreDatasource)# feature_data)  ";
+			// 	// for(i=1;i LTE arraylen(arrVal);i++){
+			// 	// 	if(structkeyexists(searchFieldEnabledStruct, i)){
+			// 	// 		db.sql&="LEFT JOIN #db.table("feature_data", request.zos.zcoreDatasource)# s#i# on 
+			// 	// 		s#i#.feature_data_id = feature_data.feature_data_id and 
+			// 	// 		s#i#.feature_field_id = #db.param(arrVal[i])# and 
+			// 	// 		s#i#.feature_schema_id = feature_schema.feature_schema_id and 
+			// 	// 		s#i#.site_id = feature_schema.site_id and 
+			// 	// 		s#i#.feature_id = #db.param(form.feature_id)# and 
+			// 	// 		s#i#.feature_data_deleted = #db.param(0)# ";
+			// 	// 	}
+			// 	// }
+			// 	db.sql&="WHERE  
+			// 	feature_data.site_id=#db.param(request.zos.globals.id)# and 
+			// 	feature_data_deleted = #db.param(0)# and 
+			// 	feature_schema_deleted = #db.param(0)# and 
+			// 	feature_data.feature_id = #db.param(form.feature_id)# and 
+			// 	feature_data_master_set_id = #db.param(0)# and  
+			// 	feature_schema.feature_schema_id=feature_data.feature_schema_id "; 
+			// 	if(methodBackup EQ "userManageSchema" and request.isUserPrimarySchema){
+			// 		db.sql&=" and feature_data_user = #db.param(currentUserIdValue)# ";
+			// 	}
+			// 	if(form.feature_data_parent_id NEQ 0){
+			// 		db.sql&=" and feature_data.feature_data_parent_id = #db.param(form.feature_data_parent_id)#";
+			// 	}
+			// 	if(status NEQ ""){
+			// 		db.sql&=" and feature_data_approved = #db.param(status)# ";
+			// 	}
+			// 	// if(arraylen(arrSearchSQL)){
+			// 	// 	db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
+			// 	// }
+			// 	if(methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML"){
+			// 		db.sql&=" and feature_data.feature_data_id = #db.param(form.feature_data_id)# ";
+			// 	}
+			// 	if(mainSchemaStruct.feature_schema_enable_archiving EQ 1 and not showArchived){
+			// 		db.sql&=" and feature_data_archived =#db.param(0)# ";
+			// 	}
+			// 	db.sql&=" and feature_schema.feature_id =#db.param(form.feature_id)# and 
+			// 	feature_schema.feature_schema_id = #db.param(form.feature_schema_id)# and 
+			// 	feature_schema.feature_schema_type=#db.param('1')# ";
+			// 	qCount=db.execute("qCount");  
+			// }else{
+			// 	// get the things
+			// 	qCount={recordcount:1, count: 0 }; 
+			// }
+		} 
 
 		if(mainSchemaStruct.feature_schema_limit GT 0){
 			db.sql="SELECT feature_schema.*,  feature_data.* 
@@ -3418,9 +3371,9 @@ Define this function in another CFC to override the default email format
 			feature_data_deleted = #db.param(0)# and 
 			feature_data.feature_id = #db.param(form.feature_id)# and  
 			feature_schema.feature_schema_id=feature_data.feature_schema_id ";
-			if(arraylen(arrSearchSQL)){
-				db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
-			}
+			// if(arraylen(arrSearchSQL)){
+			// 	db.sql&=(" and "&arrayToList(arrSearchSQL, ' and '));
+			// }
 			if(status NEQ ""){
 				db.sql&=" and feature_data_approved = #db.param(status)# ";
 			}
@@ -3452,7 +3405,6 @@ Define this function in another CFC to override the default email format
 		if(parentIndex NEQ 0){
 			rs=application.zcore.featureCom.prepareRecursiveData(arrVal[parentIndex], form.feature_schema_id, arrFieldStruct[parentIndex], false);
 		}
-		
 		rowStruct={};
 		rowIndexFix=1;
 		if(structkeyexists(arguments.struct, 'recurse') and qS.recordcount NEQ 0){
@@ -3510,11 +3462,45 @@ Define this function in another CFC to override the default email format
 				echo(arraytolist(arrSearch, ""));
 			}
 		}
-		if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
-			arrId=[-1];
-			loop query="#qS#"{
-				arrayAppend(arrId, qS.feature_data_merge_data_id);
+		arrId=[];
+		matchCount=0;
+		matchStruct={};
+		visibleCount=0;
+		offset=(form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit;
+		for(row in qS){
+			rsData=application.zcore.featureCom.parseFieldData(row);
+			if(structkeyexists(form, "searchOn")){
+				matched=true;
+				for(ts in arrSearchFilter){
+					matched=ts.typeCFC.searchFilter(ts.typeStruct, rsData[ts.fieldName], ts.searchValue);
+					if(not matched){
+						break;
+					}
+				}
+				if(!matched){
+					continue;
+				}
 			}
+			if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
+				matchCount++;
+				if(matchCount GT offset){
+					visibleCount++;
+					if(visibleCount GT mainSchemaStruct.feature_schema_admin_paging_limit){
+						continue;
+					}
+					matchStruct[row.feature_data_id]=rsData;
+					if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
+						arrayAppend(arrId, row.feature_data_merge_data_id);
+					}
+				}
+			}else{
+				matchStruct[row.feature_data_id]=rsData;
+				if(mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
+					arrayAppend(arrId, row.feature_data_merge_data_id);
+				}
+			}
+		}
+		if(arrayLen(arrId) GT 0){
 			feature_data_id_list=arrayToList(arrId, ", ");
 			db.sql="SELECT * FROM 
 			#db.table("feature_data", request.zos.zcoreDatasource)# 
@@ -3557,6 +3543,9 @@ Define this function in another CFC to override the default email format
 					<tbody>');
 					currentRowIndex=0;
 					for(row in qS){
+						if(not structkeyexists(matchStruct, row.feature_data_id)){
+							continue;
+						}
 						currentRowIndex++;
 						trHTML="";
 						if(sortEnabled){
@@ -3564,12 +3553,14 @@ Define this function in another CFC to override the default email format
 								trHTML=queueSortCom.getRowHTML(row.feature_data_id);
 							}
 						}
-						if(not structkeyexists(childStruct, row.feature_data_merge_data_id)){
-							application.zcore.featureCom.deleteSchemaSetRecursively(row.feature_data_id, row.site_id, row);
-							continue; // ignoring records with no proper child record.
+						if(row.feature_schema_enable_merge_interface EQ 1){
+							if(row.feature_data_merge_data_id EQ 0 or not structkeyexists(childStruct, row.feature_data_merge_data_id)){
+								application.zcore.featureCom.deleteSchemaSetRecursively(row.feature_data_id, row.site_id, row);
+								continue; // ignoring records with no proper child record.
+							}
+							childRow=childStruct[row.feature_data_merge_data_id];
 						}
-						childRow=childStruct[row.feature_data_merge_data_id];
-						rsData=application.zcore.featureCom.parseFieldData(row);
+						rsData=matchStruct[row.feature_data_id];
 
 
 
@@ -3798,10 +3789,10 @@ Define this function in another CFC to override the default email format
 			if(form.feature_schema_id NEQ 0){
 				if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
 					searchStruct = StructNew();
-					searchStruct.count = qCount.count;
+					searchStruct.count = matchCount;
 					searchStruct.index = form.zIndex;
 					searchStruct.showString = "Results ";
-					searchStruct.url = application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_schema_id=#form.feature_schema_id#");
+					searchStruct.url = application.zcore.functions.zURLAppend(arguments.struct.listURL, "feature_id=#form.feature_id#&feature_schema_id=#form.feature_schema_id#");
 					searchStruct.indexName = "zIndex";
 					searchStruct.buttons = 5;
 					searchStruct.perpage = mainSchemaStruct.feature_schema_admin_paging_limit;

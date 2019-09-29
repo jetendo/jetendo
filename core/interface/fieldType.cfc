@@ -40,6 +40,12 @@
 	<cfargument name="searchStruct" type="struct" required="yes">
 </cffunction>
 
+<cffunction name="searchFilter" localmode="modern" access="public">
+	<cfargument name="typeStruct" type="struct" required="yes">
+	<cfargument name="fieldValue" type="string" required="yes"> 
+	<cfargument name="searchValue" type="string" required="yes">
+</cffunction>
+
 
 <cffunction name="getSearchSQLStruct" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">

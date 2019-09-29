@@ -119,6 +119,18 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="searchFilter" localmode="modern" access="public">
+	<cfargument name="typeStruct" type="struct" required="yes">
+	<cfargument name="fieldValue" type="string" required="yes"> 
+	<cfargument name="searchValue" type="string" required="yes">
+	<cfscript>
+	if(arguments.searchValue NEQ "" and arguments.fieldValue EQ arguments.searchValue){
+		return false;
+	}
+	return true;
+	</cfscript>
+</cffunction>
+
 <cffunction name="onBeforeImport" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
 	<cfargument name="typeStruct" type="struct" required="yes">

@@ -1521,6 +1521,10 @@ displaySchemaCom.ajaxInsert();
 		application.zcore.status.setStatus(request.zsid, "Feature is required", form, true);
 		errors=true;
 	}
+	if(application.zcore.functions.zso(form, "feature_schema_admin_paging_limit", true, 0) NEQ 0 and form.feature_schema_enable_sorting EQ 1){
+		application.zcore.status.setStatus(request.zsid, "Admin page limit must be zero if sorting is enabled.", form, true);
+		errors=true;
+	}
 	if(errors){
 		if(form.method EQ 'insert'){
 			application.zcore.status.setStatus(request.zsid, false, form,true);

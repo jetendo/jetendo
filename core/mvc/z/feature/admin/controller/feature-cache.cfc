@@ -353,7 +353,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 			if(arguments.row.feature_data_value EQ ""){
 				tempValue="";
 			}else{
-				tempValue='<div class="zEditorHTML">'&arguments.row.feature_data_value&'</div>';;
+				tempValue='<div class="zEditorHTML">'&arguments.row.feature_data_value&'</div>';
 			}
 		}else if(typeId EQ 3 or typeId EQ 9){
 			if(arguments.row.feature_data_value NEQ "" and arguments.row.feature_data_value NEQ "0"){
