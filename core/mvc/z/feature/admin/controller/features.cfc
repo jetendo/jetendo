@@ -1938,7 +1938,11 @@
 	if(application.zcore.functions.zso(form, 'feature_data_image_library_id') NEQ ""){
         application.zcore.imageLibraryCom.activateLibraryId(application.zcore.functions.zso(form, 'feature_data_image_library_id'));
 	}
-	application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id);
+	if(qD.recordcount NEQ 0){
+		application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id, qD.feature_data_override_url);
+	}else{
+		application.zcore.routing.updateFeatureSchemaSetUniqueURL(form.feature_data_id, "");
+	}
 
 
 	featureCacheCom=createobject("component", "zcorerootmapping.mvc.z.feature.admin.controller.feature-cache");
@@ -5008,6 +5012,7 @@ Define this function in another CFC to override the default email format
 			r1=queueSortCom.init(queueSortStruct);
 			queueSortCom.sortAll();
 		}
+
 		if((request.zos.enableSiteOptionGroupCache and qCheck.feature_schema_enable_cache EQ 1) or (qCheck.feature_schema_enable_versioning EQ 1 and qCheck.feature_data_master_set_id NEQ 0)){
 			application.zcore.featureCom.deleteSchemaSetIdCache(qCheck.feature_id, request.zos.globals.id, form.feature_data_id);
 		}

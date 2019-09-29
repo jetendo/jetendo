@@ -2471,6 +2471,9 @@ if(not rs.success){
 	}else{
 		row=arguments.rowData;
 	}
+	if(row.site_x_option_group_set_override_url NEQ ""){
+		structdelete(application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct, trim(row.site_x_option_group_set_override_url));
+	}
 	//writeLogEntry("deleteGroupSetRecursively set id:"&arguments.site_x_option_group_set_id);
 	db.sql="SELECT * FROM #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# 
 	WHERE  site_x_option_group_set_parent_id=#db.param(arguments.site_x_option_group_set_id)# and  

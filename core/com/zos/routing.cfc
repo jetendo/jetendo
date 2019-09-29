@@ -1377,28 +1377,9 @@
 	</cfscript>
 </cffunction>
 
-
-<cffunction name="deleteSiteOptionGroupSetUniqueURL" localmode="modern" output="yes" returntype="any">
-	<cfargument name="site_x_option_group_set_id" type="string" required="yes">
-	<cfscript>
-	var db=request.zos.queryObject;
-	db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoredatasource)# site_x_option_group_set
-	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	site_x_option_group_set_deleted = #db.param(0)# and
-	site_x_option_group_set_master_set_id = #db.param(0)# and 
-	site_x_option_group_set_id = #db.param(arguments.site_x_option_group_set_id)# ";
-	qS=db.execute("qS");
-	if(qS.recordcount NEQ 0){
-		if(qS.site_x_option_group_set_override_url NEQ ""){
-			structdelete(application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct, trim(qS.site_x_option_group_set_override_url));
-		}
-	}
-	return true;
-	</cfscript>
-</cffunction>
-
 <cffunction name="updateSiteOptionGroupSetUniqueURL" localmode="modern" output="yes" returntype="any">
 	<cfargument name="site_x_option_group_set_id" type="string" required="yes">
+	<cfargument name="previousURL" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
 	db.sql="select * from #db.table("site_x_option_group_set", request.zos.zcoredatasource)# site_x_option_group_set
@@ -1408,32 +1389,17 @@
 	site_x_option_group_set_id = #db.param(arguments.site_x_option_group_set_id)# and 
 	site_x_option_group_set.site_x_option_group_set_approved=#db.param(1)# ";
 	qS=db.execute("qS");
+	uniqueURLStruct=application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct;
+	if(structkeyexists(uniqueURLStruct, arguments.previousURL) and structkeyexists(uniqueURLStruct[arguments.previousURL].urlStruct, "site_x_option_group_set_id")){
+		structdelete(uniqueURLStruct, arguments.previousURL);
+	}
 	if(qS.recordcount NEQ 0){
 		t9=structnew();
 		t9.scriptName="/z/misc/display-site-option-group/index";
 		t9.urlStruct=structnew();
 		t9.urlStruct[request.zos.urlRoutingParameter]="/z/misc/display-site-option-group/index";
 		t9.urlStruct.site_x_option_group_set_id=qS.site_x_option_group_set_id;
-		application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct[trim(qS.site_x_option_group_set_override_url)]=t9;
-	}
-	return true;
-	</cfscript>
-</cffunction>
-
-<cffunction name="deleteFeatureSchemaSetUniqueURL" localmode="modern" output="yes" returntype="any">
-	<cfargument name="feature_data_id" type="string" required="yes">
-	<cfscript>
-	var db=request.zos.queryObject;
-	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	WHERE site_id = #db.param(request.zos.globals.id)# and 
-	feature_data_deleted = #db.param(0)# and
-	feature_data_master_set_id = #db.param(0)# and 
-	feature_data_id = #db.param(arguments.feature_data_id)# ";
-	qS=db.execute("qS");
-	if(qS.recordcount NEQ 0){
-		if(qS.feature_data_override_url NEQ ""){
-			structdelete(application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct, trim(qS.feature_data_override_url));
-		}
+		uniqueURLStruct[trim(qS.site_x_option_group_set_override_url)]=t9;
 	}
 	return true;
 	</cfscript>
@@ -1441,6 +1407,7 @@
 
 <cffunction name="updateFeatureSchemaSetUniqueURL" localmode="modern" output="yes" returntype="any">
 	<cfargument name="feature_data_id" type="string" required="yes">
+	<cfargument name="previousURL" type="string" required="yes">
 	<cfscript>
 	var db=request.zos.queryObject;
 	db.sql="select * from #db.table("feature_data", request.zos.zcoreDatasource)# feature_data
@@ -1451,13 +1418,17 @@
 	feature_data_override_url<>#db.param("")# and 
 	feature_data.feature_data_approved=#db.param(1)# ";
 	qS=db.execute("qS");
+	uniqueURLStruct=application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct;
+	if(structkeyexists(uniqueURLStruct, arguments.previousURL) and structkeyexists(uniqueURLStruct[arguments.previousURL].urlStruct, "feature_data_id")){
+		structdelete(uniqueURLStruct, arguments.previousURL);
+	}
 	if(qS.recordcount NEQ 0){
 		t9=structnew();
 		t9.scriptName="/z/feature/feature-display/index";
 		t9.urlStruct=structnew();
 		t9.urlStruct[request.zos.urlRoutingParameter]="/z/feature/feature-display/index";
 		t9.urlStruct.feature_data_id=qS.feature_data_id;
-		application.sitestruct[request.zos.globals.id].urlRewriteStruct.uniqueURLStruct[trim(qS.feature_data_override_url)]=t9;
+		uniqueURLStruct[trim(qS.feature_data_override_url)]=t9;
 	}
 	return true;
 	</cfscript>

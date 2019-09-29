@@ -70,7 +70,7 @@
 	if(structcount(setStruct) EQ 0){
 		application.zcore.functions.z404("form.feature_data_id, #form.feature_data_id#, doesn't exist.");
 	} 
-	schemaStruct=getSchemaById(setStruct.feature_id, setStruct.__schemaId); 
+	schemaStruct=application.zcore.featureCom.getSchemaById(setStruct.feature_id, setStruct.feature_schema_id); 
 	if(schemaStruct.feature_schema_enable_unique_url NEQ 1){
 		application.zcore.functions.z404("form.feature_data_id, #form.feature_data_id#, is not a landing page.");
 	}

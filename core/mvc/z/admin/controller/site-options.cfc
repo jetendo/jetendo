@@ -2472,7 +2472,11 @@
 	site_x_option_group_deleted = #db.param(0)# ";
 	q=db.execute("q");
 	*/
-	application.zcore.routing.updateSiteOptionGroupSetUniqueURL(form.site_x_option_group_set_id);
+	if(qD.recordcount NEQ 0){
+		application.zcore.routing.updateSiteOptionGroupSetUniqueURL(form.site_x_option_group_set_id, qD.site_x_option_group_set_override_url);
+	}else{
+		application.zcore.routing.updateSiteOptionGroupSetUniqueURL(form.site_x_option_group_set_id, "");
+	}
 
 
 	if(qCheck.site_option_group_parent_field NEQ ""){
