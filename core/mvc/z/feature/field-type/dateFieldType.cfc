@@ -184,8 +184,25 @@
 	<cfargument name="fieldValue" type="string" required="yes"> 
 	<cfargument name="searchValue" type="string" required="yes">
 	<cfscript>
-		throw("incomplete");
-	if(arguments.searchValue NEQ "" and arguments.fieldValue DOES NOT CONTAIN arguments.searchValue){
+	if(arguments.searchValue EQ ""){
+		return true;
+	}
+	if(not isDate(arguments.fieldValue) or not isDate(arguments.searchValue)){
+		return false;
+	}
+	fieldDateTime=dateformat(arguments.fieldValue, "yyyymmdd");
+	searchDateTime=dateformat(arguments.searchValue, "yyyymmdd");
+	if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 1){
+		// start date
+		if(fieldDateTime < searchDateTime){
+			return false;
+		}
+	}else if(structkeyexists(arguments.typeStruct, 'datetime_range_search_type') and arguments.typeStruct.datetime_range_search_type EQ 2){
+		// end date
+		if(fieldDateTime > searchDateTime){
+			return false;
+		}
+	}else if(fieldDateTime NEQ searchDateTime){
 		return false;
 	}
 	return true;

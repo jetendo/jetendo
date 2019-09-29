@@ -145,9 +145,38 @@
 	<cfargument name="fieldValue" type="string" required="yes"> 
 	<cfargument name="searchValue" type="string" required="yes">
 	<cfscript>
-		throw("incomplete");
-	if(arguments.searchValue NEQ "" and arguments.fieldValue DOES NOT CONTAIN arguments.searchValue){
-		return false;
+	multipleSelection=arguments.typeStruct.selectmenu_multipleselection?:0;
+	if(arguments.searchValue EQ ""){
+		return true;
+	}else if(arguments.searchValue CONTAINS ","){ 
+		if(arguments.typeStruct.selectmenu_delimiter EQ "|"){
+			arrTemp=listToArray(arguments.searchValue, ',');
+		}else{
+			arrTemp=listToArray(arguments.searchValue, '|');
+		}
+		if(multipleSelection EQ 1){
+			for(var i=1;i LTE arrayLen(arrTemp);i++){
+				if(trim(arrTemp[i]) NEQ "" and ","&arguments.fieldValue&"," DOES NOT CONTAIN ","&trim(arrTemp[i])&","){
+					return false;
+				}
+			} 
+		}else{
+			for(var i=1;i LTE arrayLen(arrTemp);i++){
+				if(trim(arrTemp[i]) NEQ "" and arguments.fieldValue NEQ trim(arrTemp[i])){
+					return false;
+				}
+			} 
+		}
+	}else{
+		if(multipleSelection EQ 1){
+			if(trim(arguments.searchValue) NEQ "" and ","&arguments.fieldValue&"," DOES NOT CONTAIN ","&trim(arguments.searchValue)&","){
+				return false;
+			}
+		}else{
+			if(trim(arguments.searchValue) NEQ "" and arguments.fieldValue NEQ trim(arguments.searchValue)){
+				return false;
+			}
+		}
 	}
 	return true;
 	</cfscript>

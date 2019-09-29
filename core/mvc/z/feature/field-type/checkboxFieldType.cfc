@@ -178,9 +178,21 @@
 	<cfargument name="fieldValue" type="string" required="yes"> 
 	<cfargument name="searchValue" type="string" required="yes">
 	<cfscript>
-		throw("incomplete");
-	if(arguments.searchValue NEQ "" and arguments.fieldValue DOES NOT CONTAIN arguments.searchValue){
-		return false;
+	if(structkeyexists(arguments.typeStruct, 'checkbox_labels') and arguments.typeStruct.checkbox_labels NEQ ""){
+		if(arguments.searchValue NEQ ""){
+			arrValue=listToArray(arguments.searchValue, ","); 
+			arrSQL=[];
+			for(v in arrValue){
+				if(trim(v) NEQ "" and ","&arguments.fieldValue&"," DOES NOT CONTAIN ","&trim(v)&","){
+					return true;
+				}
+			}
+			return false;
+		}
+	}else{
+		if(arguments.searchValue EQ 1 and arguments.fieldValue NEQ arguments.searchValue){
+			return false;
+		}
 	}
 	return true;
 	</cfscript>
