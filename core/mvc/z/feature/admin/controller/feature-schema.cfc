@@ -104,9 +104,9 @@
 		//echo(chr(10)&indent&"<h2>Schema: "&groupStruct.feature_schema_display_name&'</h2>'&chr(10));
 		echo(indent&'<cfscript>#chr(10)#');
 		if(not arguments.disableLoop and not arguments.debugMode){
-			if(not arguments.disableDebugOutput){
-				echo(indent&'// comment out when debugging#chr(10)#');
-			}
+			// if(not arguments.disableDebugOutput){
+			// 	echo(indent&'// comment out when debugging#chr(10)#');
+			// }
 			if(groupStruct.feature_schema_parent_id NEQ 0){
 				parentSchemaStruct=fsd.featureSchemaLookup[arguments.originalParentSchemaId];
 				parentSchemaName=application.zcore.functions.zURLEncode(replace(application.zcore.functions.zFirstLetterCaps(parentSchemaStruct.feature_schema_variable_name), " ", "", "all"), "");
@@ -119,42 +119,42 @@
 				echo(indent&'arr#groupName#=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "#groupStruct.feature_schema_variable_name#");'&chr(10));
 			} 
 		}
-		if(not arguments.disableDebugOutput and structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
-			jsonStruct={};
-			for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
-				typeStruct=fsd.fieldLookup[n];
+		// if(not arguments.disableDebugOutput and structkeyexists(fsd.featureSchemaFieldLookup, groupStruct.feature_schema_id)){
+		// 	jsonStruct={};
+		// 	for(n in fsd.featureSchemaFieldLookup[groupStruct.feature_schema_id]){
+		// 		typeStruct=fsd.fieldLookup[n];
 
-				typeCFC=application.zcore.featureCom.getTypeCFC(typeStruct.feature_field_type_id);
-				debugValue=typeCFC.getDebugValue(typeStruct);
-				jsonStruct[typeStruct.feature_field_variable_name]=debugValue; 
-			} 
-			if(groupStruct.feature_schema_enable_unique_url EQ 1){
-				jsonStruct.__url='##';
-			}
-			if(groupStruct.feature_schema_enable_approval EQ 1){
-				jsonStruct.__approved=1;
-			}
-			if(groupStruct.feature_schema_enable_image_library EQ 1){
-				jsonStruct.__image_library_id=0;
-			}
-			if(arguments.disableLoop){
-				j=replace(serializeJson(jsonStruct), '##', '####', 'all');
-			}else{
-				j=replace(serializeJson([jsonStruct]), '##', '####', 'all');
-			}
-			j=replace(replace(replace(j, '{', '{'&chr(10)&indent&chr(9)), '}', chr(10)&indent&'}'), '","', '",#chr(10)&indent&chr(9)#"', 'all');
-			if(arguments.disableLoop){
-				if(arguments.debugMode){
-					echo(indent&chr(9)&'#chr(10)&indent##groupNameInstance#='&j&';'&chr(10));
-				}else{
-					echo(indent&chr(9)&'#chr(10)&indent#/* #groupNameInstance#='&j&'; */'&chr(10));
-				}
-			}else if(arguments.debugMode){
-				echo(indent&chr(9)&'arr#groupName#='&j&';'&chr(10));
-			}else{
-				echo(indent&'// uncomment to debug group without live data#chr(10)&indent#/* arr#groupName#='&j&'; */'&chr(10));
-			}
-		}
+		// 		typeCFC=application.zcore.featureCom.getTypeCFC(typeStruct.feature_field_type_id);
+		// 		debugValue=typeCFC.getDebugValue(typeStruct);
+		// 		jsonStruct[typeStruct.feature_field_variable_name]=debugValue; 
+		// 	} 
+		// 	if(groupStruct.feature_schema_enable_unique_url EQ 1){
+		// 		jsonStruct.__url='##';
+		// 	}
+		// 	if(groupStruct.feature_schema_enable_approval EQ 1){
+		// 		jsonStruct.__approved=1;
+		// 	}
+		// 	if(groupStruct.feature_schema_enable_image_library EQ 1){
+		// 		jsonStruct.__image_library_id=0;
+		// 	}
+		// 	if(arguments.disableLoop){
+		// 		j=replace(serializeJson(jsonStruct), '##', '####', 'all');
+		// 	}else{
+		// 		j=replace(serializeJson([jsonStruct]), '##', '####', 'all');
+		// 	}
+		// 	j=replace(replace(replace(j, '{', '{'&chr(10)&indent&chr(9)), '}', chr(10)&indent&'}'), '","', '",#chr(10)&indent&chr(9)#"', 'all');
+		// 	if(arguments.disableLoop){
+		// 		if(arguments.debugMode){
+		// 			echo(indent&chr(9)&'#chr(10)&indent##groupNameInstance#='&j&';'&chr(10));
+		// 		}else{
+		// 			echo(indent&chr(9)&'#chr(10)&indent#/* #groupNameInstance#='&j&'; */'&chr(10));
+		// 		}
+		// 	}else if(arguments.debugMode){
+		// 		echo(indent&chr(9)&'arr#groupName#='&j&';'&chr(10));
+		// 	}else{
+		// 		echo(indent&'// uncomment to debug group without live data#chr(10)&indent#/* arr#groupName#='&j&'; */'&chr(10));
+		// 	}
+		// }
 		echo(indent&'</cfscript>#chr(10)#');
 		if(not arguments.disableLoop){
 			echo(indent&'<cfloop from="1" to="##arrayLen(arr#groupName#)##" index="i#ss.curIndex#">#chr(10)&indent&chr(9)#<cfscript>#groupNameInstance#=arr#groupName#[i#ss.curIndex#];</cfscript>#chr(10)#');
@@ -310,7 +310,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	echo('<h2>Source code generated below.</h2>
 	<p>Note: searchSchema() retrieves all the records.  If "Enable Memory Caching" is disabled for the group, it will perform a query to select all the data.  This can be very slow if you are working with hundreds or thousands of records and it may cause nested queries to run if the sub-groups also have "Enable Memory Caching" disabled.   Conversely, for small datasets, this feature is much faster then running a query.</p>
 	<p>If you want to disable "Enable Memory Caching", we have a feature that allows returning only the columns you need, such as when making a search filter loop.</p>
-	<p>Example: arr1=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "Schema Name",  request.zos.globals.id, {__groupId=0,__setId=0}, "Field Name,Field 2,etc");</p>
+	<p>Example: arr1=application.zcore.featureCom.getFeatureSchemaArray("#feature_variable_name#", "Schema Name",  request.zos.globals.id, {__schemaId=0,__setId=0}, "Field Name,Field 2,etc");</p>
 	<p>Then when you need the full records later in your code, you can grab them by id like this.</p>
 	<p>fullStruct=application.zcore.featureCom.getSchemaSetById("#feature_variable_name#", ["Schema Name"], dataStruct.__setId);</p>
 

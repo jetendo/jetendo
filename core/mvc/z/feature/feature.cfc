@@ -381,8 +381,8 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 	} 
 	if(structkeyexists(t9, "featureSchemaIdLookup") and structkeyexists(fsd.featureSchemaIdLookup, arguments.parentSchemaId&chr(9)&arguments.groupName)){
 		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentSchemaId&chr(9)&arguments.groupName];
-		var groupStruct=fsd.featureSchemaLookup[featureSchemaId];
-		if(request.zos.enableSiteOptionGroupCache and groupStruct.feature_schema_enable_cache EQ 1){
+		var schemaStruct=fsd.featureSchemaLookup[featureSchemaId];
+		if(request.zos.enableSiteOptionGroupCache and schemaStruct.feature_schema_enable_cache EQ 1){
 			arrSchema=getFeatureSchemaArray(arguments.featureVariableName, arguments.groupName);
 			if(arguments.orderBy NEQ ""){
 				tempStruct={};
@@ -424,7 +424,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 				if(structkeyexists(row, '__approved') and row.__approved NEQ 1){
 					continue;
 				}
-				match=variables.processSearchArray(arguments.arrSearch, row, groupStruct.feature_schema_id);
+				match=variables.processSearchArray(arguments.arrSearch, row, schemaStruct.feature_schema_id);
 				if(match){
 					rs.count++;
 					if(not stopStoring){
@@ -457,7 +457,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 		}else{
 			fieldStruct={};
 
-			sql=variables.processSearchArraySQL(arguments.arrSearch, fieldStruct, 1, groupStruct.feature_schema_id);
+			sql=variables.processSearchArraySQL(arguments.arrSearch, fieldStruct, 1, schemaStruct.feature_schema_id);
 			/*if(sql EQ ""){
 				return rs;
 			}*/
@@ -506,7 +506,7 @@ application.zcore.featureCom.searchSchema("groupName", ts, 0, false);
 
 					orderByStatement=" ORDER BY "&currentCFC.getSortSQL(2, arguments.orderByDirection);
 				}else{
-					throw("arguments.orderBy, ""#arguments.orderBy#"" is not a valid field in the feature_schema_id=#groupId# | ""#groupStruct.feature_schema_variable_name#""");
+					throw("arguments.orderBy, ""#arguments.orderBy#"" is not a valid field in the feature_schema_id=#groupId# | ""#schemaStruct.feature_schema_variable_name#""");
 				}
 			}else if(structkeyexists(request.zos, 'featureFieldSearchDateRangeSortEnabled')){
 				orderByStatement=" ORDER BY s1.feature_data_start_date ASC ";
@@ -649,19 +649,19 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	s1.feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_data_approved=#db.param(1)# ";
 	var t9=getTypeData(arguments.site_id);
-	groupStruct=fsd.featureSchemaLookup[groupId];
+	schemaStruct=fsd.featureSchemaLookup[groupId];
 	if(structkeyexists(ts, 'orderBy')){
 		if(ts.orderBy EQ "startDateASC"){
 			db.sql&="ORDER BY feature_data_start_date ASC";
 		}else if(ts.orderBy EQ "startDateDESC"){
 			db.sql&="ORDER BY feature_data_start_date DESC";
 		}else{
-			if(groupStruct.feature_schema_enable_sorting EQ 1){
+			if(schemaStruct.feature_schema_enable_sorting EQ 1){
 				db.sql&=" ORDER BY s1.feature_data_sort asc ";
 			} 
 		}
 	}else{ 
-		if(groupStruct.feature_schema_enable_sorting EQ 1){
+		if(schemaStruct.feature_schema_enable_sorting EQ 1){
 			db.sql&=" ORDER BY s1.feature_data_sort asc ";
 		}
 	}
@@ -740,13 +740,13 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	curSchemaId=arguments.feature_schema_id;
 	curParentId=arguments.feature_schema_parent_id;
 	curParentSetId=arguments.feature_data_parent_id;
-	groupStruct=getSchemaById(arguments.feature_id, curSchemaId); 
+	schemaStruct=getSchemaById(arguments.feature_id, curSchemaId); 
 	if(arguments.linkCurrentPage){
 		manageAction="manageSchema";
 		if(form.method EQ "userManageSchema"){
 			manageAction="userManageSchema";
 		}
-		arrayAppend(arrParent, '<a href="/z/feature/admin/features/#manageAction#?feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#curParentSetId#">Manage #groupStruct.feature_schema_variable_name#(s)</a> / ');
+		arrayAppend(arrParent, '<a href="/z/feature/admin/features/#manageAction#?feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#curParentSetId#">Manage #schemaStruct.feature_schema_variable_name#(s)</a> / ');
 	}
 
 	// instead of getting the parent schema, get the parent data and use the schema id from that 
@@ -771,16 +771,19 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 				if(form.method EQ "userManageSchema"){
 					manageAction="userManageSchema";
 				}
-				out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / ';
 				if(not arguments.linkCurrentPage and curSchemaID EQ arguments.feature_schema_id){
-					out&=application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)&' /';
+					out=application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)&' /';
 				}else{ 
-					out&='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#q12.d2#">#application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)#</a> /';
+					out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#q12.d2#">#application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)#</a> /';
 				}
 				arrayappend(arrParent, out);
 				curSchemaId=q12.feature_schema_id;
 				curParentId=q12.feature_schema_parent_id;
 				curParentSetId=q12.d3;
+				if(q12.feature_schema_parent_id EQ 0){
+					out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / ';
+					arrayappend(arrParent, out);
+				}
 			}
 			if(q12.recordcount EQ 0 or curParentSetId EQ 0){
 				break;
@@ -857,8 +860,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	}
 	db.sql&=" s1.feature_data_id = #db.param(arguments.setId)# 
 	";
-	groupStruct=fsd.featureSchemaData[arguments.feature_id].featureSchemaLookup[arguments.groupId];
-	if(groupStruct.feature_schema_enable_sorting EQ 1){
+	schemaStruct=fsd.featureSchemaData[arguments.feature_id].featureSchemaLookup[arguments.groupId];
+	if(schemaStruct.feature_schema_enable_sorting EQ 1){
 		db.sql&=" ORDER BY s1.feature_data_sort asc ";
 	}
 	qSet=db.execute("qSet"); 
@@ -925,7 +928,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfargument name="feature_id" type="numeric" required="yes">
 	<cfargument name="groupId" type="string" required="yes">
 	<cfargument name="site_id" type="numeric" required="yes">
-	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
+	<cfargument name="parentStruct" type="struct" required="no" default="#{__schemaId=0,__setId=0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
 	<cfscript>
 	db=request.zos.noVerifyQueryObject;
@@ -954,8 +957,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			disableDefaults=true;
 		} 
 	} 
-	groupStruct=fsd.featureSchemaLookup[arguments.groupId];
-	if(groupStruct.feature_schema_enable_sorting EQ 1){
+	schemaStruct=fsd.featureSchemaLookup[arguments.groupId];
+	if(schemaStruct.feature_schema_enable_sorting EQ 1){
 		db.sql&=" ORDER BY s1.feature_data_sort asc ";
 	}else{
 		db.sql&=" ORDER BY s1.feature_data_id asc ";
@@ -1002,7 +1005,6 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		request.zos["featureSchemaImportTable"]={};
 	}
 	var groupId=getSchemaIdWithNameArray(arguments.feature_id, arguments.arrSchemaName, request.zos.globals.id);
-	//var groupStruct=typeStruct.featureSchemaLookup[groupId]; 
 	form.feature_data_id=0;
 	form.feature_data_parent_id=arguments.feature_data_parent_id;
 	form.feature_id=arguments.feature_id;
@@ -1062,7 +1064,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__groupId=0,__setId=0}, row.feature_field_variable_name);
+		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__schemaId=0,__setId=0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
@@ -1094,12 +1096,12 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	feature_schema_deleted = #db.param(0)# 
 	ORDER BY feature_schema_parent_id";
 	qSchema=db.execute("qSchema");
-	groupStruct={};
+	schemaStruct={};
 	for(row in qSchema){
-		if(not structkeyexists(groupStruct, row.site_id)){
-			groupStruct[row.site_id]={};
+		if(not structkeyexists(schemaStruct, row.site_id)){
+			schemaStruct[row.site_id]={};
 		}
-		groupStruct[row.site_id][row.feature_schema_id]={
+		schemaStruct[row.site_id][row.feature_schema_id]={
 			parentId:row.feature_schema_parent_id,
 			name:row.feature_schema_variable_name
 		};
@@ -1138,7 +1140,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 					if(parentId EQ 0){
 						break;
 					}
-					tempStruct=groupStruct[row.site_id][parentId];
+					tempStruct=schemaStruct[row.site_id][parentId];
 					parentId=tempStruct.parentId;
 					arrayAppend(arrSchema, tempStruct.name);
 				}
@@ -1212,13 +1214,13 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		}
 		typeStruct=getTypeData(arguments.site_id);
 		t9=getSiteData(arguments.site_id);
-		var groupStruct=typeStruct.featureSchemaLookup[groupId]; 
+		var schemaStruct=typeStruct.featureSchemaLookup[groupId]; 
 
 		deleteSchemaSetIndex(qSet.feature_data, qSet.site_id);
 
-		if(request.zos.enableSiteOptionGroupCache and groupStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.setId)){
-			groupStruct=t9.featureSchemaSet[arguments.setId];
-			groupStruct.__approved=approved;
+		if(request.zos.enableSiteOptionGroupCache and schemaStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.setId)){
+			schemaStruct=t9.featureSchemaSet[arguments.setId];
+			schemaStruct.__approved=approved;
 			application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
 		}
 	}
@@ -1568,7 +1570,7 @@ application.zcore.featureCom.getImageSQL(ts);
 
 
 <!--- 
-var ts=application.zcore.functions.zGetEditableSiteSchemaSetById(groupStruct.__groupId, groupStruct.__setId);
+var ts=application.zcore.functions.zGetEditableSiteSchemaSetById(schemaStruct.__schemaId, schemaStruct.__setId);
 ts.name="New name";
 var rs=application.zcore.functions.zUpdateSiteSchemaSet(ts);
 if(not rs.success){
@@ -1703,18 +1705,18 @@ if(not rs.success){
 	//writeLogEntry("deleted set values for set id:"&arguments.feature_data_id);
 	t9=getSiteData(request.zos.globals.id);
 	fsd=application.zcore.featureData.featureSchemaData[row.feature_id];
-	groupStruct=fsd.featureSchemaLookup[row.feature_schema_id]; 
+	schemaStruct=fsd.featureSchemaLookup[row.feature_schema_id]; 
 	
 	// TODO: remove from arrays / memory cache
 
-	if(structkeyexists(groupStruct, 'feature_schema_change_cfc_path') and groupStruct.feature_schema_change_cfc_path NEQ ""){
-		path=groupStruct.feature_schema_change_cfc_path;
+	if(structkeyexists(schemaStruct, 'feature_schema_change_cfc_path') and schemaStruct.feature_schema_change_cfc_path NEQ ""){
+		path=schemaStruct.feature_schema_change_cfc_path;
 		if(left(path, 5) EQ "root."){
 			path=request.zRootCFCPath&removeChars(path, 1, 5);
 		}
 		changeCom=application.zcore.functions.zcreateObject("component", path); 
 		//writeLogEntry("changeCom callback for set id:"&arguments.feature_data_id);
-		changeCom[groupStruct.feature_schema_change_cfc_delete_method](arguments.feature_data_id);
+		changeCom[schemaStruct.feature_schema_change_cfc_delete_method](arguments.feature_data_id);
 	}
 	</cfscript>
 </cffunction>
@@ -2552,7 +2554,7 @@ used to do search for a list of values
 				lastMatch=false;
 				if(arrayLen(arrChild)){
 					//writedump(arrChild); 
-					optionId=typeStruct.fieldIdLookup[arrChild[1].__groupId&chr(9)&c.field];
+					optionId=typeStruct.fieldIdLookup[arrChild[1].__schemaId&chr(9)&c.field];
 					if(application.zcore.functions.zso(typeStruct.fieldLookup[optionId].typeStruct,'selectmenu_multipleselection', true, 0) EQ 1){
 						multipleValues=true;
 						if(typeStruct.fieldLookup[optionId].typeStruct.selectmenu_delimiter EQ "|"){
@@ -2896,15 +2898,15 @@ used to do search for a list of values
 
 		return;
 	}
-	groupStruct=fsd.featureSchemaLookup[dataStruct.__groupId]; 
-	if(groupStruct["feature_schema_search_index_cfc_path"] EQ ""){
+	schemaStruct=fsd.featureSchemaLookup[dataStruct.__schemaId]; 
+	if(schemaStruct["feature_schema_search_index_cfc_path"] EQ ""){
 		customSearchIndexEnabled=false;
 	}else{ 
 		customSearchIndexEnabled=true;
-		if(left(groupStruct["feature_schema_search_index_cfc_path"], 5) EQ "root."){  
-			local.cfcpath=replace(groupStruct["feature_schema_search_index_cfc_path"], 'root.',  application.zcore.functions.zGetRootCFCPath(application.zcore.functions.zvar('shortDomain', arguments.site_id)));
+		if(left(schemaStruct["feature_schema_search_index_cfc_path"], 5) EQ "root."){  
+			local.cfcpath=replace(schemaStruct["feature_schema_search_index_cfc_path"], 'root.',  application.zcore.functions.zGetRootCFCPath(application.zcore.functions.zvar('shortDomain', arguments.site_id)));
 		}else{
-			local.cfcpath=groupStruct["feature_schema_search_index_cfc_path"];
+			local.cfcpath=schemaStruct["feature_schema_search_index_cfc_path"];
 		}
 	}
 	searchCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.searchFunctions");
@@ -2936,11 +2938,11 @@ used to do search for a list of values
 
 	if(customSearchIndexEnabled){
 		local.tempCom=application.zcore.functions.zcreateobject("component", local.cfcpath); 
-		local.tempCom[groupStruct["feature_schema_search_index_cfc_method"]](dataStruct, ds);
+		local.tempCom[schemaStruct["feature_schema_search_index_cfc_method"]](dataStruct, ds);
 	}else{
 		arrFullText=[]; 
-		if(structkeyexists(fsd.featureSchemaFieldLookup, dataStruct.__groupId)){
-			for(i in fsd.featureSchemaFieldLookup[dataStruct.__groupId]){
+		if(structkeyexists(fsd.featureSchemaFieldLookup, dataStruct.__schemaId)){
+			for(i in fsd.featureSchemaFieldLookup[dataStruct.__schemaId]){
 				c=t9.fieldLookup[i];
 				if(c["feature_field_enable_search_index"] EQ 1){
 					arrayAppend(arrFullText, dataStruct[c.name]);
@@ -3013,14 +3015,13 @@ used to do search for a list of values
 
 	if(arraylen(arguments.arrSchemaName)){
 		var groupId=getSchemaIdWithNameArray(feature_id, arguments.arrSchemaName, arguments.site_id);
-		var groupStruct=typeStruct.featureSchemaData[feature_id].featureSchemaLookup[groupId];  
-		if(request.zos.enableSiteOptionGroupCache and not arguments.showUnapproved and groupStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.feature_data_id)){
-			groupStruct=t9.featureSchemaSet[arguments.feature_data_id];
-			if(groupStruct.__groupID NEQ groupID){
+		var schemaStruct=typeStruct.featureSchemaData[feature_id].featureSchemaLookup[groupId];  
+		if(request.zos.enableSiteOptionGroupCache and not arguments.showUnapproved and schemaStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.feature_data_id)){
+			schemaStruct=t9.featureSchemaSet[arguments.feature_data_id];
+			if(schemaStruct.__schemaId NEQ groupID){
 				application.zcore.functions.z404("#arrayToList(arguments.arrSchemaName, ", ")# is not the right group for feature_schema_set_id: #arguments.feature_data_id#");
 			} 
-			// appendSchemaDefaults(groupStruct, groupStruct.__groupId);
-			return groupStruct;
+			return schemaStruct;
 		}else{ 
 			if(arguments.feature_data_id EQ ""){
 				// don't do a query when the id is missing 
@@ -3031,8 +3032,6 @@ used to do search for a list of values
 	}else{
 		if(structkeyexists(t9.featureSchemaSet, arguments.feature_data_id)){
 			return t9.featureSchemaSet[arguments.feature_data_id];
-			// appendSchemaDefaults(groupStruct, groupStruct.__groupId);
-			// return groupStruct;
 		}
 	} 
 	return {};
@@ -3041,12 +3040,12 @@ used to do search for a list of values
 
 <cffunction name="featureSchemaIdByName" localmode="modern" output="no" returntype="numeric">
 	<cfargument name="groupName" type="string" required="yes">
-	<cfargument name="option_group_parent_id" type="numeric" required="no" default="#0#">
+	<cfargument name="feature_schema_parent_id" type="numeric" required="no" default="#0#">
 	<cfargument name="site_id" type="numeric" required="no" default="#request.zos.globals.id#">
 	<cfscript>
 	fsd=application.zcore.featureData;
-	if(structkeyexists(fsd, "featureSchemaIdLookup") and structkeyexists(fsd.featureSchemaIdLookup, arguments.option_group_parent_id&chr(9)&arguments.groupName)){
-		return fsd.featureSchemaIdLookup[arguments.option_group_parent_id&chr(9)&arguments.groupName];
+	if(structkeyexists(fsd, "featureSchemaIdLookup") and structkeyexists(fsd.featureSchemaIdLookup, arguments.feature_schema_parent_id&chr(9)&arguments.groupName)){
+		return fsd.featureSchemaIdLookup[arguments.feature_schema_parent_id&chr(9)&arguments.groupName];
 	}else{
 		throw("arguments.groupName, ""#arguments.groupName#"", doesn't exist");
 	}
@@ -3057,21 +3056,35 @@ used to do search for a list of values
 	<cfargument name="featureVariableName" type="string" required="yes">
 	<cfargument name="groupName" type="string" required="yes"> 
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
-	<cfargument name="parentStruct" type="struct" required="no" default="#{__groupId=0,__setId=0}#">
+	<cfargument name="parentStruct" type="struct" required="no" default="#{__schemaId:0,__setId:0,__mergeSchemaId:0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
 	<cfscript>  
 	feature_id=getFeatureIDByName(arguments.featureVariableName);
-	t9=getSiteData(arguments.site_id);
 	fsd=application.zcore.featureData.featureSchemaData[feature_id];
-	if(structkeyexists(fsd, 'featureSchemaIdLookup') and structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__groupId&chr(9)&arguments.groupName)){
-		featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__groupId&chr(9)&arguments.groupName];
-		groupStruct=fsd.featureSchemaLookup[featureSchemaId];
-		if(request.zos.enableSiteOptionGroupCache and groupStruct["feature_schema_enable_cache"] EQ 1){
-			if(structkeyexists(t9.featureSchemaSetArrays, featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
-				return t9.featureSchemaSetArrays[featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
+	if(structkeyexists(fsd, 'featureSchemaIdLookup')){
+		t9=getSiteData(arguments.site_id);
+		if(arguments.parentStruct.__mergeSchemaId NEQ 0){
+			if(structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__mergeSchemaId&chr(9)&arguments.groupName)){
+				featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__mergeSchemaId&chr(9)&arguments.groupName];
+				schemaStruct=fsd.featureSchemaLookup[featureSchemaId];
+				if(request.zos.enableSiteOptionGroupCache and schemaStruct["feature_schema_enable_cache"] EQ 1){
+					if(structkeyexists(t9.featureSchemaSetArrays, featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
+						return t9.featureSchemaSetArrays[featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
+					}
+				}else{
+					return featureSchemaSetFromDatabaseBySchemaId(feature_id, featureSchemaId, arguments.site_id, arguments.parentStruct, arguments.fieldList);
+				}	
 			}
-		}else{
-			return featureSchemaSetFromDatabaseBySchemaId(feature_id, featureSchemaId, arguments.site_id, arguments.parentStruct, arguments.fieldList);
+		}else if(structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__schemaId&chr(9)&arguments.groupName)){
+			featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__schemaId&chr(9)&arguments.groupName];
+			schemaStruct=fsd.featureSchemaLookup[featureSchemaId];
+			if(request.zos.enableSiteOptionGroupCache and schemaStruct["feature_schema_enable_cache"] EQ 1){ 
+				if(structkeyexists(t9.featureSchemaSetArrays, featureSchemaId&chr(9)&arguments.parentStruct.__setId)){
+					return t9.featureSchemaSetArrays[featureSchemaId&chr(9)&arguments.parentStruct.__setId]; 
+				}
+			}else{
+				return featureSchemaSetFromDatabaseBySchemaId(feature_id, featureSchemaId, arguments.site_id, arguments.parentStruct, arguments.fieldList);
+			}	
 		}
 	} 
 	return arraynew(1);

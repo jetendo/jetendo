@@ -2000,7 +2000,7 @@
 			coreStruct={
 				feature_data_sort:dataStruct.__sort,
 				// NOT USED YET: feature_data_active:dataStruct.__active,
-				feature_schema_id:dataStruct.__groupId,
+				feature_schema_id:dataStruct.__schemaId,
 				feature_data_approved:dataStruct.__approved,
 				feature_data_override_url:application.zcore.functions.zso(dataStruct, '__url'),
 				feature_data_parent_id:dataStruct.__parentId,
@@ -3958,7 +3958,7 @@ Define this function in another CFC to override the default email format
 					for(groupId in sog.featureSchemaLookup){
 						group=sog.featureSchemaLookup[groupId];
 						if(group.feature_schema_parent_id EQ row.feature_data_merge_schema_id){
-							link=application.zcore.functions.zURLAppend(ms.struct.listURL, "feature_id=#group.feature_id#&feature_schema_id=#group.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_id#");
+							link=application.zcore.functions.zURLAppend(ms.struct.listURL, "feature_id=#group.feature_id#&feature_schema_id=#group.feature_schema_id#&amp;feature_data_parent_id=#row.feature_data_merge_data_id#");
 							echo('<a href="#link#">Manage #application.zcore.functions.zFirstLetterCaps(group.feature_schema_display_name)#(s)</a>'); // n.childCount
 							hasMultipleEditFeatures=true;
 						}
@@ -4293,7 +4293,7 @@ Define this function in another CFC to override the default email format
 				echo('<ul>');
 				for(var n in q1){
 					if(structkeyexists(subgroupStruct, n.feature_schema_id)){
-						echo('<li><a href="#application.zcore.functions.zURLAppend(defaultStruct.listURL, "feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_id#")#" target="_top">#subgroupStruct[n.feature_schema_id].feature_schema_display_name#</a></li>');
+						echo('<li><a href="#application.zcore.functions.zURLAppend(defaultStruct.listURL, "feature_id=#n.feature_id#&amp;feature_schema_id=#n.feature_schema_id#&amp;feature_data_parent_id=#form.feature_data_id#")#" target="_top">#subgroupStruct[n.feature_schema_id].feature_schema_display_name#</a></li>');
 					}
 				}
 				echo('</ul>');

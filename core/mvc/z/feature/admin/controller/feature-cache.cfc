@@ -265,7 +265,9 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				ts.__sort=row.feature_data_sort;
 				ts.__setId=row.feature_data_id;
 				ts.__dateModified=row.feature_data_updated_datetime;
-				ts.__groupId=row.feature_schema_id;
+				ts.__schemaId=row.feature_schema_id;
+				ts.__level=row.feature_data_level;
+				ts.__mergeSchemaId=fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_merge_group_id;
 				ts.__approved=row.feature_data_approved;
 				ts.__createdDatetime=row.feature_data_created_datetime;
 				ts.__title=row.feature_data_title;
@@ -318,7 +320,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 					}
 					fs.featureSchemaSetVersion[row.feature_data_master_set_id]=ts.__setId;
 				}else{
-					arrayappend(fs.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id], ts);
+					arrayappend(fs.featureSchemaSetArrays[ts.__schemaId&chr(9)&row.feature_data_parent_id], ts);
 				}
 			}
 		}
@@ -381,7 +383,9 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	ts.__sort=row.feature_data_sort;
 	ts.__setId=row.feature_data_id;
 	ts.__dateModified=row.feature_data_updated_datetime;
-	ts.__groupId=row.feature_schema_id;
+	ts.__schemaId=row.feature_schema_id;
+	ts.__level=row.feature_data_level;
+	ts.__mergeSchemaId=fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_merge_group_id;
 	ts.__createdDatetime=row.feature_data_created_datetime;
 	ts.__approved=row.feature_data_approved;
 	ts.__title=row.feature_data_title;
@@ -469,14 +473,11 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
 
 	db.sql="SELECT * FROM 
-	(#db.table("feature_schema", request.zos.zcoreDatasource)# s2, 
-	#db.table("feature_data", request.zos.zcoreDatasource)# s1) WHERE 
+	#db.table("feature_data", request.zos.zcoreDatasource)# s1 WHERE 
 	s1.site_id = #db.param(arguments.site_id)# and 
 	feature_data_master_set_id = #db.param(0)# and 
 	s1.feature_data_deleted = #db.param(0)# and 
-	s1.feature_schema_id = s2.feature_schema_id and 
-	s1.feature_data_id = #db.param(arguments.feature_data_id)# and 
-	s2.feature_schema_deleted = #db.param(0)#";
+	s1.feature_data_id = #db.param(arguments.feature_data_id)#";
 	var qS=db.execute("qS", "", 10000, "query", false);  
 	if(qS.recordcount EQ 0){
 		throw("feature_data_id, #arguments.feature_data_id#, doesn't exist.");
@@ -516,11 +517,12 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 			t9.featureSchemaSetId[id&"_parentId"]=qS.feature_data_parent_id;
 			t9.featureSchemaSetId[id&"_childSchema"]=structnew();
 		}
+		schemaStruct=fsd.featureSchemaLookup[row.feature_schema_id];
 		if(qS.feature_data_master_set_id EQ 0 and structkeyexists(t9.featureSchemaSetId, qS.feature_data_parent_id&"_childSchema")){
 			if(structkeyexists(t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"], row.feature_schema_id) EQ false){
 				t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id]=arraynew(1);
 			}
-			if(fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
+			if(schemaStruct.feature_schema_enable_sorting EQ 1){
 				if(structkeyexists(tempUniqueStruct, qS.feature_data_parent_id&"_"&id) EQ false){
 					var arrChild=t9.featureSchemaSetId[qS.feature_data_parent_id&"_childSchema"][row.feature_schema_id];
 					var resort=false;
@@ -582,17 +584,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				tempValue='<div class="zEditorHTML">'&fieldValue&'</div>';
 			}
 		}else if(row.feature_field_type_id EQ 3){
-			arrValue=listToArray(fieldValue, chr(9), true);
-			/*
-
-		tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
-		arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9));
-		nv=arrValue[1];
-		originalFile="";
-		if(arraylen(arrValue) EQ 2){
-			originalFile=arrValue[2];
-		}
-			*/
+			arrValue=listToArray(fieldValue, chr(9), true); 
 			if(arrValue[1] NEQ ""){
 				typeStruct=fsd.fieldLookup[row.feature_field_id].typeStruct;
 				if(application.zcore.functions.zso(typeStruct, 'file_securepath') EQ "Yes"){
@@ -629,7 +621,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		if(not structkeyexists(t9, 'featureSchemaSetQueryCache')){
 			t9.featureSchemaSetQueryCache={};
 		}
-		if(request.zos.enableSiteOptionGroupCache and row.feature_schema_enable_cache EQ 1){
+		if(request.zos.enableSiteOptionGroupCache and schemaStruct.feature_schema_enable_cache EQ 1){
 			t9.featureSchemaSetQueryCache[row.feature_data_id]=row;
 		}
 		if(structkeyexists(t9.featureSchemaSetArrays, row.feature_schema_id&chr(9)&row.feature_data_parent_id) EQ false){
@@ -639,7 +631,9 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		ts.__sort=row.feature_data_sort;
 		ts.__setId=row.feature_data_id;
 		ts.__dateModified=row.feature_data_updated_datetime;
-		ts.__groupId=row.feature_schema_id;
+		ts.__schemaId=row.feature_schema_id;
+		ts.__level=row.feature_data_level;
+		ts.__mergeSchemaId=schemaStruct.feature_schema_merge_group_id;
 		ts.__createdDatetime=row.feature_data_created_datetime;
 		ts.__approved=row.feature_data_approved;
 		ts.__title=row.feature_data_title;
@@ -649,14 +643,14 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		if(row.feature_data_image_library_id NEQ 0){
 			ts.__image_library_id=row.feature_data_image_library_id;
 		}
-		if(row.feature_schema_enable_unique_url EQ 1){
+		if(schemaStruct.feature_schema_enable_unique_url EQ 1){
 			if(row.feature_data_override_url NEQ ""){
 				ts.__url=row.feature_data_override_url;
 			}else{
 				ts.__url="/#application.zcore.functions.zURLEncode(row.feature_data_title, '-')#-50-#row.feature_data_id#.html";
 			}
 		} 
-		var fieldStruct=fsd.featureSchemaFieldLookup[ts.__groupId];
+		var fieldStruct=fsd.featureSchemaFieldLookup[ts.__schemaId];
 		
 		var defaultStruct=fsd.featureSchemaDefaults[row.feature_schema_id];
 		for(var i2 in fieldStruct){
@@ -679,8 +673,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 
 		// don't sort versions
 		if(row.feature_data_master_set_id EQ 0){
-			if(fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_enable_sorting EQ 1){
-				var arrChild=t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id];
+			if(schemaStruct.feature_schema_enable_sorting EQ 1){
+				var arrChild=t9.featureSchemaSetArrays[ts.__schemaId&chr(9)&row.feature_data_parent_id];
 				var resort=false;
 				if(row.feature_data_sort EQ 0){
 						resort=true;
@@ -709,7 +703,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 						for(var i=1;i LTE arraylen(arrChild2);i++){
 							arrayAppend(arrTemp, t9.featureSchemaSet[arrChild2[i]]);
 						}
-						t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id]=arrTemp;
+						t9.featureSchemaSetArrays[ts.__schemaId&chr(9)&row.feature_data_parent_id]=arrTemp;
 					}catch(Any e){
 						updateSchemaCacheBySchemaId(row.feature_id, row.feature_schema_id);
 						ts={};
@@ -740,7 +734,7 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 					}
 				}
 			}else{
-				var arrChild=t9.featureSchemaSetArrays[ts.__groupId&chr(9)&row.feature_data_parent_id];
+				var arrChild=t9.featureSchemaSetArrays[ts.__schemaId&chr(9)&row.feature_data_parent_id];
 				var found=false;
 				for(var i=1;i LTE arrayLen(arrChild);i++){
 					if(row.feature_data_id EQ arrChild[i].__setID){
