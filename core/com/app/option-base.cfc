@@ -971,7 +971,7 @@ used to do search for a list of values
 		local.tempCom=application.zcore.functions.zcreateobject("component", local.cfcpath); 
 		local.tempCom[groupStruct["#variables.type#_option_group_search_index_cfc_method"]](dataStruct, ds);
 	}else{
-		arrFullText=[]; 
+		arrFullText=[dataStruct.__title]; 
 		if(structkeyexists(t9.optionGroupFieldLookup, dataStruct.__groupId)){
 			for(i in t9.optionGroupFieldLookup[dataStruct.__groupId]){
 				c=t9.optionLookup[i];

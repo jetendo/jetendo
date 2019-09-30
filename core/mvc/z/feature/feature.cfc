@@ -2746,7 +2746,7 @@ used to do search for a list of values
 	var ts=0;
 	var i=0;
 	dataStruct=getSchemaSetById(application.zcore.featureCom.getFeatureNameById(arguments.feature_id), arguments.arrSchemaName, arguments.setId, arguments.site_id); 
-	fsd=application.zcore.featureData; 
+	fsd=application.zcore.featureData.featureSchemaData[arguments.feature_id]; 
 	if(not structkeyexists(dataStruct, '__approved') or dataStruct.__approved NEQ 1){
 		deleteSchemaSetIndex(arguments.setId, arguments.site_id);
 
@@ -2794,10 +2794,10 @@ used to do search for a list of values
 		local.tempCom=application.zcore.functions.zcreateobject("component", local.cfcpath); 
 		local.tempCom[schemaStruct["feature_schema_search_index_cfc_method"]](dataStruct, ds);
 	}else{
-		arrFullText=[]; 
+		arrFullText=[dataStruct.__title]; 
 		if(structkeyexists(fsd.featureSchemaFieldLookup, dataStruct.__schemaId)){
 			for(i in fsd.featureSchemaFieldLookup[dataStruct.__schemaId]){
-				c=t9.fieldLookup[i];
+				c=fsd.fieldLookup[i];
 				if(c["feature_field_enable_search_index"] EQ 1){
 					arrayAppend(arrFullText, dataStruct[c.name]);
 				}
