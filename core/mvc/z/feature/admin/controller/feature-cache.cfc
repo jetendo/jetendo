@@ -342,75 +342,6 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
  
 
 
-<cffunction name="buildSchemaSetIdField" access="private" localmode="modern">
-	<cfargument name="row" type="struct" required="yes"> 
-	<cfargument name="curStruct" type="struct" required="yes"> 
-	<cfscript>
-	var t9=application.zcore.featureCom.getTypeData(arguments.row.site_id);
-	if(arguments.row.feature_field_id NEQ ""){
-		typeId=t9.fieldLookup[arguments.row.feature_field_id].type;
-		if(typeId EQ 2){
-			if(arguments.row.feature_data_value EQ ""){
-				tempValue="";
-			}else{
-				tempValue='<div class="zEditorHTML">'&arguments.row.feature_data_value&'</div>';
-			}
-		}else if(typeId EQ 3 or typeId EQ 9){
-			if(arguments.row.feature_data_value NEQ "" and arguments.row.feature_data_value NEQ "0"){
-				if(application.zcore.functions.zso(t9.fieldLookup[arguments.row.feature_field_id].typeStruct, 'file_securepath') EQ "Yes"){
-					tempValue="/zuploadsecure/feature-options/"&arguments.row.feature_data_value;
-				}else{
-					tempValue="/zupload/feature-options/"&arguments.row.feature_data_value;
-				}
-			}else{
-				tempValue="";
-			}
-		}else{
-			tempValue=arguments.row.feature_data_value;
-		}
-		arguments.curStruct[t9.fieldLookup[arguments.row.feature_field_id].name]=tempValue;
-	}
-	</cfscript>
-</cffunction>
-
-<cffunction name="buildSchemaSetId" access="private" localmode="modern">
-	<cfargument name="row" type="struct" required="yes"> 
-	<cfargument name="disableDefaults" type="boolean" required="yes">
-	<cfscript>
-	row=arguments.row;  
-	fsd=application.zcore.featureData; 
-	ts=structnew();
-	ts.__sort=row.feature_data_sort;
-	ts.__setId=row.feature_data_id;
-	ts.__dateModified=row.feature_data_updated_datetime;
-	ts.__schemaId=row.feature_schema_id;
-	ts.__level=row.feature_data_level;
-	ts.__mergeSchemaId=fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_merge_group_id;
-	ts.__createdDatetime=row.feature_data_created_datetime;
-	ts.__approved=row.feature_data_approved;
-	ts.__title=row.feature_data_title;
-	ts.__parentID=row.feature_data_parent_id;
-	ts.__summary=row.feature_data_summary;
-	// build url
-	if(row.feature_data_image_library_id NEQ 0){
-		ts.__image_library_id=row.feature_data_image_library_id;
-	}
-	groupStruct=fsd.featureSchemaLookup[row.feature_schema_id];
-	if(groupStruct.feature_schema_enable_unique_url EQ 1){
-		if(row.feature_data_override_url NEQ ""){
-			ts.__url=row.feature_data_override_url;
-		}else{
-			ts.__url="/#application.zcore.functions.zURLEncode(row.feature_data_title, '-')#-50-#row.feature_data_id#.html";
-		}
-	}
-	if(not arguments.disableDefaults){
-		structappend(ts, fsd.featureSchemaDefaults[row.feature_schema_id]);
-	}
-	return ts;
-	</cfscript>
-</cffunction>
-
-
 <cffunction name="resortSchemaSets" localmode="modern" access="public">
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="feature_id" type="numeric" required="yes">
@@ -447,16 +378,18 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 	}
  
 
-	t9=application.zcore.featureCom.getSiteData(arguments.site_id);
-	t9.featureSchemaSetId[arguments.feature_data_parent_id&"_childSchema"][arguments.feature_schema_id]=arrTemp;
+	if(groupStruct.feature_schema_enable_cache EQ "1"){
+		t9=application.zcore.featureCom.getSiteData(arguments.site_id);
+		t9.featureSchemaSetId[arguments.feature_data_parent_id&"_childSchema"][arguments.feature_schema_id]=arrTemp;
 
-	arrData=t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id];
-	arrDataNew=[];
-	for(i=1;i LTE arraylen(arrData);i++){
-		sortIndex=sortStruct[arrData[i].__setId];
-		arrDataNew[sortIndex]=arrData[i];
+		arrData=t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id];
+		arrDataNew=[];
+		for(i=1;i LTE arraylen(arrData);i++){
+			sortIndex=sortStruct[arrData[i].__setId];
+			arrDataNew[sortIndex]=arrData[i];
+		}
+		t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id]=arrDataNew;	
 	}
-	t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id]=arrDataNew;
 	</cfscript>
 </cffunction>
 	
