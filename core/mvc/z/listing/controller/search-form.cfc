@@ -98,6 +98,15 @@ SELECT zipcode.*,
 	db=request.zos.queryObject; 
 	var returnStruct={count:0};
 	var mapQuery={}; 
+	if(structkeyexists(form, 'searchId')){
+		limit=application.zcore.status.getField(form.searchId, "search_result_limit");
+		if(limit NEQ ""){
+			form.search_result_limit=limit;
+		}
+	} 
+	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_list_layout EQ 2){
+		form.search_result_limit=application.zcore.functions.zso(form, "search_result_limit", true, 9);
+	}
 
 	application.zcore.functions.zNoCache();
 
@@ -253,7 +262,6 @@ SELECT zipcode.*,
 	}
 	ts = StructNew();
 	ts.offset = form.zIndex-1;
-	perpageDefault=10;
 	perpage=10;
 	perpage=max(1,min(perpage,100));
 	ts.perpage = perpage;
@@ -308,7 +316,6 @@ SELECT zipcode.*,
 	}
 	ts = StructNew();
 	ts.offset = form.zIndex-1;
-	perpageDefault=10;
 	perpage=10;
 	perpage=max(1,min(perpage,100));
 	ts.perpage = perpage;
@@ -3906,10 +3913,6 @@ propertyDataCom.setSearchCriteria(form);
 	<cfscript> 
 		ts = StructNew();
 		ts.offset = form.zIndex-1;
-		perpageDefault=10;
-		if(structkeyexists(form, 'searchId')){
-			form.search_result_limit=application.zcore.status.getField(form.searchId, "search_result_limit");
-		}
 		if(structkeyexists(form, 'search_result_limit') and isnumeric(form.search_result_limit) and form.search_result_limit GTE 9){
 			perpage=form.search_result_limit;
 		}else{

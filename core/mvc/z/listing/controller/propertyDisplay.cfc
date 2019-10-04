@@ -471,6 +471,8 @@ propertyDisplayCom.init(ts);
 	limit=10;
 	if(isdefined('this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit') and this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit NEQ ""){
 		limit=this.optionstruct.dataStruct.inputArguments.ss.searchCriteria.search_result_limit;
+	}else if(application.zcore.functions.zso(form, "search_result_limit", true, 0) NEQ 0){
+		limit=form.search_result_limit;
 	}
 	request.zos.requestLogEntry('propertyDisplay.cfc before display() loop');
 

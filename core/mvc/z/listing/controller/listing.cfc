@@ -956,7 +956,7 @@ Primary Cities:</th>
 	SELECT * FROM #db.table("city", request.zos.zcoreDatasource)# city WHERE 
 	city_deleted = #db.param(0)# 
 	ORDER BY city_name ASC
-	</cfsavecontent><cfscript>qexcity2=db.execute("qexcity2");</cfscript> 
+	</cfsavecontent><cfscript>qexcity2=db.execute("qexcity2", "", 10000, "query", false);</cfscript> 
 	Select a city and click add to override the default cities shown in the search form.<br /><br />
 	<cfscript>
 	selectStruct = StructNew();

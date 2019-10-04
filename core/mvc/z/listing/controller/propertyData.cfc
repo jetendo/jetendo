@@ -1434,7 +1434,7 @@ if(this.searchCriteria.search_listdate NEQ "" and this.searchCriteria.search_lis
 	}else{
 		ts.perpage=arguments.ss.perpage;
 	}
-	ts.inputArguments=arguments;
+	ts.inputArguments={ss:arguments.ss};
 	//ts.queryColumnStruct=local.queryColumnStruct;
 	ts.arrData=arraynew(1);   
 	ts.errorMessage=errorMessage;
