@@ -99,6 +99,30 @@ this.app_id=11;
 </cffunction>
 
 
+<!--- #application.zcore.listingCom.getDisclaimerDate()# --->
+<cffunction name="getDisclaimerDate" localmode="modern" output="no" returntype="any">
+	<cfscript> 
+	local.c=application.zcore.db.getConfig();
+	local.c.cacheForSeconds=3600;
+	db=application.zcore.db.newQuery(local.c);
+	db.sql="SELECT mls_disclaimer_name, min(mls_update_date) mls_update_date FROM 
+	#db.table("mls", request.zos.zcoreDatasource)# mls, 
+	#db.table("app_x_mls", request.zos.zcoreDatasource)# app_x_mls 
+	
+	WHERE mls.mls_id = app_x_mls.mls_id and 
+	mls_deleted = #db.param(0)# and 
+	app_x_mls_deleted = #db.param(0)# and 
+	app_x_mls.site_id = #db.param(request.zos.globals.id)# and 
+	mls_status = #db.param('1')#";
+	qM=db.execute("qM", "", 10000, "query", false);
+	if(qM.recordcount EQ 0){
+		return "N/A";
+	}else{
+		return dateformat(qM.mls_update_date,"m/d/yy")&" at "&timeformat(qM.mls_update_date, "h:mm tt");
+	}
+	</cfscript>
+</cffunction>
+
 <!--- #application.zcore.listingCom.getDisclaimerText()# --->
 <cffunction name="getDisclaimerText" localmode="modern" output="no" returntype="any">
 	<cfscript> 
@@ -121,7 +145,7 @@ this.app_id=11;
 			The source of the listing data is as follows:   
 			<cfscript>
 			for(row in qm){
-				echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&') ');
+				echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&timeformat(row.mls_update_date, "h:mm tt")&') ');
 			}
 			</cfscript>
 		</div>

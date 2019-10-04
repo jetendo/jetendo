@@ -106,8 +106,7 @@ or all of them without mls_id
 					writeoutput("<h2>sql for mls_id: "&i&"</h2>");
 					writeoutput(db.sql&"<br /><hr /><br />");
 				}
-	   			r1=db.insert("qInsert", request.zOS.insertIDColumnForSiteIDTable);
-				if(not r1.success){
+				if(db.execute("qInsert") EQ false){
 					application.zcore.template.fail("Failed to insert/update listing_lookup table");	
 				}
 			}

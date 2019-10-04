@@ -198,15 +198,24 @@
 			}; 
 		}else{  
 			application.callTrackingMetricsImportProgress="Downloading #u# | insertCount: #insertCount# | updateCount: #updateCount# | total: #lastTotal#"; 
-			http url="#u#" timeout="120" throwonerror="no" method="get"{ 
-				httpparam type="header" name="Authorization" value='Basic #ToBase64("#accessKey#:#secretKey#")#';
-			} 
-			if(not structkeyexists(cfhttp, 'statuscode') or left(cfhttp.statuscode,3) NEQ '200'){
-				savecontent variable="out"{
-					writedump(cfhttp);
+			for(n=1;n<=3;n++){
+				http url="#u#" timeout="160" throwonerror="no" method="get"{ 
+					httpparam type="header" name="Authorization" value='Basic #ToBase64("#accessKey#:#secretKey#")#';
+				} 
+				if(not structkeyexists(cfhttp, 'statuscode') or left(cfhttp.statuscode,3) NEQ '200'){
+					n++;
+					if(n EQ 3){
+						savecontent variable="out"{
+							writedump(cfhttp);
 
+						}
+						throw("Failed to download calltrackingmetrics. cfhttp response:"&out);
+					}else{
+						sleep(5000);
+					}
+				}else{
+					break;
 				}
-				throw("Failed to download calltrackingmetrics. cfhttp response:"&out);
 			}
 			js=deserializeJSON(cfhttp.filecontent); 
 		}

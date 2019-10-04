@@ -290,7 +290,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 					if(id EQ 0){
 						ts={
 							type:"Custom",
-							errorHTML:'Insert ID was 0, and shouldn''t be.',
+							errorHTML:'Insert ID was 0, and shouldn''t be for query name: #arguments.name#',
 							scriptName:request.zos.originalURL,
 							url:request.zos.originalURL,
 							exceptionMessage:arguments.configStruct.sql&";<br><br>"&arguments.configStruct.insertIDSQL,

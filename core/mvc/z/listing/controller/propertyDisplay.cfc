@@ -164,6 +164,7 @@ propertyDisplayCom.init(ts);
 				photo1=application.zcore.listingCom.getPhoto(idx.listing_id,1);
 			}
 		}
+		photo1Full=photo1;
 		if(photo1 NEQ ""){	
 			photo1=application.zcore.listingCom.getThumbnail(photo1, request.lastPhotoId, 1, form.pw, form.ph, form.pa);
 		}
@@ -173,6 +174,7 @@ propertyDisplayCom.init(ts);
 			propertyLink=application.zcore.functions.zURLAppend(propertyLink,"showInactive=1");
 		}
 		t2=duplicate(ts);
+		t2.photo1Full=photo1Full;
 		t2.tenure=idx.listingTenure;
 		if(row.listing_square_feet neq '' and row.listing_square_feet NEQ 0){
 			t2.square_footage=row.listing_square_feet;
@@ -196,6 +198,7 @@ propertyDisplayCom.init(ts);
 		t2.mls_id=idx.mls_id;
 		t2.listing_id=row.listing_id;
 		t2.city_id=row.listing_city;
+		t2.state=row.listing_state;
 		t2.city=idx.cityName;
 		t2.condoname=row.listing_condoname;
 		t2.address=row.listing_address;

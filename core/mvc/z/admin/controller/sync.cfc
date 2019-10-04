@@ -306,19 +306,19 @@ This allows avoiding remaps more easily.  Less code when importing.
 		row.site_option_group_user_group_id_list=arrayToList(arrId,",");
 		//row.zsite_option_group_user_group_id_list=arrayToList(arrId,",");
 	}
-	if(row.inquiries_type_id NEQ 0){
-		tempSiteId=application.zcore.functions.zGetSiteIdFromSiteIDType(row.inquiries_type_id_siteIDType);
-		db.sql="select * from #db.table("inquiries_type", request.zos.zcoreDatasource)# 
-		WHERE site_id = #db.param(tempSiteId)# and 
-		inquiries_type_deleted = #db.param(0)# and 
-		inquiries_type_name = #db.param(row.inquiriesTypeName)#";
-		qType=db.execute("qType");
-		if(qType.recordcount EQ 0){
-			throw("inquiries_type_id with name, ""#row.inquiriesTypeName#"", doesn't exist, and it is required.");
-		}
-		row.inquiries_type_id = qType.inquiries_type_id;
-		//row.zinquiries_type_id = qType.inquiries_type_id;
-	}
+	// if(row.inquiries_type_id NEQ 0){
+	// 	tempSiteId=application.zcore.functions.zGetSiteIdFromSiteIDType(row.inquiries_type_id_siteIDType);
+	// 	db.sql="select * from #db.table("inquiries_type", request.zos.zcoreDatasource)# 
+	// 	WHERE site_id = #db.param(tempSiteId)# and 
+	// 	inquiries_type_deleted = #db.param(0)# and 
+	// 	inquiries_type_name = #db.param(row.inquiriesTypeName)#";
+	// 	qType=db.execute("qType");
+	// 	if(qType.recordcount EQ 0){
+	// 		throw("inquiries_type_id with name, ""#row.inquiriesTypeName#"", doesn't exist, and it is required.");
+	// 	}
+	// 	row.inquiries_type_id = qType.inquiries_type_id;
+	// 	//row.zinquiries_type_id = qType.inquiries_type_id;
+	// }
 	if(not arguments.skipGroupIdRemap){
 		groupStruct=getOptionGroupById(sourceStruct, row.site_option_group_id);
 		if(groupStruct.success){
