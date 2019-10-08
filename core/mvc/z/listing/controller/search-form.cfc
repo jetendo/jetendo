@@ -98,6 +98,9 @@ SELECT zipcode.*,
 	db=request.zos.queryObject; 
 	var returnStruct={count:0};
 	var mapQuery={}; 
+	if(not application.zcore.app.siteHasApp("listing")){
+		application.zcore.functions.z404("Listing application not enabled.");
+	}
 	if(structkeyexists(form, 'searchId')){
 		limit=application.zcore.status.getField(form.searchId, "search_result_limit");
 		if(limit NEQ ""){
