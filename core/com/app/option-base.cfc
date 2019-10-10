@@ -357,7 +357,7 @@
 		match=false;
 		for(g=1;g LTE length;g++){ 
 			for(n=1;n LTE rowLength;n++){
-				if(refindnocase(replace('%'&arrValue[g]&'%', "%", ".*", "all"), arrRowValues[n]) NEQ 0){
+				if(refindnocase(replace('%'&application.zcore.functions.zCleanSearchText(arrValue[g])&'%', "%", ".*", "all"), arrRowValues[n]) NEQ 0){
 					match=true;
 					break;
 				}
@@ -367,7 +367,7 @@
 		match=false;
 		for(g=1;g LTE length;g++){
 			for(n=1;n LTE rowLength;n++){
-				if(refindnocase(replace('%'&arrValue[g]&'%', "%", ".*", "all"), arrRowValues[n]) EQ 0){
+				if(refindnocase(replace('%'&application.zcore.functions.zCleanSearchText(arrValue[g])&'%', "%", ".*", "all"), arrRowValues[n]) EQ 0){
 					match=true;
 					break;
 				}
