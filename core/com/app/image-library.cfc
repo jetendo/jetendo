@@ -1515,8 +1515,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				thumbnailCrop=request.zos.thumbnailSizeStruct.crop;
 			}else{
 				if(arguments.ss.forceSize){
-					thumbnailWidth=round(arrT[1]/2);
-					echo('1');
+					thumbnailWidth=round(arrT[1]/2); 
 					thumbnailHeight=round((arrT[2]/2)*.6);
 				}else{
 					thumbnailWidth=round(960/2);

@@ -232,6 +232,9 @@
 			}
 			structclear(form);
 			call=js.calls[i]; 
+			if(call.direction NEQ "inbound"){
+				continue; // skipping sms and outbound calls from import
+			}
 			t9={};
 			t9.inquiries_external_id="ctm-#call.id#";
 			t9.site_id=request.zos.globals.id;
