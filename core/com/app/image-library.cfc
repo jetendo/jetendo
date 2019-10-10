@@ -1324,6 +1324,8 @@ application.zcore.imageLibraryCom.getImageSQL(ts);
 	<cfscript>
 	if(arguments.layout_type EQ ""){
 		return "";	
+	}else if(arguments.layout_type EQ "11"){
+		return "galleryview-1.1";	
 	}else if(arguments.layout_type EQ "10"){
 		return "large-images-at-top";	
 	}else if(arguments.layout_type EQ "1" or arguments.layout_type EQ "3"){
@@ -1385,8 +1387,8 @@ application.zcore.imageLibraryCom.getLayoutTypeForm(ts); --->
 	ts.selectedValues =  arguments.ss.value;
 	ts.selectedDelimiter = ","; // change if comma conflicts...
 	// options for list data
-	ts.listLabels = "Large Photos At Bottom,Large Photos At Top,Gallery Slideshow At Bottom,Gallery Slideshow At Top,Thumbnails and Lightbox At Bottom,Thumbnails and Lightbox At Top,ContentFlow At Bottom,ContentFlow At Top,Thumbnail On Top Left - Other Large Photos At Bottom,Thumbnail On Top Right - Other Large Photos At Bottom,Custom";
-	ts.listValues = "0,10,1,3,2,4,5,6,7,9,8";
+	ts.listLabels = "Large Photos At Bottom,Large Photos At Top,Gallery Slideshow At Bottom,Gallery Slideshow At Top,Gallery Slideshow At Right,Thumbnails and Lightbox At Bottom,Thumbnails and Lightbox At Top,ContentFlow At Bottom,ContentFlow At Top,Thumbnail On Top Left - Other Large Photos At Bottom,Thumbnail On Top Right - Other Large Photos At Bottom,Custom";
+	ts.listValues = "0,10,1,3,11,2,4,5,6,7,9,8";
 	ts.listLabelsDelimiter = ","; // tab delimiter
 	ts.listValuesDelimiter = ",";
 	

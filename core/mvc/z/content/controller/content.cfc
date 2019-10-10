@@ -3020,8 +3020,197 @@ configCom.includeContentByName(ts);
 
 		request.zos.requestLogEntry('content.cfc viewPage 2'); 
 		// savecontent variable="theContentHTMLSection"{
-			beginEditLink(contentConfig, ts994824713.content_id, true);
-			if(not application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout)){
+
+		if(ts994824713.content_image_library_layout EQ 11){
+			echo('<div class="z-1of2 z-fluid-at-992 z-p-0">');
+		}
+		beginEditLink(contentConfig, ts994824713.content_id, true);
+		if(ts994824713.content_image_library_layout NEQ 11 and (not application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout))){
+			ts =structnew();
+			ts.image_library_id=ts994824713.content_image_library_id;
+			ts.size="#request.zos.globals.maximagewidth#x2000";
+			ts.crop=0; 
+			ts.top=true;
+			ts.offset=0;
+			if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){
+				ts.limit=1;
+			}
+			ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
+			application.zcore.imageLibraryCom.displayImages(ts); 
+		}
+		if(ts994824713.content_slideshow_id NEQ 0){
+			echo('<table style="width:100%;" class="zContentSlideShowDiv"><tr><td style="text-align:center;">');
+			application.zcore.functions.zEmbedSlideShow(ts994824713.content_slideshow_id);
+			echo('</td></tr></table>');
+		}
+		application.zcore.app.getAppCFC("content").excludeContentId(ts994824713.content_id);
+		rs=hasAccessToContentId(ts994824713.content_id); 
+		request.zos.requestLogEntry('content.cfc viewPage 3');
+		if(not rs.hasAccess or rs.forceLogin){ 
+			actionVar=request.zos.originalURL;
+			if(request.zos.cgi.query_string NEQ ""){
+				actionVar&="?"&request.zos.cgi.query_string;
+			}
+			application.zcore.functions.zredirect("/z/user/preference/index?returnURL=#urlencodedformat(actionVar)#");
+		}
+		request.zos.arrContentParentIDStruct=arraynew(1);
+		request.zos.arrContentParentURLStruct=arraynew(1);
+		arrayappend(request.zos.arrContentParentIDStruct, ts994824713.content_id);
+		if(ts994824713.content_url_only NEQ ''){
+			arrayappend(request.zos.arrContentParentURLStruct, ts994824713.content_url_only);
+		}else if(ts994824713.content_unique_name NEQ ''){
+			arrayappend(request.zos.arrContentParentURLStruct, ts994824713.content_unique_name);
+		}else{
+			arrayappend(request.zos.arrContentParentURLStruct, "/#application.zcore.functions.zURLEncode(ts994824713.content_name,'-')#-#application.zcore.app.getAppData("content").optionStruct.content_config_url_article_id#-#ts994824713.content_id#.html");
+		}
+
+
+		parentLinkStruct=getParentLinks(qContent);
+
+
+		tempMeta='<meta name="Keywords" content="#htmleditformat(ts994824713.content_metakey)#" />
+		<meta name="Description" content="#htmleditformat(ts994824713.content_metadesc)#" />';
+		if(contentConfig.disableContentMeta EQ false){
+			if(trim(ts994824713.content_metatitle) NEQ ""){
+				application.zcore.template.setTag('title',ts994824713.content_metatitle);
+			}else{
+				application.zcore.template.setTag('title',ts994824713.content_name);
+			}
+			application.zcore.template.setTag('meta',tempMeta);
+			application.zcore.template.setTag('pagetitle',replacenocase(replacenocase(ts994824713.content_name,"<br />"," ","ALL"),"<br />"," ","ALL"));
+			application.zcore.template.setTag('menutitle',replacenocase(replacenocase(ts994824713.content_menu_title,"<br />"," ","ALL"),"<br />"," ","ALL"));
+			application.zcore.template.setTag('pagenav', parentLinkStruct.pagenav);
+		}
+		if(ts994824713.content_name2 NEQ ''){
+			echo('<h2>#htmleditformat(ts994824713.content_name2)#</h2>');
+		} 
+		if(ts994824713.content_datetime NEQ ''){
+			echo('<strong class="news-date">Date: ');
+			if(isdate(ts994824713.content_datetime)){
+				echo(DateFormat(ts994824713.content_datetime,'m/d/yyyy'));
+			}
+			if(ts994824713.content_datetime NEQ '' and Timeformat(ts994824713.content_datetime,'HH:mm:ss') NEQ '00:00:00'){
+				echo(TimeFormat(ts994824713.content_datetime,'h:mm tt'));
+			}
+			echo('</strong> <br /><br />');
+		}
+		if(ts994824713.content_for_sale EQ '3'){
+			echo('<span style="color:##FF0000; font-size:14px; font-weight:bold;">This listing is SOLD</span><br /><br />');
+		}else if(ts994824713.content_for_sale EQ '4'){
+			echo('<span style="color:##FF0000; font-size:14px; font-weight:bold;">This listing is UNDER CONTRACT</span><br /><br />');
+		}
+		if(fileexists(request.zos.globals.homedir&'images/files/'&ts994824713.content_file)){
+			echo('<table style="border-spacing:5px; width:150px;">
+			<tr><td>');
+			if(ts994824713.content_file_caption NEQ ''){
+				echo(ts994824713.content_file_caption&'<br />');
+			}
+			echo('<a href="/images/files/#ts994824713.content_file#">Download File</a>
+			</td></tr>
+			</table>');
+		}
+		if(ts994824713.content_text EQ ''){
+			ct1948=ts994824713.content_summary;
+		}else{
+			ct1948=ts994824713.content_text;
+		} 
+		ct1948_2=ts994824713.content_text2;
+		ct1948_3=ts994824713.content_text3;
+		if(application.zcore.app.siteHasApp("content") and application.zcore.app.getAppData("content").optionStruct.content_config_contact_links EQ 1 and ts994824713.content_disable_contact_links EQ 1){
+			ct1948=rereplacenocase(ct1948,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
+			ct1948=rereplacenocase(ct1948,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+			ct1948=rereplacenocase(ct1948,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+
+			ct1948_2=rereplacenocase(ct1948_2,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
+			ct1948_2=rereplacenocase(ct1948_2,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+			ct1948_2=rereplacenocase(ct1948_2,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+
+			ct1948_3=rereplacenocase(ct1948_3,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
+			ct1948_3=rereplacenocase(ct1948_3,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+			ct1948_3=rereplacenocase(ct1948_3,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
+		}
+		if(ts994824713.content_metacode NEQ ""){
+			application.zcore.template.appendTag("meta", ts994824713.content_metacode);
+		}
+		defaultLimit=application.zcore.functions.zso(application.zcore.app.getAppData("content").optionStruct,'content_config_child_display_limit', true, 20);
+		if(defaultLimit EQ 0){
+			defaultLimit=20;
+		}
+		form.offset=application.zcore.functions.zso(form, 'offset', true, 0);
+		form.count=application.zcore.functions.zso(form, 'count', true, defaultLimit);
+		
+		request.zos.requestLogEntry('content.cfc viewPage 4');
+		childContentStruct=displayChildContent(ts994824713, contentConfig, ct1948, form.offset, form.count);
+		if(form.offset LT 0 or (form.offset NEQ 0 and childContentStruct.qContentChild.recordcount EQ 0)){
+			application.zcore.functions.z301Redirect(request.zos.originalURL);
+		}
+		ct1948=childContentStruct.bodyText;
+		request.zos.requestLogEntry('content.cfc viewPage 5');
+		if(arraylen(contentConfig.arrContentReplaceKeywords)){
+			for(i=1;i LTE arraylen(contentConfig.arrContentReplaceKeywords);i++){
+				if(isDefined(contentConfig.arrContentReplaceKeywords[i])){
+					ct1948=replacenocase(ct1948,"##"&contentConfig.arrContentReplaceKeywords[i]&"##",evaluate(contentConfig.arrContentReplaceKeywords[i]));
+				}
+			}
+		}
+		if(ts994824713.content_html_text_bottom EQ 0 and ts994824713.content_html_text NEQ ""){
+			writeoutput(ts994824713.content_html_text&'<br style="clear:both;" />');
+			if(application.zcore.app.siteHasApp("listing") and contentSearchMLS EQ 1){
+				echo('<hr />');
+			}
+		}
+		pcount=0;  
+	 
+		if(application.zcore.app.siteHasApp("listing") and qContent.content_search_mls EQ 1 and qContent.content_show_map EQ 1 and application.zcore.functions.zso(form, 'hidemls',true) EQ 0){
+			application.zcore.listingStruct.functions.zListingDisplaySavedSearchMapSummary(ts994824713.content_saved_search_id);
+		}   
+		if(ts994824713.content_text_position EQ 0){
+			column2Empty=application.zcore.functions.zIsEditorHTMLEmpty(qContent.content_text2);
+			column3Empty=application.zcore.functions.zIsEditorHTMLEmpty(qContent.content_text3);
+			if(application.zcore.functions.zso(request.zos.globals, 'enableCSSFramework', true, 0) EQ 1){
+				if(column2Empty and not column3Empty){
+					// only 1 and 3
+					echo('<div class="z-float"><div class="z-1of2 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of2 z-p-0 z-ml-0">#ct1948_3#</div></div>');
+				}else if(not column2Empty and column3Empty){
+					// only 1 and 2
+					echo('<div class="z-float"><div class="z-1of2 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of2 z-p-0 z-ml-0">#ct1948_2#</div></div>');
+				}else if(not column2Empty and not column3Empty){
+					// 1, 2 and 3
+					echo('<div class="z-float"><div class="z-1of3 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of3 z-p-0 z-ml-0">#ct1948_2#</div><div class="z-1of3 z-p-0 z-ml-0">#ct1948_3#</div></div>');
+				}else{
+					echo(ct1948);
+				}
+			}else{
+				if(column2Empty and not column3Empty){
+					// only 1 and 3
+					echo('<div style="width:100%; float:left;"><div class="zContentColumn1of2">#ct1948#</div><div class="zContentColumn1of2">#ct1948_3#</div></div>');
+				}else if(not column2Empty and column3Empty){
+					// only 1 and 2
+					echo('<div style="width:100%; float:left;"><div class="zContentColumn1of2">#ct1948#</div><div class="zContentColumn1of2">#ct1948_2#</div></div>');
+				}else if(not column2Empty and not column3Empty){
+					// 1, 2 and 3
+					echo('<div style="width:100%; float:left;"><div class="zContentColumn1of3">#ct1948#</div><div class="zContentColumn1of3">#ct1948_2#</div><div class="zContentColumn1of3">#ct1948_3#</div></div>');
+				}else{
+					echo(ct1948);
+				}
+			}
+			if(ct1948 NEQ ""){
+				echo('<br style="clear:both;" />');
+			}
+		}
+		endEditLink(contentConfig);
+		 
+		if(application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout)){
+			echo('<div style="clear:both; width:100%; float:left;">');
+			if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){ 
+				ts =structnew();
+				ts.image_library_id=ts994824713.content_image_library_id;
+				ts.size="#request.zos.globals.maximagewidth#x2000";
+				ts.crop=0;  
+				ts.offset=1;
+				ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
+				application.zcore.imageLibraryCom.displayImages(ts);  
+			}else{
 				ts =structnew();
 				ts.image_library_id=ts994824713.content_image_library_id;
 				ts.size="#request.zos.globals.maximagewidth#x2000";
@@ -3032,201 +3221,29 @@ configCom.includeContentByName(ts);
 					ts.limit=1;
 				}
 				ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
-				application.zcore.imageLibraryCom.displayImages(ts); 
+				application.zcore.imageLibraryCom.displayImages(ts);
 			}
-			if(ts994824713.content_slideshow_id NEQ 0){
-				echo('<table style="width:100%;" class="zContentSlideShowDiv"><tr><td style="text-align:center;">');
-				application.zcore.functions.zEmbedSlideShow(ts994824713.content_slideshow_id);
-				echo('</td></tr></table>');
-			}
-			application.zcore.app.getAppCFC("content").excludeContentId(ts994824713.content_id);
-			rs=hasAccessToContentId(ts994824713.content_id); 
-			request.zos.requestLogEntry('content.cfc viewPage 3');
-			if(not rs.hasAccess or rs.forceLogin){ 
-				actionVar=request.zos.originalURL;
-				if(request.zos.cgi.query_string NEQ ""){
-					actionVar&="?"&request.zos.cgi.query_string;
-				}
-				application.zcore.functions.zredirect("/z/user/preference/index?returnURL=#urlencodedformat(actionVar)#");
-			}
-			request.zos.arrContentParentIDStruct=arraynew(1);
-			request.zos.arrContentParentURLStruct=arraynew(1);
-			arrayappend(request.zos.arrContentParentIDStruct, ts994824713.content_id);
-			if(ts994824713.content_url_only NEQ ''){
-				arrayappend(request.zos.arrContentParentURLStruct, ts994824713.content_url_only);
-			}else if(ts994824713.content_unique_name NEQ ''){
-				arrayappend(request.zos.arrContentParentURLStruct, ts994824713.content_unique_name);
-			}else{
-				arrayappend(request.zos.arrContentParentURLStruct, "/#application.zcore.functions.zURLEncode(ts994824713.content_name,'-')#-#application.zcore.app.getAppData("content").optionStruct.content_config_url_article_id#-#ts994824713.content_id#.html");
-			}
+			echo('</div>');
+		}
+		if(ts994824713.content_html_text_bottom EQ 1 and ts994824713.content_html_text NEQ ""){
+			writeoutput('<div style="width:100%; float:left;">'&ts994824713.content_html_text&'</div>');
+		}
+		if(structkeyexists(request.zos,'listingApp') and structkeyexists(request.zos,'listingApp') and application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_compliantidx',false,true) EQ true and ts994824713.content_firm_name NEQ ''){
+			echo('<br />Listing courtesy of #ts994824713.content_firm_name#');
+		}
 
-
-			parentLinkStruct=getParentLinks(qContent);
-
-
-			tempMeta='<meta name="Keywords" content="#htmleditformat(ts994824713.content_metakey)#" />
-			<meta name="Description" content="#htmleditformat(ts994824713.content_metadesc)#" />';
-			if(contentConfig.disableContentMeta EQ false){
-				if(trim(ts994824713.content_metatitle) NEQ ""){
-					application.zcore.template.setTag('title',ts994824713.content_metatitle);
-				}else{
-					application.zcore.template.setTag('title',ts994824713.content_name);
-				}
-				application.zcore.template.setTag('meta',tempMeta);
-				application.zcore.template.setTag('pagetitle',replacenocase(replacenocase(ts994824713.content_name,"<br />"," ","ALL"),"<br />"," ","ALL"));
-				application.zcore.template.setTag('menutitle',replacenocase(replacenocase(ts994824713.content_menu_title,"<br />"," ","ALL"),"<br />"," ","ALL"));
-				application.zcore.template.setTag('pagenav', parentLinkStruct.pagenav);
-			}
-			if(ts994824713.content_name2 NEQ ''){
-				echo('<h2>#htmleditformat(ts994824713.content_name2)#</h2>');
-			} 
-			if(ts994824713.content_datetime NEQ ''){
-				echo('<strong class="news-date">Date: ');
-				if(isdate(ts994824713.content_datetime)){
-					echo(DateFormat(ts994824713.content_datetime,'m/d/yyyy'));
-				}
-				if(ts994824713.content_datetime NEQ '' and Timeformat(ts994824713.content_datetime,'HH:mm:ss') NEQ '00:00:00'){
-					echo(TimeFormat(ts994824713.content_datetime,'h:mm tt'));
-				}
-				echo('</strong> <br /><br />');
-			}
-			if(ts994824713.content_for_sale EQ '3'){
-				echo('<span style="color:##FF0000; font-size:14px; font-weight:bold;">This listing is SOLD</span><br /><br />');
-			}else if(ts994824713.content_for_sale EQ '4'){
-				echo('<span style="color:##FF0000; font-size:14px; font-weight:bold;">This listing is UNDER CONTRACT</span><br /><br />');
-			}
-			if(fileexists(request.zos.globals.homedir&'images/files/'&ts994824713.content_file)){
-				echo('<table style="border-spacing:5px; width:150px;">
-				<tr><td>');
-				if(ts994824713.content_file_caption NEQ ''){
-					echo(ts994824713.content_file_caption&'<br />');
-				}
-				echo('<a href="/images/files/#ts994824713.content_file#">Download File</a>
-				</td></tr>
-				</table>');
-			}
-			if(ts994824713.content_text EQ ''){
-				ct1948=ts994824713.content_summary;
-			}else{
-				ct1948=ts994824713.content_text;
-			} 
-			ct1948_2=ts994824713.content_text2;
-			ct1948_3=ts994824713.content_text3;
-			if(application.zcore.app.siteHasApp("content") and application.zcore.app.getAppData("content").optionStruct.content_config_contact_links EQ 1 and ts994824713.content_disable_contact_links EQ 1){
-				ct1948=rereplacenocase(ct1948,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
-				ct1948=rereplacenocase(ct1948,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-				ct1948=rereplacenocase(ct1948,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-
-				ct1948_2=rereplacenocase(ct1948_2,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
-				ct1948_2=rereplacenocase(ct1948_2,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-				ct1948_2=rereplacenocase(ct1948_2,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-
-				ct1948_3=rereplacenocase(ct1948_3,"(\b)(contact)(\b)",'\1<a href="/z/misc/inquiry/index" title="Contact Us">\2</a>\3',"ALL");
-				ct1948_3=rereplacenocase(ct1948_3,"(\b)(email)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-				ct1948_3=rereplacenocase(ct1948_3,"(\b)(e-mail)(\b)",'\1<a href="/z/misc/inquiry/index" title="Email Us">\2</a>\3',"ALL");
-			}
-			if(ts994824713.content_metacode NEQ ""){
-				application.zcore.template.appendTag("meta", ts994824713.content_metacode);
-			}
-			defaultLimit=application.zcore.functions.zso(application.zcore.app.getAppData("content").optionStruct,'content_config_child_display_limit', true, 20);
-			if(defaultLimit EQ 0){
-				defaultLimit=20;
-			}
-			form.offset=application.zcore.functions.zso(form, 'offset', true, 0);
-			form.count=application.zcore.functions.zso(form, 'count', true, defaultLimit);
-			
-			request.zos.requestLogEntry('content.cfc viewPage 4');
-			childContentStruct=displayChildContent(ts994824713, contentConfig, ct1948, form.offset, form.count);
-			if(form.offset LT 0 or (form.offset NEQ 0 and childContentStruct.qContentChild.recordcount EQ 0)){
-				application.zcore.functions.z301Redirect(request.zos.originalURL);
-			}
-			ct1948=childContentStruct.bodyText;
-			request.zos.requestLogEntry('content.cfc viewPage 5');
-			if(arraylen(contentConfig.arrContentReplaceKeywords)){
-				for(i=1;i LTE arraylen(contentConfig.arrContentReplaceKeywords);i++){
-					if(isDefined(contentConfig.arrContentReplaceKeywords[i])){
-						ct1948=replacenocase(ct1948,"##"&contentConfig.arrContentReplaceKeywords[i]&"##",evaluate(contentConfig.arrContentReplaceKeywords[i]));
-					}
-				}
-			}
-			if(ts994824713.content_html_text_bottom EQ 0 and ts994824713.content_html_text NEQ ""){
-				writeoutput(ts994824713.content_html_text&'<br style="clear:both;" />');
-				if(application.zcore.app.siteHasApp("listing") and contentSearchMLS EQ 1){
-					echo('<hr />');
-				}
-			}
-			pcount=0;  
-		 
-			if(application.zcore.app.siteHasApp("listing") and qContent.content_search_mls EQ 1 and qContent.content_show_map EQ 1 and application.zcore.functions.zso(form, 'hidemls',true) EQ 0){
-				application.zcore.listingStruct.functions.zListingDisplaySavedSearchMapSummary(ts994824713.content_saved_search_id);
-			}   
-			if(ts994824713.content_text_position EQ 0){
-				column2Empty=application.zcore.functions.zIsEditorHTMLEmpty(qContent.content_text2);
-				column3Empty=application.zcore.functions.zIsEditorHTMLEmpty(qContent.content_text3);
-				if(application.zcore.functions.zso(request.zos.globals, 'enableCSSFramework', true, 0) EQ 1){
-					if(column2Empty and not column3Empty){
-						// only 1 and 3
-						echo('<div class="z-float"><div class="z-1of2 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of2 z-p-0 z-ml-0">#ct1948_3#</div></div>');
-					}else if(not column2Empty and column3Empty){
-						// only 1 and 2
-						echo('<div class="z-float"><div class="z-1of2 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of2 z-p-0 z-ml-0">#ct1948_2#</div></div>');
-					}else if(not column2Empty and not column3Empty){
-						// 1, 2 and 3
-						echo('<div class="z-float"><div class="z-1of3 z-p-0 z-ml-0">#ct1948#</div><div class="z-1of3 z-p-0 z-ml-0">#ct1948_2#</div><div class="z-1of3 z-p-0 z-ml-0">#ct1948_3#</div></div>');
-					}else{
-						echo(ct1948);
-					}
-				}else{
-					if(column2Empty and not column3Empty){
-						// only 1 and 3
-						echo('<div style="width:100%; float:left;"><div class="zContentColumn1of2">#ct1948#</div><div class="zContentColumn1of2">#ct1948_3#</div></div>');
-					}else if(not column2Empty and column3Empty){
-						// only 1 and 2
-						echo('<div style="width:100%; float:left;"><div class="zContentColumn1of2">#ct1948#</div><div class="zContentColumn1of2">#ct1948_2#</div></div>');
-					}else if(not column2Empty and not column3Empty){
-						// 1, 2 and 3
-						echo('<div style="width:100%; float:left;"><div class="zContentColumn1of3">#ct1948#</div><div class="zContentColumn1of3">#ct1948_2#</div><div class="zContentColumn1of3">#ct1948_3#</div></div>');
-					}else{
-						echo(ct1948);
-					}
-				}
-				if(ct1948 NEQ ""){
-					echo('<br style="clear:both;" />');
-				}
-			}
-			endEditLink(contentConfig);
-			 
-			if(application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout)){
-				echo('<div style="clear:both; width:100%; float:left;">');
-				if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){ 
-					ts =structnew();
-					ts.image_library_id=ts994824713.content_image_library_id;
-					ts.size="#request.zos.globals.maximagewidth#x2000";
-					ts.crop=0;  
-					ts.offset=1;
-					ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
-					application.zcore.imageLibraryCom.displayImages(ts);  
-				}else{
-					ts =structnew();
-					ts.image_library_id=ts994824713.content_image_library_id;
-					ts.size="#request.zos.globals.maximagewidth#x2000";
-					ts.crop=0; 
-					ts.top=true;
-					ts.offset=0;
-					if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){
-						ts.limit=1;
-					}
-					ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
-					application.zcore.imageLibraryCom.displayImages(ts);
-				}
-				echo('</div>');
-			}
-			if(ts994824713.content_html_text_bottom EQ 1 and ts994824713.content_html_text NEQ ""){
-				writeoutput('<div style="width:100%; float:left;">'&ts994824713.content_html_text&'</div>');
-			}
-			if(structkeyexists(request.zos,'listingApp') and structkeyexists(request.zos,'listingApp') and application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_compliantidx',false,true) EQ true and ts994824713.content_firm_name NEQ ''){
-				echo('<br />Listing courtesy of #ts994824713.content_firm_name#');
-			}
+	if(ts994824713.content_image_library_layout EQ 11){
+		echo('</div><div class="z-1of2 z-fluid-at-992 z-p-0">');
+		ts =structnew();
+		ts.image_library_id=ts994824713.content_image_library_id;
+		ts.size="960x2000";
+		ts.crop=0; 
+		ts.offset=0;
+		ts.limit=0;
+		ts.layoutType=application.zcore.imageLibraryCom.getLayoutType(ts994824713.content_image_library_layout);
+		application.zcore.imageLibraryCom.displayImages(ts);
+		echo('</div>');
+	}
 	//}
 	// }
 	// if(structkeyexists(form, 'zsearchtexthighlight') AND contentConfig.searchincludebars EQ false and form[request.zos.urlRoutingParameter] NEQ "/z/misc/search-site/results"){
@@ -3274,53 +3291,7 @@ configCom.includeContentByName(ts);
 		if(out1 NEQ ""){
 			echo('<div style="clear:both;float:left; width:100%; margin-top:20px;  ">#out1#</div>');
 		}
-	}
-	/*
-	outputStruct={};
-	for(i=1;i LTE arraylen(arrOutputStruct);i++){
-		outputStruct[i]=arrOutputStruct[i];
-	}
-	try{
-		if(isNumeric(parentChildSorting) EQ false){
-			arrOrder=structsort(outputStruct,"numeric","asc","sort");
-		}else if(parentChildSorting EQ 1){
-			arrOrder=structsort(outputStruct,"numeric","desc","price");
-		}else if(parentChildSorting EQ 2){
-			arrOrder=structsort(outputStruct,"numeric","asc","price");
-		}else if(parentChildSorting EQ 3){
-			arrOrder=structsort(outputStruct,"text","asc","name");
-		}else if(parentChildSorting EQ 0){
-			arrOrder=structsort(outputStruct,"numeric","asc","sort");
-		}else{
-			arrOrder=structkeyarray(outputStruct);
-			arraysort(arrOrder, "numeric", "asc");
-		}
-	}catch(Any excpt){
-		arrOrder=structkeyarray(outputStruct);
-		arraysort(arrOrder, "numeric", "asc");
-	}
-	if(request.zos.isDeveloper and structkeyexists(form, 'zdebug')){
-		echo("parentChildSorting: "&parentChildSorting&"<br />");
-		echo('Initial sort order: <br />');
-		for(i in outputStruct){
-			echo('##'&i&' id:'&outputStruct[i].id&' | sort: '&outputStruct[i].sort&'<br />');
-		}
-		echo('<br />Final sort order: <br />');
-		for(i=1;i LTE arraylen(arrOrder);i++){
-			echo('##'&i&' id:'&outputStruct[arrOrder[i]].id&' | sort: '&outputStruct[arrOrder[i]].sort&'<br />');
-		}
-		echo('<br />');
-		
-	}
-	
-	uniqueChildStruct3838=structnew();
-	for(i=1;i LTE arraylen(arrOrder);i++){
-		c=outputStruct[arrOrder[i]];
-		if(c.id EQ "" or structkeyexists(uniqueChildStruct3838, c.id) EQ false){
-		uniqueChildStruct3838[c.id]=true;
-			writeoutput(c.output);
-		}
-	}*/
+	} 
 	if(application.zcore.app.siteHasApp("listing") and contentSearchMLS EQ 1){
 		application.zcore.listingStruct.functions.zListingDisplaySavedSearch(ts994824713.content_saved_search_id);
 	}
