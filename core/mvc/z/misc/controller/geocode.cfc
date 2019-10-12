@@ -507,6 +507,7 @@ if(rs.status EQ "error"){
 	form.address=application.zcore.functions.zso(form, "address");
 	form.key=application.zcore.functions.zso(form, 'key');
 	form.api=application.zcore.functions.zso(form, 'api', false, 0);
+	form.v=application.zcore.functions.zso(form, "v");
 
 	if(not structkeyexists(request.zsession, "geocodeKey"&form.v) or request.zsession["geocodeKey"&form.v] NEQ form.key){
 		application.zcore.functions.zReturnJSON({success:false, exact:false, key:form.key, errorMessage:"Invalid key"});

@@ -2844,7 +2844,7 @@ used to do search for a list of values
 	</cfscript>
 </cffunction>
 
-<cffunction name="getFeatureIDByName" localmode="modern" output="yes" returntype="struct">
+<cffunction name="getFeatureIDByName" localmode="modern" output="yes">
 	<cfargument name="featureVariableName" type="string" required="yes">
 	<cfscript>
 	if(structkeyexists(application.zcore.featureData.featureIdLookup, arguments.featureVariableName)){

@@ -150,6 +150,103 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	</cfscript>
 </cffunction>
 
+
+<cffunction name="getFeatureSection" access="public" localmode="modern"> 
+	<cfargument name="arrSchemaData" type="array" required="yes">
+	<cfscript> 
+	rs={success:false};  
+	if(not structkeyexists(request.zos, 'subpageLinkCacheStruct')){
+		processFeatureSchema(arguments.arrSchemaData);
+	}
+
+
+	cs=request.zos.subpageLinkCacheStruct;
+	if(structkeyexists(cs.linkCache, request.zos.originalURL)){
+		rs.section=cs.sectionCache[cs.linkCache[request.zos.originalURL]].section;
+		rs.arrLink=cs.sectionCache[cs.linkCache[request.zos.originalURL]].arrLink;
+		rs.success=true;
+	}else{ 
+		linkId2="-2";
+		arrLink=listToArray(request.zos.originalURL, "-");
+		if(arraylen(arrLink) GTE 3){
+			linkId2=arrLink[arraylen(arrLink)-1]&"-"&arrLink[arraylen(arrLink)];
+		}
+		if(structkeyexists(cs.linkCache, linkId2)){
+			rs.section=cs.sectionCache[cs.linkCache[linkId2]].section;
+			rs.arrLink=cs.sectionCache[cs.linkCache[linkId2]].arrLink;
+			rs.success=true;
+		}else{
+			for(i in cs.applicationCache){ 
+				app=cs.applicationCache[i];
+				if(application.zcore.app.siteHasApp(app) and application.zcore.app.getAppCFC(app)["isCurrentPageIn"&app]()){ 
+					rs.section=cs.sectionCache[i].section;
+					rs.arrLink=cs.sectionCache[i].arrLink;
+					rs.success=true;
+					break;
+				}
+			}
+		}
+	} 
+	return rs; 
+	</cfscript>
+</cffunction>
+
+<cffunction name="processFeatureSchema" access="public" localmode="modern"> 
+	<cfargument name="arrSchemaData" type="array" required="yes">
+	<cfscript>
+	ts={
+		sectionCache:{
+			//1: []
+		}, 
+		applicationCache:{
+		},
+		linkCache:{
+			//"appId-linkId":1
+			//"/full-link":1
+		}
+	};
+	validTypes={
+		"blog":true,
+		"job":true,
+		"event":true,
+		"listing":true
+	};
+
+	// the string parsing could be cached in a future version, so we could just do a structkeyexists instead
+	for(i3=1;i3<=arraylen(arguments.arrSchemaData);i3++){
+		currentSchema=arguments.arrSchemaData[i3]; 
+		arrSubSchema=application.zcore.featureCom.getFeatureSchemaArray("zgraphTheme", "Link", request.zos.globals.id, currentSchema); 
+		arrLink=listToArray(currentSchema.url, "-");
+		linkId="-1";
+		ts.sectionCache[i3]={section:currentSchema, arrLink:arrSubSchema};
+		if(arraylen(arrLink) GTE 3){
+			linkId=arrLink[arraylen(arrLink)-1]&"-"&arrLink[arraylen(arrLink)];
+			ts.linkCache[linkId]=i3;
+		}
+		ts.linkCache[currentSchema.url]=i3;
+		if(currentSchema.application NEQ ""){
+			if(not structkeyexists(validTypes, currentSchema.application)){
+				throw(currentSchema.application&" is not a valid application name. Only Blog, Event, Job or Listing are currently supported for the ""Application"" field.");
+			}
+			ts.applicationCache[i3]=currentSchema.application;
+		} 
+ 
+		for(i2=1;i2<=arraylen(arrSubSchema);i2++){ 
+			arrLink=listToArray(arrSubSchema[i2].url, "-");
+			linkId="-1";
+			if(arraylen(arrLink) GTE 3){
+				linkId=arrLink[arraylen(arrLink)-1]&"-"&arrLink[arraylen(arrLink)];
+			}
+			ts.sectionCache[i3]={section:currentSchema, arrLink:arrSubSchema};
+			ts.linkCache[linkId]=i3; 
+			ts.linkCache[arrSubSchema[i2].url]=i3; 
+		} 
+	}  
+	request.zos.subpageLinkCacheStruct=ts;
+	</cfscript>
+</cffunction>
+
+
 <cffunction name="setCurrentSection" access="public" localmode="modern"> 
 	<cfargument name="arrGroupData" type="array" required="yes">
 	<cfargument name="sectionId" type="string" required="yes">

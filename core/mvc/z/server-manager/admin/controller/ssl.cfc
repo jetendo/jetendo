@@ -716,7 +716,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 		application.zcore.status.setStatus(request.zsid,"SSL Certificate doesn't exist.");
 		application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid=#request.zsid#");
 	}
-	if(qSSL.ssl_public_key NEQ ""){
+	if(qSSL.recordcount NEQ 0 and qSSL.ssl_public_key NEQ ""){
 		application.zcore.status.setStatus(request.zsid, "SSL Certificate already activated. You must create a new SSL Certificate to replace this one.", form, true);
 		application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid="&request.zsid);
 	}

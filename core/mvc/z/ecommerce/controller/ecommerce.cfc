@@ -1168,6 +1168,47 @@ SELECT *, MATCH(a5_text) AGAINST (':facet1:2| magic') AS relevance FROM a5;
 		
 
 
+		echo('<tr>
+		<th colspan="2"><h3>Authorize.net</h3></th>
+		</tr>
+		<tr>
+		<th>Enabled:</th>
+		<td>');
+		echo(application.zcore.functions.zInput_Boolean("ecommerce_config_authorize_net_enabled", form.ecommerce_config_authorize_net_enabled));
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Login ID:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_authorize_net_login_id";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Transaction Key:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_authorize_net_transaction_key";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Signature Key:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_authorize_net_signature_key";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Client Key:</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "ecommerce_config_authorize_net_client_key";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr> ');
 
 		/*
 		<tr>

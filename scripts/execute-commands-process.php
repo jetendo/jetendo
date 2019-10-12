@@ -506,7 +506,7 @@ function sslInstallCertificate($a){
 	file_put_contents($currentPath.".key", $js->ssl_private_key);
 	$cmd="/usr/bin/openssl rsa -in ".escapeshellarg($currentPath.".key")." -text -noout | /bin/grep 'Private-Key:' ";
 	$ssl_key_size=trim(str_replace(" bit)", "", str_replace("Private-Key: (", "",`$cmd`)));
-	if($ssl_key_size != "" && $ssl_key_size <2048){
+	if($ssl_key_size != "" && strstr($ssl_key_size, "2048") === FALSE){
 		$rs->success=false;
 		$rs->errorMessage="The Key Size must be 2048 or higher. It was ".$ssl_key_size;
 		echo($rs->errorMessage."\n");
@@ -585,7 +585,7 @@ function sslGenerateKeyAndCSR($a){
 	if(!is_dir($currentPath)){
 		mkdir($currentPath, 0400, true);
 	}
-	if($js->ssl_key_size != "" && $js->ssl_key_size <2048){
+	if($js->ssl_key_size != "" && strstr($js->ssl_key_size, "2048") === FALSE){
 		$rs->success=false;
 		$rs->errorMessage="The Key Size must be 2048 or higher. It was ".$js->ssl_key_size;
 		echo($rs->errorMessage."\n");
