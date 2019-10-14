@@ -2018,8 +2018,13 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 				}
 			}
 			db.sql&=" s2.site_id = #db.param(request.zos.globals.id)#
-			GROUP BY s1.site_x_option_group_set_id, s2.site_x_option_group_set_id
-			ORDER BY set1.site_x_option_group_set_sort ASC  ";
+			GROUP BY s1.site_x_option_group_set_id, s2.site_x_option_group_set_id ";
+
+			if(not structkeyexists(ts, 'selectmenu_parentfield') or ts.selectmenu_parentfield EQ ""){
+				db.sql&=" ORDER BY label ASC ";
+			}else{
+				db.sql&=" ORDER BY set1.site_x_option_group_set_sort ASC  ";
+			}
 			qTemp2=db.execute("qTemp2", "", 10000, "query", false); 
 			//writedump(qtemp2);abort;
 		}
