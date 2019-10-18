@@ -68,6 +68,7 @@
 	<cfscript> 
 	this.init();
 	form.returnJson = application.zcore.functions.zso(form, 'returnJson', true, 0);
+	form.returnBoolean=application.zcore.functions.zso(form, "returnBoolean", false, false);
 	form.return_url = application.zcore.functions.zso(form, 'return_url');
 	form.error_url=application.zcore.functions.zso(form, 'error_url');
 	if(form.return_url EQ ""){
@@ -84,28 +85,38 @@
 			success:false,
 			errorMessage:"Invalid request ##3."
 		};
-		application.zcore.functions.zReturnJson(ts);
+		if(form.returnBoolean EQ 1){
+			return ts;
+		}else if(form.returnJson EQ 1){
+			application.zcore.functions.zReturnJson(ts);
+		}
 		application.zcore.functions.zRedirect("/z/misc/mailing-list/thankyou?modalpopforced=#form.modalpopforced#");
 	}
 
 	
 	if(form.modalpopforced EQ 1){
 		if(application.zcore.functions.zso(form, 'js3811') NEQ "j219"){
-			if(form.returnJson EQ 1){
-				ts={
-					success:false,
-					errorMessage:"Invalid request ##1."
-				};
+			
+			ts={
+				success:false,
+				errorMessage:"Invalid request ##1."
+			};
+			if(form.returnBoolean EQ 1){
+				return ts;
+			}else if(form.returnJson EQ 1){
 				application.zcore.functions.zReturnJson(ts);
 			}
 			writeoutput('~n~');application.zcore.functions.zabort();
 		}
 		if(application.zcore.functions.zCheckFormHashValue(application.zcore.functions.zso(form, 'js3812')) EQ false){
-			if(form.returnJson EQ 1){
-				ts={
-					success:false,
-					errorMessage:"Your session has expired.  Please submit the form again."
-				};
+			ts={
+				success:false,
+				errorMessage:"Your session has expired.  Please submit the form again."
+			};
+
+			if(form.returnBoolean EQ 1){
+				return ts;
+			}else if(form.returnJson EQ 1){
 				application.zcore.functions.zReturnJson(ts);
 			}
 			application.zcore.status.setStatus(request.zsid, "Your session has expired.  Please submit the form again.",form,true);
@@ -127,12 +138,14 @@
 	form.user_first_name=application.zcore.functions.zso(form, 'user_first_name');
 	form.user_last_name=application.zcore.functions.zso(form, 'user_last_name');
 	form.user_username=application.zcore.functions.zso(form, 'user_username');
-	if(form.user_username EQ "" or application.zcore.functions.zEmailValidate(form.user_username) EQ false){
-		if(form.returnJson EQ 1){
-			ts={
-				success:false,
-				errorMessage:"A valid email address is required."
-			};
+	if(form.user_username EQ "" or application.zcore.functions.zEmailValidate(form.user_username) EQ false){ 
+		ts={
+			success:false,
+			errorMessage:"A valid email address is required."
+		};
+		if(form.returnBoolean EQ 1){
+			return ts;
+		}else if(form.returnJson EQ 1){
 			application.zcore.functions.zReturnJson(ts);
 		}
 		application.zcore.status.setStatus(request.zsid, "A valid email address is required.", true);
@@ -158,11 +171,12 @@
 	}; 
 	autoResponderCom=createobject("component", "zcorerootmapping.mvc.z.inquiries.admin.controller.autoresponder");
 	rs=autoResponderCom.sendAutoresponder(ts);  
-
-	if(form.returnJson EQ 1){
-		ts={
-			success:true
-		};
+	ts={
+		success:true
+	};
+	if(form.returnBoolean){
+		return ts;
+	}else if(form.returnJson EQ 1){
 		application.zcore.functions.zReturnJson(ts);
 	}
 	application.zcore.functions.zRedirect(form.return_url);	

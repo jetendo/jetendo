@@ -532,7 +532,7 @@ displaySchemaCom.add();
 	</form>
 	<script type="text/javascript">
 	zArrDeferredFunctions.push(function(){
-		$("##customForm1").bind("submit", function(){
+		$("####customForm1").bind("submit", function(){
 			var postObj=zGetFormDataByFormId("customForm1"); 
 			var tempObj={};
 			tempObj.id="ajaxModalFormLoad";

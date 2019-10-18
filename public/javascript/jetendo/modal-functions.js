@@ -49,7 +49,9 @@
 			padding=0;
 		}else if(zWindowSize.width < 550){
 			zModalSideReduce=10;
-			padding=10;
+			if(padding != 0){
+				padding=10;
+			}
 		}
 		window.zCurrentModalIframeId="zModalIframe"+modalIndexId;
 

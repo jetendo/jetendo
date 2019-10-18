@@ -13,8 +13,9 @@ function setupMobileHeader(){
 
 	mobileHeaderMobileMenuClosedLinks.on("click",function(e){
 		e.preventDefault();
-		$(this).parent().toggleClass("closed");
+		//$(this).parent().toggleClass("closed");
 	});
+	
  
 	if(mobileHeader.hasClass("z-mobile-allow-fixed")){
 		win.on( 'scroll', function() {

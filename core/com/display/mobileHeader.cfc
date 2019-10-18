@@ -113,8 +113,8 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 					for(i=1;i<=arraylen(ss.arrLink);i++){
 						link=ss.arrLink[i];
 						echo('<li');
-						if(link.closed?:false){
-							echo(' class="closed"');
+						if((structkeyexists(link, "closed") and link.closed) and arraylen(link.arrLink) NEQ 0){
+							echo(' class="closed" data-count="#arraylen(link.arrLink)#"');
 						}
 						echo('><a href="#link.link#"');
 						if(structkeyexists(link, 'target') and link.target NEQ ""){
