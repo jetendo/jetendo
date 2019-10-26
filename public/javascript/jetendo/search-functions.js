@@ -144,9 +144,11 @@
 				$(this).removeClass("zSearchTabDivSelected");
 			}
 		});
-		searchCriteriaTimeoutID=setTimeout(function(){
-			$("#zSearchFormDiv").html("One moment while we load the search form.");
-		}, 500);
+		if(typeof disableSearchLoadMessage == "undefined"){
+			searchCriteriaTimeoutID=setTimeout(function(){
+				$("#zSearchFormDiv").html("One moment while we load the search form.");
+			}, 500);
+		}
 		
 		var tempObj={};
 		tempObj.id="ajaxGetSearchCriteria";

@@ -11,9 +11,10 @@ function setupMobileHeader(){
 	var mobileHeaderMobileMenuOverlay = $( '.z-mobile-header-overlay', mobileHeader );
 	var mobileHeaderMobileMenuClosedLinks        = $( '.z-mobile-menu li.closed > a', mobileHeader );
 
+
 	mobileHeaderMobileMenuClosedLinks.on("click",function(e){
 		e.preventDefault();
-		//$(this).parent().toggleClass("closed");
+		$(this).parent().toggleClass("closed");
 	});
 	
  

@@ -275,75 +275,90 @@
 					}
 
 					if ( settings.videoSlides ) {
-						if ( settings.videoResponsive ) {
-							if ( window.innerWidth < settings.videoResponsiveBreakpoint ) {
-								if ( settings.debug ) {
-									console.log( '--- MOBILE VIDEO SELECTOR USED ---' );
+						if(settings.videoWistia){
+							window._wq = window._wq || [];
+							_wq.push({ id: settings.videoWistiaID, onReady: function(video) { 
+								videoObj = $("video", video.container);
+								slider.bindVideoEvents(videoObj, slideIndex, forceDirection);
+							}});
+						}else{
+						
+							if ( settings.videoResponsive ) {
+								if ( window.innerWidth < settings.videoResponsiveBreakpoint ) {
+									if ( settings.debug ) {
+										console.log( '--- MOBILE VIDEO SELECTOR USED ---' );
+									}
+									videoObj = $( settings.videoMobileSelector, slider.currentSlide );
+								} else {
+									if ( settings.debug ) {
+										console.log( '--- DESKTOP VIDEO SELECTOR USED ---' );
+									}
+									videoObj = $( settings.videoDesktopSelector, slider.currentSlide );
 								}
-								videoObj = $( settings.videoMobileSelector, slider.currentSlide );
 							} else {
 								if ( settings.debug ) {
-									console.log( '--- DESKTOP VIDEO SELECTOR USED ---' );
+									console.log( '--- DEFAULT VIDEO SELECTOR USED ---' );
 								}
-								videoObj = $( settings.videoDesktopSelector, slider.currentSlide );
+								videoObj = $( settings.videoSelector, slider.currentSlide );
 							}
-						} else {
 							if ( settings.debug ) {
-								console.log( '--- DEFAULT VIDEO SELECTOR USED ---' );
+								console.log( videoObj, videoObj.length );
 							}
-							videoObj = $( settings.videoSelector, slider.currentSlide );
+							
+							slider.bindVideoEvents(videoObj, slideIndex, forceDirection);
+						}
+					}
+				},
+				bindVideoEvents: function(videoObj, slideIndex, forceDirection){
+					if ( videoObj.length > 0 ) {
+						if ( settings.debug ) {
+							console.log( '--- SLIDE HAS VIDEO ---' );
 						}
 
-						if ( videoObj.length > 0 ) {
+						if ( ! slider.hasClass( 'playing' ) ) {
 							if ( settings.debug ) {
-								console.log( '--- SLIDE HAS VIDEO ---' );
+								console.log( '--- PLAYING VIDEO ---' );
 							}
 
-							if ( ! slider.hasClass( 'playing' ) ) {
+							clearInterval( sliderInterval );
+
+							slider.animateSlide( slideIndex, lastSlideIndex, forceDirection );
+
+							slider.addClass( 'playing' );
+							videoObj.attr( 'currenttime', 0 );
+							videoObj.trigger( 'play' );
+
+							videoObj.unbind( 'ended' );
+							videoObj.bind( 'ended', function() {
 								if ( settings.debug ) {
-									console.log( '--- PLAYING VIDEO ---' );
+									console.log( '--- VIDEO ENDED ---' );
+								}
+								slider.removeClass( 'playing' );
+								$( this ).attr( 'currenttime', 0 );
+
+								lastSlideIndex = activeSlideIndex;
+
+								if ( activeSlideIndex < ( totalSlides - 1 ) ) {
+									activeSlideIndex++;
+								} else {
+									activeSlideIndex = 0;
 								}
 
-								clearInterval( sliderInterval );
+								if ( settings.auto ) {
+									slider.resetInterval();
+								}
 
-								slider.animateSlide( slideIndex, lastSlideIndex, forceDirection );
+								videoObj = null;
 
-								slider.addClass( 'playing' );
-								videoObj.attr( 'currenttime', 0 );
-								videoObj.trigger( 'play' );
+								if ( settings.pager ) {
+									$( 'span', pager ).removeClass( 'active' );
+									$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
+								}
 
-								videoObj.unbind( 'ended' );
-								videoObj.bind( 'ended', function() {
-									if ( settings.debug ) {
-										console.log( '--- VIDEO ENDED ---' );
-									}
-									slider.removeClass( 'playing' );
-									$( this ).attr( 'currenttime', 0 );
-
-									lastSlideIndex = activeSlideIndex;
-
-									if ( activeSlideIndex < ( totalSlides - 1 ) ) {
-										activeSlideIndex++;
-									} else {
-										activeSlideIndex = 0;
-									}
-
-									if ( settings.auto ) {
-										slider.resetInterval();
-									}
-
-									videoObj = null;
-
-									if ( settings.pager ) {
-										$( 'span', pager ).removeClass( 'active' );
-										$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
-									}
-
-									slides.removeClass( 'active' );
-									slider.setActiveSlide( activeSlideIndex, true, slideIndex, forceDirection );
-									return;
-								} );
-							}
+								slides.removeClass( 'active' );
+								slider.setActiveSlide( activeSlideIndex, true, slideIndex, forceDirection );
+								return;
+							} );
 						}
 					}
 				},

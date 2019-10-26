@@ -150,11 +150,19 @@ search sql generator has to be able to search on child group data for paging to 
 	</div>
 	<script type="text/javascript">
 	/* <![CDATA[ */
-	if(typeof reloadResultsIfBackDetected != "undefined"){
-		reloadResultsIfBackDetected();
-	}else{
-		zArrDeferredFunctions.push(function(){ reloadResultsIfBackDetected();});
-	}
+	<cfif form.groupID NEQ 0>
+		var disableSearchLoadMessage=true;
+		zArrDeferredFunctions.push(function(){
+			getSearchCriteria(#form.groupID#);
+		});
+	<cfelse>
+		if(typeof reloadResultsIfBackDetected != "undefined"){
+			reloadResultsIfBackDetected();
+		}else{
+			zArrDeferredFunctions.push(function(){ reloadResultsIfBackDetected();});
+		}
+		
+	</cfif>
 	/* ]]> */
 	</script>
 </cffunction>
@@ -396,10 +404,10 @@ search sql generator has to be able to search on child group data for paging to 
 						c=rs2.arrResult[i];
 						echo('<div class="z-search-link">');
 							if(hasImage){
-								image=imageStruct[c.__setId];
+								image1=imageStruct[c.__setId];
 								echo('<div class="z-search-link-image">');
-								if(image NEQ ""){
-									echo('<a href="#c.__url#" target="_blank">'&image&'</a>');
+								if(image1 NEQ ""){
+									echo('<a href="#c.__url#" target="_blank">'&image1&'</a>');
 								}else{
 									echo('&nbsp;');
 								}
@@ -540,7 +548,7 @@ search sql generator has to be able to search on child group data for paging to 
 	site_option_public_searchable = #db.param(1)# and 
 	site_option_deleted = #db.param(0)#
 	ORDER BY site_option_sort ASC";
-	qOption=db.execute("qOption");
+	qOption=db.execute("qOption", "", 10000, "query", false);
 	if(qOption.recordcount EQ 0){
 		rs.success=false;
 		rs.errorMessage="No public search criteria are available for this group.";
@@ -589,7 +597,7 @@ search sql generator has to be able to search on child group data for paging to 
 		ORDER BY 
 		FIELD(site_option_group_id, #db.trustedSQL("'"&arrayToList(arrChildGroupId, "','")&"'")#), 
 		site_option_sort ASC";
-		qChildOption=db.execute("qChildOption");
+		qChildOption=db.execute("qChildOption", "", 10000, "query", false);
 		lastGroupId="0";
 		optionChildStruct={};
 		groupForceOpenStruct={};
