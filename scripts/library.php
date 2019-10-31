@@ -214,6 +214,7 @@ $arrQueryFunction["24"]="getRetsNormalBySysId";
 $arrQueryFunction["25"]="getRetsNormalBySysId";
 $arrQueryFunction["29"]="getRetsNormalBySysId";
 $arrQueryFunction["30"]="getRetsNormalBySysId";
+$arrQueryFunction["31"]="getRetsNormalBySysId";
 $arrListingQueryFunction=array();
 $arrListingQueryFunction["12"]="getRetsNormalByListingId";
 $arrListingQueryFunction["16"]="getRetsNormalByListingId";
@@ -224,6 +225,7 @@ $arrListingQueryFunction["24"]="getRetsNormalByListingId";
 $arrListingQueryFunction["25"]="getRetsNormalByListingId";
 $arrListingQueryFunction["29"]="getRetsNormalByListingId";
 $arrListingQueryFunction["30"]="getRetsNormalByListingId";
+$arrListingQueryFunction["31"]="getRetsNormalByListingId";
 
 $retsConnections=array();
 
@@ -291,6 +293,8 @@ function getRetsImageType($mls_id){
 		return "LargePhoto";
 	}else if($mls_id == "30"){
 		return "HighRes";
+	}else if($mls_id == "31"){
+		return "LargePhoto";
 	}else{
 		return false;
 	}

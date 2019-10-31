@@ -683,8 +683,7 @@ variables.typeStruct["text"]="text";
 	arguments.sharedStruct.lookupStruct.table="rets#this.mls_id#_#lcase(arguments.resource)#";
 	arguments.sharedStruct.lookupStruct.primaryKey="rets#this.mls_id#_#variables.resourceStruct[arguments.resource].id#";
 	arguments.sharedStruct.lookupStruct.arrColumns=listtoarray(arguments.sharedStruct.lookupStruct.idxColumns);
-	arguments.sharedStruct.lookupStruct.idColumnOffset=0;
-	
+	arguments.sharedStruct.lookupStruct.idColumnOffset=0; 
 	for(g=1;g LTE arraylen(arguments.sharedStruct.lookupStruct.arrColumns);g++){
 		if(arguments.sharedStruct.lookupStruct.arrColumns[g] EQ arguments.sharedStruct.lookupStruct.primaryKey){
 			arguments.sharedStruct.lookupStruct.idColumnOffset=g;

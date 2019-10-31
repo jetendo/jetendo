@@ -213,9 +213,10 @@
 	<cfargument name="mls_saved_search_id" type="string" required="yes">
 	<cfargument name="ss" type="struct" required="no" default="#structnew()#">
 	<cfscript>
+	mls_saved_search_id=arguments.mls_saved_search_id;
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("mls_saved_search", request.zos.zcoreDatasource)# mls_saved_search 
-	where mls_saved_search_id= #db.param(arguments.mls_saved_search_id)# and 
+	where mls_saved_search_id= #db.param(mls_saved_search_id)# and 
 	site_id = #db.param(request.zos.globals.id)# and 
 	mls_saved_search_deleted =#db.param(0)# ";
 	qSavedSearch2=db.execute("qSavedSearch2");

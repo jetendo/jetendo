@@ -111,7 +111,7 @@
 	qM2=db.execute("qM2"); 
 	application.zcore.functions.zQueryToStruct(qM2, form);
 	
-	q2=request.zos.listing.functions.zGetSavedSearchQuery(qM2.mls_saved_search_id);
+	q2=request.zos.listing.functions.zGetSavedSearchQuery(form.mls_saved_search_id);
 	application.zcore.functions.zquerytostruct(q2,form);
 	</cfscript>
         
