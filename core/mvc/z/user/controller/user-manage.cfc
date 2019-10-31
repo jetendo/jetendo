@@ -561,7 +561,7 @@ finish simplifying this script.
 			if(variables.metaFieldInUse){
 				metaFields=variables.metaCom.displayForm("user", "Basic", "first", true);
 				if(arraylen(metaFields)){ 
-					for(i=arraylen(metaFields);i>=1;i--){
+					for(i=1;i<=arraylen(metaFields);i++){
 						echo('<tr><th>#metaFields[i].label#');
 						if(metaFields[i].required){
 							echo(' *');
@@ -575,7 +575,7 @@ finish simplifying this script.
 			if(variables.metaFieldInUse){
 				metaFields=variables.metaCom.displayForm("user", "Advanced", "first", true);
 				if(arraylen(metaFields)){ 
-					for(i=arraylen(metaFields);i>=1;i--){
+					for(i=1;i<=arraylen(metaFields);i++){
 						echo('<tr><th>#metaFields[i].label#');
 						if(metaFields[i].required){
 							echo(' *');

@@ -6,6 +6,7 @@
 	var userGroupAdminCom=0;
 	var db=request.zos.queryObject;
 	var ugid=0;
+	variables.metaCom=createObject("component", "zcorerootmapping.com.zos.meta");
 	if(structkeyexists(form,"x_ajax_id")){
 		application.zcore.functions.zHeader("x_ajax_id",form.x_ajax_id);
 	}
@@ -224,6 +225,18 @@
 	form.submitPref=application.zcore.functions.zso(form, 'submitPref',false,'Update Communication Preferences');
 	form.returnurl=application.zcore.functions.zso(form, 'returnurl');
 
+	arrError=variables.metaCom.validate("user", form);
+	if(arrayLen(arrError)){
+		if(structkeyexists(form, 'x_ajax_id')){
+			writeoutput('{success:false,errorMessage:"#arraytolist(arrError, "<br>")#"}');
+			abort;	
+		}else{
+			for(e in arrError){
+				application.zcore.status.setStatus(request.zsid, e, form, true);
+			}
+			application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
+		}
+	}
 
 	
 	form.user_password=trim(replace(application.zcore.functions.zso(form, 'user_password'),chr(160),"","all"));
@@ -236,13 +249,14 @@
 	if(len(trim(application.zcore.functions.zso(form, 'e'))) EQ 0 or application.zcore.functions.zEmailValidate(form.e) EQ false){
 		if(structkeyexists(form, 'x_ajax_id')){
 			writeoutput('{success:false,errorMessage:"Email Address is required."}');
-			application.zcore.functions.zabort();		
+			abort;		
 		}else{
 			application.zcore.status.setStatus(request.zsid, "Email Address is required.",false,true);
 			application.zcore.functions.zRedirect("/z/user/preference/index?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#");
 		}
 	}
 
+	form.user_meta_json=variables.metaCom.save("user", form); 
 	// secure the member_signature html, and limit which tags are allowed.
 	form.member_signature=application.zcore.email.cleanHTML(application.zcore.functions.zso(form, 'member_signature'));
 	
@@ -838,6 +852,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	if(isdefined('variables.qcheckemail')){
 		application.zcore.functions.zquerytostruct(variables.qcheckemail, form);
 	}
+	structappend(form, variables.metaCom.getData("user", form), false); 
 	application.zcore.functions.zStatusHandler(request.zsid,true);
 	
 	if(form.e NEQ '' and application.zcore.functions.zEmailValidate(form.e) EQ false){
@@ -933,6 +948,18 @@ If the link does not work, please copy and paste the entire link in your browser
 			</cfif> --->
 		<cfelse>
 			<table style="border-spacing:0px; width:98%;" class="zinquiry-form-table">
+				<cfscript> 
+				metaFields=variables.metaCom.displayForm("user", "Basic", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+				</cfscript>
 				<tr class=" zUserPreferenceField email">
 					<td><span style=" font-weight:bold;">Email</span></td>
 					<td><input type="text" name="user_email" style=" width:100%;" value="<cfif form.user_email EQ ''>#htmleditformat(form.e)#<cfelse>#htmleditformat(form.user_email)#</cfif>" /></td>
@@ -1006,6 +1033,38 @@ If the link does not work, please copy and paste the entire link in your browser
 						</cfscript>  
 					</td>
 				</tr>
+				<cfscript> 
+				metaFields=variables.metaCom.displayForm("user", "Basic", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "first", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+				metaFields=variables.metaCom.displayForm("user", "Advanced", "last", true);
+				if(arraylen(metaFields)){ 
+					for(i=1;i<=arraylen(metaFields);i++){
+						echo('<tr><th>#metaFields[i].label#');
+						if(metaFields[i].required){
+							echo(' *');
+						}
+						echo('</th><td>#metaFields[i].field#</td></tr>');
+					}
+				}
+				</cfscript>
 			</table>
 		</cfif>
 		<cfif local.hideAllPrefFields EQ false>
