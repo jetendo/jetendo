@@ -220,7 +220,7 @@
 			js=deserializeJSON(cfhttp.filecontent); 
 		}
 		qs.page+=1;
-		if(js.status EQ "timeout"){
+		if(structkeyexists(js, "status") and js.status EQ "timeout"){
 			// ignore timeouts
 			echo("A timeout occurred on the calltrackingmetrics.com side of the api, so we have not imported anything.");
 			return;
