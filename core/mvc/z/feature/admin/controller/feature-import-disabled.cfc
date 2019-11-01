@@ -36,7 +36,7 @@
 		// field:Number
 		"Number":{id:17},
 		// field:Checkbox:checkbox_delimiter=|&checkbox_labels=Yes|No&checkbox_values=Yes|No
-		"Radio Schema":{id:14, radio_delimiter:"|", radio_labels:"Yes|No", radio_values:"Yes|No"},
+		"Radio Group":{id:14, radio_delimiter:"|", radio_labels:"Yes|No", radio_values:"Yes|No"},
 		// field:Checkbox:checkbox_delimiter=|&checkbox_labels=Yes|No&checkbox_values=Yes|No
 		"Select Menu":{id:7, selectmenu_delimiter:"|", selectmenu_labels:"Label1|Label2", selectmenu_values:"Value1|Value2"},
 		// field:Slider:slider_from=1&slider_to=10&slider_step=1

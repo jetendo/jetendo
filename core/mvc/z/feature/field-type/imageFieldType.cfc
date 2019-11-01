@@ -281,10 +281,8 @@
 			nv=oldnv;
 		}else if(ArrayLen(arrList) NEQ 0){
 			originalFile=request.zos.lastUploadFileName;
-
-			tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
-			if(tempSet[arguments.row.feature_field_variable_name] NEQ ""){
-				arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9), true);
+			if(arguments.dataFields[arguments.row.feature_field_variable_name] NEQ ""){
+				arrValue=listToArray(arguments.dataFields[arguments.row.feature_field_variable_name], chr(9), true);
 				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arrValue[1]);	
 				if(arrayLen(arrValue) EQ 2){
 					application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&arrValue[2]);	
@@ -331,20 +329,21 @@
 		}
 	}else{
 		// retrieve from the database instead
-		tempSet=application.zcore.featureCom.parseFieldData(arguments.row);
-		arrValue=listToArray(tempSet[arguments.row.feature_field_variable_name], chr(9), true);
+		arrValue=listToArray(arguments.dataFields[arguments.row.feature_field_variable_name], chr(9), true);
 		nv=arrValue[1];
 		originalFile="";
 		if(arraylen(arrValue) EQ 2){
 			originalFile=arrValue[2];
 		}
-		structdelete(form, arguments.prefixString&arguments.row["feature_field_id"]);
 		nvd=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]&'_delete');
 		if(nvd EQ 1){
+			structdelete(form, arguments.prefixString&arguments.row["feature_field_id"]);
 			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&nv);
 			application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/feature-options/'&originalFile);
 			nv='';	
 			originalFile='';
+		}else{
+			form[arguments.prefixString&arguments.row["feature_field_id"]]=arguments.dataFields[arguments.row.feature_field_variable_name];
 		}
 	}
 	rs={ success: true, value: nv, dateValue: "" };
@@ -360,8 +359,12 @@
 	<cfargument name="prefixString" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="dataFields" type="struct" required="yes">
-	<cfscript>
-	return application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
+	<cfscript> 
+	nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
+	if(nv EQ ""){
+		return arguments.dataFields[arguments.row.feature_field_variable_name];
+	}
+	return nv;
 	</cfscript>
 </cffunction>
 

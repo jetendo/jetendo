@@ -1589,16 +1589,10 @@
 	hasTitleField=false;
 	hasSummaryField=false;
 	hasPrimaryField=false;
-	hasUserField=false;
+	hasUserField=false; 
 	originalValueStruct={};
-	if(qD.feature_data_field_order NEQ ""){
-		arrFieldOrder=listToArray(qD.feature_data_field_order, chr(13), true);
-		arrFieldData=listToArray(qD.feature_data_data, chr(13), true);
-		for(i=1;i<=arraylen(arrFieldOrder);i++){
-			originalValueStruct[arrFieldOrder[i]]=arrFieldData[i];
-		}
-	}
 	for(row in qD){
+		originalValueStruct=application.zcore.featureCom.parseFieldData(row); 
 		var typeStruct=deserializeJson(row.feature_field_type_json);
 		typeStructCache[row.feature_field_id]=typeStruct; 
 		if(row.feature_field_search_summary_field EQ 1){
@@ -1617,6 +1611,7 @@
 		nv=currentCFC.getFormValue(row, 'newvalue', form, originalValueStruct);
 		if(row.feature_field_required EQ 1){
 			if(nv EQ ""){
+				// if a file or image was already uploaded, then ignore this.
 				application.zcore.status.setFieldError(request.zsid, "newvalue"&row.feature_field_id, true);
 				application.zcore.status.setStatus(request.zsid, row.feature_field_display_name&" is a required field.", false, true);
 				errors=true;
@@ -3195,7 +3190,7 @@ Define this function in another CFC to override the default email format
 		// if(mainSchemaStruct.feature_schema_admin_paging_limit NEQ 0){
 		// 	db.sql&=" LIMIT #db.param((form.zIndex-1)*mainSchemaStruct.feature_schema_admin_paging_limit)#, #db.param(mainSchemaStruct.feature_schema_admin_paging_limit)# ";
 		// }
-		qS=db.execute("qS", "", 10000, "query", false);  
+		qS=db.execute("qS", "", 10000, "query", false);   
 
 		if(mainSchemaStruct.feature_schema_limit GT 0){
 			db.sql="SELECT count(feature_schema.feature_schema_id) count
@@ -3578,47 +3573,52 @@ Define this function in another CFC to override the default email format
 							}else{
 								echo('class="row1"');
 							}
-							echo('>
-							<td class="z-hide-at-767">#row.feature_data_id#</td>
-							<td>');
-							if(row.feature_data_level GT 0){
-								echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
+							echo('>');
+
+							savecontent variable="rowOutput"{ 
+								echo('<td class="z-hide-at-767">#row.feature_data_id#</td>
+								<td>');
+								if(row.feature_data_level GT 0){
+									echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
+								}
+								echo('#rsData.name#</td>
+								<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
+								<td>');
+								if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){
+									echo(application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime));
+								}else{
+									echo(application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime));
+								}
+								echo('</td>');
+								echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
+								ms={
+									sortEnabled:sortEnabled,
+									arrChildSchema:arrChildSchema,
+									methodBackup:methodBackup,
+									mainSchemaStruct:mainSchemaStruct,
+									qSCount:{},
+									struct:arguments.struct,
+									childRow:childRow,
+									subgroupStruct:subgroupStruct
+								};
+								if(sortEnabled){
+									ms.queueSortCom=queueSortCom;
+								}
+								if(mainSchemaStruct.feature_schema_limit GT 0){
+									ms.qSCount=qSCount;
+								}
+								echo(getAdminHTML(row, ms));
+								echo('</td>');
 							}
-							echo('#rsData.name#</td>
-							<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
-							<td>');
-							if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){
-								echo(application.zcore.functions.zGetLastUpdatedDescription(row.feature_data_updated_datetime));
-							}else{
-								echo(application.zcore.functions.zGetLastUpdatedDescription(childRow.feature_data_updated_datetime));
-							}
-							echo('</td>');
-							echo('<td style="white-space:nowrap;white-space: nowrap;" class="z-manager-admin">'); 
-							ms={
-								sortEnabled:sortEnabled,
-								arrChildSchema:arrChildSchema,
-								methodBackup:methodBackup,
-								mainSchemaStruct:mainSchemaStruct,
-								qSCount:{},
-								struct:arguments.struct,
-								childRow:childRow,
-								subgroupStruct:subgroupStruct
-							};
-							if(sortEnabled){
-								ms.queueSortCom=queueSortCom;
-							}
-							if(mainSchemaStruct.feature_schema_limit GT 0){
-								ms.qSCount=qSCount;
-							}
-							echo(getAdminHTML(row, ms));
-							echo('</td></tr>');
+							echo(rowOutput);
+							echo('</tr>');
 						}
 						if(arrayLen(arrSortColumn) NEQ 0){
 							sortRowStruct[row.feature_data_id].rowHTML=rowHTML;
 						}else{
 							echo(rowHTML);
 						}
-					}
+					} 
 					if(arrayLen(arrSortColumn) NEQ 0){
 					writedump(arrSortColumn);
 						arrRowOrder=structsort(sortRowStruct, "text", sortDirection, "sortKey");
@@ -3626,6 +3626,16 @@ Define this function in another CFC to override the default email format
 							echo(sortRowStruct[id].rowHTML);
 						}
 					}
+
+					rowStruct[row.feature_data_id]={
+						index:currentRowIndex,
+						parentId:curParentId,
+						row:rowOutput,
+						trHTML:"",
+						sublist:"",
+						sortKey:""
+					};
+					lastRowStruct=rowStruct[row.feature_data_id];
 
 					writeoutput('</tbody></table>');
 				}else{
@@ -3838,19 +3848,7 @@ Define this function in another CFC to override the default email format
 	if((methodBackup EQ "getTableHTML" or methodBackup EQ "userGetTableHTML")){ 
 		return tableHTML;
 	}else if((methodBackup EQ "getRowHTML" or methodBackup EQ "userGetRowHTML")){ 
-		if(arraylen(rowStruct)){
-			return lastRowStruct.row;  
-		}else{
-			return '<td colspan="2">Data missing, please reload the page.</td>';
-		}
-		/*
-		rowOut=lastRowStruct.row; 
-		echo('done.<script type="text/javascript">
-		window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
-		window.parent.zCloseModal();
-		</script>');
-		abort;
-		*/
+		return lastRowStruct.row;  
 	}else{
 		hasListRecurseSchema=false; 
 		for(var n in arrChildSchema){

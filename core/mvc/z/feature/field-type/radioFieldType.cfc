@@ -283,7 +283,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Radio Schema';
+	return 'Radio Group';
 	</cfscript>
 </cffunction>
 
@@ -356,7 +356,7 @@
 		}
 		</script>
 		<input type="radio" name="feature_field_type_id" value="14" onClick="setType(14);" <cfif value EQ 14>checked="checked"</cfif>/>
-		Radio Schema<br />
+		Radio Group<br />
 		<div id="typeFields14" style="display:none;padding-left:30px;"> 
 			<table style="border-spacing:0px;">
 			<tr>

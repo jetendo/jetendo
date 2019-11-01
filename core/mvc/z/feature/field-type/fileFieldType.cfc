@@ -324,7 +324,7 @@
 	<cfscript>
 	var nv=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["feature_field_id"]);
 	if(nv EQ ""){
-		//return arguments.row["#variables.siteType#_x_option_group_value"];
+		return arguments.dataFields[arguments.row.feature_field_variable_name];
 	}
 	return nv;
 	</cfscript>
