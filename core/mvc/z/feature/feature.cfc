@@ -1279,7 +1279,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 		arrParent:[]
 	};
 	delimiter="|";
-	if(arguments.setFieldStruct.selectmenu_delimiter EQ "|"){
+	if(structkeyexists(ts, "selectmenu_delimiter") and ts.selectmenu_delimiter EQ "|"){
 		delimiter=",";
 	}
 	if(structkeyexists(ts,'selectmenu_groupid') and ts.selectmenu_groupid NEQ ""){

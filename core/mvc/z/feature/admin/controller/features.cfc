@@ -3545,6 +3545,7 @@ Define this function in another CFC to override the default email format
 					</tr>
 					<tbody>');
 					currentRowIndex=0;
+					rowOutput="";
 					for(row in qS){
 						if(not structkeyexists(matchStruct, row.feature_data_id)){
 							continue;
@@ -3581,7 +3582,12 @@ Define this function in another CFC to override the default email format
 								if(row.feature_data_level GT 0){
 									echo(replace(ljustify(" ", row.feature_data_level*4), " ", "&nbsp;", "all"));
 								}
-								echo('#rsData.name#</td>
+								if(mainSchemaStruct.feature_schema_merge_title_field NEQ ""){
+									echo(rsData[mainSchemaStruct.feature_schema_merge_title_field]);
+								}else{
+									echo(rsData.name);
+								}
+								echo('</td>
 								<td>#application.zcore.featureCom.getSchemaNameById(row.feature_id, row.feature_data_merge_schema_id)#</td>
 								<td>');
 								if(datediff("s", row.feature_data_updated_datetime, childRow.feature_data_updated_datetime) LT 0){

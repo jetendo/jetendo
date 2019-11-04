@@ -362,7 +362,7 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 		#ss.afterSectionHTML#
 	</cfif>
 	
-	<cfif ss.sidebarEnabled and arraylen(arrSide) NEQ 0 or ss.sidebarTopHTML NEQ "" or ss.sidebarBottomHTML NEQ ""> 
+	<cfif ss.sidebarEnabled and (arraylen(arrSide) NEQ 0 or ss.sidebarTopHTML NEQ "" or ss.sidebarBottomHTML NEQ "")> 
 		<div class="z-default-subpage-body-full has-sidebar">
 			<div class="z-container"> 
 				<div class="z-default-subpage-subpage">

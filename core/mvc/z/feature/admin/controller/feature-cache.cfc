@@ -385,8 +385,10 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		arrData=t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id];
 		arrDataNew=[];
 		for(i=1;i LTE arraylen(arrData);i++){
-			sortIndex=sortStruct[arrData[i].__setId];
-			arrDataNew[sortIndex]=arrData[i];
+			if(structkeyexists(sortStruct, arrData[i].__setId)){
+				sortIndex=sortStruct[arrData[i].__setId];
+				arrDataNew[sortIndex]=arrData[i];
+			}
 		}
 		t9.featureSchemaSetArrays[arguments.feature_schema_id&chr(9)&arguments.feature_data_parent_id]=arrDataNew;	
 	}

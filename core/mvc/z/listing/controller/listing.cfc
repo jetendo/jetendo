@@ -145,7 +145,7 @@ this.app_id=11;
 			The source of the listing data is as follows:   
 			<cfscript>
 			for(row in qm){
-				echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&timeformat(row.mls_update_date, "h:mm tt")&') ');
+				echo(' | '&row.mls_disclaimer_name&' (updated '&dateformat(row.mls_update_date,"m/d/yy")&" "&timeformat(row.mls_update_date, "h:mm tt")&') ');
 			}
 			</cfscript>
 		</div>
