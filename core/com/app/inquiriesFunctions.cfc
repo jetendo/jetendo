@@ -293,7 +293,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 		<cfif trim(t.inquiries_phone1) NEQ ''>
 			<tr>
 				<th width="130" style="#thstyle# text-align:left;" >Phone 1:</th>
-				<td style="#tdstyle#">#t.inquiries_phone1#&nbsp;</td>
+				<td style="#tdstyle#"><a href="tel:#t.inquiries_phone1#">#t.inquiries_phone1#</a>&nbsp;</td>
 			</tr>
 		</cfif>
 		<cfif trim(t.inquiries_fax) NEQ ''>

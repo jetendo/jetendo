@@ -263,7 +263,7 @@
 		<h4>Lead Summary</h4>
 		<p>Name: #qI.inquiries_first_name# #qI.inquiries_last_name#</p>
 		<p>Email: <a href="mailto:#qI.inquiries_email#">#qI.inquiries_email#</a></p>
-		<p>Phone: #qI.inquiries_phone1#</p>
+		<p>Phone: <a href="tel:#qI.inquiries_phone1#">#qI.inquiries_phone1#</a></p>
 
 		<h3><a href="#leadLink#" target="_blank">Login and View/Update Lead</a></h3> 
 		<p><a href="#domain#">#domain#</a></p>
