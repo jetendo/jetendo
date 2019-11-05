@@ -1411,6 +1411,11 @@
 			<td><input name="site_max_image_width" type="text" value="<cfif form.site_max_image_width EQ "" or form.site_max_image_width EQ 0>695<cfelse>#form.site_max_image_width#</cfif>"></td>
 		</tr>
 		<tr>
+			<td style="vertical-align:top; width:140px;">Max Image Width:</td>
+			<td><input name="site_max_image_width" type="text" value="<cfif form.site_max_image_width EQ "" or form.site_max_image_width EQ 0>695<cfelse>#form.site_max_image_width#</cfif>"></td>
+		</tr>
+		
+		<tr>
 			<td style="vertical-align:top; width:140px;">Shared Default Theme:</td>
 			<td>
 			<cfscript>
@@ -1869,6 +1874,15 @@
 			<p>If you exclude a directory like this "large-files/*", it will not exclude "large-files" from being created on the remote server, you should just type "large-files" instead. </p>
 			<p>Be more explicit if you want to avoid accidentally matching multiple paths with the same name.  For example, if you type "images", it will exclude any "images" directory or file in the entire project.</p></td>
 		</tr> 
+		<tr>
+			<td style="vertical-align:top; width:140px;">Footer Link HTML:</td>
+			<td>Home Page<br>
+				<input name="site_company_link_home" type="text" value="#htmleditformat(form.site_company_link_home)#"><br><br>
+				Subpage<br>
+				<input name="site_company_link_subpage" type="text" value="#htmleditformat(form.site_company_link_subpage)#"><br><br>
+				You must type in correct html in these fields in order to have links work.  Please don't use div or p elements since this text is meant to be displayed inline.  The code to make this footer link appear on each site is ##application.zcore.functions.zDisplayCompanyFooterLink()##
+			</td>
+		</tr>
 		<tr >
 			<td style="vertical-align:top; width:140px;">Nginx Config:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_nginx_config", "table-error","")#><textarea name="site_nginx_config" type="text" cols="70" rows="6">#htmleditformat(form.site_nginx_config)#</textarea><br />

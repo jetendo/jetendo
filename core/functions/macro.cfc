@@ -1701,5 +1701,17 @@ if(rs.success){
 	}
 	</cfscript>
 </cffunction>
+
+<cffunction name="zDisplayCompanyFooterLink" localmode="modern" access="public">
+	<cfscript>
+	if(structkeyexists(request.zos.globals, "companyLinkHome")){
+		if(request.zos.originalURL EQ "/"){
+			echo(request.zos.globals.companyLinkHome);
+		}else{
+			echo(request.zos.globals.companyLinkSubpage);
+		}
+	}
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>
