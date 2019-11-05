@@ -13,6 +13,7 @@ this.config.textQualifier='"';
 this.config.seperator=",";
 this.config.lineDelimiter =chr(10);
 this.config.bufferedReadEnabled=false;
+this.config.ignoreDuplicateSeparator=false; 
 this.currentLine="";
 </cfscript>
 <!--- 
@@ -50,6 +51,7 @@ ts.escapedBy='"';
 ts.textQualifier='"';
 ts.seperator=",";
 ts.lineDelimiter=chr(10);
+ts.ignoreDuplicateSeparator=false; // if you set this to true, it will allow duplicate separators to be used when there is no escaping of the delimiter, such as in a tab format
 ts.bufferedReadEnabled=true; // warning - if the file has rows with line breaks between text qualifiers, then you must set bufferedReadEnabled to false.
 dataImportCom.init(ts);
  --->
@@ -234,17 +236,27 @@ dataImportCom.init(ts);
 				fStart=i+1;
 			}else if(letter EQ this.config.seperator){
 				// if first time, or the separator is repeated
-				if(i EQ 1 or mid(line,i-1,1) EQ this.config.seperator){
-					ArrayAppend(arrFields,'');
-					lastFieldEndPosition=i;
-				}else if(fStart NEQ i){
-					field = mid(line,fStart,(i-fStart));
-					ArrayAppend(arrFields, trim(field));
-					lastFieldEndPosition=i;
-				}
-				if(i+1 EQ len(line)){
-					ArrayAppend(arrFields,'');
-					lastFieldEndPosition=i;
+				if(this.config.ignoreDuplicateSeparator EQ false){
+					if(i EQ 1 or mid(line,i-1,1) EQ this.config.seperator){
+						ArrayAppend(arrFields,'');
+						lastFieldEndPosition=i;
+					}else if(fStart NEQ i){
+						field = mid(line,fStart,(i-fStart));
+						ArrayAppend(arrFields, trim(field));
+						lastFieldEndPosition=i;
+					}
+					if(i+1 EQ len(line)){
+						ArrayAppend(arrFields,'');
+						lastFieldEndPosition=i;
+					}
+				}else{
+					if(fStart NEQ i){
+						field = mid(line,fStart,(i-fStart));
+						ArrayAppend(arrFields, trim(field));
+						lastFieldEndPosition=i;
+					}else{
+						ArrayAppend(arrFields, "");
+					}
 				}
 				fStart=i+1;
 			}else if(i EQ len(line) and fStart NEQ i){
@@ -338,7 +350,6 @@ dataImportCom.init(ts);
 	}else if(len(line) EQ fStart){ 
 		ArrayAppend(arrFields, trim(right(line,1)));
 	} 
-
 	return arrFields;
 	</cfscript>
 </cffunction>
