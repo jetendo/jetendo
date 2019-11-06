@@ -267,7 +267,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 				ts.__dateModified=row.feature_data_updated_datetime;
 				ts.__schemaId=row.feature_schema_id;
 				ts.__level=row.feature_data_level;
-				ts.__mergeSchemaId=fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_merge_group_id;
+				ts.__mergeSchemaId=row.feature_data_merge_schema_id;
+				ts.__mergeDataId=row.feature_data_merge_data_id;
 				ts.__approved=row.feature_data_approved;
 				ts.__createdDatetime=row.feature_data_created_datetime;
 				ts.__title=row.feature_data_title;
@@ -568,7 +569,8 @@ application.zcore.featureCom.rebuildFeatureStructCache(form.feature_id, cacheStr
 		ts.__dateModified=row.feature_data_updated_datetime;
 		ts.__schemaId=row.feature_schema_id;
 		ts.__level=row.feature_data_level;
-		ts.__mergeSchemaId=schemaStruct.feature_schema_merge_group_id;
+		ts.__mergeSchemaId=row.feature_schema_merge_group_id;
+		ts.__mergeDataId=row.feature_data_merge_data_id;
 		ts.__createdDatetime=row.feature_data_created_datetime;
 		ts.__approved=row.feature_data_approved;
 		ts.__title=row.feature_data_title;

@@ -761,6 +761,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 			LIMIT #db.param(0)#,#db.param(1)#";
 			//and s1.feature_schema_id = #db.param(curParentId)# 
 			q12=db.execute("q12");
+			ignoreNextLink=false;
 			loop query="q12"{
 				manageAction="manageSchema";
 				if(form.method EQ "userManageSchema"){
@@ -771,13 +772,20 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 				}else{ 
 					out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#curSchemaId#&amp;feature_data_parent_id=#q12.d2#">#application.zcore.functions.zLimitStringLength(application.zcore.functions.zRemoveHTMLForSearchIndexer(q12.feature_data_title), 70)#</a> /';
 				}
-				arrayappend(arrParent, out);
 				curSchemaId=q12.feature_schema_id;
 				curParentId=q12.feature_schema_parent_id;
 				curParentSetId=q12.d3;
+				if(q12.feature_schema_enable_merge_interface EQ 1){ 
+					ignoreNextLink=true;
+				}else{
+					arrayappend(arrParent, out);
+				}
+
+				// TODO: if merge interface enabled, i must ignore the immediate child record from being
 				if(q12.feature_schema_parent_id EQ 0){
 					out='<a href="/z/feature/admin/features/#manageAction#?feature_id=#q12.feature_id#&feature_schema_id=#q12.feature_schema_id#&amp;feature_data_parent_id=#q12.d3#">#application.zcore.functions.zFirstLetterCaps(q12.feature_schema_display_name)#</a> / ';
 					arrayappend(arrParent, out);
+
 				}
 			}
 			if(q12.recordcount EQ 0 or curParentSetId EQ 0){
@@ -997,7 +1005,8 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	ts.__dateModified=row.feature_data_updated_datetime;
 	ts.__schemaId=row.feature_schema_id;
 	ts.__level=row.feature_data_level;
-	ts.__mergeSchemaId=fsd.featureSchemaLookup[row.feature_schema_id].feature_schema_merge_group_id;
+	ts.__mergeSchemaId=row.feature_data_merge_schema_id;
+	ts.__mergeDataId=row.feature_data_merge_data_id;
 	ts.__createdDatetime=row.feature_data_created_datetime;
 	ts.__approved=row.feature_data_approved;
 	ts.__title=row.feature_data_title;
@@ -1097,7 +1106,7 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	GROUP BY feature_schema.feature_schema_id";
 	qSchema=db.execute("qSchema");
 	for(row in qSchema){ 
-		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__mergeSchemaId:0,__schemaId:0,__setId:0}, row.feature_field_variable_name);
+		arr1=getFeatureSchemaArray(row.feature_variable_name, row.feature_schema_variable_name, row.site_id, {__mergeSchemaId:0,__mergeDataId:0,__schemaId:0,__setId:0}, row.feature_field_variable_name);
 		for(i=1;i LTE arraylen(arr1);i++){
 			if(arr1[i].__approved EQ 1){
 				t2=StructNew();
@@ -2892,6 +2901,46 @@ used to do search for a list of values
 	</cfscript>
 </cffunction>
 
+<!--- 
+// when using the merge interface, we can get the child data directly without having to query all of the child groups for existence using this function
+rs=application.zcore.featureCom.getMergeFeatureData("feature", row);
+if(rs.success){
+	writedump(rs.schema.feature_schema_variable_name);
+	writedump(rs.data);
+}else{
+	throw("Merged data is missing for row ###row.__setId#");
+}
+
+ --->
+<cffunction name="getMergeFeatureData" localmode="modern" output="yes" returntype="struct">
+	<cfargument name="featureVariableName" type="string" required="yes">
+	<cfargument name="struct" type="struct" required="yes">
+	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
+	<cfargument name="showUnapproved" type="boolean" required="no" default="#false#"> 
+	<cfscript> 
+	feature_id=getFeatureIDByName(arguments.featureVariableName);
+
+	typeStruct=application.zcore.featureData;
+	t9=getSiteData(arguments.site_id);
+
+	var schemaStruct=typeStruct.featureSchemaData[feature_id].featureSchemaLookup[arguments.struct.__mergeSchemaId];  
+	if(request.zos.enableSiteOptionGroupCache and not arguments.showUnapproved and schemaStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.struct.__mergeDataId)){
+		schemaSet=t9.featureSchemaSet[arguments.struct.__mergeDataId];
+		if(schemaSet.__schemaId NEQ arguments.struct.__mergeSchemaId){
+			application.zcore.functions.z404("#arrayToList(arguments.arrSchemaName, ", ")# is not the right group for feature_schema_set_id: #arguments.struct.__mergeDataId#");
+		} 
+		return {success:true, schema: schemaStruct, data: schemaSet};
+	}else{ 
+		if(arguments.struct.__mergeDataId EQ "" or arguments.struct.__mergeDataId EQ "0"){
+			// don't do a query when the id is missing 
+			return {success:false};
+		}   
+		return {success:true, schema: schemaStruct, data: featureSchemaSetFromDatabaseBySetId(feature_id, arguments.struct.__mergeSchemaId, arguments.struct.__mergeDataId, arguments.site_id, arguments.showUnapproved)};
+	}
+	return {success:false };
+	</cfscript>
+</cffunction>
+
 <cffunction name="featureSchemaIdByName" localmode="modern" output="no" returntype="numeric">
 	<cfargument name="groupName" type="string" required="yes">
 	<cfargument name="feature_schema_parent_id" type="numeric" required="no" default="#0#">
@@ -2910,14 +2959,15 @@ used to do search for a list of values
 	<cfargument name="featureVariableName" type="string" required="yes">
 	<cfargument name="groupName" type="string" required="yes"> 
 	<cfargument name="site_id" type="string" required="no" default="#request.zos.globals.id#">
-	<cfargument name="parentStruct" type="struct" required="no" default="#{__schemaId:0,__setId:0,__mergeSchemaId:0}#">
+	<cfargument name="parentStruct" type="struct" required="no" default="#{__schemaId:0,__setId:0,__mergeSchemaId:0,__mergeDataId:0}#">
 	<cfargument name="fieldList" type="string" required="no" default="">
 	<cfscript>  
 	feature_id=getFeatureIDByName(arguments.featureVariableName);
 	fsd=application.zcore.featureData.featureSchemaData[feature_id];
 	if(structkeyexists(fsd, 'featureSchemaIdLookup')){
 		t9=getSiteData(arguments.site_id);
-		if(arguments.parentStruct.__mergeSchemaId NEQ 0){
+		// this code didn't help, must be stored correctly and not needing it
+		/*if(arguments.parentStruct.__mergeSchemaId NEQ 0){
 			if(structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__mergeSchemaId&chr(9)&arguments.groupName)){
 				featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__mergeSchemaId&chr(9)&arguments.groupName];
 				schemaStruct=fsd.featureSchemaLookup[featureSchemaId];
@@ -2929,7 +2979,8 @@ used to do search for a list of values
 					return featureSchemaSetFromDatabaseBySchemaId(feature_id, featureSchemaId, arguments.site_id, arguments.parentStruct, arguments.fieldList);
 				}	
 			}
-		}else if(structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__schemaId&chr(9)&arguments.groupName)){
+		}else*/
+		if(structkeyexists(fsd.featureSchemaIdLookup, arguments.parentStruct.__schemaId&chr(9)&arguments.groupName)){
 			featureSchemaId=fsd.featureSchemaIdLookup[arguments.parentStruct.__schemaId&chr(9)&arguments.groupName];
 			schemaStruct=fsd.featureSchemaLookup[featureSchemaId];
 			if(request.zos.enableSiteOptionGroupCache and schemaStruct["feature_schema_enable_cache"] EQ 1){ 

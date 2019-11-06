@@ -348,13 +348,17 @@ request.defaultSubpageCom.displaySubpage(ts); // run where you want it to output
 	</cfscript>  
 	<cfif ss.sectionHeaderEnabled>
 		<div class="z-default-subpage-header z-hide-at-992" style="<cfif sectionImage NEQ "">background-image:url(#sectionImage#);</cfif>">
-			<div class="z-container">
-				<div class="z-default-subpage-title">#section["Section Heading"]#</div>
+			<div class="z-default-subpage-title-full">
+				<div class="z-container">
+					<div class="z-default-subpage-title">#section["Section Heading"]#</div>
+				</div>
 			</div>
 		</div>  
 		 <div class="z-default-subpage-header z-show-at-992" style="<cfif sectionMobileImage NEQ "">background-image:url(#sectionMobileImage#);</cfif>">
-			<div class="z-container">
-				<div class="z-default-subpage-title">#section["Section Heading"]#</div>
+		 	<div class="z-default-subpage-title-full">
+				<div class="z-container">
+					<div class="z-default-subpage-title">#section["Section Heading"]#</div>
+				</div>
 			</div>
 		</div>  
 	</cfif>
