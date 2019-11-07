@@ -59,7 +59,7 @@ timezone does nothing...
 		arrayappend(arguments.arrUrl,t2);
 	}
 
-	publicAccess={};
+	privateAccess={};
 	for(row in qF){
 		if(row.event_calendar_user_group_idlist EQ ""){
 			t2=StructNew();
@@ -983,6 +983,30 @@ searchEvents(ts);
 	if(not application.zcore.user.checkGroupAccess("member")){
 		ss.showInactive=false;
 	}
+	// get list of calendars this user has access to and exclude the others
+	db.sql="SELECT * from #db.table("event_calendar", request.zos.zcoreDatasource)# 
+	WHERE site_id=#db.param(request.zos.globals.id)# and  
+	event_calendar_deleted = #db.param(0)#
+	ORDER BY event_calendar_unique_url DESC";
+	qCalendar=db.execute("qCalendar", "", 10000, "query", false); 
+
+	excludePrivateCalendarId={};
+	for(row in qCalendar){
+		if(row.event_calendar_user_group_idlist NEQ ""){
+			c=listToArray(row.event_calendar_user_group_idlist, ",");
+			hasAccess=false;
+			for(n=1;n LTE arraylen(c);n++){
+				if(application.zcore.user.checkGroupIdAccess(c[n])){
+					hasAccess=true;
+					break;
+				}
+			}
+			if(not hasAccess){
+				excludePrivateCalendarId[row.event_calendar_id]=true;
+			}
+		}
+	}
+	arrExcludeCalendar=structkeyarray(excludePrivateCalendarId);
 
 	ss.keyword=replace(replace(ss.keyword, '+', '%', 'all'), ' ', '%', 'all');
 
@@ -1001,12 +1025,14 @@ searchEvents(ts);
 	if(arraylen(arrCalendar)){
 		arrCalendar2=[];
 		for(i=1;i LTE arraylen(arrCalendar);i++){
-			if(isnumeric(trim(arrCalendar[i]))){
+			if(not structkeyexists(excludePrivateCalendarId, arrCalendar[i]) and isnumeric(trim(arrCalendar[i]))){
 				arrayAppend(arrCalendar2, arrCalendar[i]);
 			}
 		}
 		calendarIdList=arrayToList(arrCalendar2, ",");
 	}
+
+
 	ts=structnew();
 	ts.image_library_id_field="event.event_image_library_id";
 	ts.count = 1; // how many images to get
@@ -1047,6 +1073,19 @@ searchEvents(ts);
 		searchOn=true;
 		db.sql&=" and concat(event.event_id, #db.param(' ')#, event_name, #db.param(' ')#, event_description)  like #db.param('%#ss.keyword#%')# ";
 	}
+	
+	if(arraylen(arrExcludeCalendar)){
+		db.sql&=" and ( ";
+		searchOn=true;
+		for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
+			if(i NEQ 1){
+				db.sql&=" and ";
+			}
+			db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
+		}
+		db.sql&=" ) ";
+	}
+
 	if(arraylen(arrCategory)){
 		db.sql&=" and ( ";
 		searchOn=true;
@@ -1117,6 +1156,17 @@ searchEvents(ts);
 		if(ss.keyword NEQ ""){
 			searchOn=true;
 			db.sql&=" and concat(event.event_id, #db.param(' ')#, event_name, #db.param(' ')#, event_description)  like #db.param('%#ss.keyword#%')# ";
+		}
+		if(arraylen(arrExcludeCalendar)){
+			db.sql&=" and ( ";
+			searchOn=true;
+			for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
+				if(i NEQ 1){
+					db.sql&=" and ";
+				}
+				db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
+			}
+			db.sql&=" ) ";
 		}
 		if(arraylen(arrCategory)){
 			db.sql&=" and ( ";
