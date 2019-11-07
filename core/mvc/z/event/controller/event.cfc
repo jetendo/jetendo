@@ -49,8 +49,7 @@ timezone does nothing...
 	WHERE site_id=#db.param(request.zos.globals.id)# and  
 	event_calendar_deleted = #db.param(0)#
 	ORDER BY event_calendar_unique_url DESC";
-	qF=db.execute("qF");
-
+	qF=db.execute("qF", "", 10000, "query", false); 
 
 	if(application.zcore.functions.zso(application.zcore.app.getAppData("event").optionStruct, 'event_config_enable_suggest_event', true) EQ 1){
 		t2=StructNew();
@@ -63,15 +62,16 @@ timezone does nothing...
 	publicAccess={};
 	for(row in qF){
 		if(row.event_calendar_user_group_idlist EQ ""){
-			publicAccess[row.event_calendar_id]=true;
 			t2=StructNew();
 			t2.groupName="Event Calendar";
 			t2.url=request.zos.currentHostName&getCalendarURL(row);
 			t2.title=row.event_calendar_name;
 			arrayappend(arguments.arrUrl,t2);
+		}else{
+			privateAccess[row.event_calendar_id]=true;
 		}
 	}
-	arrCalendar=structkeyarray(publicAccess); 
+	arrCalendar=structkeyarray(privateAccess); 
 	db.sql="SELECT * from #db.table("event_category", request.zos.zcoreDatasource)# 
 	WHERE site_id=#db.param(request.zos.globals.id)# and  
 	event_category_deleted = #db.param(0)# ";
@@ -79,9 +79,9 @@ timezone does nothing...
 		db.sql&=" and ( ";
 		for(i=1;i LTE arraylen(arrCalendar);i++){
 			if(i NEQ 1){
-				db.sql&=" or ";
+				db.sql&=" and ";
 			}
-			db.sql&=" CONCAT(#db.param(",")#, event_calendar_id, #db.param(",")#) LIKE #db.param("%,#arrCalendar[i]#,%")# ";
+			db.sql&=" CONCAT(#db.param(",")#, event_calendar_id, #db.param(",")#) NOT LIKE #db.param("%,#arrCalendar[i]#,%")# ";
 		}
 		db.sql&=" ) ";
 	}
@@ -110,9 +110,9 @@ timezone does nothing...
 		db.sql&=" and ( ";
 		for(i=1;i LTE arraylen(arrCalendar);i++){
 			if(i NEQ 1){
-				db.sql&=" or ";
+				db.sql&=" and ";
 			}
-			db.sql&=" CONCAT(#db.param(",")#, event_calendar_id, #db.param(",")#) LIKE #db.param("%,#arrCalendar[i]#,%")# ";
+			db.sql&=" CONCAT(#db.param(",")#, event_calendar_id, #db.param(",")#) NOT LIKE #db.param("%,#arrCalendar[i]#,%")# ";
 		}
 		db.sql&=" ) ";
 	}
