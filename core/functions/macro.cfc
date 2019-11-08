@@ -1713,5 +1713,17 @@ if(rs.success){
 	}
 	</cfscript>
 </cffunction>
+
+<!--- application.zcore.functions.zGetWebfontById(webfont_id); --->
+<cffunction name="zGetWebfontById" localmode="modern" access="public">
+	<cfargument name="webfont_id" type="string" required="yes">
+	<cfscript>
+	if(structkeyexists(application.zcore.webfontLookup, arguments.webfont_id)){
+		return application.zcore.webfontLookup[arguments.webfont_id];
+	}else{
+		return {};
+	}
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

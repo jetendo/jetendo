@@ -776,6 +776,15 @@
 		ts.countryStruct[row.country_code]=row.country_name;
 		arrayAppend(ts.arrCountry, row);
 	}
+ 
+	db.sql="select * FROM #db.table("webfont", request.zos.zcoreDatasource)# 
+	WHERE 
+	webfont_deleted=#db.param(0)#";
+	qwebfont=db.execute("qwebfont"); 
+	ts.webfontLookup={};
+	for(font in qwebfont){
+		ts.webfontLookup[font.webfont_id]=font;
+	}
 
 	ts.verifyTablesExcludeStruct={};
 	ts.verifyTablesExcludeStruct[request.zos.zcoreDatasource]={ 

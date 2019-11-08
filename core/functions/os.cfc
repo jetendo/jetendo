@@ -2539,6 +2539,7 @@ User's IP: #request.zos.cgi.remote_addr#
 		| <a href="/z/server-manager/admin/dns-group/index">DNS</a> 
 		| <a href="/z/_com/zos/app?method=appList&amp;zid=#arguments.zid#&amp;sid=#form.sid#">Apps</a>
 		| <a href="/z/server-manager/admin/log?sid=">Logs</a> 
+		| <a href="/z/server-manager/admin/fonts?sid=">Webfonts</a> 
 		| <a href="/z/server-manager/admin/deploy/index">Deploy</a>
 	</cfif>
      

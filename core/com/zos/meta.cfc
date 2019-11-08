@@ -93,7 +93,8 @@ ts.office_meta_json=saveMetaForm("office", form);
 				ts={
 					label:fieldStruct.label,
 					field:tempCom[fieldStruct.formRenderMethod](),
-					required:false
+					required:false,
+					hideLabel:fieldStruct.hideLabel?:false
 				};
 				if(structkeyexists(fieldStruct, 'required') and fieldStruct.required){
 					ts.required=true;
@@ -107,11 +108,19 @@ ts.office_meta_json=saveMetaForm("office", form);
 		if(structkeyexists(ss.arrFieldCache, arguments.tabName&"-"&arguments.position)){ 
 			for(fieldStruct in ss.arrFieldCache[arguments.tabName&"-"&arguments.position]){
 				// render each field
-				arrayAppend(arrField, '<tr><th>'&fieldStruct.label&'</th><td>'&tempCom[fieldStruct.formRenderMethod]());
-				if(structkeyexists(fieldStruct, 'required') and fieldStruct.required){
-					arrayAppend(arrField, ' *');
+				if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+					arrayAppend(arrField, '<tr><th>'&fieldStruct.label&'</th><td>'&tempCom[fieldStruct.formRenderMethod]());
+					if(structkeyexists(fieldStruct, 'required') and fieldStruct.required){
+						arrayAppend(arrField, ' *');
+					}
+					arrayAppend(arrField, '</td></tr>');
+				}else{
+					arrayAppend(arrField, '<tr><td colspan="2">'&tempCom[fieldStruct.formRenderMethod]());
+					if(structkeyexists(fieldStruct, 'required') and fieldStruct.required){
+						arrayAppend(arrField, ' *');
+					}
+					arrayAppend(arrField, '</td></tr>');
 				}
-				arrayAppend(arrField, '</td></tr>');
 			}
 		}
 		return arrayToList(arrField, chr(10));

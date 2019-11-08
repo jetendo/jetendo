@@ -647,11 +647,20 @@
 				metaFields=variables.metaCom.displayForm("user", "Basic", "first", true);
 				if(arraylen(metaFields)){ 
 					for(i=arraylen(metaFields);i>=1;i--){
-						echo('<tr><th>#metaFields[i].label#');
-						if(metaFields[i].required){
-							echo(' *');
-						}
-						echo('</th><td>#metaFields[i].field#</td></tr>');
+						field=metaFields[i];
+						if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+							echo('<tr><th>#field.label#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</th><td>#field.field#</td></tr>');
+						}else{
+							echo('<tr><td colspan="2">#field.field#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</td></tr>');
+						} 
 					}
 				}
 			}
@@ -838,11 +847,20 @@
 				metaFields=variables.metaCom.displayForm("user", "Basic", "last", true);
 				if(arraylen(metaFields)){ 
 					for(i=1;i<=arraylen(metaFields);i++){ 
-						echo('<tr><th>#metaFields[i].label#');
-						if(metaFields[i].required){
-							echo(' *');
-						}
-						echo('</th><td>#metaFields[i].field#</td></tr>');
+						field=metaFields[i];
+						if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+							echo('<tr><th>#field.label#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</th><td>#field.field#</td></tr>');
+						}else{
+							echo('<tr><td colspan="2">#field.field#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</td></tr>');
+						} 
 					}
 				}
 			}
@@ -856,11 +874,20 @@
 				metaFields=variables.metaCom.displayForm("user", "Advanced", "first", true);
 				if(arraylen(metaFields)){ 
 					for(i=1;i<=arraylen(metaFields);i++){
-						echo('<tr><th>#metaFields[i].label#');
-						if(metaFields[i].required){
-							echo(' *');
-						}
-						echo('</th><td>#metaFields[i].field#</td></tr>');
+						field=metaFields[i];
+						if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+							echo('<tr><th>#field.label#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</th><td>#field.field#</td></tr>');
+						}else{
+							echo('<tr><td colspan="2">#field.field#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</td></tr>');
+						} 
 					}
 				}
 			}
@@ -1145,11 +1172,20 @@
 				metaFields=variables.metaCom.displayForm("user", "Advanced", "last", true);
 				if(arraylen(metaFields)){ 
 					for(i=1;i<=arraylen(metaFields);i++){ 
-						echo('<tr><th>#metaFields[i].label#');
-						if(metaFields[i].required){
-							echo(' *');
-						}
-						echo('</th><td>#metaFields[i].field#</td></tr>');
+						field=metaFields[i];
+						if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+							echo('<tr><th>#field.label#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</th><td>#field.field#</td></tr>');
+						}else{
+							echo('<tr><td colspan="2">#field.field#');
+							if(field.required){
+								echo(' *');
+							}
+							echo('</td></tr>');
+						} 
 					}
 				}
 			}

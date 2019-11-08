@@ -1927,7 +1927,8 @@ application.zcore.status.setStatus(request.zsid, rs.deleteCount&" old records de
 		"24": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.stylesetFieldType"),
 		"25": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.productFieldType"),
 		"26": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.productCategoryFieldType"),
-		"27": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.officePickerFieldType")
+		"27": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.officePickerFieldType"),
+		"28": createobject("component", "zcorerootmapping.mvc.z.feature.field-type.fontFieldType")
 	};
 
 	return ts;

@@ -3935,19 +3935,21 @@ Define this function in another CFC to override the default email format
 
 			if(ms.mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
 				viewGroup=sog.featureSchemaLookup[ms.childRow.feature_schema_id];
+				viewData=ms.childRow;
 			}else{
 				viewGroup=row;
+				viewData=row;
 			}
 			if(viewGroup.feature_schema_enable_unique_url EQ 1){
 				var tempLink="";
-				if(ms.childRow.feature_data_override_url NEQ ""){
-					tempLink=ms.childRow.feature_data_override_url;
+				if(viewData.feature_data_override_url NEQ ""){
+					tempLink=viewData.feature_data_override_url;
 				}else{
-					tempLink="/#application.zcore.functions.zURLEncode(ms.childRow.feature_data_title, '-')#-50-#ms.childRow.feature_data_id#.html";
+					tempLink="/#application.zcore.functions.zURLEncode(viewData.feature_data_title, '-')#-50-#viewData.feature_data_id#.html";
 				}
 				if(viewGroup.feature_schema_enable_approval EQ 1){
 
-					if(ms.childRow.feature_data_approved NEQ 1){
+					if(viewData.feature_data_approved NEQ 1){
 						echo('<div class="z-manager-button-container">
 							<a title="Inactive"><i class="fa fa-times-circle" aria-hidden="true" style="color:##900;"></i></a>
 						</div>');
@@ -3958,7 +3960,7 @@ Define this function in another CFC to override the default email format
 					}
 				}
 
-				if(ms.childRow.feature_data_approved EQ 1){
+				if(viewData.feature_data_approved EQ 1){
 					writeoutput('<div class="z-manager-button-container"><a href="'&tempLink&'" target="_blank" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
 				}else{
 					writeoutput('<div class="z-manager-button-container"><a href="'&application.zcore.functions.zURLAppend(tempLink, "zpreview=1")&'" target="_blank" class="z-manager-view" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a></div>');
@@ -3978,8 +3980,8 @@ Define this function in another CFC to override the default email format
 				echo('<a href="#editLink#" onclick="zTableRecordEdit(this);  return false;">Edit #row.feature_schema_display_name#</a> ');
 
 				if(ms.mainSchemaStruct.feature_schema_enable_merge_interface EQ 1){
-					group=sog.featureSchemaLookup[ms.childRow.feature_schema_id];
-					editChildLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#ms.childRow.feature_id#&feature_schema_id=#ms.childRow.feature_schema_id#&amp;feature_data_id=#ms.childRow.feature_data_id#&amp;feature_data_parent_id=#ms.childRow.feature_data_parent_id#&amp;modalpopforced=1");
+					group=sog.featureSchemaLookup[viewData.feature_schema_id];
+					editChildLink=application.zcore.functions.zURLAppend(ms.struct.editURL, "feature_id=#viewData.feature_id#&feature_schema_id=#viewData.feature_schema_id#&amp;feature_data_id=#viewData.feature_data_id#&amp;feature_data_parent_id=#viewData.feature_data_parent_id#&amp;modalpopforced=1");
 					if(not ms.sortEnabled){
 						editLink&="&amp;disableSorting=1";
 					}
