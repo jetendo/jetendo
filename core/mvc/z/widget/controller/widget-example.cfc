@@ -74,7 +74,7 @@ Try to organize all of the static resources for a widget in a single directory t
 	Make sure to return the inner contents of <script></script> only.  Your code will be combined and optimized and it can't contain the <script> tag since it will be in an external js file later.
 	*/
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	<cfsavecontent variable="out">
 	zArrDeferredFunctions.push(function(){
 		var e="testWidgetJS - #arguments.widgetContainer#";
@@ -103,7 +103,7 @@ Try to organize all of the static resources for a widget in a single directory t
 	csd=cs["default"];
  	fs=csd["Font Scale"];
 	</cfscript> 
-<style type="text/css">
+<style>
 <cfsavecontent variable="out">
 #c# .test-example-1{ 
 	padding:#round(csd["Container Padding"]*20)#px;

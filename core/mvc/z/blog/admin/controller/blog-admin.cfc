@@ -103,7 +103,7 @@
 	<cfscript>
 	application.zcore.functions.zRequireDataTables();
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 		var table=-1;
 	zArrDeferredFunctions.push(function() {
 		/*	$('##example').dataTable( {
@@ -1735,7 +1735,7 @@ columns[i][search][regex]	booleanJS	Flag to indicate if the search term for this
 		}
 	}
 
-	echo('done.<script type="text/javascript">
+	echo('done.<script>
 	window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 	window.parent.zCloseModal();
 	</script>');
@@ -2749,7 +2749,7 @@ tabCom.enableSaveButtons();
 	tabCom.enableSaveButtons();
 	if(form.modalpopforced EQ 1){
 		echo('
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".tabCancelButton").on("click", function(e){
 				e.preventDefault();
@@ -2866,7 +2866,7 @@ tabCom.enableSaveButtons();
 			application.zcore.functions.zRedirect("/z/blog/admin/blog-admin/categoryAdd?zsid=#request.zsid#&site_x_option_group_set_id=#form.site_x_option_group_set_id#");
 		}else if(qcat.recordcount EQ 1 and form.method EQ "articleAdd"){
 			form.select_category_id=qcat.blog_category_id;
-			application.zcore.template.appendTag("scripts", '<script type="text/javascript">zArrDeferredFunctions.push(function(){  setCatBlock(true); });</script> ');
+			application.zcore.template.appendTag("scripts", '<script>zArrDeferredFunctions.push(function(){  setCatBlock(true); });</script> ');
 		}
 		selectStruct = StructNew();
 		selectStruct.name = "select_category_id";
@@ -2907,7 +2907,7 @@ tabCom.enableSaveButtons();
 				</cfsavecontent><cfscript>qCat=db.execute("qCat");</cfscript>
 				</cfif>
 				<div id="categoryBlock"></div>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */
 				var arrBlock=new Array();
 				var arrBlockId=new Array();
@@ -3010,7 +3010,7 @@ tabCom.enableSaveButtons();
 				and blog_tag.site_id = blog_x_tag.site_id 
 				ORDER BY blog_tag.blog_tag_name ASC
 				</cfsavecontent><cfscript>qTag=db.execute("qTag");</cfscript>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */
 				var arrTagBlock=[];
 				<cfif application.zcore.functions.zso(form, 'blog_tags') NEQ "">
@@ -3124,7 +3124,7 @@ tabCom.enableSaveButtons();
 			</div>
  
 	
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			function checkDateBlock(){
 				var r1=document.getElementById("blog_status1");
@@ -3304,7 +3304,7 @@ tabCom.enableSaveButtons();
 		application.zcore.functions.zRedirect("/z/blog/admin/blog-admin/articleList?zsid=#request.zsid#&site_x_option_group_set_id=#form.site_x_option_group_set_id#");
 	}
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 /* <![CDATA[ */ 
 function textCounter(field,cntfield,maxlimit) {
 	if (field.value.length > maxlimit){
@@ -3418,7 +3418,7 @@ local.blogIdBackup=form.blog_id;
 				<cfelse>
 					<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#htmleditformat(form.blog_comment_text)#</textarea><br />
 					<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250" /> characters left 
-					<script type="text/javascript">
+					<script>
 					/* <![CDATA[ */textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);/* ]]> */
 					</script>
 				</cfif>
@@ -3690,7 +3690,7 @@ tabCom.enableSaveButtons();
 	application.zcore.siteOptionCom.requireSectionEnabledSetId([""]);
 	form.blog_comment_id=application.zcore.functions.zso(form, 'blog_comment_id');
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	function textCounter(field,cntfield,maxlimit) {
 		if (field.value.length > maxlimit)){
@@ -3761,7 +3761,7 @@ tabCom.enableSaveButtons();
 				<cfelse>
 					<textarea name="blog_comment_text" wrap="physical" cols="53" rows="5" onKeyDown="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)" onkeyup="textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250)">#form.blog_comment_text#</textarea><br />
 					<input readonly type="text" name="remLen2" size="3" maxlength="3" value="250"> characters left 
-					<script type="text/javascript">
+					<script>
 					textCounter(document.myForm.blog_comment_text,document.myForm.remLen2,250);
 					</script>
 				</cfif>

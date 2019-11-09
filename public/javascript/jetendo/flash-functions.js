@@ -20,7 +20,7 @@
 		var is_webkit = navigator.userAgent.toLowerCase().indexOf('webkit') > -1;
 		var ie=(document.defaultCharset&&document.getElementById&&!window.home);
 		if(ie && !is_webkit){
-			$("body").append('<style type="text/css" id="hideObject">object{display:none;}</style>');
+			$("body").append('<style id="hideObject">object{display:none;}</style>');
 		}
 		if(!document.getElementsByTagName){
 			return;

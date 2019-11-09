@@ -75,7 +75,7 @@
 				<p>You must upgrade to a newer browser.  <a href="http://www.google.com/chrome" target="_blank">Chrome</a> or 
 				<a href="http://www.google.com/chrome" target="_blank">Firefox</a> are recommended.</p>
 			</div>
-			<style type="text/css">
+			<style>
 			.zDashboardContainerPad{width:97%; padding:1.5%; float:left;}
 			.zDashboardContainer{width:100%; }
 			.zDashboardHeader{width:98%; padding:1%; float:left;}
@@ -427,7 +427,7 @@
 	  <!--- <div class="zapp-shell-foot"><hr />Copyright&copy; #year(now())# <a href="/">#request.zos.globals.shortdomain#</a>. All Rights Reserved.
 	  </div> --->
 	  </div>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	  var zDisableBackButton=false; 
 	function backButtonOverrideBody(){

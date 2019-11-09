@@ -101,7 +101,7 @@ search sql generator has to be able to search on child group data for paging to 
 	}
 	</cfscript>
 	<cfsavecontent variable="meta">
-	<style type="text/css">
+	<style>
 	
 	</style>
 	</cfsavecontent>
@@ -148,7 +148,7 @@ search sql generator has to be able to search on child group data for paging to 
 		<div id="zSearchResultsDiv" <cfif disableSidebar> class="zSearchResultsDivNoSidebar" </cfif>>
 		</div>
 	</div>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	<cfif form.groupID NEQ 0>
 		var disableSearchLoadMessage=true;

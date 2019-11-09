@@ -316,12 +316,12 @@ done: need to define a javascript file that shows all the scripts that were auto
 
 	request.arrJS=[];
 	for(i=1;i<=arraylen(sequenceStruct.arrJS);i++){
-		/*arrayAppend(request.arrJS, '<script type="text/javascript">var a=document.createElement("script");
+		/*arrayAppend(request.arrJS, '<script>var a=document.createElement("script");
 		a.async=true;
 		a.src="#sequenceStruct.arrJS[i]#";
 		document.getElementsByTagName("head")[0].appendChild(a);</script>');*/
 		if(not structkeyexists(request.excludeLoadFileStruct, sequenceStruct.arrJS[i])){
-			arrayAppend(request.arrJS, '<script type="text/javascript" defer="defer" src="#sequenceStruct.arrJS[i]#"></script>');
+			arrayAppend(request.arrJS, '<script defer="defer" src="#sequenceStruct.arrJS[i]#"></script>');
 		}
 	}
 	for(i=1;i<=arraylen(sequenceStruct.arrCSS);i++){
@@ -422,20 +422,20 @@ done: need to define a javascript file that shows all the scripts that were auto
 		arrayAppend(arrCSSLoaded, i);//'Jetendo.loadedFiles["'&jsStringFormat(i)&'"]=true;');
 	}
 	//writedump(request.javascriptStruct);
-	application.zcore.template.prependTag('scripts', '<script type="text/javascript">var Jetendo={loadCount:0,loadedFiles:{}};</script>');
+	application.zcore.template.prependTag('scripts', '<script>var Jetendo={loadCount:0,loadedFiles:{}};</script>');
 	jsCount=10+structcount(request.javascriptPackageStruct);
 	for(i in request.javascriptPackageStruct){
-		application.zcore.template.appendTag('scripts', '<script type="text/javascript"  src="'&i&'"></script>');
+		application.zcore.template.appendTag('scripts', '<script  src="'&i&'"></script>');
 	}
 	for(i in request.javascriptPackageStruct){
 		arrayAppend(arrCSS, '<link rel="stylesheet" type="text/css" href="#i#" />');
 	}
 	application.zcore.template.prependTag('stylesheets', arrayToList(arrCSS, chr(10)));
 	// <input type="hidden" name="JetendoDependJS" id="JetendoDependJS" data-count="#jsCount#" data-loaded="#htmleditformat(arrayToList(arrCSSLoaded,","))#" value="#structkeylist(request.javascriptStruct)#" />
-	application.zcore.template.appendTag('scripts', '<script type="text/javascript" defer="defer" src="/z/javascript/jetendo-core/Dependencies.js"></script>
-		<script type="text/javascript" defer="defer" src="/z/javascript/jetendo-core/Loader.js"></script>
+	application.zcore.template.appendTag('scripts', '<script defer="defer" src="/z/javascript/jetendo-core/Dependencies.js"></script>
+		<script defer="defer" src="/z/javascript/jetendo-core/Loader.js"></script>
 		#arrayToList(request.arrJS, chr(10))#
-		<script type="text/javascript" defer="defer" src="/z/javascript/jetendo-core/custom.js"></script>');
+		<script defer="defer" src="/z/javascript/jetendo-core/custom.js"></script>');
 	// 
 		//#arrayToList(arrCSSLoaded, chr(10))#
 	</cfscript>

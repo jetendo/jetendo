@@ -92,7 +92,7 @@ request.zos.currentURLISAListingPage=true;
 	<cfelse>
 		<hr />
 		<button id="zSLEmailButton1" type="button" name="button1" onclick="zShowModalStandard('/z/listing/sl/inquiry', 540, 630);return false;" rel="nofollow" class="zSavedList-link" style="display:none;">Email your saved listings to us</button>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		zArrDeferredFunctions.push(function(){
 			$("##zSLEmailButton1").show();
@@ -340,7 +340,7 @@ when page loads again, view cart will not continue to be expanded, so don't need
 	<cfscript>
 	application.zcore.template.setPlainTemplate();
 	</cfscript>
-	<style type="text/css">
+	<style>
 	.zcart{ width:98%; padding:1%;float:left; background-color:##EEE; clear:both;}
 	.zcart-add-saved, .zcart-add-saved:link, .zcart-add-saved:visited{ background-color:##000 !important;  color:##FFF !important; }
 	.zcart-add-saved:hover{ background-color:##666 !important;  color:##FFF !important;}
@@ -403,7 +403,7 @@ when page loads again, view cart will not continue to be expanded, so don't need
 
 	});
 	 --->
-	<script type="text/javascript">
+	<script>
 
 	function zListingGetCartObj(){
 		var obj={ id:'1', label:'listingcart1 Item 1', image: '/z/a/images/s2.gif', description: 'description', addHTML: 'Add Item 1', removeHTML:'Remove Item 1', viewURL: '##view1' };

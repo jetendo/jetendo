@@ -149,7 +149,7 @@
  	</cfif>
 
 	<cfif application.zcore.app.getAppData("content").optionStruct.content_config_phone_required EQ 1>
-		<script type="text/javascript">/* <![CDATA[ */
+		<script>/* <![CDATA[ */
 		function checkit2(){
 			if(document.getElementById('name').value == '' || document.getElementById('Email').value == '' || document.getElementById('Phone').value == ''){
 				alert('Name, Email and Phone are required fields.');	
@@ -159,7 +159,7 @@
 		}/* ]]> */
 		</script>
 	<cfelse>
-		<script type="text/javascript">/* <![CDATA[ */
+		<script>/* <![CDATA[ */
 		function checkit2(){
 			if(document.getElementById('name').value == '' || document.getElementById('Email').value == ''){
 				alert('Name and Email are required fields.');	
@@ -169,7 +169,7 @@
 		}/* ]]> */
 		</script>
 	</cfif>
-	<cfscript>application.zcore.template.appendtag("meta",'<style type="text/css">
+	<cfscript>application.zcore.template.appendtag("meta",'<style>
 	/* <![CDATA[ */ html,body{border:0px; margin:0px; border-collapse:collapse;}
 	h1{padding:0px; margin:0px;} 
 	form{margin:0px; padding:0px;} /* ]]> */
@@ -179,7 +179,7 @@
 	<form class="zFormCheckDirty" action="/z/listing/inquiry-pop/send" method="post" id="name22" style="margin:0px; padding:0px;padding-top:5px;"  onsubmit="zSet9('zset9_#form.set9#');return checkit2();">
 	<input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
 	 #application.zcore.functions.zFakeFormFields()#
-	<cfscript>application.zcore.template.appendTag("meta",'<style type="text/css">	/* <![CDATA[ */ select, input, textarea, .tinypop td{ font-size:11px; line-height:14px; } /* ]]> */	</style>');
+	<cfscript>application.zcore.template.appendTag("meta",'<style>	/* <![CDATA[ */ select, input, textarea, .tinypop td{ font-size:11px; line-height:14px; } /* ]]> */	</style>');
 	</cfscript>
   
 	<table style="border-spacing:4px;width:450px;" class="tinypop">

@@ -209,7 +209,7 @@
 	
 	<cfif structkeyexists(form,'modalpopforced') and form.modalpopforced EQ 1>
 		<p>Closing window in 3 seconds.</p>
-		<script type="text/javascript">/* <![CDATA[ */ 
+		<script>/* <![CDATA[ */ 
 		setTimeout(function(){ zCloseThisWindow(); },3000);
 		/* ]]> */
 		</script>
@@ -251,7 +251,7 @@ mailingListCom.outputEndForm();
 
 	form.set9=application.zcore.functions.zGetHumanFieldIndex();
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	function zMailingListAjaxCallback(r){
 		var r=eval("("+r+")"); 
 		zSetDirty(false);

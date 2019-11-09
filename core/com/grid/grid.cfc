@@ -508,7 +508,7 @@ application.zcore.gridCom.getGridForm(ts); --->
 	
 	request.zos.debuggerEnabled=false;
 	application.zcore.functions.zModalCancel();
-	application.zcore.template.appendTag("stylesheets", '<style type="text/css">
+	application.zcore.template.appendTag("stylesheets", '<style>
     *{-webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing:border-box;} 
 
 	.z-grid-group{
@@ -518,7 +518,7 @@ application.zcore.gridCom.getGridForm(ts); --->
 	-ms-user-select: none;
 	}
     </style>');
-	application.zcore.template.appendTag("scripts", '<script type="text/javascript">var zIsModalWindow=true;</script>');
+	application.zcore.template.appendTag("scripts", '<script>var zIsModalWindow=true;</script>');
 	application.zcore.template.setTemplate("zcorerootmapping.templates.plain-no-body-style",true,true);
 	
 	application.zcore.functions.zRequireJquery();
@@ -643,7 +643,7 @@ application.zcore.gridCom.getGridForm(ts); --->
 			</div>
 		</section> 
 	</cfsavecontent>
-	<script type="text/javascript">
+	<script>
 	var gridOverlayTemplate="#jsstringformat(gridOverlayTemplate)#";
 	var gridGroupTemplate="#jsstringformat(gridGroupTemplate)#"; 
 	var gridWidth=#gridWidth#;

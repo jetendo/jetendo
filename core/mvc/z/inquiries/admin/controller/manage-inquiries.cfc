@@ -874,7 +874,7 @@
 		</div>
 
 		<div class="z-manager-edit-errors z-float"></div>  
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		var arrNoteTemplate=[];
 		<cfloop query="qTemplate">
@@ -972,7 +972,7 @@
 		</cfif>
 	</form>
 	<br>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push( function() { 
 		function emailSentCallback(r){
 			window.parent.location.reload();
@@ -1111,7 +1111,7 @@
 	}
 	</cfscript>
 
-<script type="text/javascript">
+<script>
 zArrDeferredFunctions.push(function(){
 	function placeLeadMenu(){
 		setTimeout(function(){
@@ -1329,7 +1329,7 @@ zArrDeferredFunctions.push(function(){
 	<cfif application.zcore.user.checkGroupAccess("member") or form.method EQ "userIndex">
 		 
 	
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function loadExport(){
 			var wf=document.getElementById("whichfields1");	
@@ -2406,7 +2406,7 @@ zArrDeferredFunctions.push(function(){
 		ORDER BY member_first_name ASC, member_last_name ASC";
 		qAgents=db.execute("qAgents", "", 10000, "query", false);
 		savecontent variable="userField"{
-			echo('<script type="text/javascript">
+			echo('<script>
 			/* <![CDATA[ */
 			var agentSiteIdTypeLookup=[];')
 			loop query="qAgents"{

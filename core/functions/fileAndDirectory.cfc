@@ -1647,7 +1647,7 @@ application.zcore.functions.zDisplayLazyResponsiveImage(ts);
 			request.zos.zResponsiveIndex++;
 		}
 		savecontent variable="out"{
-			echo('<style type="text/css">'&chr(10));
+			echo('<style>'&chr(10));
 			for(i in arrBreak){
 				if(i NEQ 'default'){
 					echo('@media only screen and (max-width: #i#px) { '&chr(10));
@@ -1812,7 +1812,7 @@ rs=application.zcore.functions.zDisplayLazyResponsiveBackgroundImage(ts);
 		arraySort(arrBreak, "numeric", "desc");
 		arrayPrepend(arrBreak, 'default');
 		savecontent variable="out"{
-			echo('<style type="text/css">'&chr(10));
+			echo('<style>'&chr(10));
 			for(i in bg){
 				if(i NEQ 'default'){
 					echo('@media only screen and (max-width: #i#px) { '&chr(10));

@@ -29,7 +29,7 @@
 	<title>#tagStruct.title ?: ""#</title>
 	#tagStruct.stylesheets ?: ""#
 	#tagStruct.meta ?: ""#
-	<style type="text/css">/* <![CDATA[ */ body{margin:0px;  } /* ]]> */</style>
+	<style>/* <![CDATA[ */ body{margin:0px;  } /* ]]> */</style>
 	</head>
 	<body class="zblanktemplatebody">
 	#tagStruct.content ?: ""#

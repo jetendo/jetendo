@@ -719,7 +719,7 @@
 
 	<cfif structkeyexists(form, 'createVersion')>
 		
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			doDeepCopy('/z/feature/admin/feature-deep-copy/createVersion?feature_id=#form.feature_id#&feature_data_id=#form.feature_data_id#');
 		});

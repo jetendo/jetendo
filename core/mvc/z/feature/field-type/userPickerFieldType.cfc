@@ -448,7 +448,7 @@
 	
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType16(postObj, arrError){   
 			if(postObj.user_group_id_list == ''){
 				arrError.push('You must select at least one user group in the Limit User Schemas field.');

@@ -234,7 +234,7 @@ LIMIT 0,1000
 			<cfscript>
 			application.zcore.functions.zRequireGoogleMaps();
 			</cfscript> 
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			var curMap=false;
 			var arrAdditionalLocationLatLng=[];
@@ -311,7 +311,7 @@ LIMIT 0,1000
 	</cfscript> 
 	<cfif cs.success>
 		<cfsavecontent variable="out">
-			<script type="text/javascript">
+			<script>
 			zArrDeferredFunctions.push(function(){
 				zSetCurrentUserLocation(#cs.latitude#, #cs.longitude#, "#cs.type#");
 			});

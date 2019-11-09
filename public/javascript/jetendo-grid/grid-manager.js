@@ -192,7 +192,7 @@ function renderGroupStart(group, isAdmin){
 	var bg=getBackgroundCode(group.settings.grid_group_id, group.settings.grid_group_background_type, group.settings.grid_group_background_value);
 	var arrHTML=[];
 	if(bg.css!=""){
-		arrHTML.push('<style type="text/css">'+bg.css+'</style>');
+		arrHTML.push('<style>'+bg.css+'</style>');
 	}
 
 
@@ -245,7 +245,7 @@ function renderBox(group, box, isAdmin){
 	var bg=getBackgroundCode(group.settings.grid_group_id, group.settings.grid_group_box_background_type, group.settings.grid_group_box_background_value);
 	var arrHTML=[tab+tab+tab];
 	if(bg.css!=""){
-		arrHTML.push('<style type="text/css">'+bg.css+'</style>');
+		arrHTML.push('<style>'+bg.css+'</style>');
 	}
 
 	var arrHTML=[]; 

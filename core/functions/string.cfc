@@ -306,7 +306,7 @@
             result&=', ';
         }
     }
-    application.zcore.template.prependtag("meta",'<style type="text/css">/* <![CDATA[ */ .zsearchhighlight1{ color:##000; background-color:##FF0; font-weight:bold;}.zsearchhighlight2{ color:##000; background-color:##fbAcAc; font-weight:bold;}.zsearchhighlight3{ color:##000; background-color:##FD3; font-weight:bold;}.zsearchhighlight4{ color:##000; background-color:##8cdff7; font-weight:bold;}.zsearchhighlight5{ color:##000; background-color:##FCA; font-weight:bold;}.zsearchhighlight6{ color:##000; background-color:##CDF; font-weight:bold;}.zsearchhighlight7{ color:##000; background-color:##EBF; font-weight:bold;}.zsearchhighlight8{ color:##000; background-color:##9F9; font-weight:bold;}.zsearchhighlight9{ color:##000; background-color:##AFD; font-weight:bold;} /* ]]> */</style>');
+    application.zcore.template.prependtag("meta",'<style>/* <![CDATA[ */ .zsearchhighlight1{ color:##000; background-color:##FF0; font-weight:bold;}.zsearchhighlight2{ color:##000; background-color:##fbAcAc; font-weight:bold;}.zsearchhighlight3{ color:##000; background-color:##FD3; font-weight:bold;}.zsearchhighlight4{ color:##000; background-color:##8cdff7; font-weight:bold;}.zsearchhighlight5{ color:##000; background-color:##FCA; font-weight:bold;}.zsearchhighlight6{ color:##000; background-color:##CDF; font-weight:bold;}.zsearchhighlight7{ color:##000; background-color:##EBF; font-weight:bold;}.zsearchhighlight8{ color:##000; background-color:##9F9; font-weight:bold;}.zsearchhighlight9{ color:##000; background-color:##AFD; font-weight:bold;} /* ]]> */</style>');
     return result&'</td></tr></table><br />'&t99;
     </cfscript>
 </cffunction>

@@ -77,7 +77,7 @@
 		echo(' $( "###arguments.prefixString&arguments.row["#variables.type#_option_id"]#" ).datepicker();');
 	}
 	if(structkeyexists(form, 'x_ajax_id')){
-		js='<script type="text/javascript">/* <![CDATA[ */'&js&'/* ]]> */</script>';
+		js='<script>/* <![CDATA[ */'&js&'/* ]]> */</script>';
 	}else{
 		application.zcore.skin.addDeferredScript(js);
 		js='';

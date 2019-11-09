@@ -69,7 +69,7 @@
 		//application.zcore.skin.includeCSS(stylesheetCompiled);
 	 
 		// TODO: later I might want to compile these to single file / minify
-		application.zcore.template.appendTag('scripts', '<script type="text/javascript">'&getJS("."&widgetContainer)&'</script>');
+		application.zcore.template.appendTag('scripts', '<script>'&getJS("."&widgetContainer)&'</script>');
 	}
 	//arguments.dataFields.widgetContainer="widgetInstance#id#";
  	/*

@@ -303,7 +303,7 @@
 		<cfif application.zcore.user.checkAllCompanyAccess()>
 			<h2><a href="/z/server-manager/admin/site/downloadAllSTE?sid=#form.sid#">Generate All Dreamweaver STE Files</a></h2>
 		</cfif>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function setInstallPath(){
 			var d=document.getElementById('installdir');

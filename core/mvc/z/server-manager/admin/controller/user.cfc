@@ -653,7 +653,7 @@
 				</tr>
 			</cfif>
 			<cfif currentMethod EQ "editUser" and request.zsession.user.id EQ qUser.user_id and request.zsession.user.site_id EQ qUser.site_id>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */ 
 				function checkUser(num){
 					if(document.userForm.user_server_administrator.checked){
@@ -675,7 +675,7 @@
 				} /* ]]> */
 				</script>
 			<cfelse>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */ 
 				function checkUser(num){
 					if(document.userForm.user_server_administrator.checked){

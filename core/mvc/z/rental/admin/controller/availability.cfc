@@ -17,7 +17,7 @@
 	site_id = #db.param(request.zOS.globals.id)# ORDER BY rental_name ASC ";
 	qProperties=db.execute("qProperties");
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function getCalendar(val){
 		if(val != ''){

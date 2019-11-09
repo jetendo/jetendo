@@ -7,7 +7,7 @@ var ts=0;
 application.zcore.functions.zHeader("Content-type", "text/javascript");
 application.zcore.tracking.backOneHit();</cfscript>
 <cfsavecontent variable="request.theSearchFormTemplate">
-<style type="text/css">
+<style>
 .quicksearchtable{font-family:Verdana, Geneva, sans-serif; font-size:14px;}
 .quicksearchtable select{ margin:0px; font-size:13px; line-height:14px;}
 .quicksearchtable > td{ padding:3px;}
@@ -17,7 +17,7 @@ application.zcore.tracking.backOneHit();</cfscript>
 .quicksearchrow2 td{padding:3px; vertical-align:top;}
 </style>
 <form name="quickSearchForm" id="quickSearchForm" action="#request.zos.currentHostName###searchFormSubmitURL##" target="_blank" method="post">
-<script type="text/javascript">/* <![CDATA[ */ zArrDeferredFunctions.push(function(){zFormData["zMLSSearchForm"]=new Object(); zFormData["zMLSSearchForm"].arrFields=[]; });/* ]]> */</script>
+<script>/* <![CDATA[ */ zArrDeferredFunctions.push(function(){zFormData["zMLSSearchForm"]=new Object(); zFormData["zMLSSearchForm"].arrFields=[]; });/* ]]> */</script>
 <table class="quicksearchtable">
 <tr>
 <td style="font-size:18px; font-weight:bold; line-height:24px; padding-bottom:10px;" colspan="2">Real Estate Search</td>

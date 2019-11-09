@@ -60,7 +60,7 @@ var ContentFlowGlobal = {
 
     addScript: function  (path) {
         if (this.Browser.IE || this.Browser.WebKit || this.Browser.Konqueror) {
-            document.write('<script type="text/javascript" src="'+path+'"><\/script>');
+            document.write('<script src="'+path+'"><\/script>');
         }
         else {
             var script = document.createElement('script');

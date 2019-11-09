@@ -322,7 +322,7 @@ zExpOption(ts);
 </div>
 </cfif>
 </cfif>
-<!---<script type="text/javascript" src="#request.zos.listing.cityLookupFileName#"></script>
+<!---<script src="#request.zos.listing.cityLookupFileName#"></script>
 --->
 <!---<tr><td colspan="2">
 <cfscript>
@@ -829,7 +829,7 @@ zExpOption(ts);
 		structdelete(variables,'ts');
 		//	zdump(returnstruct);
 		start49=gettickcount();
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */ setTimeout("setMLSCount('&returnStruct.count&');",100); /* ]]> */</script>');
+		writeoutput('<script>/* <![CDATA[ */ setTimeout("setMLSCount('&returnStruct.count&');",100); /* ]]> */</script>');
 		if(returnStruct.count NEQ 0){	
 			/*
 			*/

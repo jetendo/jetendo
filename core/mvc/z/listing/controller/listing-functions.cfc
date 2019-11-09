@@ -33,13 +33,13 @@
 	request.contentEditor=true;
 	</cfscript>
 	<cfif arguments.searchMLS EQ 0>
-    	<script type="text/javascript">
+    	<script>
 		zDisableOnGmapLoad=true;
 		</script>
     </cfif> 
     <cfif arguments.hideSearchMLS EQ false>
     	Search MLS <input type="radio" name="#arguments.fieldName#" value="1" <cfif arguments.searchMLS EQ 1>checked="checked"</cfif> onclick="rssToggleMLSForm(this);" style="border:none; background:none;" /> Yes | <input type="radio" name="#arguments.fieldName#" value="0" onclick="rssToggleMLSForm(this);" <cfif arguments.searchMLS EQ 0>checked="checked"</cfif> style="border:none; background:none;" /> No 
-          <script type="text/javascript">
+          <script>
 		  /* <![CDATA[ */
 		  function rssToggleMLSForm(obj){
 			var cTR=document.getElementById('rssMlsSearchFormTR');
@@ -102,7 +102,7 @@
 		</cfscript>
 	</div>
     <cfsavecontent variable="theMeta">
-    <style type="text/css">
+    <style>
 	.zSearchFormTable{float:left; width:200px;}
 	</style>
     </cfsavecontent>

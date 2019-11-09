@@ -275,7 +275,7 @@
 savedListingFix=replaceNoCase(replaceNocase(replaceNoCase(replaceNocase(zErrorTempURL,'/"/property/saved-property','/property/saved-property'),'/%22/property/saved-property/','/property/saved-property'),'/""/property/saved-property','/property/saved-property'),'/%22%22/property/saved-property/','/property/saved-property');
 </cfscript>
 <cfif savedListingFix NEQ zErrorTempURL>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ window.location.href='#savedListingFix#'; /* ]]> */
 	</script>
 	<cfabort>
@@ -604,7 +604,7 @@ if(structkeyexists(Request.zOS, 'globals') and structkeyexists(request.zos.globa
 	</table> --->
 		
 		#zAllRequestVars#
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var d=document.getElementById("zErrorRepostErrorId");
 	if(typeof d != "undefined" && d != null){
@@ -719,7 +719,7 @@ if(structkeyexists(Request.zOS, 'globals') and structkeyexists(request.zos.globa
 <title>Sorry, this page has generated an error.</title>
 <meta charset="utf-8" />
 <META HTTP-EQUIV=Refresh CONTENT="25; URL=<cfif structkeyexists(Request.zOS, 'currentHostName')><cfif left(Request.zOS.currentHostName, 4) NEQ "http">http://</cfif>#Request.zOS.currentHostName#<cfelse>http://#request.zos.CGI.HTTP_HOST#</cfif>">
-<style type="text/css">
+<style>
 <!--
 .style1 {
 	font-family: Arial, Helvetica, sans-serif;

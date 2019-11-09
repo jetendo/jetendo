@@ -275,7 +275,7 @@
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType1(postObj, arrError){ 
 			var width=parseInt(postObj.editorwidth2);
 			var height=parseInt(postObj.editorheight2);

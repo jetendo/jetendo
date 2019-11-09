@@ -287,7 +287,7 @@
 	qSchema=db.execute("qSchema");
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType24(postObj, arrError){  
 		}
 		</script>

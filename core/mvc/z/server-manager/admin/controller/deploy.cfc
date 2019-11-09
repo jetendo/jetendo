@@ -777,7 +777,7 @@
 			<textarea name="changes" cols="100" row="20" style="width:95% !important; height:200px;">'&application.zcore.functions.zreadfile(filePath)&'</textarea>');
 		}
 		</cfscript>
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".deployCoreButton").on("click", function(e){
 				e.preventDefault();

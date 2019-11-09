@@ -403,7 +403,7 @@ KEY `feature_data_id` (`feature_data_id`)
 	init();
 	request.title="#groupName#";
 	arrayAppend(request.stylesheets, ''<link rel="stylesheet" href="##request.currentPath##/stylesheets/subpage.css" type="text/css" />'');
-	// arrayAppend(request.scripts, ''<script type="text/javascript" src="##request.currentPath##/js/custom-example.js"></script>'');
+	// arrayAppend(request.scripts, ''<script src="##request.currentPath##/js/custom-example.js"></script>'');
 	header();
 	</cfscript>
 	#cfcDebugOutput#
@@ -530,7 +530,7 @@ displaySchemaCom.add();
 		</div>
 		<input type="submit" name="submit1" value="Submit" />
 	</form>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		$("####customForm1").bind("submit", function(){
 			var postObj=zGetFormDataByFormId("customForm1"); 
@@ -1951,7 +1951,7 @@ displaySchemaCom.ajaxInsert();
 					<th>#application.zcore.functions.zOutputHelpToolTip("Enable Public Form?","member.feature-schema.edit feature_schema_allow_public")#</th>
 					<td>#application.zcore.functions.zInput_Boolean("feature_schema_allow_public")#
 
-					<script type="text/javascript">
+					<script>
 					zArrDeferredFunctions.push(function(){
 						$("##feature_schema_allow_public1").bind("click", function(){
 							$("##feature_schema_enable_cache0")[0].checked=true;
@@ -2243,7 +2243,7 @@ displaySchemaCom.ajaxInsert();
 		#tabCom.endFieldSet()# 
 		#tabCom.endTabMenu()# 
 	</form>
-	<script type="text/javascript">
+	<script>
 		/* <![CDATA[ */ 
 		var firstLoad11=true;
 		function doParentCheck(){ 

@@ -219,7 +219,7 @@ weatherHTML=zGetWeather(ts);
 		}
 	}
 	</cfscript> 
-	<!--- <cfsavecontent variable="weatherHTML"><cfif arguments.ss.overrideStyles EQ false><style type="text/css">
+	<!--- <cfsavecontent variable="weatherHTML"><cfif arguments.ss.overrideStyles EQ false><style>
 .zweather-body{ float:left; width:280px; line-height:13px; font-size:11px; font-weight:bold; }
 .zweather-current{ float:left; font-size:14px; line-height:18px; margin-top:5px; margin-left:10px; font-weight:bold; }
 .zweather-yahoo{ font-size:10px; font-weight:normal; text-decoration:underline; }
@@ -621,7 +621,7 @@ weatherHTML=zGetWeather(ts);
 	
 	</cfloop> 
 			<!---
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		$(".zRssReadMore").bind("click", function(){
 			var id=$(this).attr("data-id");

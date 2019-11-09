@@ -118,7 +118,7 @@
 		</div>
 	</div>
  
-	<script type="text/javascript">
+	<script>
 	if(!window.parent.zInsertTinymceWidget){
     	alert('HTML Editor is missing');
 	}

@@ -240,7 +240,7 @@ enable round robin for users - need a new option to disable for staff.
 			ORDER BY member_first_name ASC, member_last_name ASC ";
 			qAgents=db.execute("qAgents");
 		    </cfscript>
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			function disableBothAssign(num){
 				var d1=document.getElementById("inquiries_routing_assign_to_email");
@@ -363,7 +363,7 @@ enable round robin for users - need a new option to disable for staff.
 								<input type="text" name="inquiries_routing_assign_to_email" id="inquiries_routing_assign_to_email" size="50" value="#htmleditformat(form.inquiries_routing_assign_to_email)#" onkeyup="disableMemberAssign(this);" /></td>
 						</tr>
 					</table>
-					<script type="text/javascript">
+					<script>
 					/* <![CDATA[ */
 					zArrDeferredFunctions.push(function(){
 						d1=document.getElementById("inquiries_routing_assign_to_user_id");
@@ -438,7 +438,7 @@ enable round robin for users - need a new option to disable for staff.
 			<td><input type="radio" name="inquiries_routing_reassignment_type_id" id="inquiries_routing_reassignment_type_id3" value="3" <cfif form.inquiries_routing_type_id EQ 3>checked="checked"</cfif> /> Assign To Email Address(es)&nbsp;  <input type="text" name="inquiries_routing_reassignment_to_email" id="inquiries_routing_reassignment_to_email" size="50" value="#htmleditformat(form.inquiries_routing_reassignment_to_email)#" onkeyup="disableMemberAssign2(this);" /> </td>
 			</tr>
 			</table>
-			<script type="text/javascript">
+			<script>
 			d1=document.getElementById("inquiries_routing_reassignment_to_user_id");
 			showAgentPhoto2(d1.options[d1.selectedIndex].value);
 			</script>

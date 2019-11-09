@@ -52,7 +52,7 @@
 		application.zcore.functions.zMenuClearCache({content=true});
 		variables.queueSortCom.returnJson();
 	}
-	application.zcore.template.appendTag("meta",'<style type="text/css">
+	application.zcore.template.appendTag("meta",'<style>
 	/* <![CDATA[ */ .monodrop {
 	font-family:"Lucida Console",Courier,Monospace;
 	font-size:11px; 
@@ -491,7 +491,7 @@
 
 	form.content_id=application.zcore.functions.zso(form, 'content_id');
 	if(currentMethod EQ "add" or currentMethod EQ "Add Content"){
-		application.zcore.template.appendTag('scripts','<script type="text/javascript">/* <![CDATA[ */ 
+		application.zcore.template.appendTag('scripts','<script>/* <![CDATA[ */ 
 		var zDisableBackButton=true;
 		zArrDeferredFunctions.push(function(){
 			zDisableBackButton=true;
@@ -563,7 +563,7 @@
 	tabCom.enableSaveButtons();
 	if(form.modalpopforced EQ 1){
 		echo('
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".tabCancelButton").on("click", function(e){
 				e.preventDefault();
@@ -775,7 +775,7 @@
 			</cfif>
 		</cfif>
 		</table>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function showOptions(n){
 			var t=document.getElementById("listingTableId");
@@ -860,7 +860,7 @@
 				</cfscript>
 			
 				<input type="text" name="content_mls_number" id="content_mls_number" value="#HTMLEditFormat(form.content_mls_number)#" onkeyup="setMLSDiv();" size="15" /> <div id="mlslinkdiv" ></div>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */
 				function trim11 (str) {
 					str = str.replace(/^\s+/, '');
@@ -910,7 +910,7 @@
 					#application.zcore.functions.zOutputHelpToolTip("Firm Name","member.content.edit content_firm_name")#</th>
 				<td style="vertical-align:top; ">
 					<input type="text" name="content_firm_name" value="#HTMLEditFormat(form.content_firm_name)#" style="padding:0px;" size="15" /> 
-					<script type="text/javascript">
+					<script>
 					/* <![CDATA[ */
 					function setPrice(n){
 						return;
@@ -949,7 +949,7 @@
 			<td>
 				<input type="text" name="content_price" value="<cfif form.content_price NEQ 0>#HTMLEditFormat(form.content_price)#</cfif>" size="15" />
 				<cfif application.zcore.app.siteHasApp("listing")>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */
 				<cfscript>
 				if(application.zcore.functions.zso(form, 'content_mls_price') EQ 1 or application.zcore.functions.zso(form, 'content_mls_price') EQ ''){
@@ -1190,7 +1190,7 @@
 	</cfscript>
 	<tr><th style="vertical-align:top;">#application.zcore.functions.zOutputHelpToolTip("Listing Agent","member.content.edit content_listing_user_id")#</th>
 		<td>
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			function showAgentPhoto(id){
 				var d1=document.getElementById("agentPhotoDiv");
@@ -1226,7 +1226,7 @@
 			<br />
 			<div id="agentPhotoDiv"></div>
 			<cfif application.zcore.functions.zso(form, 'content_listing_user_id',true) NEQ 0>
-				<script type="text/javascript">showAgentPhoto(#form.content_listing_user_id#);</script>
+				<script>showAgentPhoto(#form.content_listing_user_id#);</script>
 			</cfif>
 		</td>
 	</tr>
@@ -1292,7 +1292,7 @@
 					</cfscript>
 					#application.zcore.functions.zOutputHelpToolTip("Change Parent Page","member.content.edit content_parent_id")#</th>
 				<td style="vertical-align:top; ">		
-					<script type="text/javascript">
+					<script>
 					function preventSameParent(o,id){
 						if(o.options[o.selectedIndex].value == id){
 							alert('You can\'t select the same page you are editing.\nPlease select a different page.');
@@ -1722,7 +1722,7 @@
 	#application.zcore.functions.zEndForm()#
 	
 	<cfif application.zcore.app.siteHasApp("listing")>
-		<script type="text/javascript">/* <![CDATA[ */ 
+		<script>/* <![CDATA[ */ 
 		zArrDeferredFunctions.push(function(){getMLSCount('zMLSSearchForm');}); 
 		/* ]]> */</script>
 	</cfif>
@@ -2533,11 +2533,11 @@
 		}
 	}
 	if(form.parentChanged EQ 1){
-		echo('<script type="text/javascript">
+		echo('<script>
 		window.parent.location.reload(false);
 		</script>');
 	}else{
-		echo('<script type="text/javascript">
+		echo('<script>
 		window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 		window.parent.zCloseModal();
 		</script>');

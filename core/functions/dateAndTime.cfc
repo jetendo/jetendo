@@ -126,7 +126,7 @@
 	<cfif structkeyexists(request,'zdateselectdaysoutput') EQ false>
 		<cfset request.zdateselectdaysoutput=true>
 		
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		var zDateDaysInMonth=[];
 		/* ]]> */
@@ -196,7 +196,7 @@
 		</cfloop>
 		</select>
 		<cfif arguments.noDays EQ false>
-			<script type="text/javascript">/* <![CDATA[ */
+			<script>/* <![CDATA[ */
 			zDateSelectSetDays('#arguments.fieldName#','month');/* ]]> */
 			</script>
 		</cfif>

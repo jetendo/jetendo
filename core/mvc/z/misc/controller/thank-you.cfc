@@ -37,7 +37,7 @@
 		<cfif not structkeyexists(request.zsession,'disableclosewindowmessage')>
 	
 			<p>Closing window in 3 seconds.</p>
-			<script type="text/javascript">/* <![CDATA[ */ 
+			<script>/* <![CDATA[ */ 
 			setTimeout(function(){ zCloseThisWindow(); },3000);
 			/* ]]> */
 			</script>

@@ -210,7 +210,7 @@ if(form.mls_id EQ "4"){
 		}else{
 			newD=htmleditformat(titleStruct.title);
 		}
-		writeoutput('<div style="text-align:center; padding-bottom:15px;"><img id="zmlslistingphoto#i#" src="#idx["photo#i#"]#" alt="#newD#" style=" max-width:#request.zos.globals.maximagewidth#px;margin-bottom:5px; clear:both;" /><script type="text/javascript">/* <![CDATA[ */
+		writeoutput('<div style="text-align:center; padding-bottom:15px;"><img id="zmlslistingphoto#i#" src="#idx["photo#i#"]#" alt="#newD#" style=" max-width:#request.zos.globals.maximagewidth#px;margin-bottom:5px; clear:both;" /><script>/* <![CDATA[ */
 document.getElementById("zmlslistingphoto#i#").onerror=function(){zImageOnError(this);};
 /* ]]> */</script></div>');
 	}
@@ -336,7 +336,7 @@ d3=application.zcore.listingCom.listingLookupValue("listing_type",variables.list
 #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto#i#",width:10000,height:10000, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})#
 <!--- 
 <img id="zmlslistingphoto#i#" src="#application.zcore.listingCom.getThumbnail(idx['photo'&i], request.lastPhotoId, i, 10000, 10000, 0)#<!--- #idx["photo#i#"]# --->" alt="<cfif structkeyexists(idx, 'photo_description'&i)>#htmleditformat(idx['photo_description'&i])#<cfelse>Listing Photo #i#</cfif>" style="margin-bottom:5px; clear:both; " /> --->
-<!--- <script type="text/javascript">/* <![CDATA[ */
+<!--- <script>/* <![CDATA[ */
 document.getElementById("zmlslistingphoto#i#").onerror=function(){this.style.display="none";/*zImageOnError(this);*/};
 /* ]]> */</script> --->
 </cfif>

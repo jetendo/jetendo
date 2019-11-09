@@ -129,7 +129,7 @@
 		<td style="vertical-align:top; ">Comments:</td>
 		<td class="table-white">#trim(ParagraphFormat(form.inquiries_comments))#&nbsp;</td>
 	</tr>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function updateTotal(){
 		var t1=document.getElementById("total1");
@@ -371,7 +371,7 @@
 		</cfif>
 		<br />
 		<br />
-		<style type="text/css">
+		<style>
 		/* <![CDATA[ */
 		.table-highlight{
 			background-color:##DDDDDD;

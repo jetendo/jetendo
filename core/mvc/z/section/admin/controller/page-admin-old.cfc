@@ -156,7 +156,7 @@
 	} 
 	form.page_id=application.zcore.functions.zso(form, 'page_id');
 	if(currentMethod EQ "add"){
-		application.zcore.template.appendTag('scripts','<script type="text/javascript">/* <![CDATA[ */ 
+		application.zcore.template.appendTag('scripts','<script>/* <![CDATA[ */ 
 		var zDisableBackButton=true;
 		zArrDeferredFunctions.push(function(){
 			zDisableBackButton=true;
@@ -213,7 +213,7 @@
 	tabCom.enableSaveButtons();
 	if(form.modalpopforced EQ 1){
 		echo('
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".tabCancelButton").on("click", function(e){
 				e.preventDefault();
@@ -621,7 +621,7 @@
 		}
 	}
 
-	echo('done.<script type="text/javascript">
+	echo('done.<script>
 	window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 	window.parent.zCloseModal();
 	</script>');

@@ -266,7 +266,7 @@
 	
 	</td></tr>
 	</table>
-	<script type="text/javascript">
+	<script>
 	function submitSelected(){
 		document.myForm.action.value = "multipleResolved";
 		document.myForm.submit();
@@ -294,7 +294,7 @@
 		searchNav = "";
 	}
 	writeoutput(searchNav);</cfscript>
-	<script type="text/javascript">
+	<script>
 	function toggleSelect(){
 		var t = document.myForm.log_hostfilter;
 		if(document.myForm.checkall.checked){

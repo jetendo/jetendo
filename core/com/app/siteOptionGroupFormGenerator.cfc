@@ -1736,7 +1736,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 	}
 	echo('
 	echo(''
-	<style type="text/css">
+	<style>
 	.view-row{width:100%; float:left; margin-bottom:5px; padding:5px; border-bottom:1px solid ####CCC; }
 	.view-label{ width:100%; float:left; width:30%; min-width:150px; max-width:250px; }
 	.view-value{ width:100%; float:left; width:70%; min-width:250px; max-width:100%; }

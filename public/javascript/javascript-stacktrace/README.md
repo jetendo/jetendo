@@ -5,8 +5,8 @@ A JavaScript tool that allows you to debug your JavaScript by giving you a [stac
 Just include stacktrace.js file on your page, and call it like so:
 
 ```html
-<script type="text/javascript" src="path/to/stacktrace.js" />
-<script type="text/javascript">
+<script src="path/to/stacktrace.js" />
+<script>
     ... your code ...
     if (errorCondition) {
          var trace = printStackTrace();

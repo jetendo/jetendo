@@ -1131,7 +1131,7 @@
 	
 				<tr>
 					<th style="width:50px;">#application.zcore.functions.zOutputHelpToolTip("Child Link Type","member.menu.editItem menu_button_type_id")#</th>
-					<td><script type="text/javascript">
+					<td><script>
 						 /* <![CDATA[ */
 						 function setLinkType(v){
 							var d1= document.getElementById("btiContentDiv");
@@ -1266,7 +1266,7 @@
 								</cfscript>
 							</div>
 						</cfif>
-						<script type="text/javascript">setLinkType(#application.zcore.functions.zso(form, 'menu_button_type_id',true)#);</script><br />
+						<script>setLinkType(#application.zcore.functions.zso(form, 'menu_button_type_id',true)#);</script><br />
 						#application.zcore.functions.zOutputHelpToolTip("Sorting Method","member.menu.editItem menu_button_sorting")#:
 						<cfscript>
 						if(form.menu_button_type_id EQ 4){
@@ -1379,7 +1379,7 @@
 			</tr>
 			<tr>
 				<th style="width:50px;">#application.zcore.functions.zOutputHelpToolTip("Font","member.menu.edit menu_font")#</th>
-				<td><script type="text/javascript">
+				<td><script>
 				function setFont(div,v){
 					var d1=document.getElementById(div);	
 					d1.innerHTML=v;
@@ -1403,7 +1403,7 @@
 					application.zcore.functions.zInputSelectBox(ts);
 					</cfscript>
 					<div id="fontDiv" style="font-size:18px;"></div>
-					<script type="text/javascript">
+					<script>
 					setFont('fontDiv','#htmleditformat(form.menu_font)#');
 					</script></td>
 			</tr>
@@ -1529,7 +1529,7 @@
 					application.zcore.functions.zInputSelectBox(ts);
 					</cfscript>
 					<div id="fontPopupDiv" style="font-size:18px;"></div>
-					<script type="text/javascript">
+					<script>
 					setFont('fontPopupDiv','#form.menu_popup_font#');
 					</script></td>
 			</tr>

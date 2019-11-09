@@ -183,7 +183,7 @@ if(not r){
 		echo('No errors detected');
 	}
 	</cfscript>	
-	<script type="text/javascript">
+	<script>
 	var arrHttpQueueError=#serializeJson(arrError)#;
 	function showErrorResponse(n){
 		zShowModal(arrHttpQueueError[n], {width:"100%", height:600});

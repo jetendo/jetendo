@@ -240,7 +240,7 @@ need to connect page-admin, section-link and more to this
 					} 
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					</cfscript>
-					<script type="text/javascript">
+					<script>
 					function preventSameParent(o,id){
 						if(o.options[o.selectedIndex].value == id){
 							alert('You can\'t select the same page you are editing.\nPlease select a different page.');
@@ -293,7 +293,7 @@ need to connect page-admin, section-link and more to this
 		}
 	}
 
-	echo('done.<script type="text/javascript">
+	echo('done.<script>
 	window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 	window.parent.zCloseModal();
 	</script>');
@@ -365,7 +365,7 @@ need to connect page-admin, section-link and more to this
 
 	nav();
 	</cfscript>
-	<style type="text/css">
+	<style>
 	</style>
 
 	<div class="z-float">

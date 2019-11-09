@@ -11,8 +11,8 @@ Lazy Load is inspired by [YUI ImageLoader](http://developer.yahoo.com/yui/imagel
 Lazy Load depends on jQuery. Include them both in end of your HTML code:
 
 ```html
-<script src="jquery.js" type="text/javascript"></script>
-<script src="jquery.lazyload.js" type="text/javascript"></script>
+<script src="jquery.js"></script>
+<script src="jquery.lazyload.js"></script>
 ```
 
 You must alter your HTML code. URL of the real image must be put into data-original attribute. It is good idea to give Lazy Loaded image a specific class. This way you can easily control which images plugin is binded to. Note that you should have width and height attributes in your image tag.

@@ -11,9 +11,9 @@
 	<cfif request.zos.cgi.server_port EQ "443">
 		<meta name="referrer" content="origin">
 	</cfif> 
-	<script type="text/javascript">/* <![CDATA[ */var zSiteDomain="#request.zos.globals.domain#";/* ]]> */</script>
-	<script src="#request.zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#" type="text/javascript"></script>
-	<script type="text/javascript">/* <![CDATA[ */
+	<script>/* <![CDATA[ */var zSiteDomain="#request.zos.globals.domain#";/* ]]> */</script>
+	<script src="#request.zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jetendo-init.js")#"></script>
+	<script>/* <![CDATA[ */
 	#arguments.dynamicContent#
 	/* ]]> */</script>
 	</cfsavecontent>
@@ -40,9 +40,9 @@
 			<cfsavecontent variable="kitHTML">
 				<cfif right(kitURL, 3) EQ ".js">
 					<cfif structkeyexists(request.zos,'zFontsComIncluded') EQ false>
-						<script type="text/javascript">/* <![CDATA[ */ (function() {var tk = document.createElement('script');tk.src = "#jsstringformat(kitURL)#";tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs !== 4) return;};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
+						<script>/* <![CDATA[ */ (function() {var tk = document.createElement('script');tk.src = "#jsstringformat(kitURL)#";tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs !== 4) return;};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
 					<cfelse>
-						<script type="text/javascript" src="#kitURL#"></script>
+						<script src="#kitURL#"></script>
 					</cfif>
 				<cfelse>
 					<link rel="stylesheet" type="text/css" href="#kitURL#" />
@@ -64,10 +64,10 @@
 			</cfscript>
 			<cfsavecontent variable="kitHTML">
 				<cfif structkeyexists(request.zos,'zTypeKitIncluded') EQ false>
-					<script type="text/javascript">/* <![CDATA[ */ TypekitConfig = {kitId: '<cfscript>writeoutput(kitId);</cfscript>'};(function() {var tk = document.createElement('script');tk.src = '//use.typekit.com/' + TypekitConfig.kitId + '.js';tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs != 'complete' && rs != 'loaded') return;try { Typekit.load(TypekitConfig); } catch (e) {}};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
+					<script>/* <![CDATA[ */ TypekitConfig = {kitId: '<cfscript>writeoutput(kitId);</cfscript>'};(function() {var tk = document.createElement('script');tk.src = '//use.typekit.com/' + TypekitConfig.kitId + '.js';tk.type = 'text/javascript';tk.async = 'true';tk.onload = tk.onreadystatechange = function() {var rs = this.readyState;if (rs && rs != 'complete' && rs != 'loaded') return;try { Typekit.load(TypekitConfig); } catch (e) {}};var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(tk, s);})(); /* ]]> */</script>
 				<cfelse>
-					<script type="text/javascript" src="//use.typekit.com/<cfscript>writeoutput(kitId);</cfscript>.js"></script>
-					<script type="text/javascript">/* <![CDATA[ */ try { Typekit.load(); } catch (e) {} /* ]]> */</script>
+					<script src="//use.typekit.com/<cfscript>writeoutput(kitId);</cfscript>.js"></script>
+					<script>/* <![CDATA[ */ try { Typekit.load(); } catch (e) {} /* ]]> */</script>
 				</cfif>
 			</cfsavecontent>
 			<cfscript>
@@ -674,7 +674,7 @@ for(row in qSite){
 		request.zosTemplateData.content = request.zosTemplateData.template; 
 	}  
 	if(structkeyexists(request, 'zValueOffset') and request.zValueOffset NEQ 0){
-		application.zcore.template.appendTag('meta','<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zInitZValues(#request.zValueOffset#);});/* ]]> */</script>');
+		application.zcore.template.appendTag('meta','<script>/* <![CDATA[ */zArrDeferredFunctions.push(function(){zInitZValues(#request.zValueOffset#);});/* ]]> */</script>');
 	} 
 	if(not structkeyexists(form, 'zab')){
 		if(Request.zOS.isdeveloper or request.zos.istestserver or application.zcore.user.checkAllCompanyAccess()){ 
@@ -824,7 +824,7 @@ for(row in qSite){
 						arrayappend(arrEndFunction, ");}");
 					}
 				} 
-				echo('<script type="text/javascript">/* <![CDATA[ */  
+				echo('<script>/* <![CDATA[ */  
 					setTimeout(function(){
 						var tempM=new zLoader();tempM.loadScripts(["#zos.currentHostName##application.zcore.skin.getVersionURL("/z/javascript/jquery/jquery-1.10.2.min.js")#"]
 						'&arraytolist(arrBeginFunction, "")&arrayToList(arrEndFunction,"")&'

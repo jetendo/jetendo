@@ -416,7 +416,7 @@ not important yet: create contacts at same time as create lead (use same functio
 			</div>
 		</div>
 		<p>&nbsp;</p> 
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */ 
 		function assignSelectOffice(){ 
 			var officeElement=document.getElementById("office_id");

@@ -44,7 +44,7 @@ request.zos.currentURLISAListingPage=true;
 				};
 				application.zcore.functions.zReturnJson(rs);
 			}else{
-				writeoutput('<h2>This search has expired. Please search again and the click "SAVE THIS SEARCH" link again.<p>Closing window in 3 seconds.</p>		<script type="text/javascript">    /* <![CDATA[ */ setTimeout(''window.parent.zCloseModal();'',3000);     /* ]]> */    </script>');
+				writeoutput('<h2>This search has expired. Please search again and the click "SAVE THIS SEARCH" link again.<p>Closing window in 3 seconds.</p>		<script>    /* <![CDATA[ */ setTimeout(''window.parent.zCloseModal();'',3000);     /* ]]> */    </script>');
 				application.zcore.functions.zabort();
 			}
 		}
@@ -114,7 +114,7 @@ request.zos.currentURLISAListingPage=true;
 	</cfif>
 	
 	<cfif form.action EQ 'saved'>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */ setTimeout('window.parent.zCloseModal();',2000); /* ]]> */
 		</script>
 		<h2>Search saved successfully</h2>
@@ -129,7 +129,7 @@ request.zos.currentURLISAListingPage=true;
 		<cfif isNumeric(application.zcore.functions.zso(form, 'searchId')) EQ false or structcount(application.zcore.status.getStruct(form.searchid)) EQ 0>    
 			<h2>This search has expired. Please search again and click "save search".</h2>
 			<p>Closing window in 3 seconds.</p>
-				<script type="text/javascript">
+				<script>
 			/* <![CDATA[ */ setTimeout('window.parent.zCloseModal();',3000); /* ]]> */
 			</script>
 		<cfelse>

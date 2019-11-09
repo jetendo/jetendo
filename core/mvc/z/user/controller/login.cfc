@@ -76,7 +76,7 @@
 	request.zpagedebugdisabled=true;
 	application.zcore.template.setTag("title","Service Login");
 	application.zcore.template.setTemplate("zcorerootmapping.templates.simple",true,true); 
-	application.zcore.template.appendTag("meta",'<style type="text/css">
+	application.zcore.template.appendTag("meta",'<style>
 	/* <![CDATA[ */ body,table{margin:0px; font-family:Verdana, Geneva, sans-serif; font-size:11px; line-height:14px; background-color:##FFF; color:##000;}
 	input{ font-size:11px;} /* ]]> */
 	</style>');
@@ -103,7 +103,7 @@
     <div class="zmember-openid-buttons" style="width:100%;">
 	<cfif form.styleslabels NEQ false><h2 class="#form.styleslabels#"></cfif>#form.usernameLabel#<cfif form.styleslabels NEQ false></h2></cfif>
 	<input type="text" name="z_tmpusername2" id="z_tmpusername2" onkeyup="document.getElementById('statusDiv').innerHTML='Please Login';" value="<!--- <cfif request.zos.istestserver and request.zos.isdeveloper>#request.zos.developerEmailTo#</cfif> --->" size="20" <cfif form.stylesinputs NEQ false>class="#form.stylesinputs#"</cfif>  />
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ document.getElementById("z_tmpusername2").focus(); /* ]]> */
 	</script>&nbsp;</div>
     <div class="zmember-openid-buttons" style="width:100%;">

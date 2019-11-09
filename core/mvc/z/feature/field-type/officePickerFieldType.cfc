@@ -388,7 +388,7 @@
 	
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType27(postObj, arrError){    
 		}
 		</script>

@@ -93,7 +93,7 @@
 			</div>
 	</form>
 
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		zLogin.setInviteNewPasswordSubmit=function(){
 

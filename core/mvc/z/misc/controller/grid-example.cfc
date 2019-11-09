@@ -9,7 +9,7 @@
 	}
 	echo('<h2 class="z-fh-30">Layout Example</h2>');
 	</cfscript>  
-	<style type="text/css">
+	<style>
 	.zapp-shell-container{padding-left:0px; padding-right:0px;}
 	section:nth-child(even){ background-color:##555;}
 	section:nth-child(odd){ background-color:##666;}

@@ -234,11 +234,11 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 					</div>
 				</div>
 			</cfif>
-			<script src="/lucee/res/js/util.min.js.cfm" type="text/javascript"></script>
-			<script src="/lucee/res/js/echarts-all.js.cfm" type="text/javascript"></script>
-			<script src="/lucee/res/js/base.min.js.cfm" type="text/javascript"></script>
+			<script src="/lucee/res/js/util.min.js.cfm"></script>
+			<script src="/lucee/res/js/echarts-all.js.cfm"></script>
+			<script src="/lucee/res/js/base.min.js.cfm"></script>
 			<cfif !structKeyExists(url, "isAjaxRequest")>
-				<script src="/lucee/res/js/jquery.modal.min.js.cfm" type="text/javascript"></script>
+				<script src="/lucee/res/js/jquery.modal.min.js.cfm"></script>
 			</cfif>
 			<script>
 

@@ -174,9 +174,9 @@ application.zcore.functions.zClickTrackDisplayURL(ts);
 	application.zcore.template.setTemplate("zcorerootmapping.templates.plain",true,true);
 	application.zcore.functions.zRequireJquery();
 	if(arguments.enableStyles){
-		application.zcore.template.appendTag("stylesheets", '<style type="text/css">body{background:none !important;} h1{color:##000 !important;} body, table{ background-color:##FFF !important; color:##000 !important;} a:link, a:visited{ color:##369 !important; } a:hover{ color:##F00 !important; } ##zSearchJsToolNewDiv, ##zlsInstantPlaceholder{display:none !important;} </style>');
+		application.zcore.template.appendTag("stylesheets", '<style>body{background:none !important;} h1{color:##000 !important;} body, table{ background-color:##FFF !important; color:##000 !important;} a:link, a:visited{ color:##369 !important; } a:hover{ color:##F00 !important; } ##zSearchJsToolNewDiv, ##zlsInstantPlaceholder{display:none !important;} </style>');
 	}
-	application.zcore.template.appendTag("scripts", '<script type="text/javascript">var zIsModalWindow=true;</script>');
+	application.zcore.template.appendTag("scripts", '<script>var zIsModalWindow=true;</script>');
 	</cfscript>
 </cffunction>
 
@@ -185,7 +185,7 @@ application.zcore.functions.zClickTrackDisplayURL(ts);
 <cffunction name="zDisplayGoogleTranslate" localmode="modern" output="yes">
 	<cfif request.zos.cgi.http_user_agent DOES NOT CONTAIN 'MSIE 8.0' and request.zos.cgi.http_user_agent DOES NOT CONTAIN 'MSIE 7.0' and request.zos.cgi.http_user_agent DOES NOT CONTAIN 'MSIE 9.0'>
 		<div id="google_translate_element"></div>
-		<script type="text/javascript">
+		<script>
 		function googleTranslateElementInit() {
 		new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
 		}
@@ -349,7 +349,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 	request.zos.fullscreenMobileEnabled=true;
     </cfscript>
     <cfsavecontent variable="theMeta">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=<cfif arguments.scalable>yes<cfelse>no</cfif>" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style type="text/css">/* <![CDATA[ */ a, area {-webkit-touch-callout: none;}*{ -webkit-text-size-adjust: none; }/* ]]> */</style>
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=<cfif arguments.scalable>yes<cfelse>no</cfif>" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style>/* <![CDATA[ */ a, area {-webkit-touch-callout: none;}*{ -webkit-text-size-adjust: none; }/* ]]> */</style>
     </cfsavecontent>
     <cfscript>
     application.zcore.template.appendTag("meta",theMETA);
@@ -428,7 +428,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 		request.zEmbedVideoJS=true;
 	  application.zcore.skin.includeJS("/z/javascript/video-js/video.js");
 	  application.zcore.skin.includeCSS("/z/javascript/video-js/video-js.css");
-	  application.zcore.template.appendTag('meta','<script type="text/javascript">/* <![CDATA[ */ zArrDeferredFunctions.push(function(){ VideoJS.setupAllWhenReady(); }); /* ]]> */</script>');
+	  application.zcore.template.appendTag('meta','<script>/* <![CDATA[ */ zArrDeferredFunctions.push(function(){ VideoJS.setupAllWhenReady(); }); /* ]]> */</script>');
         </cfscript>
         
     </cfif>
@@ -485,7 +485,7 @@ zEmbedHTML5Video(ts);
         <img src="#arguments.ss.posterImageAbsoluteURL#" width="#arguments.ss.width#" height="#arguments.ss.height#" alt="#htmleditformat(arguments.ss.description)#" title="No video playback capabilities." />
       </object>
     </video></cfsavecontent>
-    <script type="text/javascript">
+    <script>
 	/* <![CDATA[ */ document.getElementById("#arguments.ss.id#_container").innerHTML="#jsstringformat(videoHTML)#"; /* ]]> */
 	</script>
 </cffunction>
@@ -493,11 +493,11 @@ zEmbedHTML5Video(ts);
 <cffunction name="zRequireFontFaceUrls" localmode="modern" output="no" returntype="any">
 	<cfscript>
 	if(application.zcore.functions.zso(request.zos.globals, 'fontsComURL') NEQ ""){
-		application.zcore.template.appendTag("meta",'<script type="text/javascript">/* <![CDATA[ */ var zFontsComURL="'&jsstringformat(application.zcore.functions.zso(request.zos.globals,'fontscomurl'))&'"; /* ]]> */</script>');
+		application.zcore.template.appendTag("meta",'<script>/* <![CDATA[ */ var zFontsComURL="'&jsstringformat(application.zcore.functions.zso(request.zos.globals,'fontscomurl'))&'"; /* ]]> */</script>');
 		
 	}
 	if(application.zcore.functions.zso(request.zos.globals, 'typekitURL') NEQ ""){
-		application.zcore.template.appendTag("meta",'<script type="text/javascript">/* <![CDATA[ */ var zTypeKitURL="'&jsstringformat(application.zcore.functions.zso(request.zos.globals,'typekiturl'))&'"; /* ]]> */</script>');
+		application.zcore.template.appendTag("meta",'<script>/* <![CDATA[ */ var zTypeKitURL="'&jsstringformat(application.zcore.functions.zso(request.zos.globals,'typekiturl'))&'"; /* ]]> */</script>');
 		
 	}
 	</cfscript>
@@ -514,7 +514,7 @@ zEmbedHTML5Video(ts);
 
 <cffunction name="zIncludeJsColor" localmode="modern" returntype="any" output="no">
 <cfscript>
-application.zcore.template.appendTag("meta",'<script type="text/javascript" src="/z/javascript/jscolor.js"></script>');
+application.zcore.template.appendTag("meta",'<script src="/z/javascript/jscolor.js"></script>');
 </cfscript>
 </cffunction>
 
@@ -1099,7 +1099,7 @@ not needed
 					}
 				}
 			}
-			writeoutput('<textarea id="zScopeDebugTextArea99" cols="100" rows="10"></textarea><script type="text/javascript">/* <![CDATA[ */document.getElementById("zScopeDebugTextArea99").value="'&jsStringFormat(jsoutput)&'";/* ]]> */</script>');
+			writeoutput('<textarea id="zScopeDebugTextArea99" cols="100" rows="10"></textarea><script>/* <![CDATA[ */document.getElementById("zScopeDebugTextArea99").value="'&jsStringFormat(jsoutput)&'";/* ]]> */</script>');
 		}
 	}
 	if(not count){
@@ -1152,7 +1152,7 @@ not needed
 	application.zcore.functions.zThrowIfImplicitVariableAccessDetected();
 	</cfscript>
 	<cfif arguments.jsonly>
-		<script type="text/javascript">/* <![CDATA[ */window.location.href = '#arguments.url#';/* ]]> */</script>
+		<script>/* <![CDATA[ */window.location.href = '#arguments.url#';/* ]]> */</script>
 	<cfelse>
 		<cflocation url="#arguments.url#" statuscode="301" addtoken="no">
 	</cfif>
@@ -1188,7 +1188,7 @@ not needed
 	}
 	application.zcore.functions.zThrowIfImplicitVariableAccessDetected();
 	</cfscript>
-	<script type="text/javascript">/* <![CDATA[ */window.location.href = '#arguments.url#';/* ]]> */</script>
+	<script>/* <![CDATA[ */window.location.href = '#arguments.url#';/* ]]> */</script>
 	<cflocation url="#arguments.url#" addtoken="no">
 </cffunction>
 
@@ -1249,7 +1249,7 @@ not needed
 	<cfscript>
 	if(not structkeyexists(request.zos.tempObj, 'zDisableContentTransitionCalled')){
 		request.zos.tempObj.zDisableContentTransitionCalled=true;
-		application.zcore.template.appendTag("meta", '<script type="text/javascript">zContentTransitionDisabled=true;</script>');
+		application.zcore.template.appendTag("meta", '<script>zContentTransitionDisabled=true;</script>');
 	}
 	</cfscript>
 </cffunction>
@@ -1332,7 +1332,7 @@ if(rs.success){
 			if(rs.success){
 				//if(rs.cfhttp.filecontent NEQ "" and isJson(rs.cfhttp.filecontent)){
 				if(rs.cfhttp.filecontent NEQ ""){
-					searchText='<script type="text/javascript">window._sharedData = ';
+					searchText='<script>window._sharedData = ';
 					pos=findnocase(searchText, rs.cfhttp.filecontent);
 					t=""; 
 					if(pos NEQ 0){

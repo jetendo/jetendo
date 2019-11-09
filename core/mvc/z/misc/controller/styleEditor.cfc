@@ -756,7 +756,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 	json.spaces.list_padding.Default=",,20,";
 	ss.value=serializeJson(json);
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	if(typeof zStylestyleDefaultConfig == "undefined"){
 		var zStylestyleDefaultConfig={};
@@ -788,7 +788,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 			data-style-editor-external-stylesheet="#ss.externalStylesheet#"
 		 />
 		 <a href="##" data-style-editor-field="#ss.name#" class="zStyleSetEditorButton z-manager-search-button">Open Style Editor</a></h3> 
-		 <script type="text/javascript">
+		 <script>
 		 zArrDeferredFunctions.push(function(){
 		 	$(".zStyleSetEditorButton").trigger("click");
 		 });
@@ -833,7 +833,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 			data-style-editor-external-stylesheet="0"
 		 />
 	</cfif>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	zArrDeferredFunctions.push(function(){ 
 		<cfif form.debug EQ 1>
@@ -895,7 +895,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 	<cfscript>
 	application.zcore.template.appendTag("scripts", local.scriptOutput); 
 	</cfscript> 
-	<style type="text/css">
+	<style>
 	.zblanktemplatedivcontainer{padding:0px !important;}
 
 	.interfaceContainer{display:none; cursor:pointer;  position:relative;  border-right:1px solid ##CCC;  width:701px; padding-left:5px; padding-right:10px; padding-bottom:5px; float:left; padding-top:30px;}
@@ -970,7 +970,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 					<link rel="stylesheet" type="text/css" href="/z/stylesheets/zOS.css" />
 					<link rel="stylesheet" type="text/css" href="/z/stylesheets/css-framework.css" />
 					<link rel="stylesheet" type="text/css" href="/zupload/layout-global.css" />
-					<style type="text/css" id="stylePreviewStyle"></style>
+					<style id="stylePreviewStyle"></style>
 					<div class="section1 z-float"> 
 						<div class="z-float">
 							<div class="z-container">
@@ -1008,7 +1008,7 @@ echo(application.zcore.functions.zStylesetEditor(ts));
 		<!--- <h2 style=" color:##369; font-weight:normal;">CSS Preview</h2> --->
 		<div class="stylePreviewCSS"></div>
 	</div>
-	<script type="text/javascript">
+	<script>
 	var iframeDocumentContents="#jsStringFormat(replace(replace(iframeHTML, chr(13), "", "all"), chr(10), " ", "all"))#";
 	</script>
 </cffunction>

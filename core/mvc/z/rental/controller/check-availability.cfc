@@ -69,7 +69,7 @@ ORDER BY rental_name ASC
 		application.zcore.functions.zStatusHandler(request.zsid);
 		</cfscript>
 
-<script type="text/javascript">
+<script>
 <!--
 arrProp = new Array();
 <cfloop query="qProperties">arrProp[#rental_id#] = '/#application.zcore.functions.zURLEncode(rental_name,'-')#-Cabin-Rental-Availability-Calendar-1-#rental_id#.html';</cfloop>

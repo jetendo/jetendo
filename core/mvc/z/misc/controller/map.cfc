@@ -3,7 +3,7 @@
 
 <cffunction name="mapDisplay" localmode="modern" access="remote">
 
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	zArrDeferredFunctions.push(function(){
 	});
@@ -141,7 +141,7 @@
 	application.zcore.functions.zRequireGoogleMaps();
 	</cfscript>  
 	<!--- var mapParentWindowCallback="#jsstringformat(arguments.callback)#"; --->
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var mapParentField="#jsstringformat(form.field)#";
 	var currentMapAddress="#jsstringformat(form.address)#";

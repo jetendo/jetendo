@@ -96,7 +96,7 @@
 	        form.searchid=application.zcore.status.getNewId();
 	        application.zcore.status.setStatus(form.searchid, false, form,false);
 		searchFormURL=request.zos.listing.functions.getSearchFormLink();
-		writeoutput('<script type="text/javascript">window.location.href='''&searchFormURL&'?searchId='&form.searchId&''';</script>');
+		writeoutput('<script>window.location.href='''&searchFormURL&'?searchId='&form.searchId&''';</script>');
 		
         </cfscript>
     </cffunction>
@@ -142,7 +142,7 @@
         form.action = application.zcore.functions.zso(form, 'action',false,'list'); 
         application.zcore.functions.zStatusHandler(request.zsid);
         </cfscript>
-        <script type="text/javascript">
+        <script>
         /* <![CDATA[ */
         function zSavedSearchEditForm(id){
             zShowModalStandard('/z/listing/search-js/index?editSavedSearch=1&mls_saved_search_id='+escape(id), 740, 630);

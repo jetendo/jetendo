@@ -419,7 +419,7 @@
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType3(postObj, arrError){ 
 			var imagewidth=parseInt(postObj.imagewidth);
 			var imageheight=parseInt(postObj.imageheight);

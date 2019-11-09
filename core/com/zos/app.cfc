@@ -1650,7 +1650,7 @@ if(rCom.isOK() EQ false){
 			}
 		} 
 		</cfscript>
-		<script type="text/javascript">/* <![CDATA[ */
+		<script>/* <![CDATA[ */
 		var zapp_selectAppUrlIdCount=0;
 		var zapp_selectAppUrlIdF=new Array();
 		var zapp_selectAppUrlIdFI=new Array();
@@ -1699,7 +1699,7 @@ if(rCom.isOK() EQ false){
 		}/* ]]> */
 		</script>
 		<cfscript>
-		jsFunctionCallCode='<script type="text/javascript">/* <![CDATA[ */zapp_selectAppUrlIdC();/* ]]> */</script>';
+		jsFunctionCallCode='<script>/* <![CDATA[ */zapp_selectAppUrlIdC();/* ]]> */</script>';
 		application.zcore.template.appendTag("content", jsfunctionCallCode);
 		</cfscript>
 	</cfif>
@@ -1711,7 +1711,7 @@ if(rCom.isOK() EQ false){
 	request.zos.selectAppUrlIdNameStruct[arguments.name]=true;
 	</cfscript>
 	<div id="zapp_selectAppUrlIdDiv#request.zos.selectAppUrlIdCount#"></div>
-	<script type="text/javascript">/* <![CDATA[ */
+	<script>/* <![CDATA[ */
 	<cfscript>
 	if(arguments.selectedValue NEQ ""){
 		writeoutput('zapp_selectAppUrlIdC2["'&arguments.name&'"]=parseInt("#jsstringformat(arguments.selectedValue)#");');
@@ -1775,7 +1775,7 @@ if(rCom.isOK() EQ false){
 	var n=0;
 	var db=request.zos.queryObject;
 	var configCom=0;
-	var r='<script type="text/javascript">zBindEvent(window, ''load'', zWindowOnLoad);</script>';
+	var r='<script>zBindEvent(window, ''load'', zWindowOnLoad);</script>';
 	var qI=0;
 	
 	//arrayappend(arguments.ss.js, "/z/javascript/jquery/balupton-history/scripts/uncompressed/json2.js");

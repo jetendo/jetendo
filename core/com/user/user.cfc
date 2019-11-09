@@ -1179,7 +1179,7 @@ formString = userCom.loginForm(inputStruct);
 			<cfscript>
 			ws=application.zcore.app.getWhitelabelStruct();
 			</cfscript>
-			<style type="text/css">
+			<style>
 			<cfscript>
 			if(ws.whitelabel_login_header_image_960 NEQ ""){
 				echo('.zblanktemplatedivcontainer{ padding:0px !important;}');

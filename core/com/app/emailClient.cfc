@@ -828,12 +828,12 @@ text=eCom.displayBody(text);
 		body='#application.zcore.functions.zHTMLDoctype()#<head><title>Email</title></head><body onload="setTimeout(''window.parent.zSetEmailBodyHeight(#request.zos.zEmailDisplayBodyCount#)'',1);" >'&body&'</body></html>';
 	}
 	// add inline stylesheet
-	body=replace(body,'</head>','<style type="text/css">/* <![CDATA[ */ body,html{ margin:0px; background-color:##FFFFFF; } body,html,table{ font-size:12px; font-family:Arial, Helvetica, sans-serif; line-height:18px; } /* ]]> */</style></head>','ONE');
+	body=replace(body,'</head>','<style>/* <![CDATA[ */ body,html{ margin:0px; background-color:##FFFFFF; } body,html,table{ font-size:12px; font-family:Arial, Helvetica, sans-serif; line-height:18px; } /* ]]> */</style></head>','ONE');
 	// add target="_blank"
 	body=rereplacenocase(body,'<(area|a)\s(.*)?\starget\s*=\s*(.*)?>','<\1 \2 target="_blank" z=\3>','ALL');
 	</cfscript>
 <cfsavecontent variable="theBody"><iframe id="zEmailBody#request.zos.zEmailDisplayBodyCount#" scrolling="no" style="width:#arguments.width#; display:none; border:none;  overflow:auto;" seamless="seamless"></iframe> 
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 zArrDeferredFunctions.push(function(){
 zSetEmailBody(#request.zos.zEmailDisplayBodyCount#,"#replace(jsstringformat(body),"</","<\/","all")#");

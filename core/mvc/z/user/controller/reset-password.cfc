@@ -198,7 +198,7 @@
 		</div>
 	</form> 
 
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 	zLogin.setNewPasswordSubmit=function(){
 		var pw1=$("##passwordPwd").val();
@@ -408,7 +408,7 @@ application.zcore.functions.zReturnJson(rs);
 		If your email exists in our system, you will receive an email shortly that contains instructions on how to reset your password.
 	</div>
 
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 	zLogin.submitResetPasswordForm=function(){ 
 		var tempObj={};

@@ -457,7 +457,7 @@ if(rs.status EQ "error"){
 	}
 	</cfscript>
 	<!--- <cfsavecontent variable="out"> 
-		<script type="text/javascript">
+		<script>
 		zArrMapFunctions.push(function(){
 			var ts={
 				id:"zGeocodeQueue",

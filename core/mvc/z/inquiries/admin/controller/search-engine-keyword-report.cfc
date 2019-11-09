@@ -212,7 +212,7 @@
 		<cfscript>
 		qinquiries=db.execute("qinquiries");
 		</cfscript>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function loadExport(){
 			var wf=document.getElementById("whichfields1");	

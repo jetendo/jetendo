@@ -963,7 +963,7 @@
 	</tr>
 	<cfif application.zcore.app.siteHasApp("listing")>
 		</table>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function showMLSSearchTable(showTable) {
 			var m=document.getElementById("tblSearchOptions");
@@ -1008,7 +1008,7 @@
 	#application.zcore.functions.zEndForm()#
 	<cfif application.zcore.app.siteHasApp("listing")>
 		<cfif form.slideshow_tab_type_id EQ 2>
-			<script type="text/javascript">/* <![CDATA[ */ zArrDeferredFunctions.push(function(){getMLSCount('zMLSSearchForm'); });/* ]]> */</script>
+			<script>/* <![CDATA[ */ zArrDeferredFunctions.push(function(){getMLSCount('zMLSSearchForm'); });/* ]]> */</script>
 		</cfif>
 		<cfscript>
 		if(form.slideshow_tab_type_id EQ 2) {
@@ -1017,7 +1017,7 @@
 			showTable = "false";
 		}
 		</cfscript>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */ 	
 		zArrDeferredFunctions.push(function(){
 			showMLSSearchTable(#showTable#);
@@ -1643,7 +1643,7 @@
 		</tr>
 		<tr>
 			<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Tab Type","member.slideshow.edit slideshow_tabistext")#</th>
-			<td style="vertical-align:top; "><script type="text/javascript">
+			<td style="vertical-align:top; "><script>
 			/* <![CDATA[ */
 			  function toggletabtext(o){
 				var a2=document.getElementById("tabtexttable");

@@ -23,14 +23,14 @@ Getting Started
 ### Step 1: Include VideoJS Javascript and CSS files in your page.
 Change the src/href to the appropriate location on your server.
 
-    <script src="video.js" type="text/javascript" charset="utf-8"></script>
+    <script src="video.js" charset="utf-8"></script>
     <link rel="stylesheet" href="video-js.css" type="text/css" media="screen" title="Video JS" charset="utf-8">
 
 
 ### Step 2: Add the VideoJS setup code to your page or another script.
 Must run after the VideoJS javascript file has been included
 
-    <script type="text/javascript" charset="utf-8">
+    <script charset="utf-8">
 
       // Add VideoJS to all video tags on the page when the DOM is ready
       VideoJS.setupAllWhenReady();

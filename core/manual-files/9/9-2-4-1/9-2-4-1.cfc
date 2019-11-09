@@ -12,7 +12,7 @@ jQuery Parallax Slider Plug-in Examples
 </title>
 <meta charset="utf-8" />
 <link rel="stylesheet" type="text/css" href="/z/javascript/jquery/jquery-parallax-slider/jquery.parallax-slider.css" />
-<style type="text/css">
+<style>
 /* <![CDATA[ */
 ##sliderPrev, ##sliderNext{display:none;background-color:##900; color:##FFF; z-index:100; position:relative;width:40px; text-align:center; font-size:24px; float:left; padding:10px;  cursor:pointer;text-decoration:none;}
 ##sliderPrev:hover, ##sliderNext:hover{ background-color:##C00;}
@@ -27,7 +27,7 @@ jQuery Parallax Slider Plug-in Examples
 <script src="/z/javascript/jquery/jquery.animate-colors.js"></script>
 <script src="/z/javascript/jquery/jquery.easing.1.3.js"></script>
 
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 
 $(document).ready(function(){

@@ -221,7 +221,7 @@ update `app_x_mls` set mls_id = '26' where mls_id='4' and site_id <> '-1';
 			#application.zcore.functions.zso(application.zcore, 'listingRemapCurrentSite')&" | "&application.zcore.functions.zso(application.zcore, 'listingRemapProgress')#
 		</cfif></div><br />
 		<a href="/z/listing/admin/remap-data/cancelRemap" target="_blank">Cancel Remap</a></div>
-	<script type="text/javascript">
+	<script>
 	function processRemapStatus(r){ 
 		var r=eval('('+r+')');
 		$(".statusDiv").html(r.message);

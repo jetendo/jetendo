@@ -1575,7 +1575,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				</div>
 				<div class="globalCaption"></div>
 			</div>
-		    <script type="text/javascript"> 
+		    <script> 
 			var myContentFlow#qImages.image_library_id# = new ContentFlow('contentFlow#qImages.image_library_id#', {
 				circularFlow: true,
 				loadingTimeout: 60000 
@@ -1608,7 +1608,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				application.zcore.skin.includeJS("/z/javascript/Magnific-Popup/jquery.magnific-popup.min.js");
 				application.zcore.skin.includeCSS("/z/javascript/Magnific-Popup/magnific-popup.css");
 				</cfscript>
-				<style type="text/css">
+				<style>
 				/* <![CDATA[ */ 
 				.mfp-gallery{z-index:20001;}
 				.mfp-bg{z-index:20000;}
@@ -1665,7 +1665,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 				 /* ]]> */
 				</style>
 				</cfif>
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */ zArrDeferredFunctions.push(function(){
 
 					/*$('##zThumbnailLightgallery').magnificPopup({
@@ -1989,7 +1989,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	</cfscript>
 	<cfsavecontent variable="theMeta">
 	#application.zcore.skin.includeCSS("/z/a/stylesheets/style.css")#
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var debugImageLibrary=false; 
 	zArrDeferredFunctions.push(function() { 
@@ -2028,7 +2028,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	});
 	 /* ]]> */
 	</script>
-	<cfscript>application.zcore.template.appendTag("stylesheets",'<style type="text/css">
+	<cfscript>application.zcore.template.appendTag("stylesheets",'<style>
 	/* <![CDATA[ */
 	##sortable { list-style-type: none; margin: 0; padding: 0; }
 	##sortable li, .sortableli { margin-right:10px; margin-bottom:10px; padding: 5px; height:168px; float: left; }
@@ -2040,7 +2040,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 	##sortable .imagecaptionupdate{display:none; cursor:pointer;float:left;border:1px solid ##CCC; font-size:10px; margin-left:5px; font-weight:bold; padding:3px; line-height:14px;}
 	/* ]]> */
 	</style>');</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var imageSortingStarted=false;
 	var imageSortingChanged=false; 
@@ -2113,7 +2113,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		</ul>
 	</div> 
 	<div class="z-float forimagedata2"><textarea name="forimagedata" id="forimagedata" style="display:none; width:800px; height:400px;"></textarea></div>
-		<script type="text/javascript">	
+		<script>	
 		/* <![CDATA[ */
 		if(debugImageLibrary){
 			document.getElementById("forimagedata2").style.display="block";

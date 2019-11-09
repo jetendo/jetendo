@@ -1229,7 +1229,7 @@ application.zcore.siteOptionCom.getOptionForm(ts); --->
 	qLibrary=getOptionAppById(arguments.ss.value, arguments.ss.app_id);
 	option_app_id=qLibrary["#variables.siteType#_option_app_id"];
 	</cfscript>
-<script type="text/javascript">
+<script>
 	/* <![CDATA[ */
 	function showoptionWindow(){
 		var windowSize=zGetClientWindowSize();

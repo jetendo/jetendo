@@ -303,7 +303,7 @@
 	application.zcore.functions.zStatusHandler(request.zsid); 
 	</cfscript>
 	<cfsavecontent variable="local.theMeta"> 
-		<style type="text/css">
+		<style>
 		/* <![CDATA[ */
 		.zdashboard-container{padding:1%; width:98%; float:left; background-color:##FFF;}
 		.zdashboard-panel{width:30%; min-width:300px; margin-right:1%; margin-bottom:1%; padding:1%; border:1px solid ##CCC; float:left;}

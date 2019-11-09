@@ -12,7 +12,7 @@ if(structkeyexists(form, 'searchId') EQ false and isDefined('request.zsession.te
 }
 
 //application.zcore.template.prependTag("topcontent",'<div id="ztopofdetailpage" style="width:1px; height:1px;display:inline;"></div>');
-//application.zcore.template.appendTag("content",'<script type="text/javascript">/* <![CDATA[ */ zJumpToId("ztopofdetailpage"); /* ]]> */</script>');
+//application.zcore.template.appendTag("content",'<script>/* <![CDATA[ */ zJumpToId("ztopofdetailpage"); /* ]]> */</script>');
 
 temp.title = "Listing";
 application.zcore.template.setTag('title', temp.title);
@@ -473,7 +473,7 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 				mapStageStruct.arrMapText=arraynew(1);
 				arrayappend(mapStageStruct.arrMapText, "#(mapHTML)#");
 				</cfscript>
-				<!---  <script type="text/javascript">
+				<!---  <script>
 				/* <![CDATA[ */
 				zArrDeferredFunctions.push(function(){
 				 zMapCount++;
@@ -538,7 +538,7 @@ metaKey=rereplacenocase(titleStruct.title&" "&idx.features,"<.*?>"," ","ALL");
 <meta name="keywords" content="#htmleditformat(metaKey)#" />
 <meta name="description" content="#htmleditformat(titleStruct.listing_x_site_description)#" />
 <cfif structkeyexists(form, 'zprint')>
-<style type="text/css">
+<style>
 body{background:none !important;}
 body, table{ background-color:##FFF !important; color:##000;}
 a:link, a:visited{ color:##369; }
@@ -582,7 +582,7 @@ if(local.rs.count){
 </cfscript>
 <cfif structkeyexists(form, 'zprint')>
 </div>
-<script type="text/javascript">
+<script>
 zArrDeferredFunctions.push(function(){ zListingSearchJsToolHide(); setTimeout(function(){window.print(); },1000); });
 </script>
 </cfif>

@@ -78,7 +78,7 @@ mortgageCom.sidebarPaymentCalculator();
 	</div>
 	<div id="zMortgagePaymentResults" class="zMortgagePaymentResults">
 	</div>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	zArrDeferredFunctions.push(function(){ zCalculateMonthlyPayment(); });
 	/* ]]> */

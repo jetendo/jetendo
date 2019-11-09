@@ -40,13 +40,13 @@ htmlEditor.createSimple();
 			echo('px');
 		}
 		echo(';">#htmleditformat(this.value)#</textarea>
-		<style type="text/css">
+		<style>
 		##newvalue23_ifr{max-width:100% !important;}
 		</style>');
 	}
 	</cfscript> 
 
-	<cfsavecontent variable="theScript"><script type="text/javascript">
+	<cfsavecontent variable="theScript"><script>
 	zArrDeferredFunctions.push(function(){
 
 		tinymce.init({
@@ -153,7 +153,7 @@ htmlEditor.create();
     	<cfscript>
 		request.zos.zTinyMceIndex=0;
 		</cfscript>
-        <cfsavecontent variable="theMeta"><script type="text/javascript" src="/z/a/scripts/tiny_mce/tinymce.min.js"></script></cfsavecontent><cfscript>application.zcore.template.appendtag("meta",theMeta);</cfscript>
+        <cfsavecontent variable="theMeta"><script src="/z/a/scripts/tiny_mce/tinymce.min.js"></script></cfsavecontent><cfscript>application.zcore.template.appendtag("meta",theMeta);</cfscript>
 		<cfsavecontent variable="theMeta">
 
 <cfscript>
@@ -166,12 +166,12 @@ application.zcore.template.prependTag("scripts",theMeta);
 </cfscript>
 </cfif>
 	<cfsavecontent variable="theReturn"><textarea id="#this.instanceName#" name="#this.instanceName#" class="tinyMceTextarea#request.zos.zTinyMceIndex#" cols="10" rows="10" style="width:#this.width#<cfif this.width DOES NOT CONTAIN "%" and this.width DOES NOT CONTAIN "px">px</cfif>; height:#this.height#<cfif this.height DOES NOT CONTAIN "%" and this.height DOES NOT CONTAIN "px">px</cfif>;">#htmleditformat(this.value)#</textarea>
-	<style type="text/css">
+	<style>
 	##newvalue23_ifr{max-width:100% !important;}
 	</style>
 </cfsavecontent>
 	
-	<cfsavecontent variable="theScript"><script type="text/javascript">
+	<cfsavecontent variable="theScript"><script>
 zArrDeferredFunctions.push(function(){ 
 	function removeClasses(e){ 
 		for(var i=0;i<e.childNodes.length;i++){

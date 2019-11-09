@@ -150,7 +150,7 @@
 		<a href="/z/server-manager/tasks/cache-robot/getSiteContentReport">Site Content Count Report</a>
 	</div>
 	<div class="outputDiv">#a#</div>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){ 
 		var crawlProgressId=false;  
 		function setupProgressInterval(){

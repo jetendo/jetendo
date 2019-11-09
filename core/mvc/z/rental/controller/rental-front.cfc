@@ -27,7 +27,7 @@ application.zcore.app.getAppCFC("rental").onRentalPage();
 <span style="color:##FF0000; font-weight:bold; font-size:14px;">
 <div id="premhint2" style="position:relative; left:0; visibility:'visible';text-align:left; width:400px;">#rental_special#</div></span><br /><br />
 <cfif rental_special_flash EQ 1>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ zArrDeferredFunctions.push(function(){zBlinkId("premhint2",500);}); /* ]]> */
 </script>
 </cfif> 
@@ -51,7 +51,7 @@ ORDER BY rate_period DESC, rate_sort asc
 </cfsavecontent><cfscript>qR2=db.execute("qR2");</cfscript>
 <h2>Current specials for this rental | Limit of 1 special per reservation.</h2>
 <p>Specials are automatically calculated during your online reservation.  </p>
-<style type="text/css">
+<style>
 .tbb2 td{ border-bottom:1px solid ##999999; padding:10px; }
 .table-list th{ border-bottom:1px solid ##999999; background-color:##990000; color:##FFFFFF; padding:10px; }
 </style>
@@ -386,7 +386,7 @@ for(i=1;i LTE arraylen(ArrAmen);i++){
 <span style="color:##FF0000; font-weight:bold; font-size:14px;">
 <div id="zratepremhint2" style="position:relative; left:0; top:0; visibility:'visible';text-align:left; width:100%;">#rental_special#</div></span><br />
 <cfif rental_special_flash EQ 1>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ zArrDeferredFunctions.push(function(){zBlinkId("zratepremhint2",500);}); /* ]]> */
 </script>
 </cfif> 
@@ -440,7 +440,7 @@ for(i=1;i LTE arraylen(arrImages);i=i+1){
 
 application.zcore.functions.zSetupLightbox("zRentalThumbnailLightGallery");
 </cfscript>
-<!--- <script type="text/javascript">
+<!--- <script>
 /* <![CDATA[ */ zArrDeferredFunctions.push(function(){
 $('##zRentalThumbnailLightGallery a').lightBox();
 }); /* ]]> */
@@ -663,7 +663,7 @@ if(qRental.recordcount){
 		application.zcore.functions.zStatusHandler(request.zsid);
 		</cfscript>
 
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ 
 arrProp = new Array();
 <cfloop query="qProperties">
@@ -789,7 +789,7 @@ function getCalendar(val){
 		</cfloop>
 		
 
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ function updateOffset22(val,type){
 	setDateOffset2("calSearch","search_start_date","search_end_date", "day",2);
 } /* ]]> */
@@ -1292,7 +1292,7 @@ this.includeRentalById(ts);
     <input type="hidden" name="zset9" id="zset9_#form.set9#" value="" />
        #application.zcore.functions.zFakeFormFields()#
 <cfsavecontent variable="tempMeta">
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ 	zArrDeferredFunctions.push(function(){
 		var dates = $( "##inquiries_start_date, ##inquiries_end_date" ).datepicker({
 			minDate: 0, 
@@ -1811,7 +1811,7 @@ qXAmenity=db.execute("qXAmenity");
 <span style="color:##FF0000; font-weight:bold; font-size:14px;">
 <span id="zratepremhintrental_#ss.rental_id#" style="position:relative; left:0; top:0; visibility:'visible';text-align:left; width:100%; display:block;">#ss.rental_special#</span></span>
 <cfif ss.rental_special_flash EQ 1>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ zArrDeferredFunctions.push(function(){zBlinkId("zratepremhintrental_#ss.rental_id#",500);}); /* ]]> */
 </script>
 </cfif> 
@@ -2190,7 +2190,7 @@ form.inquiries_coupon="";
 
 <form action="/z/rental/rental-front/searchTemplate" method="get">
 <input type="hidden" name="searchaction" value="search" class="z-manager-search-button" />
-<!--- <style type="text/css">
+<!--- <style>
 /* <![CDATA[ */ 
 .zrental-searchtable div{  padding-bottom:7px; width:33%; float:left; }
  /* ]]> */

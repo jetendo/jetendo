@@ -57,7 +57,7 @@
 		if(variables.qCheck.recordcount EQ 0 or variables.qCheck.inquiries_status_id EQ 4 or variables.qCheck.inquiries_status_id EQ 5 or variables.qCheck.inquiries_status_id EQ 7){
 			echo('<h2>This inquiry can no longer be updated.</h2>
 			<p>Closing this window in 3 seconds.</p>
-				<script type="text/javascript">
+				<script>
 			zArrDeferredFunctions.push(function(){
 				setTimeout(function(){
 					window.parent.zCloseModal();
@@ -515,7 +515,7 @@
 		action="userSend";
 	}
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var arrEmailTemplate=[];
 	var greeting="#JSStringFormat(trim('Hello '&application.zcore.functions.zFirstLetterCaps(variables.contact.contact_first_name))&',<br><br>')#";
@@ -661,7 +661,7 @@
 		
 	</form>
 
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push( function() {
 		$('##inquiries_subject').keypress(function(e) { 
 			// detect ENTER key 

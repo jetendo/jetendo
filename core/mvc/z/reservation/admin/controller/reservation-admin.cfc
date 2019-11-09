@@ -81,7 +81,7 @@
 	application.zcore.skin.includeCSS("/fullcalendar-2.0.2/fullcalendar.css");
 	savecontent variable="meta"{
 		echo('<link href="/fullcalendar-2.0.2/fullcalendar.print.css" rel="stylesheet" media="print" />
-		<style type="text/css">
+		<style>
 		.fc-event-inner{ cursor:pointer; }
 		</style>');
 	}

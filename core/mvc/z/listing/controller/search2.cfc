@@ -758,7 +758,7 @@
 		<br />
 		
 		<cfsavecontent variable="scriptHTML">
-		<script type="text/javascript">/* <![CDATA[ */ var zlsQueryString="#jsstringformat(actionQueryString)#";/* ]]> */</script>
+		<script>/* <![CDATA[ */ var zlsQueryString="#jsstringformat(actionQueryString)#";/* ]]> */</script>
 		 </cfsavecontent>
 		 <cfscript>
 		 application.zcore.template.appendTag("meta",scriptHTML);
@@ -1053,7 +1053,7 @@
 	<cfscript>
 	var ts=0;
 	savecontent variable="local.output"{
-		writeoutput('<script type="text/javascript">var zFormData=[];</script>');
+		writeoutput('<script>var zFormData=[];</script>');
 		if(isDefined('request.contentEditor') EQ false){
 			ts=StructNew();
 			ts.name="zMLSSearchForm";
@@ -1201,7 +1201,7 @@
 				ts.useAnchorTag=false;
 				ts.imageInput=false;
 				ts.style="padding:5px;";
-				writeoutput('<script type="text/javascript">/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
+				writeoutput('<script>/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
 			}
 			ts.onclick="";
 			application.zcore.functions.zInput_submit(ts);

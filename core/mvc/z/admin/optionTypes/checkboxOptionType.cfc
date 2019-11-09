@@ -386,7 +386,7 @@
 	<input type="radio" name="#variables.type#_option_type_id" value="8" onClick="setType(8);" <cfif value EQ 8>checked="checked"</cfif>/>
 	Checkbox<br />
 	<div id="typeOptions8" style="display:none;padding-left:30px;">  
-		<script type="text/javascript">
+		<script>
 		function validateOptionType1(postObj, arrError){  
 			if(postObj.checkbox_delimiter == ''){
 				arrError.push('Delimiter is required');

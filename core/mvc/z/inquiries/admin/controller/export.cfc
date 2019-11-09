@@ -44,7 +44,7 @@
 			<head>
 			<meta charset="utf-8" />
 			<title>#request.zos.globals.shortdomain#Inquiries Export</title>
-			<style type="text/css">
+			<style>
 			body {
 				font-family:Arial, Helvetica, sans-serif;
 				font-size:11px;

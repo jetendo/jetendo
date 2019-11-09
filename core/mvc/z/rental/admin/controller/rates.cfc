@@ -59,7 +59,7 @@
 	this.displayNavigation();
 	application.zcore.functions.zstatushandler(request.zsid);
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	zArrDeferredFunctions.push(function(){
 		//By default hide the tax field and the special rate dialog box
@@ -787,7 +787,7 @@
 				application.zcore.functions.zInputSelectBox(selectStruct);
 				</cfscript></td>
 			</tr>
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			function changeDiscount(val){
 				var ofs=document.getElementById("otherFields");
@@ -872,7 +872,7 @@
 						Select a rental and click add.  You can associate this article to multiple categories.<br />
 						<br />
 						<div id="rentalBlock"></div>
-						<script type="text/javascript">
+						<script>
 						/* <![CDATA[ */
 						var arrBlock=new Array();
 						var arrBlockId=new Array();
@@ -1002,7 +1002,7 @@
 			</tr>
 		</table>
 	</form>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */changeDiscount(#application.zcore.functions.zso(form, 'rate_coupon_type',true)#);/* ]]> */
 	</script>
 </cffunction>
@@ -1453,7 +1453,7 @@
 					No </td>
 			</tr>
 			<cfsavecontent variable="tempMeta"> 
-				<script type="text/javascript">
+				<script>
 				/* <![CDATA[ */ 	
 				zArrDeferredFunctions.push(function(){
 					var dates = $( "##rental_available_start_date" ).datepicker({

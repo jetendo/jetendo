@@ -64,13 +64,13 @@
 	}
 	</cfscript>
 	<cfsavecontent variable="theMeta">
-	<style type="text/css">
+	<style>
 	/* <![CDATA[ */ 
 	body{margin:0px; overflow:hidden;}
 	h1{display:none;} 
 	/* ]]> */
 	</style>
-   	<script type="text/javascript">
+   	<script>
 	function scaleToFill(videoTag) {  
 		var $video = $(videoTag);
 		var windowWidth=$(window).width();

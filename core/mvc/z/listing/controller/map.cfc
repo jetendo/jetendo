@@ -175,7 +175,7 @@
 			</cfif>
 		
 			<!--- <cfsavecontent variable="tempMetaBing">
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */ zOneLatitude=#listing_latitude#;
 			zOneLongitude=#listing_longitude#;
 			<cfset zBingAddress=listing_data_address&", "&cityName&", FL "&listing_data_zip>

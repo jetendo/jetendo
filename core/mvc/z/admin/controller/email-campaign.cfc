@@ -47,7 +47,7 @@ request.zscriptname=request.cgi_script_name&"?zid=#form.zid#&sid=#form.sid#";
 	</cfscript>
     <!--- <a href="#request.cgi_script_name#?action=importinquiries">Import Inquiries to User table</a> --->
     
-	<script type="text/javascript">
+	<script>
     function gotoSite(id){
        // if(id != ''){
             window.location.href='#request.cgi_script_name#?sid='+escape(id);

@@ -149,7 +149,7 @@ ts.onLoadCallback="loadMLSResults";
 ts.onChangeCallback="getMLSCount";
 application.zcore.functions.zForm(ts);
 </cfscript>
-<script type="text/javascript">
+<script>
 function setInt22(n2, n){
 	var d1=document.getElementById(n2);
 	if(n == "listing_price"){

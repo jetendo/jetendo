@@ -38,7 +38,7 @@
 	<cfreturn application.zcore.functions.zReadFile("/path/to/css.css")>
 	
 	Implementation Example 2: 
-	<style type="text/css">
+	<style>
 	<cfsavecontent variable="out">
 	.css{float:left;}
 	</cfsavecontent>
@@ -57,7 +57,7 @@
 	<cfscript>
 	ds=arguments.dataFields;
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	<cfsavecontent variable="out">
 	zArrDeferredFunctions.push(function(){
 		var e="testWidgetJS";

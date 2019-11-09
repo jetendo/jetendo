@@ -481,7 +481,7 @@ a version of index list with divs for the table instead of <table>
 			</div>
 		</cfif>
 		<cfif not variables.disableAddEdit and not variables.disableAddButton and application.zcore.functions.zso(form, 'zManagerAddOnLoad', true, 0) EQ 1>
-			<script type="text/javascript">
+			<script>
 			zArrDeferredFunctions.push(function(){
 				$(".z-manager-quick-add-link").trigger("click");
 			});
@@ -1320,7 +1320,7 @@ deleteSearchIndex(ts);
 	tabCom.enableSaveButtons();
 	if(form.modalpopforced EQ 1){
 		echo('
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".tabCancelButton").on("click", function(e){
 				e.preventDefault();
@@ -1409,7 +1409,7 @@ deleteSearchIndex(ts);
 	echo('</form>');
 	//echo(application.zcore.functions.zEndForm());
 	</cfscript>  
-	<script type="text/javascript">
+	<script>
 	</script>
 </cffunction>
 

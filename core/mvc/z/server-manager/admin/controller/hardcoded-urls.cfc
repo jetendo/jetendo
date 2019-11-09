@@ -122,7 +122,7 @@
 		</table>
 		<div id="categoryBlock"></div>
 		<input type="hidden" name="linkcount" value="#qu.recordcount#" />
-		<script type="text/javascript">
+		<script>
 		/* <! [[CDATA] */	
 		var arrBlock=new Array();
 		var arrBlockUrl=new Array();

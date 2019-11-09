@@ -876,7 +876,7 @@ Primary Cities:</th>
 			ORDER BY city_name ASC";
 			qpcity=db.execute("qpcity");
 			</cfscript>
-	<script type="text/javascript">
+	<script>
 			/* <![CDATA[ */
 			var arrpcityBlock=[];
 			var arrpcityIdBlock=[];
@@ -976,7 +976,7 @@ Primary Cities:</th>
 	city_deleted = #db.param(0)#
 	ORDER BY city_name ASC
 	</cfsavecontent><cfscript>qexcity=db.execute("qexcity");</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var arrexcityBlock=[];
 	var arrexcityIdBlock=[];
@@ -2236,7 +2236,7 @@ if(structkeyexists(request.zos.listing.listingLookupStruct[arguments.type].value
     <cfsavecontent variable="tempSearchURL">#request.zos.currentHostName#/z/listing/search-form-js/index?<cfif request.zos.originalURL EQ request.zos.listing.functions.getSearchFormLink()>searchId=#application.zcore.functions.zso(form, 'searchid')#&</cfif>searchDisableExpandingBox=<cfif structkeyexists(arguments.ss,'searchDisableExpandingBox')>#arguments.ss.searchDisableExpandingBox#<cfelse>false</cfif>&searchDisableExpandingBox=<cfif structkeyexists(arguments.ss,'searchReturnVariableStruct')>#arguments.ss.searchReturnVariableStruct#<cfelse>false</cfif>&searchFormLabelOnInput=<cfif structkeyexists(arguments.ss,'searchFormLabelOnInput')>#arguments.ss.searchFormLabelOnInput#<cfelse>false</cfif>&searchFormEnabledDropDownMenus=<cfif structkeyexists(arguments.ss,'searchFormEnabledDropDownMenus') and structkeyexists(form, 'searchId') EQ false>#arguments.ss.searchFormEnabledDropDownMenus#<cfelse>false</cfif>&searchFormHideCriteriaList=#urlencodedformat(arguments.ss.searchFormHideCriteriaList)#</cfsavecontent>
 
 <div id="zMLSSearchFormDivJSOutput"></div>
-<script type="text/javascript" src="#htmleditformat(tempSearchURL)#"></script>
+<script src="#htmleditformat(tempSearchURL)#"></script>
 <cfelse>
 <cfscript>
 	tempCom=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.listing.controller.search-form");
@@ -2412,7 +2412,7 @@ return "`"&arguments.table&"`.listing_mls_id IN "&application.zcore.app.getAppDa
 	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_detail_layout EQ 1){
 		request.zos.skin.includeCSS("/z/javascript/jquery/colorbox/example3/colorbox.css");
 		request.zos.skin.includeJS("/z/javascript/jquery/colorbox/colorbox/jquery.colorbox-min.js");
-		request.zos.template.appendTag("meta", '<style type="text/css">##cboxNext, ##cboxPrevious{display:none !important;}</style>');
+		request.zos.template.appendTag("meta", '<style>##cboxNext, ##cboxPrevious{display:none !important;}</style>');
 		request.zos.skin.addDeferredScript('
 			$("a[rel=placeImageColorbox]").colorbox({photo:true, slideshow: true});
 			zArrLoadFunctions.push({functionName:function(){
@@ -2585,7 +2585,7 @@ if(right(form[request.zos.urlRoutingParameter],4) NEQ ".xml" and right(request.c
 	// }
 	if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_disable_image_enlarge EQ 2){
 		application.zcore.skin.addDeferredScript("zIImageClickLoad=true;");
-		application.zcore.template.appendTag("meta",'<script type="text/javascript">zIImageClickLoad=true;</script>', true);
+		application.zcore.template.appendTag("meta",'<script>zIImageClickLoad=true;</script>', true);
 	}
 	application.zcore.template.prependTag('content','<div id="zlistingnextimagebutton"><span>NEXT</span></div><div id="zlistingprevimagebutton"><span>PREV</span></div>');
 	if(structkeyexists(application.zcore.app.getAppData("listing").sharedStruct.optionStruct,'mls_option_enable_instant_search') and application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_enable_instant_search EQ 1){
@@ -2658,9 +2658,9 @@ if(right(form[request.zos.urlRoutingParameter],4) NEQ ".xml" and right(request.c
 				customformurl="/z/listing/inquiry-pop/index";
 			}
 			if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_inquiry_pop_forced EQ 1){
-				writeoutput('<script type="text/javascript">/* <![CDATA[ */function listingShowModalWin(){ if(!zModalCancelFirst){var modalContent1=''<iframe src="#customformurl#" width="100%" height="98%" style="margin:0px; border:none; overflow:auto;" seamless="seamless"><\/iframe>'';var winId=false;zShowModal(modalContent1,{''width'':520,''height'':428,''disableResize'':true, ''disableClose'':true});}} '&funcType&' /* ]]> */</script>');
+				writeoutput('<script>/* <![CDATA[ */function listingShowModalWin(){ if(!zModalCancelFirst){var modalContent1=''<iframe src="#customformurl#" width="100%" height="98%" style="margin:0px; border:none; overflow:auto;" seamless="seamless"><\/iframe>'';var winId=false;zShowModal(modalContent1,{''width'':520,''height'':428,''disableResize'':true, ''disableClose'':true});}} '&funcType&' /* ]]> */</script>');
 			}else{
-				writeoutput('<script type="text/javascript">/* <![CDATA[ */function listingShowModalWin(){ if(!zModalCancelFirst){var modalContent1=''<iframe src="#customformurl#" width="100%" height="98%" style="margin:0px; border:none; overflow:auto;" seamless="seamless"><\/iframe>'';var winId=false;zShowModal(modalContent1,{''width'':520,''height'':428,''disableResize'':true});}} '&funcType&' /* ]]> */</script>');
+				writeoutput('<script>/* <![CDATA[ */function listingShowModalWin(){ if(!zModalCancelFirst){var modalContent1=''<iframe src="#customformurl#" width="100%" height="98%" style="margin:0px; border:none; overflow:auto;" seamless="seamless"><\/iframe>'';var winId=false;zShowModal(modalContent1,{''width'':520,''height'':428,''disableResize'':true});}} '&funcType&' /* ]]> */</script>');
 			}
 		}
 	}

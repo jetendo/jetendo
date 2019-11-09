@@ -617,7 +617,7 @@
 			<br />
 			#qS2.site_option_name#<br />
 			<br />
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */
 			function confirmDelete(){
 				var r=confirm("Are you sure you want to permanently delete this option?");
@@ -879,7 +879,7 @@
 	application.zcore.template.setTag("title",theTitle);
 	application.zcore.template.setTag("pagetitle",theTitle);
     </cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function setType(n){
 
@@ -952,7 +952,7 @@
 					Note: Code Name can't be changed after initial creation to allow for simple syncing between sites &amp; servers. --->
 				</cfif>
 
-					<script type="text/javascript">
+					<script>
 					var optionsSetByUser=false;
 					function autofillFieldType(v){
 						if(typeSelectedByUser){
@@ -1196,7 +1196,7 @@
 					}
 					</cfscript> 
 					<input type="hidden" id="optionTypeCount" value="#count#">
-					<script type="text/javascript">
+					<script>
 					/* <![CDATA[ */
 					setType(#application.zcore.functions.zso(form, 'site_option_type_id',true)#);
 					/* ]]> */
@@ -1426,7 +1426,7 @@
 			<input type="hidden" name="siteglobal" value="0" />
 		</cfif>
 	</form>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function checkAssociateTr(){
 		var i=document.getElementById("site_option_group_id");
@@ -4567,7 +4567,7 @@ Define this function in another CFC to override the default email format
 		}
 		/*
 		rowOut=lastRowStruct.row; 
-		echo('done.<script type="text/javascript">
+		echo('done.<script>
 		window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 		window.parent.zCloseModal();
 		</script>');
@@ -4590,7 +4590,7 @@ Define this function in another CFC to override the default email format
 		}
 	}
 	</cfscript> 
-	<script type="text/javascript"> 
+	<script> 
 	function archiveGroupRecord(obj){ 
 		var tr, table;
 		var i=0;
@@ -4903,7 +4903,7 @@ Define this function in another CFC to override the default email format
 		arrEnd=arraynew(1);
 
 		</cfscript>
-		<script type="text/javascript">
+		<script>
 		var zDisableBackButton=true;
 		zArrDeferredFunctions.push(function(){
 			zDisableBackButton=true;
@@ -5294,7 +5294,7 @@ Define this function in another CFC to override the default email format
 	</cfscript>
 	<div style="width:100%; <cfif form.site_option_group_id EQ "">min-height:1000px; </cfif> float:left; clear:both;"></div>
 	<cfif structkeyexists(form, 'jumptoanchor')>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		var d1=document.getElementById("#form.jumptoanchor#");
 		var p=zGetAbsPosition(d1);
@@ -5812,7 +5812,7 @@ Define this function in another CFC to override the default email format
 
 		');
 
-		writeoutput('<script type="text/javascript">
+		writeoutput('<script>
 		/* <![CDATA[ */
 		zArrDeferredFunctions.push(function(){ 
 
@@ -5831,7 +5831,7 @@ Define this function in another CFC to override the default email format
 		/* ]]> */
 		</script>');
 		if(structkeyexists(form, 'jumptoanchor')){
-			writeoutput('<script type="text/javascript">
+			writeoutput('<script>
 			/* <![CDATA[ */
 			zArrDeferredFunctions.push(function(){
 				setTimeout(function(){

@@ -106,7 +106,7 @@
 				<title>Missing File</title>
 				<meta charset="utf-8" />
 				<META HTTP-EQUIV=Refresh CONTENT="25; URL=http://#listgetat(host,1,":")#"> 
-				<style type="text/css">
+				<style>
 				<!--
 				.style1 {
 					font-family: Arial, Helvetica, sans-serif;

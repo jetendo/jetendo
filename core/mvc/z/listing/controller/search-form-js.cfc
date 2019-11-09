@@ -103,7 +103,7 @@ zSetSearchFormContentDiv(); ";
 if(structkeyexists(form, 'debug')){
 	writeoutput('<div id="zSearchFormJSContentDiv">test</div>');
 	//writeoutput(' /* ]]> */</script>');//</body></html>');
-	writeoutput('<script type="text/javascript">'&jsOutput&'</script>');
+	writeoutput('<script>'&jsOutput&'</script>');
 	
 }else{
 	writeoutput(jsOutput);

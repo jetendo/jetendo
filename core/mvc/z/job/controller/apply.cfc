@@ -253,7 +253,7 @@
 	</div>
 	<div class="z-clear"></div>
 
-	<script type="text/javascript">
+	<script>
 		zArrDeferredFunctions.push( function() {
 			$( '##jobForm1' ).bind( 'submit', function( event ) {
 				this.action = '/z/job/apply/submit';

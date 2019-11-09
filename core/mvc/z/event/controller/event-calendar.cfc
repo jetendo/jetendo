@@ -160,7 +160,7 @@
 	</cfscript>
 	<cfif application.zcore.functions.zso(application.zcore.app.getAppData("event").optionstruct, 'event_config_disable_other_month_days', true, 0) EQ 1>
 		<cfsavecontent variable="local.metaOutput">
-		<style type="text/css">
+		<style>
 		/* <![CDATA[ */
 		.fc-other-month{visibility:hidden;}
 		

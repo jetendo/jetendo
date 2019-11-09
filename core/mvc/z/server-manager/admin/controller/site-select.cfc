@@ -275,7 +275,7 @@
 				</div>
 			</cfloop>
 		</div>
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			$(".siteSelect1").bind("mouseover", function(){
 				$('.site-links', this).css('visibility', 'visible');
@@ -287,7 +287,7 @@
 		</script>
 		<cfscript>
 	writeoutput(searchNav);
-	application.zcore.template.appendTag("stylesheets", '<style type="text/css">
+	application.zcore.template.appendTag("stylesheets", '<style>
 	.siteSelectDiv{float:left; width:100%;  -moz-column-width:300px; -webkit-column-width:300px; column-width:300px; padding-bottom:10px; padding-top:10px; }
 	.siteSelect1{width:100%; clear:both;}
 	.siteSelect1:hover{color:##FF0 !important; }

@@ -787,7 +787,7 @@ if(application.zcore.functions.zso(form, 'search_result_layout') EQ ""){
  
  </cfif>
 
-<script type="text/javascript">/* <![CDATA[ */var zDisableSearchFormSubmit=<cfif application.zcore.functions.zso(request,'zDisableSearchFormSubmit',false,false)>true<cfelse>false</cfif>;/* ]]> */</script>
+<script>/* <![CDATA[ */var zDisableSearchFormSubmit=<cfif application.zcore.functions.zso(request,'zDisableSearchFormSubmit',false,false)>true<cfelse>false</cfif>;/* ]]> */</script>
 <cfscript>
 if(isDefined('request.contentEditor') EQ false){
 	ts=StructNew();
@@ -818,7 +818,7 @@ if(structkeyexists(form, 'searchFormHideCriteria') EQ false){
 </cfscript>
 
 <cfif form.debugSearchForm>
-<script type="text/javascript">/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */
+<script>/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */
 </script>
 </cfif>
 <cfif application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_rentals_only EQ 1>
@@ -2111,7 +2111,7 @@ writeoutput('<br />');
 writeoutput(theCriteriaHTML3);</cfscript><cfelse><cfscript>
 	//ts.onchange="zConvertSliderToSquareMeters('search_sqfoot_low','search_sqfoot_high',false);";
 	rs=application.zcore.functions.zInputSlider(ts);
-	writeoutput('<input type="hidden" name="search_sqfoot_low_zvalue" id="search_sqfoot_low_zvalue" value="'&rs.zvalue&'" />');//<script type="text/javascript">zArrDeferredFunctions.push(function(){zConvertSliderToSquareMeters("search_sqfoot_low","search_sqfoot_high",false);});</script>');
+	writeoutput('<input type="hidden" name="search_sqfoot_low_zvalue" id="search_sqfoot_low_zvalue" value="'&rs.zvalue&'" />');//<script>zArrDeferredFunctions.push(function(){zConvertSliderToSquareMeters("search_sqfoot_low","search_sqfoot_high",false);});</script>');
 	
 	if(form.searchDisableExpandingBox){
 		writeoutput(rs.output);
@@ -3613,12 +3613,12 @@ ts.inlineStyle="width:100%;";//#min(140,replace(form.searchFormSelectWidth,"px",
 
 
 <!--- </div>
-<script type="text/javascript">zToggleSortFormBox();</script> --->
+<script>zToggleSortFormBox();</script> --->
 <!---  ---><!--- 
 <cfsavecontent variable="theSearchWithinText">
 <input type="checkbox" name="search_within_map" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'within_map') EQ 1>checked="checked"</cfif>> <label for="search_within_map">Search within map?</label> <br />
 </cfsavecontent>
-<script type="text/javascript">
+<script>
 if(GMap){
     document.write('#JSStringFormat(theSearchWithinText)#');
 }
@@ -3656,7 +3656,7 @@ if(form.searchFormEnabledDropDownMenus){
 </cfscript>
 <input type="hidden" name="searchgotolistings" id="searchgotolistings" value="0" />
 <cfif request.cgi_script_name EQ '/z/listing/search-form/index' and application.zcore.functions.zso(form, 'searchgotolistings') NEQ 1>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 //setTimeout("jumpToSearchForm();",100);
 /* ]]> */
@@ -3762,7 +3762,7 @@ if(structkeyexists(request,'theSearchFormTemplate') EQ false){
 		ts.useAnchorTag=false;
 		ts.imageInput=false;
 		ts.style="padding:5px;";
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
+		writeoutput('<script>/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
 		//searchFormSubmitButtonClass="zSavedSearchButton";
 		//writeoutput("<style type=""text/css"">.zSavedSearchButton {font-size:13px; font-weight:bold; line-height:21px; border:1px solid ##000; background-color:##FFF; padding:5px; margin-top:10px;) .zSavedSearchButton a:link, .zSavedSearchButton a:visited{ color:##369; } .zSavedSearchButton a:hover{ color:##0F0; }</style>");
 	}
@@ -3793,7 +3793,7 @@ if(structkeyexists(request,'theSearchFormTemplate') EQ false){
 if(request.cgi_script_name EQ "/z/listing/search-form/index" OR isDefined('request.contentEditor')){
 	if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 		request.zos.tempObj.getMLSCountOutput=true;
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'');});/* ]]> */</script>');
+		writeoutput('<script>/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'');});/* ]]> */</script>');
 	}
 }
 if(isDefined('request.contentEditor') EQ false){
@@ -4022,12 +4022,12 @@ propertyDataCom.setSearchCriteria(form);
 			if(sidebarOutput){
 				if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 					request.zos.tempObj.getMLSCountOutput=true;
-						application.zcore.template.appendTag("sidebar",'<script type="text/javascript">/* <![CDATA[ */    zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});  /* ]]> */</script>');	
+						application.zcore.template.appendTag("sidebar",'<script>/* <![CDATA[ */    zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});  /* ]]> */</script>');	
 				}
 			}else{
 				if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 					request.zos.tempObj.getMLSCountOutput=true;
-					writeoutput('<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});   /* ]]> */</script>');
+					writeoutput('<script>/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});   /* ]]> */</script>');
 				}
 			}
 		}
@@ -4054,7 +4054,7 @@ propertyDataCom.setSearchCriteria(form);
         <cfelse>
         <p><img src="/z/a/images/redarrow.jpg" /></p>
         </cfif>
-<script type="text/javascript">/* <![CDATA[ */zListingDisplayHelpBox();/* ]]> */</script>
+<script>/* <![CDATA[ */zListingDisplayHelpBox();/* ]]> */</script>
         <div style="width:100%; height:500px;float:left; clear:both;"></div>
      </cfif>
      
@@ -4072,7 +4072,7 @@ propertyDataCom.setSearchCriteria(form);
             <cfif request.cgi_script_name EQ "/z/listing/search-form/index" OR isDefined('request.contentEditor')>
 <cfif isDefined('request.zMLSHideCount') EQ false and isDefined('request.contentEditor')>
 	<cfif structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false>
-		<cfset request.zos.tempObj.getMLSCountOutput=true><script type="text/javascript">/* <![CDATA[ */
+		<cfset request.zos.tempObj.getMLSCountOutput=true><script>/* <![CDATA[ */
 		zArrDeferredFunctions.push(function(){getMLSCount('zMLSSearchForm');  });
 	/* ]]> */</script></cfif></cfif></cfif>
 </cfif>

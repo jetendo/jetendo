@@ -21,7 +21,7 @@
 			I agree to the terms set therein therefore and forthright and otherness. #i# 
 		</cfloop>
 	</div>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		window.print();
 	});
@@ -63,7 +63,7 @@
 	</div>
 	</form>
 
-	<script type="text/javascript">
+	<script>
 	function ajaxContractError(){
 		alert("Failed to process agreement. Please check your input and try again. Contact the web developer if the problem persists.");
 	}
@@ -153,7 +153,7 @@
 </cffunction>
 	
 <cffunction name="index" access="remote" localmode="modern" roles="user">
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		var windowSize=zGetClientWindowSize();
  	  	var modalContent1='<iframe src="/z/admin/contract/displayContract"  style="margin:0px;border:none; overflow:hidden;" seamless="seamless" width="100%" height="100%"><\/iframe>';

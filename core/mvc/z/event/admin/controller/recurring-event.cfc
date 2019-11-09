@@ -33,7 +33,7 @@ To test all recurring rule types, open the browser console and run this URL on y
 	}
 
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 
 	function initRules(){
 
@@ -153,7 +153,7 @@ To test all recurring rule types, open the browser console and run this URL on y
 		</cfif>
 	});
 	</script>
-	<style type="text/css">
+	<style>
 </style>
 <div class="zRecurEventBox">
 	<div class="zRecurBoxColumn1"> 

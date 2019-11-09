@@ -101,7 +101,7 @@
 			} 
 		} 
 		</cfscript> 
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function showAgentPhoto(id){
 			var d1=document.getElementById("agentPhotoDiv");
@@ -299,7 +299,7 @@
 			} 
 		} 
 		</cfscript> 
-		<script type="text/javascript">
+		<script>
 			function showAgentPhoto(id){
 				var d1=document.getElementById("agentPhotoDiv");
 				if(id!="" && arrAgentPhoto[id]!=""){
@@ -552,7 +552,7 @@
 	</form>
 	
 	
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push( function() {  
 		function emailSentCallback(r){
 			window.parent.location.reload();

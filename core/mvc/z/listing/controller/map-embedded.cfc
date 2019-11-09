@@ -38,7 +38,7 @@ request.zos.listing.functions.zMLSSetSearchStruct(ts.searchcriteria, form);
 
 form.searchId=application.zcore.status.getNewId();
 application.zcore.status.setStatus(form.searchid,false,ts.searchcriteria); 
-writeoutput('<script type="text/javascript">/* <![CDATA[ */ zMLSSearchFormName="contentSearchHiddenForm"; /* ]]> */</script>');
+writeoutput('<script>/* <![CDATA[ */ zMLSSearchFormName="contentSearchHiddenForm"; /* ]]> */</script>');
 ts2=StructNew();
 ts2.name="contentSearchHiddenForm";
 ts2.ajax=false;
@@ -103,11 +103,11 @@ randcount=randrange(5,10);
 		mapCom.index(ms);
 		</cfscript><br /><strong><a href="##" onclick="zlsOpenResultsMap('contentSearchHiddenForm'); return false;">View Fullscreen Map</a></strong>
 <cfsavecontent variable="theScript">
-<style type="text/css">
+<style>
 body{ overflow:hidden; background:none !important; background-color:transparent !important;}
 ##zlsMapLegendDiv{display:none;}
 </style>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */ 
 zArrDeferredFunctions.push(function(){ 
 	zMapArrLoadFunctions.push(function(){

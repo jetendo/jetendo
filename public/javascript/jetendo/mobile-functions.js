@@ -18,7 +18,7 @@
 		/*if(zSetFullScreenMobileAppLoaded) return;
 		zSetFullScreenMobileAppLoaded=true;
 		if(zIsTouchscreen()){
-			$('head').append('<meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1, initial-scale=1 user-scalable=no" \/><meta name="apple-mobile-web-app-capable" content="yes" \/><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" \/><style type="text/css"> a, area {-webkit-touch-callout: none;}*{ -webkit-text-size-adjust: none; }<\/style>');
+			$('head').append('<meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1, initial-scale=1 user-scalable=no" \/><meta name="apple-mobile-web-app-capable" content="yes" \/><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" \/><style> a, area {-webkit-touch-callout: none;}*{ -webkit-text-size-adjust: none; }<\/style>');
 		}*/
 	}
 	var zIsTouchscreenCache=3;

@@ -308,7 +308,7 @@
 	qSchema=db.execute("qSchema", "", 10000, "query", false);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType13(postObj, arrError){ 
 			if(postObj.addressfield == '' || postObj.cityfield=='' || postObj.statefield=='' || postObj.zipfield==''){
 				arrError.push('Address, City, State and Zip are required fields.');

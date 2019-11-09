@@ -709,8 +709,8 @@ if(not rs.success){
 	<cfscript>
     if(structkeyexists(request.zos,'modalWindowCancelled') EQ false){
 		request.zos.modalWindowCancelled=true;
-		application.zcore.template.prependTag("content",'<script type="text/javascript">/* <![CDATA[ */ var zModalCancelFirst=true; /* ]]> */</script>');
-		application.zcore.template.appendTag("meta",'<script type="text/javascript">/* <![CDATA[ */ var zModalCancelFirst=true; /* ]]> */</script>');
+		application.zcore.template.prependTag("content",'<script>/* <![CDATA[ */ var zModalCancelFirst=true; /* ]]> */</script>');
+		application.zcore.template.appendTag("meta",'<script>/* <![CDATA[ */ var zModalCancelFirst=true; /* ]]> */</script>');
 	}
 	</cfscript>
 </cffunction>
@@ -735,7 +735,7 @@ if(not rs.success){
 	</cfscript> 
     <cfsavecontent variable="theOutput"> 
     <link type="text/css" href="/z/javascript/ContentFlow/contentflow_src.css" rel="stylesheet" />
-    <script type="text/javascript" src="/z/javascript/ContentFlow/contentflow_src.js"></script> 
+    <script src="/z/javascript/ContentFlow/contentflow_src.js"></script> 
     </cfsavecontent>
     <cfscript>
 	application.zcore.template.appendTag("meta",theOutput);
@@ -1655,7 +1655,7 @@ User's IP: #request.zos.cgi.remote_addr#
 	<cfargument name="nodumpcode" type="boolean" required="no" default="#false#">
 	<cfdump var="#arguments.varName#"><!---  showudfs="no" format="html" label="#arguments.label#"> --->
 	<cfif request.zos.cfmlServerKey EQ "railo">
-		<style type="text/css"> 
+		<style> 
 		div.-railo-dump  td span {font-weight:bold !important;}
 		div.-railo-dump table{ background-color:##FFF !important;font-family:Arial, Helvetica, sans-serif  !important; font-size:12px !important; empty-cells:show !important; color:##000 !important;border-spacing:0px !important;color:##000 !important;  border:none !important;}
 		div.-railo-dump td.r99f {background-color:##FFF !important; border-right:1px solid ##CCC !important; border-bottom:1px solid ##CCC !important; padding:3px !important;}
@@ -1668,7 +1668,7 @@ User's IP: #request.zos.cgi.remote_addr#
 		div.-railo-dump tr:hover{ background-color:##e6faeb !important;} 
 		</style>
 	<cfelse>
-		<style type="text/css"> 
+		<style> 
 		div.-lucee-dump  td span {font-weight:bold !important;}
 		div.-lucee-dump table{ background-color:##FFF !important;font-family:Arial, Helvetica, sans-serif  !important; font-size:12px !important; empty-cells:show !important; color:##000 !important;border-spacing:0px !important;color:##000 !important;  border:none !important;}
 		div.-lucee-dump td.r99f {background-color:##FFF !important; border-right:1px solid ##CCC !important; border-bottom:1px solid ##CCC !important; padding:3px !important;}
@@ -2512,7 +2512,7 @@ User's IP: #request.zos.cgi.remote_addr#
 	}
 	</cfscript>
 	<cfsavecontent variable="zsaHeader">
-	<script type="text/javascript">/* <![CDATA[ */
+	<script>/* <![CDATA[ */
     function zOSGoToSite(id){
         if(id != ''){
             window.location.href='#request.cgi_script_name#?#replacenocase(cgi.QUERY_STRING,'sid=','zzzsid=','ALL')#&sid='+escape(id);

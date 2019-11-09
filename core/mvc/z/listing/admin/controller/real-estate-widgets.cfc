@@ -11,10 +11,10 @@
 	<h1>Quick Search</h1>
 	<p>HTML CODE</p>
 	<textarea name="quicksearch1" cols="80" rows="5"  onclick="this.select();" style="width:100%; height:30px;">
-	#htmleditformat('<script type="text/javascript" src="#request.zos.currentHostName#/z/listing/quick-search/index"></script>')#
+	#htmleditformat('<script src="#request.zos.currentHostName#/z/listing/quick-search/index"></script>')#
 	</textarea>
 	<p>Widget Example</p>
-	<script type="text/javascript" src="#request.zos.currentHostName#/z/listing/quick-search/index"></script>
+	<script src="#request.zos.currentHostName#/z/listing/quick-search/index"></script>
 	<hr />
 	<!--- <p>More widgets will be available in the future.</p> --->
 

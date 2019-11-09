@@ -2398,7 +2398,7 @@ if(not rs.success){
 			disabled=true;
 		}
 		if(disabled){
-			return '<script type="text/javascript">var zVisitorTrackingDisabled=true; </script>';
+			return '<script>var zVisitorTrackingDisabled=true; </script>';
 		}
 	 } 
 	if(arguments.disableEditing EQ false and contentConfig.contentEmailFormat EQ false){

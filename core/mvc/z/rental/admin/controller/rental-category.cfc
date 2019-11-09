@@ -607,7 +607,7 @@
 		<table style="width:100%; border-spacing:0px;" class="table-list">
 			<tr>
 				<th style="vertical-align:top; ">#application.zcore.functions.zOutputHelpToolTip("Change Parent Category","member.rental.category.edit rental_category_parent_id")#</th>
-				<td style="vertical-align:top; "><script type="text/javascript">
+				<td style="vertical-align:top; "><script>
 				  /* <![CDATA[ */
 				  function preventSameParent(o,id){
 					if(o.options[o.selectedIndex].value == id){

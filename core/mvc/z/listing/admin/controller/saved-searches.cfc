@@ -79,7 +79,7 @@
     
         LIMIT #db.param((form.zSearchXIndex-1)*30)#,#db.param(30)#
     </cfsavecontent><cfscript>qCheck=db.execute("qCheck");</cfscript>
-    <style type="text/css">
+    <style>
     .table-bright {
         background-color:##F0F0F0;
     }

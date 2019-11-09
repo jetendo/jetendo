@@ -116,7 +116,7 @@
 	</cfscript>
         
     <h1>Filter MLS</h1>
-<script type="text/javascript">
+<script>
 zDisableSearchFilter=1;
 </script>
 <cfscript>
@@ -222,8 +222,8 @@ returnStruct2 = propertyDataCom.getProperties(ts);
 		arrNoSort=arraynew(1);
 		rowStruct=structnew();
 		</cfscript>
-        <script type="text/javascript" src="/z/javascript/zTableDragAndDrop.js"></script>
-        <style type="text/css">
+        <script src="/z/javascript/zTableDragAndDrop.js"></script>
+        <style>
 		##zDragTable1 td{ border-bottom:1px solid ##999; padding-right:0px;}
 		</style>
         <table id="zDragTable1" class="table-list" style="border-spacing:0px; width:100%;">
@@ -337,7 +337,7 @@ returnStruct2 = propertyDataCom.getProperties(ts);
 </table>
 <input type="hidden" name="sortfields" id="sortfields" value="#arraytolist(arrSorted)#">
 <input type="hidden" name="filterFields" value="#arraytolist(arrDefaultSort)#">
-<script type="text/javascript">
+<script>
 var table = document.getElementById('zDragTable1');
 var tableDnD = new TableDnD();
 function zDropFilterTable(table, row, startIndex, endIndex){

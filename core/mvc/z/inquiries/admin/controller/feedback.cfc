@@ -216,7 +216,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 			</cfif>
 		</ul>
 	</div>
-	<style type="text/css"> 
+	<style> 
 	.z-contact-container{ width:100%; display:table; border-spacing:0px;}
 	.z-contact-row{width:100%; display:table-row;}
 	.z-contact-label{ font-weight:bold; display:table-cell; padding-bottom:5px; width:15%;  white-space:nowrap;}
@@ -386,7 +386,7 @@ http://www.montereyboats.com.127.0.0.2.nip.io/z/inquiries/admin/feedback/viewCon
 		</div>
 
 
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push( function() {   
 		function setSubscribeHTML(self, r){
 			var r=JSON.parse(r);
@@ -961,7 +961,7 @@ feedbackCom.displayLeadFeedback(ts);
 	db.sql&=" ORDER BY inquiries_feedback_datetime DESC ";
 	qFeedback=db.execute("qFeedback");  
 	</cfscript>
-<style type="text/css">
+<style>
 .z-feedback-container{width:100%; float:left; margin-bottom:10px; border-radius:5px; border:1px solid ##CCC;}
 .z-feedback-header{width:100%; padding:5px; float:left;border-top-left-radius:5px;border-top-right-radius:5px;border-bottom:1px solid ##CCC; background-color:##F3F3F3;}
 .z-feedback-delete-div{float:right;}
@@ -982,7 +982,7 @@ feedbackCom.displayLeadFeedback(ts);
 .z-feedback-show-message .z-feedback-message{display:block !important; background-color:##FFF;border-bottom-left-radius:5px; border-bottom-right-radius:5px; }
 .z-feedback-show-message-button{ display:block; float:left; text-decoration:none; color:##369; background-color:##FFF; border-bottom-left-radius:5px; border-bottom-right-radius:5px; width:100%; padding:5px; }
 </style>
-<script type="text/javascript">
+<script>
 function setupInquiriesFeedback(){
 	$(".z-feedback-show-all-button").on("click", function(e){
 		e.preventDefault();
@@ -1162,7 +1162,7 @@ zArrDeferredFunctions.push(function(){
 		
 
 
-		<script type="text/javascript">
+		<script>
 			var theFrames;
 
 			function resizeFrames() {
@@ -1387,7 +1387,7 @@ zArrDeferredFunctions.push(function(){
 	savecontent variable="messageHTML"{
 		echo('<!DOCTYPE html><html><head><title></title>
 		<link rel="stylesheet" type="text/css" href="/z/a/stylesheets/style.css" />
-		<style type="text/css">body{margin:0px; background-color:##FFF; color:##000; font-size:14px; line-height:1.3;}</style>
+		<style>body{margin:0px; background-color:##FFF; color:##000; font-size:14px; line-height:1.3;}</style>
 		</head><body>');
 		echo(messageHTML); 
 		echo('</body></html>');  
@@ -1400,7 +1400,7 @@ zArrDeferredFunctions.push(function(){
 
 	</cfscript>
 	<iframe id="qFeedback_#fbID#" width="100%" class="resize" scrolling="no" frameborder="0" sandbox="allow-same-origin allow-top-navigation"></iframe>
-	<script type="text/javascript">
+	<script>
 	var iframe_#fbID# = document.getElementById( 'qFeedback_#fbID#' );
 	iframe_#fbID# = iframe_#fbID#.contentWindow || ( iframe_#fbID#.contentDocument.document || iframe_#fbID#.contentDocument );
 

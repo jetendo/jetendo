@@ -1050,7 +1050,7 @@ if(form.method EQ "index"){
 // display form
 echo('
 
-	<style type="text/css"> 
+	<style> 
 	.settingChanged{background-color:##FCC;}
 	</style> 
 	<div style="width:100%; overflow:auto; font-size:14px !important; float:left; padding-left:5px; padding-right:5px;">
@@ -1138,7 +1138,7 @@ echo('</table>
 	}
 	</cfscript> 
 	<iframe id="cssExampleIframe" src="/z/misc/grid-example/index?layout_setting_instance_id=#form.layout_setting_instance_id#" width="100%" height="300"></iframe> 
-	<script type="text/javascript">
+	<script>
 	function resizeExampleIframe(){
 		$("##cssExampleIframe").height(zWindowSize.height-30);
 	}

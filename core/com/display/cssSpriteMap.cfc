@@ -181,7 +181,7 @@ var tempUnique='###getTickCount()#';
 			}
 		}
 	}
-	writeoutput('<html><head><title>CSS Sprite Map Generator</title><style type="text/css">'&css2&'</style></head><body style="margin:10px;"><h1>CSS Sprite Map Generator</h1>');
+	writeoutput('<html><head><title>CSS Sprite Map Generator</title><style>'&css2&'</style></head><body style="margin:10px;"><h1>CSS Sprite Map Generator</h1>');
 	if(count){
 		writeoutput('<p>Sprite map image(s) were created from all images with "background-repeat:no-repeat" or "background:##FFF url(image.jpg) no-repeat" shorthand in the CSS. To prevent an image from being in the sprite map, use "background-repeat:no-repeat !important;".</p>');
 		writeoutput('<div style="width:100%; "><h2>JPEG Sprite Map</h2><img src="'&this.jpegRootRelativePath&'" style="border:2px solid ##999;" alt="JPEG Sprite Map" /></div>');

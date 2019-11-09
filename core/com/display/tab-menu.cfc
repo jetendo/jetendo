@@ -70,7 +70,7 @@
 	}
 	</cfscript>
 	<cfsavecontent variable="local.theScript">
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function zSetupTabMenu#variables.tabMenuIndex#(){
 		$(".zmember-tabs#variables.tabMenuIndex#-1").show();

@@ -379,7 +379,7 @@
 	
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateOptionType27(postObj, arrError){    
 		}
 		</script>

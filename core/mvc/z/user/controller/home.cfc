@@ -27,7 +27,7 @@
 
 	ws=application.zcore.app.getWhitelabelStruct();
 	</cfscript>
-	<style type="text/css">
+	<style>
 	.zPublicDashboardButton:link, .zPublicDashboardButton:visited{ width:150px;text-decoration:none; color:##000;padding:1%;display:block; border:1px solid ##CCC; margin-right:2%; margin-bottom:2%; background-color:##F3F3F3; border-radius:10px; text-align:center; float:left; }
 	.zPublicDashboardButton:hover{background-color:##FFF; border:1px solid ##666;display:block; color:##666;}
 	.zPublicDashboardButtonImage{width:100%; height:64px; float:left;margin-bottom:5px;display:block;}

@@ -1146,7 +1146,7 @@
 		header name="Expires" value="0";
 		header name="Pragma" value="no-cache";
 		header name="Cache-Control" value="no-cache, no-store, must-revalidate";
-		application.zcore.template.appendTag("scripts", '<script type="text/javascript">var zUserLoggedIn=true;</script>');
+		application.zcore.template.appendTag("scripts", '<script>var zUserLoggedIn=true;</script>');
 	}
 	/*
 	if(application.zcore.user.checkGroupAccess("member")){
@@ -1355,7 +1355,7 @@
 		if(ds.domain_redirect_mask EQ '1'){
 			writeoutput('#application.zcore.functions.zHTMLDoctype()#
 			<head><meta charset="utf-8" /><title>#htmleditformat(ds.domain_redirect_title)#</title>
-			<style type="text/css">html{height:100%;}</style>
+			<style>html{height:100%;}</style>
 			</head><body style="margin:0px; height:100%;">
 			<iframe frameborder="0" scrolling="auto" height="100%" width="100%" src="#protocol&ds.domain_redirect_new_domain#" />
 			</body></html>');
@@ -1367,7 +1367,7 @@
 	}else if(ds.domain_redirect_type EQ '1'){ // all to root
 		if(ds.domain_redirect_mask EQ '1'){
 			writeoutput('#application.zcore.functions.zHTMLDoctype()#<head><meta charset="utf-8" /><title>#htmleditformat(ds.domain_redirect_title)#</title>
-			<style type="text/css">html{height:100%;}</style>
+			<style>html{height:100%;}</style>
 			</head><body style="margin:0px; height:100%;">
 			<iframe frameborder="0" scrolling="auto" height="100%" width="100%" src="#protocol&ds.domain_redirect_new_domain#"/>
 			</body></html>');
@@ -1379,7 +1379,7 @@
 	}else if(ds.domain_redirect_type EQ '0'){ // preserve url
 		if(ds.domain_redirect_mask EQ '1'){
 			writeoutput('#application.zcore.functions.zHTMLDoctype()#<head><meta charset="utf-8" /><title>#htmleditformat(ds.domain_redirect_title)#</title>
-			<style type="text/css">html{height:100%;}</style>
+			<style>html{height:100%;}</style>
 			</head><body style="margin:0px; height:100%;">
 			<iframe frameborder="0" scrolling="auto" height="100%" width="100%" src="#protocol&ds.domain_redirect_new_domain&theURL#"/>
 			</body></html>');

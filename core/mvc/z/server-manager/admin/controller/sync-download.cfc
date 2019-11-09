@@ -182,7 +182,7 @@
 		</div>
 	</div>
 
-	<script type="text/javascript">
+	<script>
 	var fullSyncIntervalId=0;
 	zArrDeferredFunctions.push(function(){
 		$("##cancelFullSync").on("click", function(e){

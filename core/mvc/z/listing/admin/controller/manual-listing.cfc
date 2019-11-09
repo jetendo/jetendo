@@ -135,7 +135,7 @@ still need to add all the meta data fields and photo display
 		qSite=db.execute("qSite"); 
 		searchText=searchTextOriginal;
 		 </cfscript>
-	<script type="text/javascript">
+	<script>
 		 function domanual_listingSearch(){
 			 window.location.href='/z/listing/admin/manual-listing/index?searchtext='+escape(document.getElementById('searchtext').value);
 		 }
@@ -487,7 +487,7 @@ still need to add all the meta data fields and photo display
   		application.zcore.adminSecurityFilter.requireFeatureAccess("Listings");
 		form.manual_listing_unique_id=application.zcore.functions.zso(form, 'manual_listing_unique_id');
 		if(currentMethod EQ "add"){
-			application.zcore.template.appendTag('meta','<script type="text/javascript">/* <![CDATA[ */ var zDisableBackButton=true; /* ]]> */</script>');
+			application.zcore.template.appendTag('meta','<script>/* <![CDATA[ */ var zDisableBackButton=true; /* ]]> */</script>');
 		}
 		
 		db.sql="SELECT * FROM #db.table("manual_listing", request.zos.zcoreDatasource)# manual_listing 
@@ -628,7 +628,7 @@ still need to add all the meta data fields and photo display
 			#application.zcore.functions.zOutputHelpToolTip("Price","member.listing.manual_listing.edit manual_listing_price")#</th>
 			<td><input type="text" name="manual_listing_price" value="<cfif form.manual_listing_price NEQ 0>#HTMLEditFormat(form.manual_listing_price)#</cfif>" size="15" />
 			
-			<script type="text/javascript">
+			<script>
 			/* <![CDATA[ */<cfif application.zcore.functions.zso(form, 'manual_listing_mls_price') EQ 1 or application.zcore.functions.zso(form, 'manual_listing_mls_price') EQ ''>setPrice(1);<cfelse>setPrice(0);</cfif>/* ]]> */
 			</script>
 			</td>

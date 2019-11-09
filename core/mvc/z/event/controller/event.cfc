@@ -940,7 +940,7 @@ application.zcore.app.getAppCFC("event").displayEventSearchForm(ts);
 
 	</div>
 
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	zArrDeferredFunctions.push(function(){
 		zEventSearchSetupForm();

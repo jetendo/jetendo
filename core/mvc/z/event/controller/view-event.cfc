@@ -140,7 +140,7 @@
 	
 	<cfif structkeyexists(form, 'print')>
 		<cfsavecontent variable="local.metaOutput">
-		<style type="text/css">
+		<style>
 		/* <![CDATA[ */
 		.zEventView-share{display:none;}
 		.zEventView-buttons{display:none;}
@@ -162,7 +162,7 @@
 		<cfscript>
 		application.zcore.functions.zRequireGoogleMaps();
 		</cfscript> 
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		var printNow=false;
 		<cfif structkeyexists(form, 'print')>

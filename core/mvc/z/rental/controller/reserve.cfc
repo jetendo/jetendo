@@ -1206,7 +1206,7 @@ selectStruct = StructNew();
       <cfelse>
       <input type="hidden" name="inquiries_reservation" value="0" checked="checked" />
     </cfif>
-    <script type="text/javascript">
+    <script>
 	<cfif structkeyexists(form, 'secure') and DateCompare(inquiries_end_date,now()) EQ 1>
 	//calculateCost();
 	<cfelseif application.zcore.functions.zso(form, 'inquiries_end_date') EQ ''>

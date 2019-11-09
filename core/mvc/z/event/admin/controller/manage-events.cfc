@@ -885,7 +885,7 @@
 					<td>#application.zcore.functions.zInput_Boolean("event_featured", application.zcore.functions.zso(form, 'event_featured'))# (Yes, will sort the event to the top even if other events are sooner)</td>
 				</tr>  
 			</cfif>
-			<script type="text/javascript">
+			<script>
 			function openRecurringEventOptions(){
 				var startDate=$("##event_start_datetime_date").val();
 				var startTime=$("##event_start_datetime_time").val();
@@ -1361,7 +1361,7 @@
 		}
 	}
 
-	echo('done.<script type="text/javascript">
+	echo('done.<script>
 	window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 	window.parent.zCloseModal();
 	</script>');

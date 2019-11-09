@@ -35,7 +35,7 @@
 	request.zos.listing.functions.zMLSSearchOptions(form.mls_saved_search_id, "mls_saved_search_id", 1, false);
         application.zcore.functions.zEndForm();
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	 var parentWindowCallback="#jsstringformat(application.zcore.functions.zso(form,'callback'))#";
 	 function executeParentCallback(data){
@@ -85,7 +85,7 @@ then make it work with edit saved search
 <!--- <cfsavecontent variable="request.theSearchFormTemplate">
 ##startFormTag##
 <!--- <form name="quickSearchForm" id="quickSearchForm" action="##searchFormSubmitURL##" method="post"> --->
-<!--- <script type="text/javascript">zFormData["zMLSSearchForm"]=new Object(); zFormData["zMLSSearchForm"].arrFields=[];</script> --->
+<!--- <script>zFormData["zMLSSearchForm"]=new Object(); zFormData["zMLSSearchForm"].arrFields=[];</script> --->
 
 <div style="float:left; width:30%; padding-right:3%;">
 <h3>CITY:</h3>

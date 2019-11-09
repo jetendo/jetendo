@@ -205,7 +205,7 @@
 	<!--- <p>Please confirm your new account by clicking the link in the email we send you.</p> --->
 	<cfif form.modalpopforced EQ 1>
 		<p>Closing window in 3 seconds.</p>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */ 
 		setTimeout(function(){ zCloseThisWindow(true); },3000);
 		/* ]]> */
@@ -1229,7 +1229,7 @@ If the link does not work, please copy and paste the entire link in your browser
 	application.zcore.template.setTemplate("zcorerootmapping.templates.plain",true,true);
 	</cfscript>
 		<p>Closing window in 3 seconds.</p>
-		<script type="text/javascript">/* <![CDATA[ */ 
+		<script>/* <![CDATA[ */ 
 		setTimeout(function(){ zCloseThisWindow(); },3000);
 		/* ]]> */
 		</script>
@@ -1293,7 +1293,7 @@ If the link does not work, please copy and paste the entire link in your browser
 			</div>
 		</cfif>
 		<cfsavecontent variable="theMeta">
-		<style type="text/css">
+		<style>
 		  .zmember-openid-buttons{ width:auto;}
 		  .zmember-openid-buttons a:link, .zmember-openid-buttons a:visited{ width:auto;}
 		  ##openidurl{width:255px !important;}

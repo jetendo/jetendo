@@ -571,13 +571,13 @@ listing_longitude<>'0'";
 					if(variables.sidebarOutput){
 						if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 							request.zos.tempObj.getMLSCountOutput=true;
-							application.zcore.template.appendTag("sidebar",'<script type="text/javascript">/* <![CDATA[ */    
+							application.zcore.template.appendTag("sidebar",'<script>/* <![CDATA[ */    
 							zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});  /* ]]> */</script>');	
 						}
 					}else{
 						if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 							request.zos.tempObj.getMLSCountOutput=true;
-							writeoutput('<script type="text/javascript">/* <![CDATA[ */
+							writeoutput('<script>/* <![CDATA[ */
 							zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'')});   /* ]]> */</script>');
 						}
 					}
@@ -601,7 +601,7 @@ listing_longitude<>'0'";
 				}else{
 					writeoutput('<p><img src="/z/a/images/redarrow.jpg" /></p>');
 				}
-				writeoutput('<script type="text/javascript">/* <![CDATA[ */zListingDisplayHelpBox();/* ]]> */</script>
+				writeoutput('<script>/* <![CDATA[ */zListingDisplayHelpBox();/* ]]> */</script>
 				<div style="width:100%; height:500px;float:left; clear:both;"></div>');
 			}
 			if(isDefined('request.contentEditor')){
@@ -618,7 +618,7 @@ listing_longitude<>'0'";
 					if(isDefined('request.zMLSHideCount') EQ false and isDefined('request.contentEditor')){
 						if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 							request.zos.tempObj.getMLSCountOutput=true;
-							writeoutput('<script type="text/javascript">/* <![CDATA[ */
+							writeoutput('<script>/* <![CDATA[ */
 								zArrDeferredFunctions.push(function(){getMLSCount(''MLSSearchForm'');  });
 							/* ]]> */</script>');
 						}
@@ -842,13 +842,13 @@ listing_longitude<>'0'";
 			}else{
 				local.disableTemp=false;
 			}
-			writeoutput('<script type="text/javascript">/* <![CDATA[ */var zDisableSearchFormSubmit=#local.disableTemp#;/* ]]> */</script>');
+			writeoutput('<script>/* <![CDATA[ */var zDisableSearchFormSubmit=#local.disableTemp#;/* ]]> */</script>');
 			
 			if(structkeyexists(form, 'searchFormHideCriteria') EQ false){
 				form.searchFormHideCriteria=structnew();	
 			}
 			if(form.debugSearchForm){
-				writeoutput('<script type="text/javascript">/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */</script>');
+				writeoutput('<script>/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */</script>');
 			}
 			if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_rentals_only EQ 1){
 				ts=structnew();
@@ -890,7 +890,7 @@ listing_longitude<>'0'";
 			if(request.zos.originalURL EQ request.zos.listing.functions.getSearchFormLink() OR isDefined('request.contentEditor')){
 				if(structkeyexists(request.zos.tempObj,'getMLSCountOutput') EQ false){
 					request.zos.tempObj.getMLSCountOutput=true;
-					writeoutput('<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'');});/* ]]> */</script>');
+					writeoutput('<script>/* <![CDATA[ */zArrDeferredFunctions.push(function(){getMLSCount(''zMLSSearchForm'');});/* ]]> */</script>');
 				}
 			}
 			if(isDefined('request.contentEditor') EQ false){

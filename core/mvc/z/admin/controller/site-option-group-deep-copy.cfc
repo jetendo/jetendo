@@ -749,7 +749,7 @@ When making a version the primary record, it will have option to preserve the or
 
 	<cfif structkeyexists(form, 'createVersion')>
 		
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
 			doDeepCopy('/z/admin/site-option-group-deep-copy/createVersion?site_x_option_group_set_id=#form.site_x_option_group_set_id#');
 		});

@@ -585,7 +585,7 @@
 		</cfif>
 	</form>
 	<br>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push( function() { 
 		function emailSentCallback(r){
 			window.parent.location.reload();

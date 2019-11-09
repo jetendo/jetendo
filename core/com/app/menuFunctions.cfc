@@ -42,7 +42,7 @@ menuCom.init(ts);
 		variables.viewRow=variables.qView[1]; 
 		savecontent variable="theMenuMeta"{
 			if(variables.viewRow.menu_vertical EQ 1){
-				echo('<script type="text/javascript">/* <![CDATA[ */
+				echo('<script>/* <![CDATA[ */
 zMenu#variables.viewRow.menu_id#Vertical=true;/* ]]> */</script>');
 			}
 			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){
@@ -61,7 +61,7 @@ zMenu#variables.viewRow.menu_id#Vertical=true;/* ]]> */</script>');
 		variables.viewRow=variables.qView; 
 		savecontent variable="theMenuMeta"{
 			if(variables.viewRow.menu_vertical EQ 1){
-				echo('<script type="text/javascript">/* <![CDATA[ */
+				echo('<script>/* <![CDATA[ */
 zMenu#variables.viewRow.menu_id#Vertical=true;/* ]]> */</script>');
 			}
 			if(structkeyexists(request, 'zMenuMetaIncluded') EQ false){

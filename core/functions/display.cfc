@@ -6,7 +6,7 @@
 	<cfscript>
 	</cfscript>
 	<cfsavecontent variable="topMeta">
-		<style type="text/css">
+		<style>
 		/* <![CDATA[ */ 
 		###arguments.id# .mfp-gallery{z-index:20001;}
 		###arguments.id# .mfp-bg{z-index:20000;}
@@ -35,7 +35,7 @@
 
 		 /* ]]> */
 		</style>
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */ 
 		zArrDeferredFunctions.push(function(){
 
@@ -229,7 +229,7 @@ application.zcore.functions.zEnableContentTransition(); --->
 	    <cfelse>
 	    #application.zcore.skin.includeJS("/z/javascript/jquery/balupton-history/scripts/bundled/html5/jquery.history.js", "", 2)#
 	    </cfif>
-    <script type="text/javascript"> 
+    <script> 
     var zContentTransitionEnabled=true;
     var zLocalDomains=["#request.zos.globals.domain#","#replace(request.zos.globals.domain,"www.","")#"<cfif request.zos.globals.securedomain NEQ "">,"#request.zos.globals.securedomain#","#replace(request.zos.globals.securedomain,"www.","")#"</cfif><cfscript>
     if(request.zos.globals.domainAliases NEQ ""){
@@ -419,7 +419,7 @@ zSlideShow(ts);
 			slideshowCom.updateSlideshowCSS(ts);
 		}
 		if(qss.slideshow_custom_include EQ ""){
-			echo('<script type="text/javascript">/* <![CDATA[ */
+			echo('<script>/* <![CDATA[ */
 			zArrDeferredFunctions.push(function(){
 				zArrSlideshowIds.push({rotateGroupIndex:0,rotateIndex:0,id:#request.zos.tempObj.zSlideShowUniqueIdIndex#, layout:#qss.slideshow_large_image#, slideDirection:"#qss.slideshow_slide_direction#", slideDelay:#qss.slideshow_auto_slide_delay#, movedTileCount:#qss.slideshow_moved_tile_count#});
 			});
@@ -628,16 +628,16 @@ zChart(ts);
 	if(isDefined('request.zos.zChartDataId') EQ false){
 		request.zos.zChartDataId=0;
 		//output the header
-		writeoutput('<script type="text/javascript" src="#request.zos.globals.serverDomain#/scripts/flash.js"></script>');
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */
+		writeoutput('<script src="#request.zos.globals.serverDomain#/scripts/flash.js"></script>');
+		writeoutput('<script>/* <![CDATA[ */
 		zArrChartData=new Array();function zChartGetData(id){var c=document.getElementById("zchart"+id);if(typeof(c)=="object"){c.setData(zArrChartData[id]);}}/* ]]> */</script>');
 	}else{
 		request.zos.zChartDataId=request.zos.zChartDataId+1;
 	}
 	qs='dataId=#request.zos.zChartDataId#&chartWidth=#ss.width#&chartHeight=#ss.height#&chartLegendHeight=#ss.legendHeight#';
 	v="y_labels=#URLEncodedFormat(arraytolist(ss.arrYLabels))#&y_values=#URLEncodedFormat(arraytolist(ss.arrYValues))#&x_values=#URLEncodedFormat(arraytolist(ss.arrXValues))#&x_labels=#URLEncodedFormat(arraytolist(ss.arrXLabels))#&x_label=#URLEncodedFormat(ss.x_label)#&y_label=#URLEncodedFormat(ss.y_label)#&x_direction=#ss.x_direction#&y_direction=#ss.y_direction#&#arrayToList(arrLineQS,'&')#&chartWidth=#ss.width#&chartHeight=#ss.height#&chartLegendHeight=#ss.legendHeight#&complete=#ss.complete#";
-	js='<script type="text/javascript">/* <![CDATA[ */zArrChartData[#request.zos.zChartDataId#]="'&JSStringFormat(v)&'";/* ]]> */</script>';
-	chart=js&'<script type="text/javascript">zswf(''<object zSWF="off" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab##version=8,0,0,0" width="#ss.width#" height="#ss.height#" id="zchart#request.zos.zChartDataId#"><param name="allowScriptAccess" value="sameDomain" /><param name="movie" value="#request.zos.globals.serverdomain#/images/chart.swf?#qs#" /><param name="quality" value="high" /><param name="bgcolor" value="##ffffff" /><embed src="#request.zos.globals.serverdomain#/images/chart.swf?#qs#" quality="high" bgcolor="##ffffff" width="#ss.width#" height="#ss.height#" name="zchart#request.zos.zChartDataId#" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" /><\/object>'');</script>';
+	js='<script>/* <![CDATA[ */zArrChartData[#request.zos.zChartDataId#]="'&JSStringFormat(v)&'";/* ]]> */</script>';
+	chart=js&'<script>zswf(''<object zSWF="off" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab##version=8,0,0,0" width="#ss.width#" height="#ss.height#" id="zchart#request.zos.zChartDataId#"><param name="allowScriptAccess" value="sameDomain" /><param name="movie" value="#request.zos.globals.serverdomain#/images/chart.swf?#qs#" /><param name="quality" value="high" /><param name="bgcolor" value="##ffffff" /><embed src="#request.zos.globals.serverdomain#/images/chart.swf?#qs#" quality="high" bgcolor="##ffffff" width="#ss.width#" height="#ss.height#" name="zchart#request.zos.zChartDataId#" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" /><\/object>'');</script>';
 	writeoutput(chart);
 	if(ss.debug){
 		writeoutput("<br />"&replace(urldecode(qs),"&","<br />","ALL"));
@@ -715,7 +715,7 @@ rollOverCode = zStyleRollOver(inputStruct);
 		StructInsert(request, "zStyleROInit#ss.name#", true, true);
 		</cfscript>
 		<cfsavecontent variable="js">
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		var zRollOverTimer=false;
 		var zStyleRO#ss.name#style=false;
@@ -828,7 +828,7 @@ if(isDefined('Request.zSharedJSInit') EQ false){
 }
 </Cfscript>
 <cfsavecontent variable="js">
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 var zStyleROGroupName = "";
 var arrStyleRollOutHolding = new Array();
@@ -959,7 +959,7 @@ roMessageCode = zRollOverMessage(inputStruct);
 		StructInsert(request, "zROMessageInit", true, true);
 		</cfscript>
 		<cfsavecontent variable="js">
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 var zShowRollOverMessageoutx;
 var zShowRollOverMessageouty;
@@ -1009,7 +1009,7 @@ function zStopRollOverMessage(){
 	</cfif>
 	<cfscript>
 	request.zROMessageCount = application.zcore.functions.zso(Request, 'zROMessageCount',true)+1;
-	application.zcore.template.prependContent('<script type="text/javascript">/* <![CDATA[ */arrROMessageText[#request.zROMessageCount#]= ''#JSStringFormat(ss.message)#'';/* ]]> */</script>');
+	application.zcore.template.prependContent('<script>/* <![CDATA[ */arrROMessageText[#request.zROMessageCount#]= ''#JSStringFormat(ss.message)#'';/* ]]> */</script>');
 	</cfscript>
 	<cfif ss.returnStruct>
 		<cfscript>
@@ -1051,7 +1051,7 @@ function zStopRollOverMessage(){
 		</div>
 	</cfsavecontent>
 	<cfsavecontent variable="scriptOut">
-		<style type="text/css">
+		<style>
 		.z-top-message-bar{
 			background-color:##<cfif message["Top Message Background Color"] NEQ "">#message["Top Message Background Color"]#<cfelse>000000</cfif>;
 			color:##<cfif message["Top Message Text Color"] NEQ "">#message["Top Message Text Color"]#<cfelse>FFFFFF</cfif>;
@@ -1067,7 +1067,7 @@ function zStopRollOverMessage(){
 		}
 		.z-top-message-body{ width:100%; float:left; position:relative; top:0px; left:0px;}
 		</style>
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push(function(){
     		$('body').wrapInner('<div id="z-top-message-body" class="z-top-message-body" />');
     		$('body').prepend('#jsstringformat(out)#');

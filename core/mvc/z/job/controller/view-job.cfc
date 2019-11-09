@@ -178,7 +178,7 @@
 							<cfscript>
 							application.zcore.functions.zRequireGoogleMaps();
 							</cfscript> 
-							<script type="text/javascript">
+							<script>
 							/* <![CDATA[ */
 							var curMap=false;
 							var arrAdditionalLocationLatLng=[];
@@ -251,7 +251,7 @@
 		<cfscript>
 		application.zcore.functions.zRequireGoogleMaps();
 		</cfscript>  
-		<script type="text/javascript">
+		<script>
 		/* <![CDATA[ */
 		function zJobMapSuccessCallback(){
 			$("##zJobViewMapContainer").show();

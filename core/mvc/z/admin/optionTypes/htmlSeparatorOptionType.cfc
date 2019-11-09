@@ -248,7 +248,7 @@
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateOptionType11(postObj, arrError){ 
 			var htmlcontent=tinymce.get("htmlcontent").getContent();
 			if(htmlcontent == ''){

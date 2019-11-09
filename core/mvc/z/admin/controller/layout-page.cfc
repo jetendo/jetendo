@@ -202,7 +202,7 @@ D:\desktop\layout.ai
 		}
 	}
 
-	echo('done.<script type="text/javascript">
+	echo('done.<script>
 	window.parent.zReplaceTableRecordRow("#jsstringformat(rowOut)#");
 	window.parent.zCloseModal();
 	</script>');

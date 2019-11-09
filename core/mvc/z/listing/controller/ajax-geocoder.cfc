@@ -227,7 +227,7 @@
 		}
 	}
 	echo('#application.zcore.functions.zRequireGoogleMaps()#
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	var geocoder;
 	var arrListingId=new Array();

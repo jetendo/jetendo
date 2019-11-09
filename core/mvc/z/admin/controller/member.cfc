@@ -970,14 +970,14 @@
 							}
 						}
 						</cfscript>
-						<script type="text/javascript">/* <![CDATA[ */ 
+						<script>/* <![CDATA[ */ 
 							zmlsagentidarray=new Array();
 							 /* ]]> */
 							 </script>
 							<table style="border-spacing:0px;">
 								<cfloop query="qmls">
 								<tr <cfif qmls.currentrow MOD 2 EQ 0>style="background-color:##EFEFEF;"</cfif>>
-									<td><script type="text/javascript">/* <![CDATA[ */ 
+									<td><script>/* <![CDATA[ */ 
 										zmlsagentidarray[#qmls.mls_id#]="mlsagentid#qmls.mls_id#";
 										 /* ]]> */
 										 </script> 
@@ -988,7 +988,7 @@
 								</tr>
 								</cfloop>
 							</table>
-							<br /><br /><script type="text/javascript">
+							<br /><br /><script>
 						/* <![CDATA[ */ 
 						function lookupAgentIdCallback(r){
 							var myObj=eval('('+r+')');

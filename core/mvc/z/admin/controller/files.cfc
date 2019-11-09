@@ -21,7 +21,7 @@
 		application.zcore.adminSecurityFilter.requireFeatureAccess("Files & Images");	
 	}
 
-	application.zcore.template.appendTag("meta",'<style type="text/css">
+	application.zcore.template.appendTag("meta",'<style>
 	/* <![CDATA[ */
 		body, .fi-gallery-table{ background-color:##FFFFFF; color:##000000; }
 	.fi-gallery-table a:link { color:##336699; }
@@ -152,7 +152,7 @@
 
 	application.zcore.template.setTemplate('zcorerootmapping.templates.blank',true,true);
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	if(window.parent.Sizer){
 		window.parent.Sizer.ResizeDialog(650,480);
 	}
@@ -197,7 +197,7 @@
 	}
 	application.zcore.template.setTemplate('zcorerootmapping.templates.blank',true,true);
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	if(window.parent.Sizer){
 		window.parent.Sizer.ResizeDialog(650,480);
 	}
@@ -618,7 +618,7 @@
 
 
 	Resize Image:  
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */var arrWidth=new Array();
 	var arrHeight=new Array();
 	function setWH(n){	
@@ -745,7 +745,7 @@
 
 		<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onclick="window.location.href ='/z/admin/files/fileGallery?virtual_folder_id=#form.virtual_folder_id#';" />
 	</form>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	if(!window.parent.zInsertGalleryFile){
 	    alert('HTML Editor is missing');
@@ -898,7 +898,7 @@
 	<table style="margin-left:auto; margin-right:auto; border-spacing:0px;width:100%;">
 		<tr>
 		<td>
-		<script type="text/javascript">
+		<script>
 	/* <![CDATA[ */
 
 	if(!window.parent.zInsertGalleryImage){
@@ -970,7 +970,7 @@
 	application.zcore.functions.zSetPageHelpId("2.5");
 	application.zcore.functions.zStatusHandler(request.zsid);
 
-	application.zcore.template.appendTag("meta",'<style type="text/css">
+	application.zcore.template.appendTag("meta",'<style>
 	/* <![CDATA[ */ .fi-1 {
 	    background-color:##336699;
 	    color:##FFFFFF;

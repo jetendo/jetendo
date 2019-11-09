@@ -11,7 +11,7 @@
 	i1=0;
 	application.zcore.template.setPlainTemplate();
 	</cfscript> 
- <style type="text/css">
+ <style>
 textarea{font-size:14px; line-height:16px;}
  </style>
 	<div id="parentContainer1" style="display:none;">
@@ -35,7 +35,7 @@ textarea{font-size:14px; line-height:16px;}
 application.zcore.skin.includeJS("/z/javascript/zTransformHTML.js");
 </cfscript>
 
-<script type="text/javascript">
+<script>
 function doTransform(){
 	var obj={
 		container:document.getElementById("parentContainer1")
@@ -61,7 +61,7 @@ zArrDeferredFunctions.push(function(){
 	form.originalwidth=1200;
 	form.newwidth=960;
 	</cfscript> 
- <style type="text/css">
+ <style>
 .convertButton:link, .convertButton:visited{font-size:18px; border-radius:5px; background-color:##000; color:##FFF !important; margin-top:10px;display:inline-block;padding:10px;}
 *{
   -webkit-box-sizing: border-box;
@@ -109,7 +109,7 @@ application.zcore.skin.includeJS("/z/javascript/zResponsiveHTML.js");
 </cfscript>
 
 
-<script type="text/javascript">
+<script>
 function loadLink(){
 	var link=$("##link").val();
 	if(link.length==0 || link.indexOf("http:") != -1 || link.indexOf("https:") != -1){

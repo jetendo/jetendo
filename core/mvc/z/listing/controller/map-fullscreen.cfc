@@ -41,7 +41,7 @@ request.zos.listing.functions.zMLSSetSearchStruct(ts.searchcriteria, ts.searchcr
 structappend(form, ts.searchcriteria, true);
 
 structdelete(ts.searchcriteria, "fieldnames");
-   writeoutput('<script type="text/javascript">/* <![CDATA[ */ zMapFullscreen=true;zMLSSearchFormName="contentSearchHiddenForm"; /* ]]> */</script>');
+   writeoutput('<script>/* <![CDATA[ */ zMapFullscreen=true;zMLSSearchFormName="contentSearchHiddenForm"; /* ]]> */</script>');
    /*
 	*/ 
 	ts2=StructNew();
@@ -89,7 +89,7 @@ randcount=randrange(5,10);
 		mapCom.index(ms);
 		</cfscript>
 <cfsavecontent variable="theScript">
-<style type="text/css">body{ background:none !important; overflow:hidden; background-color:transparent !important;}
+<style>body{ background:none !important; overflow:hidden; background-color:transparent !important;}
 ##zlsHideListingMapDiv{display:none;}
 ##myGoogleMapV3{ z-index:21;}
 ##zlsMapLegendDiv{margin-top:-63px; width:530px !important; position:relative; background-color:##FFF; opacity:0.8; float:right !important; z-index:22;}
@@ -97,7 +97,7 @@ randcount=randrange(5,10);
 ##zlsInstantPlaceholder{display:none !important;}
 ##zSearchJsToolNewDiv{display:none !important;}
 </style>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */  
 zArrDeferredFunctions.push(function(){ 
 zArrResizeFunctions.push({functionName: zlsUpdateMapSize});

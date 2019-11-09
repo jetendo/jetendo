@@ -110,7 +110,7 @@
 	application.zcore.functions.zSetModalWindow();
 	//application.zcore.functions.zStatusHandler(Request.zsid);
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		//setTimeout(function(){
 			window.parent.zCloseModal();
@@ -310,7 +310,7 @@
 			<tr>
 				<th style="width:60px;">Value</th>
 				<td>
-				<script type="text/javascript">
+				<script>
 				function validateIPV6(str){
 					return /^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/.test(str);
 				}
@@ -575,7 +575,7 @@
 	</cfscript>
 	<p><a href="/z/server-manager/admin/dns-group/index">DNS Groups</a> / <a href="/z/server-manager/admin/dns-zone/index?dns_group_id=#form.dns_group_id#">#form.dns_group_name#</a> / #form.dns_zone_name#</p>
 	<h2>Manage DNS Records</h2>
-	<script type="text/javascript">
+	<script>
 	function openDNSModal(link){
 		zShowModalStandard(link, Math.min(550, zWindowSize.width-50), Math.min(500, zWindowSize.height-50));
 	}
@@ -607,7 +607,7 @@
 	</script>
 	<cfsavecontent variable="css">
 	
-	<style type="text/css">
+	<style>
 	.addButtonLabel{ display:block; float:left; padding:5px;font-weight:bold; margin-right:5px;}
 	.addButton:link, .addButton:visited{ display:block; cursor:pointer;float:left; text-decoration:none; font-weight:bold; padding:5px; background-color:##EEE; border:1px solid ##CCC; margin-right:5px; color:##000;}
 	.addButton:hover{background-color:##FFF;  color:##666;}

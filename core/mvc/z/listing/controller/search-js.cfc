@@ -19,7 +19,7 @@ returnStruct= propertyDataCom.getProperties(ts);
 </cfscript>
 
 <cfsavecontent variable="theMeta">
-<script type="text/javascript">
+<script>
 zArrDeferredFunctions.push(function(){
 	var u=window.location.href;
 	var p=u.indexOf("##");
@@ -46,7 +46,7 @@ zArrDeferredFunctions.push(function(){
 	zScrollApp.disableFirstAjaxLoad=false;
 });
 </script>
-<style type="text/css">
+<style>
 /* <![CDATA[ */
 body{ padding-top:60px; background:none !important; background-color:transparent !important;}
 /* ]]> */

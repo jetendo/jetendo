@@ -28,7 +28,7 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Secure Message</title>
-<style type="text/css">
+<style>
 body,table{ font-family:Verdana, arial,sans-serif; font-size:13px; line-height:16px;}
 </style>
 </head>
@@ -224,7 +224,7 @@ Please do not close your browser until the confirmation message is displayed.</p
 		</tr>
 		<tr><th>&nbsp;</th>
 		<td>
-        <script type="text/javascript">
+        <script>
 		/* <![CDATA[ */ function hideSubmitButton(){
 			var d2=document.getElementById("tempMessageDiv2");
 			d2.style.display="none";

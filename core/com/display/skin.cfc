@@ -32,7 +32,7 @@
 <cffunction name="addDeferredScript" localmode="modern" access="public" output="no">
 	<cfargument name="script" type="string" required="yes">
 	<cfscript>
-	application.zcore.template.appendTag("scripts", '<script type="text/javascript">/* <![CDATA[ */zArrDeferredFunctions.push(function(){#arguments.script# });/* ]]> */</script>');
+	application.zcore.template.appendTag("scripts", '<script>/* <![CDATA[ */zArrDeferredFunctions.push(function(){#arguments.script# });/* ]]> */</script>');
 	</cfscript>
 </cffunction>
 	

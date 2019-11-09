@@ -19,7 +19,7 @@ when page loads again, view cart will not continue to be expanded, so don't need
 	<cfscript>
 	application.zcore.template.setPlainTemplate();
 	</cfscript>
-	<style type="text/css">
+	<style>
 	.zcart{ width:98%; padding:1%;float:left; background-color:##EEE; clear:both;}
 	.zcart-add-saved, .zcart-add-saved:link, .zcart-add-saved:visited{ background-color:##000 !important;  color:##FFF !important; }
 	.zcart-add-saved:hover{ background-color:##666 !important;  color:##FFF !important;}
@@ -105,7 +105,7 @@ when page loads again, view cart will not continue to be expanded, so don't need
 	application.zcore.skin.includeJS("/z/javascript/jquery/jquery.easing.1.3.js");
 	application.zcore.skin.includeJS("/z/javascript/jetendo/zCart.js");
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	var cart1Data=[];
 	cart1Data[1]={ id:'1', label:'cart1 Item 1', image: '/z/a/images/s2.gif', description: 'description', addHTML: 'Add Item 1', removeHTML:'Remove Item 1', viewURL: '##view1' };
 	cart1Data[2]={ id:'2', label:'cart1 Item 2', image: '/z/a/images/s2.gif', description: 'description', addHTML: 'Add Item 2', removeHTML:'Remove Item 2', viewURL: '##view2'  };

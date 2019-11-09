@@ -107,7 +107,7 @@ loanCalcCom.customExample();
 
 
 <cffunction name="outputLoanCalculatorJavascript" localmode="modern" access="public">
-	<script type="text/javascript">
+	<script>
 	function zCalculateLoanPayment(){
 		var amount=parseInt(document.getElementById("loan_amount").value);
 		var interest=parseFloat(document.getElementById("loan_interest").value);

@@ -23,7 +23,7 @@
 		"grid_group_section_center": "0"
 	}; */
 	</cfscript>
-	<!--- <script type="text/javascript">
+	<!--- <script>
 	var groupSettings=#serializeJSON(groupSettings)#;
 
 	</script> 
@@ -210,7 +210,7 @@
 </div>
 <cfsavecontent variable="out">
 </cfsavecontent>  
-<script type="text/javascript">
+<script>
 //var gridGroupFormTemplate="#jsstringformat(out)#";
 var gridGroupTabIndex=#tabCom.getIndex()#;
 </script>

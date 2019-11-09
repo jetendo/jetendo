@@ -319,7 +319,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	application.zcore.template.setTag("title","Video Library");
 	</cfscript>
 	<cfsavecontent variable="theMeta">
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var zVideoJSDomain="#request.zos.currentHostName#";
 	// this could be done with zGetCookie 
@@ -382,7 +382,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	</tr>
 	</table> --->
 	<cfsavecontent variable="theMETA">
-	<style type="text/css">
+	<style>
 	/* <![CDATA[ */ 
 
 	.videoLibraryThumbnails{list-style:none;margin: 0px;
@@ -390,7 +390,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	margin-top: 20px;}
 	.videoLibraryThumbnails li{ float:left; width:100%; margin-bottom:20px;} /* ]]> */
 	</style>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 
 	function progressHandlingFunction(e){
@@ -480,7 +480,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	qF=db.execute("qF");
 	</cfscript>
 	<cfloop query="qF"> 
-	<script type="text/javascript">
+	<script>
 		/* <![CDATA[ */
 		function zInitVideoLibrary#qF.currentrow#(){
 			var t=new Object();
@@ -543,13 +543,13 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 	ORDER BY video_id DESC ";
 	qF=db.execute("qF");
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ 
 	var arrVideoLibraryComplete={};
 	 /* ]]> */
 	 </script>
 	<cfloop query="qF"> 
-	<script type="text/javascript">
+	<script>
 		/* <![CDATA[ */
 		function zInitVideoLibrary2_#qF.currentrow#(){
 			var t=new Object();
@@ -640,7 +640,7 @@ http://stackoverflow.com/questions/9860868/flowplayer-secure-streaming-with-apac
 		</div>
 		
 	</cfsavecontent>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	var embedCode="#replace(jsstringformat(embedCode),"</","<\/","all")#";
 	/* ]]> */

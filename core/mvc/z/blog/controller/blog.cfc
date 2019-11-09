@@ -1856,7 +1856,7 @@ this.app_id=10;
 	optionStruct=application.zcore.app.getAppData("blog").optionStruct;
 	//previewEnabled=false;
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */ function textCounter(field,cntfield,maxlimit) {
 		if (field.value.length > maxlimit){ // if too long...trim it!
 			field.value = field.value.substring(0, maxlimit);

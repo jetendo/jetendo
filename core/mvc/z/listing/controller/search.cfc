@@ -1298,7 +1298,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
 <br />
 
 <cfsavecontent variable="scriptHTML"> 
-<script type="text/javascript">/* <![CDATA[ */ var zlsQueryString="#jsstringformat(actionQueryString)#";/* ]]> */</script>
+<script>/* <![CDATA[ */ var zlsQueryString="#jsstringformat(actionQueryString)#";/* ]]> */</script>
  
  </cfsavecontent>
  <cfscript>
@@ -1624,7 +1624,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
         
         </div>
     </div>
-    <script type="text/javascript">
+    <script>
 	/* <![CDATA[ */ 
 	function d492(){
 		//alert(zFormData['zMLSSearchForm'].arrFields.length);
@@ -1648,7 +1648,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
  <cfsavecontent variable="startFormTagHTML">
  <div id="searchFormTopDiv" style="float:left;  width:100%; clear:both;"></div>
 
-<script type="text/javascript">/* <![CDATA[ */var zDisableSearchFormSubmit=<cfif application.zcore.functions.zso(request,'zDisableSearchFormSubmit',false,false)>true<cfelse>false</cfif>;/* ]]> */</script>
+<script>/* <![CDATA[ */var zDisableSearchFormSubmit=<cfif application.zcore.functions.zso(request,'zDisableSearchFormSubmit',false,false)>true<cfelse>false</cfif>;/* ]]> */</script>
 <cfscript>
 if(isDefined('request.contentEditor') EQ false){
 	//zdump(application.zcore.status.getStruct(form.searchid));
@@ -1684,7 +1684,7 @@ if(isDefined('request.searchFormHideCriteria')){
 </cfscript>
 
 <cfif form.debugSearchForm>
-<script type="text/javascript">/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */</script>
+<script>/* <![CDATA[ */zDebugMLSAjax=true;/* ]]> */</script>
 </cfif>
 <cfif application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_rentals_only EQ 1>
 <cfscript>
@@ -4218,7 +4218,7 @@ mls_saved_search_deleted = #db.param(0)#
 		ts.useAnchorTag=false;
 		ts.imageInput=false;
 		ts.style="padding:5px;";
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
+		writeoutput('<script>/* <![CDATA[ */zDisableSearchFormSubmit=true;/* ]]> */</script>');
 	}
 	ts.onclick="";
 	application.zcore.functions.zInput_submit(ts);

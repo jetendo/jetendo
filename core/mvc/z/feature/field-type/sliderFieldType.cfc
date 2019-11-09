@@ -291,7 +291,7 @@
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateFieldType22(postObj, arrError){   
 			if(postObj.slider_from == ''){
 				arrError.push('Slider From is required.');

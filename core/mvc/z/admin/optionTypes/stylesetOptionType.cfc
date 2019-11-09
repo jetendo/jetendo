@@ -274,7 +274,7 @@
 	qGroup=db.execute("qGroup");
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateOptionType24(postObj, arrError){  
 		}
 		</script>

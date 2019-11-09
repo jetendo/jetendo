@@ -310,7 +310,7 @@ application.zcore.paypal.displayButton(ts);
 	</cfscript>
 	<h2>Redirecting to PayPal.com Checkout</h2>  
 	<p>Please don't use the back button.</p>
-	<script type="text/javascript">
+	<script>
 	setTimeout(function(){
 		var a=window.location;
 		a.href='#checkoutLink#';

@@ -289,7 +289,7 @@
 		</cfscript>
   
   <cfsavecontent variable="styleString">
-  <style type="text/css">
+  <style>
 			.zOS_mode_table {
 				background-color:##FFFFFF;
 				color:##000000;

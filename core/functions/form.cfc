@@ -344,7 +344,7 @@ USAGE
 			local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 			ss.onchange&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 			arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-			writeoutput('<script type="text/javascript">/* <![CDATA[ */');
+			writeoutput('<script>/* <![CDATA[ */');
 			writeoutput('zArrDeferredFunctions.push(function(){');
 			writeoutput('var ts=new Object();');
 			writeoutput('ts.type="select";');
@@ -521,7 +521,7 @@ USAGE
 	}
 	</cfscript>
 	<cfsavecontent variable="output">
-	<script type="text/javascript">
+	<script>
 	/* <![CDATA[ */
 	function #fieldName#_checkSSN(fieldNum){
 		if(fieldNum==1){
@@ -638,7 +638,7 @@ writeoutput(application.zcore.functions.zInput_Chmod(inputStruct));
 	
 	<cfif arguments.ss.readOnly EQ false>
 	<cfsavecontent variable="js">	
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 function #arguments.ss.name#_updateChMod(){
 	var chmod=0;
@@ -904,7 +904,7 @@ function #arguments.ss.name#_updateChecks(){
 </tr>
 </table>
 <cfif arguments.ss.readOnly EQ false>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 #arguments.ss.name#_updateChecks();
 /* ]]> */
@@ -992,7 +992,7 @@ writeoutput(application.zcore.functions.zInput_RadioGroup(ts));
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onclick&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */');
+		writeoutput('<script>/* <![CDATA[ */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="radio";');
@@ -1140,7 +1140,7 @@ writeoutput(application.zcore.functions.zInput_Checkbox(ts));
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onclick&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[*/');
+		writeoutput('<script>/* <![CDATA[*/');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="text";');
@@ -1196,7 +1196,7 @@ writeoutput(application.zcore.functions.zInput_Checkbox(ts));
     	<label style="cursor:pointer;" for="#arguments.ss.name#_name#i#" id="#arguments.ss.name#_namelabel#i#">#htmleditformat(curL)#</label>
     	#arguments.ss.separator#
     	<cfif arguments.ss.onclick NEQ "">
-	    	<script type="text/javascript">
+	    	<script>
 	    	zArrDeferredFunctions.push(function(){
 	    		$("###arguments.ss.name#_name#i#").bind("click", function(){ 
 		    		#arguments.ss.onclick#
@@ -1243,7 +1243,7 @@ writeoutput(application.zcore.functions.zInput_Checkbox(ts));
 		    id="#arguments.ss.name#_namelabel#arguments.ss.query.currentrow+arrayLen(arrV)#">#htmleditformat(curL)#</label>
 		    #arguments.ss.separator#
 	    	<cfif arguments.ss.onclick NEQ "">
-		    	<script type="text/javascript">
+		    	<script>
 		    	zArrDeferredFunctions.push(function(){
 		    		$("###arguments.ss.name#_name#arguments.ss.query.currentrow+arrayLen(arrV)#").bind("click", function(){ 
 		    			#arguments.ss.onclick# });
@@ -1308,7 +1308,7 @@ zInput_submit(ts);
 		out='<a href="##"';// #request.zos.zFormCurrentName#";
 	}
 	if(application.zcore.functions.zso(request.zos, "zFormCurrentName") NEQ ""){
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */ zArrDeferredFunctions.push(function(){zFormData["#request.zos.zFormCurrentName#"].submitContainer="#arguments.ss.name#_container";});/* ]]> */</script>');
+		writeoutput('<script>/* <![CDATA[ */ zArrDeferredFunctions.push(function(){zFormData["#request.zos.zFormCurrentName#"].submitContainer="#arguments.ss.name#_container";});/* ]]> */</script>');
     }
 	if(arguments.ss.name EQ ""){
 		application.zcore.template.fail("arguments.ss.name is required.");
@@ -1435,7 +1435,7 @@ zInput_Text(ts);
 		arguments.ss.onkeyup&=local.tempJS;
 		arguments.ss.onchange&=local.tempJS;
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[*/');
+		writeoutput('<script>/* <![CDATA[*/');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="text";');
@@ -1524,7 +1524,7 @@ zInput_hidden(ts);
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onchange&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[  */');
+		writeoutput('<script>/* <![CDATA[  */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="hidden";');
@@ -1624,7 +1624,7 @@ zInput_file(ts); --->
 		}
 	}
 	if(application.zcore.functions.zso(request.zos, "zFormCurrentName") NEQ ""){
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */
+		writeoutput('<script>/* <![CDATA[ */
 		zFormData["#request.zos.zFormCurrentName#"].contentType="multipart/form-data";zFormData["#request.zos.zFormCurrentName#"].method="post";document.#request.zos.zFormCurrentName#.enctype="multipart/form-data";document.#request.zos.zFormCurrentName#.method="post";
 		/* ]]> */</script>');
     }
@@ -1636,7 +1636,7 @@ zInput_file(ts); --->
 		arguments.ss.onkeyup&=local.tempJS;
 		arguments.ss.onchange&=local.tempJS;
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */');
+		writeoutput('<script>/* <![CDATA[ */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="file";');
@@ -1748,7 +1748,7 @@ zInput_file(ts); --->
             <cfset request.zos.zInputExpandingBoxScript=true>
             <cfset request.zInputExpandingBoxCount=0> 
         </cfif>
-        	<script type="text/javascript">/* <![CDATA[ */
+        	<script>/* <![CDATA[ */
 			zExpArrMenuBox.push("#arguments.ss.name#");
 			/* ]]> */
 			</script>
@@ -1776,7 +1776,7 @@ zInput_file(ts); --->
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onchange&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[ 1 */');
+		writeoutput('<script>/* <![CDATA[ 1 */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="zExpandingBox";');
@@ -1952,7 +1952,7 @@ zInput_file(ts); --->
         </table></div></span>
         <cfscript>
 	
-        echo('<script type="text/javascript">
+        echo('<script>
 		/* <![CDATA[ */
 		zArrDeferredFunctions.push(function(){
 	 	zExpMenuBoxData[#request.zInputExpandingBoxCount#]=new Object();
@@ -2042,7 +2042,7 @@ zForm(ts);
 		request.zos.zForm.formStruct[arguments.ss.name]=structnew();
 		request.zos.zForm.formStruct[arguments.ss.name].arrFields=arraynew(1);
 		</cfscript>
-<script type="text/javascript">
+<script>
 /* <![CDATA[ */
 zArrDeferredFunctions.push(function(){
 zFormData["#arguments.ss.name#"]=new Object();
@@ -2070,7 +2070,7 @@ zFormData["#arguments.ss.name#"].contentType="application/x-www-form-urlencoded"
     <form name="#arguments.ss.name#" id="#arguments.ss.name#" class="#arguments.ss.class#" action="#htmleditformat(arguments.ss.action)#" method="post" onsubmit="return zFormSubmit('#arguments.ss.name#',false,false);" <cfif arguments.ss.enctype NEQ "">enctype="#arguments.ss.enctype#"</cfif>>
     <div id="zFormMessage_#arguments.ss.name#" class="zFormMessageBox"></div>
 </cffunction>
-<cffunction name="zEndForm" localmode="modern" returntype="any" output="true"></form><!--- <script type="text/javascript">/* <![CDATA[ */zDisableTextSelection(document.getElementById("#request.zos.zFormCurrentName#"));/* ]]> */</script> --->
+<cffunction name="zEndForm" localmode="modern" returntype="any" output="true"></form><!--- <script>/* <![CDATA[ */zDisableTextSelection(document.getElementById("#request.zos.zFormCurrentName#"));/* ]]> */</script> --->
 	<cfscript>
 	request.zos.zFormCurrentName="";
 	</cfscript>
@@ -2161,7 +2161,7 @@ this is not accurate
 	var zOffset=0;
 	var arrOut9=arraynew(1);
 	var out2="";
-	var ds1='<script type="text/javascript">/* <![CDATA[ */document.write("';
+	var ds1='<script>/* <![CDATA[ */document.write("';
 	var ds2=' ';
 	var ds3='';
 	var ds4='");/* ]]> */</script>';
@@ -2238,7 +2238,7 @@ this is not accurate
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onchange&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */');
+		writeoutput('<script>/* <![CDATA[ */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="text";');
@@ -2329,7 +2329,7 @@ this is not accurate
 
  Type: <input type="text" name="#arguments.ss.name#_zmanual" id="#arguments.ss.name#_zmanual" onkeyup="#arguments.ss.onkeyup# 
 	zFormOnEnter(event,this);" onkeypress="#arguments.ss.onkeypress#" value="" style="width:40%; #arguments.ss.inputstyle#" #inputstyles# />
-    <script type="text/javascript">
+    <script>
 	/* <![CDATA[ */
 	document.getElementById("#arguments.ss.name#_zmanual").setAttribute("autocomplete","off");
 	/* ]]> */
@@ -2364,7 +2364,7 @@ arrayprepend(arrOut,out2);
 
 <cfsavecontent variable="out2">
 <cfif arguments.ss.selectedOnTop EQ false><div id="zInputOptionBlock#zOffset#" style="width:100%;"></div></cfif>
-<script type="text/javascript">/* <![CDATA[ */
+<script>/* <![CDATA[ */
 zArrDeferredFunctions.push(function(){
 <cfif arraylen(arrSelected) NEQ 0>zValues[#zOffset#]=["#arraytolist(arrSelected,'","')#"];zValues[#zOffset+1#]=["#arraytolist(arrSelectedV,'","')#"];;zValues[#zOffset+2#]=["#arraytolist(arrSelectedLink,'","')#"];</cfif>
 zValues[#zOffset+3#]=new Array("#arraytolist(arrOut9,'","')#");
@@ -2414,7 +2414,7 @@ zInputSetSelectedOptions(false,#zOffset#);
 	StructAppend(arguments.ss, ts, false);
 	
 	arrO=arraynew(1);
-	arrayAppend(arrO,"<script type=""text/javascript"">/* <![CDATA[ */
+	arrayAppend(arrO,"<script>/* <![CDATA[ */
 zArrDeferredFunctions.push(function(){");
 	arrayAppend(arrO,"var zd1=document.getElementById('#arguments.ss.labelId#');var zd2=new Function('zMotiontoggleSlide(""#arguments.ss.id#"",""#arguments.ss.labelId#"",""#arguments.ss.hideOnCloseId#"");');");
 	if(arguments.ss.click){
@@ -2446,7 +2446,7 @@ zArrDeferredFunctions.push(function(){");
 	}
 	rs.zValue=request.zValueOffset+1;
 	savecontent variable="rs.output"{
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */
+		writeoutput('<script>/* <![CDATA[ */
 		zArrDeferredFunctions.push(function(){');
 		for(i=1;i LTE arguments.count;i++){
 			request.zValueOffset++;
@@ -2490,7 +2490,7 @@ zExpOption(ts);
 <div id="zExpOption#arguments.ss.zExpOptionValue#_container" style="z-index:#arguments.ss.zExpOptionValue+10#;width:#arguments.ss.width#px;" class="zExpOption_container"><div class="zExpOption_button" id="zExpOption#arguments.ss.zExpOptionValue#_button"><a  href="##" onclick="return false;" style=" width:#arguments.ss.width-12#px; "></a></div><div id="zExpOption#arguments.ss.zExpOptionValue#_contents" class="zExpOption_contents" style=" <cfif arguments.ss.height NEQ 0>height:#arguments.ss.height-22#px; </cfif> width:#arguments.ss.width-12#px; white-space:nowrap;<cfif arguments.ss.disableOverflow>overflow:visible !important;</cfif> ">#arguments.ss.contents#</div>
         <!--- <div id="zExpUpdateBar#arguments.ss.zExpOptionValue#" style=" width:#arguments.ss.width-12#px; " class="zExpOption_update">Click to Update</div> ---></div>
 	
-    <script type="text/javascript">/* <![CDATA[ 12 */
+    <script>/* <![CDATA[ 12 */
 zArrDeferredFunctions.push(function(){
 	zExpOptionLabelHTML[#arguments.ss.zExpOptionValue#]="<span class=\"zExpOption_label\">#jsstringformat(arguments.ss.label)#<\/span>";zExpOptionSetValue(#arguments.ss.zExpOptionValue#,"#jsstringformat(arguments.ss.value)#","<cfif arguments.ss.zMotionOpen>none<cfelse>inline</cfif>");
 });
@@ -2596,7 +2596,7 @@ zInputSlider(ts);
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		arguments.ss.onchange&="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);";
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[ */');
+		writeoutput('<script>/* <![CDATA[ */');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="text";');
@@ -2704,7 +2704,7 @@ zInputSlider(ts);
 </div>
 <div id="zInputSliderBottomBox_#zValue#" style="display:none;width:100%; float:left; clear:both;"></div>
 <cfscript>
-echo('<script type="text/javascript">
+echo('<script>
 /* <![CDATA[ */
 zArrDeferredFunctions.push(function(){
 zValues[#zValue#]="#JSStringFormat(arraytolist(arrLabels,chr(10)))#".split("\n");
@@ -3566,7 +3566,7 @@ echo('
             <td><textarea name="form_comments" cols="50" rows="5"></textarea></td>
         </tr>
     </table>
-    <script type="text/javascript">
+    <script>
     var tFN32=document.getElementById("zInqTheF"+"ormNames#local.tick#");tFN34="ne";tFN32.style.display="no"+tFN34;
     tFN32.parentNode.removeChild(tFN32);
     </script>
@@ -3586,7 +3586,7 @@ echo('
 		local.fieldId=arraylen(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields);
 		local.tempJS="zFormOnChange('#request.zos.zFormCurrentName#',#local.fieldId#);"; 
 		arrayappend(request.zos.zForm.formStruct[request.zos.zFormCurrentName].arrFields,ds);
-		writeoutput('<script type="text/javascript">/* <![CDATA[*/');
+		writeoutput('<script>/* <![CDATA[*/');
 		writeoutput('zArrDeferredFunctions.push(function(){');
 		writeoutput('var ts=new Object();');
 		writeoutput('ts.type="text";');
@@ -3754,7 +3754,7 @@ application.zcore.functions.zEmailTokenAutocompleteInput(ts);
 			</select>
 			<div id="#ss.field#_error" class="z-float" style="display:none; color:##900;"></div>
 		</div>
-		<script type="text/javascript">
+		<script>
 		zArrDeferredFunctions.push( function() {
 			zEmailTokenInput.setupTokenizeInput("#ss.field#");
 		});

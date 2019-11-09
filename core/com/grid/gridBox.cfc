@@ -78,7 +78,7 @@
 </div>
 <cfsavecontent variable="out">
 </cfsavecontent>
-<script type="text/javascript">
+<script>
 //var gridBoxFormTemplate="#jsstringformat(out)#";
 var gridBoxTabIndex=#tabCom.getIndex()#;
 </script>

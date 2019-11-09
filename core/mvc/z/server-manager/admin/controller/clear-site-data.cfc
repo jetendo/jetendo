@@ -80,7 +80,7 @@
 		}
 	}
 	</cfscript>
-	<script type="text/javascript">
+	<script>
 	zArrDeferredFunctions.push(function(){
 		$(".clearCheckAll").on("click", function(){
 			$("##clearDataForm input").each(function(){

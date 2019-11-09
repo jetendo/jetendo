@@ -295,7 +295,7 @@
 	qGroup=db.execute("qGroup", "", 10000, "query", false);
 	</cfscript>
 	<cfsavecontent variable="output">
-		<script type="text/javascript">
+		<script>
 		function validateOptionType13(postObj, arrError){ 
 			if(postObj.addressfield == '' || postObj.cityfield=='' || postObj.statefield=='' || postObj.zipfield==''){
 				arrError.push('Address, City, State and Zip are required fields.');
