@@ -155,7 +155,7 @@
 	</tr>  
 	<tr>
 		<th style="vertical-align:top; width:140px;">CSS Color:</th>
-		<td  #application.zcore.status.getErrorStyle(Request.zsid, "styleset_color_value", "table-error","")#><input name="styleset_color_value" onkeyup="tryColorSet(this.value);" type="text" size="10" maxlength="10" value="#htmleditformat(form.styleset_color_value)#"><br> 
+		<td  #application.zcore.status.getErrorStyle(Request.zsid, "styleset_color_value", "table-error","")#><input name="styleset_color_value" onkeyup="tryColorSet(this.value);" type="text" size="30" maxlength="30" value="#htmleditformat(form.styleset_color_value)#"><br> 
 			You can use any valid css hex, rgb, or rgba value. rgba is used for transparent colors.
 		</td>
 	</tr>   

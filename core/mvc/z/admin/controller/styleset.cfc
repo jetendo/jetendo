@@ -8,7 +8,181 @@
 	}
 	request.zos.stylesetPath="/zupload/styleset/";
 	request.zos.stylesetUploadPath="zupload/styleset/";
+	request.zos.arrStylesetColorField=["styleset_aside_background_color", "styleset_aside_heading_1_color", "styleset_aside_heading_2_color", "styleset_aside_heading_3_color", "styleset_aside_link_color", "styleset_aside_link_hover_color", "styleset_aside_menu_link_background_color", "styleset_aside_menu_link_hover_background_color", "styleset_aside_menu_link_hover_text_color", "styleset_aside_menu_link_text_color", "styleset_aside_text_color", "styleset_background_color", "styleset_body_background_color", "styleset_body_heading_1_color", "styleset_body_heading_2_color", "styleset_body_heading_3_color", "styleset_body_link_color", "styleset_body_link_hover_color", "styleset_body_text_color", "styleset_bullet_color", "styleset_button_2_background_color", "styleset_button_2_text_color", "styleset_button_background_color", "styleset_button_text_color", "styleset_contain_background_color", "styleset_contain_border_color", "styleset_contain_bullet_color", "styleset_contain_button_2_background_color", "styleset_contain_button_2_text_color", "styleset_contain_button_background_color", "styleset_contain_button_text_color", "styleset_contain_heading_1_color", "styleset_contain_heading_2_color", "styleset_contain_heading_3_color", "styleset_contain_link_color", "styleset_contain_link_hover_color", "styleset_contain_text_color", "styleset_form_field_background_color", "styleset_form_field_border_color", "styleset_form_field_text_color", "styleset_form_submit_background_color", "styleset_form_submit_text_color", "styleset_heading_1_color", "styleset_heading_2_color", "styleset_heading_3_color", "styleset_image_border_color", "styleset_inner_container_background_color", "styleset_inner_container_border_bottom_color", "styleset_inner_container_border_left_color", "styleset_inner_container_border_right_color", "styleset_inner_container_border_top_color", "styleset_inner_container_button_2_background_color", "styleset_inner_container_button_2_text_color", "styleset_inner_container_button_background_color", "styleset_inner_container_button_text_color", "styleset_inner_container_heading_1_color", "styleset_inner_container_heading_2_color", "styleset_inner_container_heading_3_color", "styleset_inner_container_text_color", "styleset_link_color", "styleset_link_hover_color", "styleset_nocontain_border_color", "styleset_nocontain_bullet_color", "styleset_nocontain_button_background_color", "styleset_nocontain_button_text_color", "styleset_nocontain_link_color", "styleset_nocontain_link_hover_color", "styleset_nocontain_panel_bullet_color", "styleset_nocontain_panel_button_2_background_color", "styleset_nocontain_panel_button_2_text_color", "styleset_nocontain_panel_button_background_color", "styleset_nocontain_panel_button_text_color", "styleset_nocontain_panel_heading_1_color", "styleset_nocontain_panel_heading_2_color", "styleset_nocontain_panel_heading_3_color", "styleset_nocontain_panel_link_color", "styleset_nocontain_panel_link_hover_color", "styleset_nocontain_panel_text_color", "styleset_nocontain_text_color", "styleset_panel_image_border_color", "styleset_panel_overlay_background_color", "styleset_panel_overlay_text_color", "styleset_row_background_color", "styleset_slideshow_circle_active_color", "styleset_slideshow_circle_inactive_color", "styleset_slideshow_nextprevious_button_color", "styleset_text_color"];
+	request.zos.arrStylesetFontField=["styleset_aside_heading_1_font", "styleset_aside_heading_2_font", "styleset_aside_heading_3_font", "styleset_aside_text_font", "styleset_body_heading_1_font", "styleset_body_heading_2_font", "styleset_body_heading_3_font", "styleset_button_font", "styleset_contain_button_font", "styleset_contain_heading_1_font", "styleset_contain_heading_2_font", "styleset_contain_heading_3_font", "styleset_contain_text_font", "styleset_heading_1_font", "styleset_heading_2_font", "styleset_heading_3_font", "styleset_inner_container_button_font", "styleset_inner_container_heading_1_font", "styleset_inner_container_heading_2_font", "styleset_inner_container_heading_3_font", "styleset_inner_container_text_font", "styleset_nocontain_button_font", "styleset_nocontain_panel_button_font", "styleset_nocontain_panel_heading_1_font", "styleset_nocontain_panel_heading_2_font", "styleset_nocontain_panel_heading_3_font", "styleset_nocontain_panel_text_font", "styleset_nocontain_text_font", "styleset_panel_overlay_font", "styleset_text_font"];
+	</cfscript>
+</cffunction> 
 
+<!--- todo: get stylesetUsage to allow remapping those too --->
+<cffunction name="getStylesetUsage" localmode="modern" access="public">
+	<cfscript>
+	</cfscript>
+</cffunction>
+
+<cffunction name="getFontColorUsage" localmode="modern" access="public">
+	<cfargument name="qSet" type="query" required="yes">
+	<cfscript>
+	ts={
+		colorUsage:{},
+		fontUsage:{}
+	};
+	for(row in qSet){
+		for(field in request.zos.arrStylesetFontField){
+			if(arguments.qSet[field] NEQ "" and arguments.qSet[field] NEQ "0"){
+				ts.fontUsage[arguments.qSet[field]]=true;
+			}
+		}
+		for(field in request.zos.arrStylesetColorField){
+			if(arguments.qSet[field] NEQ "" and arguments.qSet[field] NEQ "0"){
+				ts.colorUsage[arguments.qSet[field]]=true;
+			}
+		}
+	}
+	return ts;
+	</cfscript>
+</cffunction>
+
+<cffunction name="remapFontColorSave" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	var db=request.zos.queryObject;
+	form.styleset_id=application.zcore.functions.zso(form, "styleset_id", true);
+	form.remap=application.zcore.functions.zso(form, "remap", true, 2); // 0 is fonts, 1 is colors, 2 is both
+
+	db.sql="SELECT * FROM #db.table("styleset", "zgraph")# 
+	WHERE ";
+	if(form.styleset_id NEQ 0){
+		db.sql&=" styleset_id = #db.param(form.styleset_id)# and ";
+	}
+	db.sql&=" site_id in (#db.param(0)#, #db.param(request.zos.globals.id)#) and 
+	styleset_deleted=#db.param(0)#";
+	qSet=db.execute("qSet");
+
+	colorRemap={};
+	for(i=1;i<=form.colorCount;i++){
+		if(form["newColor#i#"] NEQ ""){
+			colorRemap[form["colorId#i#"]]=form["newColor#i#"];
+		}
+	}
+	fontRemap={};
+	for(i=1;i<=form.fontCount;i++){
+		if(form["newFont#i#"] NEQ ""){
+			fontRemap[form["fontId#i#"]]=form["newFont#i#"];
+		}
+	}
+	updateCount=0;
+	for(row in qSet){
+		ts={
+			table:"styleset",
+			datasource:"zgraph",
+			struct:{
+				styleset_id:row.styleset_id,
+				site_id:row.site_id,
+				styleset_updated_datetime:request.zos.mysqlnow,
+				styleset_deleted:0
+			}
+		};
+		update=false;
+		for(field in request.zos.arrStylesetFontField){
+			if(arguments.qSet[field] NEQ "" and arguments.qSet[field] NEQ "0"){
+				if(structkeyexists(fontRemap, arguments.qSet[field])){
+					ts.struct[field]=fontRemap[arguments.qSet[field]];
+					update=true;
+				}
+			}
+		}
+		for(field in request.zos.arrStylesetColorField){
+			if(arguments.qSet[field] NEQ "" and arguments.qSet[field] NEQ "0"){
+				if(structkeyexists(colorRemap, arguments.qSet[field])){
+					ts.struct[field]=colorRemap[arguments.qSet[field]];
+					update=true;
+				}
+			}
+		}
+		if(update){
+			updateCount++;
+			application.zcore.functions.zUpdate(ts);
+
+		}
+	}
+	application.zcore.status.setStatus(request.zsid, "#updateCount# stylesets updated.");
+	application.zcore.functions.zRedirect("/z/admin/styleset/index?zsid=#request.zsid#");
+	</cfscript>
+</cffunction>
+
+<!--- /z/admin/styleset/remapFontColor --->
+<cffunction name="remapFontColor" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	var db=request.zos.queryObject;
+	form.styleset_id=application.zcore.functions.zso(form, "styleset_id", true, 3);
+	form.remap=application.zcore.functions.zso(form, "remap", true, 2); // 0 is fonts, 1 is colors, 2 is both
+
+	db.sql="SELECT * FROM #db.table("styleset", "zgraph")# 
+	WHERE ";
+	if(form.styleset_id NEQ 0){
+		db.sql&=" styleset_id = #db.param(form.styleset_id)# and ";
+	}
+	db.sql&=" site_id in (#db.param(0)#, #db.param(request.zos.globals.id)#) and 
+	styleset_deleted=#db.param(0)#";
+	qSet=db.execute("qSet");
+	fontColorUsage=getFontColorUsage(qSet);
+	writedump(fontColorUsage);
+
+	echo('
+	<form action="/z/admin/styleset/remapFontColorSave" method="post">
+	<input type="hidden" name="styleset_id" value="#form.styleset_id#">
+	<input type="hidden" name="remap" value="#form.remap#">
+	<table style=" border-spacing:0px;" class="table-list">');
+	if(form.remap EQ 2 or form.remap EQ 1){
+		echo('<tr><td colspan="2"><h2>Remap Colors</h2></td></tr>');
+		echo('<tr><td>Original Color</td><td>New Color</td></tr>');
+		colorCount=0;
+		for(color in fontColorUsage.colorUsage){
+			colorCount++;
+			if(structkeyexists(application.zcore.stylesetColorLookup, color)){
+				oldColor=application.zcore.stylesetColorLookup[color];
+			}else{
+				oldColor={ styleset_color_name: "Color Missing", styleset_color_value: "##FFFFFF" };
+			}
+			form["newColor#colorCount#"]="";
+			echo('<tr>
+				<td><div style="width:25px; height:25px; background-color:#oldColor.styleset_color_value#; margin-right:10px; float:left;"></div> #oldColor.styleset_color_name#
+					<input type="hidden" name="colorId#colorCount#" value="#color#">
+				</td>
+				<td>');
+			colorSelectField("newColor#colorCount#");
+			echo('</td>
+			</tr>');
+		}
+	}
+	if(form.remap EQ 2 or form.remap EQ 0){
+		fontCount=0;
+		for(font in fontColorUsage.fontUsage){
+			fontCount++;
+			if(structkeyexists(application.zcore.webfontLookup, font)){
+				oldFont=application.zcore.webfontLookup[font];
+			}else{
+				oldFont={ webfont_name: "Font Missing" };
+			}
+			form["newfont#fontCount#"]="";
+			echo('<tr><td colspan="2"><h2>Remap Fonts</h2></td></tr>');
+			echo('<tr><td>Original Font</td><td>New Font</td></tr>');
+			echo('<tr><td>
+				#oldFont.webfont_name#
+					<input type="hidden" name="fontId#fontCount#" value="#font#">
+			</td><td>');
+			fontSelectField("newfont#fontCount#");
+			echo('</td></tr>');
+		}
+	}
+
+	echo('
+		<tr><td colspan="2"><input type="submit" name="submit1" value="Submit"> <input type="button" name="cancel1" value="Cancel" onclick="window.location.href=''/z/admin/styleset/index'';"></td></tr>
+	</table>
+	<input type="hidden" name="colorCount" value="#colorCount#">
+	<input type="hidden" name="fontCount" value="#fontCount#">
+	</form>');
 	</cfscript>
 </cffunction>
 
@@ -81,7 +255,7 @@
 	}
     form.site_id=request.zos.globals.id;
 	if(application.zcore.user.checkServerAccess()){
-		if(form.global EQ 1){
+		if(form.preset EQ 1){
 			form.site_id=0;
     	}
     }
@@ -102,8 +276,7 @@
 			styleset_deleted=#db.param(0)# ";
 			db.execute("qUpdate");
 		}
-	}
-    // TODO: upload images
+	} 
     if(form.site_id EQ 0){
     	request.uploadPath=request.zos.globals.serverprivatehomedir&request.zos.stylesetUploadPath;
 	}else{
@@ -241,9 +414,9 @@
 	<table style="width:100%; border-spacing:0px;" class="table-list"> 
 	<cfif application.zcore.user.checkServerAccess()>
 		<tr>
-			<th style="vertical-align:top; width:140px;">Global</th>
-			<td><input type="radio" name="global" id="global1" value="1" <cfif form.site_id EQ "0">checked="checked"</cfif>> <label for="global1">Yes</label> 
-				<input type="radio" name="global" id="global0" value="0" <cfif form.site_id NEQ "0">checked="checked"</cfif>> <label for="global0">No</label> 
+			<th style="vertical-align:top; width:140px;">Preset</th>
+			<td><input type="radio" name="preset" id="preset1" value="1" <cfif form.site_id EQ "0">checked="checked"</cfif>> <label for="preset1">Yes</label> 
+				<input type="radio" name="preset" id="preset0" value="0" <cfif form.site_id NEQ "0">checked="checked"</cfif>> <label for="preset0">No</label> 
 				
 			</td>
 		</tr>
@@ -267,7 +440,7 @@
 		ts.queryLabelField = "styleset_group_name";
 		ts.queryParseLabelVars = false; // set to true if you want to have a custom formated label
 		ts.queryParseValueVars = false; // set to true if you want to have a custom formated value
-		ts.queryValueField = "styleset_color_id"; 
+		ts.queryValueField = "styleset_group_id"; 
 		application.zcore.functions.zInputSelectBox(ts);
 		</cfscript>
 		</td>
@@ -690,16 +863,188 @@
 </cffunction>
 
 
+<cffunction name="copy" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	var db=request.zos.queryObject;
+	form.copyPreset=application.zcore.functions.zso(form, "copyPreset", true); 
+	form.styleset_id=application.zcore.functions.zso(form, "styleset_id"); 
+	db.sql="SELECT * FROM #db.table("styleset", "zgraph")# 
+	WHERE styleset_deleted=#db.param(0)# and 
+	site_id IN (#db.param(0)#, #db.param(request.zos.globals.id)#) and 
+	styleset_id=#db.param(form.styleset_id)# 
+	ORDER BY styleset_name ASC ";
+	qSet=db.execute("qSet");
+	if(qSet.recordcount EQ 0){
+		application.zcore.status.setStatus(request.zsid, "Invalid styleset id", form, true);
+		application.zcore.functions.zRedirect("/z/admin/styleset/index?zsid=#request.zsid#");	
+	}
+	application.zcore.functions.zQueryToStruct(qSet); 
+
+	if(structkeyexists(form, "confirm")){
+		if(form.newname EQ ""){
+			application.zcore.status.setStatus(request.zsid, "New Name is required", form, true);
+			application.zcore.functions.zRedirect("/z/admin/styleset/copy?zsid=#request.zsid#");
+		}
+		form.newsiteid=application.zcore.functions.zso(form, "newsiteid", true);
+		if(form.newsiteid EQ 0){
+			form.newsiteid=request.zos.globals.id;
+		}
+		// copy any files
+	    if(qSet.site_id EQ 0){
+	    	uploadPath=request.zos.globals.serverprivatehomedir&request.zos.stylesetUploadPath;
+			form.site_id=0;
+		}else{
+	    	uploadPath=request.zos.globals.privatehomedir&request.zos.stylesetUploadPath;
+	    	if(form.newsiteid NEQ request.zos.globals.id){
+	    		form.styleset_group_id=0;
+	    		// TODO: interface to reassign the colors
+	    		// TODO: interface to reassign the fonts
+	    	}
+			form.site_id=form.newsiteid;
+	    }
+		if(form.copyPreset EQ 1){
+			form.site_id=form.newsiteid;
+			form.styleset_group_id=0;
+		}
+	    application.zcore.functions.zCreateDirectory(uploadPath);
+	    currentUploadPath=application.zcore.functions.zvar("privatehomedir", form.newsiteid)&request.zos.stylesetUploadPath;
+
+	    arrFile=[
+		    "styleset_bullet_image",
+		    "styleset_row_background_image",
+		    "styleset_row_background_mobile_image",
+		    "styleset_contain_bullet_image",
+		    "styleset_nocontain_bullet_image",
+		    "styleset_nocontain_panel_bullet_image",
+		    "styleset_slideshow_next_button_image",
+		    "styleset_slideshow_previous_button_image"
+	    ];
+	    for(fieldName in arrFile){
+		    filePath=uploadPath&qSet[fieldName];
+			path=application.zcore.functions.zCopyFile(filePath, currentUploadPath, false);
+			form[fieldName]=getfilefrompath(path);
+		}
+		form.styleset_name=form.newname;
+		form.styleset_deleted=0;
+		form.styleset_updated_datetime=request.zos.mysqlnow; 
+		inputStruct = StructNew();
+		inputStruct.table = "styleset";
+		inputStruct.struct=form;
+		inputStruct.datasource="zgraph";
+		form.styleset_id = application.zcore.functions.zInsert(inputStruct);
+
+		application.zcore.status.setStatus(request.zsid, "Styleset Copied");
+		application.zcore.functions.zRedirect("/z/admin/styleset/index?zsid=#request.zsid#");
+	}else{
+		echo('
+		<form action="/z/admin/styleset/copy" method="get">
+		<h2>Copy Styleset: #form.styleset_name#</h2>
+		<p>Site: (optional)</p>
+		<p>');
+		application.zcore.functions.zGetSiteSelect('newsiteid');
+		echo('</p>
+		<p>New Name: *</p>
+			<input type="hidden" name="copyPreset" value="#form.copyPreset#">
+			<input type="hidden" name="styleset_id" value="#form.styleset_id#">
+			<input type="hidden" name="confirm" value="1">
+		<p><input type="text" name="newname" value="" required="required"></p>
+		<p><input type="submit" name="submit1" value="Copy"> 
+			<input type="button" name="cancel1" value="Cancel" onclick="window.location.href=''/z/admin/styleset/index'';"></p>
+		</form>
+		');
+	}
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="copyPreset" localmode="modern" access="remote" roles="administrator">
+	<cfscript>
+	init();
+	var db=request.zos.queryObject; 
+	currentMethod=form.method;
+	form.styleset_group_id=application.zcore.functions.zso(form, "styleset_group_id", true);
+	db.sql="SELECT * FROM 
+	#db.table("styleset", "zgraph")# 
+	LEFT JOIN 
+	#db.table("styleset_group", "zgraph")# ON 
+	styleset.site_id = styleset_group.site_id and 
+	styleset.styleset_group_id = styleset_group.styleset_group_id and 
+	styleset_group_deleted=#db.param(0)# 
+	WHERE styleset_deleted=#db.param(0)# and ";
+	if(form.styleset_group_id NEQ 0){
+		db.sql&=" styleset.styleset_group_id =#db.param(form.styleset_group_id)# and ";
+	}
+	db.sql&="
+	styleset.site_id =  #db.param(0)# 
+	ORDER BY styleset_name ASC ";
+	qSet=db.execute("qSet");
+	</cfscript>
+    
+    <p><a href="/z/admin/styleset-group/index">Groups</a> | <a href="/z/admin/styleset-color/index">Colors</a> | <a href="/z/admin/styleset/index">Stylesets</a></p>
+    <div class="z-float">
+		<h2 style="display:inline-block; padding-right:10px;">Copy Styleset From Preset</h2>
+	</div> 
+ 	<p>Filter by Preset Group: 
+ 	<cfscript>
+
+	db.sql="select * FROM #db.table("styleset_group", "zgraph")# 
+	WHERE 
+	site_id =#db.param(request.zos.globals.id)# and 
+	styleset_group_deleted=#db.param(0)# 
+	ORDER BY styleset_group_name ASC";
+	qGroup=db.execute("qGroup", "", 10000, "query", false);  
+
+	ts = StructNew();
+	ts.name = "styleset_group_id"; 
+	ts.size = 1; // more for multiple select 
+	ts.query = qGroup;
+	ts.queryLabelField = "styleset_group_name";
+	ts.onchange="window.location.href='/z/admin/styleset/copyPreset?styleset_group_id='+this.options[this.selectedIndex].value;";
+	ts.queryParseLabelVars = false; // set to true if you want to have a custom formated label
+	ts.queryParseValueVars = false; // set to true if you want to have a custom formated value
+	ts.queryValueField = "styleset_group_id"; 
+	application.zcore.functions.zInputSelectBox(ts);
+	</cfscript></p>
+	<table style="width:100%; border-spacing:0px;" class="table-list"> 
+		<tr>
+			<th>Name</th> 
+			<th>Group</th> 
+			<th>Admin</th>
+		</tr>
+		<cfloop query="qSet"> 
+			<tr>
+				<td>#qSet.styleset_name#</td> 
+				<td>#qSet.styleset_group_name#</td> 
+				<td>
+					<a href="/z/admin/styleset/copy?styleset_id=#qSet.styleset_id#&copyPreset=1" class="z-manager-search-button">Copy</a> 
+				</td>
+			</tr> 
+		</cfloop>
+    </table> 
+</cffunction>
+
 <cffunction name="index" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	init();
 	var db=request.zos.queryObject; 
 	currentMethod=form.method;
-	db.sql="SELECT * FROM #db.table("styleset", "zgraph")# 
-	WHERE styleset_deleted=#db.param(0)# and 
-	site_id IN (#db.param(0)#, #db.param(request.zos.globals.id)#)
+	form.styleset_group_id=application.zcore.functions.zso(form, "styleset_group_id", true);
+	db.sql="SELECT * FROM 
+	#db.table("styleset", "zgraph")# 
+	LEFT JOIN 
+	#db.table("styleset_group", "zgraph")# ON 
+	styleset.site_id = styleset_group.site_id and 
+	styleset.styleset_group_id = styleset_group.styleset_group_id and 
+	styleset_group_deleted=#db.param(0)# 
+	WHERE styleset_deleted=#db.param(0)# and ";
+	if(form.styleset_group_id NEQ 0){
+		db.sql&=" styleset.styleset_group_id =#db.param(form.styleset_group_id)# and ";
+	}
+	db.sql&="
+	styleset.site_id =  #db.param(request.zos.globals.id)# 
 	ORDER BY styleset_name ASC ";
-	qSet=db.execute("qSet");
+	qSet=db.execute("qSet"); 
 	if(qSet.recordcount EQ 0 and currentMethod EQ "edit"){
 		application.zcore.functions.zRedirect("/z/admin/styleset/index");	
 	}
@@ -710,17 +1055,43 @@
     <div class="z-float">
 		<h2 style="display:inline-block; padding-right:10px;">Stylesets</h2>
 		<a href="/z/admin/styleset/add" class="z-manager-search-button">Add</a>
+		<a href="/z/admin/styleset/copyPreset" class="z-manager-search-button">Copy Preset</a>
 	</div> 
+ 	
+ 	<p>Filter by Preset Group: 
+ 	<cfscript>
+
+	db.sql="select * FROM #db.table("styleset_group", "zgraph")# 
+	WHERE 
+	site_id =#db.param(request.zos.globals.id)# and 
+	styleset_group_deleted=#db.param(0)# 
+	ORDER BY styleset_group_name ASC";
+	qGroup=db.execute("qGroup", "", 10000, "query", false);  
+
+	ts = StructNew();
+	ts.name = "styleset_group_id"; 
+	ts.size = 1; // more for multiple select 
+	ts.query = qGroup;
+	ts.queryLabelField = "styleset_group_name";
+	ts.onchange="window.location.href='/z/admin/styleset/copyPreset?styleset_group_id='+this.options[this.selectedIndex].value;";
+	ts.queryParseLabelVars = false; // set to true if you want to have a custom formated label
+	ts.queryParseValueVars = false; // set to true if you want to have a custom formated value
+	ts.queryValueField = "styleset_group_id"; 
+	application.zcore.functions.zInputSelectBox(ts);
+	</cfscript></p>
 	<table style="width:100%; border-spacing:0px;" class="table-list"> 
 		<tr>
 			<th>Name</th> 
+			<th>Group</th> 
 			<th>Admin</th>
 		</tr>
 		<cfloop query="qSet"> 
 			<tr>
 				<td>#qSet.styleset_name#</td> 
+				<td>#qSet.styleset_group_name#</td>  
 				<td>
-					<a href="/z/admin/styleset/view?styleset_id=#qSet.styleset_id#" target="_blank" class="z-manager-search-button">Preview</a> 
+					<a href="/z/admin/styleset/view?styleset_id=#qSet.styleset_id#" target="_blank" class="z-manager-search-button">View</a> 
+					<a href="/z/admin/styleset/copy?styleset_id=#qSet.styleset_id#" class="z-manager-search-button">Copy</a> 
 					<a href="/z/admin/styleset/edit?styleset_id=#qSet.styleset_id#" class="z-manager-search-button">Edit</a> 
 					<a href="/z/admin/styleset/delete?styleset_id=#qSet.styleset_id#" class="z-manager-search-button">Delete</a></td>
 			</tr> 

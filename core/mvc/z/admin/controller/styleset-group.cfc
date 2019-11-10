@@ -69,7 +69,7 @@
 		}
 	} 
 	if(application.zcore.user.checkServerAccess()){
-		if(form.global EQ 1){
+		if(form.preset EQ 1){
 			form.site_id=0;
 		}else{
     		form.site_id=request.zos.globals.id;
@@ -146,9 +146,9 @@
 	</tr>   
 	<cfif application.zcore.user.checkServerAccess()>
 		<tr>
-			<td style="vertical-align:top; width:140px;">Global</td>
-			<td><input type="radio" name="global" id="global1" value="1" <cfif form.site_id EQ "0">checked="checked"</cfif>> <label for="global1">Yes</label> 
-				<input type="radio" name="global" id="global0" value="0" <cfif form.site_id NEQ "0">checked="checked"</cfif>> <label for="global0">No</label> 
+			<td style="vertical-align:top; width:140px;">Preset</td>
+			<td><input type="radio" name="preset" id="preset1" value="1" <cfif form.site_id EQ "0">checked="checked"</cfif>> <label for="preset1">Yes</label> 
+				<input type="radio" name="preset" id="preset0" value="0" <cfif form.site_id NEQ "0">checked="checked"</cfif>> <label for="preset0">No</label> 
 				
 			</td>
 		</tr>
