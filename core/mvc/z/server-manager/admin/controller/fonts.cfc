@@ -67,7 +67,7 @@
 	if(currentMethod EQ "insert"){
 		form.webfont_id = application.zcore.functions.zInsert(inputStruct);
 		if(form.webfont_id EQ false){
-			application.zcore.status.setStatus(Request.zsid, "Fail to add webfont",form,true);
+			application.zcore.status.setStatus(Request.zsid, "Failed to add webfont",form,true);
 			application.zcore.functions.zRedirect("/z/server-manager/admin/fonts/add?zsid=#Request.zsid#");
 		} 
 	}else{
@@ -76,7 +76,7 @@
 		webfont_deleted=#db.param(0)#";
 		qwebfont=db.execute("qwebfont");  
 		if(application.zcore.functions.zUpdate(inputStruct) EQ false){
-			application.zcore.status.setStatus(Request.zsid, "Fail to update webfont",form,true);
+			application.zcore.status.setStatus(Request.zsid, "Failed to update webfont",form,true);
 			application.zcore.functions.zRedirect("/z/server-manager/admin/fonts/edit?sid=#form.webfont_id#&zsid=#Request.zsid#");
 		}
 	} 
@@ -204,7 +204,7 @@
 	</cfscript>
     
     <div class="z-float">
-		<h2 style="display:inline-block;">Webfonts</h2>
+		<h2 style="display:inline-block; padding-right:10px;">Webfonts</h2>
 		<a href="/z/server-manager/admin/fonts/add" class="z-manager-search-button">Add</a>
 	</div>
 	<cfscript>
