@@ -5,10 +5,11 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	request.zPageDebugDisabled=true;
+	form.heading=application.zcore.functions.zso(form, "heading", false, "Upcoming Events");
 	request.zos.functions.zIncludeZOSForms();
 	request.zos.functions.zrequirejquery();
 	echo('<div class="zEventWidget-container">
-		<h2>Upcoming Events</h2>');
+		<h2>#form.heading#</h2>');
 	request.zos.template.setPlainTemplate();
 	form.startdate=now();
 	form.enddate=dateadd("d", 365, now()); 
@@ -28,8 +29,7 @@
 			db.sql="select * from #db.table("event_calendar")# WHERE 
 			event_calendar_id =#db.param(form.calendarids)# and 
 			event_calendar_deleted=#db.param(0)# and 
-			site_id = #db.param(request.zos.globals.id)# and 
-			event_calendar_user_group_idlist=#db.param('')# ";
+			site_id = #db.param(request.zos.globals.id)# ";
 			qCalendar=db.execute("qCalendar");
 			for(row in qCalendar){
 				link=eventCom.getCalendarURL(row);
@@ -38,8 +38,7 @@
 			db.sql="select group_concat(event_calendar_id SEPARATOR #db.param(',')#) idlist from #db.table("event_calendar")# WHERE 
 			event_calendar_id =#db.param(form.calendarids)# and 
 			event_calendar_deleted=#db.param(0)# and 
-			site_id = #db.param(request.zos.globals.id)# and 
-			event_calendar_user_group_idlist=#db.param('')# ";
+			site_id = #db.param(request.zos.globals.id)# ";
 			qCalendar=db.execute("qCalendar");
 			if(qCalendar.recordcount and qCalendar.idlist NEQ ""){
 				link="/z/event/event-calendar/index?calendarids=#qCalendar.idlist#";
@@ -54,8 +53,7 @@
 		event_calendar_deleted=#db.param(0)# and  
 		event_category_deleted=#db.param(0)# and 
 		event_calendar.site_id=event_category.site_id and 
-		event_category.site_id = #db.param(request.zos.globals.id)# and 
-		event_calendar_user_group_idlist=#db.param('')# ";
+		event_category.site_id = #db.param(request.zos.globals.id)# ";
 		qCategory=db.execute("qCategory");
 		for(row in qCategory){
 			link=eventCom.getCategoryURL(row);

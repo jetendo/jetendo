@@ -5,6 +5,7 @@
 	db=request.zos.queryObject;
 	application.zcore.adminSecurityFilter.requireFeatureAccess("Event Widgets");
 	application.zcore.functions.zSetPageHelpId("10.7");
+	form.heading=request.zos.functions.zso(form, 'heading');
 	form.calendarids=request.zos.functions.zso(form, 'calendarids');
 	form.categories=request.zos.functions.zso(form, 'categories'); 
 	if(form.categories NEQ ""){
@@ -14,6 +15,9 @@
 	form.width=request.zos.functions.zso(form, 'width', true, 300);
 	form.height=request.zos.functions.zso(form, 'height', true, 500);
 	link='#request.zos.globals.domain#/z/event/event-widget?limit=#form.limit#';
+	if(form.heading NEQ ""){
+		link&="&amp;heading=#urlencodedformat(form.heading)#";
+	}
 	if(form.calendarids NEQ ""){
 		link&="&amp;calendarids=#form.calendarids#";
 	}
@@ -35,8 +39,7 @@
 		<cfscript>
 		db.sql="select * from #db.table("event_calendar", request.zos.zcoreDatasource)# WHERE 
 		site_id = #db.param(request.zos.globals.id)# and 
-		event_calendar_deleted=#db.param(0)# and 
-		event_calendar_user_group_idlist=#db.param('')#  
+		event_calendar_deleted=#db.param(0)#  
 		ORDER BY event_calendar_name ASC";
 		qCalendar=db.execute("qCalendar"); 
 		ts = StructNew();
@@ -66,8 +69,7 @@
 		event_calendar.site_id = event_category.site_id and 
 		event_category_deleted=#db.param(0)# and 
 		event_calendar.site_id = #db.param(request.zos.globals.id)# and 
-		event_calendar_deleted=#db.param(0)# and 
-		event_calendar_user_group_idlist=#db.param('')#  
+		event_calendar_deleted=#db.param(0)# 
 		ORDER BY event_calendar_name ASC, event_category_name ASC";
 		qCalendar=db.execute("qCalendar"); 
 		ts = StructNew();
@@ -92,6 +94,13 @@
 	</div>
 	<div style="width:70%; float:left;">
 	<input type="text" name="limit" value="#form.limit#" /> (A number 20 or less)
+	</div>
+	</div>
+	<div style="width:100%; margin-bottom:10px; float:left;">
+	<div style="width:90px; float:left;">
+	Heading: 
+	</div>
+	<div style="width:70%; float:left;"><input type="text" name="heading" value="Upcoming Events" />
 	</div>
 	</div>
 
