@@ -155,16 +155,16 @@
 	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
-<cffunction name="loadStylesetData" localmode="modern" access="public">
+<cffunction name="loadStylesetColorData" localmode="modern" access="public">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not structkeyexists(request.zos, "qStyleset")){
-		db.sql="select * FROM #db.table("styleset", "zgraph")# 
+	if(not structkeyexists(request.zos, "qStylesetColor")){
+		db.sql="select * FROM #db.table("styleset_color", "zgraph")# 
 		WHERE 
 		site_id=#db.param(request.zos.globals.id)# and 
-		styleset_deleted=#db.param(0)# 
-		ORDER BY styleset_name ASC";
-		request.zos.qstyleset=db.execute("qstyleset", "", 10000, "query", false); 
+		styleset_color_deleted=#db.param(0)# 
+		ORDER BY styleset_color_name ASC";
+		request.zos.qStylesetColor=db.execute("qStylesetColor", "", 10000, "query", false); 
 	}
 	</cfscript>
 </cffunction>
@@ -180,15 +180,15 @@
 	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
-	loadStylesetData();
+	loadStylesetColorData();
 	savecontent variable="out"{
 		selectStruct = StructNew();
 		selectStruct.name = '#arguments.prefixString##arguments.row["feature_field_id"]#';
-		selectStruct.query = request.zos.qStyleset;
+		selectStruct.query = request.zos.qStylesetColor;
 		selectStruct.hideSelect=false;
 		// selectStruct.inlineStyle="max-width:200px;"; 
-		selectStruct.queryLabelField = "styleset_name";
-		selectStruct.queryValueField = "styleset_id";
+		selectStruct.queryLabelField = "styleset_color_name";
+		selectStruct.queryValueField = "styleset_color_id";
 		selectStruct.multiple=false;
 		application.zcore.functions.zInputSelectBox(selectStruct); 
 	}
@@ -210,14 +210,8 @@
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
-
-	loadStylesetData();
-	styleset=application.zcore.functions.zGetStylesetById(arguments.value);
-	if(structcount(styleset)){
-		return styleset.styleset_name;
-	}else{
-		return "";
-	}
+	loadStylesetColorData();
+	return application.zcore.functions.zGetStylesetColorById(arguments.value, "");
 	</cfscript>
 </cffunction>
 
@@ -254,7 +248,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Styleset';
+	return 'Styleset Color';
 	</cfscript>
 </cffunction>
 
@@ -293,8 +287,8 @@
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="feature_field_type_id" value="24" onClick="setType(24);" <cfif value EQ "24">checked="checked"</cfif>/>
-	Styleset<br />
+	<input type="radio" name="feature_field_type_id" value="29" onClick="setType(29);" <cfif value EQ "29">checked="checked"</cfif>/>
+	Styleset Color<br />
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction> 

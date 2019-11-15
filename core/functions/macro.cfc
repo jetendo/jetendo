@@ -1714,6 +1714,25 @@ if(rs.success){
 	</cfscript>
 </cffunction>
 
+<!--- application.zcore.functions.zGetStylesetColorById(styleset_color_id, defaultColorValue); --->
+<cffunction name="zGetStylesetColorById" localmode="modern" access="public">
+	<cfargument name="styleset_color_id" type="string" required="yes">
+	<cfargument name="defaultColorValue" type="string" required="yes">
+	<cfscript>
+	if(structkeyexists(application.zcore.stylesetColorLookup, arguments.styleset_color_id)){
+		color=application.zcore.stylesetColorLookup[arguments.styleset_color_id];
+		if(color.styleset_color_value contains "rgb" or color.styleset_color_value contains "##"){
+			return color.styleset_color_value;
+		}else{
+			return "##"&color.styleset_color_value;
+		}
+	}else{
+		return arguments.defaultColorValue;
+	}
+	</cfscript>
+</cffunction>
+
+
 <!--- application.zcore.functions.zGetWebfontById(webfont_id); --->
 <cffunction name="zGetWebfontById" localmode="modern" access="public">
 	<cfargument name="webfont_id" type="string" required="yes">
@@ -1725,5 +1744,19 @@ if(rs.success){
 	}
 	</cfscript>
 </cffunction>
+
+
+<!--- application.zcore.functions.zGetStylesetById(styleset_id); --->
+<cffunction name="zGetStylesetById" localmode="modern" access="public">
+	<cfargument name="styleset_id" type="string" required="yes">
+	<cfscript>
+	if(structkeyexists(application.zcore.stylesetLookup, arguments.styleset_id)){
+		return application.zcore.stylesetLookup[arguments.styleset_id];
+	}else{
+		return {};
+	}
+	</cfscript>
+</cffunction>
+
 </cfoutput>
 </cfcomponent>

@@ -1760,6 +1760,7 @@ formString = userCom.loginForm(inputStruct);
 	<cfargument name="user_group_name" type="string" required="no" default="user">
 	<cfargument name="excludeParentSite" type="boolean" required="no" default="#false#">
 	<cfargument name="includeContactId" type="boolean" required="no" default="#false#">
+	<cfargument name="sortByLastName" type="boolean" required="no" default="#false#">
 	<cfscript> 
 	db=request.zos.queryObject;
 	userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
@@ -1814,8 +1815,12 @@ formString = userCom.loginForm(inputStruct);
 	}
  	db.sql&=") and 
 	user_deleted = #db.param(0)# and   
-	user_server_administrator=#db.param(0)# 
-	ORDER BY user_first_name ASC, user_last_name ASC, member_company ASC";
+	user_server_administrator=#db.param(0)# ";
+	if(arguments.sortByLastName){
+		db.sql&=" ORDER BY user_last_name ASC, user_first_name ASC,  member_company ASC";
+	}else{
+		db.sql&=" ORDER BY user_first_name ASC, user_last_name ASC, member_company ASC";
+	}
 	qUser=db.execute("qUser");  
 	return qUser;
 	</cfscript>

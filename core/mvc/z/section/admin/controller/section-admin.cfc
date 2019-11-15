@@ -329,6 +329,11 @@ need to connect page-admin, section-link and more to this
 </cffunction>
 
 <cffunction name="nav" localmode="modern" access="public" roles="member"> 
+	<p>
+		<a href="/z/admin/styleset-color/index">Styleset Groups</a> | 
+		<a href="/z/admin/styleset/index">Stylesets</a> | 
+		<a href="/z/admin/styleset-color/index">Styleset Colors</a> 
+	</p>
 	<p> 
 		<a href="/z/admin/layout-breakpoint/index">Breakpoints</a> | 
 		<a href="/z/admin/layout-global/index">Global Layout Settings</a> | 

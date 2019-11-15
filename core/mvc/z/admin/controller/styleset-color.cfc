@@ -31,7 +31,7 @@
 		site_id in (#db.param(0)#, #db.param(request.zos.globals.id)#) and 
 		styleset_color_deleted=#db.param(0)# ";
 		db.execute("qDelete");    
-		updateColorCache();
+		updateCache(application.zcore);
 		application.zcore.status.setStatus(request.zsid, "Color deleted.");
 		application.zcore.functions.zRedirect('/z/admin/styleset-color/index?zsid='&request.zsid);
 		</cfscript>
@@ -101,7 +101,7 @@
 			application.zcore.functions.zRedirect("/z/admin/styleset-color/edit?sid=#form.styleset_color_id#&zsid=#Request.zsid#");
 		}
 	} 
-	updateColorCache();
+	updateCache(application.zcore);
 	application.zcore.status.setStatus(Request.zsid, "Color saved");
 	application.zcore.functions.zRedirect('/z/admin/styleset-color/index?zsid='&request.zsid);
 	</cfscript>
@@ -187,8 +187,8 @@
 	</form>
 </cffunction>
 
-
-<cffunction name="updateColorCache" localmode="modern" access="public">
+<cffunction name="updateCache" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="select * FROM 
@@ -200,7 +200,7 @@
 	for(color in qColor){
 		styleset_colorLookup[color.styleset_color_id]=color;
 	}
-	application.zcore.stylesetColorLookup=styleset_colorLookup;
+	arguments.ss.stylesetColorLookup=styleset_colorLookup;
 	</cfscript>
 </cffunction>
 

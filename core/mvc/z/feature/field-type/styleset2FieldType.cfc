@@ -1,3 +1,4 @@
+<!--- not used currently --->
 <cfcomponent implements="zcorerootmapping.interface.fieldType">
 <cfoutput>
 <cffunction name="init" localmode="modern" access="public" output="no">
@@ -12,7 +13,7 @@
 <cffunction name="getDebugValue" localmode="modern" access="public" returntype="string" output="no">
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfscript>
-	return "Example Text";
+	return "";
 	</cfscript>
 </cffunction>
 
@@ -36,8 +37,20 @@
 	<cfargument name="fieldIndex" type="string" required="yes">
 	<cfargument name="sortDirection" type="string" required="yes">
 	<cfscript>
-	return "sVal"&arguments.fieldIndex&" "&arguments.sortDirection;
+	return "";
 	</cfscript>
+</cffunction>
+
+<cffunction name="hasCustomDelete" localmode="modern" access="public" returntype="boolean" output="no">
+	<cfscript>
+	return false;
+	</cfscript>
+</cffunction>
+
+<cffunction name="onDelete" localmode="modern" access="public">
+	<cfargument name="value" type="string" required="yes">
+	<cfargument name="site_id" type="string" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
 </cffunction>
 
 <cffunction name="isCopyable" localmode="modern" access="public" returntype="boolean" output="no">
@@ -48,7 +61,7 @@
 
 <cffunction name="isSearchable" localmode="modern" access="public" returntype="boolean" output="no">
 	<cfscript>
-	return true;
+	return false;
 	</cfscript>
 </cffunction>
 
@@ -60,7 +73,7 @@
 	<cfargument name="value" type="string" required="yes">
 	<cfargument name="onChangeJavascript" type="string" required="yes">
 	<cfscript>
-	return '<input type="text" name="#arguments.prefixString##arguments.row["feature_field_id"]#" onkeyup="#arguments.onChangeJavascript#" onpaste="#arguments.onChangeJavascript#" id="#arguments.prefixString##arguments.row["feature_field_id"]#" value="#htmleditformat(arguments.value)#" style="width:95%; min-width:95%;" />';
+	return '';
 	</cfscript>
 </cffunction>
 
@@ -72,7 +85,7 @@
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="searchStruct" type="struct" required="yes">
 	<cfscript>
-	return arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]];
+	return '';
 	</cfscript>
 </cffunction>
 
@@ -82,18 +95,12 @@
 	<cfargument name="prefixString" type="string" required="yes"> 
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
-	<cfscript>
-	ts={
-		type="LIKE",
-		field: arguments.row["feature_field_variable_name"],
-		arrValue:[]
-	};
-	if(arguments.value NEQ ""){
-		arrayAppend(ts.arrValue, '%'&arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]]&'%');
-	}
+	<cfscript> 
+	ts={};
 	return ts;
 	</cfscript>
 </cffunction>
+
 
 <cffunction name="getSearchSQL" localmode="modern" access="public">
 	<cfargument name="row" type="struct" required="yes">
@@ -104,10 +111,7 @@
 	<cfargument name="databaseDateField" type="string" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
-	var db=request.zos.queryObject;
-	if(arguments.value NEQ ""){
-		return arguments.databaseField&' like '&db.trustedSQL("'%"&application.zcore.functions.zescape(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])&"%'");
-	}
+	var db=request.zos.queryObject; 
 	return '';
 	</cfscript>
 </cffunction>
@@ -117,11 +121,43 @@
 	<cfargument name="fieldValue" type="string" required="yes"> 
 	<cfargument name="searchValue" type="string" required="yes">
 	<cfscript>
-	if(arguments.searchValue NEQ "" and arguments.fieldValue DOES NOT CONTAIN arguments.searchValue){
-		return false;
-	}
+	// if(arguments.searchValue NEQ "" and arguments.fieldValue DOES NOT CONTAIN arguments.searchValue){
+	// 	return false;
+	// }
 	return true;
 	</cfscript>
+</cffunction>
+
+<cffunction name="getFormField" localmode="modern" access="public">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
+	<cfargument name="prefixString" type="string" required="yes">
+	<cfargument name="dataStruct" type="struct" required="yes">  
+	<cfscript>
+	ts={
+		name:arguments.prefixString&arguments.row["feature_field_id"],
+		selector:arguments.typeStruct.styleset_selector,
+		editFonts:arguments.typeStruct.styleset_fonts,
+		editSizes:arguments.typeStruct.styleset_sizes,
+		editSpaces:arguments.typeStruct.styleset_spaces,
+		editColors:arguments.typeStruct.styleset_colors,
+		editBreakpoints:arguments.typeStruct.styleset_breakpoints,
+		externalStylesheet:arguments.typeStruct.styleset_external_stylesheet
+	};
+	styleEditorCom=createObject("component", "zcorerootmapping.mvc.z.misc.controller.styleEditor");
+	return { label: true, hidden: false, value: styleEditorCom.zStylesetEditor(ts)};  
+	</cfscript>
+</cffunction>
+
+<cffunction name="getFormFieldCode" localmode="modern" access="public">
+	<cfargument name="row" type="struct" required="yes">
+	<cfargument name="typeStruct" type="struct" required="yes">
+	<cfargument name="fieldName" type="string" required="yes">
+	<cfscript>
+	return ' 
+	styleset not implemented for generator yet
+	';
+	</cfscript> 
 </cffunction>
 
 <cffunction name="validateFormField" localmode="modern" access="public">
@@ -143,80 +179,16 @@
 	</cfscript>
 </cffunction>
 
-<cffunction name="hasCustomDelete" localmode="modern" access="public" returntype="boolean" output="no">
-	<cfscript>
-	return false;
-	</cfscript>
-</cffunction>
-
-<cffunction name="onDelete" localmode="modern" access="public">
-	<cfargument name="value" type="string" required="yes">
-	<cfargument name="site_id" type="string" required="yes">
-	<cfargument name="typeStruct" type="struct" required="yes">
-</cffunction>
-
-<cffunction name="loadStylesetData" localmode="modern" access="public">
-	<cfscript>
-	db=request.zos.queryObject;
-	if(not structkeyexists(request.zos, "qStyleset")){
-		db.sql="select * FROM #db.table("styleset", "zgraph")# 
-		WHERE 
-		site_id=#db.param(request.zos.globals.id)# and 
-		styleset_deleted=#db.param(0)# 
-		ORDER BY styleset_name ASC";
-		request.zos.qstyleset=db.execute("qstyleset", "", 10000, "query", false); 
-	}
-	</cfscript>
-</cffunction>
-
-
-<cffunction name="getFormField" localmode="modern" access="public">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="typeStruct" type="struct" required="yes">
-	<cfargument name="prefixString" type="string" required="yes">
-	<cfargument name="dataStruct" type="struct" required="yes">  
-	<cfscript>
-	required="";
-	if(arguments.row.feature_field_required EQ 1){
-		required="required";
-	}
-	loadStylesetData();
-	savecontent variable="out"{
-		selectStruct = StructNew();
-		selectStruct.name = '#arguments.prefixString##arguments.row["feature_field_id"]#';
-		selectStruct.query = request.zos.qStyleset;
-		selectStruct.hideSelect=false;
-		// selectStruct.inlineStyle="max-width:200px;"; 
-		selectStruct.queryLabelField = "styleset_name";
-		selectStruct.queryValueField = "styleset_id";
-		selectStruct.multiple=false;
-		application.zcore.functions.zInputSelectBox(selectStruct); 
-	}
-	return { label: true, hidden: false, value:out};  
-	</cfscript>
-</cffunction>
- 
-<cffunction name="getFormFieldCode" localmode="modern" access="public">
-	<cfargument name="row" type="struct" required="yes">
-	<cfargument name="typeStruct" type="struct" required="yes">
-	<cfargument name="fieldName" type="string" required="yes">
-	<cfscript>
-	return '<select name="#arguments.fieldName#"><option>-- Select --</option></select>';
-	</cfscript>
-</cffunction>
 
 <cffunction name="getListValue" localmode="modern" access="public">
 	<cfargument name="dataStruct" type="struct" required="yes">
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="value" type="string" required="yes">
 	<cfscript>
-
-	loadStylesetData();
-	styleset=application.zcore.functions.zGetStylesetById(arguments.value);
-	if(structcount(styleset)){
-		return styleset.styleset_name;
+	if(structkeyexists(arguments.dataStruct, arguments.value)){
+		return arguments.dataStruct[arguments.value];
 	}else{
-		return "";
+		return arguments.value; 
 	}
 	</cfscript>
 </cffunction>
@@ -254,7 +226,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Styleset';
+	return 'Style Editor';
 	</cfscript>
 </cffunction>
 
@@ -270,14 +242,31 @@
 		application.zcore.status.setStatus(Request.zsid, false,arguments.dataStruct,true);
 		return { success:false};
 	}
-	arguments.dataStruct["feature_field_type_json"]="{}";
-	return { success:true, typeStruct: {}};
+	ts={
+		styleset_selector:application.zcore.functions.zso(arguments.dataStruct, 'styleset_selector'),
+		styleset_fonts:application.zcore.functions.zso(arguments.dataStruct, 'styleset_fonts'),
+		styleset_sizes:application.zcore.functions.zso(arguments.dataStruct, 'styleset_sizes'),
+		styleset_spaces:application.zcore.functions.zso(arguments.dataStruct, 'styleset_spaces'),
+		styleset_colors:application.zcore.functions.zso(arguments.dataStruct, 'styleset_colors'),
+		styleset_breakpoints:application.zcore.functions.zso(arguments.dataStruct, 'styleset_breakpoints'),
+		styleset_external_stylesheet:application.zcore.functions.zso(arguments.dataStruct, 'styleset_external_stylesheet')
+	};
+	arguments.dataStruct["feature_field_type_json"]=serializeJson(ts);
+	return { success:true, typeStruct: ts};
 	</cfscript>
 </cffunction>
 		
+
 <cffunction name="getFieldStruct" output="no" localmode="modern" access="public"> 
 	<cfscript>
-	ts={ 
+	ts={
+		styleset_selector:"",
+		styleset_fonts:"",
+		styleset_sizes:"",
+		styleset_spaces:"",
+		styleset_colors:"",
+		styleset_breakpoints:"",
+		styleset_external_stylesheet:""
 	};
 	return ts;
 	</cfscript>
@@ -291,10 +280,59 @@
 	var db=request.zos.queryObject;
 	var output="";
 	var value=application.zcore.functions.zso(arguments.dataStruct, arguments.fieldName);
+	db.sql="select * from #db.table("feature_field", request.zos.zcoreDatasource)# WHERE 
+	feature_id=#db.param(form.feature_id)# and 
+	feature_field_deleted = #db.param(0)# and
+	feature_schema_id = #db.param(arguments.dataStruct["feature_schema_id"])# 	
+	ORDER BY feature_field_variable_name ASC";
+	qSchema=db.execute("qSchema");
 	</cfscript>
 	<cfsavecontent variable="output">
-	<input type="radio" name="feature_field_type_id" value="24" onClick="setType(24);" <cfif value EQ "24">checked="checked"</cfif>/>
-	Styleset<br />
+		<script>
+		function validateFieldType24(postObj, arrError){  
+		}
+		</script>
+	<input type="radio" name="feature_field_type_id" value="24" onClick="setType(24);" <cfif value EQ 24>checked="checked"</cfif>/>
+	#this.getTypeName()#<br />
+	<div id="typeFields24" style="display:none;padding-left:30px;">  
+		<table class="table-list">
+		<tr>
+			<td>
+		CSS Selector Prefix: </td><td>
+			<input type="text" name="styleset_selector" value="#htmleditformat(application.zcore.functions.zso(form, "styleset_selector"))#"><br><br>
+			The selector must be a valid CSS selector which be prefixed to all the styles generated.
+		</td></tr> 
+		<tr><td>
+		Fonts: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_fonts")#
+		</td></tr>
+		<tr>
+			<td>
+		Sizes: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_sizes")#
+		</td></tr>
+		<tr>
+			<td>
+		Spaces: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_spaces")#
+		</td></tr>
+		<tr>
+			<td>
+		Colors: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_colors")#
+		</td></tr>
+		<tr>
+			<td>
+		Breakpoints: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_breakpoints")#
+		</td></tr> 
+		<tr>
+			<td>
+		External Stylesheet: </td><td>
+			#application.zcore.functions.zInput_Boolean("styleset_external_stylesheet")#
+		</td></tr> 
+		</table>
+	</div>
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction> 
@@ -302,7 +340,7 @@
 <cffunction name="getCreateTableColumnSQL" localmode="modern" access="public">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfscript>
-	return "`#arguments.fieldName#` text NOT NULL";
+	return "`#arguments.fieldName#` varchar(80) NOT NULL";
 	</cfscript>
 </cffunction>
 </cfoutput>

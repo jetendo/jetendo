@@ -20,7 +20,7 @@
 		WHERE webfont_id = #db.param(form.webfont_id)# and 
 		webfont_deleted=#db.param(0)# ";
 		db.execute("qDelete");    
-		updateFontCache();
+		updateCache(application.zcore);
 		application.zcore.status.setStatus(request.zsid, "Webfont deleted.");
 		application.zcore.functions.zRedirect('/z/server-manager/admin/fonts/index?zsid='&request.zsid);
 		</cfscript>
@@ -80,7 +80,7 @@
 			application.zcore.functions.zRedirect("/z/server-manager/admin/fonts/edit?sid=#form.webfont_id#&zsid=#Request.zsid#");
 		}
 	} 
-	updateFontCache();
+	updateCache(application.zcore);
 	application.zcore.status.setStatus(Request.zsid, "Webfont saved");
 	application.zcore.functions.zRedirect('/z/server-manager/admin/fonts/index?zsid='&request.zsid);
 	</cfscript>
@@ -173,7 +173,8 @@
 	</form>
 </cffunction>
 
-<cffunction name="updateFontCache" localmode="modern" access="public">
+<cffunction name="updateCache" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
 	db.sql="select * FROM 
@@ -184,7 +185,7 @@
 	for(font in qwebfont){
 		webfontLookup[font.webfont_id]=font;
 	}
-	application.zcore.webfontLookup=webfontLookup;
+	arguments.ss.webfontLookup=webfontLookup;
 	</cfscript>
 </cffunction>
 

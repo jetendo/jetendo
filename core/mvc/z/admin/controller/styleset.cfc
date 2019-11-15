@@ -8,8 +8,16 @@
 	}
 	request.zos.stylesetPath="/zupload/styleset/";
 	request.zos.stylesetUploadPath="zupload/styleset/";
-	request.zos.arrStylesetColorField=["styleset_aside_background_color", "styleset_aside_heading_1_color", "styleset_aside_heading_2_color", "styleset_aside_heading_3_color", "styleset_aside_link_color", "styleset_aside_link_hover_color", "styleset_aside_menu_link_background_color", "styleset_aside_menu_link_hover_background_color", "styleset_aside_menu_link_hover_text_color", "styleset_aside_menu_link_text_color", "styleset_aside_text_color", "styleset_background_color", "styleset_body_background_color", "styleset_body_heading_1_color", "styleset_body_heading_2_color", "styleset_body_heading_3_color", "styleset_body_link_color", "styleset_body_link_hover_color", "styleset_body_text_color", "styleset_bullet_color", "styleset_button_2_background_color", "styleset_button_2_text_color", "styleset_button_background_color", "styleset_button_text_color", "styleset_contain_background_color", "styleset_contain_border_color", "styleset_contain_bullet_color", "styleset_contain_button_2_background_color", "styleset_contain_button_2_text_color", "styleset_contain_button_background_color", "styleset_contain_button_text_color", "styleset_contain_heading_1_color", "styleset_contain_heading_2_color", "styleset_contain_heading_3_color", "styleset_contain_link_color", "styleset_contain_link_hover_color", "styleset_contain_text_color", "styleset_form_field_background_color", "styleset_form_field_border_color", "styleset_form_field_text_color", "styleset_form_submit_background_color", "styleset_form_submit_text_color", "styleset_heading_1_color", "styleset_heading_2_color", "styleset_heading_3_color", "styleset_image_border_color", "styleset_inner_container_background_color", "styleset_inner_container_border_bottom_color", "styleset_inner_container_border_left_color", "styleset_inner_container_border_right_color", "styleset_inner_container_border_top_color", "styleset_inner_container_button_2_background_color", "styleset_inner_container_button_2_text_color", "styleset_inner_container_button_background_color", "styleset_inner_container_button_text_color", "styleset_inner_container_heading_1_color", "styleset_inner_container_heading_2_color", "styleset_inner_container_heading_3_color", "styleset_inner_container_text_color", "styleset_link_color", "styleset_link_hover_color", "styleset_nocontain_border_color", "styleset_nocontain_bullet_color", "styleset_nocontain_button_background_color", "styleset_nocontain_button_text_color", "styleset_nocontain_link_color", "styleset_nocontain_link_hover_color", "styleset_nocontain_panel_bullet_color", "styleset_nocontain_panel_button_2_background_color", "styleset_nocontain_panel_button_2_text_color", "styleset_nocontain_panel_button_background_color", "styleset_nocontain_panel_button_text_color", "styleset_nocontain_panel_heading_1_color", "styleset_nocontain_panel_heading_2_color", "styleset_nocontain_panel_heading_3_color", "styleset_nocontain_panel_link_color", "styleset_nocontain_panel_link_hover_color", "styleset_nocontain_panel_text_color", "styleset_nocontain_text_color", "styleset_panel_image_border_color", "styleset_panel_overlay_background_color", "styleset_panel_overlay_text_color", "styleset_row_background_color", "styleset_slideshow_circle_active_color", "styleset_slideshow_circle_inactive_color", "styleset_slideshow_nextprevious_button_color", "styleset_text_color"];
+	request.zos.arrStylesetColorField=["styleset_aside_background_color", "styleset_aside_heading_1_color", "styleset_aside_heading_2_color", "styleset_aside_heading_3_color", "styleset_aside_link_color", "styleset_aside_link_hover_color", "styleset_aside_menu_link_background_color", "styleset_aside_menu_link_hover_background_color", "styleset_aside_menu_link_hover_text_color", "styleset_aside_menu_link_text_color", "styleset_aside_text_color", "styleset_background_color", "styleset_body_background_color", "styleset_body_heading_1_color", "styleset_body_heading_2_color", "styleset_body_heading_3_color", "styleset_body_link_color", "styleset_body_link_hover_color", "styleset_body_text_color", "styleset_bullet_color", "styleset_button_2_background_color", "styleset_button_2_text_color", "styleset_button_background_color", "styleset_button_text_color", "styleset_contain_background_color", "styleset_contain_border_color", "styleset_contain_bullet_color", "styleset_contain_button_2_background_color", "styleset_contain_button_2_text_color", "styleset_contain_button_background_color", "styleset_contain_button_text_color", "styleset_contain_heading_1_color", "styleset_contain_heading_2_color", "styleset_contain_heading_3_color", "styleset_contain_link_color", "styleset_contain_link_hover_color", "styleset_contain_text_color", "styleset_form_field_background_color", "styleset_form_field_border_color", "styleset_form_field_text_color", "styleset_form_submit_background_color", "styleset_form_submit_text_color", "styleset_heading_1_color", "styleset_heading_2_color", "styleset_heading_3_color", "styleset_image_border_color", "styleset_inner_container_background_color", "styleset_inner_container_border_color", "styleset_inner_container_button_2_background_color", "styleset_inner_container_button_2_text_color", "styleset_inner_container_button_background_color", "styleset_inner_container_button_text_color", "styleset_inner_container_heading_1_color", "styleset_inner_container_heading_2_color", "styleset_inner_container_heading_3_color", "styleset_inner_container_text_color", "styleset_link_color", "styleset_link_hover_color", "styleset_nocontain_border_color", "styleset_nocontain_bullet_color", "styleset_nocontain_button_background_color", "styleset_nocontain_button_text_color", "styleset_nocontain_link_color", "styleset_nocontain_link_hover_color", "styleset_nocontain_panel_bullet_color", "styleset_nocontain_panel_button_2_background_color", "styleset_nocontain_panel_button_2_text_color", "styleset_nocontain_panel_button_background_color", "styleset_nocontain_panel_button_text_color", "styleset_nocontain_panel_heading_1_color", "styleset_nocontain_panel_heading_2_color", "styleset_nocontain_panel_heading_3_color", "styleset_nocontain_panel_link_color", "styleset_nocontain_panel_link_hover_color", "styleset_nocontain_panel_text_color", "styleset_nocontain_text_color", "styleset_panel_image_border_color", "styleset_panel_overlay_background_color", "styleset_panel_overlay_text_color", "styleset_row_background_color", "styleset_slideshow_circle_active_color", "styleset_slideshow_circle_inactive_color", "styleset_slideshow_nextprevious_button_color", "styleset_text_color"];
 	request.zos.arrStylesetFontField=["styleset_aside_heading_1_font", "styleset_aside_heading_2_font", "styleset_aside_heading_3_font", "styleset_aside_text_font", "styleset_body_heading_1_font", "styleset_body_heading_2_font", "styleset_body_heading_3_font", "styleset_button_font", "styleset_contain_button_font", "styleset_contain_heading_1_font", "styleset_contain_heading_2_font", "styleset_contain_heading_3_font", "styleset_contain_text_font", "styleset_heading_1_font", "styleset_heading_2_font", "styleset_heading_3_font", "styleset_inner_container_button_font", "styleset_inner_container_heading_1_font", "styleset_inner_container_heading_2_font", "styleset_inner_container_heading_3_font", "styleset_inner_container_text_font", "styleset_nocontain_button_font", "styleset_nocontain_panel_button_font", "styleset_nocontain_panel_heading_1_font", "styleset_nocontain_panel_heading_2_font", "styleset_nocontain_panel_heading_3_font", "styleset_nocontain_panel_text_font", "styleset_nocontain_text_font", "styleset_panel_overlay_font", "styleset_text_font"];
+	request.zos.stylesetColorFieldStruct={};
+	request.zos.stylesetFontFieldStruct={};
+	for(field in request.zos.arrStylesetColorField){
+		request.zos.stylesetColorFieldStruct[field]=true;
+	}
+	for(field in request.zos.arrStylesetFontField){
+		request.zos.stylesetFontFieldStruct[field]=true;
+	}
 	</cfscript>
 </cffunction> 
 
@@ -42,12 +50,31 @@
 	</cfscript>
 </cffunction>
 
+<cffunction name="updateCache" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="select * FROM 
+	#db.table("styleset", "zgraph")# 
+	WHERE styleset_deleted=#db.param(0)# and 
+	site_id <> #db.param(-1)# ";
+	qStyle=db.execute("qStyle"); 
+	stylesetLookup={};
+	for(style in qStyle){
+		stylesetLookup[style.styleset_id]=style;
+	}
+	arguments.ss.stylesetLookup=stylesetLookup;
+	</cfscript>
+</cffunction>
+
 <cffunction name="remapFontColorSave" localmode="modern" access="remote" roles="administrator">
 	<cfscript>
 	init();
 	var db=request.zos.queryObject;
 	form.styleset_id=application.zcore.functions.zso(form, "styleset_id", true);
 	form.remap=application.zcore.functions.zso(form, "remap", true, 2); // 0 is fonts, 1 is colors, 2 is both
+
+	// TODO: select * from feature_field WHERE feature_type_id=#db.param(color)#
 
 	db.sql="SELECT * FROM #db.table("styleset", "zgraph")# 
 	WHERE ";
@@ -105,6 +132,7 @@
 
 		}
 	}
+	updateCache(application.zcore);
 	application.zcore.status.setStatus(request.zsid, "#updateCount# stylesets updated.");
 	application.zcore.functions.zRedirect("/z/admin/styleset/index?zsid=#request.zsid#");
 	</cfscript>
@@ -127,7 +155,7 @@
 	styleset_deleted=#db.param(0)#";
 	qSet=db.execute("qSet");
 	fontColorUsage=getFontColorUsage(qSet);
-	writedump(fontColorUsage);
+
 
 	echo('
 	<form action="/z/admin/styleset/remapFontColorSave" method="post">
@@ -215,8 +243,8 @@
 		WHERE styleset_id = #db.param(form.styleset_id)# and 
 		site_id = #db.param(qSet.site_id)# and 
 		styleset_deleted=#db.param(0)# ";
-		db.execute("qDelete");    
-		updateStylesetCache();
+		db.execute("qDelete"); 
+		updateCache(application.zcore);
 		application.zcore.status.setStatus(request.zsid, "Styleset deleted.");
 		application.zcore.functions.zRedirect('/z/admin/styleset/index?zsid='&request.zsid);
 		</cfscript>
@@ -312,7 +340,7 @@
 			application.zcore.functions.zRedirect("/z/admin/styleset/edit?sid=#form.styleset_id#&zsid=#Request.zsid#");
 		}
 	}  
-	updateStylesetCache();
+	updateCache(application.zcore);
 	application.zcore.status.setStatus(Request.zsid, "Styleset saved");
 	application.zcore.functions.zRedirect('/z/admin/styleset/index?zsid='&request.zsid);
 	</cfscript>
@@ -410,6 +438,7 @@
 	</cfscript>
 	#tabCom.beginTabMenu()# 
 	#tabCom.beginFieldSet("Default")#
+	<p>Setting Font and Padding Scale fields to 0 will let them inherit their value.</p>
 
 	<table style="width:100%; border-spacing:0px;" class="table-list"> 
 	<cfif application.zcore.user.checkServerAccess()>
@@ -742,23 +771,7 @@
 	#tabCom.endFieldSet()# 
 	#tabCom.endTabMenu()#
 	</form>
-</cffunction>
-
-<cffunction name="updateStylesetCache" localmode="modern" access="public">
-	<cfscript>
-	db=request.zos.queryObject;
-	db.sql="select * FROM 
-	#db.table("styleset", "zgraph")# 
-	WHERE styleset_deleted=#db.param(0)# and 
-	site_id <> #db.param(-1)# ";
-	qSet=db.execute("qSet"); 
-	stylesetLookup={};
-	for(styleset in qSet){
-		stylesetLookup[styleset.styleset_id]=styleset;
-	}
-	application.zcore.stylesetLookup=stylesetLookup;
-	</cfscript>
-</cffunction>
+</cffunction> 
 
 <cffunction name="borderSelectField" localmode="modern" access="public">
 	<cfargument name="field" type="string" required="yes">
@@ -778,6 +791,9 @@
 <cffunction name="colorSelectField" localmode="modern" access="public">
 	<cfargument name="field" type="string" required="yes">
 	<cfscript>
+	if(form.method EQ "edit" and not structkeyexists(request.zos.stylesetColorFieldStruct, arguments.field)){
+		throw("#arguments.field# missing | All color fields must be manually added to request.zos.stylesetColorFieldStruct for the remapping system to work.");
+	}
 	db=request.zos.queryObject;
 	if(not structkeyexists(request, "qColor")){
 		db.sql="select * FROM #db.table("styleset_color", "zgraph")# 
@@ -821,6 +837,9 @@
 <cffunction name="fontSelectField" localmode="modern" access="public">
 	<cfargument name="field" type="string" required="yes">
 	<cfscript>
+	if(form.method EQ "edit" and not structkeyexists(request.zos.stylesetFontFieldStruct, arguments.field)){
+		throw("#arguments.field# missing | All font fields must be manually added to request.zos.stylesetFontFieldStruct for the remapping system to work.");
+	}
 	db=request.zos.queryObject;
 	if(not structkeyexists(request.zos, "qWebFont")){
 		db.sql="select * FROM #db.table("webfont", request.zos.zcoreDatasource)# 

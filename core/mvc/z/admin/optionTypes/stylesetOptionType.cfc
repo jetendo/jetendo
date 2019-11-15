@@ -212,7 +212,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Style Editor';
+	return 'Styleset';
 	</cfscript>
 </cffunction>
 
