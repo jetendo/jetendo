@@ -5,12 +5,15 @@ var zArrGalleryViewSlideshowTemplate=[];
 var zGalleryReloadTimeoutId=0; 
 (function($, window, document, undefined){
 	"use strict";
+
 	function zLoadAndCropImages(){
 		var debug=false;
 		var e=zGetElementsByClassName("zLoadAndCropImage");
 		var time=new Date().getTime();
 		for(var i=0;i<e.length;i++){
 			if(e[i].getAttribute("data-imageloaded")==="1"){
+				c=$("canvas", e[i]);
+				c[0].style.maxWidth="99%";
 				continue;
 			}
 			e[i].setAttribute("data-imageloaded", "1");
@@ -34,19 +37,23 @@ var zGalleryReloadTimeoutId=0;
 	}
 	function zLoadAndCropImagesDefer(){
 		setTimeout(zLoadAndCropImages, 1);
+		setTimeout(zLoadAndCropImages, 3000);
 	}
 
 	zArrLoadFunctions.push({functionName:zLoadAndCropImagesDefer});
 	function zLoadAndCropImage(obj, imageURL, debug, width, height, crop, style){ 
-		if((zMSIEBrowser!==-1 && zMSIEVersion<=9) || window.location.href.indexOf("disableCanvasCrop=") != -1){
+		// TODO: someday figure out how to make crop always work, for now, i gave up.
+		// if((zMSIEBrowser!==-1 && zMSIEVersion<=9) || window.location.href.indexOf("disableCanvasCrop=") != -1){
 			if(height===10000){
 				obj.innerHTML='<img src="'+imageURL+'" style="max-width:100%;" />';
 			}else{
 				obj.innerHTML='<img src="'+imageURL+'" width="'+width+'" style="max-width:100%;" />';
 			}
-			return;	
-		}
+
+			//return;	
+		// }
 		//debug=true;
+		/*
 		var p=window.location.href.indexOf("/", 8);
 		var currentHostName="a";
 		if(p != -1){
@@ -100,8 +107,10 @@ var zGalleryReloadTimeoutId=0;
 			}
 			if(debug) console.log(imageObj.src+": image loaded");
 			var start=new Date();
-			canvas.width=this.width;
-			canvas.height=this.height;
+			if(this.width > 25 && this.height > 25){
+				canvas.width=this.width;
+				canvas.height=this.height;
+			}
 			context.drawImage(this, 0, 0);
 			var imageData=context.getImageData(0,0, this.width, this.height);
 			var end = new Date().getTime();
@@ -340,10 +349,7 @@ var zGalleryReloadTimeoutId=0;
 				ycrop=0;
 				x2crop=0;
 				y2crop=0;
-			}
-			/*newWidth+=10;
-			newHeight+=10;
-			*/
+			} 
 			if(debug) console.log(imageObj.src+": "+"final size:"+nw+"x"+nh);
 			if(debug) console.log(imageObj.src+": "+"sizes:"+width+"x"+height+":"+this.width+"x"+this.height);
 			
@@ -357,15 +363,28 @@ var zGalleryReloadTimeoutId=0;
 			if(debug) console.log(imageObj.src+": "+Math.ceil(xcrop)+" | "+Math.ceil(ycrop)+" | "+Math.floor(newWidth-(x2crop))+" | "+Math.floor(newHeight-(y2crop))+" | "+-Math.ceil(x2crop/2)+" | "+-Math.ceil(y2crop/2)+" | "+Math.ceil(nw)+" | "+Math.ceil(nh));
 			if(tempWidth <= 10 || tempWidth >= 1000 || tempHeight <= 10 || tempHeight >= 1000){
 				if(debug) console.log(imageObj.src+": "+"Failed to draw canvas because width x height must be >= 10x10 and <= 1000: "+tempWidth+"x"+tempHeight);
+				canvas.width=tempWidth;
+				canvas.height=tempHeight;
 				return;
 			}
 
 
 
-			canvas.width=tempWidth;
-			canvas.height=tempHeight;
+			if(tempWidth > 25 && tempHeight > 25){
+				canvas.width=tempWidth;
+				canvas.height=tempHeight;
+			}
 			obj.appendChild(canvas);
 			if(debug) console.log("canvas.width: "+canvas.width+" height:"+canvas.height);
+			if(canvas.height < 50){
+				if(window.location.href.indexOf('windermerehomes') != -1){
+					if(typeof window.canvasdebug1=="undefined"){
+						alert("too small:"+canvas.width+":"+canvas.height);
+						window.canvasdebug1=true;
+					}
+				}
+
+			}
 
 			if(debug) console.log(imageObj.src+": newWidth:"+newWidth+" newHeight:"+newHeight+" canvas.height:"+canvas.height+" nh:"+Math.ceil(nh)+" y2crop:"+Math.ceil(y2crop));
 			context.drawImage(imageObj, Math.ceil(xcrop), Math.ceil(ycrop), Math.floor(newWidth-(xcrop*2)), Math.floor(newHeight-(ycrop*2)),-Math.ceil(x2crop/2), -Math.ceil(y2crop/2), Math.ceil(nw), Math.ceil(nh));
@@ -375,6 +394,7 @@ var zGalleryReloadTimeoutId=0;
 			if(debug) console.log(imageObj.src+": "+(time/1000)+" seconds to crop image");
 		};
 		imageObj.src = imageURL;
+		*/
 	}
 
 	function zImageLazyLoadUpdate(currSlideElement, nextSlideElement, options, forwardFlag){
