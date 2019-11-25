@@ -419,20 +419,23 @@
 		qG=db.execute("qG");
 		if(qG.recordcount EQ 1){
 			ts.user_group_id=qG.user_group_id;
+			form.user_group_id=ts.user_group_id;
 		}else{
 			if(form.method EQ 'insert'){
 				ts.user_group_id=form.user_group_id2;
+				form.user_group_id=ts.user_group_id;
 			}else{
 				structdelete(variables, 'user_group_id');
 				structdelete(form,  'user_group_id');
 				structdelete(ts,'user_group_id');
 				ts.user_group_id=qU2.user_group_id;	
+				form.user_group_id=ts.user_group_id;
 			}
 		}
 	}else if(form.method EQ "update"){
 		ts.user_group_id=qU2.user_group_id;
+		form.user_group_id=ts.user_group_id;
 	}
-	form.user_group_id=ts.user_group_id;
 	ts.sendConfirmOptIn=false;
 	userAdminCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_admin");
 	if(structkeyexists(request.zos.userSession.groupAccess, "administrator") and structkeyexists(request.zos.userSession.groupAccess, "client")){

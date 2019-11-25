@@ -135,13 +135,15 @@ doesn't work anymore
 	$t->url=$adminDomain."/z/blog/admin/ping/index";
 	array_push($arrTask, $t);
 */
+	/*
+	// don't need anymore
 	$t=new stdClass();
 	$t->logName="site-map-xml-publish.html";
 	$t->interval="daily";
 	$t->startTimeOffsetSeconds=1400;
 	$t->url=$adminDomain."/z/server-manager/tasks/update-sitemap/index?force=1";
 	array_push($arrTask, $t);
-
+	*/
 	$t=new stdClass();
 	$t->logName="resend-autoresponders.html";
 	$t->interval=7200;

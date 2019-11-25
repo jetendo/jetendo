@@ -298,10 +298,10 @@ if(rs.success){
 		// if ( qAutoresponder.inquiries_autoresponder_main_link NEQ '' ) {
 		// 	mainHTML = '<p><a href="#qAutoresponder.inquiries_autoresponder_main_link#"><img src="#this.getDripImageURL( qAutoresponder.inquiries_autoresponder_main_image )#" style="float:left;"></a></p>';
 		// } else {
-			mainHTML = '<p><img src="#request.zos.globals.domain#/zupload/autoresponder/#qAutoresponder.inquiries_autoresponder_main_image#" style="float:left;"></p>';
+			mainHTML = '<p><img src="#request.zos.globals.domain#/zupload/autoresponder/#qAutoresponder.inquiries_autoresponder_main_image#"></p>';
 		// }
 	}
-	ts.html=rs.htmlStart&qAutoresponder.inquiries_autoresponder_html&mainHTML&rs.htmlEnd;
+	ts.html=rs.htmlStart&mainHTML&qAutoresponder.inquiries_autoresponder_html&rs.htmlEnd;
 
 	ts.html=application.zcore.email.forceAbsoluteURLs(ts.html);
 	// replace variables

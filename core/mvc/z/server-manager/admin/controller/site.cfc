@@ -382,6 +382,15 @@
 	if(form.site_phone_tracking_label_text EQ ""){
 		form.site_phone_tracking_label_text="Tracking Label";
 	}
+	if(form.site_google_analytics_overview_last_import_datetime NEQ "" and isdate(form.site_google_analytics_overview_last_import_datetime)){
+		form.site_google_analytics_overview_last_import_datetime=dateformat(form.site_google_analytics_overview_last_import_datetime, "yyyy-mm-dd")&" 00:00:00";
+	}
+	if(form.site_google_analytics_organic_last_import_datetime NEQ "" and isdate(form.site_google_analytics_organic_last_import_datetime)){
+		form.site_google_analytics_organic_last_import_datetime=dateformat(form.site_google_analytics_organic_last_import_datetime, "yyyy-mm-dd")&" 00:00:00";
+	}
+	if(form.site_google_analytics_keyword_last_import_datetime NEQ "" and isdate(form.site_google_analytics_keyword_last_import_datetime)){
+		form.site_google_analytics_keyword_last_import_datetime=dateformat(form.site_google_analytics_keyword_last_import_datetime, "yyyy-mm-dd")&" 00:00:00";
+	}
 	if(form.site_report_start_date NEQ "" and isdate(form.site_report_start_date)){
 		form.site_report_start_date=dateformat(form.site_report_start_date, "yyyy-mm-dd");
 	}
@@ -1899,10 +1908,12 @@
 		</tr>
 
 		
-        </table>
+        </table> 
         <cfscript>
 	 
 		application.zcore.skin.addDeferredScript('
+		$( "##site_google_analytics_keyword_last_import_datetime" ).datepicker();  
+		$( "##site_google_analytics_keyword_last_import_datetime" ).datepicker();  
 		$( "##site_report_start_date" ).datepicker();  
 		$( "##site_keyword_ranking_start_date" ).datepicker();  
 		');
@@ -2037,6 +2048,27 @@
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_exclude_keyword_list", "table-error","")#>
 				<input name="site_google_analytics_exclude_keyword_list" type="text" size="70" value="#htmleditformat(form.site_google_analytics_exclude_keyword_list)#"><br />
 				This is for excluding the client's name, staff, or products on organic traffic reports.   Separate multiple keyword phrases by commas.
+			</td>
+		</tr> 
+		<tr >
+			<td style="vertical-align:top; width:140px;">Google Overview Last Import Date:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_overview_last_import_datetime", "table-error","")#>
+				<input name="site_google_analytics_overview_last_import_datetime" id="site_google_analytics_overview_last_import_datetime" type="text" size="70" value="#htmleditformat(dateformat(form.site_google_analytics_overview_last_import_datetime, "m/d/yyyy"))#"><br>
+				Modify this if you need to reimport data.
+			</td>
+		</tr> 
+		<tr >
+			<td style="vertical-align:top; width:140px;">Google Organic Last Import Date:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_organic_last_import_datetime", "table-error","")#>
+				<input name="site_google_analytics_organic_last_import_datetime" id="site_google_analytics_organic_last_import_datetime" type="text" size="70" value="#htmleditformat(dateformat(form.site_google_analytics_organic_last_import_datetime, "m/d/yyyy"))#"><br>
+				Modify this if you need to reimport data.
+			</td>
+		</tr> 
+		<tr >
+			<td style="vertical-align:top; width:140px;">Google Keyword Last Import Date:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_keyword_last_import_datetime", "table-error","")#>
+				<input name="site_google_analytics_keyword_last_import_datetime" id="site_google_analytics_keyword_last_import_datetime" type="text" size="70" value="#htmleditformat(dateformat(form.site_google_analytics_keyword_last_import_datetime, "m/d/yyyy"))#"><br>
+				Modify this if you need to reimport data.
 			</td>
 		</tr> 
 		<tr >
