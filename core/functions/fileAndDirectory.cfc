@@ -811,17 +811,17 @@ notes: optionally delete an existing image that has a field in the specified dat
     arguments.source = replace(arguments.source, '"',"","ALL"); 
     // throw critical errors
     if(ArrayLen(arrSizes) EQ 0){
-        application.zcore.template.fail("resizeImage: sizeList must contain one of more sizes (i.e. 150x120) as comma seperated values.",true); 
+        application.zcore.functions.z404("resizeImage: sizeList must contain one of more sizes (i.e. 150x120) as comma seperated values.",true); 
     }
     tempDestination = replace(tempDestination, '\','/',"ALL");
     if(directoryexists(tempDestination) EQ false){
-        application.zcore.template.fail("resizeImage: destination directory doesn't exist.",true);
+        application.zcore.functions.z404("resizeImage: destination directory doesn't exist.");
     }
     if(right(tempDestination,1) NEQ '/'){
         tempDestination = tempDestination&"/";
     }
     if(fileexists(arguments.source) EQ false){
-        throw("resizeImage: source file doesn't exist. Path: #arguments.source#");
+        application.zcore.functions.z404("resizeImage: source file doesn't exist. Path: #arguments.source#");
         // start writing trace message that show up in debugger, but don't force errors.
         return false;
     }
@@ -851,7 +851,7 @@ notes: optionally delete an existing image that has a field in the specified dat
     if(arguments.autoCropList NEQ ""){
         arrCrop=listtoarray(arguments.autoCropList);	
         if(arraylen(arrCrop) NEQ arraylen(arrSizes)){
-            application.zcore.template.fail("resizeImage: sizeList and autocrop lists must be the same length.",true);
+            application.zcore.functions.z404("resizeImage: sizeList and autocrop lists must be the same length.");
             // start writing trace message that show up in debugger, but don't force errors.
             return false;
         }
@@ -899,7 +899,7 @@ notes: optionally delete an existing image that has a field in the specified dat
             newWidth = int(listGetAt(arrSizes[n],1,"x"));
             newHeight = int(listGetAt(arrSizes[n],2,"x"));
         }catch(Any excpt){
-            application.zcore.template.fail("resizeImage: size, `#arrSizes[n]#`, is an invalid format.  You must specify your sizes like 140x120 (widthxheight).",true);
+            application.zcore.functions.z404("resizeImage: size, `#arrSizes[n]#`, is an invalid format.  You must specify your sizes like 140x120 (widthxheight).",true);
         } 
         ratio=newWidth/currentWidth;
         nw=round(currentWidth*ratio);
