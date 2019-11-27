@@ -581,6 +581,9 @@ This is the structure of the renderMethod function
 			// Don't process custom fields within the filter query.
 			continue;
 		}
+		if(arraylen(field['searchFields']) EQ 0){
+			continue;
+		}
 		fieldKey=replace(field['fieldKey'], '[]', '');
 		arrValue=form[ fieldKey ];
 		if(not isArray(form[ fieldKey ])){
