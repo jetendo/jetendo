@@ -504,11 +504,11 @@ LookupMulti1C
 			
 			for(i=1;i LTE arguments.ss.listing_photocount;i++){
 				
-				local.fNameTemp1=arguments.ss.rets31_listingkeynumeric&"-"&i&".jpeg";
+				local.fNameTemp1=arguments.ss.listing_id&"-"&i&".jpeg";
 				local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
 				local.absPath='#request.zos.sharedPath#mls-images/31/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
 				if(i EQ 1){
-					request.lastPhotoId=this.mls_id&"-"&arguments.ss.rets31_listingkeynumeric;
+					request.lastPhotoId=arguments.ss.listing_id;
 				}
 				idx["photo"&i]=request.zos.retsPhotoPath&'31/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
 			}
@@ -556,9 +556,9 @@ LookupMulti1C
 		var db=request.zos.queryObject;
 		
 		//request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
-		request.lastPhotoId=this.mls_id&"-"&arguments.sysid;
+		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		// local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
-		local.fNameTemp1=arguments.sysid&"-"&arguments.num&".jpeg";
+		local.fNameTemp1="31-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
 		local.absPath='#request.zos.sharedPath#mls-images/31/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
 		if(fileexists(local.absPath)){
