@@ -2484,7 +2484,7 @@
 		for(row in qCheck){
 			mainGroupStruct=row;
 		}
-		resortSetByParentField(mainGroupStruct);
+		resortSetByParentField(mainGroupStruct, form.site_x_option_group_set_parent_id);
 	}
 	
 	if(debug) writeoutput(((gettickcount()-startTime)/1000)& 'seconds3<br>'); startTime=gettickcount();
@@ -2882,9 +2882,15 @@
 
 <cffunction name="resortSetByParentField" localmode="modern" access="public">
 	<cfargument name="groupQuery" type="struct" required="yes">
+	<cfargument name="parentSetId" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
+
+
 	rs=getSortedData(arguments.groupQuery);
+
+	application.zcore.siteOptionCom.checkForParentSortUpdate(arguments.groupQuery, arguments.parentSetId);
+
 	for(i=1;i<=arraylen(rs.arrOrder);i++){
 		db.sql="update #db.table("site_x_option_group_set", request.zos.zcoreDatasource)#
 		set 
@@ -2896,6 +2902,8 @@
 		site_x_option_group_set.site_x_option_group_set_deleted=#db.param(0)#";
 		db.execute("qUpdate");
 
+
+
 		// fire onChange com if there is one
 		if(arguments.groupQuery.site_option_group_change_cfc_path NEQ ""){
 			path=arguments.groupQuery.site_option_group_change_cfc_path;
@@ -2903,7 +2911,7 @@
 				path=request.zRootCFCPath&removeChars(path, 1, 5);
 			}
 			changeCom=application.zcore.functions.zcreateObject("component", path); 
-			changeCom[arguments.groupQuery.site_option_group_change_cfc_sort_method](row.site_x_option_group_set_id, i); 
+			changeCom[arguments.groupQuery.site_option_group_change_cfc_sort_method](rs.arrOrder[i], i); 
 		}
 	}
 	</cfscript>
@@ -3644,7 +3652,7 @@ Define this function in another CFC to override the default email format
 			if(structkeyexists(form, 'zQueueSortAjax')){
 				if(mainGroupStruct.site_option_group_parent_field NEQ ""){
 					// resort all records
-					resortSetByParentField(mainGroupStruct);
+					resortSetByParentField(mainGroupStruct, form.site_x_option_group_set_parent_id);
 				}else{
 
 					// update cache
@@ -3655,6 +3663,8 @@ Define this function in another CFC to override the default email format
 						t9=application.zcore.siteOptionCom.getTypeData(request.zos.globals.id);
 						var groupStruct=t9.optionGroupLookup[form.site_option_group_id];
 	 
+						application.zcore.siteOptionCom.checkForParentSortUpdate(groupStruct, form.site_x_option_group_set_parent_id);
+
 						if(groupStruct.site_option_group_change_cfc_path NEQ ""){
 							path=groupStruct.site_option_group_change_cfc_path;
 							if(left(path, 5) EQ "root."){
