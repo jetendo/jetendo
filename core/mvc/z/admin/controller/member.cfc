@@ -211,6 +211,21 @@
 				application.zcore.functions.zReturnJson({success:false, errorMessage:rs.errorMessage});
 			}
 		}
+
+		// TODO: future also unassign from contact if that system ever gets finished
+
+		// unassign user from inquiries
+		db.sql="UPDATE #db.table("inquiries", request.zos.zcoreDatasource)#  SET
+		user_id = #db.param(0)# and 
+		user_id_siteidtype=#db.param(0)# 
+		WHERE
+		user_id=#db.param(qCheck.user_id)# and 
+		user_id_siteidtype = #db.param(application.zcore.functions.zGetSiteIdType(qCheck.site_id))# and 
+		inquiries_deleted=#db.param(0)# and 
+		site_id = #db.param(request.zos.globals.id)# ";
+		qInquiry=db.execute("qInquiry");
+
+
 		db.sql="DELETE FROM #db.table("user", request.zos.zcoreDatasource)#  WHERE 
 		user_id = #db.param(qCheck.user_id)# and 
 		user_deleted = #db.param(0)# and 
