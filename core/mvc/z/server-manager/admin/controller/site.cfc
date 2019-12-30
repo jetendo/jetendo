@@ -1418,12 +1418,7 @@
 		<tr>
 			<td style="vertical-align:top; width:140px;">Max Image Width:</td>
 			<td><input name="site_max_image_width" type="text" value="<cfif form.site_max_image_width EQ "" or form.site_max_image_width EQ 0>695<cfelse>#form.site_max_image_width#</cfif>"></td>
-		</tr>
-		<tr>
-			<td style="vertical-align:top; width:140px;">Max Image Width:</td>
-			<td><input name="site_max_image_width" type="text" value="<cfif form.site_max_image_width EQ "" or form.site_max_image_width EQ 0>695<cfelse>#form.site_max_image_width#</cfif>"></td>
-		</tr>
-		
+		</tr> 
 		<tr>
 			<td style="vertical-align:top; width:140px;">Shared Default Theme:</td>
 			<td>
