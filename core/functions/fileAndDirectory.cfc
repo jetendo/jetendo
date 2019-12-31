@@ -1415,9 +1415,9 @@ application.zcore.functions.zSplitFile(path,kblength,line);
 	var np=p2&fn&"_"&(arraylen(arrFiles)+1)&"."&fext;
 	var g=1;
 	var open=true;
-	var error=false;
+	var error1=false;
 	if(fileexists(arguments.path) EQ false or directoryexists(p2) EQ false){
-		application.zcore.template.fail("zSplitFile: arguments.path, #arguments.path#, does not exist.");	
+		throw("zSplitFile: arguments.path, #arguments.path#, does not exist.");	
 	}
 	try{
 		fp=fileopen(arguments.path,"read");
@@ -1471,7 +1471,7 @@ application.zcore.functions.zSplitFile(path,kblength,line);
 						np=p2&fn&"_"&(arraylen(arrFiles)+1)&"."&fext;
 						arrayappend(arrFiles,np);
 						if(arraylen(arrFiles) GT 500){
-							error="zSplitFile: Too many files created.  Limit of 500.";	
+							error1="zSplitFile: Too many files created.  Limit of 500.";	
 							break;
 						}
 						wfp=fileopen(np,"write");
@@ -1502,8 +1502,8 @@ application.zcore.functions.zSplitFile(path,kblength,line);
 			fileclose(wfp);
 		}
 	}
-	if(error NEQ false){
-		application.zcore.template.fail(error);	
+	if(error1 NEQ false){
+		application.zcore.template.fail(error1);	
 	}
 	return arrFiles;
 	</cfscript>
@@ -1560,10 +1560,10 @@ application.zcore.functions.zSplitFile(path,kblength,line);
     	return true; // ignore other file types
     } 
 	secureCommand="getImageMagickConvertResize"&chr(9)&10000&chr(9)&10000&chr(9)&0&chr(9)&0&chr(9)&0&chr(9)&0&chr(9)&arguments.source&chr(9)&arguments.source;
-	output=application.zcore.functions.zSecureCommand(secureCommand, 30);
-	if(output NEQ "1"){
+	output1=application.zcore.functions.zSecureCommand(secureCommand, 30);
+	if(output1 NEQ "1"){
 		if(request.zos.isDeveloper){
-			throw("Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output);
+			throw("Failed to resize image with zSecureCommand: "&secureCommand&" | Output: "&output1);
 		}
 		return false;
 	}else{
@@ -1937,5 +1937,16 @@ if(rs.success){
 	}
 	</cfscript>
 </cffunction>
+
+<cffunction name="zIsImageFile" localmode="modern" access="public">
+	<cfargument name="filePath" type="string" required="yes">
+	<cfscript>
+	ext=application.zcore.functions.zGetFileExt(arguments.filePath);
+	if(ext EQ "jpg" or ext EQ "jpeg" or ext EQ "gif" or ext EQ "png" or ext EQ "webp"){
+		return true;
+	}
+	return false;
+	</cfscript>
+</cffunction> 
 </cfoutput>
 </cfcomponent>

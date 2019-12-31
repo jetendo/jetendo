@@ -302,7 +302,7 @@ text=eCom.forceAbsoluteURLs(text);
 			}
 		}
 		if(matched EQ 0){
-			if(find("?",up1) EQ 0 and dt EQ curDomain and isImageFile(ht)){
+			if(find("?",up1) EQ 0 and dt EQ curDomain and application.zcore.functions.zIsImageFile(ht)){
 				// fast grab from filesystem - no download needed
 				up=up1;
 				upf=ht;
