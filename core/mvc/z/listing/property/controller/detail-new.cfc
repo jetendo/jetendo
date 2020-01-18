@@ -517,7 +517,7 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 		 <div class="z-float z-equal-heights" data-column-count="3">
 			<cfloop from="1" to="#form.listing_photocount#" index="i">
 			<cfif structkeyexists(idx,'photo'&i)>
-			<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:150px; float:left; overflow:hidden; margin-right:1%; margin-bottom:2%;">
+			<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:150px; float:left; min-height:170px; overflow:hidden; margin-right:1%; margin-bottom:2%;">
 				<img src="#idx['photo'&i]#" alt="" class="z-fluid">
 			<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 			</div>

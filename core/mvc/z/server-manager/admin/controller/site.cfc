@@ -1135,6 +1135,7 @@
 	qWebSite=db.execute("qWebSite");
 	db.sql="SELECT * FROM #db.table("site", request.zos.zcoreDatasource)# site 
 	WHERE site_id <> #db.param(form.sid)# and 
+	site_active=#db.param(1)# and 
 	site_deleted = #db.param(0)#";
 	if(not application.zcore.user.checkAllCompanyAccess()){
 		db.sql&=" and company_id = #db.param(request.zsession.user.company_id)#";

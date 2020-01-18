@@ -1989,7 +1989,7 @@ this.app_id=10;
 		order by 
 		blog_views-((DATE_FORMAT(NOW(), #db1.param('%Y%m%d')#)-DATE_FORMAT(blog_datetime, #db1.param('%Y%m%d')#))*#db1.param(randrange(5,30)/100)#) DESC  
 		LIMIT #db1.param(0)#,#db1.param(8)# ";
-		qPopular=db1.execute("qPopular");
+		qPopular=db1.execute("qPopular", "", 10000, "query", false);
 		</cfscript>
 		<cfif qPopular.recordcount NEQ 0>  
 			<div class="zblog-populararticles">
@@ -2049,7 +2049,7 @@ this.app_id=10;
 		}
 		db2.sql&="
 		LIMIT #db2.param(0)#,#db2.param(4)#";
-		qRelated=db2.execute("qRelated");  
+		qRelated=db2.execute("qRelated", "", 10000, "query", false); 
 		</cfscript>
 		<cfif qArticle.blog_category_name NEQ "" or qRelated.recordcount NEQ 0>
 			<div class="zblog-relatedarticles">
@@ -2175,7 +2175,7 @@ this.app_id=10;
 		GROUP BY blog.blog_id 
 		ORDER BY blog_sticky desc, blog_datetime DESC 
 		LIMIT #db3.param(0)#,#db3.param(1)# ";
-		qImagePrevious=db3.execute("qImagePrevious");
+		qImagePrevious=db3.execute("qImagePrevious", "", 10000, "query", false);
 
 		ts=structnew("sync");
 		ts.image_library_id_field="blog.blog_image_library_id";
@@ -2194,7 +2194,7 @@ this.app_id=10;
 		GROUP BY blog.blog_id
 		ORDER BY blog_sticky asc, blog_datetime ASC 
 		LIMIT #db3.param(0)#,#db3.param(1)# ";
-		qImageNext=db3.execute("qImageNext");
+		qImageNext=db3.execute("qImageNext", "", 10000, "query", false);
 		</cfscript>
 
 		<cfif qImagePrevious.recordcount+qImageNext.recordcount GT 0> 
