@@ -1187,7 +1187,7 @@
 		form.site_debug_enabled='1';
 		form.site_editor_stylesheet='/stylesheets/style-manager.css';
 		local.www="www.";
-		if(listlen(form.newdomain,".") GT 2){
+		if(listlen(form.newdomain,".") EQ 1 or listlen(form.newdomain,".") GT 2){
 			local.www="";
 		}
 		if(request.zos.istestserver){
