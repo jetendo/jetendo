@@ -72,9 +72,10 @@
 	// IOS requires \r\n, but lucee removes \r so I'd have to recompile lucee with a mode to not do that or use a temporary file publishing method
 	savecontent variable="out"{
 		echo('BEGIN:VCALENDAR#chr(13)##chr(10)#');
-		echo('PRODID:website#chr(13)##chr(10)#');
 		echo('VERSION:2.0#chr(13)##chr(10)#');
+		echo('PRODID:-//jetendo/calendar//NONSGML v1.0//EN#chr(13)##chr(10)#');
 		echo('BEGIN:VEVENT#chr(13)##chr(10)#');
+		echo('UID:#application.zcore.functions.zURLEncode(request.zos.globals.domain, "-")&"-"&row.event_id&"-"&row.event_recur_id##chr(13)##chr(10)#');
 		echo('DTSTAMP:#dateformat(updatedDate,'yyyymmdd')&"T"&timeformat(updatedDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
 		echo('DTSTART:#dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
 		echo('DTEND:#dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
@@ -82,9 +83,8 @@
 		echo('DESCRIPTION:#encodeForVCalendar(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description))##chr(13)##chr(10)#');
 		echo('SUMMARY:#encodeForVCalendar(row.event_name)##chr(13)##chr(10)#');
 		echo('PRIORITY:3#chr(13)##chr(10)#');
-		echo('UID:#application.zcore.functions.zURLEncode(request.zos.globals.domain, "-")&"-"&row.event_id&"-"&row.event_recur_id#');
 		echo('END:VEVENT#chr(13)##chr(10)#');
-		echo('END:VCALENDAR#chr(13)##chr(10)#');
+		echo('END:VCALENDAR');
 	}
 	path=request.zos.globals.privateHomeDir&"/zupload/#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
 	application.zcore.functions.zWriteFile(path, out);
@@ -347,9 +347,9 @@
 						<a href="#request.zos.originalURL#?print=1" target="_blank" class="zEventView1-print" rel="nofollow">Print</a>
 					</div>
 					<div class="z-float">
-						<cfif request.zos.cgi.http_user_agent DOES NOT CONTAIN "IOS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Iphone OS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Ipad OS">
+						<!--- <cfif request.zos.cgi.http_user_agent DOES NOT CONTAIN "IOS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Iphone OS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Ipad OS"> --->
 							<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" title="Open the download file to add this event to your email software's calendar" class="zEventView1-print" style="margin-right:5px; margin-bottom:5px;">Add To My Calendar</a>
-						</cfif>
+						<!--- </cfif> --->
 
 						<cfscript>
 						
