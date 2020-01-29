@@ -1074,16 +1074,18 @@ searchEvents(ts);
 		db.sql&=" and concat(event.event_id, #db.param(' ')#, event_name, #db.param(' ')#, event_description)  like #db.param('%#ss.keyword#%')# ";
 	}
 	
-	if(arraylen(arrExcludeCalendar)){
-		db.sql&=" and ( ";
-		searchOn=true;
-		for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
-			if(i NEQ 1){
-				db.sql&=" and ";
+	if(ss.event_id EQ 0){
+		if(arraylen(arrExcludeCalendar)){
+			db.sql&=" and ( ";
+			searchOn=true;
+			for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
+				if(i NEQ 1){
+					db.sql&=" and ";
+				}
+				db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
 			}
-			db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
+			db.sql&=" ) ";
 		}
-		db.sql&=" ) ";
 	}
 
 	if(arraylen(arrCategory)){
@@ -1157,16 +1159,19 @@ searchEvents(ts);
 			searchOn=true;
 			db.sql&=" and concat(event.event_id, #db.param(' ')#, event_name, #db.param(' ')#, event_description)  like #db.param('%#ss.keyword#%')# ";
 		}
-		if(arraylen(arrExcludeCalendar)){
-			db.sql&=" and ( ";
-			searchOn=true;
-			for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
-				if(i NEQ 1){
-					db.sql&=" and ";
+	
+		if(ss.event_id EQ 0){
+			if(arraylen(arrExcludeCalendar)){
+				db.sql&=" and ( ";
+				searchOn=true;
+				for(i=1;i LTE arraylen(arrExcludeCalendar);i++){
+					if(i NEQ 1){
+						db.sql&=" and ";
+					}
+					db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
 				}
-				db.sql&=" CONCAT(#db.param(',')#,event_calendar_id, #db.param(',')#) NOT LIKE #db.param('%,'&arrExcludeCalendar[i]&',%')# ";
+				db.sql&=" ) ";
 			}
-			db.sql&=" ) ";
 		}
 		if(arraylen(arrCategory)){
 			db.sql&=" and ( ";

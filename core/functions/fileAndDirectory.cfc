@@ -17,6 +17,25 @@
 	}
 	</cfscript>
 </cffunction>
+<!--- 
+disabled for now
+<!--- isGzipped=application.zcore.functions.zGzipUnzipFilePath("/absolute/path/to/file.txt", "/absolute/path/to/outputfile.txt", 20); --->
+<cffunction name="zGzipUnzipFilePath" localmode="modern" access="public" returntype="boolean">
+	<cfargument name="filePath" type="string" required="yes">
+	<cfargument name="outputFilePath" type="string" required="yes">
+	<cfargument name="timeoutInSeconds" type="numeric" required="yes">
+	<cfscript>
+	if(not directoryexists(arguments.filePath) and not fileexists(arguments.filePath)){
+		throw(arguments.filePath&" doesn't exist.  arguments.filePath must be a valid absolute path to a file.");
+	}
+	result=application.zcore.functions.zSecureCommand("gzipUnzipFilePath"&chr(9)&arguments.filePath&chr(9)&arguments.outputFilePath, arguments.timeoutInSeconds);
+	if(result EQ "1"){
+		return true;
+	}else{
+		return false;
+	}
+	</cfscript>
+</cffunction>  --->
 
 <cffunction name="zMd5HashFile" localmode="modern" returntype="struct" output="no">
 	<cfargument name="path" type="string" required="yes">

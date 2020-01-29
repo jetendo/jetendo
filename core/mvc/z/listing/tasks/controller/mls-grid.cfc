@@ -1,6 +1,9 @@
-<cfcomponent>
+<cfcomponent extends="zcorerootmapping.mvc.z.listing.mls-provider.base">
 <cfoutput>
 <!--- 
+// requires curl for the metadata.xml download to work due to needing to uncompress the gzip response
+// this command must go in custom-secure-scripts/mls-grid-download.php and added to production cronjob like this:
+15 1 * * * /usr/bin/php /var/jetendo-server/custom-secure-scripts/mls-grid-download.php >/dev/null 2>&1
 
 // wipe out the listings to reimport them again...
 DELETE FROM `#request.zos.zcoreDatasource#`.listing_track WHERE listing_id LIKE '29-%';
@@ -23,15 +26,28 @@ $count=true
 StandardStatus = ?
 Resource = Property, Media, Member, etc
  
-	http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index
+
+debug 1 feed, 1 record:
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index?debug=1
+
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/viewMetadata
+
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/displayFields
+
+has enums with individual plain text name and id value pairs - do i need them?
  --->
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript>
 	db=request.zos.queryObject;
-	variables.mls_id=29;
+	variables.mls_id=32;
+	this.mls_id=32;
+	request.zos["listing"]=application.zcore.listingStruct;
+
 	// get all the active record ids from database into a lookup table so we can mark for deletion faster
 	db.sql="select listing_track_id, listing_id from #db.table("listing_track", request.zos.zcoreDatasource)# 
-	WHERE listing_id like #db.param('#variables.mls_id#-%')# ";
+	WHERE listing_id like #db.param('#variables.mls_id#-%')# and 
+	listing_track_deleted=#db.param(0)# ";
 	qTrack=db.execute("qTrack");
 	variables.listingLookup={};
 	loop query="qTrack"{
@@ -88,6 +104,46 @@ Resource = Property, Media, Member, etc
 		"ShowingContactPhone":true,
 		"SyndicationRemarks":true,
 	};
+
+	variables.arrResource=[
+		"PropertyResi",
+		"PropertyRlse",
+		"PropertyRinc",
+		"PropertyLand",
+		"PropertyFarm",
+		"PropertyMobi", // not used on canopyMLS
+		"PropertyComs",
+		"PropertyComl",
+		"PropertyBuso", // not used on canopyMLS
+		"Member",
+		"Office",
+		"Media"
+	];
+
+
+	metaDataPath="/var/jetendo-server/jetendo/share/mls-data/32/metadata.xml";
+	a=application.zcore.functions.zReadFile(metaDataPath);
+	variables.metaData=xmlparse(a);
+	</cfscript>
+</cffunction>
+
+<cffunction name="viewMetadata" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	init();
+	writedump(variables.metaData);
+	abort;
+	</cfscript>
+</cffunction>
+
+<cffunction name="displayFields" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	index();
 	</cfscript>
 </cffunction>
 
@@ -98,7 +154,6 @@ Resource = Property, Media, Member, etc
 	} 
 	setting requesttimeout="100000"; 
 
- 	debug=true;
  	link="";
 
  	// photos
@@ -128,60 +183,43 @@ Resource = Property, Media, Member, etc
 
 	// store
 
-	arrResource=[
-		"PropertyResi",
-		"PropertyRlse",
-		"PropertyRinc",
-		"PropertyLand",
-		"PropertyFarm",
-		"PropertyMobi", // not used on canopyMLS
-		"PropertyComs",
-		"PropertyComl",
-		"PropertyBuso", // not used on canopyMLS
-		"Member",
-		"Office",
-		"Media"
-	];
 	resourceIndex=4; // leave as 0 when not debugging
 	// property, but only residential??
-	debug=false;
+	form.debug=application.zcore.functions.zso(form, "debug", true, 0);
  	top=500; // 5000 is max records?
  	skip=0;
  	count=false; // don't need count since the next link can pull everything
  	lastUpdateDate=createdate(2020, 1, 20); // first time, pull very old data createdate(2010,1,1);
- 	if(debug){
+ 	if(form.debug EQ 1){
  		top=1;
  		skip=0;
  		count=true;
  		resourceIndex=1;
  	}
 
- 	displayFields=true;
-	if(displayFields){
+ 	if(form.method EQ "displayFields"){
+	 	displayFields=true;
 		top=1;
 		skip=0;
 		count=false;
+	}else{
+		displayFields=false;
 	}
-
-	// a=downloadData("https://api.mlsgrid.com/$metadata");
-	// writedump(a);
-	// abort;
-
 
 	insertCount=0;
 	updateCount=0;
 	deleteCount=0;
-
+	skipCount=0;
 	init();
 
 
- 	for(n=1;n<=arrayLen(arrResource);n++){
+ 	for(n=1;n<=arrayLen(variables.arrResource);n++){
  		if(resourceIndex EQ 0){
-			resource=arrResource[n];
+			resource=variables.arrResource[n];
 		}else if(resourceIndex NEQ n){
-			continue; // skip to the correct resourceIndex
+			continue; // skip to the correct resourceIndex when debugging
 		}else{
-			resource=arrResource[resourceIndex];
+			resource=variables.arrResource[resourceIndex];
 		}
 
  		filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
@@ -210,7 +248,7 @@ Resource = Property, Media, Member, etc
 					processMedia(ds);
 				}else{
 					listing_id=variables.mls_id&"-"&ds.listingId;
-					if(ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active"){
+					if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
 						// delete this record somehow
 						if(structkeyexists(variables.listingLookup, listing_id)){ 
 							db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
@@ -229,102 +267,107 @@ Resource = Property, Media, Member, etc
 							listing_track_deleted = #db2.param(0)#";
 							db2.execute("qDelete"); 
 							deleteCount++;
-						}
-					}else{
-						excludeListingFields(ds);
-						rs=processListing(ds);
 
-						// insert to the 4 tables
-						dataChanged=true;
-						if(not structkeyexists(variables.listingLookup, listing_id)){ 
-							// new record - might want to keep the previous values someday
-							rs.listing_track_id="null";
-							rs.listing_id=listing_id;
-							rs.listing_track_price=ds.ListPrice;
-							rs.listing_track_price_change=ds.ListPrice;
-							rs.listing_track_hash="";
-							rs.listing_track_deleted="0";
-							rs.listing_track_inactive='0';
-							rs.listing_track_datetime=request.zos.mysqlnow;
-							rs.listing_track_updated_datetime=request.zos.mysqlnow;
-							rs.listing_track_processed_datetime=request.zos.mysqlnow;
-							insertCount++;
 						}else{
-							rs.listing_track_id=variables.listingLookup[listing_id];
-							rs.listing_id=listing_id;
-							rs.listing_track_price=ds.ListPrice;
-							rs.listing_track_change_price=ds.ListPrice;
-							rs.listing_track_hash="";
-							rs.listing_track_deleted="0";
-							rs.listing_track_inactive='0';
-							rs.listing_track_datetime=request.zos.mysqlnow;
-							rs.listing_track_updated_datetime=request.zos.mysqlnow;
-							rs.listing_track_processed_datetime=request.zos.mysqlnow;
-							updateCount++;
-						} 
-						ts2={
-							debug:true,
-							datasource:request.zos.zcoreDatasource,
-							table:"listing",
-							struct:rs
-						};
-						ts2.struct.listing_deleted='0';
-						ts5={
-							debug:true,
-							datasource:request.zos.zcoreDatasource,
-							table:"listing_memory",
-							struct:rs
-						};
-						ts5.struct.listing_deleted='0';
-						ts3={
-							debug:true,
-							datasource:request.zos.zcoreDatasource,
-							table:"listing_data",
-							struct:rs
-						};
-						jsData={}; 
-						for(i2 in variables.arrColumn){
-							jsData[i2]=rs[variables.arrColumn[i2]];
+							skipCount++;
 						}
-						ts3.struct.listing_data_json=serializeJson(jsData);
-						ts3.struct.listing_data_deleted='0';
-						ts4={
-							debug:true,
-							datasource:request.zos.zcoreDatasource,
-							table:"listing_track",
-							struct:rs
-						};
-						ts4.struct.listing_track_deleted='0'; 
+						continue;
+					}
+					excludeDS=duplicate(ds);
+					excludeListingFields(excludeDS);
+					rs=processListing(ds, excludeDS);
 
-						transaction action="begin"{
-							try{ 
-								if(not structkeyexists(variables.listingLookup, listing_id)){ 
-									application.zcore.functions.zInsert(ts4);
-									application.zcore.functions.zInsert(ts5);
-									application.zcore.functions.zInsert(ts2); 
-									application.zcore.functions.zInsert(ts3); 
-								}else{
-									// listing_track
-									ts4.forceWhereFields="listing_id,listing_track_deleted";
-									application.zcore.functions.zUpdate(ts4);
-									
-									// listing_memory
-									ts5.forceWhereFields="listing_id,listing_deleted";
-									application.zcore.functions.zInsert(ts5); 
+					// insert to the 4 tables
+					dataChanged=true;
+					if(not structkeyexists(variables.listingLookup, listing_id)){ 
+						// new record - might want to keep the previous values someday
+						rs.listing_track_id="null";
+						rs.listing_id=listing_id;
+						rs.listing_track_price=ds.ListPrice;
+						rs.listing_track_price_change=ds.ListPrice;
+						rs.listing_track_hash="";
+						rs.listing_track_deleted="0";
+						rs.listing_track_inactive='0';
+						rs.listing_track_datetime=request.zos.mysqlnow;
+						rs.listing_track_updated_datetime=request.zos.mysqlnow;
+						rs.listing_track_processed_datetime=request.zos.mysqlnow;
+						insertCount++;
+					}else{
+						rs.listing_track_id=variables.listingLookup[listing_id];
+						rs.listing_id=listing_id;
+						rs.listing_track_price=ds.ListPrice;
+						rs.listing_track_change_price=ds.ListPrice;
+						rs.listing_track_hash="";
+						rs.listing_track_deleted="0";
+						rs.listing_track_inactive='0';
+						rs.listing_track_datetime=request.zos.mysqlnow;
+						rs.listing_track_updated_datetime=request.zos.mysqlnow;
+						rs.listing_track_processed_datetime=request.zos.mysqlnow;
+						updateCount++;
+					} 
+					ts2={
+						debug:true,
+						datasource:request.zos.zcoreDatasource,
+						table:"listing",
+						struct:rs
+					};
+					ts2.struct.listing_deleted='0';
+					ts5={
+						debug:true,
+						datasource:request.zos.zcoreDatasource,
+						table:"listing_memory",
+						struct:rs
+					};
+					ts5.struct.listing_deleted='0';
+					ts3={
+						debug:true,
+						datasource:request.zos.zcoreDatasource,
+						table:"listing_data",
+						struct:rs
+					};
+					jsData={}; 
+					for(i2 in variables.arrColumn){
+						jsData[i2]=rs[variables.arrColumn[i2]];
+					}
+					ts3.struct.listing_data_json=serializeJson(jsData);
+					ts3.struct.listing_data_deleted='0';
+					ts4={
+						debug:true,
+						datasource:request.zos.zcoreDatasource,
+						table:"listing_track",
+						struct:rs
+					};
+					ts4.struct.listing_track_deleted='0'; 
 
-									// listing
-									ts2.forceWhereFields="listing_id,listing_deleted";
-									application.zcore.functions.zUpdate(ts2);
+					transaction action="begin"{
+						try{ 
+							if(not structkeyexists(variables.listingLookup, listing_id)){ 
+								listing_track_id=application.zcore.functions.zInsert(ts4);
+								application.zcore.functions.zInsert(ts5);
+								application.zcore.functions.zInsert(ts2); 
+								application.zcore.functions.zInsert(ts3); 
+								variables.listingLookup[listing_id]=listing_track_id;
+							}else{
+								// listing_track
+								ts4.forceWhereFields="listing_id,listing_track_deleted";
+								application.zcore.functions.zUpdate(ts4);
+								
+								// listing_memory
+								ts5.forceWhereFields="listing_id,listing_deleted";
+								application.zcore.functions.zInsert(ts5); 
 
-									// listing_data
-									ts3.forceWhereFields="listing_id,listing_data_deleted";
-									application.zcore.functions.zUpdate(ts3);  
-								}
-								transaction action="commit"; 
-							}catch(Any e){
-								transaction action="rollback";
-								rethrow;
+								// listing
+								ts2.forceWhereFields="listing_id,listing_deleted";
+								application.zcore.functions.zUpdate(ts2);
+
+								// listing_data
+								ts3.forceWhereFields="listing_id,listing_data_deleted";
+								application.zcore.functions.zUpdate(ts3);  
 							}
+							transaction action="commit"; 
+						}catch(Any e){
+							transaction action="rollback";
+							rethrow;
 						}
 					}
 				}
@@ -341,7 +384,7 @@ Resource = Property, Media, Member, etc
  			break;
  		}
  	} 
- 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#");
+ 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
 	abort;
 	</cfscript>
 </cffunction>
@@ -364,8 +407,7 @@ Resource = Property, Media, Member, etc
 	<cfscript>
 	link=arguments.link;
 
-	debug=false;
- 	if(debug){
+ 	if(form.debug EQ 1){
  		cfhttp=getDebugValue();
  	}else{
 		http url="#link#" timeout="10000"{
@@ -480,1098 +522,344 @@ Resource = Property, Media, Member, etc
 	</cfscript>
 </cffunction>
 
-<cffunction name="processListing" localmode="modern" access="public">
-	<cfargument name="ds" type="struct" required="yes">
+
+<cffunction name="listingLookupNewId" localmode="modern" output="no" returntype="any">
+	<cfargument name="type" type="string" required="yes">
+	<cfargument name="oldid" type="string" required="yes">
+	<cfargument name="defaultValue" type="string" required="no" default="">
 	<cfscript>
-	ds=arguments.ds; 
-		startTime=gettickcount('nano');
- 
-
-		for(i in ds){
-			if((right(i, 4) EQ "date" or i CONTAINS "timestamp") and isdate(ds[i])){
-				d=parsedatetime(ds[i]);
-				ds[i]=dateformat(d, "m/d/yyyy")&" "&timeformat(d, "h:mm tt");
-			}else if(ds[i] EQ 0 or ds[i] EQ 1){
-
-			}else if(len(ds[i]) lt 14 and isnumeric(ds[i]) and right(ds[i], 3) EQ ".00"){
-				ds[i]=numberformat(ds[i]);
-			}else{
-				ds[i]=replace(ds[i], ",", ", ", "all");
-			}
-		}
-		//writedump(ts); 		abort; 
-		
-		ts["List Price"]=replace(ts["List Price"],",","","ALL");
-		
-		local.listing_subdivision="";
-		if(local.listing_subdivision EQ ""){
-			if(findnocase(","&ts["Subdivision Name"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
-				ts["Subdivision Name"]="";
-			}else if(ts["Subdivision Name"] NEQ ""){
-				ts["Subdivision Name"]=application.zcore.functions.zFirstLetterCaps(ts["Subdivision Name"]);
-			}
-			if(ts["Subdivision Name"] NEQ ""){
-				local.listing_subdivision=ts["Subdivision Name"];
-			}
-		}
-		if(ts["Property Type"] EQ "INC" and ts["Monthly"] NEQ "" and ts["Monthly"] NEQ "0"){
-			ts["List Price"]=ts["Monthly"];
-		}
-		this.price=ts["List Price"];
-		local.listing_price=ts["List Price"];
-		cityName=this.getRetsValue("property", "", "city", ts["city"]);
-		// get the actual city name: 
-		cid=getNewCityId(ts["city"], cityName, ts["State Or Province"]);
-		 
-
-		arrS=listtoarray(ts['Special Listing Conditions'],","); 
-		local.listing_county="";
-		if(local.listing_county EQ ""){
-			local.listing_county=this.listingLookupNewId("County",ts['County Or Parish']);
-		}
-		//writedump(listing_county); 		abort; 
-		local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type", ts['Property Sub Type']);
-
-
-		local.listing_type_id=this.listingLookupNewId("listing_type",ts['Property Type']);
-
-		
-
-		rs=getListingTypeWithCode(ts["Property Type"]);
-		
-		if(ts["Permit Address Internet YN"] EQ "N"){
-			ts["street ##"]="";
-			ts["street name"]="";
-			ts["street type"]="";
-			ts["Unit ##"]="";
-		}
-		
-		ts["Property Type"]=rs.id;
-		ad=ts['Street Number'];
-		if(ad NEQ 0){
-			address=trim(ts["Street Dir Prefix"]&" #ad# ");
-		}else{
-			address="";	
-		}
-		address&=" "&trim(ts['Street Name']&" "&ts['Street Suffix']&" "&ts["Street Dir Suffix"]);
-		curLat='';
-		curLong='';
-		if(trim(address) NEQ ""){
-			rs5=this.baseGetLatLong(address,ts['State Or Province'],ts['Postal Code'], arguments.ss.listing_id);
-			if(rs5.success){
-				curLat=rs5.latitude;
-				curLong=rs5.longitude;
-			}
-		}
-		address=application.zcore.functions.zfirstlettercaps(address);
-		
-		if(ts['Unit Number'] NEQ ''){
-			address&=" Unit: "&ts["Unit Number"];	
-		} 
-		ts2=structnew();
-		ts2.field="";
-		ts2.yearbuiltfield=ts['Year Built'];
-		ts2.foreclosureField="";
-		
-		s=this.processRawStatus(ts2);
-		arrS=listtoarray(ts['Special Listing Conditions'],",");
-		for(i=1;i LTE arraylen(arrS);i++){
-			c=trim(arrS[i]);
-			if(c EQ "ShortSale"){
-				s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["short sale"]]=true;
-				break;
-			} 
-			if(c EQ "FCPC"){
-				s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
-			}
-		}
-		if(ts['New Construction YN'] EQ "Y"){
-			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["New Construction"]]=true;
-		}
-		if(ts.rets29_propertytype EQ "RNT"){
-			structdelete(s,request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]);
-			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]]=true;
-		}else{
-			structdelete(s,request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]);
-			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]]=true;
-		}
-		arrT3=[];
-		local.listing_status=structkeylist(s,",");
-
-		uns=structnew();
-		tmp=ts['Architectural Style'];
-		//writedump(tmp);
-		if(tmp NEQ ""){
-		   arrT=listtoarray(tmp);
-			for(i=1;i LTE arraylen(arrT);i++){ 
-				tmp=this.listingLookupNewId("style",arrT[i]); 
-				if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
-					uns[tmp]=true;
-					arrayappend(arrT3,tmp);
-				}
-			}
-		}
-		local.listing_style=arraytolist(arrT3);
-		//writedump(listing_style); 	abort;
-
-
-		arrT2=[]; 
-		tmp=ts['Parking'];
-		if(tmp NEQ ""){
-		   arrT=listtoarray(tmp);
-			for(i=1;i LTE arraylen(arrT);i++){
-				tmp=this.listingLookupNewId("parking",arrT[i]);
-				if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
-					uns[tmp]=true;
-					arrayappend(arrT2,tmp);
-				}
-			}
-		}
-		local.listing_parking=arraytolist(arrT2, ",");
-		
-		if(structkeyexists(ts,'Listing Contract Date')){
-			arguments.ss.listing_track_datetime=dateformat(ts["Listing Contract Date"],"yyyy-mm-dd")&" "&timeformat(ts["Listing Contract Date"], "HH:mm:ss");
-		}
-		arguments.ss.listing_track_updated_datetime=dateformat(ts["Matrix Modified DT"],"yyyy-mm-dd")&" "&timeformat(ts["Matrix Modified DT"], "HH:mm:ss");
-		//arguments.ss.listing_track_price=ts["Original List Price"];
-		//if(arguments.ss.listing_track_price EQ "" or arguments.ss.listing_track_price EQ "0" or arguments.ss.listing_track_price LT 100){
-			arguments.ss.listing_track_price=ts["List Price"];
-		//}
-		arguments.ss.listing_track_price_change=ts["List Price"];
-		liststatus=ts["Status"];
-		s2=structnew();
-		//if(liststatus EQ "ACT"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Active"]]=true;
-		//}
-		/*if(liststatus EQ "AWC"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Active"]]=true;
-		}
-		if(liststatus EQ "WDN"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Withdrawn"]]=true;
-		}
-		if(liststatus EQ "TOM"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Temporarily Off Market"]]=true;
-		}
-		if(liststatus EQ "PNC"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Coming Soon-No Show"]]=true;
-		}
-		if(liststatus EQ "EXP"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Expired"]]=true;
-		}
-		if(liststatus EQ "SLD"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Closed"]]=true;
-		}
-		if(liststatus EQ "LSE"){
-			s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Leased"]]=true;
-		}*/
-
-		//if(liststatus EQ "LSO"){
-		//CANT FIND LEASE OPTION	s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["lease option"]]=true;
-		//}
-		//if(liststatus EQ "RNT"){
-		//CANT FIND RENTED	s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Leased"]]=true;
-		//}
-		local.listing_liststatus=structkeylist(s2,",");
-		if(local.listing_liststatus EQ ""){
-			local.listing_liststatus=1;
-		}
-		
-		// view & frontage
-		arrT3=[];
-		
-		uns=structnew();
-		tmp=ts['Lot Features'];		
-		if(tmp NEQ ""){
-		   arrT=listtoarray(tmp);
-			for(i=1;i LTE arraylen(arrT);i++){
-				tmp=this.listingLookupNewId("frontage",arrT[i]);
-				if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
-					uns[tmp]=true;
-					arrayappend(arrT3,tmp);
-				}
-			}
-		} 
-		local.listing_frontage=arraytolist(arrT3);
-		
-		local.listing_view="";
-		/* 
-		arrT2=[];
-		uns=structnew();
-  
-		local.listing_view=arraytolist(arrT2);
-		*/
-
-		local.listing_pool=0; 
-		extFeatures={
-			"INPOOL":true,
-			"AGPOOL":true
-		}; 
-		tmp=ts['Exterior Features']; 
-		if(tmp NEQ ""){
-		   arrT=listtoarray(tmp);
-			for(i=1;i LTE arraylen(arrT);i++){
-				if(structkeyexists(extFeatures, arrT[i])){
-					local.listing_pool=1;	
-					break;
-				} 
-			}
-		} 
- 
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow1+=(tempTime-startTime);
-		startTime=tempTime; 
-   		ts=this.convertRawDataToLookupValues(ts, variables.tableLookup[ts.rets29_propertytype], ts.rets29_propertytype); 
-		
-		dataCom=this.getRetsDataObject();
-		local.listing_data_detailcache1=dataCom.getDetailCache1(ts);
-		local.listing_data_detailcache2=dataCom.getDetailCache2(ts);
-		local.listing_data_detailcache3=dataCom.getDetailCache3(ts);
-		
-		rs=structnew();
-		rs.mls_id=29;
-		rs.listing_id=arguments.ss.listing_id;
-		// LotDimension LotSizeArea 
-		rs.listing_acreage=ts["Acres Wooded"];
-		rs.listing_baths=ts["Baths Full"];
-		rs.listing_halfbaths=ts["Baths Half"];
-		rs.listing_beds=ts["Beds Total"];
-		rs.listing_city=cid;
-		rs.listing_county=local.listing_county;
-		rs.listing_frontage=","&local.listing_frontage&",";
-		rs.listing_frontage_name="";
-		rs.listing_price=ts["list price"];
-		rs.listing_status=","&local.listing_status&",";
-		rs.listing_state=ts["State Or Province"];
-		rs.listing_type_id=local.listing_type_id;
-		rs.listing_sub_type_id=","&local.listing_sub_type_id&",";
-		rs.listing_style=","&local.listing_style&",";
-		rs.listing_view=","&local.listing_view&",";
-		rs.listing_lot_square_feet="";
-		if(structkeyexists(ts, "Acres Wooded") and isnumeric(ts["Acres Wooded"])){
-			rs.listing_lot_square_feet=round(ts["Acres Wooded"]/0.000022956841138659);
-		}else if(structkeyexists(ts, "Lot Size Area In Acres") and isnumeric(ts["Lot Size Area In Acres"])){
-			rs.listing_lot_square_feet=round(ts["Lot Size Area In Acres"]/0.000022956841138659);
-		}
-		rs.listing_square_feet=ts["Sq Ft Total"];
-		rs.listing_subdivision=local.listing_subdivision;
-		rs.listing_year_built=ts["year built"];
-		rs.listing_office=ts["List Office MLSID"];
-		rs.listing_office_name=ts["rets29_listofficename"];
-		rs.listing_agent=ts["List Agent MLSID"];
-		rs.listing_latitude=curLat;
-		rs.listing_longitude=curLong;
-		rs.listing_pool=local.listing_pool;
-		rs.listing_photocount=ts["Photo Count"];
-		rs.listing_coded_features="";
-		rs.listing_updated_datetime=arguments.ss.listing_track_updated_datetime;
-		rs.listing_primary="0";
-		rs.listing_mls_id=arguments.ss.listing_mls_id;
-		rs.listing_address=trim(address);
-		rs.listing_zip=ts["Postal Code"];
-		rs.listing_condition="";
-		rs.listing_parking=local.listing_parking;
-		rs.listing_region="";
-		rs.listing_tenure="";
-		rs.listing_liststatus=local.listing_liststatus;
-		rs.listing_data_remarks=ts["public remarks"];
-		rs.listing_data_address=trim(address);
-		rs.listing_data_zip=trim(ts["Postal Code"]);
-		rs.listing_data_detailcache1=listing_data_detailcache1;
-		rs.listing_data_detailcache2=listing_data_detailcache2;
-		rs.listing_data_detailcache3=listing_data_detailcache3; 
-
-		rs.listing_track_sysid=ts["rets29_matrix_unique_id"];
-		//writedump(rs);		writedump(ts);abort;
-
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow2+=(tempTime-startTime);
-		startTime=tempTime;
-
-		return {
-			listingData:rs,
-			columnIndex:columnIndex,
-			arrData:arguments.ss.arrData
-		}; 
-
-		// PropertyResi
-		ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-		ts["BathroomsFull"]=application.zcore.functions.zso(ds, "BathroomsFull");
-		ts["BathroomsHalf"]=application.zcore.functions.zso(ds, "BathroomsHalf");
-		ts["BathroomsTotalInteger"]=application.zcore.functions.zso(ds, "BathroomsTotalInteger");
-		ts["BedroomsTotal"]=application.zcore.functions.zso(ds, "BedroomsTotal");
-		ts["BuilderName"]=application.zcore.functions.zso(ds, "BuilderName");
-		ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-		ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-		ts["City"]=application.zcore.functions.zso(ds, "City");
-		ts["CAR_ConstructionType"]=application.zcore.functions.zso(ds, "CAR_ConstructionType");
-		ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-		ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-		ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-		ts["RoadSurfaceType"]=application.zcore.functions.zso(ds, "RoadSurfaceType");
-		ts["ElementarySchool"]=application.zcore.functions.zso(ds, "ElementarySchool");
-		ts["Appliances"]=application.zcore.functions.zso(ds, "Appliances");
-		ts["ConstructionMaterials"]=application.zcore.functions.zso(ds, "ConstructionMaterials");
-		ts["FireplaceFeatures"]=application.zcore.functions.zso(ds, "FireplaceFeatures");
-		ts["FireplaceYN"]=application.zcore.functions.zso(ds, "FireplaceYN");
-		ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-		ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-		ts["Heating"]=application.zcore.functions.zso(ds, "Heating");
-		ts["HighSchool"]=application.zcore.functions.zso(ds, "HighSchool");
-		ts["AssociationName"]=application.zcore.functions.zso(ds, "AssociationName");
-		ts["AssociationPhone"]=application.zcore.functions.zso(ds, "AssociationPhone");
-		ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-		ts["CAR_HOASubjectToDues"]=application.zcore.functions.zso(ds, "CAR_HOASubjectToDues");
-		ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-		ts["LaundryFeatures"]=application.zcore.functions.zso(ds, "LaundryFeatures");
-		ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-		ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-		ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-		ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-		ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-		ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-		ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-		ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-		ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-		ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-		ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-		ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-		ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-		ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-		ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-		ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-		ts["MiddleOrJuniorSchool"]=application.zcore.functions.zso(ds, "MiddleOrJuniorSchool");
-		ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-		ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-		ts["Model"]=application.zcore.functions.zso(ds, "Model");
-		ts["NewConstructionYN"]=application.zcore.functions.zso(ds, "NewConstructionYN");
-		ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-		ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-		ts["ParkingFeatures"]=application.zcore.functions.zso(ds, "ParkingFeatures");
-		ts["PendingTimestamp"]=application.zcore.functions.zso(ds, "PendingTimestamp");
-		ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-		ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-		ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-		ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-		ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-		ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-		ts["PostalCodePlus4"]=application.zcore.functions.zso(ds, "PostalCodePlus4");
-		ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-		ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-		ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-		ts["CAR_ProposedSpecialAssessmentYN"]=application.zcore.functions.zso(ds, "CAR_ProposedSpecialAssessmentYN");
-		ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-		ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-		ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-		ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-		ts["BuyerAgentKey"]=application.zcore.functions.zso(ds, "BuyerAgentKey");
-		ts["BuyerAgentAOR"]=application.zcore.functions.zso(ds, "BuyerAgentAOR");
-		ts["BuyerAgentMlsId"]=application.zcore.functions.zso(ds, "BuyerAgentMlsId");
-		ts["BuyerOfficeKey"]=application.zcore.functions.zso(ds, "BuyerOfficeKey");
-		ts["BuyerOfficeMlsId"]=application.zcore.functions.zso(ds, "BuyerOfficeMlsId");
-		ts["Sewer"]=application.zcore.functions.zso(ds, "Sewer");
-		ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-		ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-		ts["CAR_SqFtAdditional"]=application.zcore.functions.zso(ds, "CAR_SqFtAdditional");
-		ts["BelowGradeFinishedArea"]=application.zcore.functions.zso(ds, "BelowGradeFinishedArea");
-		ts["CAR_SqFtLower"]=application.zcore.functions.zso(ds, "CAR_SqFtLower");
-		ts["CAR_SqFtMain"]=application.zcore.functions.zso(ds, "CAR_SqFtMain");
-		ts["CAR_SqFtThird"]=application.zcore.functions.zso(ds, "CAR_SqFtThird");
-		ts["LivingArea"]=application.zcore.functions.zso(ds, "LivingArea");
-		ts["BuildingAreaTotal"]=application.zcore.functions.zso(ds, "BuildingAreaTotal");
-		ts["CAR_SqFtUnheatedBasement"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedBasement");
-		ts["CAR_SqFtUnheatedLower"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedLower");
-		ts["CAR_SqFtUnheatedMain"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedMain");
-		ts["CAR_SqFtUnheatedThird"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedThird");
-		ts["CAR_SqFtUnheatedTotal"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedTotal");
-		ts["CAR_SqFtUnheatedUpper"]=application.zcore.functions.zso(ds, "CAR_SqFtUnheatedUpper");
-		ts["CAR_SqFtUpper"]=application.zcore.functions.zso(ds, "CAR_SqFtUpper");
-		ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-		ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-		ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-		ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-		ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-		ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-		ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-		ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-		ts["SubdivisionName"]=application.zcore.functions.zso(ds, "SubdivisionName");
-		ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-		ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-		ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-		ts["UnitNumber"]=application.zcore.functions.zso(ds, "UnitNumber");
-		ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-		ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-		ts["WaterSource"]=application.zcore.functions.zso(ds, "WaterSource");
-		ts["CAR_WaterHeater"]=application.zcore.functions.zso(ds, "CAR_WaterHeater");
-		ts["YearBuilt"]=application.zcore.functions.zso(ds, "YearBuilt");
-		ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-		ts["CAR_MainLevelGarageYN"]=application.zcore.functions.zso(ds, "CAR_MainLevelGarageYN");
-		ts["OccupantType"]=application.zcore.functions.zso(ds, "OccupantType");
-		ts["CAR_ProjectedClosingDate"]=application.zcore.functions.zso(ds, "CAR_ProjectedClosingDate");
-		ts["CAR_CCRSubjectTo"]=application.zcore.functions.zso(ds, "CAR_CCRSubjectTo");
-		ts["RoomType"]=application.zcore.functions.zso(ds, "RoomType");
-		ts["CAR_room1_BathsFull"]=application.zcore.functions.zso(ds, "CAR_room1_BathsFull");
-		ts["CAR_room1_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room1_BathsHalf");
-		ts["CAR_room1_BedsTotal"]=application.zcore.functions.zso(ds, "CAR_room1_BedsTotal");
-		ts["RoomBathroom1Level"]=application.zcore.functions.zso(ds, "RoomBathroom1Level");
-		ts["RoomBathroom2Level"]=application.zcore.functions.zso(ds, "RoomBathroom2Level");
-		ts["RoomBreakfastRoomLevel"]=application.zcore.functions.zso(ds, "RoomBreakfastRoomLevel");
-		ts["RoomDiningRoomLevel"]=application.zcore.functions.zso(ds, "RoomDiningRoomLevel");
-		ts["RoomFamilyRoomLevel"]=application.zcore.functions.zso(ds, "RoomFamilyRoomLevel");
-		ts["RoomKitchenLevel"]=application.zcore.functions.zso(ds, "RoomKitchenLevel");
-		ts["RoomLivingRoomLevel"]=application.zcore.functions.zso(ds, "RoomLivingRoomLevel");
-		ts["RoomMasterBedroomLevel"]=application.zcore.functions.zso(ds, "RoomMasterBedroomLevel");
-		ts["CAR_room1_RoomType"]=application.zcore.functions.zso(ds, "CAR_room1_RoomType");
-		ts["CAR_room2_BathsFull"]=application.zcore.functions.zso(ds, "CAR_room2_BathsFull");
-		ts["CAR_room2_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room2_BathsHalf");
-		ts["CAR_room2_BedsTotal"]=application.zcore.functions.zso(ds, "CAR_room2_BedsTotal");
-		ts["RoomBathroom3Level"]=application.zcore.functions.zso(ds, "RoomBathroom3Level");
-		ts["RoomBathroom4Level"]=application.zcore.functions.zso(ds, "RoomBathroom4Level");
-		ts["RoomBathroom5Level"]=application.zcore.functions.zso(ds, "RoomBathroom5Level");
-		ts["RoomLaundryLevel"]=application.zcore.functions.zso(ds, "RoomLaundryLevel");
-		ts["RoomLoftLevel"]=application.zcore.functions.zso(ds, "RoomLoftLevel");
-		ts["RoomMasterBedroom2Level"]=application.zcore.functions.zso(ds, "RoomMasterBedroom2Level");
-		ts["RoomBedroom1Level"]=application.zcore.functions.zso(ds, "RoomBedroom1Level");
-		ts["RoomBedroom2Level"]=application.zcore.functions.zso(ds, "RoomBedroom2Level");
-		ts["CAR_room2_RoomType"]=application.zcore.functions.zso(ds, "CAR_room2_RoomType");
-		ts["CAR_room3_BathsFull"]=application.zcore.functions.zso(ds, "CAR_room3_BathsFull");
-		ts["CAR_room3_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room3_BathsHalf");
-		ts["CAR_room3_BedsTotal"]=application.zcore.functions.zso(ds, "CAR_room3_BedsTotal");
-		ts["RoomBathroom6Level"]=application.zcore.functions.zso(ds, "RoomBathroom6Level");
-		ts["RoomLoft2Level"]=application.zcore.functions.zso(ds, "RoomLoft2Level");
-		ts["RoomPlayRoomLevel"]=application.zcore.functions.zso(ds, "RoomPlayRoomLevel");
-		ts["RoomBedroom3Level"]=application.zcore.functions.zso(ds, "RoomBedroom3Level");
-		ts["CAR_room3_RoomType"]=application.zcore.functions.zso(ds, "CAR_room3_RoomType");
-		ts["CAR_room4_BathsFull"]=application.zcore.functions.zso(ds, "CAR_room4_BathsFull");
-		ts["CAR_room4_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room4_BathsHalf");
-		ts["CAR_room4_BedsTotal"]=application.zcore.functions.zso(ds, "CAR_room4_BedsTotal");
-		ts["RoomNoneLevel"]=application.zcore.functions.zso(ds, "RoomNoneLevel");
-		ts["CAR_room4_RoomType"]=application.zcore.functions.zso(ds, "CAR_room4_RoomType");
-		ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-		ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-		// PropertyRlse
-		ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["AboveGradeFinishedArea"]=application.zcore.functions.zso(ds, "AboveGradeFinishedArea");
-ts["ArchitecturalStyle"]=application.zcore.functions.zso(ds, "ArchitecturalStyle");
-ts["AvailabilityDate"]=application.zcore.functions.zso(ds, "AvailabilityDate");
-ts["BathroomsFull"]=application.zcore.functions.zso(ds, "BathroomsFull");
-ts["BathroomsHalf"]=application.zcore.functions.zso(ds, "BathroomsHalf");
-ts["BathroomsTotalInteger"]=application.zcore.functions.zso(ds, "BathroomsTotalInteger");
-ts["BedroomsTotal"]=application.zcore.functions.zso(ds, "BedroomsTotal");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["CloseDate"]=application.zcore.functions.zso(ds, "CloseDate");
-ts["ClosePrice"]=application.zcore.functions.zso(ds, "ClosePrice");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["CAR_DOMToClose"]=application.zcore.functions.zso(ds, "CAR_DOMToClose");
-ts["RoadSurfaceType"]=application.zcore.functions.zso(ds, "RoadSurfaceType");
-ts["ElementarySchool"]=application.zcore.functions.zso(ds, "ElementarySchool");
-ts["Appliances"]=application.zcore.functions.zso(ds, "Appliances");
-ts["FireplaceFeatures"]=application.zcore.functions.zso(ds, "FireplaceFeatures");
-ts["FireplaceYN"]=application.zcore.functions.zso(ds, "FireplaceYN");
-ts["Flooring"]=application.zcore.functions.zso(ds, "Flooring");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["Furnished"]=application.zcore.functions.zso(ds, "Furnished");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["Heating"]=application.zcore.functions.zso(ds, "Heating");
-ts["HighSchool"]=application.zcore.functions.zso(ds, "HighSchool");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["InteriorFeatures"]=application.zcore.functions.zso(ds, "InteriorFeatures");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["LaundryFeatures"]=application.zcore.functions.zso(ds, "LaundryFeatures");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["CAR_MainLevelGarageYN"]=application.zcore.functions.zso(ds, "CAR_MainLevelGarageYN");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["MiddleOrJuniorSchool"]=application.zcore.functions.zso(ds, "MiddleOrJuniorSchool");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["OccupantType"]=application.zcore.functions.zso(ds, "OccupantType");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["ParkingFeatures"]=application.zcore.functions.zso(ds, "ParkingFeatures");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PetsAllowed"]=application.zcore.functions.zso(ds, "PetsAllowed");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["CAR_Porch"]=application.zcore.functions.zso(ds, "CAR_Porch");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["PostalCodePlus4"]=application.zcore.functions.zso(ds, "PostalCodePlus4");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["CAR_PropertySubTypeSecondary"]=application.zcore.functions.zso(ds, "CAR_PropertySubTypeSecondary");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["BuyerAgentKey"]=application.zcore.functions.zso(ds, "BuyerAgentKey");
-ts["BuyerAgentAOR"]=application.zcore.functions.zso(ds, "BuyerAgentAOR");
-ts["BuyerAgentMlsId"]=application.zcore.functions.zso(ds, "BuyerAgentMlsId");
-ts["BuyerOfficeKey"]=application.zcore.functions.zso(ds, "BuyerOfficeKey");
-ts["BuyerOfficeMlsId"]=application.zcore.functions.zso(ds, "BuyerOfficeMlsId");
-ts["Sewer"]=application.zcore.functions.zso(ds, "Sewer");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["LivingArea"]=application.zcore.functions.zso(ds, "LivingArea");
-ts["BuildingAreaTotal"]=application.zcore.functions.zso(ds, "BuildingAreaTotal");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-ts["SubdivisionName"]=application.zcore.functions.zso(ds, "SubdivisionName");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TenantPays"]=application.zcore.functions.zso(ds, "TenantPays");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["EntryLevel"]=application.zcore.functions.zso(ds, "EntryLevel");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["WaterSource"]=application.zcore.functions.zso(ds, "WaterSource");
-ts["CAR_WaterHeater"]=application.zcore.functions.zso(ds, "CAR_WaterHeater");
-ts["YearBuilt"]=application.zcore.functions.zso(ds, "YearBuilt");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["RoomType"]=application.zcore.functions.zso(ds, "RoomType");
-ts["CAR_room1_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room1_BathsHalf");
-ts["RoomBathroom1Level"]=application.zcore.functions.zso(ds, "RoomBathroom1Level");
-ts["RoomBreakfastRoomLevel"]=application.zcore.functions.zso(ds, "RoomBreakfastRoomLevel");
-ts["RoomKitchenLevel"]=application.zcore.functions.zso(ds, "RoomKitchenLevel");
-ts["RoomLaundryLevel"]=application.zcore.functions.zso(ds, "RoomLaundryLevel");
-ts["RoomLivingRoomLevel"]=application.zcore.functions.zso(ds, "RoomLivingRoomLevel");
-ts["RoomPantryLevel"]=application.zcore.functions.zso(ds, "RoomPantryLevel");
-ts["CAR_room1_RoomType"]=application.zcore.functions.zso(ds, "CAR_room1_RoomType");
-ts["CAR_room2_BathsFull"]=application.zcore.functions.zso(ds, "CAR_room2_BathsFull");
-ts["CAR_room2_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_room2_BathsHalf");
-ts["CAR_room2_BedsTotal"]=application.zcore.functions.zso(ds, "CAR_room2_BedsTotal");
-ts["RoomBathroom2Level"]=application.zcore.functions.zso(ds, "RoomBathroom2Level");
-ts["RoomBathroom3Level"]=application.zcore.functions.zso(ds, "RoomBathroom3Level");
-ts["RoomBedroom1Level"]=application.zcore.functions.zso(ds, "RoomBedroom1Level");
-ts["RoomBedroom2Level"]=application.zcore.functions.zso(ds, "RoomBedroom2Level");
-ts["RoomBedroom3Level"]=application.zcore.functions.zso(ds, "RoomBedroom3Level");
-ts["CAR_room2_RoomType"]=application.zcore.functions.zso(ds, "CAR_room2_RoomType");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-// PropertyRinc
-ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["AccessibilityFeatures"]=application.zcore.functions.zso(ds, "AccessibilityFeatures");
-ts["BathroomsFull"]=application.zcore.functions.zso(ds, "BathroomsFull");
-ts["BathroomsHalf"]=application.zcore.functions.zso(ds, "BathroomsHalf");
-ts["BedroomsTotal"]=application.zcore.functions.zso(ds, "BedroomsTotal");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CAR_CCRSubjectTo"]=application.zcore.functions.zso(ds, "CAR_CCRSubjectTo");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["CommunityFeatures"]=application.zcore.functions.zso(ds, "CommunityFeatures");
-ts["CAR_ConstructionStatus"]=application.zcore.functions.zso(ds, "CAR_ConstructionStatus");
-ts["CAR_ConstructionType"]=application.zcore.functions.zso(ds, "CAR_ConstructionType");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-ts["Directions"]=application.zcore.functions.zso(ds, "Directions");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["RoadSurfaceType"]=application.zcore.functions.zso(ds, "RoadSurfaceType");
-ts["ElementarySchool"]=application.zcore.functions.zso(ds, "ElementarySchool");
-ts["Appliances"]=application.zcore.functions.zso(ds, "Appliances");
-ts["ConstructionMaterials"]=application.zcore.functions.zso(ds, "ConstructionMaterials");
-ts["FireplaceFeatures"]=application.zcore.functions.zso(ds, "FireplaceFeatures");
-ts["FireplaceYN"]=application.zcore.functions.zso(ds, "FireplaceYN");
-ts["Flooring"]=application.zcore.functions.zso(ds, "Flooring");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["Heating"]=application.zcore.functions.zso(ds, "Heating");
-ts["HighSchool"]=application.zcore.functions.zso(ds, "HighSchool");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["LaundryFeatures"]=application.zcore.functions.zso(ds, "LaundryFeatures");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingTerms"]=application.zcore.functions.zso(ds, "ListingTerms");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["CAR_MainLevelGarageYN"]=application.zcore.functions.zso(ds, "CAR_MainLevelGarageYN");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["MiddleOrJuniorSchool"]=application.zcore.functions.zso(ds, "MiddleOrJuniorSchool");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["NewConstructionYN"]=application.zcore.functions.zso(ds, "NewConstructionYN");
-ts["NumberOfUnitsTotal"]=application.zcore.functions.zso(ds, "NumberOfUnitsTotal");
-ts["OccupantType"]=application.zcore.functions.zso(ds, "OccupantType");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["ParkingFeatures"]=application.zcore.functions.zso(ds, "ParkingFeatures");
-ts["PendingTimestamp"]=application.zcore.functions.zso(ds, "PendingTimestamp");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PetsAllowed"]=application.zcore.functions.zso(ds, "PetsAllowed");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["CAR_Porch"]=application.zcore.functions.zso(ds, "CAR_Porch");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["PostalCodePlus4"]=application.zcore.functions.zso(ds, "PostalCodePlus4");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["CAR_ProposedSpecialAssessmentYN"]=application.zcore.functions.zso(ds, "CAR_ProposedSpecialAssessmentYN");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-ts["BuyerAgentKey"]=application.zcore.functions.zso(ds, "BuyerAgentKey");
-ts["BuyerAgentAOR"]=application.zcore.functions.zso(ds, "BuyerAgentAOR");
-ts["BuyerAgentMlsId"]=application.zcore.functions.zso(ds, "BuyerAgentMlsId");
-ts["BuyerOfficeKey"]=application.zcore.functions.zso(ds, "BuyerOfficeKey");
-ts["BuyerOfficeMlsId"]=application.zcore.functions.zso(ds, "BuyerOfficeMlsId");
-ts["Sewer"]=application.zcore.functions.zso(ds, "Sewer");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-ts["CAR_SqFtAdditional"]=application.zcore.functions.zso(ds, "CAR_SqFtAdditional");
-ts["BelowGradeFinishedArea"]=application.zcore.functions.zso(ds, "BelowGradeFinishedArea");
-ts["CAR_SqFtGarage"]=application.zcore.functions.zso(ds, "CAR_SqFtGarage");
-ts["LivingArea"]=application.zcore.functions.zso(ds, "LivingArea");
-ts["BuildingAreaTotal"]=application.zcore.functions.zso(ds, "BuildingAreaTotal");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-ts["SyndicationRemarks"]=application.zcore.functions.zso(ds, "SyndicationRemarks");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-ts["TenantPays"]=application.zcore.functions.zso(ds, "TenantPays");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["WaterSource"]=application.zcore.functions.zso(ds, "WaterSource");
-ts["WaterfrontFeatures"]=application.zcore.functions.zso(ds, "WaterfrontFeatures");
-ts["CAR_WaterHeater"]=application.zcore.functions.zso(ds, "CAR_WaterHeater");
-ts["YearBuilt"]=application.zcore.functions.zso(ds, "YearBuilt");
-ts["CAR_ZoningNCM"]=application.zcore.functions.zso(ds, "CAR_ZoningNCM");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["CAR_unit1_BathsFull"]=application.zcore.functions.zso(ds, "CAR_unit1_BathsFull");
-ts["CAR_unit1_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_unit1_BathsHalf");
-ts["UnitType1BedsTotal"]=application.zcore.functions.zso(ds, "UnitType1BedsTotal");
-ts["CAR_unit1_SqFtTotal"]=application.zcore.functions.zso(ds, "CAR_unit1_SqFtTotal");
-ts["CAR_unit1_UnitRooms"]=application.zcore.functions.zso(ds, "CAR_unit1_UnitRooms");
-ts["CAR_unit2_BathsFull"]=application.zcore.functions.zso(ds, "CAR_unit2_BathsFull");
-ts["CAR_unit2_BathsHalf"]=application.zcore.functions.zso(ds, "CAR_unit2_BathsHalf");
-ts["UnitType2BedsTotal"]=application.zcore.functions.zso(ds, "UnitType2BedsTotal");
-ts["CAR_unit2_SqFtTotal"]=application.zcore.functions.zso(ds, "CAR_unit2_SqFtTotal");
-ts["CAR_unit2_UnitRooms"]=application.zcore.functions.zso(ds, "CAR_unit2_UnitRooms");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-// PropertyLand
-ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["AssociationFee"]=application.zcore.functions.zso(ds, "AssociationFee");
-ts["AssociationFeeFrequency"]=application.zcore.functions.zso(ds, "AssociationFeeFrequency");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CAR_CanSubdivideYN"]=application.zcore.functions.zso(ds, "CAR_CanSubdivideYN");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["CoListAgentKey"]=application.zcore.functions.zso(ds, "CoListAgentKey");
-ts["CoListAgentFullName"]=application.zcore.functions.zso(ds, "CoListAgentFullName");
-ts["CoListAgentAOR"]=application.zcore.functions.zso(ds, "CoListAgentAOR");
-ts["CoListAgentMlsId"]=application.zcore.functions.zso(ds, "CoListAgentMlsId");
-ts["CoListOfficeKey"]=application.zcore.functions.zso(ds, "CoListOfficeKey");
-ts["CoListOfficeMlsId"]=application.zcore.functions.zso(ds, "CoListOfficeMlsId");
-ts["CoListOfficeName"]=application.zcore.functions.zso(ds, "CoListOfficeName");
-ts["CommunityFeatures"]=application.zcore.functions.zso(ds, "CommunityFeatures");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-ts["Directions"]=application.zcore.functions.zso(ds, "Directions");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["ElementarySchool"]=application.zcore.functions.zso(ds, "ElementarySchool");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["HabitableResidenceYN"]=application.zcore.functions.zso(ds, "HabitableResidenceYN");
-ts["HighSchool"]=application.zcore.functions.zso(ds, "HighSchool");
-ts["AssociationName"]=application.zcore.functions.zso(ds, "AssociationName");
-ts["AssociationPhone"]=application.zcore.functions.zso(ds, "AssociationPhone");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["CAR_HOASubjectToDues"]=application.zcore.functions.zso(ds, "CAR_HOASubjectToDues");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingTerms"]=application.zcore.functions.zso(ds, "ListingTerms");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotSizeDimensions"]=application.zcore.functions.zso(ds, "LotSizeDimensions");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["MiddleOrJuniorSchool"]=application.zcore.functions.zso(ds, "MiddleOrJuniorSchool");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["CAR_OutBuildingsYN"]=application.zcore.functions.zso(ds, "CAR_OutBuildingsYN");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["CAR_PlatBookSlide"]=application.zcore.functions.zso(ds, "CAR_PlatBookSlide");
-ts["CAR_PlatReferenceSectionPages"]=application.zcore.functions.zso(ds, "CAR_PlatReferenceSectionPages");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-ts["CAR_Restrictions"]=application.zcore.functions.zso(ds, "CAR_Restrictions");
-ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-ts["Sewer"]=application.zcore.functions.zso(ds, "Sewer");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-ts["CAR_SqFtBuildingMinimum"]=application.zcore.functions.zso(ds, "CAR_SqFtBuildingMinimum");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-ts["SubdivisionName"]=application.zcore.functions.zso(ds, "SubdivisionName");
-ts["CAR_SuitableUse"]=application.zcore.functions.zso(ds, "CAR_SuitableUse");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["WaterSource"]=application.zcore.functions.zso(ds, "WaterSource");
-ts["CAR_ZoningNCM"]=application.zcore.functions.zso(ds, "CAR_ZoningNCM");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-// PropertyFarm
-ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["CAR_ConstructionType"]=application.zcore.functions.zso(ds, "CAR_ConstructionType");
-ts["CAR_CorrectionCount"]=application.zcore.functions.zso(ds, "CAR_CorrectionCount");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-ts["Directions"]=application.zcore.functions.zso(ds, "Directions");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["ElementarySchool"]=application.zcore.functions.zso(ds, "ElementarySchool");
-ts["ExteriorFeatures"]=application.zcore.functions.zso(ds, "ExteriorFeatures");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["HabitableResidenceYN"]=application.zcore.functions.zso(ds, "HabitableResidenceYN");
-ts["HighSchool"]=application.zcore.functions.zso(ds, "HighSchool");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingTerms"]=application.zcore.functions.zso(ds, "ListingTerms");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotFeatures"]=application.zcore.functions.zso(ds, "LotFeatures");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["MiddleOrJuniorSchool"]=application.zcore.functions.zso(ds, "MiddleOrJuniorSchool");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["CAR_OutBuildingsYN"]=application.zcore.functions.zso(ds, "CAR_OutBuildingsYN");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["PostalCodePlus4"]=application.zcore.functions.zso(ds, "PostalCodePlus4");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["CAR_Restrictions"]=application.zcore.functions.zso(ds, "CAR_Restrictions");
-ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-ts["Sewer"]=application.zcore.functions.zso(ds, "Sewer");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-ts["CAR_SqFtBuildingMinimum"]=application.zcore.functions.zso(ds, "CAR_SqFtBuildingMinimum");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StreetDirSuffix"]=application.zcore.functions.zso(ds, "StreetDirSuffix");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["SubdivisionName"]=application.zcore.functions.zso(ds, "SubdivisionName");
-ts["SyndicationRemarks"]=application.zcore.functions.zso(ds, "SyndicationRemarks");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["VirtualTourURLUnbranded"]=application.zcore.functions.zso(ds, "VirtualTourURLUnbranded");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["WaterSource"]=application.zcore.functions.zso(ds, "WaterSource");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-ts["CAR_SuitableUse"]=application.zcore.functions.zso(ds, "CAR_SuitableUse");
-ts["WaterBodyName"]=application.zcore.functions.zso(ds, "WaterBodyName");
-ts["Elevation"]=application.zcore.functions.zso(ds, "Elevation");
-ts["WaterfrontFeatures"]=application.zcore.functions.zso(ds, "WaterfrontFeatures");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-// PropertyComs
-ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["BathroomsTotalInteger"]=application.zcore.functions.zso(ds, "BathroomsTotalInteger");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["Cooling"]=application.zcore.functions.zso(ds, "Cooling");
-ts["Heating"]=application.zcore.functions.zso(ds, "Heating");
-ts["CAR_ConstructionType"]=application.zcore.functions.zso(ds, "CAR_ConstructionType");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["Flooring"]=application.zcore.functions.zso(ds, "Flooring");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["Inclusions"]=application.zcore.functions.zso(ds, "Inclusions");
-ts["CAR_InsideCityYN"]=application.zcore.functions.zso(ds, "CAR_InsideCityYN");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingTerms"]=application.zcore.functions.zso(ds, "ListingTerms");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["NewConstructionYN"]=application.zcore.functions.zso(ds, "NewConstructionYN");
-ts["NumberOfBuildings"]=application.zcore.functions.zso(ds, "NumberOfBuildings");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["CAR_PlatReferenceSectionPages"]=application.zcore.functions.zso(ds, "CAR_PlatReferenceSectionPages");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["PostalCodePlus4"]=application.zcore.functions.zso(ds, "PostalCodePlus4");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["CAR_PropertySubTypeSecondary"]=application.zcore.functions.zso(ds, "CAR_PropertySubTypeSecondary");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-ts["CAR_Restrictions"]=application.zcore.functions.zso(ds, "CAR_Restrictions");
-ts["CAR_RestrictionsDescription"]=application.zcore.functions.zso(ds, "CAR_RestrictionsDescription");
-ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-ts["BuyerAgentAOR"]=application.zcore.functions.zso(ds, "BuyerAgentAOR");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-ts["CAR_SqFtAvailableMaximum"]=application.zcore.functions.zso(ds, "CAR_SqFtAvailableMaximum");
-ts["CAR_SqFtAvailableMinimum"]=application.zcore.functions.zso(ds, "CAR_SqFtAvailableMinimum");
-ts["CAR_SqFtMaximumLease"]=application.zcore.functions.zso(ds, "CAR_SqFtMaximumLease");
-ts["CAR_SqFtMinimumLease"]=application.zcore.functions.zso(ds, "CAR_SqFtMinimumLease");
-ts["LivingArea"]=application.zcore.functions.zso(ds, "LivingArea");
-ts["BuildingAreaTotal"]=application.zcore.functions.zso(ds, "BuildingAreaTotal");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StoriesTotal"]=application.zcore.functions.zso(ds, "StoriesTotal");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-ts["CAR_SuitableUse"]=application.zcore.functions.zso(ds, "CAR_SuitableUse");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-ts["CAR_TransactionType"]=application.zcore.functions.zso(ds, "CAR_TransactionType");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["YearBuilt"]=application.zcore.functions.zso(ds, "YearBuilt");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["CAR_CCRSubjectTo"]=application.zcore.functions.zso(ds, "CAR_CCRSubjectTo");
-ts["OccupantType"]=application.zcore.functions.zso(ds, "OccupantType");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-// PropertyComl
-ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
-ts["AccessCode"]=application.zcore.functions.zso(ds, "AccessCode");
-ts["BathroomsTotalInteger"]=application.zcore.functions.zso(ds, "BathroomsTotalInteger");
-ts["CAR_BuyerAgentSaleYN"]=application.zcore.functions.zso(ds, "CAR_BuyerAgentSaleYN");
-ts["CAR_CCRSubjectTo"]=application.zcore.functions.zso(ds, "CAR_CCRSubjectTo");
-ts["CumulativeDaysOnMarket"]=application.zcore.functions.zso(ds, "CumulativeDaysOnMarket");
-ts["City"]=application.zcore.functions.zso(ds, "City");
-ts["Cooling"]=application.zcore.functions.zso(ds, "Cooling");
-ts["Heating"]=application.zcore.functions.zso(ds, "Heating");
-ts["CAR_CommercialLocationDescription"]=application.zcore.functions.zso(ds, "CAR_CommercialLocationDescription");
-ts["CAR_ComplexName"]=application.zcore.functions.zso(ds, "CAR_ComplexName");
-ts["CAR_ConstructionStatus"]=application.zcore.functions.zso(ds, "CAR_ConstructionStatus");
-ts["CAR_ConstructionType"]=application.zcore.functions.zso(ds, "CAR_ConstructionType");
-ts["CountyOrParish"]=application.zcore.functions.zso(ds, "CountyOrParish");
-ts["CrossStreet"]=application.zcore.functions.zso(ds, "CrossStreet");
-ts["CAR_DeedReference"]=application.zcore.functions.zso(ds, "CAR_DeedReference");
-ts["Directions"]=application.zcore.functions.zso(ds, "Directions");
-ts["CAR_Documents"]=application.zcore.functions.zso(ds, "CAR_Documents");
-ts["DaysOnMarket"]=application.zcore.functions.zso(ds, "DaysOnMarket");
-ts["Elevation"]=application.zcore.functions.zso(ds, "Elevation");
-ts["CAR_FloodPlain"]=application.zcore.functions.zso(ds, "CAR_FloodPlain");
-ts["Flooring"]=application.zcore.functions.zso(ds, "Flooring");
-ts["FoundationDetails"]=application.zcore.functions.zso(ds, "FoundationDetails");
-ts["CAR_GeocodeSource"]=application.zcore.functions.zso(ds, "CAR_GeocodeSource");
-ts["CAR_HOASubjectTo"]=application.zcore.functions.zso(ds, "CAR_HOASubjectTo");
-ts["Inclusions"]=application.zcore.functions.zso(ds, "Inclusions");
-ts["CAR_InsideCityYN"]=application.zcore.functions.zso(ds, "CAR_InsideCityYN");
-ts["Latitude"]=application.zcore.functions.zso(ds, "Latitude");
-ts["ListAgentKey"]=application.zcore.functions.zso(ds, "ListAgentKey");
-ts["ListAgentDirectPhone"]=application.zcore.functions.zso(ds, "ListAgentDirectPhone");
-ts["ListAgentFullName"]=application.zcore.functions.zso(ds, "ListAgentFullName");
-ts["ListAgentMlsId"]=application.zcore.functions.zso(ds, "ListAgentMlsId");
-ts["ListAgentAOR"]=application.zcore.functions.zso(ds, "ListAgentAOR");
-ts["ListingContractDate"]=application.zcore.functions.zso(ds, "ListingContractDate");
-ts["ListingAgreement"]=application.zcore.functions.zso(ds, "ListingAgreement");
-ts["ListOfficeKey"]=application.zcore.functions.zso(ds, "ListOfficeKey");
-ts["ListOfficeMlsId"]=application.zcore.functions.zso(ds, "ListOfficeMlsId");
-ts["ListOfficeName"]=application.zcore.functions.zso(ds, "ListOfficeName");
-ts["ListOfficePhone"]=application.zcore.functions.zso(ds, "ListOfficePhone");
-ts["ListPrice"]=application.zcore.functions.zso(ds, "ListPrice");
-ts["Longitude"]=application.zcore.functions.zso(ds, "Longitude");
-ts["LotSizeArea"]=application.zcore.functions.zso(ds, "LotSizeArea");
-ts["ListingKey"]=application.zcore.functions.zso(ds, "ListingKey");
-ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
-ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
-ts["ListingId"]=application.zcore.functions.zso(ds, "ListingId");
-ts["NewConstructionYN"]=application.zcore.functions.zso(ds, "NewConstructionYN");
-ts["NumberOfBuildings"]=application.zcore.functions.zso(ds, "NumberOfBuildings");
-ts["OccupantType"]=application.zcore.functions.zso(ds, "OccupantType");
-ts["CAR_OwnerAgentYN"]=application.zcore.functions.zso(ds, "CAR_OwnerAgentYN");
-ts["ParcelNumber"]=application.zcore.functions.zso(ds, "ParcelNumber");
-ts["InternetAddressDisplayYN"]=application.zcore.functions.zso(ds, "InternetAddressDisplayYN");
-ts["InternetEntireListingDisplayYN"]=application.zcore.functions.zso(ds, "InternetEntireListingDisplayYN");
-ts["CAR_PermitSyndicationYN"]=application.zcore.functions.zso(ds, "CAR_PermitSyndicationYN");
-ts["PhotosCount"]=application.zcore.functions.zso(ds, "PhotosCount");
-ts["PhotosChangeTimestamp"]=application.zcore.functions.zso(ds, "PhotosChangeTimestamp");
-ts["PostalCode"]=application.zcore.functions.zso(ds, "PostalCode");
-ts["StructureType"]=application.zcore.functions.zso(ds, "StructureType");
-ts["PropertySubType"]=application.zcore.functions.zso(ds, "PropertySubType");
-ts["CAR_PropertySubTypeSecondary"]=application.zcore.functions.zso(ds, "CAR_PropertySubTypeSecondary");
-ts["PropertyType"]=application.zcore.functions.zso(ds, "PropertyType");
-ts["PublicRemarks"]=application.zcore.functions.zso(ds, "PublicRemarks");
-ts["CAR_RailService"]=application.zcore.functions.zso(ds, "CAR_RailService");
-ts["CAR_RATIO_CurrentPrice_By_Acre"]=application.zcore.functions.zso(ds, "CAR_RATIO_CurrentPrice_By_Acre");
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]=application.zcore.functions.zso(ds, "CAR_RATIO_ListPrice_By_TaxAmount");
-ts["CAR_Restrictions"]=application.zcore.functions.zso(ds, "CAR_Restrictions");
-ts["CAR_RestrictionsDescription"]=application.zcore.functions.zso(ds, "CAR_RestrictionsDescription");
-ts["RoadResponsibility"]=application.zcore.functions.zso(ds, "RoadResponsibility");
-ts["Roof"]=application.zcore.functions.zso(ds, "Roof");
-ts["ShowingContactPhone"]=application.zcore.functions.zso(ds, "ShowingContactPhone");
-ts["SpecialListingConditions"]=application.zcore.functions.zso(ds, "SpecialListingConditions");
-ts["CAR_SqFtAvailableMaximum"]=application.zcore.functions.zso(ds, "CAR_SqFtAvailableMaximum");
-ts["CAR_SqFtAvailableMinimum"]=application.zcore.functions.zso(ds, "CAR_SqFtAvailableMinimum");
-ts["CAR_SqFtMaximumLease"]=application.zcore.functions.zso(ds, "CAR_SqFtMaximumLease");
-ts["CAR_SqFtMinimumLease"]=application.zcore.functions.zso(ds, "CAR_SqFtMinimumLease");
-ts["LivingArea"]=application.zcore.functions.zso(ds, "LivingArea");
-ts["BuildingAreaTotal"]=application.zcore.functions.zso(ds, "BuildingAreaTotal");
-ts["StateOrProvince"]=application.zcore.functions.zso(ds, "StateOrProvince");
-ts["StandardStatus"]=application.zcore.functions.zso(ds, "StandardStatus");
-ts["CAR_StatusContractualSearchDate"]=application.zcore.functions.zso(ds, "CAR_StatusContractualSearchDate");
-ts["StoriesTotal"]=application.zcore.functions.zso(ds, "StoriesTotal");
-ts["StreetDirPrefix"]=application.zcore.functions.zso(ds, "StreetDirPrefix");
-ts["StreetName"]=application.zcore.functions.zso(ds, "StreetName");
-ts["StreetNumber"]=application.zcore.functions.zso(ds, "StreetNumber");
-ts["StreetNumberNumeric"]=application.zcore.functions.zso(ds, "StreetNumberNumeric");
-ts["StreetSuffix"]=application.zcore.functions.zso(ds, "StreetSuffix");
-ts["CAR_StreetViewParam"]=application.zcore.functions.zso(ds, "CAR_StreetViewParam");
-ts["CAR_SuitableUse"]=application.zcore.functions.zso(ds, "CAR_SuitableUse");
-ts["CAR_Table"]=application.zcore.functions.zso(ds, "CAR_Table");
-ts["TaxAnnualAmount"]=application.zcore.functions.zso(ds, "TaxAnnualAmount");
-ts["CAR_TransactionType"]=application.zcore.functions.zso(ds, "CAR_TransactionType");
-ts["CAR_UnitCount"]=application.zcore.functions.zso(ds, "CAR_UnitCount");
-ts["UnitNumber"]=application.zcore.functions.zso(ds, "UnitNumber");
-ts["Utilities"]=application.zcore.functions.zso(ds, "Utilities");
-ts["InternetAutomatedValuationDisplayYN"]=application.zcore.functions.zso(ds, "InternetAutomatedValuationDisplayYN");
-ts["InternetConsumerCommentYN"]=application.zcore.functions.zso(ds, "InternetConsumerCommentYN");
-ts["YearBuilt"]=application.zcore.functions.zso(ds, "YearBuilt");
-ts["CAR_ZoningNCM"]=application.zcore.functions.zso(ds, "CAR_ZoningNCM");
-ts["ZoningDescription"]=application.zcore.functions.zso(ds, "ZoningDescription");
-ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
-ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
-
-return ts;
+	return "";
+	// arguments.oldid=replace(arguments.oldid,'"','','all');
+	// if(structkeyexists(request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct,arguments.type) and structkeyexists(request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct[arguments.type].id,arguments.oldid)){
+	// 	return request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldid];
+	// }else{
+	// 	return arguments.defaultValue;
+	// }
 	</cfscript>
 </cffunction>
+
+<cffunction name="processListing" localmode="modern" access="public">
+	<cfargument name="ds" type="struct" required="yes">
+	<cfargument name="excludeDs" type="struct" required="yes">
+	<cfscript>
+	ds=arguments.ds; 
+	startTime=gettickcount('nano');
+
+
+	for(i in ds){
+		if((right(i, 4) EQ "date" or i CONTAINS "timestamp") and isdate(ds[i])){
+			d=parsedatetime(ds[i]);
+			ds[i]=dateformat(d, "m/d/yyyy")&" "&timeformat(d, "h:mm tt");
+		}else if(ds[i] EQ 0 or ds[i] EQ 1){
+
+		}else if(len(ds[i]) lt 14 and isnumeric(ds[i]) and right(ds[i], 3) EQ ".00"){
+			ds[i]=numberformat(ds[i]);
+		}else{
+			ds[i]=replace(ds[i], ",", ", ", "all");
+		}
+	}
+	//writedump(ts); 		abort; 
+	
+	ds["ListPrice"]=replace(ds["ListPrice"],",","","ALL");
+	
+	local.listing_subdivision="";
+	if(local.listing_subdivision EQ ""){
+		if(findnocase(","&ds["SubdivisionName"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
+			ds["SubdivisionName"]="";
+		}else if(ds["SubdivisionName"] NEQ ""){
+			ds["SubdivisionName"]=application.zcore.functions.zFirstLetterCaps(ds["SubdivisionName"]);
+		}
+		if(ds["SubdivisionName"] NEQ ""){
+			local.listing_subdivision=ds["SubdivisionName"];
+		}
+	} 
+	this.price=ds["ListPrice"];
+	local.listing_price=ds["ListPrice"];
+	cityName=ds["city"];
+	// get the actual city name: 
+	cid=getNewCityId(ds["city"], cityName, ds["StateOrProvince"]);
+	 
+
+	arrS=listtoarray(ds['SpecialListingConditions'],","); 
+	local.listing_county="";
+	if(local.listing_county EQ ""){
+		local.listing_county=this.listingLookupNewId("County",ds['CountyOrParish']);
+	}
+	//writedump(listing_county); 		abort; 
+	local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type", ds['PropertySubType']);
+
+
+	local.listing_type_id=this.listingLookupNewId("listing_type",ds['PropertyType']);
+
+	
+
+	// rs=getListingTypeWithCode(ds["PropertyType"]);
+	
+	if(application.zcore.functions.zso(ds, "InternetAddressDisplayYN", false, "Y") EQ "N"){
+		ds["StreetNumber"]="";
+		ds["StreetName"]="";
+		ds["StreetType"]="";
+		ds["UnitNumber"]="";
+	}
+
+	// ds["PropertyType"]=rs.id;
+	ad=ds['StreetNumber'];
+	if(ad NEQ 0){
+		address=trim(application.zcore.functions.zso(ds, "StreetDirPrefix")&" #ad# ");
+	}else{
+		address="";	
+	}
+	address&=" "&trim(ds['StreetName']&" "&ds['StreetSuffix']&" "&application.zcore.functions.zso(ds, "StreetDirSuffix"));
+	curLat='';
+	curLong='';
+	if(trim(address) NEQ ""){ 
+		rs5=this.baseGetLatLong(address,ds['StateOrProvince'],ds['PostalCode'], variables.mls_id&"-"&ds.listingId);
+		if(rs5.success){
+			curLat=rs5.latitude;
+			curLong=rs5.longitude;
+		}
+	}
+	address=application.zcore.functions.zfirstlettercaps(address);
+	
+	if(ds['UnitNumber'] NEQ ''){
+		address&=" Unit: "&ds["UnitNumber"];	
+	} 
+	ts2=structnew();
+	ts2.field="";
+	ts2.yearbuiltfield=ds['YearBuilt'];
+	ts2.foreclosureField="";
+	
+	s={};//this.processRawStatus(ts2);
+	arrS=listtoarray(ds['SpecialListingConditions'],",");
+	for(i=1;i LTE arraylen(arrS);i++){
+		c=trim(arrS[i]);
+		if(c EQ "Short Sale"){
+			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["short sale"]]=true;
+			break;
+		} 
+		if(c EQ "In Foreclosure"){
+			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
+		}
+		if(c EQ "Real Estate Owned"){
+			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["bank owned"]]=true;
+		}
+	}
+	if(ds['NewConstructionYN'] EQ "Y"){
+		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["New Construction"]]=true;
+	}
+	if(ds["PropertyType"] EQ "Residential Lease" or ds["PropertyType"] EQ "Commercial Lease"){
+		structdelete(s,request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]);
+		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]]=true;
+	}else{
+		structdelete(s,request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]);
+		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]]=true;
+	}
+	arrT3=[];
+	local.listing_status=structkeylist(s,",");
+
+	uns=structnew();
+	tmp=ds['ArchitecturalStyle'];
+	//writedump(tmp);
+	if(tmp NEQ ""){
+	   arrT=listtoarray(tmp);
+		for(i=1;i LTE arraylen(arrT);i++){ 
+			tmp=this.listingLookupNewId("style",arrT[i]); 
+			if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
+				uns[tmp]=true;
+				arrayappend(arrT3,tmp);
+			}
+		}
+	}
+	local.listing_style=arraytolist(arrT3);
+	//writedump(listing_style); 	abort;
+
+
+	arrT2=[]; 
+	tmp=ds['ParkingFeatures'];
+	if(tmp NEQ ""){
+	   arrT=listtoarray(tmp);
+		for(i=1;i LTE arraylen(arrT);i++){
+			tmp=this.listingLookupNewId("parking",arrT[i]);
+			if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
+				uns[tmp]=true;
+				arrayappend(arrT2,tmp);
+			}
+		}
+	}
+	local.listing_parking=arraytolist(arrT2, ",");
+	
+	if(structkeyexists(ds,'ListingContractDate')){
+		arguments.ss.listing_track_datetime=dateformat(ds["ListingContractDate"],"yyyy-mm-dd")&" "&timeformat(ds["ListingContractDate"], "HH:mm:ss");
+	}
+	arguments.ss.listing_track_updated_datetime=dateformat(ds["ModificationTimestamp"],"yyyy-mm-dd")&" "&timeformat(ds["ModificationTimestamp"], "HH:mm:ss"); 
+	arguments.ss.listing_track_price=ds["ListPrice"];
+	arguments.ss.listing_track_price_change=ds["ListPrice"];
+	liststatus=ds["StandardStatus"];
+	s2=structnew();
+	/*
+	Active (StandardStatus)
+	Active Under Contract (StandardStatus)
+	Canceled (StandardStatus)
+	Closed (StandardStatus)
+	Coming Soon
+	Delete
+	Expired (StandardStatus)
+	Hold (StandardStatus)
+	Incomplete
+	Pending (StandardStatus)
+	Withdrawn (StandardStatus)
+	*/ 
+	if(liststatus EQ "Active"){
+		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Active"]]=true;
+	}
+	if(liststatus EQ "Withdrawn"){
+		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Withdrawn"]]=true;
+	}  
+	if(liststatus EQ "Expired"){
+		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Expired"]]=true;
+	}
+	if(liststatus EQ "Closed"){
+		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Closed"]]=true;
+	} 
+	local.listing_liststatus=structkeylist(s2,",");
+	if(local.listing_liststatus EQ ""){
+		local.listing_liststatus=1;
+	}
+	
+	// view & frontage
+	arrT3=[];
+	
+	uns=structnew();
+	tmp=ds['LotFeatures'];		
+	if(tmp NEQ ""){
+	   arrT=listtoarray(tmp);
+		for(i=1;i LTE arraylen(arrT);i++){
+			tmp=this.listingLookupNewId("frontage",arrT[i]);
+			if(tmp NEQ "" and structkeyexists(uns,tmp) EQ false){
+				uns[tmp]=true;
+				arrayappend(arrT3,tmp);
+			}
+		}
+	} 
+	local.listing_frontage=arraytolist(arrT3);
+	
+	local.listing_view=""; 
+
+	local.listing_pool=0; 
+	extFeatures={
+		"INPOOL":true,
+		"AGPOOL":true
+	}; 
+	tmp=ds['ExteriorFeatures']; 
+	if(tmp NEQ ""){
+	   arrT=listtoarray(tmp);
+		for(i=1;i LTE arraylen(arrT);i++){
+			if(structkeyexists(extFeatures, arrT[i])){
+				local.listing_pool=1;	
+				break;
+			} 
+		}
+	}  
+	 
+	listing_data_detailcache1=getDetailCache1(ds);
+	listing_data_detailcache2=getDetailCache2(ds);
+	listing_data_detailcache3=getDetailCache3(ds);
+	
+	rs=structnew();
+	rs.mls_id=variables.mls_id;
+	rs.listing_id=arguments.ss.listing_id;
+	rs.listing_acreage=ds["LotSizeArea"];
+	rs.listing_baths=ds["BathroomsFull"];
+	rs.listing_halfbaths=ds["BathroomsHalf"];
+	rs.listing_beds=ds["BedroomsTotal"];
+	rs.listing_city=cid;
+	rs.listing_county=local.listing_county;
+	rs.listing_frontage=","&local.listing_frontage&",";
+	rs.listing_frontage_name="";
+	rs.listing_price=ds["listprice"];
+	rs.listing_status=","&local.listing_status&",";
+	rs.listing_state=ds["StateOrProvince"];
+	rs.listing_type_id=local.listing_type_id;
+	rs.listing_sub_type_id=","&local.listing_sub_type_id&",";
+	rs.listing_style=","&local.listing_style&",";
+	rs.listing_view=","&local.listing_view&",";
+	rs.listing_lot_square_feet=""; 
+	rs.listing_square_feet=ds["CAR_SqFtMain"];
+	rs.listing_subdivision=local.listing_subdivision;
+	rs.listing_year_built=ds["yearbuilt"];
+	rs.listing_office=ds["ListOfficeMLSID"];
+	rs.listing_office_name=ds["ListOfficeName"];
+	rs.listing_agent=ds["ListAgentMlsId"];
+	rs.listing_latitude=curLat;
+	rs.listing_longitude=curLong;
+	rs.listing_pool=local.listing_pool;
+	rs.listing_photocount=ds["PhotosCount"];
+	rs.listing_coded_features="";
+	rs.listing_updated_datetime=arguments.ss.listing_track_updated_datetime;
+	rs.listing_primary="0";
+	rs.listing_mls_id=arguments.ss.listing_mls_id;
+	rs.listing_address=trim(address);
+	rs.listing_zip=ds["PostalCode"];
+	rs.listing_condition="";
+	rs.listing_parking=local.listing_parking;
+	rs.listing_region="";
+	rs.listing_tenure="";
+	rs.listing_liststatus=local.listing_liststatus;
+	rs.listing_data_remarks=ds["PublicRemarks"];
+	rs.listing_data_address=trim(address);
+	rs.listing_data_zip=trim(ds["PostalCode"]);
+	rs.listing_data_detailcache1=listing_data_detailcache1;
+	rs.listing_data_detailcache2=listing_data_detailcache2;
+	rs.listing_data_detailcache3=listing_data_detailcache3; 
+
+	rs.listing_track_sysid=ds["@odata.id"];
+	writedump(rs);		writedump(ts);abort;
+
+	return rs;
+	</cfscript>
+</cffunction>
+    <cffunction name="getDetailCache1" localmode="modern" output="yes" returntype="string">
+      <cfargument name="idx" type="struct" required="yes">
+      <cfscript>
+		var arrR=arraynew(1);
+		var ts=structnew(); 
+
+		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
+		    
+		return arraytolist(arrR,'');
+		
+		</cfscript>
+	</cffunction>
+    
+    
+	<cffunction name="getDetailCache2" localmode="modern" output="yes" returntype="string">
+        <cfargument name="idx" type="struct" required="yes">
+        <cfscript>
+		var arrR=arraynew(1);
+		var ts=structnew();  
+
+		if(structkeyexists(arguments.idx, "rets29_ParcelNumber")){
+			arguments.idx["rets29_ParcelNumber"]=replace(arguments.idx["rets29_ParcelNumber"], "Â", "-", "all");
+		}
+
+		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
+		    
+		return arraytolist(arrR,'');
+		
+		</cfscript>
+    </cffunction>
+    <cffunction name="getDetailCache3" localmode="modern" output="yes" returntype="string">
+        <cfargument name="idx" type="struct" required="yes">
+        <cfscript>
+		var arrR=arraynew(1);
+		var ts=structnew();   
+
+		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
+		     
+
+		return arraytolist(arrR,'');
+		</cfscript>
+	</cffunction>
 
 <cffunction name="getDebugValue" localmode="modern" access="public">
 	<cfscript>

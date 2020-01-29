@@ -69,26 +69,31 @@
 	startDate=DateAdd("h", tz.utcHourOffset, row.event_recur_start_datetime);
 	endDate=DateAdd("h", tz.utcHourOffset, row.event_recur_end_datetime);
 
+	// IOS requires \r\n, but lucee removes \r so I'd have to recompile lucee with a mode to not do that or use a temporary file publishing method
 	savecontent variable="out"{
-		echo('BEGIN:VCALENDAR#chr(10)#');
-		echo('PRODID:website');
-		echo('VERSION:2.0#chr(10)#');
-		echo('BEGIN:VEVENT#chr(10)#');
-		echo('DTSTAMP:#dateformat(updatedDate,'yyyymmdd')&"T"&timeformat(updatedDate, "HHmmss")&"Z"##chr(10)#');
-		echo('DTSTART:#dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z"##chr(10)#');
-		echo('DTEND:#dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z"##chr(10)#');
-		echo('LOCATION:#encodeForVCalendar(address)##chr(10)#');
-		echo('DESCRIPTION:#encodeForVCalendar(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description))##chr(10)#');
-		echo('SUMMARY:#encodeForVCalendar(row.event_name)##chr(10)#');
-		echo('PRIORITY:3#chr(10)#');
+		echo('BEGIN:VCALENDAR#chr(13)##chr(10)#');
+		echo('PRODID:website#chr(13)##chr(10)#');
+		echo('VERSION:2.0#chr(13)##chr(10)#');
+		echo('BEGIN:VEVENT#chr(13)##chr(10)#');
+		echo('DTSTAMP:#dateformat(updatedDate,'yyyymmdd')&"T"&timeformat(updatedDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
+		echo('DTSTART:#dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
+		echo('DTEND:#dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z"##chr(13)##chr(10)#');
+		echo('LOCATION:#encodeForVCalendar(address)##chr(13)##chr(10)#');
+		echo('DESCRIPTION:#encodeForVCalendar(application.zcore.functions.zRemoveHTMLForSearchIndexer(row.event_description))##chr(13)##chr(10)#');
+		echo('SUMMARY:#encodeForVCalendar(row.event_name)##chr(13)##chr(10)#');
+		echo('PRIORITY:3#chr(13)##chr(10)#');
 		echo('UID:#application.zcore.functions.zURLEncode(request.zos.globals.domain, "-")&"-"&row.event_id&"-"&row.event_recur_id#');
-		echo('END:VEVENT#chr(10)#');
-		echo('END:VCALENDAR#chr(10)#');
+		echo('END:VEVENT#chr(13)##chr(10)#');
+		echo('END:VCALENDAR#chr(13)##chr(10)#');
 	}
+	path=request.zos.globals.privateHomeDir&"/zupload/#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
+	application.zcore.functions.zWriteFile(path, out);
+ 
 
-	header name="Content-Disposition"  value="attachment;filename=#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
-	application.zcore.functions.zHeader("Content-Type", "text/calendar");
-	echo(out);
+	//header name="Content-Disposition"  value="inline; filename=";
+	//application.zcore.functions.zHeader("Content-Type", "text/calendar; charset=utf-8");
+	content file="#path#" deletefile="yes" type="text/calendar";
+	//echo(out);
 	abort;
 	</cfscript>
 </cffunction>
@@ -342,7 +347,9 @@
 						<a href="#request.zos.originalURL#?print=1" target="_blank" class="zEventView1-print" rel="nofollow">Print</a>
 					</div>
 					<div class="z-float">
-						<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print" style="margin-right:5px; margin-bottom:5px;">Add To My Calendar</a>
+						<cfif request.zos.cgi.http_user_agent DOES NOT CONTAIN "IOS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Iphone OS" and request.zos.cgi.http_user_agent DOES NOT CONTAIN "Ipad OS">
+							<a href="/z/event/view-event/download?event_id=#struct.event_id#&event_recur_id=#struct.event_recur_id#" title="Open the download file to add this event to your email software's calendar" class="zEventView1-print" style="margin-right:5px; margin-bottom:5px;">Add To My Calendar</a>
+						</cfif>
 
 						<cfscript>
 						
@@ -354,7 +361,7 @@
 						startDateConverted=dateformat(startDate,'yyyymmdd')&"T"&timeformat(startDate, "HHmmss")&"Z";
 						endDateConverted=dateformat(endDate,'yyyymmdd')&"T"&timeformat(endDate, "HHmmss")&"Z";
 						</cfscript>
-						<a href="https://www.google.com/calendar/render?action=TEMPLATE&text=#urlencodedformat(struct.event_name)#&dates=#startDateConverted#/#endDateConverted#&details=For+details,+click+here:+#request.zos.globals.domain##request.zos.originalURL#&sf=true&output=xml" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print">Add To Google Calendar</a>
+						<a href="https://www.google.com/calendar/render?action=TEMPLATE&text=#urlencodedformat(struct.event_name)#&dates=#startDateConverted#/#endDateConverted#&details=For+details,+click+here:+#urlencodedformat("#request.zos.globals.domain##request.zos.originalURL#")#&sf=true&output=xml" target="_blank"  title="Open the download file to add this event to your email software's calendar" class="zEventView1-print">Add To Google Calendar</a>
 
 
 
@@ -505,9 +512,10 @@
 	ts.event_id=form.event_id;
 	ts.perpage=1;
 	ts.onlyFutureEvents=true;
-	if(application.zcore.user.checkGroupAccess("member")){
-		ts.showInactive=true;
-	}
+	// if(application.zcore.user.checkGroupAccess("member")){
+	// 	ts.showInactive=true;
+	// }
+	ts.showInactive=true;
 	eventCom=application.zcore.app.getAppCFC("event");
 	rs=eventCom.searchEvents(ts);
 	if(rs.count EQ 0){

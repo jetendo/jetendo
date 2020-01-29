@@ -18,6 +18,7 @@ getScryptEncrypt#chr(9)#password
 getSystemIpList
 getNewerCoreMVCFiles
 gzipFilePath#chr(9)#absoluteFilePath
+gzipUnzipFilePath#chr(9)#absoluteFilePath#chr(9)#absoluteOutputFilePath
 httpDownload#chr(9)#link#chr(9)#timeout
 httpJsonPost#chr(9)#link#chr(9)#jsonData#chr(9)#timeout
 httpDownloadToFile#chr(9)#link##chr(9)#timeout#chr(9)#absoluteFilePath
@@ -84,6 +85,8 @@ function processContents($contents){
 		return tarZipGlobalDatabase($a);
 	}else if($contents =="gzipFilePath"){
 		return gzipFilePath($a);
+	}else if($contents =="gzipUnzipFilePath"){
+		return "0"; // disabled for now: gzipUnzipFilePath($a);
 	}else if($contents =="imageMagickConvertSVGtoPNG"){
 		return imageMagickConvertSVGtoPNG($a);
 	}else if($contents =="getImageMagickIdentify"){
@@ -1429,6 +1432,43 @@ function gzipFilePath($a){
 			$cmd="/bin/gzip -S .gz -f -9 ".escapeshellarg($path);
 			`$cmd`;
 			if(file_exists($path.".gz")){
+				return "1";
+			}
+		}
+	}
+	return "0";
+}
+function gzipUnzipFilePath($a){
+	set_time_limit(1000);
+	if(count($a) != 2){
+		return "0";
+	}
+	$path=$a[0];
+	$outputPath=$a[1];
+	if(file_exists($path)){
+		$path=getAbsolutePath($path);
+		$outputPath=getAbsolutePath($outputPath);
+		$p=get_cfg_var("jetendo_root_path");
+		$found=false;
+		if(substr($path, 0, strlen($p)) == $p){
+			$found=true;
+		}
+		$p=zGetBackupPath();
+		if(substr($path, 0, strlen($p)) == $p){
+			$found=true;
+		}
+		$found2=false;
+		if(substr($outputPath, 0, strlen($p)) == $p){
+			$found2=true;
+		}
+		$p=zGetBackupPath();
+		if(substr($outputPath, 0, strlen($p)) == $p){
+			$found2=true;
+		}
+		if($found){
+			$cmd="/bin/gzip -d ".escapeshellarg($path)." ".escapeshellarg($outputPath);
+			`$cmd`;
+			if(file_exists($outputPath)){
 				return "1";
 			}
 		}
