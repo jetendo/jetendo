@@ -2000,11 +2000,19 @@
 				The project/account id for semrush.com.  Separate multiple profile ids by commas. I.e. 511227
 			</td>
 		</tr>
+
 		<tr >
 			<td style="vertical-align:top; width:140px;">Semrush.com Label List:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_semrush_label_list", "table-error","")#>
 				<input name="site_semrush_label_list" type="text" size="70" value="#htmleditformat(form.site_semrush_label_list)#"><br />
 				Optional. This will divide the reports for SEMRush if the labels are different. Each label must be less then 100 characters.
+			</td>
+		</tr>
+		<tr >
+			<td style="vertical-align:top; width:140px;">Semrush.com Site ID List:</td>
+			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_semrush_site_id_list", "table-error","")#>
+				<input name="site_semrush_site_id_list" type="text" size="70" value="#htmleditformat(form.site_semrush_site_id_list)#"><br />
+				Optional comma separated list of jetendo site id to add to report.
 			</td>
 		</tr>
 		<tr >
