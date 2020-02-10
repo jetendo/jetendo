@@ -25,7 +25,12 @@ $count=true
 
 StandardStatus = ?
 Resource = Property, Media, Member, etc
- 
+
+
+# download everything
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index?incremental=0 
+
+# download only the newest data:
 http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index
 
 debug 1 feed, 1 record:
@@ -54,7 +59,6 @@ has enums with individual plain text name and id value pairs - do i need them?
 		variables.listingLookup[qTrack.listing_id]=qTrack.listing_track_id;
 	}
 	variables.fieldNameLookup=getFieldNames();
-	variables.arrColumn=listToArray("AboveGradeFinishedArea,AccessCode,AccessibilityFeatures,Appliances,ArchitecturalStyle,AssociationFee,AssociationFeeFrequency,AssociationName,AssociationPhone,AvailabilityDate,BathroomsFull,BathroomsHalf,BathroomsTotalInteger,BedroomsTotal,BelowGradeFinishedArea,BuilderName,BuildingAreaTotal,BuyerAgentAOR,BuyerAgentKey,BuyerAgentMlsId,BuyerOfficeKey,BuyerOfficeMlsId,CAR_BuyerAgentSaleYN,CAR_CanSubdivideYN,CAR_CCRSubjectTo,CAR_CommercialLocationDescription,CAR_ComplexName,CAR_ConstructionStatus,CAR_ConstructionType,CAR_CorrectionCount,CAR_DeedReference,CAR_Documents,CAR_DOMToClose,CAR_FloodPlain,CAR_GeocodeSource,CAR_HOASubjectTo,CAR_HOASubjectToDues,CAR_InsideCityYN,CAR_MainLevelGarageYN,CAR_OutBuildingsYN,CAR_OwnerAgentYN,CAR_PermitSyndicationYN,CAR_PlatBookSlide,CAR_PlatReferenceSectionPages,CAR_Porch,CAR_ProjectedClosingDate,CAR_PropertySubTypeSecondary,CAR_ProposedSpecialAssessmentYN,CAR_RailService,CAR_RATIO_CurrentPrice_By_Acre,CAR_RATIO_ListPrice_By_TaxAmount,CAR_Restrictions,CAR_RestrictionsDescription,CAR_room1_BathsFull,CAR_room1_BathsHalf,CAR_room1_BedsTotal,CAR_room1_RoomType,CAR_room2_BathsFull,CAR_room2_BathsHalf,CAR_room2_BedsTotal,CAR_room2_RoomType,CAR_room3_BathsFull,CAR_room3_BathsHalf,CAR_room3_BedsTotal,CAR_room3_RoomType,CAR_room4_BathsFull,CAR_room4_BathsHalf,CAR_room4_BedsTotal,CAR_room4_RoomType,CAR_SqFtAdditional,CAR_SqFtAvailableMaximum,CAR_SqFtAvailableMinimum,CAR_SqFtBuildingMinimum,CAR_SqFtGarage,CAR_SqFtLower,CAR_SqFtMain,CAR_SqFtMaximumLease,CAR_SqFtMinimumLease,CAR_SqFtThird,CAR_SqFtUnheatedBasement,CAR_SqFtUnheatedLower,CAR_SqFtUnheatedMain,CAR_SqFtUnheatedThird,CAR_SqFtUnheatedTotal,CAR_SqFtUnheatedUpper,CAR_SqFtUpper,CAR_StatusContractualSearchDate,CAR_StreetViewParam,CAR_SuitableUse,CAR_Table,CAR_TransactionType,CAR_unit1_BathsFull,CAR_unit1_BathsHalf,CAR_unit1_SqFtTotal,CAR_unit1_UnitRooms,CAR_unit2_BathsFull,CAR_unit2_BathsHalf,CAR_unit2_SqFtTotal,CAR_unit2_UnitRooms,CAR_UnitCount,CAR_WaterHeater,CAR_ZoningNCM,City,CloseDate,ClosePrice,CoListAgentAOR,CoListAgentFullName,CoListAgentKey,CoListAgentMlsId,CoListOfficeKey,CoListOfficeMlsId,CoListOfficeName,CommunityFeatures,ConstructionMaterials,Cooling,CountyOrParish,CrossStreet,CumulativeDaysOnMarket,DaysOnMarket,Directions,ElementarySchool,Elevation,EntryLevel,ExteriorFeatures,FireplaceFeatures,FireplaceYN,Flooring,FoundationDetails,Furnished,HabitableResidenceYN,Heating,HighSchool,Inclusions,InteriorFeatures,InternetAddressDisplayYN,InternetAutomatedValuationDisplayYN,InternetConsumerCommentYN,InternetEntireListingDisplayYN,Latitude,LaundryFeatures,ListAgentAOR,ListAgentDirectPhone,ListAgentFullName,ListAgentKey,ListAgentMlsId,ListingAgreement,ListingContractDate,ListingId,ListingKey,ListingTerms,ListOfficeKey,ListOfficeMlsId,ListOfficeName,ListOfficePhone,ListPrice,LivingArea,Longitude,LotFeatures,LotSizeArea,LotSizeDimensions,MiddleOrJuniorSchool,MlgCanView,Model,ModificationTimestamp,NewConstructionYN,NumberOfBuildings,NumberOfUnitsTotal,OccupantType,OriginatingSystemModificationTimestamp,OriginatingSystemName,ParcelNumber,ParkingFeatures,PendingTimestamp,PetsAllowed,PhotosChangeTimestamp,PhotosCount,PostalCode,PostalCodePlus4,PropertySubType,PropertyType,PublicRemarks,RoadResponsibility,RoadSurfaceType,Roof,RoomBathroom1Level,RoomBathroom2Level,RoomBathroom3Level,RoomBathroom4Level,RoomBathroom5Level,RoomBathroom6Level,RoomBedroom1Level,RoomBedroom2Level,RoomBedroom3Level,RoomBreakfastRoomLevel,RoomDiningRoomLevel,RoomFamilyRoomLevel,RoomKitchenLevel,RoomLaundryLevel,RoomLivingRoomLevel,RoomLoft2Level,RoomLoftLevel,RoomMasterBedroom2Level,RoomMasterBedroomLevel,RoomNoneLevel,RoomPantryLevel,RoomPlayRoomLevel,RoomType,Sewer,ShowingContactPhone,SpecialListingConditions,StandardStatus,StateOrProvince,StoriesTotal,StreetDirPrefix,StreetDirSuffix,StreetName,StreetNumber,StreetNumberNumeric,StreetSuffix,StructureType,SubdivisionName,SyndicationRemarks,TaxAnnualAmount,TenantPays,UnitNumber,UnitType1BedsTotal,UnitType2BedsTotal,Utilities,VirtualTourURLUnbranded,WaterBodyName,WaterfrontFeatures,WaterSource,YearBuilt,ZoningDescription,@odata.id", ",");
 
 
 	variables.excludeStruct={
@@ -105,6 +109,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		"SyndicationRemarks":true,
 	};
 
+	// data is too big, can't just download the active listings
 	variables.arrResource=[
 		"PropertyResi",
 		"PropertyRlse",
@@ -147,46 +152,154 @@ has enums with individual plain text name and id value pairs - do i need them?
 	</cfscript>
 </cffunction>
 
-<cffunction name="index" localmode="modern" access="remote"> 
+
+<cffunction name="cancel" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	application.cancelMLSGridImport=true;
+	sleep(7000);
+	structdelete(application, "cancelMLSGridImport");
+	structdelete(application, "mlsGridImportRunning");
+	structdelete(application, "mlsGridDownloadRunning");
+	echo("The import was cancelled.");
+	abort;
+	</cfscript>
+</cffunction>
+
+<cffunction name="index" localmode="modern" access="remote" roles="administrator"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	</cfscript>
+	<h1>MLS Grid Import</h1>
+
+	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Download Everything</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
+</cffunction>
+
+<cffunction name="download" localmode="modern" access="remote"> 
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
 	setting requesttimeout="100000"; 
+	if(structkeyexists(application, "mlsGridDownloadRunning")){
+		echo("The download is already running, you must cancel it or wait.");
+		abort;
+	}
+	application.mlsGridDownloadRunning=true;
+	resourceIndex=0; // leave as 0 when not debugging
+	form.incremental=application.zcore.functions.zso(form, "incremental", true, 1);
+	form.debug=application.zcore.functions.zso(form, "debug", true, 0);
 
- 	link="";
+ 	top=1000; // 5000 is max records?
+ 	skip=0;
+ 	count=false; // don't need count since the next link can pull everything
+ 	lastUpdateDate=createdate(2010, 1, 20); // first time, pull very old data createdate(2010,1,1);
+ 	if(form.incremental EQ 1){
+		dateContents=application.zcore.functions.zReadFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate");
+		if(dateContents NEQ false){
+			arrDate=listToArray(dateContents, "/");
+			if(arrayLen(arrDate) EQ 3){
+				lastUpdateDate=createDate(arrDate[1], arrDate[2], arrDate[3]);
+			}
+		}
+	}
+ 	if(form.debug EQ 1){
+ 		top=1;
+ 		skip=0;
+ 		count=true;
+ 		resourceIndex=1;
+ 	}
 
- 	// photos
- // 	if(debug){
-	//  	cfhttp={status_code:200, filecontent:'{"@odata.context":"https://api.mlsgrid.com/$metadata##Media","@odata.count":71878,"value":[{"@odata.id":"https://api.mlsgrid.com/Media(''5df107c015b90f02aef77657'')","MediaKey":"5df107c015b90f02aef77657","OriginatingSystemModificationTimestamp":"2019-12-13T15:43:04.000Z","Order":0,"ImageWidth":1024,"ImageHeight":682,"ImageSizeDescription":"1024x682","MediaURL":"https://s3.amazonaws.com/mlsgrid/images/db8be70b-50de-482d-ba44-b52335550b11.jpeg","MediaModificationTimestamp":"2019-12-11T15:14:08.495Z","ModificationTimestamp":"2020-01-20T00:08:06.371Z","ResourceRecordKey":"CAR64335367","ResourceRecordID":"CAR3572577","ResourceName":"PropertyResi","OriginatingSystemName":"carolina","MlgCanView":false}],"@odata.nextLink":"https://api.mlsgrid.com/Media?$filter=ModificationTimestamp%2520gt%25202020-01-20T00%3A00%3A00.00Z&$top=1&$skip=1&$count=true"}'};
-	//  }else{
-	//  	top=1;
-	//  	skip=0;
-	//  	count=true;
-	//  	lastUpdateDate=createdate(2020, 1, 20);
-	//  	// photos: 
-	//  	link="https://api.mlsgrid.com/Media?$filter=ModificationTimestamp%20gt%20#dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z&$top=#top#&$skip=#skip#&$count=#count#";
-	// 	http url="#link#" timeout="10000"{
-	// 		httpparam type="header" name="Authorization" value="Bearer #request.zos.mlsGridToken#";
-	// 	}
-	// }
-	// writedump(cfhttp);
-	// abort;
+ 	if(form.method EQ "displayFields"){
+	 	displayFields=true;
+		top=1;
+		skip=0;
+		count=false;
+	}else{
+		displayFields=false;
+	}
 
-	// get unused fields as cfml code
+	insertCount=0;
+	updateCount=0;
+	deleteCount=0;
+	skipCount=0;
+	downloadCount=0;
+	init(); 
 
-	// exclude fields
+	application.zcore.functions.zCreateDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
 
-	// download all data from scratch
+ 	for(n=1;n<=arrayLen(variables.arrResource);n++){
+ 		if(resourceIndex EQ 0){
+			resource=variables.arrResource[n];
+		}else if(resourceIndex NEQ n){
+			continue; // skip to the correct resourceIndex when debugging
+		}else{
+			resource=variables.arrResource[resourceIndex];
+		}
 
-	// download since last update minus one day to be sure timezone doesn't interfere
+		if(form.incremental EQ 1){
+ 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
+ 		}else if(resource EQ "Media"){
+ 			// media can't filter active listings
+ 			top=5000;
+ 			lastUpdateDate="2010-01-01"; // force very old date
+ 			filter="ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z"; // no filter allowed with media
+ 		}else{
+ 			lastUpdateDate="2010-01-01"; // force very old date
+ 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z and StandardStatus eq Odata.Models.StandardStatus'Active'");
+ 		}
+	 	nextLink="https://api.mlsgrid.com/#resource#?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
 
-	// store
+	 	fileNumber=1;
+	 	while(true){
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled after downloading #downloadCount# files");
+	 			abort;
+	 		}
+		 	js=downloadData(nextLink); 
+		 	application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/"&lcase(resource)&"-"&createuuid()&".txt", serializeJson(js));
+			nextLink=application.zcore.functions.zso(js, "@odata.nextLink");
+			fileNumber++;
+			downloadCount++;
+			if(nextLink EQ ""){
+				break;
+			}
+		}
+		//break; // for debugging just one.
+	}
+	if(form.incremental EQ 1){
+		application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate", dateformat(dateadd("h", -12, now()), "yyyy/m/d"));
+	}
+ 	echo("Downloaded #downloadCount# files");
+	structdelete(application, "mlsGridDownloadRunning");
+	abort;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="process" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	if(structkeyexists(application, "mlsGridImportRunning")){
+		echo("The import is already running, you must cancel it or wait.");
+		abort;
+	}
+	setting requesttimeout="100000";  
+	application.mlsGridImportRunning=true;
 
 	resourceIndex=4; // leave as 0 when not debugging
 	// property, but only residential??
 	form.debug=application.zcore.functions.zso(form, "debug", true, 0);
- 	top=500; // 5000 is max records?
+ 	top=1000; // 5000 is max records?
  	skip=0;
  	count=false; // don't need count since the next link can pull everything
  	lastUpdateDate=createdate(2020, 1, 20); // first time, pull very old data createdate(2010,1,1);
@@ -209,183 +322,195 @@ has enums with individual plain text name and id value pairs - do i need them?
 	insertCount=0;
 	updateCount=0;
 	deleteCount=0;
-	skipCount=0;
-	init();
+	skipCount=0; 
+	init(); 
 
+	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
 
- 	for(n=1;n<=arrayLen(variables.arrResource);n++){
- 		if(resourceIndex EQ 0){
-			resource=variables.arrResource[n];
-		}else if(resourceIndex NEQ n){
-			continue; // skip to the correct resourceIndex when debugging
-		}else{
-			resource=variables.arrResource[resourceIndex];
+	loop query="qFiles"{
+		arrName=listToArray(qFiles.name, "-");
+		if(arrayLen(arrName) NEQ 2){
+			continue;
 		}
-
- 		filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
-	 	nextLink="https://api.mlsgrid.com/#resource#?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
-
+		resource=arrName[1];
 	 	// MlgCanView 
-	 	while(true){
-		 	js=downloadData(nextLink);
-			// writedump(resource);
-			// writedump(js);
-			for(i=1;i<=arraylen(js.value);i++){
-				ds=js.value[i];
-
-				if(displayFields){
-					for(k in ds){
-						echo('ts["#k#"]=application.zcore.functions.zso(ds, "#k#");<br>');
-					}
-					break;
-				}
-
-				if(resource EQ "Member"){
-					processMember(ds);
-				}else if(resource EQ "Office"){
-					processOffice(ds);
-				}else if(resource EQ "Media"){
-					processMedia(ds);
-				}else{
-					listing_id=variables.mls_id&"-"&ds.listingId;
-					if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
-						// delete this record somehow
-						if(structkeyexists(variables.listingLookup, listing_id)){ 
-							db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
-							WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-							db2.execute("qDelete");
-							db2.sql="DELETE FROM #db2.table("listing_data", request.zos.zcoreDatasource)#  
-							WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db2.param(0)# ";
-							db2.execute("qDelete");
-							db2.sql="DELETE FROM #db2.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-							db2.execute("qDelete");
-							db2.sql="UPDATE #db2.table("listing_track", request.zos.zcoreDatasource)# listing_track 
-							SET listing_track_hash=#db2.param('')#, 
-							listing_track_inactive=#db2.param(1)#, 
-							listing_track_updated_datetime=#db2.param(request.zos.mysqlnow)#  
-							WHERE listing_id=#db.param(listing_id)# and 
-							listing_track_deleted = #db2.param(0)#";
-							db2.execute("qDelete"); 
-							deleteCount++;
-
-						}else{
-							skipCount++;
-						}
-						continue;
-					}
-					excludeDS=duplicate(ds);
-					excludeListingFields(excludeDS);
-					rs=processListing(ds, excludeDS);
-
-					// insert to the 4 tables
-					dataChanged=true;
-					if(not structkeyexists(variables.listingLookup, listing_id)){ 
-						// new record - might want to keep the previous values someday
-						rs.listing_track_id="null";
-						rs.listing_id=listing_id;
-						rs.listing_track_price=ds.ListPrice;
-						rs.listing_track_price_change=ds.ListPrice;
-						rs.listing_track_hash="";
-						rs.listing_track_deleted="0";
-						rs.listing_track_inactive='0';
-						rs.listing_track_datetime=request.zos.mysqlnow;
-						rs.listing_track_updated_datetime=request.zos.mysqlnow;
-						rs.listing_track_processed_datetime=request.zos.mysqlnow;
-						insertCount++;
-					}else{
-						rs.listing_track_id=variables.listingLookup[listing_id];
-						rs.listing_id=listing_id;
-						rs.listing_track_price=ds.ListPrice;
-						rs.listing_track_change_price=ds.ListPrice;
-						rs.listing_track_hash="";
-						rs.listing_track_deleted="0";
-						rs.listing_track_inactive='0';
-						rs.listing_track_datetime=request.zos.mysqlnow;
-						rs.listing_track_updated_datetime=request.zos.mysqlnow;
-						rs.listing_track_processed_datetime=request.zos.mysqlnow;
-						updateCount++;
-					} 
-					ts2={
-						debug:true,
-						datasource:request.zos.zcoreDatasource,
-						table:"listing",
-						struct:rs
-					};
-					ts2.struct.listing_deleted='0';
-					ts5={
-						debug:true,
-						datasource:request.zos.zcoreDatasource,
-						table:"listing_memory",
-						struct:rs
-					};
-					ts5.struct.listing_deleted='0';
-					ts3={
-						debug:true,
-						datasource:request.zos.zcoreDatasource,
-						table:"listing_data",
-						struct:rs
-					};
-					jsData={}; 
-					for(i2 in variables.arrColumn){
-						jsData[i2]=rs[variables.arrColumn[i2]];
-					}
-					ts3.struct.listing_data_json=serializeJson(jsData);
-					ts3.struct.listing_data_deleted='0';
-					ts4={
-						debug:true,
-						datasource:request.zos.zcoreDatasource,
-						table:"listing_track",
-						struct:rs
-					};
-					ts4.struct.listing_track_deleted='0'; 
-
-					transaction action="begin"{
-						try{ 
-							if(not structkeyexists(variables.listingLookup, listing_id)){ 
-								listing_track_id=application.zcore.functions.zInsert(ts4);
-								application.zcore.functions.zInsert(ts5);
-								application.zcore.functions.zInsert(ts2); 
-								application.zcore.functions.zInsert(ts3); 
-								variables.listingLookup[listing_id]=listing_track_id;
-							}else{
-								// listing_track
-								ts4.forceWhereFields="listing_id,listing_track_deleted";
-								application.zcore.functions.zUpdate(ts4);
-								
-								// listing_memory
-								ts5.forceWhereFields="listing_id,listing_deleted";
-								application.zcore.functions.zInsert(ts5); 
-
-								// listing
-								ts2.forceWhereFields="listing_id,listing_deleted";
-								application.zcore.functions.zUpdate(ts2);
-
-								// listing_data
-								ts3.forceWhereFields="listing_id,listing_data_deleted";
-								application.zcore.functions.zUpdate(ts3);  
-							}
-							transaction action="commit"; 
-						}catch(Any e){
-							transaction action="rollback";
-							rethrow;
-						}
-					}
-				}
-				break; // for debugging, only do 1
+ 		path=request.zos.globals.privateHomeDir&"mlsgrid/"&qFiles.name;
+ 		contents=application.zcore.functions.zReadFile(path);
+ 		if(contents EQ false){
+ 			throw("File missing: #path#");
+ 		}
+ 		js=deserializeJSON(contents);
+		// writedump(resource);
+		// writedump(js);			 abort;
+		for(i=1;i<=arraylen(js.value);i++){
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled");
+	 			abort;
+	 		}
+			if(i EQ 3){
+				break; // only do 2 while debugging.
 			}
+			ds=js.value[i];
 
-			break; // for debugging, only do 1
-			nextLink=application.zcore.functions.zso(js, "@odata.nextLink");
-			if(nextLink EQ ""){
+			if(displayFields){
+				for(k in ds){
+					echo('ts["#k#"]=application.zcore.functions.zso(ds, "#k#");<br>');
+				}
 				break;
 			}
+
+			if(resource EQ "member"){
+				processMember(ds);
+			}else if(resource EQ "office"){
+				processOffice(ds);
+			}else if(resource EQ "media"){
+				if(ds["MlgCanView"] EQ "false"){
+					db.sql="delete from #db.table("listing_media", "zgraph")# 
+					WHERE mls_id=#db.param(this.mls_id)# and 
+					listing_media_key=#db.param("#ds["MediaKey"]#")# and 
+					listing_media_deleted=#db.param(0)# ";
+				}else{
+					processMedia(ds);
+				}
+			}else{
+				listing_id=variables.mls_id&"-"&ds.listingId;
+				if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
+					// delete this record somehow
+					if(structkeyexists(variables.listingLookup, listing_id)){ 
+						db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
+						WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
+						db2.execute("qDelete");
+						db2.sql="DELETE FROM #db2.table("listing_data", request.zos.zcoreDatasource)#  
+						WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db2.param(0)# ";
+						db2.execute("qDelete");
+						db2.sql="DELETE FROM #db2.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
+						db2.execute("qDelete");
+						db2.sql="UPDATE #db2.table("listing_track", request.zos.zcoreDatasource)# listing_track 
+						SET listing_track_hash=#db2.param('')#, 
+						listing_track_inactive=#db2.param(1)#, 
+						listing_track_updated_datetime=#db2.param(request.zos.mysqlnow)#  
+						WHERE listing_id=#db.param(listing_id)# and 
+						listing_track_deleted = #db2.param(0)#";
+						db2.execute("qDelete"); 
+						deleteCount++;
+
+					}else{
+						skipCount++;
+					}
+					continue;
+				}
+				excludeDS=duplicate(ds);
+				excludeListingFields(excludeDS);
+				rs=processListing(ds, excludeDS);
+
+				// insert to the 4 tables
+				dataChanged=true;
+				if(not structkeyexists(variables.listingLookup, listing_id)){ 
+					// new record - might want to keep the previous values someday
+					rs.listing_track_id="null";
+					rs.listing_id=listing_id;
+					rs.listing_track_price=ds.ListPrice;
+					rs.listing_track_price_change=ds.ListPrice;
+					rs.listing_track_hash="";
+					rs.listing_track_deleted="0";
+					rs.listing_track_inactive='0';
+					rs.listing_track_datetime=request.zos.mysqlnow;
+					rs.listing_track_updated_datetime=request.zos.mysqlnow;
+					rs.listing_track_processed_datetime=request.zos.mysqlnow;
+					insertCount++;
+				}else{
+					rs.listing_track_id=variables.listingLookup[listing_id];
+					rs.listing_id=listing_id;
+					rs.listing_track_price=ds.ListPrice;
+					rs.listing_track_change_price=ds.ListPrice;
+					rs.listing_track_hash="";
+					rs.listing_track_deleted="0";
+					rs.listing_track_inactive='0';
+					rs.listing_track_datetime=request.zos.mysqlnow;
+					rs.listing_track_updated_datetime=request.zos.mysqlnow;
+					rs.listing_track_processed_datetime=request.zos.mysqlnow;
+					updateCount++;
+				} 
+				ts2={
+					debug:true,
+					datasource:request.zos.zcoreDatasource,
+					table:"listing",
+					struct:rs
+				};
+				ts2.struct.listing_deleted='0';
+				ts5={
+					debug:true,
+					datasource:request.zos.zcoreDatasource,
+					table:"listing_memory",
+					struct:rs
+				};
+				ts5.struct.listing_deleted='0';
+				ts3={
+					debug:true,
+					datasource:request.zos.zcoreDatasource,
+					table:"listing_data",
+					struct:rs
+				};
+				jsData={}; 
+				for(i2 in rs){
+					if(i2 DOES NOT CONTAIN "listing_" and not structkeyexists(variables.excludeStruct, i2)){
+						jsData[i2]=rs[i2];
+					}
+				}
+				ts3.struct.listing_data_json=serializeJson(jsData);
+				ts3.struct.listing_data_deleted='0';
+				ts4={
+					debug:true,
+					datasource:request.zos.zcoreDatasource,
+					table:"listing_track",
+					struct:rs
+				};
+				ts4.struct.listing_track_deleted='0'; 
+
+				transaction action="begin"{
+					try{ 
+						if(not structkeyexists(variables.listingLookup, listing_id)){ 
+							listing_track_id=application.zcore.functions.zInsert(ts4);
+							application.zcore.functions.zInsert(ts5);
+							application.zcore.functions.zInsert(ts2); 
+							application.zcore.functions.zInsert(ts3); 
+							variables.listingLookup[listing_id]=listing_track_id;
+						}else{
+							// listing_track
+							ts4.forceWhereFields="listing_id,listing_track_deleted";
+							application.zcore.functions.zUpdate(ts4);
+							
+							// listing_memory
+							ts5.forceWhereFields="listing_id,listing_deleted";
+							application.zcore.functions.zInsert(ts5); 
+
+							// listing
+							ts2.forceWhereFields="listing_id,listing_deleted";
+							application.zcore.functions.zUpdate(ts2);
+
+							// listing_data
+							ts3.forceWhereFields="listing_id,listing_data_deleted";
+							application.zcore.functions.zUpdate(ts3);  
+						}
+						transaction action="commit"; 
+					}catch(Any e){
+						transaction action="rollback";
+						rethrow;
+					}
+				}
+			} 
+		 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
+			structdelete(application, "mlsGridImportRunning");
+			echo('stopped');abort;
+			application.zcore.functions.zDeleteFile(path);
 		}
  		if(resourceIndex NEQ 0){
  			break;
  		}
  	} 
  	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
-	abort;
+	structdelete(application, "mlsGridImportRunning");
+	abort; 
 	</cfscript>
 </cffunction>
 
