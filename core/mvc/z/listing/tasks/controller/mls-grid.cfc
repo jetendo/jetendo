@@ -120,8 +120,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 		"PropertyComs",
 		"PropertyComl",
 		"PropertyBuso", // not used on canopyMLS
-		"Member",
-		"Office",
+		// "Member", // don't need it
+		// "Office", // don't need it
 		"Media"
 	];
 
@@ -176,9 +176,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	</cfscript>
 	<h1>MLS Grid Import</h1>
 
-	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
-	<h2><a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Download Everything</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
-	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Download Everything</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
 </cffunction>
 
@@ -286,9 +286,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="process" localmode="modern" access="remote"> 
 	<cfscript>
+	db=request.zos.queryObject;
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
+	if(structkeyexists(form, "force")){
+		structdelete(application, "mlsGridImportRunning");
+	}
 	if(structkeyexists(application, "mlsGridImportRunning")){
 		echo("The import is already running, you must cancel it or wait.");
 		abort;
@@ -296,7 +300,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 	setting requesttimeout="100000";  
 	application.mlsGridImportRunning=true;
 
-	resourceIndex=4; // leave as 0 when not debugging
+
+	resourceIndex=0; // leave as 0 when not debugging
 	// property, but only residential??
 	form.debug=application.zcore.functions.zso(form, "debug", true, 0);
  	top=1000; // 5000 is max records?
@@ -327,17 +332,21 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
 
+	// process all the media files first so we can add the image urls to the listing_data record
 	loop query="qFiles"{
 		arrName=listToArray(qFiles.name, "-");
 		if(arrayLen(arrName) NEQ 2){
 			continue;
 		}
 		resource=arrName[1];
+		if(resource NEQ "media"){
+			continue;
+		}
 	 	// MlgCanView 
  		path=request.zos.globals.privateHomeDir&"mlsgrid/"&qFiles.name;
- 		contents=application.zcore.functions.zReadFile(path);
+ 		contents=application.zcore.functions.zReadFile(path); 
  		if(contents EQ false){
- 			throw("File missing: #path#");
+ 			continue; // file missing, ignore it and do the next file
  		}
  		js=deserializeJSON(contents);
 		// writedump(resource);
@@ -359,144 +368,212 @@ has enums with individual plain text name and id value pairs - do i need them?
 				break;
 			}
 
-			if(resource EQ "member"){
+			/*if(resource EQ "member"){
 				processMember(ds);
 			}else if(resource EQ "office"){
 				processOffice(ds);
-			}else if(resource EQ "media"){
-				if(ds["MlgCanView"] EQ "false"){
-					db.sql="delete from #db.table("listing_media", "zgraph")# 
-					WHERE mls_id=#db.param(this.mls_id)# and 
-					listing_media_key=#db.param("#ds["MediaKey"]#")# and 
-					listing_media_deleted=#db.param(0)# ";
-				}else{
-					processMedia(ds);
-				}
+			}else  */ 
+			if(ds["MlgCanView"] EQ "false"){
+				db.sql="delete from #db.table("listing_media", "zgraph")# 
+				WHERE mls_id=#db.param(this.mls_id)# and 
+				listing_media_key=#db.param("#ds["MediaKey"]#")# and 
+				listing_media_deleted=#db.param(0)# ";
+				db.execute("qDelete");
 			}else{
-				listing_id=variables.mls_id&"-"&ds.listingId;
-				if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
-					// delete this record somehow
-					if(structkeyexists(variables.listingLookup, listing_id)){ 
-						db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
-						WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-						db2.execute("qDelete");
-						db2.sql="DELETE FROM #db2.table("listing_data", request.zos.zcoreDatasource)#  
-						WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db2.param(0)# ";
-						db2.execute("qDelete");
-						db2.sql="DELETE FROM #db2.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-						db2.execute("qDelete");
-						db2.sql="UPDATE #db2.table("listing_track", request.zos.zcoreDatasource)# listing_track 
-						SET listing_track_hash=#db2.param('')#, 
-						listing_track_inactive=#db2.param(1)#, 
-						listing_track_updated_datetime=#db2.param(request.zos.mysqlnow)#  
-						WHERE listing_id=#db.param(listing_id)# and 
-						listing_track_deleted = #db2.param(0)#";
-						db2.execute("qDelete"); 
-						deleteCount++;
+				ns=processMedia(ds);
+				db.sql="select listing_media_id from #db.table("listing_media", "zgraph")# 
+				WHERE mls_id=#db.param(this.mls_id)# and 
+				listing_media_key=#db.param("#ns["MediaKey"]#")# and 
+				listing_media_deleted=#db.param(0)# ";
+				qMedia=db.execute("qMedia");
 
-					}else{
-						skipCount++;
-					}
-					continue;
-				}
-				excludeDS=duplicate(ds);
-				excludeListingFields(excludeDS);
-				rs=processListing(ds, excludeDS);
-
-				// insert to the 4 tables
-				dataChanged=true;
-				if(not structkeyexists(variables.listingLookup, listing_id)){ 
-					// new record - might want to keep the previous values someday
-					rs.listing_track_id="null";
-					rs.listing_id=listing_id;
-					rs.listing_track_price=ds.ListPrice;
-					rs.listing_track_price_change=ds.ListPrice;
-					rs.listing_track_hash="";
-					rs.listing_track_deleted="0";
-					rs.listing_track_inactive='0';
-					rs.listing_track_datetime=request.zos.mysqlnow;
-					rs.listing_track_updated_datetime=request.zos.mysqlnow;
-					rs.listing_track_processed_datetime=request.zos.mysqlnow;
-					insertCount++;
+				if(qMedia.recordcount NEQ 0){
+					db.sql="update #db.table("listing_media", "zgraph")#  SET
+					listing_media_url=#db.param(ns["MediaURL"])#, 
+					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
+					listing_media_order=#db.param(ns["Order"])#, 
+					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
+					WHERE mls_id=#db.param(this.mls_id)# and 
+					listing_media_key=#db.param("#ns["MediaKey"]#")# and 
+					listing_media_deleted=#db.param(0)# ";
+					db.execute("qUpdate");
 				}else{
-					rs.listing_track_id=variables.listingLookup[listing_id];
-					rs.listing_id=listing_id;
-					rs.listing_track_price=ds.ListPrice;
-					rs.listing_track_change_price=ds.ListPrice;
-					rs.listing_track_hash="";
-					rs.listing_track_deleted="0";
-					rs.listing_track_inactive='0';
-					rs.listing_track_datetime=request.zos.mysqlnow;
-					rs.listing_track_updated_datetime=request.zos.mysqlnow;
-					rs.listing_track_processed_datetime=request.zos.mysqlnow;
-					updateCount++;
-				} 
-				ts2={
-					debug:true,
-					datasource:request.zos.zcoreDatasource,
-					table:"listing",
-					struct:rs
-				};
-				ts2.struct.listing_deleted='0';
-				ts5={
-					debug:true,
-					datasource:request.zos.zcoreDatasource,
-					table:"listing_memory",
-					struct:rs
-				};
-				ts5.struct.listing_deleted='0';
-				ts3={
-					debug:true,
-					datasource:request.zos.zcoreDatasource,
-					table:"listing_data",
-					struct:rs
-				};
-				jsData={}; 
-				for(i2 in rs){
-					if(i2 DOES NOT CONTAIN "listing_" and not structkeyexists(variables.excludeStruct, i2)){
-						jsData[i2]=rs[i2];
-					}
+					db.sql="INSERT INTO #db.table("listing_media", "zgraph")#  SET 
+					listing_media_key=#db.param("#ns["MediaKey"]#")#,
+					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
+					listing_media_url=#db.param(ns["MediaURL"])#, 
+					listing_media_order=#db.param(ns["Order"])#, 
+					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
+					mls_id=#db.param(this.mls_id)#,
+					listing_media_deleted=#db.param(0)# ";
+					db.execute("qInsert");
 				}
-				ts3.struct.listing_data_json=serializeJson(jsData);
-				ts3.struct.listing_data_deleted='0';
-				ts4={
-					debug:true,
-					datasource:request.zos.zcoreDatasource,
-					table:"listing_track",
-					struct:rs
-				};
-				ts4.struct.listing_track_deleted='0'; 
+			} 
+		}
+		application.zcore.functions.zDeleteFile(path);
+ 	} 
 
-				transaction action="begin"{
-					try{ 
-						if(not structkeyexists(variables.listingLookup, listing_id)){ 
-							listing_track_id=application.zcore.functions.zInsert(ts4);
-							application.zcore.functions.zInsert(ts5);
-							application.zcore.functions.zInsert(ts2); 
-							application.zcore.functions.zInsert(ts3); 
-							variables.listingLookup[listing_id]=listing_track_id;
-						}else{
-							// listing_track
-							ts4.forceWhereFields="listing_id,listing_track_deleted";
-							application.zcore.functions.zUpdate(ts4);
-							
-							// listing_memory
-							ts5.forceWhereFields="listing_id,listing_deleted";
-							application.zcore.functions.zInsert(ts5); 
+ 	echo("media done");
+ 	abort;
 
-							// listing
-							ts2.forceWhereFields="listing_id,listing_deleted";
-							application.zcore.functions.zUpdate(ts2);
+ 	// process all the listing files after media files
+	loop query="qFiles"{
+		arrName=listToArray(qFiles.name, "-");
+		if(arrayLen(arrName) NEQ 2){
+			continue;
+		}
+		resource=arrName[1];
+		if(resource EQ "media"){
+			continue;
+		}
+	 	// MlgCanView 
+ 		path=request.zos.globals.privateHomeDir&"mlsgrid/"&qFiles.name;
+ 		contents=application.zcore.functions.zReadFile(path);
+ 		if(contents EQ false){
+ 			continue; // file missing, ignore it and do the next file
+ 		}
+ 		js=deserializeJSON(contents);
+		// writedump(resource);
+		// writedump(js);			 abort;
+		for(i=1;i<=arraylen(js.value);i++){
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled");
+	 			abort;
+	 		}
+			if(i EQ 3){
+				break; // only do 2 while debugging.
+			}
+			ds=js.value[i];
 
-							// listing_data
-							ts3.forceWhereFields="listing_id,listing_data_deleted";
-							application.zcore.functions.zUpdate(ts3);  
-						}
-						transaction action="commit"; 
-					}catch(Any e){
-						transaction action="rollback";
-						rethrow;
+			if(displayFields){
+				for(k in ds){
+					echo('ts["#k#"]=application.zcore.functions.zso(ds, "#k#");<br>');
+				}
+				break;
+			}
+			listing_id=variables.mls_id&"-"&ds.listingId;
+			if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
+				// delete this record somehow
+				if(structkeyexists(variables.listingLookup, listing_id)){ 
+					db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
+					WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
+					db2.execute("qDelete");
+					db2.sql="DELETE FROM #db2.table("listing_data", request.zos.zcoreDatasource)#  
+					WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db2.param(0)# ";
+					db2.execute("qDelete");
+					db2.sql="DELETE FROM #db2.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
+					db2.execute("qDelete");
+					db2.sql="UPDATE #db2.table("listing_track", request.zos.zcoreDatasource)# listing_track 
+					SET listing_track_hash=#db2.param('')#, 
+					listing_track_inactive=#db2.param(1)#, 
+					listing_track_updated_datetime=#db2.param(request.zos.mysqlnow)#  
+					WHERE listing_id=#db.param(listing_id)# and 
+					listing_track_deleted = #db2.param(0)#";
+					db2.execute("qDelete"); 
+					deleteCount++;
+
+				}else{
+					skipCount++;
+				}
+				continue;
+			}
+			excludeDS=duplicate(ds);
+			excludeListingFields(excludeDS);
+			rs=processListing(ds, excludeDS);
+
+			// insert to the 4 tables
+			dataChanged=true;
+			if(not structkeyexists(variables.listingLookup, listing_id)){ 
+				// new record - might want to keep the previous values someday
+				rs.listing_track_id="null";
+				rs.listing_id=listing_id;
+				rs.listing_track_price=ds.ListPrice;
+				rs.listing_track_price_change=ds.ListPrice;
+				rs.listing_track_hash="";
+				rs.listing_track_deleted="0";
+				rs.listing_track_inactive='0';
+				rs.listing_track_datetime=request.zos.mysqlnow;
+				rs.listing_track_updated_datetime=request.zos.mysqlnow;
+				rs.listing_track_processed_datetime=request.zos.mysqlnow;
+				insertCount++;
+			}else{
+				rs.listing_track_id=variables.listingLookup[listing_id];
+				rs.listing_id=listing_id;
+				rs.listing_track_price=ds.ListPrice;
+				rs.listing_track_change_price=ds.ListPrice;
+				rs.listing_track_hash="";
+				rs.listing_track_deleted="0";
+				rs.listing_track_inactive='0';
+				rs.listing_track_datetime=request.zos.mysqlnow;
+				rs.listing_track_updated_datetime=request.zos.mysqlnow;
+				rs.listing_track_processed_datetime=request.zos.mysqlnow;
+				updateCount++;
+			} 
+			ts2={
+				debug:true,
+				datasource:request.zos.zcoreDatasource,
+				table:"listing",
+				struct:rs
+			};
+			ts2.struct.listing_deleted='0';
+			ts5={
+				debug:true,
+				datasource:request.zos.zcoreDatasource,
+				table:"listing_memory",
+				struct:rs
+			};
+			ts5.struct.listing_deleted='0';
+			ts3={
+				debug:true,
+				datasource:request.zos.zcoreDatasource,
+				table:"listing_data",
+				struct:rs
+			};
+			jsData={}; 
+			for(i2 in rs){
+				if(i2 DOES NOT CONTAIN "listing_" and not structkeyexists(variables.excludeStruct, i2)){
+					jsData[i2]=rs[i2];
+				}
+			}
+			ts3.struct.listing_data_json=serializeJson(jsData);
+			ts3.struct.listing_data_deleted='0';
+			ts4={
+				debug:true,
+				datasource:request.zos.zcoreDatasource,
+				table:"listing_track",
+				struct:rs
+			};
+			ts4.struct.listing_track_deleted='0'; 
+
+			transaction action="begin"{
+				try{ 
+					if(not structkeyexists(variables.listingLookup, listing_id)){ 
+						listing_track_id=application.zcore.functions.zInsert(ts4);
+						application.zcore.functions.zInsert(ts5);
+						application.zcore.functions.zInsert(ts2); 
+						application.zcore.functions.zInsert(ts3); 
+						variables.listingLookup[listing_id]=listing_track_id;
+					}else{
+						// listing_track
+						ts4.forceWhereFields="listing_id,listing_track_deleted";
+						application.zcore.functions.zUpdate(ts4);
+						
+						// listing_memory
+						ts5.forceWhereFields="listing_id,listing_deleted";
+						application.zcore.functions.zInsert(ts5); 
+
+						// listing
+						ts2.forceWhereFields="listing_id,listing_deleted";
+						application.zcore.functions.zUpdate(ts2);
+
+						// listing_data
+						ts3.forceWhereFields="listing_id,listing_data_deleted";
+						application.zcore.functions.zUpdate(ts3);  
 					}
+					transaction action="commit"; 
+				}catch(Any e){
+					transaction action="rollback";
+					rethrow;
 				}
 			} 
 		 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
@@ -506,8 +583,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 		}
  		if(resourceIndex NEQ 0){
  			break;
- 		}
- 	} 
+ 		} 
+	}
  	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
 	structdelete(application, "mlsGridImportRunning");
 	abort; 
@@ -557,7 +634,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfscript>
 	ds=arguments.ds;
 	// Media
-	ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
+	ts={};
+	// ts["@odata.id"]=application.zcore.functions.zso(ds, "@odata.id");
 	ts["MediaKey"]=application.zcore.functions.zso(ds, "MediaKey");
 	ts["OriginatingSystemModificationTimestamp"]=application.zcore.functions.zso(ds, "OriginatingSystemModificationTimestamp");
 	ts["Order"]=application.zcore.functions.zso(ds, "Order");
@@ -572,9 +650,10 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ts["ResourceName"]=application.zcore.functions.zso(ds, "ResourceName");
 	ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
 	ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
+	return ts;
 	</cfscript>
 </cffunction>
-
+<!--- 
 <cffunction name="processOffice" localmode="modern" access="public">
 	<cfargument name="ds" type="struct" required="yes">
 	<cfscript>
@@ -607,8 +686,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
 	ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
 	</cfscript>
-</cffunction>
-
+</cffunction> --->
+<!--- 
 <cffunction name="processMember" localmode="modern" access="public">
 	<cfargument name="ds" type="struct" required="yes">
 	<cfscript>
@@ -646,7 +725,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ts["ModificationTimestamp"]=application.zcore.functions.zso(ds, "ModificationTimestamp");
 	</cfscript>
 </cffunction>
-
+ --->
 
 <cffunction name="listingLookupNewId" localmode="modern" output="no" returntype="any">
 	<cfargument name="type" type="string" required="yes">
