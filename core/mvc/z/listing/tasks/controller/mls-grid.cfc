@@ -187,6 +187,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
+		echo("incomplete - disabled for now");abort;
 	setting requesttimeout="100000"; 
 	if(structkeyexists(application, "mlsGridDownloadRunning")){
 		echo("The download is already running, you must cancel it or wait.");
@@ -290,6 +291,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
+		echo("incomplete - disabled for now");abort;
 	if(structkeyexists(form, "force")){
 		structdelete(application, "mlsGridImportRunning");
 	}
