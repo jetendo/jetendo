@@ -5258,8 +5258,7 @@ Define this function in another CFC to override the default email format
 				<cfset tempIndex++>
 			</cfif>
 			<tr>
-				<th>&nbsp;</th>
-				<td>
+				<th colspan="2">
 				<cfif qS.site_option_group_is_home_page EQ 1>
 					<input type="hidden" name="site_x_option_group_set_override_url" value="/" />
 				</cfif>
