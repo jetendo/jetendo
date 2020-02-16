@@ -644,7 +644,7 @@ if(table_id EQ false){
 		if(not structkeyexists(Request.zos,'arrQueryLog')){
 			request.zos.arrQueryLog =[];
 		}
-		ArrayAppend(request.zos.arrQueryLog, sqlInsert);
+		ArrayAppend(request.zos.arrQueryLog, "1");
 	}
 
 	transaction action="begin"{
@@ -855,7 +855,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 		<cftry>
 			<cfscript>
 			if(ss.norequestsql EQ false){
-				ArrayAppend(request.zos.arrQueryLog, sqlUpdate);
+				ArrayAppend(request.zos.arrQueryLog, "1");
 			}
 			</cfscript>
 			<cfquery name="qUpdate" datasource="#ss.datasource#">
@@ -1145,7 +1145,7 @@ if(application.zcore.functions.zUpdate(inputStruct) EQ false){
 	}else{
 		arguments.sql=trim(arguments.sql);
 	}
-	ArrayAppend(request.zos.arrQueryLog, (arguments.sql));
+	ArrayAppend(request.zos.arrQueryLog, "1");//(arguments.sql));
 	
 	if(cacheEnabled and left(arguments.sql, 7) EQ "SELECT "){
 		isSelect=true;

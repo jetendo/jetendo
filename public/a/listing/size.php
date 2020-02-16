@@ -329,7 +329,7 @@ if(isset($_GET['d'])){
 }
 if(!isset($_GET['f']) || !isset($_GET['w']) || !isset($_GET['h']) || !isset($_GET['m'])){
 	if($debug){
-		if(!isset($_GET['f'])){
+		if(!isset($_GET['f']) && !isset($_GET['p'])){
 			echo "f is required";
 		}
 		if(!isset($_GET['w'])){

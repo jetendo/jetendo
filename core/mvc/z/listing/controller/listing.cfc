@@ -177,7 +177,7 @@ this.app_id=11;
 local.c=replace(arguments.photourl, request.zos.currentHostName&"/", "/");
 if(arguments.photourl contains "/z/index.php?method=size"){
 	return arguments.photourl;
-}
+} 
 if(compare(arguments.photourl, local.c) NEQ 0){
 	if(left(local.c, 12) EQ "/zretsphotos"){
 		if(arguments.width EQ 10000 or arguments.height EQ 10000){ 
@@ -193,7 +193,7 @@ if(compare(arguments.photourl, local.c) NEQ 0){
 }else{
 	if(arguments.width EQ 10000 or arguments.height EQ 10000){
 		if(left(arguments.photourl,5) EQ "http:" or left(arguments.photourl,6) EQ "https:"){ 
-			return request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&m=#replace(arguments.listing_id,"-","&f=")#-#arguments.num#.jpeg&p=#urlencodedformat(arguments.photourl)#&a=#arguments.autocrop#";
+			return arguments.photourl;//request.zos.currentHostName&"/z/index.php?method=size&w=#arguments.width#&h=#arguments.height#&m=#replace(arguments.listing_id,"-","&f=")#-#arguments.num#.jpeg&p=#urlencodedformat(arguments.photourl)#&a=#arguments.autocrop#";
 		}else{
 			return request.zos.currentHostName&arguments.photourl;
 		}

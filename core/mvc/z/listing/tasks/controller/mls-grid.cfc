@@ -45,19 +45,18 @@ has enums with individual plain text name and id value pairs - do i need them?
 <cffunction name="init" localmode="modern" access="public">
 	<cfscript>
 	db=request.zos.queryObject;
-	variables.mls_id=32;
-	this.mls_id=32;
+	this.mls_id=32; 
 	request.zos["listing"]=application.zcore.listingStruct;
 
 	// get all the active record ids from database into a lookup table so we can mark for deletion faster
 	db.sql="select listing_track_id, listing_id from #db.table("listing_track", request.zos.zcoreDatasource)# 
-	WHERE listing_id like #db.param('#variables.mls_id#-%')# and 
+	WHERE listing_id like #db.param('#this.mls_id#-%')# and 
 	listing_track_deleted=#db.param(0)# ";
 	qTrack=db.execute("qTrack");
 	variables.listingLookup={};
 	loop query="qTrack"{
 		variables.listingLookup[qTrack.listing_id]=qTrack.listing_track_id;
-	}
+	} 
 	variables.fieldNameLookup=getFieldNames();
 
 
@@ -163,6 +162,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 	structdelete(application, "cancelMLSGridImport");
 	structdelete(application, "mlsGridImportRunning");
 	structdelete(application, "mlsGridDownloadRunning");
+	structdelete(application, "currentMLSGridStatus");
+	structdelete(application, "mlsgridCronRunning");
 	echo("The import was cancelled.");
 	abort;
 	</cfscript>
@@ -175,10 +176,14 @@ has enums with individual plain text name and id value pairs - do i need them?
 	} 
 	</cfscript>
 	<h1>MLS Grid Import</h1>
+	<h2>Current Status: #application.zcore.functions.zso(application, "currentMLSGridStatus")#</h2>
 
+	
 	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Download Everything</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Cron</a></h2>
+	<p>Cron is designed to process one file at a time.  It should be scheduled to run once a minute.  If you add ?force=1 to the url, it will allow it to run again in the case of an error, but it will also be able to run again after 5 minutes too.</p>
 	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
 </cffunction>
 
@@ -187,7 +192,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
-		echo("incomplete - disabled for now");abort;
+	echo("incomplete - disabled for now");abort;
 	setting requesttimeout="100000"; 
 	if(structkeyexists(application, "mlsGridDownloadRunning")){
 		echo("The download is already running, you must cancel it or wait.");
@@ -201,7 +206,7 @@ has enums with individual plain text name and id value pairs - do i need them?
  	top=1000; // 5000 is max records?
  	skip=0;
  	count=false; // don't need count since the next link can pull everything
- 	lastUpdateDate=createdate(2010, 1, 20); // first time, pull very old data createdate(2010,1,1);
+ 	lastUpdateDate=createdate(2020, 2, 14); // first time, pull very old data createdate(2010,1,1);
  	if(form.incremental EQ 1){
 		dateContents=application.zcore.functions.zReadFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate");
 		if(dateContents NEQ false){
@@ -244,17 +249,18 @@ has enums with individual plain text name and id value pairs - do i need them?
 		}else{
 			resource=variables.arrResource[resourceIndex];
 		}
-
+		// note filter operators have to be lower case.
 		if(form.incremental EQ 1){
  			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
  		}else if(resource EQ "Media"){
  			// media can't filter active listings
  			top=5000;
  			lastUpdateDate="2010-01-01"; // force very old date
- 			filter="ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z"; // no filter allowed with media
+ 			filter="MlgCanView eq true"; // no other filter can reduce the media data
  		}else{
+ 		continue; // skip for now because i already have them
  			lastUpdateDate="2010-01-01"; // force very old date
- 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z and StandardStatus eq Odata.Models.StandardStatus'Active'");
+ 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z and StandardStatus eq Odata.Models.StandardStatus'Active' and MlgCanView eq true");
  		}
 	 	nextLink="https://api.mlsgrid.com/#resource#?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
 
@@ -266,7 +272,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	 		}
 		 	js=downloadData(nextLink); 
 		 	application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/"&lcase(resource)&"-"&createuuid()&".txt", serializeJson(js));
-			nextLink=application.zcore.functions.zso(js, "@odata.nextLink");
+			nextLink=replace(application.zcore.functions.zso(js, "@odata.nextLink"), "'", "%27", "all");
 			fileNumber++;
 			downloadCount++;
 			if(nextLink EQ ""){
@@ -278,20 +284,231 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(form.incremental EQ 1){
 		application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate", dateformat(dateadd("h", -12, now()), "yyyy/m/d"));
 	}
+	structdelete(application, "currentMLSGridStatus");
  	echo("Downloaded #downloadCount# files");
 	structdelete(application, "mlsGridDownloadRunning");
 	abort;
 	</cfscript>
 </cffunction>
 
+<cffunction name="buildListingIdLookup" localmode="modern" access="remote"> 
+	<cfscript>
+	setting requesttimeout="10000";
+	request.listingIdLookup={};
+
+	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
+
+	listingCount=0;
+	oldestListingDate=now();
+	// process all the media files first so we can add the image urls to the listing_data record
+	loop query="qFiles"{
+		arrName=listToArray(qFiles.name, "-");
+		if(arrayLen(arrName) LT 2){
+			continue;
+		}
+		resource=arrName[1]; 
+		if(resource EQ "exclude" or resource EQ "media" or resource EQ "member" or resource EQ "office" or resource EQ "agent"){
+			// skip media files
+			continue;
+		}
+ 		path=request.zos.globals.privateHomeDir&"mlsgrid/"&qFiles.name;
+ 		contents=application.zcore.functions.zReadFile(path); 
+ 		if(contents EQ false){
+ 			continue; // file missing, ignore it and do the next file
+ 		}
+ 		js=deserializeJSON(contents);
+		// writedump(resource);
+		// writedump(js);			 abort;
+		for(i=1;i<=arraylen(js.value);i++){
+			application.currentMLSGridStatus="BuildListingIdLookup Listing Row ###i# of #path#";
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled");
+	 			abort;
+	 		}
+			// if(i EQ 3){
+			// 	break; // only do 2 while debugging.
+			// }
+			ds=js.value[i];
+			tempDate=dateformat(ds["ModificationTimestamp"], "yyyymmdd");
+			if(tempDate LTE dateformat(oldestListingDate, "yyyymmdd")){
+				oldestListingDate=ds["ModificationTimestamp"];
+			} 
+
+			if(ds["MlgCanView"] EQ "true"){
+				listingCount++;
+				request.listingIdLookup[ds["ListingID"]]=true;
+			}
+		}
+	}
+
+	application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/exclude-listingIdLookup.txt", serializeJson(request.listingIdLookup));
+
+	//writedump(request.listingIdLookup);
+	structdelete(application, "currentMLSGridStatus");
+	echo("Building listing id lookup for #listingCount# visible listings. Oldest modification date: #dateformat(oldestListingDate, "yyyy-mm-dd")#");
+	abort;
+	</cfscript>
+</cffunction>
+
+<cffunction name="getMediaByListingId" localmode="modern" access="public"> 
+	<cfargument name="listing_id" type="string" required="yes">
+	<cfscript>
+	db=request.zos.queryObject;
+	db.sql="select * from #db.table("listing_media", "zgraph")# 
+	WHERE
+	listing_id=#db.param(arguments.listing_id)#  and 
+	listing_media_deleted=#db.param(0)# 
+	ORDER BY listing_media_order ASC";
+	qMedia=db.execute("qMedia", "", 10000, "query", false);
+	arrPhoto=[];
+	if(qMedia.recordcount EQ 0){
+		return arrPhoto; // ignore photos for now
+		// download images for 1 listing to fix the missing data once
+		skip=0;
+		count=false;
+		top=5000;
+		// note filter operators have to be lower case.
+		filter=urlencodedformat("MlgCanView eq true and ResourceRecordID eq '#listgetat(arguments.listing_id, 2, "-")#'");
+		nextLink="https://api.mlsgrid.com/Media?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
+		js=downloadData(nextLink);   
+
+		for(i=1;i<=arraylen(js.value);i++){
+			application.currentMLSGridStatus="Process Media Row ###i# for listing_id: #arguments.listing_id#";
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled");
+	 			abort;
+	 		}
+			ds=js.value[i];
+			if(ds["MlgCanView"] EQ "false"){
+				db.sql="update #db.table("listing_media", "zgraph")# 
+				set 
+				listing_media_url=#db.param("")# 
+				WHERE mls_id=#db.param(this.mls_id)# and 
+				listing_media_key=#db.param("#ds["MediaKey"]#")# and 
+				listing_media_deleted=#db.param(0)# ";
+				db.execute("qUpdate");
+			}else{
+				ns=processMedia(ds);
+				db.sql="select listing_media_id from #db.table("listing_media", "zgraph")# 
+				WHERE mls_id=#db.param(this.mls_id)# and 
+				listing_media_key=#db.param("#ns["MediaKey"]#")# and 
+				listing_media_deleted=#db.param(0)# ";
+				qMedia=db.execute("qMedia");
+
+				arrayAppend(arrPhoto, ns["MediaURL"]);
+				if(qMedia.recordcount NEQ 0){
+					db.sql="update #db.table("listing_media", "zgraph")#  SET
+					listing_media_url=#db.param(ns["MediaURL"])#, 
+					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
+					listing_media_order=#db.param(ns["Order"])#, 
+					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
+					WHERE mls_id=#db.param(this.mls_id)# and 
+					listing_media_key=#db.param("#ns["MediaKey"]#")# and 
+					listing_media_deleted=#db.param(0)# ";
+					db.execute("qUpdate");
+				}else{
+					db.sql="INSERT INTO #db.table("listing_media", "zgraph")#  SET 
+					listing_media_key=#db.param("#ns["MediaKey"]#")#,
+					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
+					listing_media_url=#db.param(ns["MediaURL"])#, 
+					listing_media_order=#db.param(ns["Order"])#, 
+					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
+					mls_id=#db.param(this.mls_id)#,
+					listing_media_deleted=#db.param(0)# ";
+					db.execute("qInsert");
+				}
+			}
+		}
+	}else{
+		for(row in qMedia){
+			if(row.listing_media_url NEQ ""){
+				arrayAppend(arrPhoto, row.listing_media_url);
+			}
+		}
+	}
+	return arrPhoto;
+	</cfscript>
+</cffunction>
+
+<cffunction name="cron" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	setting requesttimeout="100000";
+
+	if(structkeyexists(application, "mlsgridCronRunning") and not structkeyexists(form, "force")){
+		previousDate=dateformat(application.mlsgridCronRunning, "yyyymmdd")&timeformat(application.mlsgridCronRunning, "HHmmss");
+		currentDate=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss");
+		if(currentDate-previousDate <= 500){
+			echo("Cron is already running.  You must wait 5 minutes before running this again if there was an error, or add ?force=1 to the url.");
+			abort;
+		}
+	}
+
+	application.mlsgridCronRunning=request.zos.now;
+	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
+	if(qFiles.recordcount EQ 0){
+		structdelete(application, "mlsgridCronRunning");
+		break; // import complete
+	}
+	currentRow=1; 
+	loop query="qFiles"{ 
+		try{
+			process(qFiles.name);
+		}catch(Any e){
+			structdelete(application, "mlsGridImportRunning");
+			structdelete(application, "currentMLSGridStatus");
+			structdelete(application, "mlsgridCronRunning");
+			rethrow;
+		} 
+		structdelete(application, "mlsGridImportRunning"); 
+		if(currentRow EQ 5){
+			break;
+		}
+		currentRow++;
+	}
+ 
+	structdelete(application, "mlsGridImportRunning");
+	structdelete(application, "currentMLSGridStatus");
+	structdelete(application, "mlsgridCronRunning");
+	echo("Import complete");
+	abort;
+	</cfscript>
+</cffunction>
 
 <cffunction name="process" localmode="modern" access="remote"> 
+	<cfscript>
+	try{
+		runProcess("");
+	}catch(Any e){
+		structdelete(application, "mlsGridImportRunning");
+		structdelete(application, "currentMLSGridStatus");
+		rethrow; // TODO: do this for now because of media import
+		structdelete(application, "mlsgridCronRunning");
+		rethrow;
+	}
+
+	structdelete(application, "mlsGridImportRunning");
+	structdelete(application, "currentMLSGridStatus");
+	structdelete(application, "mlsgridCronRunning");
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="runProcess" localmode="modern" access="public"> 
+	<cfargument name="fileName" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
-		echo("incomplete - disabled for now");abort;
+
+	fileName=arguments.fileName;
+	if(fileName CONTAINS "/" or fileName CONTAINS "\"){
+		application.zcore.functions.z404("Insecure fileName: #fileName#");
+	}
+		// echo("incomplete - disabled for now");abort;
 	if(structkeyexists(form, "force")){
 		structdelete(application, "mlsGridImportRunning");
 	}
@@ -300,8 +517,15 @@ has enums with individual plain text name and id value pairs - do i need them?
 		abort;
 	}
 	setting requesttimeout="100000";  
-	application.mlsGridImportRunning=true;
 
+	// TODO: remove the logic and keep the variable assignment when done programming
+	if(not structkeyexists(form, "skipMedia")){
+		application.mlsGridImportRunning=true;
+	}
+
+	// don't need this for now, it gets all the active listing_id in a file
+	// contents=application.zcore.functions.zReadFile(request.zos.globals.privateHomeDir&"mlsgrid/exclude-listingIdLookup.txt");
+	// request.listingIdLookup=deserializeJson(contents);
 
 	resourceIndex=0; // leave as 0 when not debugging
 	// property, but only residential??
@@ -332,55 +556,60 @@ has enums with individual plain text name and id value pairs - do i need them?
 	skipCount=0; 
 	init(); 
 
+	mediaCount=0;
+	mediaFileCount=0;
+
 	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
 
 	// process all the media files first so we can add the image urls to the listing_data record
 	loop query="qFiles"{
+		if(structkeyexists(form, "skipMedia")){
+			break;
+		}
+		if(fileName NEQ ""){
+			if(fileName NEQ qFiles.name){
+				continue;
+			}
+		} 
+		// echo("media process skipped<br>");
+		// break; // skip media import until it is done downloading
 		arrName=listToArray(qFiles.name, "-");
-		if(arrayLen(arrName) NEQ 2){
+		if(arrayLen(arrName) LT 2){
 			continue;
 		}
 		resource=arrName[1];
 		if(resource NEQ "media"){
 			continue;
-		}
-	 	// MlgCanView 
+		} 
  		path=request.zos.globals.privateHomeDir&"mlsgrid/"&qFiles.name;
  		contents=application.zcore.functions.zReadFile(path); 
  		if(contents EQ false){
  			continue; // file missing, ignore it and do the next file
  		}
- 		js=deserializeJSON(contents);
-		// writedump(resource);
-		// writedump(js);			 abort;
+ 		js=deserializeJSON(contents); 
 		for(i=1;i<=arraylen(js.value);i++){
+			application.currentMLSGridStatus="Process Media Row ###i# of #path#";
 	 		if(structkeyexists(application, "cancelMLSGridImport")){
 	 			echo("Import cancelled");
 	 			abort;
 	 		}
-			if(i EQ 3){
-				break; // only do 2 while debugging.
-			}
 			ds=js.value[i];
-
 			if(displayFields){
 				for(k in ds){
 					echo('ts["#k#"]=application.zcore.functions.zso(ds, "#k#");<br>');
 				}
 				break;
 			}
+			mediaCount++;
 
-			/*if(resource EQ "member"){
-				processMember(ds);
-			}else if(resource EQ "office"){
-				processOffice(ds);
-			}else  */ 
 			if(ds["MlgCanView"] EQ "false"){
-				db.sql="delete from #db.table("listing_media", "zgraph")# 
+				db.sql="update #db.table("listing_media", "zgraph")# 
+				set 
+				listing_media_url=#db.param("")# 
 				WHERE mls_id=#db.param(this.mls_id)# and 
 				listing_media_key=#db.param("#ds["MediaKey"]#")# and 
 				listing_media_deleted=#db.param(0)# ";
-				db.execute("qDelete");
+				db.execute("qUpdate");
 			}else{
 				ns=processMedia(ds);
 				db.sql="select listing_media_id from #db.table("listing_media", "zgraph")# 
@@ -410,22 +639,29 @@ has enums with individual plain text name and id value pairs - do i need them?
 					listing_media_deleted=#db.param(0)# ";
 					db.execute("qInsert");
 				}
-			} 
+			}  
 		}
+		mediaFileCount++;
 		application.zcore.functions.zDeleteFile(path);
  	} 
 
- 	echo("media done");
- 	abort;
-
+	if(not structkeyexists(form, "skipMedia")){
+	 	echo("Processed #mediaCount# media records in #mediaFileCount# files<br>");
+	 	return;
+	}
  	// process all the listing files after media files
 	loop query="qFiles"{
+		if(fileName NEQ ""){
+			if(fileName NEQ qFiles.name){
+				continue;
+			}
+		}
 		arrName=listToArray(qFiles.name, "-");
-		if(arrayLen(arrName) NEQ 2){
+		if(arrayLen(arrName) LT 2){
 			continue;
 		}
 		resource=arrName[1];
-		if(resource EQ "media"){
+		if(resource EQ "exclude" or resource EQ "media"){
 			continue;
 		}
 	 	// MlgCanView 
@@ -438,13 +674,11 @@ has enums with individual plain text name and id value pairs - do i need them?
 		// writedump(resource);
 		// writedump(js);			 abort;
 		for(i=1;i<=arraylen(js.value);i++){
+			application.currentMLSGridStatus="Process Listing Row ###i# of #path#";
 	 		if(structkeyexists(application, "cancelMLSGridImport")){
 	 			echo("Import cancelled");
-	 			abort;
-	 		}
-			if(i EQ 3){
-				break; // only do 2 while debugging.
-			}
+	 			return;
+	 		} 
 			ds=js.value[i];
 
 			if(displayFields){
@@ -453,7 +687,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				}
 				break;
 			}
-			listing_id=variables.mls_id&"-"&ds.listingId;
+			listing_id=this.mls_id&"-"&ds.listingId;
 			if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
 				// delete this record somehow
 				if(structkeyexists(variables.listingLookup, listing_id)){ 
@@ -481,7 +715,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 			}
 			excludeDS=duplicate(ds);
 			excludeListingFields(excludeDS);
+
 			rs=processListing(ds, excludeDS);
+			// writedump(rs);abort;
 
 			// insert to the 4 tables
 			dataChanged=true;
@@ -546,7 +782,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				struct:rs
 			};
 			ts4.struct.listing_track_deleted='0'; 
-
+			// writedump(ts3);abort;
 			transaction action="begin"{
 				try{ 
 					if(not structkeyexists(variables.listingLookup, listing_id)){ 
@@ -562,7 +798,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 						
 						// listing_memory
 						ts5.forceWhereFields="listing_id,listing_deleted";
-						application.zcore.functions.zInsert(ts5); 
+						application.zcore.functions.zUpdate(ts5); 
 
 						// listing
 						ts2.forceWhereFields="listing_id,listing_deleted";
@@ -578,18 +814,22 @@ has enums with individual plain text name and id value pairs - do i need them?
 					rethrow;
 				}
 			} 
-		 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
-			structdelete(application, "mlsGridImportRunning");
-			echo('stopped');abort;
-			application.zcore.functions.zDeleteFile(path);
+		 // 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
+			// structdelete(application, "mlsGridImportRunning");
+			// structdelete(application, "currentMLSGridStatus");
+			// structdelete(application, "mlsgridCronRunning");
+			// echo('stopped');return;
 		}
+		application.zcore.functions.zDeleteFile(path);
  		if(resourceIndex NEQ 0){
  			break;
  		} 
 	}
  	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
 	structdelete(application, "mlsGridImportRunning");
-	abort; 
+	structdelete(application, "currentMLSGridStatus");
+	structdelete(application, "mlsgridCronRunning");
+	return; 
 	</cfscript>
 </cffunction>
 
@@ -610,14 +850,11 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfargument name="link" type="string" required="yes">
 	<cfscript>
 	link=arguments.link;
-
- 	if(form.debug EQ 1){
- 		cfhttp=getDebugValue();
- 	}else{
-		http url="#link#" timeout="10000"{
-			httpparam type="header" name="Authorization" value="Bearer #request.zos.mlsGridToken#";
-		}
+ 
+	http url="#link#" timeout="10000"{
+		httpparam type="header" name="Authorization" value="Bearer #request.zos.mlsGridToken#";
 	}
+	sleep(2000);
 	//writedump(cfhttp);abort;
 	if(cfhttp.status_code NEQ "200"){
 		savecontent variable="out"{
@@ -734,13 +971,37 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfargument name="oldid" type="string" required="yes">
 	<cfargument name="defaultValue" type="string" required="no" default="">
 	<cfscript>
-	return "";
-	// arguments.oldid=replace(arguments.oldid,'"','','all');
-	// if(structkeyexists(request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct,arguments.type) and structkeyexists(request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct[arguments.type].id,arguments.oldid)){
-	// 	return request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldid];
-	// }else{
-	// 	return arguments.defaultValue;
-	// }
+	arguments.oldid=replace(arguments.oldid,'"','','all');
+	if(arguments.oldid EQ ""){
+		return arguments.defaultValue;
+	}
+	if(structkeyexists(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct,arguments.type) and structkeyexists(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id,arguments.oldid)){
+		return request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldid];
+	}else{
+		db=request.zos.queryObject;
+
+		ts={
+			table:"listing_lookup",
+			datasource:request.zos.zcoreDatasource,
+			struct:{
+				listing_lookup_type:arguments.type,
+				listing_lookup_value:arguments.oldid,
+				listing_lookup_oldid:arguments.oldid,
+				listing_lookup_datetime:request.zos.mysqlnow,
+				listing_lookup_mls_provider:this.mls_id,
+				listing_lookup_oldid_unchanged:arguments.oldid,
+				listing_lookup_updated_datetime:request.zos.mysqlnow,
+				listing_lookup_deleted:0
+			}
+		}
+		listing_lookup_id=application.zcore.functions.zInsert(ts);
+		if(listing_lookup_id NEQ false){
+			request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldId]=listing_lookup_id;
+			return listing_lookup_id;
+		}else{
+			return arguments.defaultValue;
+		}
+	}
 	</cfscript>
 </cffunction>
 
@@ -769,7 +1030,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ds["ListPrice"]=replace(ds["ListPrice"],",","","ALL");
 	
 	local.listing_subdivision="";
-	if(local.listing_subdivision EQ ""){
+	if(structkeyexists(ds, "SubdivisionName")){
 		if(findnocase(","&ds["SubdivisionName"]&",", ",,false,none,not on the list,not applicable,not in subdivision,n/a,other,zzz,na,0,.,N,0000,00,/,") NEQ 0){
 			ds["SubdivisionName"]="";
 		}else if(ds["SubdivisionName"] NEQ ""){
@@ -786,13 +1047,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 	cid=getNewCityId(ds["city"], cityName, ds["StateOrProvince"]);
 	 
 
-	arrS=listtoarray(ds['SpecialListingConditions'],","); 
+	arrS=listtoarray(application.zcore.functions.zso(ds, 'SpecialListingConditions'),","); 
 	local.listing_county="";
 	if(local.listing_county EQ ""){
-		local.listing_county=this.listingLookupNewId("County",ds['CountyOrParish']);
+		local.listing_county=this.listingLookupNewId("county",ds['CountyOrParish']);
 	}
 	//writedump(listing_county); 		abort; 
-	local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type", ds['PropertySubType']);
+	local.listing_sub_type_id=this.listingLookupNewId("listing_sub_type", application.zcore.functions.zso(ds, 'PropertySubType'));
 
 
 	local.listing_type_id=this.listingLookupNewId("listing_type",ds['PropertyType']);
@@ -819,7 +1080,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	curLat='';
 	curLong='';
 	if(trim(address) NEQ ""){ 
-		rs5=this.baseGetLatLong(address,ds['StateOrProvince'],ds['PostalCode'], variables.mls_id&"-"&ds.listingId);
+		rs5=this.baseGetLatLong(address,ds['StateOrProvince'],ds['PostalCode'], this.mls_id&"-"&ds.listingId);
 		if(rs5.success){
 			curLat=rs5.latitude;
 			curLong=rs5.longitude;
@@ -827,44 +1088,44 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	address=application.zcore.functions.zfirstlettercaps(address);
 	
-	if(ds['UnitNumber'] NEQ ''){
+	if(application.zcore.functions.zso(ds, 'UnitNumber') NEQ ''){
 		address&=" Unit: "&ds["UnitNumber"];	
 	} 
 	ts2=structnew();
 	ts2.field="";
-	ts2.yearbuiltfield=ds['YearBuilt'];
+	ts2.yearbuiltfield=application.zcore.functions.zso(ds, 'YearBuilt');
 	ts2.foreclosureField="";
 	
 	s={};//this.processRawStatus(ts2);
-	arrS=listtoarray(ds['SpecialListingConditions'],",");
+	arrS=listtoarray(application.zcore.functions.zso(ds, 'SpecialListingConditions'),",");
 	for(i=1;i LTE arraylen(arrS);i++){
 		c=trim(arrS[i]);
 		if(c EQ "Short Sale"){
-			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["short sale"]]=true;
+			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["short sale"]]=true;
 			break;
 		} 
 		if(c EQ "In Foreclosure"){
-			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
+			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["foreclosure"]]=true;
 		}
 		if(c EQ "Real Estate Owned"){
-			s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["bank owned"]]=true;
+			s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["bank owned"]]=true;
 		}
 	}
-	if(ds['NewConstructionYN'] EQ "Y"){
-		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["New Construction"]]=true;
+	if(application.zcore.functions.zso(ds, 'NewConstructionYN') EQ "Y"){
+		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["New Construction"]]=true;
 	}
 	if(ds["PropertyType"] EQ "Residential Lease" or ds["PropertyType"] EQ "Commercial Lease"){
-		structdelete(s,request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]);
-		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]]=true;
+		structdelete(s,request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]);
+		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]]=true;
 	}else{
-		structdelete(s,request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]);
-		s[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]]=true;
+		structdelete(s,request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for rent"]);
+		s[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.statusStr["for sale"]]=true;
 	}
 	arrT3=[];
 	local.listing_status=structkeylist(s,",");
 
 	uns=structnew();
-	tmp=ds['ArchitecturalStyle'];
+	tmp=application.zcore.functions.zso(ds, 'ArchitecturalStyle');
 	//writedump(tmp);
 	if(tmp NEQ ""){
 	   arrT=listtoarray(tmp);
@@ -881,7 +1142,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 
 	arrT2=[]; 
-	tmp=ds['ParkingFeatures'];
+	tmp=application.zcore.functions.zso(ds, 'ParkingFeatures');
 	if(tmp NEQ ""){
 	   arrT=listtoarray(tmp);
 		for(i=1;i LTE arraylen(arrT);i++){
@@ -916,16 +1177,16 @@ has enums with individual plain text name and id value pairs - do i need them?
 	Withdrawn (StandardStatus)
 	*/ 
 	if(liststatus EQ "Active"){
-		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Active"]]=true;
+		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Active"]]=true;
 	}
 	if(liststatus EQ "Withdrawn"){
-		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Withdrawn"]]=true;
+		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Withdrawn"]]=true;
 	}  
 	if(liststatus EQ "Expired"){
-		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Expired"]]=true;
+		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Expired"]]=true;
 	}
 	if(liststatus EQ "Closed"){
-		s2[request.zos.listing.mlsStruct[variables.mls_id].sharedStruct.lookupStruct.liststatusStr["Closed"]]=true;
+		s2[request.zos.listing.mlsStruct[this.mls_id].sharedStruct.lookupStruct.liststatusStr["Closed"]]=true;
 	} 
 	local.listing_liststatus=structkeylist(s2,",");
 	if(local.listing_liststatus EQ ""){
@@ -936,7 +1197,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	arrT3=[];
 	
 	uns=structnew();
-	tmp=ds['LotFeatures'];		
+	tmp=application.zcore.functions.zso(ds, 'LotFeatures');		
 	if(tmp NEQ ""){
 	   arrT=listtoarray(tmp);
 		for(i=1;i LTE arraylen(arrT);i++){
@@ -956,7 +1217,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		"INPOOL":true,
 		"AGPOOL":true
 	}; 
-	tmp=ds['ExteriorFeatures']; 
+	tmp=application.zcore.functions.zso(ds, 'ExteriorFeatures'); 
 	if(tmp NEQ ""){
 	   arrT=listtoarray(tmp);
 		for(i=1;i LTE arraylen(arrT);i++){
@@ -966,314 +1227,308 @@ has enums with individual plain text name and id value pairs - do i need them?
 			} 
 		}
 	}  
-	 
-	listing_data_detailcache1=getDetailCache1(ds);
-	listing_data_detailcache2=getDetailCache2(ds);
-	listing_data_detailcache3=getDetailCache3(ds);
+	
 	
 	rs=structnew();
-	rs.mls_id=variables.mls_id;
-	rs.listing_id=arguments.ss.listing_id;
-	rs.listing_acreage=ds["LotSizeArea"];
-	rs.listing_baths=ds["BathroomsFull"];
-	rs.listing_halfbaths=ds["BathroomsHalf"];
-	rs.listing_beds=ds["BedroomsTotal"];
+	rs.mls_id=this.mls_id;
+	rs.listing_id=this.mls_id&"-"&ds.listingId;
+	rs.listing_acreage=application.zcore.functions.zso(ds, "LotSizeArea");
+	rs.listing_baths=application.zcore.functions.zso(ds, "BathroomsFull");
+	rs.listing_halfbaths=application.zcore.functions.zso(ds, "BathroomsHalf");
+	rs.listing_beds=application.zcore.functions.zso(ds, "BedroomsTotal");
 	rs.listing_city=cid;
 	rs.listing_county=local.listing_county;
 	rs.listing_frontage=","&local.listing_frontage&",";
 	rs.listing_frontage_name="";
-	rs.listing_price=ds["listprice"];
+	rs.listing_price=application.zcore.functions.zso(ds, "listprice");
 	rs.listing_status=","&local.listing_status&",";
-	rs.listing_state=ds["StateOrProvince"];
+	rs.listing_state=application.zcore.functions.zso(ds, "StateOrProvince");
 	rs.listing_type_id=local.listing_type_id;
 	rs.listing_sub_type_id=","&local.listing_sub_type_id&",";
 	rs.listing_style=","&local.listing_style&",";
 	rs.listing_view=","&local.listing_view&",";
 	rs.listing_lot_square_feet=""; 
-	rs.listing_square_feet=ds["CAR_SqFtMain"];
+	rs.listing_square_feet=application.zcore.functions.zso(ds, "CAR_SqFtMain");
 	rs.listing_subdivision=local.listing_subdivision;
-	rs.listing_year_built=ds["yearbuilt"];
-	rs.listing_office=ds["ListOfficeMLSID"];
-	rs.listing_office_name=ds["ListOfficeName"];
-	rs.listing_agent=ds["ListAgentMlsId"];
+	rs.listing_year_built=application.zcore.functions.zso(ds, "yearbuilt");
+	rs.listing_office=application.zcore.functions.zso(ds, "ListOfficeMLSID");
+	rs.listing_office_name=application.zcore.functions.zso(ds, "ListOfficeName");
+	rs.listing_agent=application.zcore.functions.zso(ds, "ListAgentMlsId");
 	rs.listing_latitude=curLat;
 	rs.listing_longitude=curLong;
 	rs.listing_pool=local.listing_pool;
-	rs.listing_photocount=ds["PhotosCount"];
+	rs.listing_photocount=application.zcore.functions.zso(ds, "PhotosCount");
 	rs.listing_coded_features="";
 	rs.listing_updated_datetime=arguments.ss.listing_track_updated_datetime;
 	rs.listing_primary="0";
-	rs.listing_mls_id=arguments.ss.listing_mls_id;
+	rs.listing_mls_id=this.mls_id;
 	rs.listing_address=trim(address);
-	rs.listing_zip=ds["PostalCode"];
+	rs.listing_zip=application.zcore.functions.zso(ds, "PostalCode");
 	rs.listing_condition="";
 	rs.listing_parking=local.listing_parking;
 	rs.listing_region="";
 	rs.listing_tenure="";
 	rs.listing_liststatus=local.listing_liststatus;
-	rs.listing_data_remarks=ds["PublicRemarks"];
+	rs.listing_data_remarks=application.zcore.functions.zso(ds, "PublicRemarks");
 	rs.listing_data_address=trim(address);
-	rs.listing_data_zip=trim(ds["PostalCode"]);
-	rs.listing_data_detailcache1=listing_data_detailcache1;
-	rs.listing_data_detailcache2=listing_data_detailcache2;
-	rs.listing_data_detailcache3=listing_data_detailcache3; 
+	rs.listing_data_zip=trim(application.zcore.functions.zso(ds, "PostalCode"));
+	rs.listing_data_detailcache1=getDetailCache1(arguments.excludeDS);
+	rs.listing_data_detailcache2=getDetailCache2(arguments.excludeDS);
+	rs.listing_data_detailcache3=getDetailCache3(arguments.excludeDS);
 
-	rs.listing_track_sysid=ds["@odata.id"];
-	writedump(rs);		writedump(ts);abort;
+	rs.listing_track_sysid=ds["ListingKey"];
+
+
+	// make sure we have all the images before importing the listing.
+	rs.arrPhoto=getMediaByListingId(this.mls_id&"-"&ds["ListingID"]);
+	// for(i=1;i<=arrayLen(arrPhoto);i++){
+	// 	rs["photo#i#"]=arrPhoto[i];
+	// } 
 
 	return rs;
 	</cfscript>
 </cffunction>
-    <cffunction name="getDetailCache1" localmode="modern" output="yes" returntype="string">
-      <cfargument name="idx" type="struct" required="yes">
-      <cfscript>
-		var arrR=arraynew(1);
-		var ts=structnew(); 
 
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
-		    
-		return arraytolist(arrR,'');
-		
-		</cfscript>
-	</cffunction>
-    
-    
-	<cffunction name="getDetailCache2" localmode="modern" output="yes" returntype="string">
-        <cfargument name="idx" type="struct" required="yes">
-        <cfscript>
-		var arrR=arraynew(1);
-		var ts=structnew();  
+<cffunction name="getDetailCache1" localmode="modern" output="yes" returntype="string">
+  <cfargument name="idx" type="struct" required="yes">
+  <cfscript>
+	var arrR=arraynew(1);
+	var ts=structnew(); 
+	variables.allFields={};
 
-		if(structkeyexists(arguments.idx, "rets29_ParcelNumber")){
-			arguments.idx["rets29_ParcelNumber"]=replace(arguments.idx["rets29_ParcelNumber"], "Â", "-", "all");
-		}
-
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
-		    
-		return arraytolist(arrR,'');
-		
-		</cfscript>
-    </cffunction>
-    <cffunction name="getDetailCache3" localmode="modern" output="yes" returntype="string">
-        <cfargument name="idx" type="struct" required="yes">
-        <cfscript>
-		var arrR=arraynew(1);
-		var ts=structnew();   
-
-		arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.idxExclude, ts, variables.allFields));
-		     
-
-		return arraytolist(arrR,'');
-		</cfscript>
-	</cffunction>
-
-<cffunction name="getDebugValue" localmode="modern" access="public">
-	<cfscript>
-	js={
-			filecontent:'{"@odata.context":"https://api.mlsgrid.com/$metadata##PropertyResi","@odata.count":6744,"value":[{"@odata.id":"https://api.mlsgrid.com/PropertyResi(''CAR3554719'')","BathroomsFull":5,"BathroomsHalf":1,"BathroomsTotalInteger":6,"BedroomsTotal":5,"BuilderName":"Lennar","CAR_BuyerAgentSaleYN":"0","CumulativeDaysOnMarket":107,"City":"Charlotte","CAR_ConstructionType":"Site Built","CountyOrParish":"Mecklenburg","CAR_DeedReference":"15822-440","DaysOnMarket":107,"RoadSurfaceType":"Concrete","ElementarySchool":"Palisades Park","Appliances":"Gas Cooktop,Dishwasher,Double Oven,Dryer,Microwave,Washer","ConstructionMaterials":"Brick Partial,Fiber Cement","FireplaceFeatures":"Family Room","FireplaceYN":false,"FoundationDetails":"Basement","CAR_GeocodeSource":"Manual","Heating":"Heat Pump,Heat Pump","HighSchool":"Olympic","AssociationName":"Braesal Management","AssociationPhone":"704-847-3507","CAR_HOASubjectTo":"Required","CAR_HOASubjectToDues":"Mandatory","Latitude":35.070471,"LaundryFeatures":"Upper Level","ListAgentKey":"CAR59636720","ListAgentDirectPhone":"980-298-0767","ListAgentFullName":"Ehren Hutchings","ListAgentMlsId":"CAR69988","ListAgentAOR":"Charlotte Regional Realtor Association","ListingContractDate":"2019-10-04","ListingAgreement":"Exclusive Right To Sell","ListOfficeKey":"CAR46002214","ListOfficeMlsId":"CAR10141","ListOfficeName":"OfferPad Brokerage LLC","ListOfficePhone":"480-636-9175","ListPrice":459900,"Longitude":-81.017402,"LotSizeArea":0.45,"ListingKey":"CAR63599851","OriginatingSystemModificationTimestamp":"2020-01-20T00:10:36.000Z","MiddleOrJuniorSchool":"Southwest","OriginatingSystemName":"carolina","ListingId":"CAR3554719","Model":"Westley F","NewConstructionYN":false,"CAR_OwnerAgentYN":"0","ParcelNumber":"21726160","ParkingFeatures":"Garage - 3 Car","PendingTimestamp":"2020-01-19T05:00:00.000Z","InternetAddressDisplayYN":true,"InternetEntireListingDisplayYN":true,"CAR_PermitSyndicationYN":"1","PhotosCount":37,"PhotosChangeTimestamp":"2019-11-21T15:09:06.559Z","PostalCode":"28278","PostalCodePlus4":"8884","StructureType":"3 Story/Basement","PropertySubType":"Single Family Residence","PropertyType":"Residential","CAR_ProposedSpecialAssessmentYN":"0","PublicRemarks":"Welcome home to this brick stunner! This open floor plan makes entertaining easy. The chef of the home will appreciate the large center island, double ovens, gas cook top and miles of gorgeous granite. Each room offers gorgeous views of your tree lined yard, expansive deck and custom fire pit. Did I mention the large additional master on the first floor? The second story offers a large bonus room, additional spacious bedrooms and baths plus another master bedroom with a spa like en suite. The third floor offers a guest suite with its own private bathroom too. Let''s not forget the unfinished basement that can be customized to your needs. The possibilities are endless! Come check out this beauty.","CAR_RATIO_CurrentPrice_By_Acre":"1022000.00","CAR_RATIO_ListPrice_By_TaxAmount":"1.20078","RoadResponsibility":"Public Maintained Road","BuyerAgentKey":"CAR43201026","BuyerAgentAOR":"Charlotte Regional Realtor Association","BuyerAgentMlsId":"CAR54158","BuyerOfficeKey":"CAR1005675","BuyerOfficeMlsId":"CAR9147","Sewer":"Public Sewer","ShowingContactPhone":"800-746-9464","SpecialListingConditions":"None","CAR_SqFtAdditional":"0","BelowGradeFinishedArea":0,"CAR_SqFtLower":"0","CAR_SqFtMain":"1685","CAR_SqFtThird":"617","LivingArea":3904,"BuildingAreaTotal":3904,"CAR_SqFtUnheatedBasement":"1646","CAR_SqFtUnheatedLower":"0","CAR_SqFtUnheatedMain":"617","CAR_SqFtUnheatedThird":"0","CAR_SqFtUnheatedTotal":"2263","CAR_SqFtUnheatedUpper":"0","CAR_SqFtUpper":"1602","StateOrProvince":"NC","StandardStatus":"Pending","CAR_StatusContractualSearchDate":"2020-01-19","StreetName":"Alydar Commons","StreetNumber":"16822","StreetNumberNumeric":16822,"StreetSuffix":"Lane","CAR_StreetViewParam":"1$35.070471$-81.017402$274.74$13.33$1.00$2Xyslcujvmd-C_rQTCnEVA","SubdivisionName":"Southern Trace","CAR_Table":"Listing - Residential","TaxAnnualAmount":383000,"CAR_UnitCount":"0","UnitNumber":"67","InternetAutomatedValuationDisplayYN":true,"InternetConsumerCommentYN":true,"WaterSource":"Public","CAR_WaterHeater":"Gas","YearBuilt":2016,"ZoningDescription":"R3","CAR_MainLevelGarageYN":"1","OccupantType":"Owner","CAR_ProjectedClosingDate":"2020-02-11","CAR_CCRSubjectTo":"Undiscovered","RoomType":"Bathroom 1,Bathroom 2,Breakfast Room,Dining Room,Family Room,Kitchen,Living Room,Master Bedroom,Bathroom 3,Bathroom 4,Bathroom 5,Laundry,Loft,Master Bedroom 2,Bedroom 1,Bedroom 2,Play Room,Bedroom 3,None","CAR_room1_BathsFull":"1","CAR_room1_BathsHalf":"1","CAR_room1_BedsTotal":"1","RoomBathroom1Level":"Main","RoomBathroom2Level":"Main","RoomBreakfastRoomLevel":"Main","RoomDiningRoomLevel":"Main","RoomFamilyRoomLevel":"Main","RoomKitchenLevel":"Main","RoomLivingRoomLevel":"Main","RoomMasterBedroomLevel":"Main","CAR_room1_RoomType":"Bathroom(s),Breakfast,Dining Room,Family Room,Kitchen,Living Room,2nd Master","CAR_room2_BathsFull":"3","CAR_room2_BathsHalf":"0","CAR_room2_BedsTotal":"3","RoomBathroom3Level":"Upper","RoomBathroom4Level":"Upper","RoomBathroom5Level":"Upper","RoomLaundryLevel":"Upper","RoomLoftLevel":"Upper","RoomMasterBedroom2Level":"Upper","RoomBedroom1Level":"Upper","RoomBedroom2Level":"Upper","CAR_room2_RoomType":"Bathroom(s),Bedroom(s),Laundry,Loft,Master Bedroom","CAR_room3_BathsFull":"1","CAR_room3_BathsHalf":"0","CAR_room3_BedsTotal":"1","RoomBathroom6Level":"Third","RoomLoft2Level":"Third","RoomPlayRoomLevel":"Third","RoomBedroom3Level":"Third","CAR_room3_RoomType":"Bathroom(s),Bedroom(s),Loft,Play Room","CAR_room4_BathsFull":"0","CAR_room4_BathsHalf":"0","CAR_room4_BedsTotal":"0","RoomNoneLevel":"Basement","CAR_room4_RoomType":"None","MlgCanView":true,"ModificationTimestamp":"2020-01-20T00:11:06.405Z","CloseDate":null,"ExpirationDate":null,"OffMarketDate":null,"PurchaseContractDate":null}],"@odata.nextLink":"https://api.mlsgrid.com/PropertyResi?$filter=ModificationTimestamp%2520gt%25202020-01-20T00%3A00%3A00.00Z&$top=1&$skip=1&$count=true"}',
- 		
- 		status_code:200
- 	};
- 	return js;
+	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+	    
+	return arraytolist(arrR,'');
+	
 	</cfscript>
 </cffunction>
+
+
+<cffunction name="getDetailCache2" localmode="modern" output="yes" returntype="string">
+    <cfargument name="idx" type="struct" required="yes">
+    <cfscript>
+	var arrR=arraynew(1);
+	var ts=structnew();  
+	variables.allFields={};
+ 
+
+	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+	    
+	return arraytolist(arrR,'');
+	
+	</cfscript>
+</cffunction>
+
+<cffunction name="getDetailCache3" localmode="modern" output="yes" returntype="string">
+    <cfargument name="idx" type="struct" required="yes">
+    <cfscript>
+	var arrR=arraynew(1);
+	var ts=structnew();   
+	variables.allFields={};
+	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+	     
+
+	return arraytolist(arrR,'');
+	</cfscript>
+</cffunction>
+ 
 
 <cffunction name="getFieldNames" localmode="modern" access="public">
 	<cfscript>
 		ts={};
 		ts["AboveGradeFinishedArea"]="Above Grade Finished Area";
-ts["AccessCode"]="Access Code";
-ts["AccessibilityFeatures"]="Accessibility Features";
-ts["Appliances"]="Appliances";
-ts["ArchitecturalStyle"]="Architectural Style";
-ts["AssociationFee"]="Association Fee";
-ts["AssociationFeeFrequency"]="Association Fee Frequency";
-ts["AssociationName"]="Association Name";
-ts["AssociationPhone"]="Association Phone";
-ts["AvailabilityDate"]="Availability Date";
-ts["BathroomsFull"]="Bathrooms Full";
-ts["BathroomsHalf"]="Bathrooms Half";
-ts["BathroomsTotalInteger"]="Bathrooms Total Integer";
-ts["BedroomsTotal"]="Bedrooms Total";
-ts["BelowGradeFinishedArea"]="Below Grade Finished Area";
-ts["BuilderName"]="Builder Name";
-ts["BuildingAreaTotal"]="Building Area Total";
-ts["CAR_CanSubdivideYN"]="Can Subdivide YN";
-ts["CAR_CommercialLocationDescription"]="Commercial Location Description";
-ts["CAR_ComplexName"]="Complex Name";
-ts["CAR_ConstructionStatus"]="Construction Status";
-ts["CAR_ConstructionType"]="Construction Type";
-ts["CAR_CorrectionCount"]="Correction Count";
-ts["CAR_DeedReference"]="Deed Reference";
-ts["CAR_FloodPlain"]="Flood Plain";
-ts["CAR_GeocodeSource"]="Geocode Source";
-ts["CAR_HOASubjectTo"]="HOA Subject To";
-ts["CAR_HOASubjectToDues"]="HOA Subject To Dues";
-ts["CAR_InsideCityYN"]="Inside City YN";
-ts["CAR_MainLevelGarageYN"]="Main Level Garage YN";
-ts["CAR_OutBuildingsYN"]="Out Buildings YN";
-ts["CAR_PermitSyndicationYN"]="Permit Syndication YN";
-ts["CAR_PlatBookSlide"]="Plat Book Slide";
-ts["CAR_PlatReferenceSectionPages"]="Plat Reference Section Pages";
-ts["CAR_Porch"]="Porch";
-ts["CAR_ProjectedClosingDate"]="Projected Closing Date";
-ts["CAR_PropertySubTypeSecondary"]="Property Sub Type Secondary";
-ts["CAR_ProposedSpecialAssessmentYN"]="Proposed Special Assessment YN";
-ts["CAR_RailService"]="Rail Service";
-ts["CAR_RATIO_CurrentPrice_By_Acre"]="RATIO Current Price By Acre";
-ts["CAR_RATIO_ListPrice_By_TaxAmount"]="RATIO ListPrice By TaxAmount";
-ts["CAR_Restrictions"]="Restrictions";
-ts["CAR_RestrictionsDescription"]="Restrictions Description";
-ts["CAR_room1_BathsFull"]="Room 1 Baths Full";
-ts["CAR_room1_BathsHalf"]="Room 1 Baths Half";
-ts["CAR_room1_BedsTotal"]="Room 1 Beds Total";
-ts["CAR_room1_RoomType"]="Room 1 Room Type";
-ts["CAR_room2_BathsFull"]="Room 2 Baths Full";
-ts["CAR_room2_BathsHalf"]="Room 2 Baths Half";
-ts["CAR_room2_BedsTotal"]="Room 2 Beds Total";
-ts["CAR_room2_RoomType"]="Room 2 Room Type";
-ts["CAR_room3_BathsFull"]="Room 3 Baths Full";
-ts["CAR_room3_BathsHalf"]="Room 3 Baths Half";
-ts["CAR_room3_BedsTotal"]="Room 3 Beds Total";
-ts["CAR_room3_RoomType"]="Room 3 Room Type";
-ts["CAR_room4_BathsFull"]="Room 4 Baths Full";
-ts["CAR_room4_BathsHalf"]="Room 4 Baths Half";
-ts["CAR_room4_BedsTotal"]="Room 4 Beds Total";
-ts["CAR_room4_RoomType"]="Room 4 Room Type";
-ts["CAR_SqFtAdditional"]="SqFt Additional";
-ts["CAR_SqFtAvailableMaximum"]="SqFt Available Maximum";
-ts["CAR_SqFtAvailableMinimum"]="SqFt Available Minimum";
-ts["CAR_SqFtBuildingMinimum"]="SqFt Building Minimum";
-ts["CAR_SqFtGarage"]="SqFt Garage";
-ts["CAR_SqFtLower"]="SqFt Lower";
-ts["CAR_SqFtMain"]="SqFt Main";
-ts["CAR_SqFtMaximumLease"]="SqFt Maximum Lease";
-ts["CAR_SqFtMinimumLease"]="SqFt Minimum Lease";
-ts["CAR_SqFtThird"]="SqFt Third";
-ts["CAR_SqFtUnheatedBasement"]="SqFt Unheated Basement";
-ts["CAR_SqFtUnheatedLower"]="SqFt Unheated Lower";
-ts["CAR_SqFtUnheatedMain"]="SqFt Unheated Main";
-ts["CAR_SqFtUnheatedThird"]="SqFt Unheated Third";
-ts["CAR_SqFtUnheatedTotal"]="SqFt Unheated Total";
-ts["CAR_SqFtUnheatedUpper"]="SqFt Unheated Upper";
-ts["CAR_SqFtUpper"]="SqFt Upper";
-ts["CAR_StatusContractualSearchDate"]="Status Contractual Search Date";
-ts["CAR_StreetViewParam"]="Street View Param";
-ts["CAR_SuitableUse"]="Suitable Use";
-ts["CAR_Table"]="Table";
-ts["CAR_TransactionType"]="Transaction Type";
-ts["CAR_unit1_BathsFull"]="Unit 1 Baths Full";
-ts["CAR_unit1_BathsHalf"]="Unit 1 Baths Half";
-ts["CAR_unit1_SqFtTotal"]="Unit 1 SqFt Total";
-ts["CAR_unit1_UnitRooms"]="Unit 1 Unit Rooms";
-ts["CAR_unit2_BathsFull"]="Unit 2 Baths Full";
-ts["CAR_unit2_BathsHalf"]="Unit 2 Baths Half";
-ts["CAR_unit2_SqFtTotal"]="Unit 2 SqFt Total";
-ts["CAR_unit2_UnitRooms"]="Unit 2 Unit Rooms";
-ts["CAR_UnitCount"]="Unit Count";
-ts["CAR_WaterHeater"]="Water Heater";
-ts["CAR_ZoningNCM"]="Zoning NCM";
-ts["City"]="City";
-ts["CloseDate"]="Close Date";
-ts["ClosePrice"]="Close Price";
-ts["CommunityFeatures"]="Community Features";
-ts["ConstructionMaterials"]="Construction Materials";
-ts["Cooling"]="Cooling";
-ts["CountyOrParish"]="County Or Parish";
-ts["CrossStreet"]="Cross Street";
-ts["CumulativeDaysOnMarket"]="Cumulative Days On Market";
-ts["DaysOnMarket"]="Days On Market";
-ts["Directions"]="Directions";
-ts["ElementarySchool"]="Elementary School";
-ts["Elevation"]="Elevation";
-ts["EntryLevel"]="EntryLevel";
-ts["ExteriorFeatures"]="ExteriorFeatures";
-ts["FireplaceFeatures"]="FireplaceFeatures";
-ts["FireplaceYN"]="Fireplace YN";
-ts["Flooring"]="Flooring";
-ts["FoundationDetails"]="Foundation Details";
-ts["Furnished"]="Furnished";
-ts["HabitableResidenceYN"]="Habitable Residence YN";
-ts["Heating"]="Heating";
-ts["HighSchool"]="High School";
-ts["Inclusions"]="Inclusions";
-ts["InteriorFeatures"]="Interior Features";
-ts["LaundryFeatures"]="Laundry Features";
-ts["ListPrice"]="List Price";
-ts["LivingArea"]="Living Area";
-ts["LotFeatures"]="Lot Features";
-ts["LotSizeArea"]="Lot Size Area";
-ts["LotSizeDimensions"]="Lot Size Dimensions";
-ts["MiddleOrJuniorSchool"]="Middle Or Junior School";
-ts["Model"]="Model";
-ts["NewConstructionYN"]="New Construction YN";
-ts["NumberOfBuildings"]="Number Of Buildings";
-ts["NumberOfUnitsTotal"]="Number Of Units Total";
-ts["OccupantType"]="Occupant Type";
-ts["ParcelNumber"]="Parcel Number";
-ts["ParkingFeatures"]="Parking Features";
-ts["PetsAllowed"]="Pets Allowed";
-ts["PhotosCount"]="Photos Count";
-ts["PostalCode"]="Postal Code";
-ts["PostalCodePlus4"]="Postal Code Plus 4";
-ts["PropertySubType"]="Property Sub Type";
-ts["PropertyType"]="Property Type";
-ts["PublicRemarks"]="Public Remarks";
-ts["RoadResponsibility"]="Road Responsibility";
-ts["RoadSurfaceType"]="Road SurfaceType";
-ts["Roof"]="Roof";
-ts["RoomBathroom1Level"]="Room Bathroom 1 Level";
-ts["RoomBathroom2Level"]="Room Bathroom 2 Level";
-ts["RoomBathroom3Level"]="Room Bathroom 3 Level";
-ts["RoomBathroom4Level"]="Room Bathroom 4 Level";
-ts["RoomBathroom5Level"]="Room Bathroom 5 Level";
-ts["RoomBathroom6Level"]="Room Bathroom 6 Level";
-ts["RoomBedroom1Level"]="Room Bedroom 1 Level";
-ts["RoomBedroom2Level"]="Room Bedroom 2 Level";
-ts["RoomBedroom3Level"]="Room Bedroom 3 Level";
-ts["RoomBreakfastRoomLevel"]="Room Breakfast Room Level";
-ts["RoomDiningRoomLevel"]="Room Dining Room Level";
-ts["RoomFamilyRoomLevel"]="Room Family Room Level";
-ts["RoomKitchenLevel"]="Room Kitchen Level";
-ts["RoomLaundryLevel"]="Room Laundry Level";
-ts["RoomLivingRoomLevel"]="Room Living Room Level";
-ts["RoomLoft2Level"]="Room Loft 2 Level";
-ts["RoomLoftLevel"]="Room Loft Level";
-ts["RoomMasterBedroom2Level"]="Room Master Bedroom 2 Level";
-ts["RoomMasterBedroomLevel"]="Room Master Bedroom Level";
-ts["RoomNoneLevel"]="Room None Level";
-ts["RoomPantryLevel"]="Room Pantry Level";
-ts["RoomPlayRoomLevel"]="Room Play Room Level";
-ts["RoomType"]="Room Type";
-ts["Sewer"]="Sewer";
-ts["SpecialListingConditions"]="Special Listing Conditions";
-ts["StandardStatus"]="Standard Status";
-ts["StateOrProvince"]="State Or Province";
-ts["StoriesTotal"]="Stories Total";
-ts["StreetDirPrefix"]="Street Dir Prefix";
-ts["StreetDirSuffix"]="Street Dir Suffix";
-ts["StreetName"]="Street Name";
-ts["StreetNumber"]="Street Number";
-ts["StreetNumberNumeric"]="Street Number Numeric";
-ts["StreetSuffix"]="Street Suffix";
-ts["StructureType"]="Structure Type";
-ts["SubdivisionName"]="Subdivision Name";
-ts["TaxAnnualAmount"]="TaxAnnual Amount";
-ts["TenantPays"]="Tenant Pays";
-ts["UnitNumber"]="Unit Number";
-ts["UnitType1BedsTotal"]="Unit Type 1 Beds Total";
-ts["UnitType2BedsTotal"]="Unit Type 2 Beds Total";
-ts["Utilities"]="Utilities";
-ts["VirtualTourURLUnbranded"]="Virtual Tour URL Unbranded";
-ts["WaterBodyName"]="Water Body Name";
-ts["WaterfrontFeatures"]="Waterfront Features";
-ts["WaterSource"]="Water Source";
-ts["YearBuilt"]="Year Built";
-ts["ZoningDescription"]="Zoning Description";
+	ts["AccessCode"]="Access Code";
+	ts["AccessibilityFeatures"]="Accessibility Features";
+	ts["Appliances"]="Appliances";
+	ts["ArchitecturalStyle"]="Architectural Style";
+	ts["AssociationFee"]="Association Fee";
+	ts["AssociationFeeFrequency"]="Association Fee Frequency";
+	ts["AssociationName"]="Association Name";
+	ts["AssociationPhone"]="Association Phone";
+	ts["AvailabilityDate"]="Availability Date";
+	ts["BathroomsFull"]="Bathrooms Full";
+	ts["BathroomsHalf"]="Bathrooms Half";
+	ts["BathroomsTotalInteger"]="Bathrooms Total Integer";
+	ts["BedroomsTotal"]="Bedrooms Total";
+	ts["BelowGradeFinishedArea"]="Below Grade Finished Area";
+	ts["BuilderName"]="Builder Name";
+	ts["BuildingAreaTotal"]="Building Area Total";
+	ts["CAR_CanSubdivideYN"]="Can Subdivide YN";
+	ts["CAR_CommercialLocationDescription"]="Commercial Location Description";
+	ts["CAR_ComplexName"]="Complex Name";
+	ts["CAR_ConstructionStatus"]="Construction Status";
+	ts["CAR_ConstructionType"]="Construction Type";
+	ts["CAR_CorrectionCount"]="Correction Count";
+	ts["CAR_DeedReference"]="Deed Reference";
+	ts["CAR_FloodPlain"]="Flood Plain";
+	ts["CAR_GeocodeSource"]="Geocode Source";
+	ts["CAR_HOASubjectTo"]="HOA Subject To";
+	ts["CAR_HOASubjectToDues"]="HOA Subject To Dues";
+	ts["CAR_InsideCityYN"]="Inside City YN";
+	ts["CAR_MainLevelGarageYN"]="Main Level Garage YN";
+	ts["CAR_OutBuildingsYN"]="Out Buildings YN";
+	ts["CAR_PermitSyndicationYN"]="Permit Syndication YN";
+	ts["CAR_PlatBookSlide"]="Plat Book Slide";
+	ts["CAR_PlatReferenceSectionPages"]="Plat Reference Section Pages";
+	ts["CAR_Porch"]="Porch";
+	ts["CAR_ProjectedClosingDate"]="Projected Closing Date";
+	ts["CAR_PropertySubTypeSecondary"]="Property Sub Type Secondary";
+	ts["CAR_ProposedSpecialAssessmentYN"]="Proposed Special Assessment YN";
+	ts["CAR_RailService"]="Rail Service";
+	ts["CAR_RATIO_CurrentPrice_By_Acre"]="RATIO Current Price By Acre";
+	ts["CAR_RATIO_ListPrice_By_TaxAmount"]="RATIO ListPrice By TaxAmount";
+	ts["CAR_Restrictions"]="Restrictions";
+	ts["CAR_RestrictionsDescription"]="Restrictions Description";
+	ts["CAR_room1_BathsFull"]="Room 1 Baths Full";
+	ts["CAR_room1_BathsHalf"]="Room 1 Baths Half";
+	ts["CAR_room1_BedsTotal"]="Room 1 Beds Total";
+	ts["CAR_room1_RoomType"]="Room 1 Room Type";
+	ts["CAR_room2_BathsFull"]="Room 2 Baths Full";
+	ts["CAR_room2_BathsHalf"]="Room 2 Baths Half";
+	ts["CAR_room2_BedsTotal"]="Room 2 Beds Total";
+	ts["CAR_room2_RoomType"]="Room 2 Room Type";
+	ts["CAR_room3_BathsFull"]="Room 3 Baths Full";
+	ts["CAR_room3_BathsHalf"]="Room 3 Baths Half";
+	ts["CAR_room3_BedsTotal"]="Room 3 Beds Total";
+	ts["CAR_room3_RoomType"]="Room 3 Room Type";
+	ts["CAR_room4_BathsFull"]="Room 4 Baths Full";
+	ts["CAR_room4_BathsHalf"]="Room 4 Baths Half";
+	ts["CAR_room4_BedsTotal"]="Room 4 Beds Total";
+	ts["CAR_room4_RoomType"]="Room 4 Room Type";
+	ts["CAR_SqFtAdditional"]="SqFt Additional";
+	ts["CAR_SqFtAvailableMaximum"]="SqFt Available Maximum";
+	ts["CAR_SqFtAvailableMinimum"]="SqFt Available Minimum";
+	ts["CAR_SqFtBuildingMinimum"]="SqFt Building Minimum";
+	ts["CAR_SqFtGarage"]="SqFt Garage";
+	ts["CAR_SqFtLower"]="SqFt Lower";
+	ts["CAR_SqFtMain"]="SqFt Main";
+	ts["CAR_SqFtMaximumLease"]="SqFt Maximum Lease";
+	ts["CAR_SqFtMinimumLease"]="SqFt Minimum Lease";
+	ts["CAR_SqFtThird"]="SqFt Third";
+	ts["CAR_SqFtUnheatedBasement"]="SqFt Unheated Basement";
+	ts["CAR_SqFtUnheatedLower"]="SqFt Unheated Lower";
+	ts["CAR_SqFtUnheatedMain"]="SqFt Unheated Main";
+	ts["CAR_SqFtUnheatedThird"]="SqFt Unheated Third";
+	ts["CAR_SqFtUnheatedTotal"]="SqFt Unheated Total";
+	ts["CAR_SqFtUnheatedUpper"]="SqFt Unheated Upper";
+	ts["CAR_SqFtUpper"]="SqFt Upper";
+	ts["CAR_StatusContractualSearchDate"]="Status Contractual Search Date";
+	ts["CAR_StreetViewParam"]="Street View Param";
+	ts["CAR_SuitableUse"]="Suitable Use";
+	ts["CAR_Table"]="Table";
+	ts["CAR_TransactionType"]="Transaction Type";
+	ts["CAR_unit1_BathsFull"]="Unit 1 Baths Full";
+	ts["CAR_unit1_BathsHalf"]="Unit 1 Baths Half";
+	ts["CAR_unit1_SqFtTotal"]="Unit 1 SqFt Total";
+	ts["CAR_unit1_UnitRooms"]="Unit 1 Unit Rooms";
+	ts["CAR_unit2_BathsFull"]="Unit 2 Baths Full";
+	ts["CAR_unit2_BathsHalf"]="Unit 2 Baths Half";
+	ts["CAR_unit2_SqFtTotal"]="Unit 2 SqFt Total";
+	ts["CAR_unit2_UnitRooms"]="Unit 2 Unit Rooms";
+	ts["CAR_UnitCount"]="Unit Count";
+	ts["CAR_WaterHeater"]="Water Heater";
+	ts["CAR_ZoningNCM"]="Zoning NCM";
+	ts["City"]="City";
+	ts["CloseDate"]="Close Date";
+	ts["ClosePrice"]="Close Price";
+	ts["CommunityFeatures"]="Community Features";
+	ts["ConstructionMaterials"]="Construction Materials";
+	ts["Cooling"]="Cooling";
+	ts["CountyOrParish"]="County Or Parish";
+	ts["CrossStreet"]="Cross Street";
+	ts["CumulativeDaysOnMarket"]="Cumulative Days On Market";
+	ts["DaysOnMarket"]="Days On Market";
+	ts["Directions"]="Directions";
+	ts["ElementarySchool"]="Elementary School";
+	ts["Elevation"]="Elevation";
+	ts["EntryLevel"]="EntryLevel";
+	ts["ExteriorFeatures"]="ExteriorFeatures";
+	ts["FireplaceFeatures"]="FireplaceFeatures";
+	ts["FireplaceYN"]="Fireplace YN";
+	ts["Flooring"]="Flooring";
+	ts["FoundationDetails"]="Foundation Details";
+	ts["Furnished"]="Furnished";
+	ts["HabitableResidenceYN"]="Habitable Residence YN";
+	ts["Heating"]="Heating";
+	ts["HighSchool"]="High School";
+	ts["Inclusions"]="Inclusions";
+	ts["InteriorFeatures"]="Interior Features";
+	ts["LaundryFeatures"]="Laundry Features";
+	ts["ListPrice"]="List Price";
+	ts["LivingArea"]="Living Area";
+	ts["LotFeatures"]="Lot Features";
+	ts["LotSizeArea"]="Lot Size Area";
+	ts["LotSizeDimensions"]="Lot Size Dimensions";
+	ts["MiddleOrJuniorSchool"]="Middle Or Junior School";
+	ts["Model"]="Model";
+	ts["NewConstructionYN"]="New Construction YN";
+	ts["NumberOfBuildings"]="Number Of Buildings";
+	ts["NumberOfUnitsTotal"]="Number Of Units Total";
+	ts["OccupantType"]="Occupant Type";
+	ts["ParcelNumber"]="Parcel Number";
+	ts["ParkingFeatures"]="Parking Features";
+	ts["PetsAllowed"]="Pets Allowed";
+	ts["PhotosCount"]="Photos Count";
+	ts["PostalCode"]="Postal Code";
+	ts["PostalCodePlus4"]="Postal Code Plus 4";
+	ts["PropertySubType"]="Property Sub Type";
+	ts["PropertyType"]="Property Type";
+	ts["PublicRemarks"]="Public Remarks";
+	ts["RoadResponsibility"]="Road Responsibility";
+	ts["RoadSurfaceType"]="Road SurfaceType";
+	ts["Roof"]="Roof";
+	ts["RoomBathroom1Level"]="Room Bathroom 1 Level";
+	ts["RoomBathroom2Level"]="Room Bathroom 2 Level";
+	ts["RoomBathroom3Level"]="Room Bathroom 3 Level";
+	ts["RoomBathroom4Level"]="Room Bathroom 4 Level";
+	ts["RoomBathroom5Level"]="Room Bathroom 5 Level";
+	ts["RoomBathroom6Level"]="Room Bathroom 6 Level";
+	ts["RoomBedroom1Level"]="Room Bedroom 1 Level";
+	ts["RoomBedroom2Level"]="Room Bedroom 2 Level";
+	ts["RoomBedroom3Level"]="Room Bedroom 3 Level";
+	ts["RoomBreakfastRoomLevel"]="Room Breakfast Room Level";
+	ts["RoomDiningRoomLevel"]="Room Dining Room Level";
+	ts["RoomFamilyRoomLevel"]="Room Family Room Level";
+	ts["RoomKitchenLevel"]="Room Kitchen Level";
+	ts["RoomLaundryLevel"]="Room Laundry Level";
+	ts["RoomLivingRoomLevel"]="Room Living Room Level";
+	ts["RoomLoft2Level"]="Room Loft 2 Level";
+	ts["RoomLoftLevel"]="Room Loft Level";
+	ts["RoomMasterBedroom2Level"]="Room Master Bedroom 2 Level";
+	ts["RoomMasterBedroomLevel"]="Room Master Bedroom Level";
+	ts["RoomNoneLevel"]="Room None Level";
+	ts["RoomPantryLevel"]="Room Pantry Level";
+	ts["RoomPlayRoomLevel"]="Room Play Room Level";
+	ts["RoomType"]="Room Type";
+	ts["Sewer"]="Sewer";
+	ts["SpecialListingConditions"]="Special Listing Conditions";
+	ts["StandardStatus"]="Standard Status";
+	ts["StateOrProvince"]="State Or Province";
+	ts["StoriesTotal"]="Stories Total";
+	ts["StreetDirPrefix"]="Street Dir Prefix";
+	ts["StreetDirSuffix"]="Street Dir Suffix";
+	ts["StreetName"]="Street Name";
+	ts["StreetNumber"]="Street Number";
+	ts["StreetNumberNumeric"]="Street Number Numeric";
+	ts["StreetSuffix"]="Street Suffix";
+	ts["StructureType"]="Structure Type";
+	ts["SubdivisionName"]="Subdivision Name";
+	ts["TaxAnnualAmount"]="TaxAnnual Amount";
+	ts["TenantPays"]="Tenant Pays";
+	ts["UnitNumber"]="Unit Number";
+	ts["UnitType1BedsTotal"]="Unit Type 1 Beds Total";
+	ts["UnitType2BedsTotal"]="Unit Type 2 Beds Total";
+	ts["Utilities"]="Utilities";
+	ts["VirtualTourURLUnbranded"]="Virtual Tour URL Unbranded";
+	ts["WaterBodyName"]="Water Body Name";
+	ts["WaterfrontFeatures"]="Waterfront Features";
+	ts["WaterSource"]="Water Source";
+	ts["YearBuilt"]="Year Built";
+	ts["ZoningDescription"]="Zoning Description";
 
 
-return ts;
-</cfscript>
+	return ts;
+	</cfscript>
 </cffunction>
 </cfoutput>
 </cfcomponent>

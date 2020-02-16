@@ -1,0 +1,144 @@
+<cfcomponent extends="zcorerootmapping.mvc.z.listing.mls-provider.base">
+<cfoutput>
+	<cfscript>
+	// this.retsVersion="1.7";
+	
+	this.mls_id=32;
+	if(request.zos.istestserver){
+		this.hqPhotoPath="#request.zos.sharedPath#mls-images/32/";
+	}else{
+		this.hqPhotoPath="#request.zos.sharedPath#mls-images/32/";
+	}
+	// this.useRetsFieldName="system";
+ 
+	this.arrFieldLookupFields=arraynew(1);
+	this.mls_provider="32";
+	// this.sysidfield="";
+	// variables.resourceStruct=structnew();
+	// variables.resourceStruct["property"]=structnew();
+	// variables.resourceStruct["property"].resource="property";
+	// variables.resourceStruct["property"].id="mlsnumber";
+	// variables.resourceStruct["office"]=structnew();
+	// variables.resourceStruct["office"].resource="office";
+	// variables.resourceStruct["office"].id="mlsid";
+	// variables.resourceStruct["agent"]=structnew();
+	// variables.resourceStruct["agent"].resource="agent";
+	// variables.resourceStruct["agent"].id="mlsid";
+	// this.emptyStruct=structnew();
+	
+	
+	
+	// variables.tableLookup=structnew();
+   	// variables.tableLookup["RNT"]="Rent";  
+    // variables.tableLookup["SFR"]="Resi";  
+    // variables.tableLookup["MUL"]="MF";  
+    // variables.tableLookup["LND"]="Land";  
+    // variables.tableLookup["COM"]="Comm";  
+    // variables.tableLookup["CND"]="Resi";  
+	//variables.tableLookup["listing"]="1"; 
+	// variables.t5=structnew();
+
+	// this.remapFieldStruct=variables.t5;
+
+	
+	</cfscript> 
+    
+
+    <cffunction name="parseRawData" localmode="modern" output="yes" returntype="any">
+    	<cfargument name="ss" type="struct" required="yes">
+    	<cfscript> 
+		</cfscript>
+    </cffunction>
+
+    <cffunction name="getDetails" localmode="modern" output="yes" returntype="any">
+    	<cfargument name="ss" type="struct" required="yes">
+        <cfargument name="row" type="numeric" required="no" default="#1#">
+        <cfargument name="fulldetails" type="boolean" required="no" default="#false#">
+    	<cfscript> 
+		var idx=this.baseGetDetails(arguments.ss, arguments.row, arguments.fulldetails); 
+		t99=gettickcount();
+		idx["features"]="";
+		t44444=0;
+		idx.listingSource=request.zos.listing.mlsStruct[listgetat(idx.listing_id,1,'-')].mls_disclaimer_name;
+
+		request.lastPhotoId=""; 
+		if(arguments.ss.listing_photocount EQ 0){
+			idx["photo1"]='/z/a/listing/images/image-not-available.gif';
+		}else if(len(idx.listing_data_json) GT 0){
+			js=deserializeJson(idx.listing_data_json);
+			if(structkeyexists(js, "arrPhoto")){
+				for(i=1;i<=arraylen(js.arrPhoto);i++){
+					idx["photo#i#"]=js.arrPhoto[i];
+				}
+				request.lastPhotoId=idx.listing_id&"-1";
+			}
+		}
+		idx["agentName"]="";//arguments.ss["rets32_listagentfullname"];
+		idx["agentPhone"]="";//arguments.ss["RETS32_LISTAGENTDIRECTWORKPHONE"];
+		//idx["agentEmail"]=arguments.ss["rets32_listagentemail"];
+		idx["officeName"]="";//arguments.ss["rets32_listofficename"];
+		idx["officePhone"]="";//arguments.ss["RETS32_LISTOFFICEPHONE"];
+		idx["officeCity"]="";
+		idx["officeAddress"]="";
+		idx["officeZip"]="";
+		idx["officeState"]="";
+		idx["officeEmail"]="";
+			
+		idx["virtualtoururl"]="";//application.zcore.functions.zso(arguments.ss, "rets32_virtualtoururlunbranded");
+		idx["zipcode"]="";//application.zcore.functions.zso(arguments.ss, "rets#this.mls_id#_postalcode");
+		// if(application.zcore.functions.zso(arguments.ss, "rets32_associationfee") NEQ ""){
+		// 	idx["maintfees"]=arguments.ss["rets32_associationfee"]; 
+			
+		// }else{
+			idx["maintfees"]=0;
+		// }
+		
+		
+		</cfscript>
+        <cfsavecontent variable="details">
+        <table class="ztablepropertyinfo">
+        #idx.listing_data_detailcache1#
+        #idx.listing_data_detailcache2#
+        #idx.listing_data_detailcache3#
+        </table>
+        </cfsavecontent>
+        <cfscript>
+		idx.details=details;
+		
+		return idx;
+		</cfscript>
+    </cffunction>
+    
+    
+    <cffunction name="getPhoto" localmode="modern" output="no" returntype="any">
+    	<cfargument name="mls_pid" type="string" required="yes">
+        <cfargument name="num" type="numeric" required="no" default="#1#">
+        <cfargument name="sysid" type="string" required="no" default="0">
+    	<cfscript>
+		db=request.zos.queryObject;  
+		db.sql="select *
+		from 
+		#db.table("listing_media", "zgraph")# 
+		WHERE listing_id=#db.param(this.mls_id&"-"&arguments.mls_pid)# and 
+		listing_media_url<>#db.param('')# and 
+		listing_media_order=#db.param(arguments.num)# and 
+		listing_media_deleted=#db.param(0)# 
+		limit #db.param(0)#,#db.param(1)#";
+		qPhoto=db.execute("qPhoto"); 
+		request.lastPhotoId="";
+		for(row in qPhoto){
+			request.lastPhotoId=row.listing_id&"-1";
+			return row.listing_media_url;
+		}
+		return ""; 
+		</cfscript>
+    </cffunction>
+	
+    <cffunction name="getLookupTables" localmode="modern" access="public" output="no" returntype="struct">
+		<cfscript>  
+
+		return {arrSQL:[], cityCreated:false, arrError:[]};
+		</cfscript>
+	</cffunction>
+    </cfoutput>
+</cfcomponent>
