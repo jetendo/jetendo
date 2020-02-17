@@ -517,8 +517,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		runProcess("");
 	}catch(Any e){
 		structdelete(application, "mlsGridImportRunning");
-		structdelete(application, "currentMLSGridStatus");
-		rethrow; // TODO: do this for now because of media import
+		structdelete(application, "currentMLSGridStatus"); 
 		structdelete(application, "mlsgridCronRunning");
 		rethrow;
 	}
@@ -553,10 +552,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	setting requesttimeout="100000";  
 
-	// TODO: remove the logic and keep the variable assignment when done programming
-	if(not structkeyexists(form, "skipMedia")){
-		application.mlsGridImportRunning=true;
-	}
+	application.mlsGridImportRunning=true;
 
 	// don't need this for now, it gets all the active listing_id in a file
 	// contents=application.zcore.functions.zReadFile(request.zos.globals.privateHomeDir&"mlsgrid/exclude-listingIdLookup.txt");
@@ -865,8 +861,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 			// structdelete(application, "mlsgridCronRunning");
 			// echo('stopped');return;
 		}
-		application.zcore.functions.zRenameFile(path, request.zos.globals.privateHomeDir&"mlsgrid-listing-backup/"&qFiles.name);
-		//application.zcore.functions.zDeleteFile(path);
+		// application.zcore.functions.zRenameFile(path, request.zos.globals.privateHomeDir&"mlsgrid-listing-backup/"&qFiles.name);
+		application.zcore.functions.zDeleteFile(path);
  		if(resourceIndex NEQ 0){
  			break;
  		} 
@@ -1020,9 +1016,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	arguments.oldid=replace(arguments.oldid,'"','','all');
 	if(arguments.oldid EQ ""){
 		return arguments.defaultValue;
-	}
-	if(structkeyexists(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct,arguments.type) and structkeyexists(request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id,arguments.oldid)){
-		return request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldid];
+	} 
+	if(structkeyexists(request.zos.listing.listingLookupStruct,arguments.type) and structkeyexists(request.zos.listing.listingLookupStruct[arguments.type].id,arguments.oldid)){
+		return request.zos.listing.listingLookupStruct[arguments.type].id[arguments.oldid];
 	}else{
 		db=request.zos.queryObject;
 
@@ -1042,7 +1038,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		}
 		listing_lookup_id=application.zcore.functions.zInsert(ts);
 		if(listing_lookup_id NEQ false){
-			request.zos.listing.mlsStruct[this.mls_id].sharedStruct.listingLookupStruct[arguments.type].id[arguments.oldId]=listing_lookup_id;
+			request.zos.listing.listingLookupStruct[arguments.type].id[arguments.oldId]=listing_lookup_id;
 			return listing_lookup_id;
 		}else{
 			return arguments.defaultValue;
@@ -1324,6 +1320,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 	rs.listing_track_sysid=ds["ListingKey"];
 
+	rs.VirtualTourURLUnbranded=application.zcore.functions.zso(ds, "VirtualTourURLUnbranded");
 
 	// make sure we have all the images before importing the listing.
 	rs.arrPhoto=getMediaByListingId(this.mls_id&"-"&ds["ListingID"]);
@@ -1597,7 +1594,7 @@ ts["YearBuilt"]=true;
 ts["ZoningDescription"]=true;
 ts["CAR_MainLevelGarageYN"]=true;
 ts["OccupantType"]=true;
-ts["CAR_ProjectedClosingDate"]=true;
+// ts["CAR_ProjectedClosingDate"]=true;
 ts["CAR_CCRSubjectTo"]=true;
 // ts["MlgCanView"]=true;
 // ts["ModificationTimestamp"]=true;
@@ -1636,8 +1633,8 @@ ts["CAR_SqFtBuildingMinimum"]=true;
 ts["CAR_SuitableUse"]=true;
 ts["CAR_CorrectionCount"]=true;
 ts["LotFeatures"]=true;
-ts["StreetDirSuffix"]=true;
-ts["VirtualTourURLUnbranded"]=true;
+// ts["StreetDirSuffix"]=true;
+// ts["VirtualTourURLUnbranded"]=true;
 ts["WaterBodyName"]=true;
 ts["Inclusions"]=true;
 ts["CAR_InsideCityYN"]=true;
@@ -1648,7 +1645,7 @@ ts["CAR_SqFtAvailableMinimum"]=true;
 ts["CAR_SqFtMaximumLease"]=true;
 ts["CAR_SqFtMinimumLease"]=true;
 ts["CAR_TransactionType"]=true;
-ts["AccessCode"]=true;
+// ts["AccessCode"]=true;
 ts["CAR_CommercialLocationDescription"]=true;
 ts["CAR_ComplexName"]=true;
 ts["CrossStreet"]=true;
