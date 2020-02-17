@@ -400,7 +400,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				mlsgrid_media_deleted=#db.param(0)# ";
 				qMedia=db.execute("qMedia");
 
-				arrayAppend(arrPhoto, ns["MediaURL"]);
+				// arrayAppend(arrPhoto, ns["MediaURL"]);
 				if(qMedia.recordcount NEQ 0){
 					db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET
 					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
@@ -424,11 +424,16 @@ has enums with individual plain text name and id value pairs - do i need them?
 				}
 			}
 		}
-	}else{
-		for(row in qMedia){
-			if(row.mlsgrid_media_url NEQ ""){
-				arrayAppend(arrPhoto, row.mlsgrid_media_url);
-			}
+		db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+		WHERE
+		listing_id=#db.param(arguments.listing_id)#  and 
+		mlsgrid_media_deleted=#db.param(0)# 
+		ORDER BY mlsgrid_media_order ASC";
+		qMedia=db.execute("qMedia", "", 10000, "query", false);
+	}
+	for(row in qMedia){
+		if(row.mlsgrid_media_url NEQ ""){
+			arrayAppend(arrPhoto, row.mlsgrid_media_url);
 		}
 	}
 	return arrPhoto;

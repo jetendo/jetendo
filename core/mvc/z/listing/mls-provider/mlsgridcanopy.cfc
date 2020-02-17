@@ -121,7 +121,7 @@
 		#db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 		WHERE listing_id=#db.param(this.mls_id&"-"&arguments.mls_pid)# and 
 		mlsgrid_media_url<>#db.param('')# and 
-		mlsgrid_media_order=#db.param(arguments.num)# and 
+		mlsgrid_media_order=#db.param(arguments.num-1)# and 
 		mlsgrid_media_deleted=#db.param(0)# 
 		limit #db.param(0)#,#db.param(1)#";
 		qPhoto=db.execute("qPhoto"); 
