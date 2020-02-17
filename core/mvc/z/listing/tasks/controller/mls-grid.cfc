@@ -182,7 +182,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
 	<h2>Download: <a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Everything</a> | <a href="/z/listing/tasks/mls-grid/download?incremental=0&skipListing=1" target="_blank">Media</a> | <a href="/z/listing/tasks/mls-grid/download?incremental=0&skipMedia=1" target="_blank">Listings</a><cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process Media + Listings</a> | <a href="/z/listing/tasks/mls-grid/process?skipMedia=1" target="_blank">Process Listings</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
-	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Cron</a></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/cron" target="_blank">Cron</a></h2>
 	<p>Cron is designed to process one file at a time.  It should be scheduled to run once a minute.  If you add ?force=1 to the url, it will allow it to run again in the case of an error, but it will also be able to run again after 5 minutes too.</p>
 	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
 </cffunction>
@@ -360,7 +360,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfscript>
 	db=request.zos.queryObject;
 	arrPhoto=[];
-	return arrPhoto; // ignore photos for now
+	// return arrPhoto; // ignore photos for now
 	db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 	WHERE
 	listing_id=#db.param(arguments.listing_id)#  and 
@@ -1083,15 +1083,15 @@ has enums with individual plain text name and id value pairs - do i need them?
 		address="";	
 	}
 	address&=" "&trim(ds['StreetName']&" "&ds['StreetSuffix']&" "&application.zcore.functions.zso(ds, "StreetDirSuffix"));
-	curLat='';
-	curLong='';
-	if(trim(address) NEQ ""){ 
-		rs5=this.baseGetLatLong(address,ds['StateOrProvince'],ds['PostalCode'], this.mls_id&"-"&ds.listingId);
-		if(rs5.success){
-			curLat=rs5.latitude;
-			curLong=rs5.longitude;
-		}
-	}
+	curLat=ds.latitude;
+	curLong=ds.longitude;
+	// if(trim(address) NEQ ""){ 
+	// 	rs5=this.baseGetLatLong(address,ds['StateOrProvince'],ds['PostalCode'], this.mls_id&"-"&ds.listingId);
+	// 	if(rs5.success){
+	// 		curLat=rs5.latitude;
+	// 		curLong=rs5.longitude;
+	// 	}
+	// }
 	address=application.zcore.functions.zfirstlettercaps(address);
 	
 	if(application.zcore.functions.zso(ds, 'UnitNumber') NEQ ''){
