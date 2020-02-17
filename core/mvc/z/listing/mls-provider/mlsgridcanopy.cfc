@@ -4,6 +4,7 @@
 	// this.retsVersion="1.7";
 	
 	this.mls_id=32;
+	this.mls_provider="mlsgridcanopy";
 	if(request.zos.istestserver){
 		this.hqPhotoPath="#request.zos.sharedPath#mls-images/32/";
 	}else{

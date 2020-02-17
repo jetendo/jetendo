@@ -199,6 +199,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		echo("The download is already running, you must cancel it or wait.");
 		abort;
 	}
+	request.ignoreSlowScript=true;
 	application.mlsGridDownloadRunning=true;
 	resourceIndex=0; // leave as 0 when not debugging
 	form.incremental=application.zcore.functions.zso(form, "incremental", true, 1);
@@ -207,13 +208,13 @@ has enums with individual plain text name and id value pairs - do i need them?
  	top=1000; // 5000 is max records?
  	skip=0;
  	count=false; // don't need count since the next link can pull everything
- 	lastUpdateDate=createdate(2020, 2, 14); // first time, pull very old data createdate(2010,1,1);
+ 	lastUpdateDate=createdatetime(2020, 2, 14,0,0,0); // first time, pull very old data createdate(2010,1,1);
  	if(form.incremental EQ 1){
 		dateContents=application.zcore.functions.zReadFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate");
 		if(dateContents NEQ false){
 			arrDate=listToArray(dateContents, "/");
-			if(arrayLen(arrDate) EQ 3){
-				lastUpdateDate=createDate(arrDate[1], arrDate[2], arrDate[3]);
+			if(arrayLen(arrDate) EQ 6){
+				lastUpdateDate=createDateTime(arrDate[1], arrDate[2], arrDate[3], arrDate[4], arrDate[5], arrDate[6]);
 			}
 		}
 	}
@@ -252,7 +253,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		}
 		// note filter operators have to be lower case.
 		if(form.incremental EQ 1){
- 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
+ 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T#timeformat(lastUpdateDate, "HH:mm:ss")#.00Z");
  		}else if(resource EQ "Media"){
  			if(structkeyexists(form, "skipMedia")){
  				continue;
@@ -266,7 +267,7 @@ has enums with individual plain text name and id value pairs - do i need them?
  				continue;
  			}
  			lastUpdateDate="2010-01-01"; // force very old date
- 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z and StandardStatus eq Odata.Models.StandardStatus'Active' and MlgCanView eq true");
+ 			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T#timeformat(lastUpdateDate, "HH:mm:ss")#Z and StandardStatus eq Odata.Models.StandardStatus'Active' and MlgCanView eq true");
  		}
 	 	nextLink="https://api.mlsgrid.com/#resource#?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
 
@@ -286,14 +287,14 @@ has enums with individual plain text name and id value pairs - do i need them?
 			}
 		}
 		//break; // for debugging just one.
-	}
+	} 
 	if(form.incremental EQ 1){
-		application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate", dateformat(dateadd("h", -12, now()), "yyyy/m/d"));
+		application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"mlsgrid/lastUpdateDate", dateformat(dateadd("h", 4, now()), "yyyy/m/d")&timeformat(dateadd("h", 4, now()), "/HH/mm/ss"));
 	}
 	structdelete(application, "currentMLSGridStatus");
  	echo("Downloaded #downloadCount# files");
 	structdelete(application, "mlsGridDownloadRunning");
-	abort;
+
 	</cfscript>
 </cffunction>
 
@@ -308,6 +309,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	oldestListingDate=now();
 	// process all the media files first so we can add the image urls to the listing_data record
 	loop query="qFiles"{
+		if(qFiles.name CONTAINS "##"){
+			continue;
+		}
 		arrName=listToArray(qFiles.name, "-");
 		if(arrayLen(arrName) LT 2){
 			continue;
@@ -447,6 +451,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
 	setting requesttimeout="100000";
+	request.ignoreSlowScript=true;
+
 
 	if(structkeyexists(application, "mlsgridCronRunning") and not structkeyexists(form, "force")){
 		previousDate=dateformat(application.mlsgridCronRunning, "yyyymmdd")&timeformat(application.mlsgridCronRunning, "HHmmss");
@@ -458,6 +464,20 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 
 	application.mlsgridCronRunning=request.zos.now;
+
+	if(not request.zos.isTestServer){ 
+		// the first run would always be 20 minutes after the server starts
+		if(not structkeyexists(application, "mlsGridLastCronDownload")){
+			application.mlsGridLastCronDownload=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss");
+		}
+		currentTime=dateformat(now(), "yyyymmdd")&timeformat(now(), "HHmmss");
+		if(currentTime-application.mlsGridLastCronDownload GTE 1200 or structkeyexists(form, "forceDownload")){
+			// download every 20 minutes
+			application.mlsGridLastCronDownload=currentTime;
+			form.incremental=1;
+			download();
+		}
+	}
 	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
 	if(qFiles.recordcount EQ 0){
 		structdelete(application, "mlsgridCronRunning");
@@ -465,6 +485,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	currentRow=1; 
 	loop query="qFiles"{ 
+		if(qFiles.name CONTAINS "##"){
+			continue;
+		}
 		try{
 			process(qFiles.name);
 		}catch(Any e){
@@ -514,6 +537,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
+	request.ignoreSlowScript=true;
 
 	fileName=arguments.fileName;
 	if(fileName CONTAINS "/" or fileName CONTAINS "\"){
@@ -544,7 +568,7 @@ has enums with individual plain text name and id value pairs - do i need them?
  	top=1000; // 5000 is max records?
  	skip=0;
  	count=false; // don't need count since the next link can pull everything
- 	lastUpdateDate=createdate(2020, 1, 20); // first time, pull very old data createdate(2010,1,1);
+ 	lastUpdateDate=createdatetime(2020, 1, 20, 0,0,0); // first time, pull very old data createdate(2010,1,1);
  	if(form.debug EQ 1){
  		top=1;
  		skip=0;
@@ -574,6 +598,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 	// process all the media files first so we can add the image urls to the listing_data record
 	loop query="qFiles"{
+		if(qFiles.name CONTAINS "##"){
+			continue;
+		}
 		if(structkeyexists(form, "skipMedia")){
 			break;
 		}
@@ -662,6 +689,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
  	// process all the listing files after media files
 	loop query="qFiles"{
+		if(qFiles.name CONTAINS "##"){
+			continue;
+		}
 		if(fileName NEQ ""){
 			if(fileName NEQ qFiles.name){
 				continue;
@@ -702,21 +732,25 @@ has enums with individual plain text name and id value pairs - do i need them?
 			if(form.debug EQ 0 and (ds["MlgCanView"] EQ "false" or ds["StandardStatus"] NEQ "active")){
 				// delete this record somehow
 				if(structkeyexists(variables.listingLookup, listing_id)){ 
-					db2.sql="DELETE FROM #db2.table("listing", request.zos.zcoreDatasource)#  
-					WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-					db2.execute("qDelete");
-					db2.sql="DELETE FROM #db2.table("listing_data", request.zos.zcoreDatasource)#  
-					WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db2.param(0)# ";
-					db2.execute("qDelete");
-					db2.sql="DELETE FROM #db2.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db2.param(0)# ";
-					db2.execute("qDelete");
-					db2.sql="UPDATE #db2.table("listing_track", request.zos.zcoreDatasource)# listing_track 
-					SET listing_track_hash=#db2.param('')#, 
-					listing_track_inactive=#db2.param(1)#, 
-					listing_track_updated_datetime=#db2.param(request.zos.mysqlnow)#  
+					db.sql="DELETE FROM #db.table("listing", request.zos.zcoreDatasource)#  
+					WHERE listing_id =#db.param(listing_id)# and listing_deleted = #db.param(0)# ";
+					db.execute("qDelete");
+					db.sql="DELETE FROM #db.table("listing_data", request.zos.zcoreDatasource)#  
+					WHERE listing_id =#db.param(listing_id)# and listing_data_deleted = #db.param(0)# ";
+					db.execute("qDelete");
+					db.sql="DELETE FROM #db.table("listing_memory", request.zos.zcoreDatasource)# WHERE listing_id=#db.param(listing_id)# and listing_deleted = #db.param(0)# ";
+					db.execute("qDelete");
+					db.sql="DELETE FROM #db.table("listing_track", request.zos.zcoreDatasource)# 
 					WHERE listing_id=#db.param(listing_id)# and 
-					listing_track_deleted = #db2.param(0)#";
-					db2.execute("qDelete"); 
+					listing_track_deleted = #db.param(0)#";
+					db.execute("qDelete"); 
+					// db.sql="UPDATE #db.table("listing_track", request.zos.zcoreDatasource)# listing_track 
+					// SET listing_track_hash=#db.param('')#, 
+					// listing_track_inactive=#db.param(1)#, 
+					// listing_track_updated_datetime=#db.param(request.zos.mysqlnow)#  
+					// WHERE listing_id=#db.param(listing_id)# and 
+					// listing_track_deleted = #db.param(0)#";
+					// db.execute("qDelete"); 
 					deleteCount++;
 
 				}else{
@@ -837,7 +871,7 @@ has enums with individual plain text name and id value pairs - do i need them?
  			break;
  		} 
 	}
- 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#");
+ 	echo("Inserted #insertCount#, Updated #updateCount#, Deleted #deleteCount#, Skipped #skipCount#<br>");
 	structdelete(application, "mlsGridImportRunning");
 	structdelete(application, "currentMLSGridStatus");
 	structdelete(application, "mlsgridCronRunning");
@@ -1296,7 +1330,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	// for(i=1;i<=arrayLen(arrPhoto);i++){
 	// 	rs["photo#i#"]=arrPhoto[i];
 	// } 
-	writedump(rs);abort;
+	// writedump(rs);abort;
 
 	return rs;
 	</cfscript>
@@ -1544,12 +1578,12 @@ ts["SpecialListingConditions"]=true;
 ts["CAR_SqFtUpper"]=true;
 ts["StateOrProvince"]=true;
 // ts["StandardStatus"]=true;
-ts["CAR_StatusContractualSearchDate"]=true;
+// ts["CAR_StatusContractualSearchDate"]=true;
 // ts["StreetName"]=true;
 // ts["StreetNumber"]=true;
 // ts["StreetNumberNumeric"]=true;
 // ts["StreetSuffix"]=true;
-ts["CAR_StreetViewParam"]=true;
+// ts["CAR_StreetViewParam"]=true;
 ts["SubdivisionName"]=true;
 ts["CAR_Table"]=true;
 ts["TaxAnnualAmount"]=true;
@@ -1741,8 +1775,8 @@ ts["Utilities"]=true;
 	ts["ElementarySchool"]="Elementary School";
 	ts["Elevation"]="Elevation";
 	ts["EntryLevel"]="EntryLevel";
-	ts["ExteriorFeatures"]="ExteriorFeatures";
-	ts["FireplaceFeatures"]="FireplaceFeatures";
+	ts["ExteriorFeatures"]="Exterior Features";
+	ts["FireplaceFeatures"]="Fireplace Features";
 	ts["FireplaceYN"]="Fireplace YN";
 	ts["Flooring"]="Flooring";
 	ts["FoundationDetails"]="Foundation Details";
