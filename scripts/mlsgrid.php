@@ -9,5 +9,6 @@ if(zIsTestServer()){
 	$domain=get_cfg_var("jetendo_admin_domain");
 }
 $link=$domain."/z/listing/tasks/mls-grid/cron";
-`/usr/bin/wget -q $link &`;
+echo "\n".$link."\n";
+`/usr/bin/wget -qO $link &`;
 ?>

@@ -72,11 +72,11 @@
 				}
 				request.lastPhotoId=idx.listing_id&"-1";
 			}
-		}
+		} 
 		idx["agentName"]="";//arguments.ss["rets32_listagentfullname"];
 		idx["agentPhone"]="";//arguments.ss["RETS32_LISTAGENTDIRECTWORKPHONE"];
 		//idx["agentEmail"]=arguments.ss["rets32_listagentemail"];
-		idx["officeName"]="";//arguments.ss["rets32_listofficename"];
+		idx["officeName"]=idx.listing_office_name;//arguments.ss["rets32_listofficename"];
 		idx["officePhone"]="";//arguments.ss["RETS32_LISTOFFICEPHONE"];
 		idx["officeCity"]="";
 		idx["officeAddress"]="";
@@ -85,7 +85,7 @@
 		idx["officeEmail"]="";
 			
 		idx["virtualtoururl"]="";//application.zcore.functions.zso(arguments.ss, "rets32_virtualtoururlunbranded");
-		idx["zipcode"]="";//application.zcore.functions.zso(arguments.ss, "rets#this.mls_id#_postalcode");
+		idx["zipcode"]=idx.listing_data_zip;//application.zcore.functions.zso(arguments.ss, "rets#this.mls_id#_postalcode");
 		// if(application.zcore.functions.zso(arguments.ss, "rets32_associationfee") NEQ ""){
 		// 	idx["maintfees"]=arguments.ss["rets32_associationfee"]; 
 			
@@ -118,17 +118,17 @@
 		db=request.zos.queryObject;  
 		db.sql="select *
 		from 
-		#db.table("listing_media", "zgraph")# 
+		#db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 		WHERE listing_id=#db.param(this.mls_id&"-"&arguments.mls_pid)# and 
-		listing_media_url<>#db.param('')# and 
-		listing_media_order=#db.param(arguments.num)# and 
-		listing_media_deleted=#db.param(0)# 
+		mlsgrid_media_url<>#db.param('')# and 
+		mlsgrid_media_order=#db.param(arguments.num)# and 
+		mlsgrid_media_deleted=#db.param(0)# 
 		limit #db.param(0)#,#db.param(1)#";
 		qPhoto=db.execute("qPhoto"); 
 		request.lastPhotoId="";
 		for(row in qPhoto){
 			request.lastPhotoId=row.listing_id&"-1";
-			return row.listing_media_url;
+			return row.mlsgrid_media_url;
 		}
 		return ""; 
 		</cfscript>

@@ -125,13 +125,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 	];
 
 
-	metaDataPath="/var/jetendo-server/jetendo/share/mls-data/32/metadata.xml";
-	a=application.zcore.functions.zReadFile(metaDataPath);
-	variables.metaData=xmlparse(a);
+	// metaDataPath="/var/jetendo-server/jetendo/share/mls-data/32/metadata.xml";
+	// a=application.zcore.functions.zReadFile(metaDataPath);
+	// variables.metaData=xmlparse(a);
 	</cfscript>
 </cffunction>
 
-<cffunction name="viewMetadata" localmode="modern" access="remote"> 
+<!--- <cffunction name="viewMetadata" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
@@ -140,9 +140,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 	writedump(variables.metaData);
 	abort;
 	</cfscript>
-</cffunction>
+</cffunction> --->
 
-<cffunction name="displayFields" localmode="modern" access="remote"> 
+<cffunction name="displayFields" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
@@ -152,7 +152,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 </cffunction>
 
 
-<cffunction name="cancel" localmode="modern" access="remote"> 
+<cffunction name="cancel" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
@@ -180,8 +180,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 	
 	<h2><a href="/z/listing/tasks/mls-grid/download" target="_blank">Incremental Download</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
-	<h2><a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Download Everything</a> <cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
-	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
+	<h2>Download: <a href="/z/listing/tasks/mls-grid/download?incremental=0" target="_blank">Everything</a> | <a href="/z/listing/tasks/mls-grid/download?incremental=0&skipListing=1" target="_blank">Media</a> | <a href="/z/listing/tasks/mls-grid/download?incremental=0&skipMedia=1" target="_blank">Listings</a><cfif structkeyexists(application, "mlsGridDownloadRunning")>(Running)</cfif></h2>
+	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process Media + Listings</a> | <a href="/z/listing/tasks/mls-grid/process?skipMedia=1" target="_blank">Process Listings</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Cron</a></h2>
 	<p>Cron is designed to process one file at a time.  It should be scheduled to run once a minute.  If you add ?force=1 to the url, it will allow it to run again in the case of an error, but it will also be able to run again after 5 minutes too.</p>
 	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
@@ -192,7 +192,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
-	echo("incomplete - disabled for now");abort;
+	// echo("incomplete - disabled for now");abort;
 	setting requesttimeout="100000"; 
 	if(structkeyexists(application, "mlsGridDownloadRunning")){
 		echo("The download is already running, you must cancel it or wait.");
@@ -253,12 +253,17 @@ has enums with individual plain text name and id value pairs - do i need them?
 		if(form.incremental EQ 1){
  			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z");
  		}else if(resource EQ "Media"){
+ 			if(structkeyexists(form, "skipMedia")){
+ 				continue;
+ 			}
  			// media can't filter active listings
  			top=5000;
  			lastUpdateDate="2010-01-01"; // force very old date
  			filter="MlgCanView eq true"; // no other filter can reduce the media data
- 		}else{
- 		continue; // skip for now because i already have them
+ 		}else{ 
+ 			if(structkeyexists(form, "skipListing")){
+ 				continue;
+ 			}
  			lastUpdateDate="2010-01-01"; // force very old date
  			filter=urlencodedformat("ModificationTimestamp gt #dateformat(lastUpdateDate, "yyyy-mm-dd")#T00:00:00.00Z and StandardStatus eq Odata.Models.StandardStatus'Active' and MlgCanView eq true");
  		}
@@ -354,15 +359,15 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfargument name="listing_id" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	db.sql="select * from #db.table("listing_media", "zgraph")# 
+	arrPhoto=[];
+	return arrPhoto; // ignore photos for now
+	db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 	WHERE
 	listing_id=#db.param(arguments.listing_id)#  and 
-	listing_media_deleted=#db.param(0)# 
-	ORDER BY listing_media_order ASC";
+	mlsgrid_media_deleted=#db.param(0)# 
+	ORDER BY mlsgrid_media_order ASC";
 	qMedia=db.execute("qMedia", "", 10000, "query", false);
-	arrPhoto=[];
 	if(qMedia.recordcount EQ 0){
-		return arrPhoto; // ignore photos for now
 		// download images for 1 listing to fix the missing data once
 		skip=0;
 		count=false;
@@ -380,49 +385,49 @@ has enums with individual plain text name and id value pairs - do i need them?
 	 		}
 			ds=js.value[i];
 			if(ds["MlgCanView"] EQ "false"){
-				db.sql="update #db.table("listing_media", "zgraph")# 
+				db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 				set 
-				listing_media_url=#db.param("")# 
+				mlsgrid_media_url=#db.param("")# 
 				WHERE mls_id=#db.param(this.mls_id)# and 
-				listing_media_key=#db.param("#ds["MediaKey"]#")# and 
-				listing_media_deleted=#db.param(0)# ";
+				mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
+				mlsgrid_media_deleted=#db.param(0)# ";
 				db.execute("qUpdate");
 			}else{
 				ns=processMedia(ds);
-				db.sql="select listing_media_id from #db.table("listing_media", "zgraph")# 
+				db.sql="select mlsgrid_media_id from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 				WHERE mls_id=#db.param(this.mls_id)# and 
-				listing_media_key=#db.param("#ns["MediaKey"]#")# and 
-				listing_media_deleted=#db.param(0)# ";
+				mlsgrid_media_key=#db.param("#ns["MediaKey"]#")# and 
+				mlsgrid_media_deleted=#db.param(0)# ";
 				qMedia=db.execute("qMedia");
 
 				arrayAppend(arrPhoto, ns["MediaURL"]);
 				if(qMedia.recordcount NEQ 0){
-					db.sql="update #db.table("listing_media", "zgraph")#  SET
-					listing_media_url=#db.param(ns["MediaURL"])#, 
+					db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET
+					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
-					listing_media_order=#db.param(ns["Order"])#, 
-					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
+					mlsgrid_media_order=#db.param(ns["Order"])#, 
+					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
 					WHERE mls_id=#db.param(this.mls_id)# and 
-					listing_media_key=#db.param("#ns["MediaKey"]#")# and 
-					listing_media_deleted=#db.param(0)# ";
+					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")# and 
+					mlsgrid_media_deleted=#db.param(0)# ";
 					db.execute("qUpdate");
 				}else{
-					db.sql="INSERT INTO #db.table("listing_media", "zgraph")#  SET 
-					listing_media_key=#db.param("#ns["MediaKey"]#")#,
+					db.sql="INSERT INTO #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET 
+					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
-					listing_media_url=#db.param(ns["MediaURL"])#, 
-					listing_media_order=#db.param(ns["Order"])#, 
-					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
+					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
+					mlsgrid_media_order=#db.param(ns["Order"])#, 
+					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
 					mls_id=#db.param(this.mls_id)#,
-					listing_media_deleted=#db.param(0)# ";
+					mlsgrid_media_deleted=#db.param(0)# ";
 					db.execute("qInsert");
 				}
 			}
 		}
 	}else{
 		for(row in qMedia){
-			if(row.listing_media_url NEQ ""){
-				arrayAppend(arrPhoto, row.listing_media_url);
+			if(row.mlsgrid_media_url NEQ ""){
+				arrayAppend(arrPhoto, row.mlsgrid_media_url);
 			}
 		}
 	}
@@ -431,7 +436,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 </cffunction>
 
 <cffunction name="cron" localmode="modern" access="remote"> 
-	<cfscript>
+	<cfscript> 
 	if(not request.zos.isDeveloper and not request.zos.isServer){
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
@@ -603,40 +608,40 @@ has enums with individual plain text name and id value pairs - do i need them?
 			mediaCount++;
 
 			if(ds["MlgCanView"] EQ "false"){
-				db.sql="update #db.table("listing_media", "zgraph")# 
+				db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 				set 
-				listing_media_url=#db.param("")# 
+				mlsgrid_media_url=#db.param("")# 
 				WHERE mls_id=#db.param(this.mls_id)# and 
-				listing_media_key=#db.param("#ds["MediaKey"]#")# and 
-				listing_media_deleted=#db.param(0)# ";
+				mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
+				mlsgrid_media_deleted=#db.param(0)# ";
 				db.execute("qUpdate");
 			}else{
 				ns=processMedia(ds);
-				db.sql="select listing_media_id from #db.table("listing_media", "zgraph")# 
+				db.sql="select mlsgrid_media_id from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 				WHERE mls_id=#db.param(this.mls_id)# and 
-				listing_media_key=#db.param("#ns["MediaKey"]#")# and 
-				listing_media_deleted=#db.param(0)# ";
+				mlsgrid_media_key=#db.param("#ns["MediaKey"]#")# and 
+				mlsgrid_media_deleted=#db.param(0)# ";
 				qMedia=db.execute("qMedia");
 
 				if(qMedia.recordcount NEQ 0){
-					db.sql="update #db.table("listing_media", "zgraph")#  SET
-					listing_media_url=#db.param(ns["MediaURL"])#, 
+					db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET
+					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
-					listing_media_order=#db.param(ns["Order"])#, 
-					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
+					mlsgrid_media_order=#db.param(ns["Order"])#, 
+					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
 					WHERE mls_id=#db.param(this.mls_id)# and 
-					listing_media_key=#db.param("#ns["MediaKey"]#")# and 
-					listing_media_deleted=#db.param(0)# ";
+					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")# and 
+					mlsgrid_media_deleted=#db.param(0)# ";
 					db.execute("qUpdate");
 				}else{
-					db.sql="INSERT INTO #db.table("listing_media", "zgraph")#  SET 
-					listing_media_key=#db.param("#ns["MediaKey"]#")#,
+					db.sql="INSERT INTO #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET 
+					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
-					listing_media_url=#db.param(ns["MediaURL"])#, 
-					listing_media_order=#db.param(ns["Order"])#, 
-					listing_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
+					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
+					mlsgrid_media_order=#db.param(ns["Order"])#, 
+					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)#,
 					mls_id=#db.param(this.mls_id)#,
-					listing_media_deleted=#db.param(0)# ";
+					mlsgrid_media_deleted=#db.param(0)# ";
 					db.execute("qInsert");
 				}
 			}  
@@ -645,7 +650,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 		application.zcore.functions.zDeleteFile(path);
  	} 
 
-	if(not structkeyexists(form, "skipMedia")){
+	if(not structkeyexists(form, "skipMedia") and mediaFileCount NEQ 0){
 	 	echo("Processed #mediaCount# media records in #mediaFileCount# files<br>");
 	 	return;
 	}
@@ -820,7 +825,8 @@ has enums with individual plain text name and id value pairs - do i need them?
 			// structdelete(application, "mlsgridCronRunning");
 			// echo('stopped');return;
 		}
-		application.zcore.functions.zDeleteFile(path);
+		application.zcore.functions.zRenameFile(path, request.zos.globals.privateHomeDir&"mlsgrid-listing-backup/"&qFiles.name);
+		//application.zcore.functions.zDeleteFile(path);
  		if(resourceIndex NEQ 0){
  			break;
  		} 
