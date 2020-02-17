@@ -61,12 +61,14 @@
 		idx["features"]="";
 		t44444=0;
 		idx.listingSource=request.zos.listing.mlsStruct[listgetat(idx.listing_id,1,'-')].mls_disclaimer_name;
-
+		js={};
+		if(len(idx.listing_data_json) GT 0){
+			js=deserializeJson(idx.listing_data_json);
+		}
 		request.lastPhotoId=""; 
 		if(arguments.ss.listing_photocount EQ 0){
 			idx["photo1"]='/z/a/listing/images/image-not-available.gif';
-		}else if(len(idx.listing_data_json) GT 0){
-			js=deserializeJson(idx.listing_data_json);
+		}else{
 			if(structkeyexists(js, "arrPhoto")){
 				for(i=1;i<=arraylen(js.arrPhoto);i++){
 					idx["photo#i#"]=js.arrPhoto[i];
@@ -85,7 +87,7 @@
 		idx["officeState"]="";
 		idx["officeEmail"]="";
 			
-		idx["virtualtoururl"]="";//application.zcore.functions.zso(arguments.ss, "rets32_virtualtoururlunbranded");
+		idx["virtualtoururl"]=application.zcore.functions.zso(js, "VirtualTourURLUnbranded");//application.zcore.functions.zso(arguments.ss, "rets32_virtualtoururlunbranded");
 		idx["zipcode"]=idx.listing_data_zip;//application.zcore.functions.zso(arguments.ss, "rets#this.mls_id#_postalcode");
 		// if(application.zcore.functions.zso(arguments.ss, "rets32_associationfee") NEQ ""){
 		// 	idx["maintfees"]=arguments.ss["rets32_associationfee"]; 
