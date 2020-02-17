@@ -46,6 +46,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfscript>
 	db=request.zos.queryObject;
 	this.mls_id=32; 
+	this.mls_provider="mlsgridcanopy";
 	request.zos["listing"]=application.zcore.listingStruct;
 
 	// get all the active record ids from database into a lookup table so we can mark for deletion faster
@@ -999,7 +1000,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				listing_lookup_value:arguments.oldid,
 				listing_lookup_oldid:arguments.oldid,
 				listing_lookup_datetime:request.zos.mysqlnow,
-				listing_lookup_mls_provider:this.mls_id,
+				listing_lookup_mls_provider:this.mls_provider,
 				listing_lookup_oldid_unchanged:arguments.oldid,
 				listing_lookup_updated_datetime:request.zos.mysqlnow,
 				listing_lookup_deleted:0
@@ -1295,8 +1296,55 @@ has enums with individual plain text name and id value pairs - do i need them?
 	// for(i=1;i<=arrayLen(arrPhoto);i++){
 	// 	rs["photo#i#"]=arrPhoto[i];
 	// } 
+	writedump(rs);abort;
 
 	return rs;
+	</cfscript>
+</cffunction>
+
+   
+
+<cffunction name="getListingDetailRowOutput" localmode="modern" output="no" returntype="string">
+	<cfargument name="label" type="string" required="yes">
+	<cfargument name="idx" type="struct" required="yes">
+	<cfargument name="idxExclude" type="struct" required="yes">
+	<cfargument name="idxMap" type="struct" required="yes">
+	<cfargument name="allFields" type="struct" required="yes">
+	<cfscript>
+	// variables.fieldNameLookup
+	idxTemp3=structnew();
+	idxTemp32=structnew();
+	n1=1;
+	for(i in arguments.idxMap){
+		idxTemp32[arguments.idxMap[i]&"-"&n1]=i;
+		idxTemp3[i]=arguments.idxMap[i];
+		n1++;
+	}
+	arrR2=[];
+	arrK=structkeyarray(idxTemp32);
+	arraysort(arrK, "text", "asc");
+	for(i99=1;i99 LTE arraylen(arrK);i99++){
+		if(not structkeyexists(variables.fieldNameLookup, i)){ 
+			continue;
+		}
+		i=idxTemp32[arrK[i99]]; 
+		for(i9 in arguments.allFields){
+			if(arguments.allFields[i9].field EQ i){
+				structdelete(arguments.allFields, i9);
+				break;
+			}
+		}
+		if(structkeyexists(arguments.idxExclude, i) EQ false){
+			if(structkeyexists(arguments.idx, i) and structkeyexists(arguments.idx, i) and arguments.idx[i] NEQ "" and arguments.idx[i] NEQ "0"){
+				arrayappend(arrR2, '<tr><th>'&application.zcore.functions.zfirstlettercaps(variables.fieldNameLookup[i])&'</th><td>'&htmleditformat(arguments.idx[i])&'</td></tr>'&chr(10));
+			}
+		}
+	} 
+	if(arraylen(arrR2) NEQ 0){
+		return '<tr><td colspan="2"><h3>'&arguments.label&'</h3></td></tr>'&arraytolist(arrR2,"");
+	}else{
+		return "";
+	}
 	</cfscript>
 </cffunction>
 
@@ -1307,7 +1355,89 @@ has enums with individual plain text name and id value pairs - do i need them?
 	var ts=structnew(); 
 	variables.allFields={};
 
-	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Interior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+
+	ts["RoomBathroom1Level"]=true;
+	ts["RoomBathroom2Level"]=true;
+	ts["RoomBreakfastRoomLevel"]=true;
+	ts["RoomDiningRoomLevel"]=true;
+	ts["RoomFamilyRoomLevel"]=true;
+	ts["RoomKitchenLevel"]=true;
+	ts["RoomLivingRoomLevel"]=true;
+	ts["RoomMasterBedroomLevel"]=true;
+	ts["CAR_room1_RoomType"]=true;
+	ts["CAR_room2_BathsFull"]=true;
+	ts["CAR_room2_BathsHalf"]=true;
+	ts["CAR_room2_BedsTotal"]=true;
+	ts["RoomBathroom3Level"]=true;
+	ts["RoomBathroom4Level"]=true;
+	ts["RoomBathroom5Level"]=true;
+	ts["RoomLaundryLevel"]=true;
+	ts["RoomLoftLevel"]=true;
+	ts["RoomMasterBedroom2Level"]=true;
+	ts["RoomBedroom1Level"]=true;
+	ts["RoomBedroom2Level"]=true;
+	ts["CAR_room2_RoomType"]=true;
+	ts["CAR_room3_BathsFull"]=true;
+	ts["CAR_room3_BathsHalf"]=true;
+	ts["CAR_room3_BedsTotal"]=true;
+	ts["RoomBathroom6Level"]=true;
+	ts["RoomLoft2Level"]=true;
+	ts["RoomPlayRoomLevel"]=true;
+	ts["RoomBedroom3Level"]=true;
+	ts["CAR_room3_RoomType"]=true;
+	ts["CAR_room4_BathsFull"]=true;
+	ts["CAR_room4_BathsHalf"]=true;
+	ts["CAR_room4_BedsTotal"]=true;
+	ts["RoomNoneLevel"]=true;
+	ts["CAR_room4_RoomType"]=true;
+	ts["Flooring"]=true;
+	ts["Furnished"]=true;
+	ts["InteriorFeatures"]=true;
+	ts["RoomPantryLevel"]=true;
+	ts["AccessibilityFeatures"]=true;
+	ts["NumberOfUnitsTotal"]=true;
+	ts["CAR_SqFtGarage"]=true;
+	ts["CAR_unit1_BathsFull"]=true;
+	ts["CAR_unit1_BathsHalf"]=true;
+	ts["UnitType1BedsTotal"]=true;
+	ts["CAR_unit1_SqFtTotal"]=true;
+	ts["CAR_unit1_UnitRooms"]=true;
+	ts["CAR_unit2_BathsFull"]=true;
+	ts["CAR_unit2_BathsHalf"]=true;
+	ts["UnitType2BedsTotal"]=true;
+	ts["CAR_unit2_SqFtTotal"]=true;
+	ts["CAR_unit2_UnitRooms"]=true;
+	ts["Cooling"]=true;
+	ts["BathroomsFull"]=true;
+	ts["BathroomsHalf"]=true;
+	ts["BathroomsTotalInteger"]=true;
+	ts["BedroomsTotal"]=true;
+	ts["Appliances"]=true;
+	ts["ConstructionMaterials"]=true;
+	ts["FireplaceFeatures"]=true;
+	ts["FireplaceYN"]=true;
+	ts["FoundationDetails"]=true;
+	ts["Heating"]=true;
+	ts["LaundryFeatures"]=true;
+	ts["CAR_SqFtAdditional"]=true;
+	ts["BelowGradeFinishedArea"]=true;
+	ts["CAR_SqFtLower"]=true;
+	ts["CAR_SqFtMain"]=true;
+	ts["CAR_SqFtThird"]=true;
+	ts["LivingArea"]=true;
+	ts["BuildingAreaTotal"]=true;
+	ts["CAR_SqFtUnheatedBasement"]=true;
+	ts["CAR_SqFtUnheatedLower"]=true;
+	ts["CAR_SqFtUnheatedMain"]=true;
+	ts["CAR_SqFtUnheatedThird"]=true;
+	ts["CAR_SqFtUnheatedTotal"]=true;
+	ts["CAR_SqFtUnheatedUpper"]=true;
+	ts["RoomType"]=true;
+	ts["CAR_room1_BathsFull"]=true;
+	ts["CAR_room1_BathsHalf"]=true;
+	ts["CAR_room1_BedsTotal"]=true;
+
+	arrayappend(arrR, getListingDetailRowOutput("Interior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
 	    
 	return arraytolist(arrR,'');
 	
@@ -1323,7 +1453,18 @@ has enums with individual plain text name and id value pairs - do i need them?
 	variables.allFields={};
  
 
-	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Exterior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+ts["LotSizeArea"]=true;
+ts["ParkingFeatures"]=true;
+
+ts["Sewer"]=true;
+ts["ArchitecturalStyle"]=true;
+ts["CAR_Porch"]=true;
+ts["EntryLevel"]=true;
+ts["ExteriorFeatures"]=true;
+ts["Elevation"]=true;
+ts["Roof"]=true;
+ts["StoriesTotal"]=true;
+	arrayappend(arrR, getListingDetailRowOutput("Exterior Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
 	    
 	return arraytolist(arrR,'');
 	
@@ -1336,7 +1477,154 @@ has enums with individual plain text name and id value pairs - do i need them?
 	var arrR=arraynew(1);
 	var ts=structnew();   
 	variables.allFields={};
-	arrayappend(arrR, application.zcore.listingCom.getListingDetailRowOutput("Additional Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
+
+ts["PetsAllowed"]=true;
+ts["BuilderName"]=true;
+// ts["CAR_BuyerAgentSaleYN"]=true;
+ts["CumulativeDaysOnMarket"]=true;
+// ts["City"]=true;
+ts["CAR_ConstructionType"]=true;
+// ts["CountyOrParish"]=true;
+ts["CAR_DeedReference"]=true;
+ts["DaysOnMarket"]=true;
+ts["RoadSurfaceType"]=true;
+ts["ElementarySchool"]=true;
+// ts["CAR_GeocodeSource"]=true;
+ts["HighSchool"]=true;
+ts["AssociationName"]=true;
+ts["AssociationPhone"]=true;
+ts["CAR_HOASubjectTo"]=true;
+ts["CAR_HOASubjectToDues"]=true;
+// ts["Latitude"]=true;
+// ts["ListAgentKey"]=true;
+// ts["ListAgentDirectPhone"]=true;
+// ts["ListAgentFullName"]=true;
+// ts["ListAgentMlsId"]=true;
+// ts["ListAgentAOR"]=true;
+// ts["ListingContractDate"]=true;
+// ts["ListingAgreement"]=true;
+// ts["ListOfficeKey"]=true;
+// ts["ListOfficeMlsId"]=true;
+// ts["ListOfficeName"]=true;
+// ts["ListOfficePhone"]=true;
+// ts["ListPrice"]=true;
+// ts["Longitude"]=true;
+// ts["ListingKey"]=true;
+// ts["OriginatingSystemModificationTimestamp"]=true;
+ts["MiddleOrJuniorSchool"]=true;
+// ts["OriginatingSystemName"]=true;
+// ts["ListingId"]=true;
+ts["Model"]=true;
+ts["NewConstructionYN"]=true;
+// ts["CAR_OwnerAgentYN"]=true;
+ts["ParcelNumber"]=true;
+// ts["PendingTimestamp"]=true;
+// ts["InternetAddressDisplayYN"]=true;
+// ts["InternetEntireListingDisplayYN"]=true;
+// ts["CAR_PermitSyndicationYN"]=true;
+// ts["PhotosCount"]=true;
+// ts["PhotosChangeTimestamp"]=true;
+ts["PostalCode"]=true;
+ts["PostalCodePlus4"]=true;
+ts["StructureType"]=true;
+ts["PropertySubType"]=true;
+ts["PropertyType"]=true;
+ts["CAR_ProposedSpecialAssessmentYN"]=true;
+// ts["PublicRemarks"]=true;
+ts["CAR_RATIO_CurrentPrice_By_Acre"]=true;
+ts["CAR_RATIO_ListPrice_By_TaxAmount"]=true;
+ts["RoadResponsibility"]=true;
+// ts["BuyerAgentKey"]=true;
+// ts["BuyerAgentAOR"]=true;
+// ts["BuyerAgentMlsId"]=true;
+// ts["BuyerOfficeKey"]=true;
+// ts["BuyerOfficeMlsId"]=true;
+// ts["ShowingContactPhone"]=true;
+ts["SpecialListingConditions"]=true;
+ts["CAR_SqFtUpper"]=true;
+ts["StateOrProvince"]=true;
+// ts["StandardStatus"]=true;
+ts["CAR_StatusContractualSearchDate"]=true;
+// ts["StreetName"]=true;
+// ts["StreetNumber"]=true;
+// ts["StreetNumberNumeric"]=true;
+// ts["StreetSuffix"]=true;
+ts["CAR_StreetViewParam"]=true;
+ts["SubdivisionName"]=true;
+ts["CAR_Table"]=true;
+ts["TaxAnnualAmount"]=true;
+ts["CAR_UnitCount"]=true;
+// ts["UnitNumber"]=true;
+// ts["InternetAutomatedValuationDisplayYN"]=true;
+// ts["InternetConsumerCommentYN"]=true;
+ts["WaterSource"]=true;
+ts["CAR_WaterHeater"]=true;
+ts["YearBuilt"]=true;
+ts["ZoningDescription"]=true;
+ts["CAR_MainLevelGarageYN"]=true;
+ts["OccupantType"]=true;
+ts["CAR_ProjectedClosingDate"]=true;
+ts["CAR_CCRSubjectTo"]=true;
+// ts["MlgCanView"]=true;
+// ts["ModificationTimestamp"]=true;
+// ts["@odata.id"]=true;
+ts["AboveGradeFinishedArea"]=true;
+ts["AvailabilityDate"]=true;
+ts["CloseDate"]=true;
+ts["ClosePrice"]=true;
+ts["CAR_DOMToClose"]=true;
+ts["CAR_PropertySubTypeSecondary"]=true;
+ts["TenantPays"]=true;
+ts["CommunityFeatures"]=true;
+ts["CAR_ConstructionStatus"]=true;
+ts["Directions"]=true;
+// ts["ListingTerms"]=true;
+ts["SyndicationRemarks"]=true;
+ts["WaterfrontFeatures"]=true;
+ts["CAR_ZoningNCM"]=true;
+ts["AssociationFee"]=true;
+ts["AssociationFeeFrequency"]=true;
+ts["CAR_CanSubdivideYN"]=true;
+// ts["CoListAgentKey"]=true;
+// ts["CoListAgentFullName"]=true;
+// ts["CoListAgentAOR"]=true;
+// ts["CoListAgentMlsId"]=true;
+// ts["CoListOfficeKey"]=true;
+// ts["CoListOfficeMlsId"]=true;
+// ts["CoListOfficeName"]=true;
+ts["HabitableResidenceYN"]=true;
+ts["LotSizeDimensions"]=true;
+ts["CAR_OutBuildingsYN"]=true;
+ts["CAR_PlatBookSlide"]=true;
+ts["CAR_PlatReferenceSectionPages"]=true;
+ts["CAR_Restrictions"]=true;
+ts["CAR_SqFtBuildingMinimum"]=true;
+ts["CAR_SuitableUse"]=true;
+ts["CAR_CorrectionCount"]=true;
+ts["LotFeatures"]=true;
+ts["StreetDirSuffix"]=true;
+ts["VirtualTourURLUnbranded"]=true;
+ts["WaterBodyName"]=true;
+ts["Inclusions"]=true;
+ts["CAR_InsideCityYN"]=true;
+ts["NumberOfBuildings"]=true;
+ts["CAR_RestrictionsDescription"]=true;
+ts["CAR_SqFtAvailableMaximum"]=true;
+ts["CAR_SqFtAvailableMinimum"]=true;
+ts["CAR_SqFtMaximumLease"]=true;
+ts["CAR_SqFtMinimumLease"]=true;
+ts["CAR_TransactionType"]=true;
+ts["AccessCode"]=true;
+ts["CAR_CommercialLocationDescription"]=true;
+ts["CAR_ComplexName"]=true;
+ts["CrossStreet"]=true;
+ts["CAR_Documents"]=true;
+ts["CAR_FloodPlain"]=true;
+ts["CAR_RailService"]=true;
+// ts["StreetDirPrefix"]=true;
+ts["Utilities"]=true;
+
+	arrayappend(arrR, getListingDetailRowOutput("Additional Information", arguments.idx, variables.excludeStruct, ts, variables.allFields));
 	     
 
 	return arraytolist(arrR,'');

@@ -451,6 +451,7 @@
 			<p><a href="/z/listing/admin/remap-data/index">Remap Real Estate Saved Search Data</a></p>
 			<p><a href="/z/listing/tasks/sendListingAlerts/index" target="_blank">Send Email Alerts</a></p>
 			<p><a href="/z/listing/tasks/importMLS/index" target="_blank">Import Data</a> 
+			 | <a href="/z/listing/tasks/importMLS/checkImportTimer" target="_blank">Check Import Timer</a></p>
 			<p><a href="/z/listing/tasks/mls-grid/index" target="_blank">MLS Grid</a> 
 			<cfif structkeyexists(application.zcore, 'mlsImportIsRunning')>
 				(Running -
@@ -459,8 +460,7 @@
 						| #application.zcore.idxImportStatus#
 					</cfif> | 
 				)
-			</cfif>
-			 | <a href="/z/listing/tasks/importMLS/checkImportTimer" target="_blank">Check Import Timer</a></p>
+			</cfif></p>
 			<p><a href="/z/listing/tasks/generateData/index" target="_blank">Generate Cache Data</a></p>
 			<p><a href="/z/listing/tasks/listingLookupBuilder/index" target="_blank">Update Lookup Tables</a></p>
 			<p><a href="/z/listing/tasks/listingLookupBuilder/updateDistanceCache" target="_blank">Update City Distance Table</a></p>
