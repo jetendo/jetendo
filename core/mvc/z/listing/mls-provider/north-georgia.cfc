@@ -263,7 +263,8 @@
 		if(arguments.ss.ngm_photocount EQ 0){
 			idx["photo1"]='/z/a/listing/images/image-not-available.gif';
 		}else{	
-			for(i=1;i LTE arguments.ss.ngm_photocount;i++){
+			// don't know how to support more then 26 images
+			for(i=1;i LTE min(26, arguments.ss.ngm_photocount);i++){
 				idx["photo"&i]='http://photos.neg.ctimls.com/neg/photos/large/#left(right(ts.mls_pid,2),1)#/#right(ts.mls_pid,1)#/#ts.mls_pid##application.zcore.functions.zNumberToLetter(i)#.jpg';
 			}
 		}

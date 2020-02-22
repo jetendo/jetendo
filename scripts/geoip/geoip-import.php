@@ -7,6 +7,13 @@
 
 require(get_cfg_var("jetendo_scripts_path")."library.php");
 set_time_limit(5000);
+
+$maxMindLicense=get_cfg_var("jetendo_maxmind_license");
+if($maxMindLicense == ""){
+	echo("jetendo_maxmind_license php info configuration variable must be defined.");
+	exit;
+}
+
 $mysqlUser=get_cfg_var("jetendo_mysql_default_username");
 $mysqlPass=get_cfg_var("jetendo_mysql_default_password");
 
@@ -124,10 +131,16 @@ $r=$cmysql->query($sql, MYSQLI_STORE_RESULT);
 if($r===FALSE){
 		zEmailErrorAndExit("GeoIP Import Failed", "Failed: ".$cmysql->error);
 } 
+
+
 echo "Download Zip\n";
 $zipPath=$path."GeoLite2-City-CSV.zip";
 @unlink($zipPath);
-$cmd="wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City-CSV.zip -O ".$zipPath;
+
+$link="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City-CSV&license_key=".$maxMindLicense."&suffix=zip";
+ 
+
+$cmd="wget ".escapeshellarg($link)." -O ".$zipPath; 
 `$cmd`;
 if(!file_exists($zipPath)){
 	zEmailErrorAndExit("GeoIP Import Failed", "Failed to download zip: ".$zipPath);
