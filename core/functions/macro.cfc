@@ -802,11 +802,11 @@ application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never"
 			}
 		}else{
 			if(arrayLen(arrLabel) NEQ 0){
-				j="<span id=""zencodeemailspan#request.zos.encodedEmailInit#""></span>";
-				application.zcore.template.appendTag("scripts","<script type=""text/javascript"">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zeeo('#arrEmail[4]#','#arrEmail[2]#','#arrEmail[1]#','#arrEmail[3]#',#arguments.link#,'#arrLabel[4]#','#arrLabel[2]#','#arrLabel[1]#','#arrLabel[3]#',#arguments.returnlink#,#request.zos.encodedEmailInit#);});/* ]]> */</script>");
+				j="<span id=""zencodeemailspan#request.zos.encodedEmailInit#""></span>
+				<script type=""text/javascript"">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zeeo('#arrEmail[4]#','#arrEmail[2]#','#arrEmail[1]#','#arrEmail[3]#',#arguments.link#,'#arrLabel[4]#','#arrLabel[2]#','#arrLabel[1]#','#arrLabel[3]#',#arguments.returnlink#,#request.zos.encodedEmailInit#);});/* ]]> */</script>";
 			}else{
-				j="<span id=""zencodeemailspan#request.zos.encodedEmailInit#""></span>";
-				application.zcore.template.appendTag("scripts","<script type=""text/javascript"">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zeeo('#arrEmail[4]#','#arrEmail[2]#','#arrEmail[1]#','#arrEmail[3]#',#arguments.link#,'','','','',#arguments.returnlink#,#request.zos.encodedEmailInit#);});/* ]]> */</script>");
+				j="<span id=""zencodeemailspan#request.zos.encodedEmailInit#""></span>
+				<script type=""text/javascript"">/* <![CDATA[ */zArrDeferredFunctions.push(function(){zeeo('#arrEmail[4]#','#arrEmail[2]#','#arrEmail[1]#','#arrEmail[3]#',#arguments.link#,'','','','',#arguments.returnlink#,#request.zos.encodedEmailInit#);});/* ]]> */</script>";
 			}
 		}
 	}
@@ -1703,13 +1703,16 @@ if(rs.success){
 </cffunction>
 
 <cffunction name="zDisplayCompanyFooterLink" localmode="modern" access="public">
+	<cfargument name="defaultString" type="string" required="no" default="">
 	<cfscript>
-	if(structkeyexists(request.zos.globals, "companyLinkHome")){
+	if(structkeyexists(request.zos.globals, "companyLinkHome") and request.zos.globals.companyLinkHome NEQ ""){
 		if(request.zos.originalURL EQ "/"){
 			echo(request.zos.globals.companyLinkHome);
 		}else{
 			echo(request.zos.globals.companyLinkSubpage);
 		}
+	}else{
+		echo(arguments.defaultString);
 	}
 	</cfscript>
 </cffunction>
