@@ -64,7 +64,7 @@ options:
 				return;
 			}
 			// setup mouse events for add and remove buttons for this cart's name only.
-			$(".zcart-add."+options.name).bind('click', function(){
+			$(".zcart-add."+options.name).bind('click', function(){ 
 				var jsonObj=eval("("+this.getAttribute("data-zcart-json")+")"); 
 				var $quantity=$(".zcart-quantity[data-zcart-item-id='"+jsonObj.id+"']");
 				if($quantity.length){
@@ -75,7 +75,10 @@ options:
 				}else{
 					jsonObj.quantity=1;
 				}
-				self.add(jsonObj);
+				var result=self.add(jsonObj);
+				if(result){
+					alert("Product added to cart");
+				}
 				return false;
 			}); 
 			$(".zcart-item-quantity-input").bind('keyup paste blur', setQuantity);
@@ -228,7 +231,7 @@ the "remove" replacement feature has to use the id, but the other functions need
 			// mark all other "add" buttons as saved too if their id matches.
 			if(jsonObj.quantity <= 0){
 				alert("You must enter a quantity of 1 or more.");
-				return;
+				return false;
 			}
 			var found=false;
 			var foundOffset=-1;
@@ -236,13 +239,12 @@ the "remove" replacement feature has to use the id, but the other functions need
 				for(var i in items){
 					if(items[i].id == jsonObj.id){
 						alert('This product is already in your cart. Please view cart and change quantity instead.');
-						return;
+						return false;
 						//found=true;
 						//foundOffset=items[i].offset;
 					}
 				}
-			}
-			
+			} 
 			
 			jsonObj.offset=idOffset;
 			count++;
@@ -259,14 +261,16 @@ the "remove" replacement feature has to use the id, but the other functions need
 			items[idOffset]=jsonObj;
 			idOffset++;
 			self.updateCount();
+			return true;
 		};
 		self.bindCartItemEvents=function(offset){
 			$('#'+options.name+'zcart-item-delete-link'+offset).on('click', function(e){
 				e.preventDefault(); 
 				var offset=this.getAttribute("data-zcart-id"); 
 				self.remove(offset); 
+				$(this).parent().parent().parent().remove();
 			});
-			$("#"+options.name+"zcart-item"+offset).hide().fadeIn('fast');
+			$("#"+options.name+"zcart-item"+offset).hide().fadeIn('fast'); 
 			$(".zcart-item-quantity-input[data-zcart-id='"+offset+"']").bind('keyup paste blur', setQuantity);
 
 		}
