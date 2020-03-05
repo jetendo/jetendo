@@ -81,17 +81,18 @@ options:
 				}
 				return false;
 			}); 
-			$(".zcart-item-quantity-input").bind('keyup paste blur', setQuantity);
+			$(document).on("touchstart click", ".zcart-item-quantity-input", function(e){this.select(); });
+			$(".zcart-item-quantity-input").on('keyup paste blur', setQuantity);
 			$(".zcart-remove."+options.name).bind('click', function(){
 				var offset=this.getAttribute("data-zcart-id");
 				self.remove(offset);
 				return false;
 			});
-			$(".zcart-refresh."+options.name).bind('click', function(){
+			$(".zcart-refresh."+options.name).on('click', function(){
 				self.renderItems();
 				return false;
 			});
-			$(".zcart-view."+options.name).bind('click', function(){
+			$(".zcart-view."+options.name).on('click', function(){
 				if($(this).hasClass("zcart-view-open")){ 
 					$cartDiv.slideUp("fast");  
 					$(this).removeClass("zcart-view-open");
@@ -103,7 +104,7 @@ options:
 				}
 				return false;
 			});
-			$(".zcart-checkout."+options.name).bind('click', function(){
+			$(".zcart-checkout."+options.name).on('click', function(){
 				self.checkout();
 				return false;
 			});
@@ -269,9 +270,10 @@ the "remove" replacement feature has to use the id, but the other functions need
 				var offset=this.getAttribute("data-zcart-id"); 
 				self.remove(offset); 
 				$(this).parent().parent().parent().remove();
+				
 			});
 			$("#"+options.name+"zcart-item"+offset).hide().fadeIn('fast'); 
-			$(".zcart-item-quantity-input[data-zcart-id='"+offset+"']").bind('keyup paste blur', setQuantity);
+			$(".zcart-item-quantity-input[data-zcart-id='"+offset+"']").bind('paste blur', setQuantity);
 
 		}
 		self.updatePrice = function(offset, price){

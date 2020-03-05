@@ -319,7 +319,7 @@
 			inquiries_type_id = #db.param(15)# and 
 			inquiries_type_id_siteIDType=#db.param(4)# and 
 			site_id = #db.param(request.zos.globals.id)# ";
-			qId=db.execute("qId");
+			qId=db.execute("qId", "", 10000, "query", false);
 			for(row in qId){
 				structappend(form, row, false);
 			}

@@ -161,8 +161,32 @@ if((cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info"
 	}else{
 		request.rootCFCPath="jet.";
 	}
-	com=createobject("component", request.rootCFCPath&"mvc.front.controller."&arrPath[3]);
-	com[arrPath[4]]();
+	form.originalURL=form._zsa3_path;
+	form.method=arrPath[4];
+	if(structkeyexists(form, "x_ajax_id")){
+		header name="x_ajax_id" value="#form.x_ajax_id#";
+		rs={success:true, html:"", title:""};
+		try{
+			savecontent variable="rs.html"{
+				com=createobject("component", request.rootCFCPath&"mvc.front.controller."&arrPath[3]);
+				com[arrPath[4]]();
+			}
+			if(structkeyexists(request, "tagStruct") and structkeyexists(request.tagStruct, "title")){
+				rs.title=request.tagStruct.title;
+			}
+		}catch(Any e){
+			savecontent variable="rs.errorMessage"{
+				echo('<h2>There was an error with this request:</h2>
+				<p>#form._zsa3_path#</p>');
+				writedump(e);
+			}
+			rs.success=false;
+		}
+		echo(serializeJSON(rs));
+	}else{
+		com=createobject("component", request.rootCFCPath&"mvc.front.controller."&arrPath[3]);
+		com[form.method]();
+	}
 	abort;
 }
 

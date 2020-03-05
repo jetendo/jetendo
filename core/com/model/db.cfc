@@ -145,7 +145,7 @@ Copyright (c) 2013 Far Beyond Code LLC.
 	}else{
 		if((left(arguments.sql, 20)) DOES NOT CONTAIN "select "){
 			queryStruct.lazy=false;
-		}else if(request.zos.isTestServer){
+		}else{// if(request.zos.isTestServer){
 			queryStruct.lazy=true;
 		}
 	}

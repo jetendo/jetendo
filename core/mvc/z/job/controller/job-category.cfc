@@ -27,7 +27,7 @@
 		WHERE site_id = #db.param( request.zos.globals.id )#
 			AND job_category_deleted=#db.param( 0 )#
 			AND job_category_id = #db.param( form.job_category_id )# ";
-		qCategory=db.execute( "qCategory" );
+		qCategory=db.execute( "qCategory", "", 10000, "query", false ); 
 
 		application.zcore.functions.zQueryToStruct( qCategory, form );
 

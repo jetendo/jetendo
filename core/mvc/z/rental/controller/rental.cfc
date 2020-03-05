@@ -352,7 +352,7 @@
 		site_id = #db.param(request.zos.globals.id)# and 
 		rental_deleted = #db.param(0)#
         ORDER BY rental_name ASC 
-        </cfsavecontent><cfscript>qrental=db.execute("qrental");</cfscript>
+        </cfsavecontent><cfscript>qrental=db.execute("qrental", "", 10000, "query", false);</cfscript>
         <cfloop query="qrental"><cfscript>
 		t2=StructNew();
 		t2.groupName="Rental";
