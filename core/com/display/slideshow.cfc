@@ -426,7 +426,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 			site_id=#db.param(request.zos.globals.id)# and 
 			slideshow_tab_deleted = #db.param(0)#
 			ORDER BY slideshow_tab_sort ASC";
-			qT=db.execute("qT");
+			qT=db.execute("qT", "", 10000, "query", false);
 			if(qT.recordcount NEQ 0){
 				tab=qT.slideshow_tab_id;
 			}
@@ -441,7 +441,7 @@ width:#slideshowConfig.thumbbarWidth#px;height:#slideshowConfig.thumbbarHeight#p
 	slideshow.site_id = #db.param(request.zos.globals.id)# and 
 	slideshow_deleted = #db.param(0)# and 
 	slideshow_tab_deleted = #db.param(0)# ";
-	variables.qslideshow=db.execute("qslideshow");
+	variables.qslideshow=db.execute("qslideshow", "", 10000, "query", false);
 	if(variables.qslideshow.recordcount EQ 0){ 
 		writeoutput('success=0&errorMessage='&urlencodedformat('Slideshow record is missing.'));
 		abort;

@@ -3340,7 +3340,7 @@ Define this function in another CFC to override the default email format
 	site_option_group_deleted=#db.param(0)# and 
 	site_id = #db.param(request.zos.globals.id)# and 
 	site_option_group_id=#db.param(form.site_option_group_id)# ";
-	qCheckGroup=db.execute("qCheckGroup");
+	qCheckGroup=db.execute("qCheckGroup", "", 10000, "query", false);
 	if(qCheckGroup.recordcount EQ 0){
 		application.zcore.functions.z404("Invalid site_option_group_id");
 	}
@@ -3367,7 +3367,7 @@ Define this function in another CFC to override the default email format
 			site_x_option_group_set_deleted=#db.param(0)# and 
 			site_id = #db.param(request.zos.globals.id)# and 
 			site_x_option_group_set_id=#db.param(currentSetId)# ";
-			qCheckSet=db.execute("qCheckSet");
+			qCheckSet=db.execute("qCheckSet", "", 10000, "query", false);
 			if(qCheckSet.recordcount EQ 0){
 				application.zcore.functions.z404("Invalid record.  set id doesn't exist: #currentSetId#");
 			}
@@ -3388,7 +3388,7 @@ Define this function in another CFC to override the default email format
 				site_option_group_deleted=#db.param(0)# and 
 				site_id = #db.param(request.zos.globals.id)# and 
 				site_option_group_id=#db.param(qCheckSet.site_option_group_id)# ";
-				qCheckGroup=db.execute("qCheckGroup");
+				qCheckGroup=db.execute("qCheckGroup", "", 10000, "query", false);
 			}
 			if(qCheckGroup.site_option_group_user_id_field EQ ""){
 				application.zcore.functions.z404("This site_option_group requires site_option_group_user_id_field to be defined to enable user dashboard editing: #qCheckGroup.site_option_group_name#");
@@ -3399,7 +3399,7 @@ Define this function in another CFC to override the default email format
 			site_option_deleted = #db.param(0)# and
 			site_id =#db.param(request.zos.globals.id)# and 
 			site_option_name=#db.param(qCheckGroup.site_option_group_user_id_field)#";
-			qOption=db.execute("qOption");
+			qOption=db.execute("qOption", "", 10000, "query", false);
 			if(qOption.recordcount EQ 0){
 				application.zcore.functions.z404("This site_option_group has an invalid site_option_group_user_id_field that doesn't exist: #qCheckGroup.site_option_group_user_id_field#");
 			}
@@ -3409,7 +3409,7 @@ Define this function in another CFC to override the default email format
 			site_id = #db.param(request.zos.globals.id)# and 
 			site_x_option_group_set_id=#db.param(currentSetId)# and 
 			site_option_group_id=#db.param(qCheckSet.site_option_group_id)# ";
-			qCheckValue=db.execute("qCheckValue");  
+			qCheckValue=db.execute("qCheckValue", "", 10000, "query", false);  
 			if(qCheckValue.recordcount NEQ 0){
 				siteIdType=application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id); 
 				if(request.zsession.user.id&"|"&siteIdType NEQ qCheckValue.site_x_option_group_value){

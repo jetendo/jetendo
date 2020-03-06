@@ -107,7 +107,7 @@
 	site_id IN (#db.trustedSQL("'"&arrayToList(arrId, "', '")&"'")#) and
 	site_option_group_id <> #db.param(0)# and 
 	site_option_group_deleted=#db.param(0)# ";
-	qGroup=db.execute("qGroup");
+	qGroup=db.execute("qGroup", "", 10000, "query", false);
 
 
 	for(group in qGroup){

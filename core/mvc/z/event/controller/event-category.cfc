@@ -22,7 +22,7 @@
 	WHERE site_id = #db.param(request.zos.globals.id)# and 
 	event_category_deleted=#db.param(0)# and 
 	event_category_id = #db.param(form.event_category_id)# ";
-	qCategory=db.execute("qCategory");
+	qCategory=db.execute("qCategory", "", 10000, "query", false);
 	application.zcore.functions.zQueryToStruct(qCategory, form);
 	if(qCategory.recordcount EQ 0){
 		application.zcore.functions.z404("form.event_category_id, #form.event_category_id#,  doesn't exist.");

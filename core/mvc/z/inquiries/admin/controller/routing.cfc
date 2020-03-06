@@ -238,7 +238,7 @@ enable round robin for users - need a new option to disable for staff.
 			user_server_administrator=#db.param(0)# and 
 			user_deleted = #db.param(0)#
 			ORDER BY member_first_name ASC, member_last_name ASC ";
-			qAgents=db.execute("qAgents");
+			qAgents=db.execute("qAgents", "", 10000, "query", false);
 		    </cfscript>
 			<script>
 			/* <![CDATA[ */

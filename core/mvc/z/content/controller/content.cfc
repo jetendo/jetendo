@@ -1645,7 +1645,7 @@ configCom.includeContentByName(ts);
 			content.site_id = #db.param(arguments.site_id)# and 
 			content_id = #db.param(parentId)# and 
 			content_deleted=#db.param(0)#";
-			qC=db.execute("qC");  
+			qC=db.execute("qC", "", 10000, "query", false);  
 			if(qC.content_user_group_id NEQ 0){
 				return qC.content_user_group_id;
 			}

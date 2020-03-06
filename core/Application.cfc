@@ -150,46 +150,7 @@
 	</cfscript>
 </cffunction> 
 </cfcomponent> --->
-<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfscript>
-// BEGIN override cfml admin settings
-// regional
-if((cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info") and structkeyexists(form, '_zsa3_path') and left(form._zsa3_path, 7) EQ '/front/'){
-	request.starttime=gettickcount();
-	arrPath=listToArray(form._zsa3_path, "/", true);
-	if(cgi.http_host EQ "jet.zsite.info"){
-		request.rootCFCPath="jet_zsite_info.";
-	}else{
-		request.rootCFCPath="jet.";
-	}
-	form.originalURL=form._zsa3_path;
-	form.method=arrPath[4];
-	if(structkeyexists(form, "x_ajax_id")){
-		header name="x_ajax_id" value="#form.x_ajax_id#";
-		rs={success:true, html:"", title:""};
-		try{
-			savecontent variable="rs.html"{
-				com=createobject("component", request.rootCFCPath&"mvc.front.controller."&arrPath[3]);
-				com[arrPath[4]]();
-			}
-			if(structkeyexists(request, "tagStruct") and structkeyexists(request.tagStruct, "title")){
-				rs.title=request.tagStruct.title;
-			}
-		}catch(Any e){
-			savecontent variable="rs.errorMessage"{
-				echo('<h2>There was an error with this request:</h2>
-				<p>#form._zsa3_path#</p>');
-				writedump(e);
-			}
-			rs.success=false;
-		}
-		echo(serializeJSON(rs));
-	}else{
-		com=createobject("component", request.rootCFCPath&"mvc.front.controller."&arrPath[3]);
-		com[form.method]();
-	}
-	abort;
-}
-
+<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfif (cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info") and structkeyexists(form, '_zsa3_path') and left(form._zsa3_path, 7) EQ '/front/'><cfinclude template="/jet/core/config.cfm"><cfinclude template="/jet/core/onRequestStart.cfm"><cfreturn></cfif><cfscript>
 if(structkeyexists(form, 'firstlineabort')){
 	if(structkeyexists(form, 'stopWebServer')){ 
 		jetendo.stopWebServer();
