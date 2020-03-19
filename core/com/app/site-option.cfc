@@ -2891,11 +2891,14 @@ if(not rs.success){
 			throw("infinite loop");
 		}
 	}  
+	arrUser=[""];
 	if(qCheckSet.site_x_option_group_set_user NEQ ""){
 		arrUser=listToArray(qCheckSet.site_x_option_group_set_user, "|");
 		site_id=application.zcore.functions.zGetSiteIdFromSiteIdType(arrUser[2]);
+	}else{
+		return; // return silently because the user data was missing
 	}
-	user_id=qCheckSet.site_x_option_group_set_user
+	user_id=qCheckSet.site_x_option_group_set_user;
 	db.sql="select * from #db.table("user", request.zos.zcoreDatasource)# WHERE 
 	user_deleted=#db.param(0)# and 
 	site_id = #db.param(site_id)# and 

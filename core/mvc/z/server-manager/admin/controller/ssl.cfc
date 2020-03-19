@@ -223,20 +223,20 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 		result=application.zcore.functions.zSecureCommand("sslInstallLetsEncryptCertificate"&chr(9)&jsonOutput, 60);
 		if(result EQ ""){
 			application.zcore.status.setStatus(request.zsid, "Install Lets Encrypt Secure Certificate command failed: #form.ssl_hash#", form, true);
-			application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/addLetsEncrypt?sid=#form.sid#&ssl_id=#form.ssl_id#&zsid="&request.zsid);
+			application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/addLetsEncrypt?sid=#form.sid#&ssl_id=#form.ssl_id#&zsid="&request.zsid); 
 		}else{
 			resultStruct=deserializeJson(result);
-			if(request.zos.isTestServer and resultStruct.ssl_public_key EQ "public_key_test"){
-				savecontent variable="out"{
-					if(structkeyexists(resultStruct, 'output') and isArray(resultStruct.output)){
-						arrayToList(resultStruct.output, "<hr>");
-					}
-					writedump(resultStruct);
-					writedump(form);
-				}
-				application.zcore.status.setStatus(request.zsid, "Lets Encrypt Secure Certificate Can't Be Installed on the Test Environment. Debugging info for testing purposes: "&out, form, true);
-				application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid="&request.zsid);
-			}
+			// if(request.zos.isTestServer and resultStruct.ssl_public_key EQ "public_key_test"){
+			// 	savecontent variable="out"{
+			// 		if(structkeyexists(resultStruct, 'output') and isArray(resultStruct.output)){
+			// 			arrayToList(resultStruct.output, "<hr>");
+			// 		}
+			// 		writedump(resultStruct);
+			// 		writedump(form);
+			// 	}
+			// 	application.zcore.status.setStatus(request.zsid, "Lets Encrypt Secure Certificate Can't Be Installed on the Test Environment. Debugging info for testing purposes: "&out, form, true);
+			// 	application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid="&request.zsid);
+			// }
 			if(not resultStruct.success){
 				savecontent variable="out"{
 					if(structkeyexists(resultStruct, 'output') and isArray(resultStruct.output)){

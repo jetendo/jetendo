@@ -1995,7 +1995,7 @@
 			//errors=true;
 		}*/
 	}
-	if(methodBackup EQ "userInsertGroup" or methodBackup EQ "userUpdateGroup"){
+	if(methodBackup EQ "userInsertGroup" or methodBackup EQ "userUpdateGroup" or methodBackup EQ "publicInsertGroup"){
 		if(qCheck.site_option_group_user_id_field NEQ ""){
 			if(not structkeyexists(arguments.struct, 'arrForceFields')){
 				arguments.struct.arrForceFields=[];
@@ -2230,14 +2230,13 @@
 		}
 		if(qCheck.site_option_group_user_id_field NEQ "" and row.site_option_name EQ qCheck.site_option_group_user_id_field){
 			hasUserField=true;
-			if(methodBackup EQ "userInsertGroup" or methodBackup EQ "userUpdateGroup"){
-				if(not application.zcore.user.checkGroupAccess("member")){
+			if(methodBackup EQ "userInsertGroup" or methodBackup EQ "userUpdateGroup" or methodBackup EQ "publicInsertGroup"){
+				if(not application.zcore.user.checkGroupAccess("member") and application.zcore.user.checkGroupAccess("user")){
 					// force current user if not an administrative user.
 					nv=request.zsession.user.id&"|"&application.zcore.functions.zGetSiteIdType(request.zsession.user.site_id);
 				}
 			}
 			userFieldValue=nv;
-
 		}
 		var tempData={
 			site_option_app_id:form.site_option_app_id,
@@ -2776,7 +2775,7 @@
 		urlformtoken="&"&qCheck.site_option_group_public_thankyou_token&"="&formtoken;
 	}
 
-	if(methodBackup EQ "userUpdateGroup" or methodBackup EQ "userInsertGroup"){
+	if(methodBackup EQ "userUpdateGroup" or methodBackup EQ "userInsertGroup" or methodBackup EQ "publicInsertGroup"){
 		if(qCheck.site_option_group_change_email_usergrouplist NEQ ""){
 			newAction='created';
 			if(methodBackup CONTAINS 'update'){
