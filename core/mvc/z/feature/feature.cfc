@@ -1806,18 +1806,18 @@ if(not rs.success){
 	ts.html&='<p>#qCheckSet.feature_data_title#</p> 
 	<p>'; 
 	if(arguments.action NEQ "deleted"){
-		if(qSchema.feature_schema_enable_unique_url EQ 1){
-			if(qCheckSet.feature_data_override_url NEQ ""){
-				link=qCheckSet.feature_data_override_url;
-			}else{
-				var urlId=50;
-				if(urlId EQ "" or urlId EQ 0){
-					throw("feature_schema_url_id is not set for site_id, #site_id#.");
-				}
-				link="/#application.zcore.functions.zURLEncode(qCheckSet.feature_data_title, '-')#-#urlId#-#qCheckSet.feature_data_id#.html";
-			}
-			ts.html&='<a href="#request.zos.globals.domain##link#" target="_blank">View</a> | ';
-		}
+		// if(qSchema.feature_schema_enable_unique_url EQ 1){
+		// 	if(qCheckSet.feature_data_override_url NEQ ""){
+		// 		link=qCheckSet.feature_data_override_url;
+		// 	}else{
+		// 		var urlId=50;
+		// 		if(urlId EQ "" or urlId EQ 0){
+		// 			throw("feature_schema_url_id is not set for site_id, #site_id#.");
+		// 		}
+		// 		link="/#application.zcore.functions.zURLEncode(qCheckSet.feature_data_title, '-')#-#urlId#-#qCheckSet.feature_data_id#.html";
+		// 	}
+		// 	ts.html&='<a href="#request.zos.globals.domain##link#" target="_blank">View</a> | ';
+		// }
 		ts.html&='<a href="#request.zos.globals.domain#/z/feature/admin/features/editSchema?feature_id=0&amp;feature_schema_id=#qCheckSet.feature_schema_id#&amp;feature_data_id=#qCheckSet.feature_data_id#&amp;feature_data_parent_id=0" target="_blank">Edit</a>';
 	}
 	ts.html&=' | <a href="#request.zos.globals.domain#/z/feature/admin/features/manageSchema?feature_id=0&feature_schema_id=#qCheckSet.feature_schema_id#" target="_blank">Manage #groupName#(s)</a></p>

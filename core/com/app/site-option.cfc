@@ -2934,18 +2934,18 @@ if(not rs.success){
 	ts.html&='<p>#qCheckSet.site_x_option_group_set_title#</p> 
 	<p>'; 
 	if(arguments.action NEQ "deleted"){
-		if(qGroup.site_option_group_enable_unique_url EQ 1){
-			if(qCheckSet.site_x_option_group_set_override_url NEQ ""){
-				link=qCheckSet.site_x_option_group_set_override_url;
-			}else{
-				var urlId=request.zos.globals.optionGroupUrlId;
-				if(urlId EQ "" or urlId EQ 0){
-					throw("site_option_group_url_id is not set for site_id, #site_id#.");
-				}
-				link="/#application.zcore.functions.zURLEncode(qCheckSet.site_x_option_group_set_title, '-')#-#urlId#-#qCheckSet.site_x_option_group_set_id#.html";
-			}
-			ts.html&='<a href="#request.zos.globals.domain##link#" target="_blank">View</a> | ';
-		}
+		// if(qGroup.site_option_group_enable_unique_url EQ 1){
+		// 	if(qCheckSet.site_x_option_group_set_override_url NEQ ""){
+		// 		link=qCheckSet.site_x_option_group_set_override_url;
+		// 	}else{
+		// 		var urlId=request.zos.globals.optionGroupUrlId;
+		// 		if(urlId EQ "" or urlId EQ 0){
+		// 			throw("site_option_group_url_id is not set for site_id, #site_id#.");
+		// 		}
+		// 		link="/#application.zcore.functions.zURLEncode(qCheckSet.site_x_option_group_set_title, '-')#-#urlId#-#qCheckSet.site_x_option_group_set_id#.html";
+		// 	}
+		// 	ts.html&='<a href="#request.zos.globals.domain##link#" target="_blank">View</a> | ';
+		// }
 		ts.html&='<a href="#request.zos.globals.domain#/z/admin/site-options/editGroup?site_option_app_id=0&amp;site_option_group_id=#qCheckSet.site_option_group_id#&amp;site_x_option_group_set_id=#qCheckSet.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=0" target="_blank">Edit</a>';
 	}
 	ts.html&=' | <a href="#request.zos.globals.domain#/z/admin/site-options/manageGroup?site_option_app_id=0&site_option_group_id=#qCheckSet.site_option_group_id#" target="_blank">Manage #groupName#(s)</a></p>
