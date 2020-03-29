@@ -169,6 +169,7 @@ quickSearchCom.includeQuickSearch(ts);
 <cffunction name="autocompleteSearch" localmode="modern" access="remote" returntype="string">
 	<cfscript>
 	form.keyword=application.zcore.functions.zso(form, 'keyword'); 
+	form.searchType=application.zcore.functions.zso(form, 'searchType'); 
 	rs={
 		success:true,
 		arrOrder:["neighborhood", "city", "county", "address", "zip", "school", "feature", "listing_id", "keyword"],
