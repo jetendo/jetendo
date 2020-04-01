@@ -1578,7 +1578,9 @@ application.zcore.imageLibraryCom.displayImages(ts);
 		    <script> 
 			var myContentFlow#qImages.image_library_id# = new ContentFlow('contentFlow#qImages.image_library_id#', {
 				circularFlow: true,
-				loadingTimeout: 60000 
+				loadingTimeout: 60000,
+				scaleFactor:1.5
+
 				<cfif application.zcore.functions.zso(arguments.ss, 'disableMouseWheel', false, false)>
 					, scrollWheelSpeed :0
 				</cfif>
