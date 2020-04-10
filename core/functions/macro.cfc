@@ -1332,15 +1332,15 @@ if(rs.success){
 			if(rs.success){
 				//if(rs.cfhttp.filecontent NEQ "" and isJson(rs.cfhttp.filecontent)){
 				if(rs.cfhttp.filecontent NEQ ""){
-					searchText='<script>window._sharedData = ';
+					searchText='>window._sharedData = ';
 					pos=findnocase(searchText, rs.cfhttp.filecontent);
 					t=""; 
 					if(pos NEQ 0){
-						pos2=findnocase('</script>', rs.cfhttp.filecontent, pos); 
+						pos2=findnocase('</script>', rs.cfhttp.filecontent, pos);  
 						if(pos2 NEQ 0){
 							t=mid(rs.cfhttp.filecontent, pos+len(searchText), pos2-(pos+len(searchText)+1) ); 
 						}
-					} 
+					}  
 					if(t NEQ "" and isJson(t)){
 						jsonObj=deserializeJSON(t); 
 						arrImage=jsonObj.entry_data.ProfilePage[1].graphql.user.edge_owner_to_timeline_media.edges; 
