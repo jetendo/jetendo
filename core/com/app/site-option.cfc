@@ -2799,7 +2799,7 @@ if(not rs.success){
 	site_option_group_enable_user_dashboard_admin=#db.param(1)# and 
 	site_option_group_deleted=#db.param(0)# 
 	ORDER BY site_option_group_parent_id ASC, site_option_group_display_name ASC";
-	qGroup=db.execute("qGroup");
+	qGroup=db.execute("qGroup", "", 10000, "query", false);
 	for(row in qGroup){ 
 		if(row.site_option_group_parent_id NEQ 0){
 			continue;
