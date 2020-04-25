@@ -3309,6 +3309,9 @@ application.zcore.app.getAppCFC("blog").articleIncludeTemplate(rs, rs.displayCou
 	searchStruct.perpage = 10;	
 	//searchNav = application.zcore.functions.zSearchResultsNav(searchStruct);
 	searchStruct.index = application.zcore.status.getField(form.listId, "zIndex",1); 
+	if(not isnumeric(searchStruct.index)){
+		application.zcore.functions.z404("Invalid zindex: #searchStruct.index#");
+	}
 	start = searchStruct.perpage * max(1,searchStruct.index) - 10;
 	
 	db.sql="select * 

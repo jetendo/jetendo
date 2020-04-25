@@ -150,7 +150,7 @@
 	rental_deleted = #db.param(0)# 
 	GROUP BY rental.rental_id 
 	order by rental_sort ASC, rental_name";
-	qProp=db.execute("qProp");
+	qProp=db.execute("qProp", "", 10000, "query", false);
 	</cfscript>
 	<p>To display promotional text for a rental, click "edit" and enter text in the "Special Message" field.</p>
 	<table id="sortRowTable" class="table-list" style="border-spacing:0px; width:100%;">

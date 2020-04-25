@@ -259,6 +259,9 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 	var ts=0;
 	var arrList=0;
 	var zDebug=application.zcore.functions.zso(form, 'zDebug', false, false);
+	if(not isnumeric(arguments.image_library_id)){
+		application.zcore.functions.z404("Invalid image_library_id: #arguments.image_library_id#");
+	}
 	if(not request.zos.isDeveloper){
 		zDebug=false;
 	}
@@ -804,11 +807,14 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 </cffunction>
 
 
-<cffunction name="copyImageLibrary" localmode="modern" access="remote" returntype="any" output="yes">
+<cffunction name="copyImageLibrary" localmode="modern" access="public" returntype="any" output="yes">
 	<cfargument name="image_library_id" type="string" required="yes">
 	<cfargument name="site_id" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
+	if(not isnumeric(arguments.image_library_id)){
+		application.zcore.functions.z404("Invalid image_library_id: #arguments.image_library_id#");
+	}
 	db.sql="select * from #db.table("image_library", request.zos.zcoreDatasource)# WHERE 
 	image_library_id = #db.param(arguments.image_library_id)# and 
 	image_library_deleted=#db.param(0)# and 
@@ -882,6 +888,9 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 	form.image_caption=application.zcore.functions.zso(form, 'image_caption');
 	form.image_file=application.zcore.functions.zso(form, 'image_file');
 	form.image_library_id=application.zcore.functions.zso(form, 'image_library_id');
+	if(not isnumeric(form.image_library_id)){
+		application.zcore.functions.z404("Invalid image_library_id: #form.image_library_id#");
+	}
 	if(not variables.hasAccessToImageLibraryId(form.image_library_id)){
 		if(form.disableImageProcessOutput){
 			return {
