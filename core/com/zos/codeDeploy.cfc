@@ -30,7 +30,7 @@
 	tFunctions.OnApplicationListingStart=OnApplicationListingStart;
 	tFunctions.loadNextListingSite=loadNextListingSite; 
 	tFunctions.checkDomainRedirect=checkDomainRedirect; 
-	tFunctions.onApplicationStart=onApplicationStart;
+	tFunctions.onCustomApplicationStart=onCustomApplicationStart;
 	tFunctions.onRequestStart=onRequestStart; 
 	tFunctions.onRequestStart1=onRequestStart1; 
 	tFunctions.onRequestStart12=onRequestStart12;

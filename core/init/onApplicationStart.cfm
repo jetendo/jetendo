@@ -891,7 +891,7 @@
 
 
 
-<cffunction name="onApplicationStart" localmode="modern" access="public"  returntype="any" output="yes" hint="Fires when the application is first created.">
+<cffunction name="onCustomApplicationStart" localmode="modern" access="public"  returntype="any" output="yes" hint="Fires when the application is first created.">
 	<cfscript> 
 	application.serverStartTickCount=gettickcount(); 
 	// get all sites, and whether they have listing app, because we want to load sites not needing listing app first.

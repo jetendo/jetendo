@@ -39,7 +39,7 @@
 		onCodeDeploy(); 
 	}
 	if(request.zos.zreset EQ "app" or request.zos.zreset EQ "all"){
-		onApplicationStart(); 
+		onCustomApplicationStart(); 
 		OnInternalApplicationStart();
 		OnApplicationListingStart();
 	}
@@ -326,7 +326,7 @@
 		// only on test server for now.
 		zos.enableNewLeadManagement=true;
 	}
-	if(zos.isDeveloperIpMatch or zos.isServer){
+	if(zos.isDeveloperIpMatch or zos.isServer or (not zos.isTestServer and not structkeyexists(application, "serverStartTickCount"))){
 		if(structkeyexists(form, 'zForceReset')){
 			structdelete(application,'onInternalApplicationStartRunning');
 		}
@@ -361,7 +361,11 @@
 			form.zforce=1;
 			structdelete(application,'onInternalApplicationStartRunning');
 		}
-		if(structkeyexists(form, 'zcoreRunFirstInit')){ 
+		if(structkeyexists(form, 'zcoreRunFirstInit') or (not zos.isTestServer and not structkeyexists(application, "serverStartTickCount"))){ 
+			if(not structkeyexists(application, "serverStartTickCount")){
+				form.zforce=true;
+				form.zreset="app";
+			}
 			application.serverStartTickCount=gettickcount();
 			if(structkeyexists(application,'onInternalApplicationStartRunning') and not structkeyexists(form, 'zforce')){
 				echo('Another request is running the application init process already, please wait for it to complete.');
@@ -369,7 +373,7 @@
 			}
 			application.onInternalApplicationStartRunning=true;
 			if(not structkeyexists(application, 'zcoreSitesArrPriorityLoad') or structkeyexists(form, 'zreset')){
-				onApplicationStart();
+				onCustomApplicationStart();
 			}  
 			onInternalApplicationStart();
 			site_id=getSiteId();    
@@ -410,7 +414,7 @@
 	if(zos.isTestServer and not structkeyexists(application,'onInternalApplicationStartRunning')){ 
 		if(site_id NEQ 0){
 			if(not structkeyexists(application,'zcore') or not structkeyexists(application.zcore,'functions')){
-				onApplicationStart();
+				onCustomApplicationStart();
 				OnInternalApplicationStart();
 				loadSite(application.zcore.serverGlobals.serverid);
 			} 
@@ -438,7 +442,7 @@
 			// if(not structkeyexists(application, "zcoreIsInitMinute") or application.zcoreIsInitMinute NEQ timeformat(now(), "HHmm")){
 			// 	application.zcoreIsInitMinute=timeformat(now(), "HHmm");
 			// 	lock name="forceInitOnRequestStartOncePerMinute" type="exclusive" timeout="180"{
-			// 		onApplicationStart(); 
+			// 		onCustomApplicationStart(); 
 			// 		OnInternalApplicationStart();
 			// 		OnApplicationListingStart();
 			// 	}
@@ -536,7 +540,7 @@
 			zos.disableSystemCaching=false;
 		}
 		if(zos.disableSystemCaching or not structkeyexists(application,'zcore') or not structkeyexists(application.zcore,'functions') or zos.zreset EQ "app" or zos.zreset EQ "all"){
-			onApplicationStart();
+			onCustomApplicationStart();
 			OnInternalApplicationStart();
 			OnApplicationListingStart();
 		}
