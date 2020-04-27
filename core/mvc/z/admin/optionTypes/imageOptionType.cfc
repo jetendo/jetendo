@@ -182,7 +182,7 @@
 	var allowDelete=true;
 	if(arguments.row["#variables.type#_option_required"] EQ 1){
 		allowDelete=false;
-	}
+	} 
 	return { label: true, hidden: false, value:application.zcore.functions.zInputImage(arguments.prefixString&arguments.row["#variables.type#_option_id"], application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/site-options/', request.zos.currentHostName&'/zupload/site-options/',250, allowDelete)&'<br /><br />
 	Note: The image will be resized to fit inside these pixel dimensions: '&
 	application.zcore.functions.zso(arguments.optionStruct, 'imagewidth',false,'1000')&' x '&
@@ -250,7 +250,7 @@
 			if((len(nv) LTE len(request.zos.installPath) or left(nv, len(request.zos.installPath)) NEQ request.zos.installPath or not fileexists(nv))){
 				return { success: true, value: replace(nv, '/zupload/site-options/', ''), dateValue: "" };
 			}
-		}
+		} 
 		photoresize=application.zcore.functions.zso(arguments.optionStruct, 'imagewidth',false,'1000')&"x"&application.zcore.functions.zso(arguments.optionStruct, 'imageHeight',false,'1000');
 		nvd=application.zcore.functions.zso(arguments.dataStruct, arguments.prefixString&arguments.row["#variables.type#_option_id"]&'_delete');
 		if(structkeyexists(arguments.row, '#variables.siteType#_x_option_group_id')){
@@ -346,6 +346,7 @@
 				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/site-options/'&arguments.row["#variables.siteType#_x_option_value"]);
 				application.zcore.functions.zdeletefile(application.zcore.functions.zvar('privatehomedir',request.zos.globals.id)&'zupload/site-options/'&arguments.row["#variables.siteType#_x_option_original"]);
 			}
+			originalFile="";
 			nv='';	
 		}
 	}

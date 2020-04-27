@@ -326,6 +326,14 @@
 		// only on test server for now.
 		zos.enableNewLeadManagement=true;
 	}
+	if(not zos.isTestServer and not structkeyexists(application, "serverStartTickCount")){ 
+		if(not structkeyexists(application, "serverStartTickCount")){
+			form.zforce=true;
+			form.zreset="app";
+			form.zcoreRunFirstInit=true;
+			structdelete(application,'onInternalApplicationStartRunning');
+		}
+	}
 	if(zos.isDeveloperIpMatch or zos.isServer or (not zos.isTestServer and not structkeyexists(application, "serverStartTickCount"))){
 		if(structkeyexists(form, 'zForceReset')){
 			structdelete(application,'onInternalApplicationStartRunning');
@@ -361,11 +369,7 @@
 			form.zforce=1;
 			structdelete(application,'onInternalApplicationStartRunning');
 		}
-		if(structkeyexists(form, 'zcoreRunFirstInit') or (not zos.isTestServer and not structkeyexists(application, "serverStartTickCount"))){ 
-			if(not structkeyexists(application, "serverStartTickCount")){
-				form.zforce=true;
-				form.zreset="app";
-			}
+		if(structkeyexists(form, 'zcoreRunFirstInit')){
 			application.serverStartTickCount=gettickcount();
 			if(structkeyexists(application,'onInternalApplicationStartRunning') and not structkeyexists(form, 'zforce')){
 				echo('Another request is running the application init process already, please wait for it to complete.');
