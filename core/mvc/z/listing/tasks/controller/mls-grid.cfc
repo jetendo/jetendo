@@ -438,7 +438,11 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	for(row in qMedia){
 		if(row.mlsgrid_media_url NEQ ""){
-			link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+			if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
+				link=row.mlsgrid_media_url;
+			}else{
+				link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+			}
 			arrayAppend(arrPhoto,  link);
 		}
 	}

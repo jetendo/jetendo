@@ -231,7 +231,7 @@ writeoutput(application.zcore.functions.zLoadAndCropImage({id:"",width:140,heigh
 	}else{
 		local.crop="0";
 	}
-	if(find(":",ts.url, 8) EQ 0 and left(ts.url,1) NEQ "/" and left(ts.url, len(request.zos.currentHostName)) NEQ request.zos.currentHostName){
+	if(ts.url DOES NOT CONTAIN "/zimageproxy/" and  find(":",ts.url, 8) EQ 0 and left(ts.url,1) NEQ "/" and left(ts.url, len(request.zos.currentHostName)) NEQ request.zos.currentHostName){
 		ts.url="/zimageproxy/"&replace(replace(ts.url,"http://",""),"https://","");
 	}
 	return ('<span id="'&ts.id&'" style="'&htmleditformat(ts.style)&'" class="'&trim('zLoadAndCropImage '&ts.class)&'" data-imagewidth="'&ts.width&'" data-imageheight="'&ts.height&'" data-imagestyle="'&htmleditformat(ts.canvasStyle)&'" data-imagecrop="'&local.crop&'" data-imageurl="'&htmleditformat(ts.url)&'"></span>');
@@ -1697,7 +1697,7 @@ if(rs.success){
 	if(rs.status EQ "complete" and rs.latitude NEQ ""){
 		return {success:true, exact:rs.exact, addressComponents:rs.addressComponents, latitude:rs.latitude, longitude:rs.longitude};
 	}else{
-		return {success:false, exact:false, errorNumber:rs.errorNumber, errorMessage:"Couldn't find coordinates for address"};
+		return {success:false, exact:false, errorNumber:application.zcore.functions.zso(rs, "errorNumber", true, 0), errorMessage:"Couldn't find coordinates for address"};
 	}
 	</cfscript>
 </cffunction>
