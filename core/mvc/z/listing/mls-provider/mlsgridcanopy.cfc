@@ -130,8 +130,13 @@
 		qPhoto=db.execute("qPhoto"); 
 		request.lastPhotoId="";
 		for(row in qPhoto){
-			request.lastPhotoId=row.listing_id&"-1";
-			return row.mlsgrid_media_url;
+			request.lastPhotoId=row.listing_id&"-1"; 
+			if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
+				link=row.mlsgrid_media_url;
+			}else{
+				link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+			}
+			return link;
 		}
 		return ""; 
 		</cfscript>
