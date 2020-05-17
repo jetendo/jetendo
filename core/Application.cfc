@@ -213,10 +213,6 @@ this.scopeCascading = "standard";
 
 
 
-if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "AhrefsBot" or cgi.http_user_agent CONTAINS "MJ12bot"){
-	header statuscode="404" statustext="Page not found";
-	abort;
-}
 // END override cfml admin settings
  
 tempCGI=duplicate(CGI);
@@ -238,6 +234,20 @@ setupGlobals(tempCGI);
 request.zos.requestLogEntry=requestLogEntry;
 request.zos.requestData=requestData;
 request.zos.cgi=tempCGI; 
+if(cgi.http_user_agent CONTAINS "SemrushBot" or cgi.http_user_agent CONTAINS "AhrefsBot" or cgi.http_user_agent CONTAINS "MJ12bot"){
+	// allow semrush ips:
+	ipStruct={
+		"46.229.173.66":true,
+		"46.229.173.67":true,
+		"46.229.173.68":true,
+		"213.174.147.83":true,
+		"192.243.56.76":true
+	};
+	if(not structkeyexists(ipStruct, request.zos.cgi.remote_addr)){
+		header statuscode="404" statustext="Page not found";
+		abort;
+	}
+}
 this.onCoreRequest(); 
 </cfscript>
 

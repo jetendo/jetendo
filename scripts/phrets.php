@@ -1113,6 +1113,24 @@ class phRETS {
 		return $return_data;
 	}
 
+	public function GetMetadataXMLAsFile($filePath){
+		  if (empty($this->capability_url['GetMetadata'])) {
+	        die("GetServerInformation() called but unable to find GetMetadata location. Failed login?\n");
+	    }
+
+	    $optional_params['Type']   = 'METADATA-SYSTEM';
+	    $optional_params['ID']     = '*';
+	    $optional_params['Format'] = 'STANDARD-XML';
+
+	    //request server information
+	    $result = $this->RETSRequest($this->capability_url['GetMetadata'], $optional_params, $filePath );
+
+	    if (!$result) {
+	        return false;
+	    }
+	    return true;
+	}
+
 
 	public function GetMetadataTypes($id = 0) {
 		$this->reset_error_info();
@@ -1570,7 +1588,7 @@ class phRETS {
 	}
 
 
-	public function RETSRequest($action, $parameters = "") {
+	public function RETSRequest($action, $parameters = "", $fileLocation="") {
 		$this->reset_error_info();
 
 		$this->last_request = array();
@@ -1598,6 +1616,11 @@ class phRETS {
 		$request_arguments = "";
 		if (is_array($parameters)) {
 			$request_arguments = http_build_query($parameters, '', '&');
+		}
+
+		if($fileLocation != ""){
+    		$out = fopen($fileLocation,"w");
+			curl_setopt($this->ch, CURLOPT_FILE, $out); 
 		}
 
 		// update request method on each request
@@ -1634,7 +1657,7 @@ class phRETS {
 			$ua_dig_resp = md5(trim($ua_a1) .':'. trim($this->request_id) .':'. trim($session_id_to_calculate_with) .':'. trim($this->static_headers['RETS-Version']));
 			$request_headers .= "RETS-UA-Authorization: Digest {$ua_dig_resp}\r\n";
 		}
-
+		//$request_url=str_replace("%3D", "=", $request_url);
 		$this->last_request_url = $request_url;
 		if ($this->debug_mode == true) {
 			ob_start();
@@ -1649,6 +1672,10 @@ class phRETS {
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(trim($request_headers)));
 		// do it
 		$response_body = curl_exec($this->ch);
+		if($fileLocation != ""){
+			fclose($out);
+			return true;
+		}
 		
 		$response_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 

@@ -71,7 +71,7 @@ function zso($obj, $varName, $isNumber=false, $defaultValue=''){
 	}
 }
 
-function zEmailErrorAndExit($subject, $message){
+function zEmailErrorAndExit($subject, $message, $disableExit=false){
 	$host=`hostname`;
 	$to      = get_cfg_var('jetendo_developer_email_to');
 	$subject = $subject.' on '.$host;
@@ -80,9 +80,11 @@ function zEmailErrorAndExit($subject, $message){
 		'X-Mailer: PHP/' . phpversion();
 
 	mail($to, $subject, $message, $headers);
-	echo $subject."\n";
-	echo "Execution aborted.";
-	exit;
+	if(!$disableExit){
+		echo $subject."\n";
+		echo "Execution aborted.";
+		exit;
+	}
 }
 function zGetBackupPath(){
 	if(zIsTestServer()){

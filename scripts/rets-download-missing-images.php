@@ -33,9 +33,9 @@ $destinationPath=get_cfg_var("jetendo_share_path")."mls-images/";
 $result2=$cmysql->query("SELECT * FROM mls WHERE 
 mls_status = '1' and 
 mls_deleted='0' and 
-mls_provider LIKE 'rets%' 
-and mls_id NOT IN ('12', '19', '20', '16', '30', '27')
-ORDER BY mls_update_date desc", MYSQLI_STORE_RESULT);
+mls_provider LIKE 'rets%' and 
+mls_id IN ('25', '31')
+ORDER BY mls_update_date desc", MYSQLI_STORE_RESULT); // , '12', '19', '20', '16', '30', '27')
 // errors:
 // 12 = User Agent not registered or denied.
 // 19 = password is not working yet - need to test when it does
