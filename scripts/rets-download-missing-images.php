@@ -22,7 +22,7 @@ $mlsDataDatasource=get_cfg_var("jetendo_datasource");
 $cmysql=new mysqli(get_cfg_var("jetendo_mysql_default_host"),get_cfg_var("jetendo_mysql_default_user"),get_cfg_var("jetendo_mysql_default_password"), get_cfg_var("jetendo_datasource"));
 
 if($cmysql->error != ""){
-	echo "Mysql error:".$cmysql."\n";
+	echo "Mysql error:".$cmysql->error."\n";
 	exit;
 }
 $mysqldate = date("Y-m-d H:i:s");

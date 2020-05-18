@@ -1667,17 +1667,30 @@ class phRETS {
 			$c=ob_get_clean();
 			fwrite($this->debug_log, $c."\n");
 		}
-		curl_setopt($this->ch, CURLOPT_URL, $request_url);
+		// if(strstr($request_url, "rets2_3/GetObject") !== FALSE){
+		// 	curl_setopt($this->ch, CURLOPT_URL, "https://retsgw.flexmls.com:80/rets2_3/GetObject?Resource=Property&Type=HiRes&ID=1070824:1&Location=1");
+		// if(strstr($request_url, "rets/search") !== FALSE){
+		// 	curl_setopt($this->ch, CURLOPT_URL, "https://rets.stellarmls.com/rets/search?SearchType=Property&Class=Property&Query=(ListingKeyNumeric=0+)&Select=ListingKeyNumeric&QueryType=DMQL2&Count=1&Format=COMPACT&Offset=1&Limit=10&StandardNames=0");
+			// %28MlsStatus%3D%7CACT%29
+			// curl_setopt($this->ch, CURLOPT_URL, $request_url);
+		// }else{
+			curl_setopt($this->ch, CURLOPT_URL, $request_url);
+		// }
 
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(trim($request_headers)));
+
+		// var_dump(curl_getinfo($this->ch));
 		// do it
 		$response_body = curl_exec($this->ch);
+
 		if($fileLocation != ""){
 			fclose($out);
 			return true;
 		}
 		
 		$response_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+		// var_dump("response code:".$response_code ."\n\n");
+		// echo "response: ".$response_body."\n\n";
 
 		if ($this->debug_mode == true) {
 			fwrite($this->debug_log, "RESPONSE:".$response_body ."\n");
