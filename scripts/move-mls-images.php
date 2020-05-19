@@ -76,11 +76,11 @@ if ($handle = opendir($mp)) {
 				while (false !== ($entry2 = readdir($handle2))) {
 					if($entry2 !="." && $entry2 !=".."){
 						$ext=substr($entry2, strlen($entry2)-4,4);
-						if(($ext === FALSE && $ext === FALSE) && (strpos($entry2, "-sold-") === FALSE || $entry=="20")){
+						if(($ext != ".log" && $ext != ".tmp") && (strpos($entry2, "-sold-") === FALSE || $entry=="20")){
 							$updatedDate = filemtime($mp.$entry."/".$entry2);
 							$sixtySecondsAgo= strtotime('-'.$minutesToDelayProcessing.' minutes');
 							// echo $entry2." | ".$updatedDate." < ".$sixtySecondsAgo."\n";
-							if ($updatedDate < $sixtySecondsAgo) {
+							if ($updatedDate < $sixtySecondsAgo || $entry=="26") {
 								//$source="/home/remote-mls-data/".$entry."/".$entry2;
 								$tempdest=$mp.$entry."/".$entry2;
 								$dest="".get_cfg_var("jetendo_share_path")."mls-data/".$entry."/".$entry2;
@@ -348,7 +348,7 @@ if ($handle = opendir($mp)) {
 						//echo $cur."\n";
 						if($iCount1 % 100 == 0){
 							if($iCount1 !=0){
-								echo "process ".$iCount1."\n";
+								echo "process ".$iCount1." | last: ".$cur."\n";
 								$r=processFiles($arrSQL, $arrF, $arrFID, $arrFID2, $arrFD, $arrFN);
 								if($r===FALSE){
 									$stopProcessing=true;

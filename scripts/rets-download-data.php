@@ -2,6 +2,8 @@
 /*
 // this script runs for less then 60 minutes and stores the current data class and offset before exiting.
 
+// to force download the images again, run a query to update listing_track set listing_track_external_photo_timestamp='' where listing_id like 'MLS_ID-%'
+
 
 // add these to crontab -e
 1 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-25.php >/dev/null 2>&1
@@ -235,7 +237,7 @@ function zCheckRetsLogin($arrRetsConnections, $mls_id, $arrConfig){
 		$connect = $arrRetsConnections[$mls_id]->Connect($arrConfig["loginURL"], $arrConfig["username"], $arrConfig["password"]);
 
 		if (!$connect) {
-			echo "  + Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."<br>\n";
+			echo "  + Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."\n";
 			print_r($arrRetsConnections[$mls_id]->Error());
 			return false;
 		}else{
@@ -301,8 +303,12 @@ function zDownloadRetsData($inputMLSID){
 		} 
 		// store in the same location as the previous method
 		$dataPath=get_cfg_var("jetendo_share_path")."mls-data/temp/".$mls_id."/";
+		$finalDataPath=get_cfg_var("jetendo_share_path")."mls-data/".$mls_id."/";
 		if(!is_dir($dataPath)){
 			mkdir($dataPath, 0777);
+		}
+		if(!is_dir($finalDataPath)){
+			mkdir($finalDataPath, 0777);
 		}
 
  
@@ -340,7 +346,7 @@ function zDownloadRetsData($inputMLSID){
 			}
 		}else{
 			// do this on the first request only.
-			$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."metadata.1.xml");
+			$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($finalDataPath."metadata.1.xml");
 			echo "metadata xml saved\n";
 		}
 
@@ -348,14 +354,18 @@ function zDownloadRetsData($inputMLSID){
 			$file_name=$arrRetsConfig[$mls_id]["dataFileNames"][$i];
 			$class=$arrRetsConfig[$mls_id]["dataClasses"][$i];
 
-			echo "Downloading class: {$class}<br>\n";
+			echo "Downloading class: {$class}\n";
 			// echo $dataPath.$file_name;exit;
-			$fh = fopen($dataPath.$file_name.".tmp", "a"); // append to the file because we may need to resume. creates if doesn't exist.
 
 			$maxrows = true;
 			$offset = $startOffset;
-			$limit = 10;
+			$limit = 30;
 			$fields_order = array();
+			if($offset==1){
+				$fh = fopen($dataPath.$file_name.".tmp", "w"); // append to the file because we may need to resume. creates if doesn't exist.
+			}else{
+				$fh = fopen($dataPath.$file_name.".tmp", "a"); // append to the file because we may need to resume. creates if doesn't exist.
+			}
 
 			$photoKeyFieldIndex=-1;
 			$photoDateFieldIndex=-1;
@@ -385,7 +395,7 @@ function zDownloadRetsData($inputMLSID){
 				$search = $arrRetsConnections[$mls_id]->SearchQuery("Property", $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
 
 				if($offset == 1){
-					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}<br>\n";
+					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}\n";
 				}
 
 				echo "Processing ".$arrRetsConnections[$mls_id]->NumRows()." rows | offset: ".$offset."\n";
@@ -431,6 +441,20 @@ function zDownloadRetsData($inputMLSID){
 							if($listing["photoTimestamp"] != $row["listing_track_external_photo_timestamp"]){
 								$listing["updatePhotos"]=true;
 							}
+							if($row["listing_track_external_photo_timestamp"] == ""){
+								for($g=1;$g<=$listing["photoCount"];$g++){
+			 						if(file_exists(getImageHashPath($mls_id, $listing["listingID"]."-".$g.".jpeg"))){
+			 							$listing["photoVerifiedCount"]++;
+			 						}
+			 					}
+			 					if($listing["photoVerifiedCount"]!=$listing["photoCount"]){
+			 						$listing["updatePhotos"]=true;
+			 					}else{
+			 						$listing["updatePhotos"]=false; // for the first time, let's assume we have all the images?  
+									$sql="update listing_track set listing_track_external_photo_timestamp = '".$listing["photoTimestamp"]."' where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."' and listing_track_deleted='0'";
+									$r2=$db->query($sql);
+								}
+							}
 						}
 						// if($listing["new"]){
 						// 	// insert listing
@@ -457,17 +481,6 @@ function zDownloadRetsData($inputMLSID){
  						// break; // use to debug and disable image downloading to verifying offset is working.
 
  						if(is_numeric($listing["photoCount"]) && $listing["photoCount"] > 0){
-		 					for($g=1;$g<=$listing["photoCount"];$g++){
-		 						if(file_exists(getImageHashPath($mls_id, $listing["listingID"]."-".$g.".jpeg"))){
-		 							$listing["photoVerifiedCount"]++;
-		 						}
-		 					}
-		 					if($listing["photoVerifiedCount"]!=$listing["photoCount"]){
-		 						$listing["updatePhotos"]=true; 
-		 					}else{
-		 						$listing["updatePhotos"]=false; // for the first time, let's assume we have all the images? 
-							}
-
 	 						if($listing["updatePhotos"]){
 								$arrPhoto=array();
 
@@ -478,6 +491,8 @@ function zDownloadRetsData($inputMLSID){
 									$arrPhoto=$arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], $listing["photoKey"], "*", $locationEnabled);
 									$arrLine=explode("\n",$arrPhoto[0]["Data"]);
 									$photoCountIndex=1;
+
+									// TODO: consider doing curl multi parallel download to speed it up: https://www.askapache.com/php/curl-multi-downloads/
 									for($n2=0;$n2<count($arrLine);$n2++){
 										$line=$arrLine[$n2];
 										if(substr($line, 0, strlen("Location: ")) == "Location: "){
@@ -530,7 +545,7 @@ function zDownloadRetsData($inputMLSID){
 				  					}
 				  				}
 			  					// delete any images that exceed the current photo count to avoid waste
-			  					for($f=$listing["photoCount"]+1;$f<=50;$f++){
+			  					for($f=$listing["photoCount"]+1;$f<=80;$f++){
 									@unlink(getImageHashPath($mls_id, $listing["listingID"]."-".$f.".jpeg"));
 								}
 								$listing["photoVerifiedCount"]=0;
@@ -539,10 +554,10 @@ function zDownloadRetsData($inputMLSID){
 			 							$listing["photoVerifiedCount"]++;
 			 						}
 			 					}
+								// update the photo timestamp - its ok to ignore that some listings can't be verified due to corrupt data, we want it faster.
+								$sql="update listing_track set listing_track_external_photo_timestamp = '".$listing["photoTimestamp"]."' where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."' and listing_track_deleted='0'";
+								$r=$db->query($sql);
 			 					if($listing["photoVerifiedCount"]==$listing["photoCount"]){ 
-									// update the photo timestamp
-									$sql="update listing_track set listing_track_external_photo_timestamp = '".$listing["photoTimestamp"]."' where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."' and listing_track_deleted='0'";
-									$r=$db->query($sql);
 									echo "Photos downloaded and verified for listing id: ".$listing["listingID"]."\n";
 								}else{
 									echo "Photo download completed, but verification failed for listing id: ".$listing["listingID"]."\n";
@@ -561,10 +576,10 @@ function zDownloadRetsData($inputMLSID){
 				// stop after the first one
 				// break;
 			}
-
+			$startOffset=1; // reset the offset so other dataClasses start from the beginning.
 			fclose($fh);
 			// rename file to final name, so that it can be processed.  this is necessary because the image downloading takes too long.
-			rename($dataPath.$file_name.".tmp", $dataPath.$file_name);
+			rename($dataPath.$file_name.".tmp", $finalDataPath.$file_name);
 
 			// echo "stop after one\n";			exit;
 			// echo "  - done<br>\n";
