@@ -323,7 +323,7 @@ function zDownloadRetsData($inputMLSID){
 		$arrRetsConnections[$mls_id]->SetParam("dataTimestampField", $arrRetsConfig[$mls_id]["dataTimestampField"]);
 
 		// only create directories if one is missing
- 		if(!is_dir($imageRootPath.$mls_id."/ff/f")){
+ 		// if(!is_dir($imageRootPath.$mls_id."/ff/f")){
 			$arr=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");
 			for($i=0;$i<count($arr);$i++){
 				for($i2=0;$i2<count($arr);$i2++){
@@ -336,7 +336,7 @@ function zDownloadRetsData($inputMLSID){
 					}
 				}
 			} 
-		}
+		// }
 
 		$dataClassIndex=0;
 		$startOffset=1;
@@ -511,10 +511,14 @@ function zDownloadRetsData($inputMLSID){
 											$r=@fopen($link, 'rb');
 											if($r==false){
 												$tryAgain=true;
+												echo "fopen failed\n";
+												var_dump($http_response_header);
 											}
 											$r=@file_put_contents($filename, $r);
 											if($r==false){
 												$tryAgain=true;
+												echo "file_put_contents failed\n";
+												var_dump($http_response_header);
 											}
 											if($tryAgain){
 												echo "Failed, trying again\n";
