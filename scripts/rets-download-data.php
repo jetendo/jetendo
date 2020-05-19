@@ -1,10 +1,34 @@
 <?php 
+/*
+// this script runs for less then 60 minutes and stores the current data class and offset before exiting.
+
+
+// add these to crontab -e
+1 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-25.php >/dev/null 2>&1
+2 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-26.php >/dev/null 2>&1
+3 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-27.php >/dev/null 2>&1
+4 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-31.php >/dev/null 2>&1
+*/
+
 // php /var/jetendo-server/jetendo/scripts/rets-download-data.php
 
+// redownload all active each time it runs
+
+
+
+/*
+how does incremental work,  doesn't without starting over on the CFML part since that is a mess of complex metadata, id mappings, and lack of flexibility.
+	it would be better to download the decoded values, ignores the metadata on new version. focus on straight to new listing table with tracking of feed and listing in one place with no memory table like mls-grid
+*/
+
+// make mls_id
 // this script can't run forever.
 // need to track state, and skip to current feed, and offset to avoid getting stuck.
 // allow running multiple feeds simultaneously
 // allow daily full updates, and hourly incremental updates
+
+// store current state in json in txt on each execution
+
 
 
 // 31 doesn't work with timestamp search, but it works if i remove it, and the images are high resolution.
@@ -27,6 +51,9 @@
 
 require("library.php");
 $imageRootPath=get_cfg_var("jetendo_share_path")."mls-images/";
+ini_set('memory_limit', '256M');
+set_time_limit(60*59); // 59 minute limit
+error_reporting(E_ALL);
 
 class HttpMultipartFileParser
 {
@@ -220,8 +247,9 @@ function zCheckRetsLogin($arrRetsConnections, $mls_id, $arrConfig){
 	} 
 }
 
-function zDownloadRetsData(){
+function zDownloadRetsData($inputMLSID){
 	global $arrRetsConnections, $arrRetsConfig, $imageRootPath; 
+	$start_time = microtime(true);
 
 	$db=new mysqli(get_cfg_var("jetendo_mysql_default_host"),get_cfg_var("jetendo_mysql_default_user"),get_cfg_var("jetendo_mysql_default_password"), get_cfg_var("jetendo_datasource"));
 
@@ -231,7 +259,7 @@ function zDownloadRetsData(){
 	}
 
 	foreach ($arrRetsConfig as $mls_id=>$retsConfig) {
-		if($mls_id != 25){
+		if($mls_id != $inputMLSID){
 			echo "debug: skipping mls_id: ".$mls_id."\n";
 			continue;
 		}
@@ -244,16 +272,14 @@ function zDownloadRetsData(){
 		if(!isset($arrRetsConnections[$mls_id])){
 			$arrRetsConnections[$mls_id] = new phRETS;
 			$arrRetsConnections[$mls_id]->SetParam("use_post_method", true);
+			// $arrRetsConnections[$mls_id]->SetParam("offset_support", false); // can't use offset_support because we need to handle 10 listings at a time
+			$arrRetsConnections[$mls_id]->SetParam("compression_enabled", true);
 			$taskLogPath=get_cfg_var("jetendo_share_path")."task-log/";
 			// $arrRetsConnections[$mls_id]->SetParam("debug_mode", true);
 			// $arrRetsConnections[$mls_id]->SetParam("debug_file", get_cfg_var("jetendo_share_path")."retsDataDownloadLog.txt");
 			$arrRetsConnections[$mls_id]->AddHeader("RETS-Version", "RETS/1.7.2");
 			$arrRetsConnections[$mls_id]->AddHeader("User-Agent", "RETSConnector/1.0");
-		}
-		// if($mls_id != 27){
-		// 	continue;
-		// }
-
+		} 
 		//var_dump($arrRetsConnections);exit;
 
 		if(!zCheckRetsLogin($arrRetsConnections, $mls_id, $arrConfig)){
@@ -264,10 +290,9 @@ function zDownloadRetsData(){
 			$connect = $arrRetsConnections[$mls_id]->Connect($arrConfig["loginURL"], $arrConfig["username"], $arrConfig["password"]);
 
 			if (!$connect) {
-				echo "  + Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."<br>\n";
+				echo "Not connected: mls_id: ".$mls_id." | loginURL: ".$arrConfig["loginURL"]."\n";
 				print_r($arrRetsConnections[$mls_id]->Error());
-				zEmailErrorAndExit("MLS ID ".$mls_id." connection failed", "RETS connection failed in rets download data script.", true);
-				return false;
+				zEmailErrorAndExit("MLS ID ".$mls_id." connection failed", "RETS connection failed in rets download data script.", true); 
 			}else{
 				echo "Connected to mls_id=".$mls_id."\n";
 			}
@@ -280,25 +305,7 @@ function zDownloadRetsData(){
 			mkdir($dataPath, 0777);
 		}
 
-		// dont delete this works for all 4 data feeds.
-		// $resource="Property";
-		// $type=$arrRetsConfig[$mls_id]["listingMediaField"];
-		// // $send_id="1060818"; // can be comma separated, then you'd have to analyze the Content-ID
-		// $send_id="1000107"; // 27 |  can be comma separated, then you'd have to analyze the Content-ID
-		// // $send_id="1075137"; //  31 | can be comma separated, then you'd have to analyze the Content-ID
-		// // $send_id="4453489"; // 25 | can be comma separated, then you'd have to analyze the Content-ID
-		// $location=$arrRetsConfig[$mls_id]["locationEnabled"]; 
-		// $photos=$arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], $send_id, '*', $location);
-		// // $photos = $arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], getSysIdByListingId("26-1060818"), 1, 0); 
-		// $fh=fopen($dataPath."photos.txt", "w");
-		// fwrite($fh, json_encode($photos));
-		// fclose($fh);
-		// echo "saved photos\n";
-		// exit;
-
-		// do this once a day only
-		//$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."metadata.1.xml");
-		//echo "metadata xml saved\n";
+ 
 		//exit;
 
 		$previous_start_time = "1980-01-01T00:00:00";
@@ -306,37 +313,65 @@ function zDownloadRetsData(){
 
 		$arrRetsConnections[$mls_id]->SetParam("dataTimestampField", $arrRetsConfig[$mls_id]["dataTimestampField"]);
 
- 		
-		$arr=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");
-		for($i=0;$i<count($arr);$i++){
-			for($i2=0;$i2<count($arr);$i2++){
-				for($i3=0;$i3<count($arr);$i3++){
-					$fpath=$imageRootPath.$mls_id."/".$arr[$i].$arr[$i2]."/".$arr[$i3];
-					// echo $fpath;exit;
-					if(!is_dir($fpath)){
-						mkdir($fpath, 0777, true);
+		// only create directories if one is missing
+ 		if(!is_dir($imageRootPath.$mls_id."/ff/f")){
+			$arr=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");
+			for($i=0;$i<count($arr);$i++){
+				for($i2=0;$i2<count($arr);$i2++){
+					for($i3=0;$i3<count($arr);$i3++){
+						$fpath=$imageRootPath.$mls_id."/".$arr[$i].$arr[$i2]."/".$arr[$i3];
+						// echo $fpath;exit;
+						if(!is_dir($fpath)){
+							mkdir($fpath, 0777, true);
+						}
 					}
 				}
+			} 
+		}
+
+		$dataClassIndex=0;
+		$startOffset=1;
+		if(file_exists($dataPath."download-rets-".$mls_id.".log")){
+			$c=file_get_contents($dataPath."download-rets-".$mls_id.".log");
+			$arrLog=unserialize($c);
+			if(is_array($arrLog) and isset($arrLog["dataClassIndex"])){
+				$dataClassIndex=$arrLog["dataClassIndex"];
+				$startOffset=$arrLog["offset"];
 			}
-		} 
+		}else{
+			// do this on the first request only.
+			$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."metadata.1.xml");
+			echo "metadata xml saved\n";
+		}
 
-
-		for($i=0;$i<count($arrRetsConfig[$mls_id]["dataClasses"]);$i++){
+		for($i=$dataClassIndex;$i<count($arrRetsConfig[$mls_id]["dataClasses"]);$i++){
 			$file_name=$arrRetsConfig[$mls_id]["dataFileNames"][$i];
 			$class=$arrRetsConfig[$mls_id]["dataClasses"][$i];
 
-			echo "+ Property:{$class}<br>\n";
+			echo "Downloading class: {$class}<br>\n";
 			// echo $dataPath.$file_name;exit;
-			$fh = fopen($dataPath.$file_name, "w");
+			$fh = fopen($dataPath.$file_name.".tmp", "a"); // append to the file because we may need to resume. creates if doesn't exist.
 
 			$maxrows = true;
-			$offset = 1;
-			$limit = 1;
+			$offset = $startOffset;
+			$limit = 10;
 			$fields_order = array();
 
 			$photoKeyFieldIndex=-1;
 			$photoDateFieldIndex=-1;
 			while ($maxrows) {
+				// store current position in download for fast resume
+				$arrLog=array(
+					"dataClassIndex"=>$i,
+					"offset"=>$offset
+				);
+				file_put_contents($dataPath."download-rets-".$mls_id.".log", serialize($arrLog));
+				// stop after 50 minutes to avoid overlapping next execution time
+				if(microtime(true)-$start_time > 60*50){
+					// store current dataClass $i, and $offset
+					echo "Stopped after 50 minutes of execution\n";
+					exit;
+				}
 
 				// TODO: add field with the query to use for each class.
 				$query = "";//({$arrRetsConfig[$mls_id]["dataTimestampField"]}={$previous_start_time}+)";
@@ -344,11 +379,16 @@ function zDownloadRetsData(){
 					// $query.=",".$arrRetsConfig[$mls_id]["dataQuery"];
 					$query.=$arrRetsConfig[$mls_id]["dataQuery"];
 				}
-				$query.="";
 
 				// run RETS search
-				echo "   + Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
+				// echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
 				$search = $arrRetsConnections[$mls_id]->SearchQuery("Property", $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+
+				if($offset == 1){
+					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}<br>\n";
+				}
+
+				echo "Processing ".$arrRetsConnections[$mls_id]->NumRows()." rows | offset: ".$offset."\n";
 
 				if ($arrRetsConnections[$mls_id]->NumRows() > 0) {
 
@@ -380,48 +420,41 @@ function zDownloadRetsData(){
 						$sql="select * from listing_track where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."'";
 						$r=$db->query($sql);
 						if($r->num_rows==0){
-							$listing["new"]=true;
-							$listing["update"]=true;
+							$listing["new"]=true; // not used for anything yet
+							$listing["update"]=true; // not used for anything yet
 							$listing["updatePhotos"]=true;
 						}else{
 							$row=$r->fetch_array(MYSQLI_ASSOC);
 							if($listing["timestamp"] != $row["listing_track_external_timestamp"]){
-								$listing["update"]=true;
+								$listing["update"]=true; // not used for anything yet
 							}
-							if($listing["timestamp"] != $row["listing_track_external_photo_timestamp"]){
+							if($listing["photoTimestamp"] != $row["listing_track_external_photo_timestamp"]){
 								$listing["updatePhotos"]=true;
 							}
 						}
-						if($listing["new"]){
-							// insert listing
-						}else if($listing["update"]){
-							// update listing
-						}
+						// if($listing["new"]){
+						// 	// insert listing
+						// }else if($listing["update"]){
+						// 	// update listing
+						// }
+						fwrite($fh, implode("\t", $this_record)."\n");
 						array_push($arrListing, $listing);
 
  					}
-					$offset = ($offset + $arrRetsConnections[$mls_id]->NumRows());
- 					// get photos if needed
+					$offset = ($offset + $arrRetsConnections[$mls_id]->NumRows()); 
 
- 					// for debugging only
- 					// $arrListing=array(array(
-						// 	"record"=>array(),
-						// 	"timestamp"=>"",
-						// 	"photoTimestamp"=>"",
-						// 	"listingID"=>"1001119",
-						// 	"photoKey"=>"1001119",
-						// 	"photoCount"=>30,
-						// 	"photoVerifiedCount"=>0,
-						// 	"new"=>true,
-						// 	"update"=>true,
-						// 	"updatePhotos"=>true
- 					// ));
+					// for debugging
+					// if($offset > 30){
+					// 	break;
+					// }
+ 
+					// stores the images with same hash path as the old method
 
-					// need to store the images with same hash path, or change how the front references them.  also impacts the delete script.
-
-					// it is safe to do new rets api call at any time, because each call returns the full data.
+					// note: it is safe to do new rets api call at any time, because each call returns the full response
  					for($n=0;$n<count($arrListing);$n++){
  						$listing=$arrListing[$n];
+
+ 						// break; // use to debug and disable image downloading to verifying offset is working.
 
  						if(is_numeric($listing["photoCount"]) && $listing["photoCount"] > 0){
 		 					for($g=1;$g<=$listing["photoCount"];$g++){
@@ -430,29 +463,29 @@ function zDownloadRetsData(){
 		 						}
 		 					}
 		 					if($listing["photoVerifiedCount"]!=$listing["photoCount"]){
-		 						$listing["updatePhotos"]=true;
-		 					}
+		 						$listing["updatePhotos"]=true; 
+		 					}else{
+		 						$listing["updatePhotos"]=false; // for the first time, let's assume we have all the images? 
+							}
 
 	 						if($listing["updatePhotos"]){
 								$arrPhoto=array();
 
 								$locationEnabled=$arrRetsConfig[$mls_id]["locationEnabled"]; 
 
-								// not using anymore: always writes to the same file.  this limits us to processing images for 1 listing at a time.
-								// $filename=get_cfg_var("jetendo_share_path")."tempretsphotodownload.txt";
-								// $locationEnabled=0; // temporarily force binary download to see how to store the files.
-
 								if($locationEnabled){
 									// location=1 only works with a "*" multipart request and I had to download them individually after that.
 									$arrPhoto=$arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], $listing["photoKey"], "*", $locationEnabled);
 									$arrLine=explode("\n",$arrPhoto[0]["Data"]);
+									$photoCountIndex=1;
 									for($n2=0;$n2<count($arrLine);$n2++){
 										$line=$arrLine[$n2];
 										if(substr($line, 0, strlen("Location: ")) == "Location: "){
 											$link=substr($line, strlen("Location: "));
-
-											$filename=getImageHashPath($mls_id, $listing["listingID"]."-".($n2+1).".jpeg");
-											echo "storing image: ".$filename."\n";
+ 
+											$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$photoCountIndex.".jpeg");
+											$photoCountIndex++;
+											echo "storing image: ".$filename." from ".$link."\n";
 											file_put_contents($filename, fopen($link, 'rb'));
 										}
 									}
@@ -463,7 +496,7 @@ function zDownloadRetsData(){
 										
 										// if we request the same listing too fast, it will return no images, so we should skip a failure like that until the next import to avoid getting stuck, the listing will appear on the site with missing images in the meantime.
 										if(substr($arrPhoto[0]["Data"], 0, 5) == "<RETS"){
-											echo "Error: ".$arrPhoto[0]["Data"]."\n";
+											echo "Photo download error for listing id: ".$listing["listingID"]." : ".$arrPhoto[0]["Data"]."\n";
 										}else{
 											$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$n2.".jpeg");
 											echo "storing image: ".$filename."\n";
@@ -474,6 +507,9 @@ function zDownloadRetsData(){
 											// var_dump($arrPhoto[0]["Data"]);
 											// exit; 
 
+
+											// not using anymore: always writes to the same file.  this limits us to processing images for 1 listing at a time.
+											// $filename=get_cfg_var("jetendo_share_path")."tempretsphotodownload.txt"; 
 											// multipart works, but we're not using it, since the individual requests above was easier and didn't need the complex parsing.
 											// $fh2=fopen($filename, "wb");
 											// fwrite($fh2, trim($arrPhoto[0]["Data"]));
@@ -497,27 +533,45 @@ function zDownloadRetsData(){
 			  					for($f=$listing["photoCount"]+1;$f<=50;$f++){
 									@unlink(getImageHashPath($mls_id, $listing["listingID"]."-".$f.".jpeg"));
 								}
-
+								$listing["photoVerifiedCount"]=0;
+			 					for($g=1;$g<=$listing["photoCount"];$g++){
+			 						if(file_exists(getImageHashPath($mls_id, $listing["listingID"]."-".$g.".jpeg"))){
+			 							$listing["photoVerifiedCount"]++;
+			 						}
+			 					}
+			 					if($listing["photoVerifiedCount"]==$listing["photoCount"]){ 
+									// update the photo timestamp
+									$sql="update listing_track set listing_track_external_photo_timestamp = '".$listing["photoTimestamp"]."' where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."' and listing_track_deleted='0'";
+									$r=$db->query($sql);
+									echo "Photos downloaded and verified for listing id: ".$listing["listingID"]."\n";
+								}else{
+									echo "Photo download completed, but verification failed for listing id: ".$listing["listingID"]."\n";
+								}
+							}else{
+								echo "Photos up to date for listing id: ".$listing["listingID"]."\n";
 							}
 						}
-						fwrite($fh, implode("\t", $this_record)."\n");
 					}
 				}
 
 				$maxrows = $arrRetsConnections[$mls_id]->IsMaxrowsReached();
-				echo "    + Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}<br>\n";
 
 				$arrRetsConnections[$mls_id]->FreeResult($search);
 
 				// stop after the first one
-				break;
+				// break;
 			}
 
 			fclose($fh);
+			// rename file to final name, so that it can be processed.  this is necessary because the image downloading takes too long.
+			rename($dataPath.$file_name.".tmp", $dataPath.$file_name);
 
 			// echo "stop after one\n";			exit;
-			echo "  - done<br>\n";
+			// echo "  - done<br>\n";
+
+			// break; // TODO: remove this when going live.
 		} 
+		@unlink($dataPath."download-rets-".$mls_id.".log");
 
 	}
 	return true;
@@ -529,6 +583,5 @@ function getImageHashPath($mls_id, $filename){
 	$md5name=md5($mls_id."-".$filename);
 	return $imageRootPath.$mls_id."/".substr($md5name,0,2)."/".substr($md5name,2,1)."/".$mls_id."-".$filename;
 }
-zDownloadRetsData();
  
 ?>

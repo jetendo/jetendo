@@ -470,6 +470,7 @@ LookupMulti1C
 	rs.listing_data_detailcache3=listing_data_detailcache3; 
 	//if(ts["WATERTYPE"] NEQ ""){ 	writedump(rs);abort;	}
 
+	rs.listing_track_external_timestamp=ts["rets31_list_87"]; 
 	rs.listing_track_sysid=ts["rets31_ListingKeyNumeric"];
 	rs2={
 		listingData:rs,

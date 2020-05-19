@@ -543,7 +543,7 @@ GF20150107140558302722000000
 	rs.listing_data_detailcache2=local.listing_data_detailcache2;
 	rs.listing_data_detailcache3=local.listing_data_detailcache3; 
 
-
+	rs.listing_track_external_timestamp=ts["rets26_list_87"]; 
 	rs.listing_track_sysid="";
 	rs2={
 		listingData:rs,

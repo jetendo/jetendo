@@ -482,6 +482,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_data_detailcache3=listing_data_detailcache3;
 		//writedump(rs);		writedump(ts);abort;
 
+		rs.listing_track_external_timestamp=ts["Modification Timestamp"]; 
 		rs.listing_track_sysid=ts["rets25_listingkeynumeric"];
 
 		tempTime=gettickcount('nano');

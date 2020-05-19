@@ -75,7 +75,8 @@ if ($handle = opendir($mp)) {
 			if ($handle2 = opendir($mp.$entry)) {
 				while (false !== ($entry2 = readdir($handle2))) {
 					if($entry2 !="." && $entry2 !=".."){
-						if(strpos($entry2, "-sold-") === FALSE || $entry=="20"){
+						$ext=substr($entry2, strlen($entry2)-4,4);
+						if(($ext === FALSE && $ext === FALSE) && (strpos($entry2, "-sold-") === FALSE || $entry=="20")){
 							$updatedDate = filemtime($mp.$entry."/".$entry2);
 							$sixtySecondsAgo= strtotime('-'.$minutesToDelayProcessing.' minutes');
 							// echo $entry2." | ".$updatedDate." < ".$sixtySecondsAgo."\n";

@@ -1621,6 +1621,9 @@ class phRETS {
 		if($fileLocation != ""){
     		$out = fopen($fileLocation,"w");
 			curl_setopt($this->ch, CURLOPT_FILE, $out); 
+		}else{
+			curl_setopt($this->ch, CURLOPT_FILE, null); 
+			curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 		}
 
 		// update request method on each request

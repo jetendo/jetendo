@@ -407,6 +407,7 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	rs.listing_data_detailcache3=listing_data_detailcache3; 
 	rs["HiRes location"]=ts["HiRes location"]; 
 
+	rs.listing_track_external_timestamp=ts["rets27_list_87"]; 
 	rs.listing_track_sysid="";
 	rs2={
 		listingData:rs,
