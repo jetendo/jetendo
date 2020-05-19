@@ -347,6 +347,8 @@ function zDownloadRetsData($inputMLSID){
 		}else{
 			// do this on the first request only.
 			$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($finalDataPath."metadata.1.xml");
+			system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($finalDataPath."metadata.1.xml"));
+			system("/bin/chmod 777 ".escapeshellarg($finalDataPath."metadata.1.xml"));
 			echo "metadata xml saved\n";
 		}
 
@@ -579,6 +581,9 @@ function zDownloadRetsData($inputMLSID){
 			$startOffset=1; // reset the offset so other dataClasses start from the beginning.
 			fclose($fh);
 			// rename file to final name, so that it can be processed.  this is necessary because the image downloading takes too long.
+
+			system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath.$file_name.".tmp"));
+			system("/bin/chmod 777 ".escapeshellarg($dataPath.$file_name.".tmp"));
 			rename($dataPath.$file_name.".tmp", $finalDataPath.$file_name);
 
 			// echo "stop after one\n";			exit;
