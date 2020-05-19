@@ -418,7 +418,7 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	</cfscript>
 </cffunction> 
 
-<cffunction name="getCachedRequestListingImageUrls" localmode="modern" access="public">
+<!--- <cffunction name="getCachedRequestListingImageUrls" localmode="modern" access="public">
 	<cfargument name="idx" type="struct" required="yes">
 	<cfscript>
 	if(not structkeyexists(request.zos, 'listingImageURLCache')){
@@ -435,7 +435,7 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	request.zos.listingImageURLCache[arguments.idx.listing_id]=ts;
 	return ts;
 	</cfscript>
-</cffunction>
+</cffunction> --->
     
 <cffunction name="getDetails" localmode="modern" output="yes" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
@@ -452,16 +452,14 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	if(idx.listing_photocount EQ 0){
 		idx["photo1"]='/z/a/listing/images/image-not-available.gif';
 	}else{
-		ts=getCachedRequestListingImageUrls(idx); 
-		structappend(idx, ts, true); 
-		/*
+		// ts=getCachedRequestListingImageUrls(idx); 
+		// structappend(idx, ts, true); 
 		i=1;
 		for(i=1;i LTE idx.listing_photocount;i++){
 			fNameTemp1="27-"&idx.urlMlsPid&"-"&i&".jpeg";
 			fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
 			idx["photo"&i]=request.zos.retsPhotoPath&'27/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
 		}
-		*/
 	} 
 	idx["agentName"]="";
 	idx["agentPhone"]="";
@@ -498,20 +496,19 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	<cfargument name="num" type="numeric" required="no" default="#1#">
 	<cfscript>
 	request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
-	if(structkeyexists(request.zos, 'listingImageURLCache')){
-		if(structkeyexists(request.zos.listingImageURLCache, this.mls_id&"-"&arguments.mls_pid)){
-			if(structkeyexists(request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid], "photo"&arguments.num)){
-				return request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid]["photo"&arguments.num];
-			}
-		}
-	}
-	request.lastPhotoId="";
-	/*
-	request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
-	fNameTemp1="27-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
-	fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
-	return request.zos.retsPhotoPath&'27/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
-	*/
+	local.fNameTemp1="26-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
+	local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
+	return request.zos.retsPhotoPath&'26/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+	
+	// request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
+	// if(structkeyexists(request.zos, 'listingImageURLCache')){
+	// 	if(structkeyexists(request.zos.listingImageURLCache, this.mls_id&"-"&arguments.mls_pid)){
+	// 		if(structkeyexists(request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid], "photo"&arguments.num)){
+	// 			return request.zos.listingImageURLCache[this.mls_id&"-"&arguments.mls_pid]["photo"&arguments.num];
+	// 		}
+	// 	}
+	// }
+	// request.lastPhotoId="";
 	
 	</cfscript>
 </cffunction>

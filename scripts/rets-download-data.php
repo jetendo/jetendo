@@ -1,5 +1,7 @@
 <?php 
 /*
+// TODO: make a script that can send email of the last line of download-complete.log for each MLS ID as a once a day report.
+
 // this script runs for less then 60 minutes and stores the current data class and offset before exiting.
 
 // to force download the images again, run a query to update listing_track set listing_track_external_photo_timestamp='' where listing_id like 'MLS_ID-%'
@@ -28,11 +30,18 @@
 // it also verifies if the images exist on disk, and forces an image update if any are missing.
 
 // we need to download agent, agent images and office for rets 31 nsb
+/*
+Member is dataclass
+MemberStatus A
+AgentPhoto
+*/
+
+// TODO: maybe download rets25 sold someday, currently i removed them.
 
 require("library.php");
 $imageRootPath=get_cfg_var("jetendo_share_path")."mls-images/";
 ini_set('memory_limit', '256M');
-set_time_limit(2000000); // 59 minute limit
+set_time_limit(2000000); 
 error_reporting(E_ALL);
 
 class HttpMultipartFileParser
@@ -619,7 +628,10 @@ function zDownloadRetsData($inputMLSID){
 			// break; // TODO: remove this when going live.
 		} 
 		@unlink($dataPath."download-rets-".$mls_id.".log");
-		zEmail("MLS ID ".$mls_id." download completed.", "MLS ID ".$mls_id." download completed.");
+		$fh3=fopen($dataPath."download-complete.log", "a");
+		fwrite($fh3, date("Y-m-d H:i")."\n");
+		fclose($fh3);
+		// zEmail("MLS ID ".$mls_id." download completed.", "MLS ID ".$mls_id." download completed.");
 
 	}
 	return true;
