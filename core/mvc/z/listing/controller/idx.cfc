@@ -284,6 +284,9 @@ this.inited=false;
 					}
 					line=fileReadLine(request.zos.idxFileHandle);
 					this.optionstruct.skipBytes+=len(line)+1;
+					if(trim(line) EQ ""){
+						continue;
+					}
 					line=variables.csvParser.parseLineIntoArray(line);  
 
 					processedRow=true;
@@ -410,7 +413,7 @@ this.inited=false;
 	ts.listing_mls_id=this.optionstruct.mls_id;
 	try{
 		if(arraylen(ts.arrData) LT request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset){
-			request.addRowErrorMessage="This row was not long enough to contain the listing_id column: "&application.zcore.functions.zparagraphformat(arraytolist(arguments.arrRow,chr(10)))&". Reverted to previous day's file to avoid data loss. ";
+			request.addRowErrorMessage="For mls id, #this.optionstruct.mls_id#, This row was not long enough to contain the listing_id column: "&application.zcore.functions.zparagraphformat(arraytolist(arguments.arrRow,chr(10)))&". Reverted to previous day's file to avoid data loss. ";
 			return false;
 		} 
 		ts.listing_id=this.optionstruct.mls_id&'-'&ts.arrData[request.zos.listing.mlsStruct[this.optionstruct.mls_id].sharedStruct.lookupStruct.idColumnOffset];

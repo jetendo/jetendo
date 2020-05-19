@@ -17,44 +17,22 @@
 // redownload all active each time it runs
 
 
-
-/*
-how does incremental work,  doesn't without starting over on the CFML part since that is a mess of complex metadata, id mappings, and lack of flexibility.
-	it would be better to download the decoded values, ignores the metadata on new version. focus on straight to new listing table with tracking of feed and listing in one place with no memory table like mls-grid
-*/
-
-// make mls_id
-// this script can't run forever.
-// need to track state, and skip to current feed, and offset to avoid getting stuck.
-// allow running multiple feeds simultaneously
-// allow daily full updates, and hourly incremental updates
-
-// store current state in json in txt on each execution
-
-
-
 // 31 doesn't work with timestamp search, but it works if i remove it, and the images are high resolution.
-// 25 doesn't ever return data - i contacted them about it - https://www.stellarmls.com/data-delivery
 
 // flexmls requires you to download the images with the location=1 and url method instead of location=0
 // https://sparkplatform.com/docs/rets/tutorials/hi_res
-// 26 - works, but the images are low resolution.
-// 27 - works, but the images are low resolution.
-
-// TODO: need to schedule XML metadata to download periodically as well.
-// TODO: need to finish configuring all the rets config
-// TODO: need to verify the images are stored exactly the same way.  i can download a listing from live server to achieve that.
-
 
 // this script downloads the tab delimited rets data, and also the images. 
 // It places the images in the final hashed file path so they need no further processing.
-// it also deletes any existing images whenever it updates the images
+// it also deletes any existing extra images whenever it updates the images
 // it also verifies if the images exist on disk, and forces an image update if any are missing.
+
+// we need to download agent, agent images and office for rets 31 nsb
 
 require("library.php");
 $imageRootPath=get_cfg_var("jetendo_share_path")."mls-images/";
 ini_set('memory_limit', '256M');
-set_time_limit(60*59); // 59 minute limit
+set_time_limit(2000000); // 59 minute limit
 error_reporting(E_ALL);
 
 class HttpMultipartFileParser
@@ -251,6 +229,22 @@ function zCheckRetsLogin($arrRetsConnections, $mls_id, $arrConfig){
 
 function zDownloadRetsData($inputMLSID){
 	global $arrRetsConnections, $arrRetsConfig, $imageRootPath; 
+
+	// prevent multiple simultaneous executions
+	$cmd="ps aux";
+	$r=`$cmd`;
+	$r=trim($r);
+	$arrLine=explode("\n", $r);
+	$count=0;
+	foreach($arrLine as $line){
+		if(strstr($line, "import-rets-".$inputMLSID.".php") !== FALSE && strstr($line, "/bin/sh") === FALSE){
+			$count++;
+		}
+	}
+	if($count > 1){
+		echo "Already running, please wait until current script completes.";
+		exit;
+	}
 	$start_time = microtime(true);
 
 	$db=new mysqli(get_cfg_var("jetendo_mysql_default_host"),get_cfg_var("jetendo_mysql_default_user"),get_cfg_var("jetendo_mysql_default_password"), get_cfg_var("jetendo_datasource"));
@@ -379,11 +373,12 @@ function zDownloadRetsData($inputMLSID){
 				);
 				file_put_contents($dataPath."download-rets-".$mls_id.".log", serialize($arrLog));
 				// stop after 50 minutes to avoid overlapping next execution time
-				if(microtime(true)-$start_time > 60*50){
-					// store current dataClass $i, and $offset
-					echo "Stopped after 50 minutes of execution\n";
-					exit;
-				}
+				// now runs forever, but prevents simultaneous runs, because some of the rets server are too slow
+				// if(microtime(true)-$start_time > 60*50){
+				// 	// store current dataClass $i, and $offset
+				// 	echo "Stopped after 50 minutes of execution\n";
+				// 	exit;
+				// }
 
 				// TODO: add field with the query to use for each class.
 				$query = "";//({$arrRetsConfig[$mls_id]["dataTimestampField"]}={$previous_start_time}+)";
@@ -463,7 +458,7 @@ function zDownloadRetsData($inputMLSID){
 						// }else if($listing["update"]){
 						// 	// update listing
 						// }
-						fwrite($fh, implode("\t", $this_record)."\n");
+						fwrite($fh, str_replace("\r", " ", str_replace("\n", " ", implode("\t", $this_record)))."\n");
 						array_push($arrListing, $listing);
 
  					}
@@ -503,7 +498,39 @@ function zDownloadRetsData($inputMLSID){
 											$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$photoCountIndex.".jpeg");
 											$photoCountIndex++;
 											echo "storing image: ".$filename." from ".$link."\n";
-											file_put_contents($filename, fopen($link, 'rb'));
+											$tryAgain=false;
+											$r=@fopen($link, 'rb');
+											if($r==false){
+												$tryAgain=true;
+											}
+											$r=@file_put_contents($filename, $r);
+											if($r==false){
+												$tryAgain=true;
+											}
+											if($tryAgain){
+												echo "Failed, trying again\n";
+												sleep(1);
+												$r=@fopen($link, 'rb');
+												if($r==false){
+													$tryAgain=true;
+												}
+												$r=@file_put_contents($filename, $r);
+												if($r==false){
+													$tryAgain=true;
+												}
+												if($tryAgain){
+													echo "Failed, trying again\n";
+													sleep(1);
+													$r=@fopen($link, 'rb');
+													if($r==false){
+														$tryAgain=true;
+													}
+													$r=@file_put_contents($filename, $r);
+													if($r==false){
+														$tryAgain=true;
+													}
+												}
+											}
 										}
 									}
 								}else{
@@ -592,6 +619,7 @@ function zDownloadRetsData($inputMLSID){
 			// break; // TODO: remove this when going live.
 		} 
 		@unlink($dataPath."download-rets-".$mls_id.".log");
+		zEmail("MLS ID ".$mls_id." download completed.", "MLS ID ".$mls_id." download completed.");
 
 	}
 	return true;
