@@ -222,11 +222,15 @@ class phRETS {
 		if (isset($this->last_response_headers['Content-type']) && !isset($this->last_response_headers['Content-Type'])) {
 			$this->last_response_headers['Content-Type'] = $this->last_response_headers['Content-type'];
 		}
+		// fix case issue if exists
+		if (isset($this->last_response_headers['content-type']) && !isset($this->last_response_headers['Content-Type'])) {
+			$this->last_response_headers['Content-Type'] = $this->last_response_headers['content-type'];
+		}
 
 		if (!isset($this->last_response_headers['Content-Type'])) {
 			$this->last_response_headers['Content-Type'] = "";
 		}
-
+ 
 		// check what type of response came back
 		if (strpos($this->last_response_headers['Content-Type'], 'multipart') !== false) {
 
@@ -297,6 +301,9 @@ class phRETS {
 							}
 							// fix case issue if exists
 							if ($header == "Content-type") {
+								$header = "Content-Type";
+							}
+							if ($header == "content-type") {
 								$header = "Content-Type";
 							}
 							$this_photo[$header] = $value;

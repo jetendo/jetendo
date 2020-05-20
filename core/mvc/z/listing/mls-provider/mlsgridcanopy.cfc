@@ -69,12 +69,17 @@
 		if(arguments.ss.listing_photocount EQ 0){
 			idx["photo1"]='/z/a/listing/images/image-not-available.gif';
 		}else{
-			if(structkeyexists(js, "arrPhoto")){
-				for(i=1;i<=arraylen(js.arrPhoto);i++){
-					idx["photo#i#"]=js.arrPhoto[i];
-				}
-				request.lastPhotoId=idx.listing_id&"-1";
+			for(i=1;i LTE idx.listing_photocount;i++){
+				fNameTemp1=this.mls_id&"-"&idx.urlMlsPid&"-"&i&".jpeg";
+				fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
+				idx["photo"&i]=request.zos.retsPhotoPath&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
 			}
+			// if(structkeyexists(js, "arrPhoto")){
+			// 	for(i=1;i<=arraylen(js.arrPhoto);i++){
+			// 		idx["photo#i#"]=js.arrPhoto[i];
+			// 	}
+			// 	request.lastPhotoId=idx.listing_id&"-1";
+			// }
 		} 
 		idx["agentName"]="";//arguments.ss["rets32_listagentfullname"];
 		idx["agentPhone"]="";//arguments.ss["RETS32_LISTAGENTDIRECTWORKPHONE"];
@@ -119,26 +124,34 @@
         <cfargument name="sysid" type="string" required="no" default="0">
     	<cfscript>
 		db=request.zos.queryObject;  
-		db.sql="select *
-		from 
-		#db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
-		WHERE listing_id=#db.param(this.mls_id&"-"&arguments.mls_pid)# and 
-		mlsgrid_media_url<>#db.param('')# and 
-		mlsgrid_media_order=#db.param(arguments.num-1)# and 
-		mlsgrid_media_deleted=#db.param(0)# 
-		limit #db.param(0)#,#db.param(1)#";
-		qPhoto=db.execute("qPhoto"); 
-		request.lastPhotoId="";
-		for(row in qPhoto){
-			request.lastPhotoId=row.listing_id&"-1"; 
-			if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
-				link=row.mlsgrid_media_url;
-			}else{
-				link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
-			}
-			return link;
-		}
-		return ""; 
+
+		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
+		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
+		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
+		return request.zos.retsPhotoPath&this.mls_id&'/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+		
+
+
+		// db.sql="select *
+		// from 
+		// #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+		// WHERE listing_id=#db.param(this.mls_id&"-"&arguments.mls_pid)# and 
+		// mlsgrid_media_url<>#db.param('')# and 
+		// mlsgrid_media_order=#db.param(arguments.num-1)# and 
+		// mlsgrid_media_deleted=#db.param(0)# 
+		// limit #db.param(0)#,#db.param(1)#";
+		// qPhoto=db.execute("qPhoto"); 
+		// request.lastPhotoId="";
+		// for(row in qPhoto){
+		// 	request.lastPhotoId=row.listing_id&"-1"; 
+		// 	if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
+		// 		link=row.mlsgrid_media_url;
+		// 	}else{
+		// 		link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+		// 	}
+		// 	return link;
+		// }
+		// return ""; 
 		</cfscript>
     </cffunction>
 	

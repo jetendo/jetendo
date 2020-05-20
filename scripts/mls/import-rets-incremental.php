@@ -33,7 +33,13 @@ make a cron job that loops to watch for a new txt.incremental file to exist
 2 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-26.php >/dev/null 2>&1
 3 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-27.php >/dev/null 2>&1
 4 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-31.php >/dev/null 2>&1
+
+
 */
+#*/15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-25-incremental.php >/dev/null 2>&1
+#*/15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-26-incremental.php >/dev/null 2>&1
+#*/15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-27-incremental.php >/dev/null 2>&1
+#*/15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/mls/import-rets-31-incremental.php >/dev/null 2>&1
 
 // php /var/jetendo-server/jetendo/scripts/rets-download-data.php
 
@@ -92,8 +98,14 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 	$arrLine=explode("\n", $r);
 	$count=0;
 	foreach($arrLine as $line){
-		if(strstr($line, "import-rets-".$inputMLSID.".php") !== FALSE && strstr($line, "/bin/sh") === FALSE){
-			$count++;
+		if($incremental){
+			if(strstr($line, "import-rets-".$inputMLSID."-incremental.php") !== FALSE && strstr($line, "/bin/sh") === FALSE){
+				$count++;
+			}
+		}else{
+			if(strstr($line, "import-rets-".$inputMLSID.".php") !== FALSE && strstr($line, "/bin/sh") === FALSE){
+				$count++;
+			}
 		}
 	}
 	if($count > 1){
@@ -216,9 +228,9 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 			$file_name=$arrRetsConfig[$mls_id]["dataFileNames"][$i];
 			$class=$arrRetsConfig[$mls_id]["dataClasses"][$i];
 
+			$listingCount=0;
 			if($incremental){
 				$file_name.="-".date("Y-m-d")."-".date("H-i-s")."-incremental";
-				$listingCount=0;
 			}
 
 			echo "Downloading class: {$class}\n";
@@ -292,9 +304,7 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 						foreach ($fields_order as $fo) { 
 							$this_record[] = $record[$fo]; 
 						}
-						if($incremental){
-							$listingCount++;
-						}
+						$listingCount++;
 						$listing=array(
 							"record"=>$record,
 							"timestamp"=>$record[$arrRetsConfig[$mls_id]["photoTimestampField"]],
@@ -371,54 +381,102 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 									$arrLine=explode("\n",$arrPhoto[0]["Data"]);
 									$photoCountIndex=1;
 
+									// var_dump($arrPhoto);
+									// echo $arrRetsConfig[$mls_id]["listingMediaField"]."\n";exit;
+
 									// TODO: consider doing curl multi parallel download to speed it up: https://www.askapache.com/php/curl-multi-downloads/
-									for($n2=0;$n2<count($arrLine);$n2++){
-										$line=$arrLine[$n2];
-										if(substr($line, 0, strlen("Location: ")) == "Location: "){
-											$link=substr($line, strlen("Location: "));
- 
-											$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$photoCountIndex.".jpeg");
-											$photoCountIndex++;
-											echo "storing image: ".$filename." from ".$link."\n";
-											$tryAgain=false;
-											$r=@fopen($link, 'rb');
-											if($r==false){
-												$tryAgain=true;
-												echo "fopen failed\n";
-												var_dump($http_response_header);
-											}
-											$r=@file_put_contents($filename, $r);
-											if($r==false){
-												$tryAgain=true;
-												echo "file_put_contents failed\n";
-												var_dump($http_response_header);
-											}
-											if($tryAgain){
-												echo "Failed, trying again\n";
-												sleep(1);
-												$r=@fopen($link, 'rb');
-												if($r==false){
-													$tryAgain=true;
-												}
-												$r=@file_put_contents($filename, $r);
-												if($r==false){
-													$tryAgain=true;
-												}
-												if($tryAgain){
-													echo "Failed, trying again\n";
-													sleep(1);
-													$r=@fopen($link, 'rb');
-													if($r==false){
-														$tryAgain=true;
-													}
-													$r=@file_put_contents($filename, $r);
-													if($r==false){
-														$tryAgain=true;
-													}
-												}
-											}
-										}
+
+									// $active=0;
+        							$mh = curl_multi_init();
+        							curl_multi_setopt ( $mh , CURLMOPT_MAXCONNECTS, 8); // download 8 images at a time.
+        							$ch=array();
+        							$curlFileHandles=array();
+									for($n2=0;$n2<count($arrPhoto);$n2++){
+										$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$photoCountIndex.".jpeg");
+										$photoCountIndex++;
+										$link=$arrPhoto[$n2]["Location"];
+										echo "storing image: ".$filename." from ".$link."\n";
+
+										$ch[$n2] = curl_init($link);
+							            curl_setopt ($ch[$n2], CURLOPT_FOLLOWLOCATION, true);
+										curl_setopt ($ch[$n2], CURLOPT_RETURNTRANSFER, true);
+            							curl_setopt ($ch[$n2], CURLOPT_FAILONERROR, 0);
+										curl_setopt ($ch[$n2], CURLOPT_BINARYTRANSFER, true);
+            							curl_setopt ($ch[$n2], CURLOPT_REFERER, 'https://www.flexmls.com');
+							            $curlFileHandles[$n2]=fopen($filename, "w+");
+  										curl_setopt($ch[$n2], CURLOPT_FILE, $curlFileHandles[$n2]);
+							            curl_multi_add_handle ($mh,$ch[$n2]);
+
+										// $r=@fopen($link, 'rb');
+										// if($r==false){
+										// 	echo "fopen failed\n";
+										// 	var_dump($http_response_header);
+										// }
+										// $r=@file_put_contents($filename, $r);
 									}
+									do { 
+										$r=curl_multi_exec($mh, $active);
+										usleep(300000);
+									}while($r == CURLM_CALL_MULTI_PERFORM || $active);
+									if ($r != CURLM_OK) die("Curl multi read error $r");
+									for($n2=0;$n2<count($arrPhoto);$n2++){
+										if (curl_errno($ch[$n2])) {
+											echo curl_error($ch[$n2])."-".curl_errno($ch[$n2]);
+										}
+										curl_multi_remove_handle($mh,$ch[$n2]);
+										curl_close($ch[$n2]);
+									}
+									curl_multi_close($mh);
+									for($n2=0;$n2<count($arrPhoto);$n2++){
+										@fclose($curlFileHandles[$n2]);
+									}
+									// for($n2=0;$n2<count($arrLine);$n2++){
+									// 	$line=$arrLine[$n2];
+									// 	if(substr($line, 0, strlen("Location: ")) == "Location: "){
+									// 		$link=substr($line, strlen("Location: "));
+ 
+									// 		$filename=getImageHashPath($mls_id, $listing["listingID"]."-".$photoCountIndex.".jpeg");
+									// 		$photoCountIndex++;
+									// 		echo "storing image: ".$filename." from ".$link."\n";
+									// 		$tryAgain=false;
+									// 		$r=@fopen($link, 'rb');
+									// 		if($r==false){
+									// 			$tryAgain=true;
+									// 			echo "fopen failed\n";
+									// 			var_dump($http_response_header);
+									// 		}
+									// 		$r=@file_put_contents($filename, $r);
+									// 		if($r==false){
+									// 			$tryAgain=true;
+									// 			echo "file_put_contents failed\n";
+									// 			var_dump($http_response_header);
+									// 		}
+									// 		if($tryAgain){
+									// 			echo "Failed, trying again\n";
+									// 			sleep(1);
+									// 			$r=@fopen($link, 'rb');
+									// 			if($r==false){
+									// 				$tryAgain=true;
+									// 			}
+									// 			$r=@file_put_contents($filename, $r);
+									// 			if($r==false){
+									// 				$tryAgain=true;
+									// 			}
+									// 			if($tryAgain){
+									// 				echo "Failed, trying again\n";
+									// 				sleep(1);
+									// 				$r=@fopen($link, 'rb');
+									// 				if($r==false){
+									// 					$tryAgain=true;
+									// 				}
+									// 				$r=@file_put_contents($filename, $r);
+									// 				if($r==false){
+									// 					$tryAgain=true;
+									// 				}
+									// 			}
+									// 		}
+									// 	}
+									// }
 								}else{
 									// when location is not enabled, we get the images one at a time.
 									for($n2=1;$n2<=$listing["photoCount"];$n2++){

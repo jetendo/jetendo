@@ -409,6 +409,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				if(qMedia.recordcount NEQ 0){
 					db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET
 					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
+					mlsgrid_media_downloaded=#db.param(1)#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
 					mlsgrid_media_order=#db.param(ns["Order"])#, 
 					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
@@ -419,6 +420,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				}else{
 					db.sql="INSERT INTO #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET 
 					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")#,
+					mlsgrid_media_downloaded=#db.param(1)#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
 					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
 					mlsgrid_media_order=#db.param(ns["Order"])#, 
@@ -438,12 +440,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	for(row in qMedia){
 		if(row.mlsgrid_media_url NEQ ""){
-			if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
-				link=row.mlsgrid_media_url;
-			}else{
-				link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
-			}
-			arrayAppend(arrPhoto,  link);
+			// if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
+			// 	link=row.mlsgrid_media_url;
+			// }else{
+			// 	link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+			// }
+			// arrayAppend(arrPhoto,  link);
+			arrayAppend(arrPhoto, row.mlsgrid_media_url);
 		}
 	}
 	return arrPhoto;
@@ -660,6 +663,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				if(qMedia.recordcount NEQ 0){
 					db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET
 					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
+					mlsgrid_media_downloaded=#db.param(1)#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
 					mlsgrid_media_order=#db.param(ns["Order"])#, 
 					mlsgrid_media_updated_datetime=#db.param(request.zos.mysqlnow)# 
@@ -670,6 +674,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 				}else{
 					db.sql="INSERT INTO #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  SET 
 					mlsgrid_media_key=#db.param("#ns["MediaKey"]#")#,
+					mlsgrid_media_downloaded=#db.param(1)#,
 					listing_id=#db.param("#this.mls_id#-#ns["ResourceRecordID"]#")#,
 					mlsgrid_media_url=#db.param(ns["MediaURL"])#, 
 					mlsgrid_media_order=#db.param(ns["Order"])#, 
@@ -936,6 +941,74 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ts["ResourceName"]=application.zcore.functions.zso(ds, "ResourceName");
 	ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
 	ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
+
+	if(ts["MediaURL"] NEQ ""){
+		fNameTemp1=this.mls_id&"-"&ts["ResourceRecordID"]&"-"&(ts["Order"]+1)&".jpeg";
+		fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
+		destinationFile=request.zos.sharedPath&"mls-images/"&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+		path=request.zos.sharedPath&"mls-images/"&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/";
+		application.zcore.functions.zCreateDirectory(path);
+
+		link=replace(ts["MediaURL"], "/zimageproxy/", "https://");
+		HTTP METHOD="GET" URL="#link#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+		}
+	}
+	return ts;
+	</cfscript>
+</cffunction>
+
+
+<cffunction name="downloadAllMedia" localmode="modern" access="remote"> 
+	<cfscript>	
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	init();
+	setting requesttimeout="100000";
+	db=request.zos.noVerifyQueryObject;
+	offset=0;
+	while(true){
+		db.sql="select * from 
+		#db.table("listing", request.zos.zcoreDatasource)#, 
+		#db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+		WHERE listing.listing_id like #db.param("#this.mls_id#-%")# and 
+		listing.listing_id = mlsgrid_media.listing_id and 
+		listing_deleted=#db.param(0)# and 
+		mlsgrid_media_deleted=#db.param(0)# and 
+		mlsgrid_media_downloaded=#db.param(0)# 
+		ORDER BY mlsgrid_media_order
+		LIMIT #db.param(offset)#, #db.param(100)# ";
+		qMedia=db.execute("qMedia");
+		if(qMedia.recordcount EQ 0){
+			break;
+		}
+		for(row in qMedia){
+			if(row.mlsgrid_media_url EQ ""){
+				continue;
+			}
+			fNameTemp1=row.listing_id&"-"&(row.mlsgrid_media_order+1)&".jpeg";
+			fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
+			displayFile='/zretsphotos/'&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+			destinationFile=request.zos.sharedPath&"mls-images/"&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+			path=request.zos.sharedPath&"mls-images/"&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/";
+			// application.zcore.functions.zCreateDirectory(path);
+
+			row.mlsgrid_media_url=replace(row.mlsgrid_media_url, "/zimageproxy/", "https://");
+			if(not fileexists(destinationFile)){
+				HTTP METHOD="GET" URL="#row.mlsgrid_media_url#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+				}
+			}
+			db.sql="UPDATE #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+			SET
+			mlsgrid_media_downloaded=#db.param(1)# 
+			WHERE listing_id = #db.param(row.listing_id)# and 
+			mlsgrid_media_deleted=#db.param(0)#";
+			qMedia=db.execute("qMedia");
+			// echo('<img src="#displayFile#">');
+			// abort;
+		}
+		offset+=100;
+	}
 	return ts;
 	</cfscript>
 </cffunction>
