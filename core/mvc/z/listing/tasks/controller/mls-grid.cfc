@@ -26,15 +26,17 @@ $count=true
 StandardStatus = ?
 Resource = Property, Media, Member, etc
 
-
-# download everything
-http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index?incremental=0 
-
-# download only the newest data:
+# view commands
 http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index
 
+# download everything
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/download?incremental=0 
+
+# download only the newest data:
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/download
+
 debug 1 feed, 1 record:
-http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/index?debug=1
+http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/download?debug=1
 
 http://sa.farbeyondcode.com.local.zsite.info/z/listing/tasks/mls-grid/viewMetadata
 
@@ -185,7 +187,81 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<h2><a href="/z/listing/tasks/mls-grid/process" target="_blank">Process Media + Listings</a> | <a href="/z/listing/tasks/mls-grid/process?skipMedia=1" target="_blank">Process Listings</a> <cfif structkeyexists(application, "mlsGridImportRunning")>(Running)</cfif></h2>
 	<h2><a href="/z/listing/tasks/mls-grid/cron" target="_blank">Cron</a></h2>
 	<p>Cron is designed to process one file at a time.  It should be scheduled to run once a minute.  If you add ?force=1 to the url, it will allow it to run again in the case of an error, but it will also be able to run again after 5 minutes too.</p>
+	<h2>Test Download</h2>
+	<form action="/z/listing/tasks/mls-grid/testDownload" method="get">
+		<p>Query:<br><input style="width:100%;" type="text" name="query" value="#htmleditformat("StandardStatus eq Odata.Models.StandardStatus'Active' and MlgCanView eq true")#"></p>
+		<p><input type="submit" name="submit1" value="Submit"></p>
+	</form>
 	<h2><a href="/z/listing/tasks/mls-grid/cancel" target="_blank">Cancel</a></h2>
+</cffunction>
+
+
+<cffunction name="testDownload" localmode="modern" access="remote"> 
+	<cfscript>
+	if(not request.zos.isDeveloper and not request.zos.isServer){
+		application.zcore.functions.z404("Only the developer and server can access this feature.");
+	} 
+	setting requesttimeout="100000";  
+	request.ignoreSlowScript=true;
+	resourceIndex=0; // leave as 0 when not debugging
+	form.query=application.zcore.functions.zso(form, "query");
+	form.debug=application.zcore.functions.zso(form, "debug", true, 0);
+
+ 	top=1; // 5000 is max records?
+ 	skip=0;
+ 	count=true; // don't need count since the next link can pull everything
+ 	lastUpdateDate=createdatetime(2020, 2, 14,0,0,0); // first time, pull very old data createdate(2010,1,1);
+ 	
+ 	if(form.debug EQ 1){
+ 		top=1;
+ 		skip=0;
+ 		count=true;
+ 		resourceIndex=1;
+ 	}
+	displayFields=false;
+
+	insertCount=0;
+	updateCount=0;
+	deleteCount=0;
+	skipCount=0;
+	downloadCount=0;
+	init(); 
+
+	application.zcore.functions.zCreateDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
+
+ 	for(n=1;n<=arrayLen(variables.arrResource);n++){
+ 		if(resourceIndex EQ 0){
+			resource=variables.arrResource[n];
+		}else if(resourceIndex NEQ n){
+			continue; // skip to the correct resourceIndex when debugging
+		}else{
+			resource=variables.arrResource[resourceIndex];
+		}
+		// note filter operators have to be lower case.
+		if(structkeyexists(form, "skipListing")){
+			continue;
+		}
+		if(resource EQ "Media"){
+			continue;
+		}
+		lastUpdateDate="2010-01-01"; // force very old date
+		filter=urlencodedformat(form.query);
+	 	nextLink="https://api.mlsgrid.com/#resource#?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
+
+	 	fileNumber=1;
+	 	while(true){
+	 		if(structkeyexists(application, "cancelMLSGridImport")){
+	 			echo("Import cancelled after downloading #downloadCount# files");
+	 			abort;
+	 		}
+		 	js=downloadData(nextLink); 
+
+		 	echo("Resource: "&resource&" Count: "&application.zcore.functions.zso(js, "@odata.count", true)&"<br>");
+		 	writedump(js);
+		 	break;
+		} 
+	}  
+	</cfscript>
 </cffunction>
 
 <cffunction name="download" localmode="modern" access="remote"> 
@@ -950,7 +1026,24 @@ has enums with individual plain text name and id value pairs - do i need them?
 		application.zcore.functions.zCreateDirectory(path);
 
 		link=replace(ts["MediaURL"], "/zimageproxy/", "https://");
-		HTTP METHOD="GET" URL="#link#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+		try{
+			HTTP METHOD="GET" URL="#link#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+			}
+		}catch(Any e){
+			sleep(2000);
+			try{
+				HTTP METHOD="GET" URL="#link#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+				}
+			}catch(Any e2){
+				if(cfhttpresult.status_code NEQ "403"){
+					savecontent variable="out"{
+						echo("Image download failed: "&link&"<br><br>");
+						writedump(cfhttpresult);
+						writedump(e2);
+					}
+					throw(out);
+				}
+			}
 		}
 	}
 	return ts;
@@ -964,8 +1057,9 @@ has enums with individual plain text name and id value pairs - do i need them?
 		application.zcore.functions.z404("Only the developer and server can access this feature.");
 	} 
 	init();
+	form.order=application.zcore.functions.zso(form, "order");
 	setting requesttimeout="100000";
-	db=request.zos.noVerifyQueryObject;
+	db=request.zos.queryObject;
 	offset=0;
 	while(true){
 		db.sql="select * from 
@@ -975,15 +1069,25 @@ has enums with individual plain text name and id value pairs - do i need them?
 		listing.listing_id = mlsgrid_media.listing_id and 
 		listing_deleted=#db.param(0)# and 
 		mlsgrid_media_deleted=#db.param(0)# and 
-		mlsgrid_media_downloaded=#db.param(0)# 
-		ORDER BY mlsgrid_media_order
-		LIMIT #db.param(offset)#, #db.param(100)# ";
+		mlsgrid_media_downloaded=#db.param(0)# ";
+		if(form.order NEQ ""){
+			db.sql&=" and mlsgrid_media_order=#db.param(form.order)# ";
+		}
+		db.sql&=" ORDER BY mlsgrid_media_order
+		LIMIT #db.param(0)#, #db.param(100)# ";
 		qMedia=db.execute("qMedia");
 		if(qMedia.recordcount EQ 0){
 			break;
 		}
 		for(row in qMedia){
 			if(row.mlsgrid_media_url EQ ""){
+				db.sql="UPDATE #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+				SET
+				mlsgrid_media_downloaded=#db.param(1)# 
+				WHERE listing_id = #db.param(row.listing_id)# and 
+				mlsgrid_media_key=#db.param(row.mlsgrid_media_key)# and 
+				mlsgrid_media_deleted=#db.param(0)#";
+				qMedia=db.execute("qMedia");
 				continue;
 			}
 			fNameTemp1=row.listing_id&"-"&(row.mlsgrid_media_order+1)&".jpeg";
@@ -995,19 +1099,36 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 			row.mlsgrid_media_url=replace(row.mlsgrid_media_url, "/zimageproxy/", "https://");
 			if(not fileexists(destinationFile)){
-				HTTP METHOD="GET" URL="#row.mlsgrid_media_url#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+				try{
+					HTTP METHOD="GET" URL="#row.mlsgrid_media_url#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+					}
+				}catch(Any e){
+					sleep(2000);
+					try{
+						HTTP METHOD="GET" URL="#row.mlsgrid_media_url#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
+						}
+					}catch(Any e2){
+						if(cfhttpresult.status_code NEQ "403"){
+							savecontent variable="out"{
+								echo("Image download failed: "&row.mlsgrid_media_url&"<br><br>");
+								writedump(cfhttpresult);
+								writedump(e2);
+							}
+							throw(out);
+						} 
+					}
 				}
 			}
 			db.sql="UPDATE #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
 			SET
 			mlsgrid_media_downloaded=#db.param(1)# 
 			WHERE listing_id = #db.param(row.listing_id)# and 
+			mlsgrid_media_key=#db.param(row.mlsgrid_media_key)# and 
 			mlsgrid_media_deleted=#db.param(0)#";
 			qMedia=db.execute("qMedia");
 			// echo('<img src="#displayFile#">');
 			// abort;
-		}
-		offset+=100;
+		} 
 	}
 	return ts;
 	</cfscript>

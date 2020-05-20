@@ -7,6 +7,8 @@ this.optionstruct=structnew();
 this.optionstruct.limitTestServer=true;
 this.inited=false;
 </cfscript>
+
+<!--- /z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".$filename --->
 <cffunction name="index" localmode="modern" access="remote" returntype="any"> 
 	<cfscript> 
 	if(not request.zos.isServer and not request.zos.isDeveloper){

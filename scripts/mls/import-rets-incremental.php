@@ -213,6 +213,7 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 			}
 		}
 		$lastTimestampFile=$dataPath."download-rets-".$mls_id."-last-timestamp.log";
+		$lastTimestampDate=date("Y-m-d")."T".date("H:i:sP");
 
 		$previousStartTime = "1980-01-01T00:00:00".date("P");
 		$nextStartTime=date("Y-m-d")."T".date("H:i:sP");
@@ -567,11 +568,11 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 
 			// break; // TODO: remove this when going live.
 		} 
+		file_put_contents($lastTimestampFile, $lastTimestampDate);
 		if($incremental){
-			file_put_contents($lastTimestampFile, date("Y-m-d")."T".date("H:i:s"));
 		}else{
 			@unlink($dataPath."download-rets-".$mls_id.".log");
-			$fh3=fopen($dataPath."download-complete.log", "a");
+			$fh3=fopen($dataPath."download-complete.log", "w");
 			fwrite($fh3, date("Y-m-d H:i")."\n");
 			fclose($fh3);
 		}

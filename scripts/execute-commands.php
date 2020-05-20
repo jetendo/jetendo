@@ -7,6 +7,11 @@ function microtimeFloat()
     return ((float)$usec + (float)$sec);
 }
 
+if(zIsTestServer()){ 
+     $domain=get_cfg_var("jetendo_test_admin_domain"); 
+}else{ 
+     $domain=get_cfg_var("jetendo_admin_domain"); 
+} 
 $debugQueue=true;
 $debug=false; // never go live with this true, since it prevents multi-process execution.
 $timeout=60; // seconds
@@ -14,6 +19,8 @@ $timeStart=microtimeFloat();
 $completePath=get_cfg_var("jetendo_root_path")."execute/complete/";
 $startPath=get_cfg_var("jetendo_root_path")."execute/start/";
 $activePath=get_cfg_var("jetendo_root_path")."execute/active/";
+
+
 
 $arrPath=array($completePath, $startPath, $activePath);
 if(!is_dir($activePath)){
@@ -252,7 +259,33 @@ while(true){
 		}
 		closedir($handle);
 	}
-	usleep(30000); // wait 30 milliseconds
+
+
+	// open dir on mls-data
+	foreach($arrRetsConfig as $mls_id=>$config){
+		if(isset($config["enableDataDownload"]) && $config["enableDataDownload"]){
+			$path=get_cfg_var("jetendo_share_path")."mls-data/".$mls_id."/";
+			$handle=opendir($path);
+			if($handle){
+				while (false !== ($entry = readdir($handle))) {
+					if(strstr($entry, "-incremental") != FALSE){
+						// rename and execute
+						$newPath=str_replace("-incremental", "-processing", $entry);
+						rename($path.$entry, $path.$newPath);
+						$link=$domain."/z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".urlencode($newPath);
+						$cmd="/usr/bin/wget -O /dev/null -o /dev/null ".escapeshellarg($link)." 2>&1";
+						echo $cmd."\n";
+						`$cmd`;
+						exit;
+					}
+				}
+				closedir($handle);
+			}
+		}
+	}
+	// 
+
+	usleep(50000); // wait 50 milliseconds
 
 	if(microtimeFloat() - $timeStart > $timeout){
 		echo "Timeout reached";
