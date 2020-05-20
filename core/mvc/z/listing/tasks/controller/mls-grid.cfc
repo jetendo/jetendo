@@ -1129,8 +1129,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 			// echo('<img src="#displayFile#">');
 			// abort;
 		} 
-	}
-	return ts;
+	} 
 	</cfscript>
 </cffunction>
 <!--- 
