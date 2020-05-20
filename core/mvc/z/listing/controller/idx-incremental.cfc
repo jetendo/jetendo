@@ -21,17 +21,7 @@ this.inited=false;
 	}
 	setting requesttimeout="150000";
 	request.ignoreslowscript=true;
- 
-	if(structkeyexists(application.zcore, 'mlsImportIsRunning')){
-		if(not structkeyexists(form, 'zforce')){
-			if(datediff("n", application.zcore.mlsImportIsRunning, now()) GT 5){
-				structdelete(application.zcore, 'mlsImportIsRunning');
-			}else{
-				application.zcore.functions.z404('importMLS is already running | <a href="/z/listing/tasks/importMLS/index?zforce=1">Force execution</a>');
-				abort;
-			}
-		}
-	} 
+  
 	application.zcore.listingCom.makeListingImportDataReady();
   
 	try{
@@ -241,10 +231,12 @@ this.inited=false;
 		dataStruct.hasListing=false;
 		dataStruct.update=false;
 		dataStruct.new=false;
+		dataStruct.listing_track_id=qTrack.listing_track_id;
 	}else{
 		dataStruct.hasListing=true;
 		dataStruct.update=false;
 		dataStruct.new=false;
+		dataStruct.listing_track_id=qTrack.listing_track_id;
 		if(qTrack.listing_track_hash NEQ newHash){
 			dataStruct.update=true;
 		}
