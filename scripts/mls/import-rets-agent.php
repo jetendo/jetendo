@@ -305,6 +305,15 @@ function zDownloadRetsAgentData($inputMLSID){
  						// break; // use to debug and disable image downloading to verifying offset is working.
 
  						if(isset($arrRetsConfig[$mls_id]["agentMediaField"])){
+ 							// only download agent images once per day to reduce processing time
+							$filename=getImageHashPath($arrRetsConfig[$mls_id]["agentImagePath"], $listing["agentID"]."-1.jpeg");
+							if(file_exists($filename)){
+								$m=filemtime($filename);
+								if(date("Y-m-d", $m) == date("Y-m-d", time())){
+									continue; // skip downloading this image until tomorrow
+								}
+							}
+
 							$arrPhoto=array();
 
 							$locationEnabled=$arrRetsConfig[$mls_id]["locationEnabled"]; 

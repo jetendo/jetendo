@@ -1,4 +1,4 @@
 <?php 
-require(get_cfg_var("jetendo_scripts_path")."rets-download-data.php");
-zDownloadRetsData(27);
+require(get_cfg_var("jetendo_scripts_path")."mls/import-rets-incremental.php");
+zDownloadRetsData(27, false);
 ?>

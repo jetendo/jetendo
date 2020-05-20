@@ -208,7 +208,7 @@
 	<cfargument name="sharedStruct" type="struct" required="yes">
 	<cfscript>
 	</cfscript>
-</cffunction>
+</cffunction> 
 
 <cffunction name="getImportFilePath" localmode="modern" output="no" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">

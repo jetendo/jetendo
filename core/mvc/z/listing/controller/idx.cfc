@@ -136,11 +136,19 @@ this.inited=false;
 	request.zos.listing=application.zcore.listingStruct;
 	if(this.optionstruct.first_line_columns EQ 1){
 		f=fileopen(request.zos.sharedPath&this.optionstruct.filePath,"read", this.optionstruct.charset);
+		if(fileIsEOF(f)){
+			fclose(f);
+			application.zcore.functions.zDeleteFile(request.zos.sharedPath&this.optionstruct.filePath);
+			abort;
+		}
 		try{
 			firstline=lcase(filereadline(f));
 		}catch(Any excpt){
 			fileclose(f);
-			application.zcore.template.fail("firstline=lcase(filereadline(f)); failed | #request.zos.sharedPath&this.optionstruct.filepath#.");
+			savecontent variable="out"{
+				writedump(excpt);
+			}
+			throw(out&"<br>firstline=lcase(filereadline(f)); failed | #request.zos.sharedPath&this.optionstruct.filepath#.");
 		}
 		fileclose(f); 
 		arrColumns=listtoarray(replace(firstline," ","","ALL"), this.optionstruct.delimiter, true);
@@ -197,7 +205,7 @@ this.inited=false;
 			request.totalRunTime=gettickcount();
 		}
 		if(this.optionstruct.delimiter EQ ""){
-			application.zcore.template.fail("The delimiter for mls_id, "&this.optionstruct.mls_id&", can't be an empty string.");	
+			throw("The delimiter for mls_id, "&this.optionstruct.mls_id&", can't be an empty string.");	
 		}
 		// idea for higher performance initial insert:
 			// instead of reading the file from disk, import the csv into a temporary mysql table based on first row size
@@ -207,8 +215,7 @@ this.inited=false;
 			// select * from recordcount
 				// consider allowing threads= (CPU cores / 2)  to process these tables simultaneously
 					// figure out how to do that.
-		 
-		request.zTempIDXFilePath=request.zos.sharedPath&this.optionstruct.filePath;
+		  
 		
 		request.zos.idxFileHandle=fileOpen("#request.zos.sharedPath&this.optionstruct.filePath#", 'read', this.optionStruct.charset);
 		 
@@ -358,7 +365,7 @@ this.inited=false;
 			this.optionstruct.filePath=""; 
 		}
 	}catch(Any local.e){
-		if(structkeyexists(variables, 'fileHandle')){
+		if(structkeyexists(request.zos, 'fileHandle')){
 			fileClose(request.zos.idxFileHandle);
 		}
 		rethrow;

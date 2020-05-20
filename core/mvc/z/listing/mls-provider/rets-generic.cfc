@@ -586,7 +586,7 @@ variables.typeStruct["text"]="text";
 	application.zcore.listingStruct.mlsStruct[this.mls_id].sharedStruct.lookupStruct.arrColumns=listtoarray(application.zcore.listingStruct.mlsStruct[this.mls_id].sharedStruct.lookupStruct.idxColumns); 
 	</cfscript>
 </cffunction>
-
+ 
 <cffunction name="getImportFilePath" localmode="modern" output="no" returntype="any">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfargument name="allowSold" type="boolean" required="yes">
