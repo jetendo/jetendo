@@ -579,7 +579,7 @@ application.zcore.imageLibraryCom.getLibraryForm(ts); --->
 			}
 			request.zsession.publicImageLibraryIdStruct[image_library_id]=true;	
 		}else{
-			if(not application.zcore.user.checkGroupAccess("member")){
+			if(not application.zcore.user.checkGroupAccess("user")){
 				application.zcore.functions.z404("No access allow to image library when not logged in.");
 			}
 			qLibrary=this.getLibraryById(arguments.ss.value);
