@@ -42,7 +42,8 @@ weatherHTML=zGetWeather(ts);
 		request.zLastWeatherLookup={temperature:0};
 		return "";
 	}*/
-	ts.timeout=3;
+	// ts.timeout=20;
+	setting requesttimeout="25";
 	ts.forecastLink=true;
 	ts.currentOnly=false;
 	ts.overrideStyles=false;
@@ -84,19 +85,20 @@ weatherHTML=zGetWeather(ts);
 		// using openweathermap.org api - 1000 free requests per day
 		ss2["weatherset"&arguments.ss.zip&ctemp&'v2']=now();
 		try{
-			r=application.zcore.functions.zdownloadlink("https://api.openweathermap.org/data/2.5/weather?zip=#arguments.ss.zip#,US&units=imperial&appid=#request.zos.openweathermapapikey#", arguments.ss.timeout);
+			r=application.zcore.functions.zdownloadlink("https://api.openweathermap.org/data/2.5/weather?zip=#arguments.ss.zip#,US&units=imperial&appid=#request.zos.openweathermapapikey#", 20);
 		}catch(Any e){ 
-			e='Failed to download weather after timeout: #arguments.ss.timeout# | https://api.openweathermap.org/data/2.5/weather?zip=#arguments.ss.zip#,US&units=imperial&appid=#request.zos.openweathermapapikey#';
-			ts={
-				type:"Custom",
-				errorHTML:e,
-				scriptName:request.zos.originalURL,
-				url:request.zos.originalURL,
-				exceptionMessage:e,
-				// optional
-				lineNumber:'87'
-			}
-			application.zcore.functions.zLogError(ts);
+			// it is so unreliable, that we don't want to know when it fails.
+			// e='Failed to download weather after timeout: #arguments.ss.timeout# | https://api.openweathermap.org/data/2.5/weather?zip=#arguments.ss.zip#,US&units=imperial&appid=#request.zos.openweathermapapikey#';
+			// ts={
+			// 	type:"Custom",
+			// 	errorHTML:e,
+			// 	scriptName:request.zos.originalURL,
+			// 	url:request.zos.originalURL,
+			// 	exceptionMessage:e,
+			// 	// optional
+			// 	lineNumber:'87'
+			// }
+			// application.zcore.functions.zLogError(ts);
 			r={success:false};
 		} 
 	} 
