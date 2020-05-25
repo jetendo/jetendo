@@ -422,12 +422,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		local.listing_pool=0;
 		if(ts["Pool Private YN"] EQ "Y" or ts["Pool Private YN"] EQ "1"){
 			local.listing_pool=1;	
-		}
-
-
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow1+=(tempTime-startTime);
-		startTime=tempTime;
+		} 
 
 		ts=this.convertRawDataToLookupValues(ts, 'property', ts.rets25_propertytype);
 		dataCom=this.getRetsDataObject();
@@ -483,11 +478,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		//writedump(rs);		writedump(ts);abort;
 
 		rs.listing_track_external_timestamp=ts["Modification Timestamp"]; 
-		rs.listing_track_sysid=ts["rets25_listingkeynumeric"];
-
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow2+=(tempTime-startTime);
-		startTime=tempTime;
+		rs.listing_track_sysid=ts["rets25_listingkeynumeric"]; 
 
 		return {
 			listingData:rs,

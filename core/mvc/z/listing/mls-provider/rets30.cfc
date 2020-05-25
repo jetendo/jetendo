@@ -410,11 +410,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		if(ts["pool yn"] EQ "Y"){
 			local.listing_pool=1;	
 		}
-
-
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow1+=(tempTime-startTime);
-		startTime=tempTime;
+ 
 
 		ts=this.convertRawDataToLookupValues(ts, 'listing', ts.rets30_propertytype);
 		dataCom=this.getRetsDataObject();
@@ -476,10 +472,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		//writedump(rs);		writedump(ts);abort;
 
 		rs.listing_track_sysid=ts["rets30_matrix_unique_id"];
-		rs["LargePhoto location"]=ts["LargePhoto location"];
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow2+=(tempTime-startTime);
-		startTime=tempTime;
+		rs["LargePhoto location"]=ts["LargePhoto location"]; 
 
 		//writedump(rs);abort;
 		return {

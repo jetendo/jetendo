@@ -331,11 +331,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 					break;
 				} 
 			}
-		} 
- 
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow1+=(tempTime-startTime);
-		startTime=tempTime; 
+		}  
    		ts=this.convertRawDataToLookupValues(ts, variables.tableLookup[ts.rets29_propertytype], ts.rets29_propertytype); 
 		
 		dataCom=this.getRetsDataObject();
@@ -396,11 +392,7 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 		rs.listing_data_detailcache3=listing_data_detailcache3; 
 
 		rs.listing_track_sysid=ts["rets29_matrix_unique_id"];
-		//writedump(rs);		writedump(ts);abort;
-
-		tempTime=gettickcount('nano');
-		application.idxImportTimerStruct.parseRow2+=(tempTime-startTime);
-		startTime=tempTime;
+		//writedump(rs);		writedump(ts);abort; 
 
 		return {
 			listingData:rs,

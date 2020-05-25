@@ -1942,12 +1942,16 @@ if(rs.success){
 	try{
 		lock name="#request.zos.installPath#|file|#arguments.filePath#" timeout="100" throwontimeout="yes" type="exclusive"{
 			if(fileexists(arguments.filePath)){
-				result=application.zcore.functions.zSecureCommand("convertFileCharsetISO88591toUTF8"&chr(9)&arguments.filePath, 10);
+				result=application.zcore.functions.zSecureCommand("convertFileCharsetISO88591toUTF8"&chr(9)&arguments.filePath, 30);
+				arrResult=listToArray(result, "|");
+				result=arrResult[1];
 				if(result EQ false){
+					request.convertFileCharsetErrorMessage=arrResult[2];
 					return false;
 				}
 				return true;
 			}else{
+				request.convertFileCharsetErrorMessage="File doesn't exist: #arguments.filePath#";
 				return false;
 			} 
 		}

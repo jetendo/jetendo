@@ -27,6 +27,7 @@
 	if(not request.zos.isServer and not request.zos.isDeveloper){
 		application.zcore.functions.z404("Only server or developer can access this url.");
 	}
+	setting requesttimeout="10000";
 	if((request.zos.istestserver EQ false or structkeyexists(form, 'forceEmail')) and not structkeyexists(form, 'forceDebug')){
 		form.debug=false;
 	}else{

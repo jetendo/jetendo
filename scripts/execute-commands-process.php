@@ -2105,13 +2105,13 @@ function saveFaviconSet($a){
 function convertFileCharsetISO88591toUTF8($a){ 
 	if(count($a) != 1){
 		echo "Incorrect number of arguments to convertFileCharsetISO88591toUTF8.\n";
-		return "0";
+		return "0|Incorrect number of arguments to convertFileCharsetISO88591toUTF8";
 	}
 	set_time_limit(100);
 	$sourceFilePath=$a[0];  
 	if(!file_exists($sourceFilePath)){
 		echo "File doesn't exist sourceFilePath: ".$sourceFilePath."\n";
-		return "0";
+		return "0|File doesn't exist sourceFilePath: ".$sourceFilePath."\n";
 	}
 	$sourceFilePath=getAbsolutePath($sourceFilePath);
 	$p=get_cfg_var("jetendo_root_path"); 
@@ -2124,11 +2124,14 @@ function convertFileCharsetISO88591toUTF8($a){
 		@unlink($sourceFilePath.".temp");
 		$cmd="/usr/bin/iconv -f ISO-8859-1 -t UTF-8 < ".escapeshellarg($sourceFilePath)." > ".escapeshellarg($sourceFilePath.".temp");
 		$r=`$cmd`; 
+		if(!file_exists($sourceFilePath.".temp")){
+			return "0|File, ".$sourceFilePath.".temp, didn't exist after running iconv.  Output: ".$r; 
+		}
 		unlink($sourceFilePath);
 		rename($sourceFilePath.".temp", $sourceFilePath); 
-		return "1";
+		return "1|Success";
 	} 
-	return "0"; 
+	return "0|File, ".$sourceFilePath.", not in jetendo root path: ".$p; 
 }
 		// imageMagickConvertSVGtoPNG#chr(9)#absoluteSource#chr(9)#absoluteDestination
 function imageMagickConvertSVGtoPNG($a){
