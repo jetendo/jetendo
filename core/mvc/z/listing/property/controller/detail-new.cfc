@@ -513,19 +513,56 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 			 nw=round((1200-65)/3);
 			 nh=round(nw*0.68);
 		 }
+		 count=0;
 		 </cfscript>
-		 <div class="z-float z-equal-heights" data-column-count="3">
-			<cfloop from="1" to="#form.listing_photocount#" index="i">
-			<cfif structkeyexists(idx,'photo'&i)>
-			<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:150px; float:left; min-height:170px; overflow:hidden; margin-right:1%; margin-bottom:2%;">
-				<img src="#idx['photo'&i]#" alt="" class="z-fluid">
-			<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
+		 <div class="z-hide-at-767 z-float">
+			 <div id="listingLightboxContainer" class="z-float">
+				<div class="z-float">
+					<cfloop from="1" to="#form.listing_photocount#" index="i">
+						<cfif structkeyexists(idx,'photo'&i)>
+							<cfif count MOD 3 EQ 0 and count NEQ 1>
+								</div>
+								<div class="z-float">
+							</cfif>
+							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:200px; float:left; margin-right:1%; margin-bottom:2%;">
+								<a href="#idx['photo'&i]#"><img src="#idx['photo'&i]#" alt="" class="z-fluid"></a>
+							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
+							</div>
+							<cfscript>
+							count++;
+							</cfscript>
+						</cfif>
+					</cfloop>
+				</div>
 			</div>
-			</cfif>
-			</cfloop>
+		</div>
+		 <div class="z-show-at-767 z-float">
+			 <div id="listingLightboxContainer2" class="z-float">
+				<div class="z-float">
+					<cfloop from="1" to="#form.listing_photocount#" index="i">
+						<cfif structkeyexists(idx,'photo'&i)>
+							<cfif count MOD 2 EQ 0 and count NEQ 1>
+								</div>
+								<div class="z-float">
+							</cfif>
+							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:48%; float:left; margin-right:1%; margin-bottom:2%;">
+								<a href="#idx['photo'&i]#"><img src="#idx['photo'&i]#" alt="" class="z-fluid"></a>
+							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
+							</div>
+							<cfscript>
+							count++;
+							</cfscript>
+						</cfif>
+					</cfloop>
+				</div>
+			</div>
 		</div>
      </div>
- 
+	<cfscript>
+	application.zcore.functions.zSetupLightbox("listingLightboxContainer");
+	application.zcore.functions.zSetupLightbox("listingLightboxContainer2");
+	</cfscript>
+
  
 
 <cfsavecontent variable="metacontent">
