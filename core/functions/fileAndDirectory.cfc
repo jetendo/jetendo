@@ -1898,7 +1898,7 @@ if(rs.success){
 	<cfscript>
 	ts={
 		passive:"yes",  // "yes" or "no"
-		port:21,
+		port:21, 
 		transfermode: "ASCII", // "auto", "ASCII" or "binary"
 		timeout:20 // number of seconds before failing
 	}
@@ -1940,10 +1940,10 @@ if(rs.success){
 	<cfargument name="filePath" required="yes" type="string">
 	<cfscript>
 	// fileexists ensures the path is within sandbox
-	// try{
-	// 	lock name="#request.zos.installPath#|file|#arguments.filePath#" timeout="100" throwontimeout="yes" type="exclusive"{
+	try{
+		lock name="#request.zos.installPath#|file|#arguments.filePath#" timeout="100" throwontimeout="yes" type="exclusive"{
 			if(fileexists(arguments.filePath)){
-				result=application.zcore.functions.zSecureCommand("convertFileCharsetISO88591toUTF8"&chr(9)&arguments.filePath, 30);
+				result=application.zcore.functions.zSecureCommand("convertFileCharsetISO88591toUTF8"&chr(9)&arguments.filePath, 60);
 				arrResult=listToArray(result, "|");
 				result=arrResult[1];
 				if(result EQ false){
@@ -1955,14 +1955,14 @@ if(rs.success){
 				request.convertFileCharsetErrorMessage="File doesn't exist: #arguments.filePath#";
 				return false;
 			} 
-	// 	}
-	// }catch(Any e){ 
-	// 	savecontent variable="out"{
-	// 		writedump(e);
-	// 	}
-	// 	request.convertFileCharsetErrorMessage="Exclusive lock timeout: #out#";
-	// 	return false;
-	// }
+		}
+	}catch(Any e){ 
+		savecontent variable="out"{
+			writedump(e);
+		}
+		request.convertFileCharsetErrorMessage="Exclusive lock timeout: #out#";
+		return false;
+	}
 	</cfscript>
 </cffunction>
 

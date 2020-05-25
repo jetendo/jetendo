@@ -19,6 +19,7 @@ $timeStart=microtimeFloat();
 $completePath=get_cfg_var("jetendo_root_path")."execute/complete/";
 $startPath=get_cfg_var("jetendo_root_path")."execute/start/";
 $activePath=get_cfg_var("jetendo_root_path")."execute/active/";
+$executeLog=get_cfg_var("jetendo_root_path")."share/execute-log.txt";
 
 
 
@@ -29,11 +30,11 @@ if(!is_dir($activePath)){
 // scale relative to cpu count
 $processorCount=`/bin/cat /proc/cpuinfo | /bin/grep processor | /usr/bin/wc -l`;
 $commandGroups=array();
-$commandGroups["image"]=max(4, intval($processorCount));
-$commandGroups["imageidentify"]=max(8, intval($processorCount)*3);
-$commandGroups["login"]=max(8, intval($processorCount));
-$commandGroups["http"]=max(16, intval($processorCount)*2);
-$commandGroups["serveradministrator"]=max(50, intval(intval($processorCount)/2));
+$commandGroups["image"]=max(6, intval($processorCount)*2);
+$commandGroups["imageidentify"]=max(12, intval($processorCount)*4);
+$commandGroups["login"]=max(8, intval($processorCount)*2);
+$commandGroups["http"]=max(8, intval($processorCount)*4);
+$commandGroups["serveradministrator"]=max(50, intval($processorCount)*4);
 
 $commandQueue=array();
 $commandActive=array();
@@ -157,7 +158,7 @@ if($debugQueue){
 
 // debug the active count, to see if we successfully throttled by group.
 
-
+$logFile=fopen($executeLog, "a");
 while(true){
 	if($debugQueue){
 		//echo("running threads: ".$runningThreads."\n");
@@ -212,6 +213,7 @@ while(true){
 
 				$c=file_get_contents($startPath.$entry);
 				echo($script." $'".str_replace("\t", "\\t", $c)."' 'debug'\n\n"); 
+				fwrite($logFile, date("Y-m-d H:i:s")."\t".$c."\n");
 				$parts=explode("\t", $c);
 				if(isset($commandTypeLookup[$parts[0]])){
 					$type=$commandTypeLookup[$parts[0]];
@@ -261,35 +263,41 @@ while(true){
 	}
 
 
-	// open dir on mls-data
-	foreach($arrRetsConfig as $mls_id=>$config){
-		if(isset($config["enableDataDownload"]) && $config["enableDataDownload"]){
-			$path=get_cfg_var("jetendo_share_path")."mls-data/".$mls_id."/";
-			$handle=opendir($path);
-			if($handle){
-				while (false !== ($entry = readdir($handle))) {
-					if(strstr($entry, "-incremental") != FALSE){
-						// rename and execute
-						$newPath=str_replace("-incremental", "-processing", $entry);
-						rename($path.$entry, $path.$newPath);
-						$link=$domain."/z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".urlencode($newPath);
-						$cmd="/usr/bin/wget -O /dev/null -o /dev/null ".escapeshellarg($link)." 2>&1";
-						echo $cmd."\n";
-						`$cmd`;
-						exit;
-					}
-				}
-				closedir($handle);
-			}
-		}
-	}
-	// 
-
 	usleep(50000); // wait 50 milliseconds
 
 	if(microtimeFloat() - $timeStart > $timeout){
 		echo "Timeout reached";
-		exit;
+		break;
 	}
+}
+
+
+// run only once
+// open dir on mls-data
+foreach($arrRetsConfig as $mls_id=>$config){
+	if(isset($config["enableDataDownload"]) && $config["enableDataDownload"]){
+		$path=get_cfg_var("jetendo_share_path")."mls-data/".$mls_id."/";
+		$handle=opendir($path);
+		if($handle){
+			while (false !== ($entry = readdir($handle))) {
+				if(strstr($entry, "-incremental") != FALSE){
+					// rename and execute
+					$newPath=str_replace("-incremental", "-processing", $entry);
+					rename($path.$entry, $path.$newPath);
+					$link=$domain."/z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".urlencode($newPath);
+					$cmd="/usr/bin/wget -O /dev/null -o /dev/null ".escapeshellarg($link).$background;
+					echo $cmd."\n";
+					`$cmd`;
+					fwrite($logFile, date("Y-m-d H:i:s")."\t".$cmd."\n"); 
+				}
+			}
+			closedir($handle);
+		}
+	}
+}
+fclose($logFile);
+if(filesize($executeLog) > '5000000'){
+	@unlink($executeLog.".previous");
+	rename($executeLog, $executeLog.".previous");
 }
 ?>
