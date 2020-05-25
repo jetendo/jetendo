@@ -438,17 +438,26 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="getMediaByListingId" localmode="modern" access="public"> 
 	<cfargument name="listing_id" type="string" required="yes">
+	<cfargument name="photoCount" type="string" required="yes">
+	<cfargument name="forcePhotoRedownload" type="boolean" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	arrPhoto=[];
+	// arrPhoto=[];
 	// return arrPhoto; // ignore photos for now
-	db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
-	WHERE
-	listing_id=#db.param(arguments.listing_id)#  and 
-	mlsgrid_media_deleted=#db.param(0)# 
-	ORDER BY mlsgrid_media_order ASC";
-	qMedia=db.execute("qMedia", "", 10000, "query", false);
-	if(qMedia.recordcount EQ 0){
+	photosFound=0;
+	if(not arguments.forcePhotoRedownload){
+		// verify if images exist on disk, if not, redownload all photos for this listing.
+		for(i=1;i<=arguments.photoCount;i++){
+			fNameTemp1=arguments.listing_id&"-"&i&".jpeg";
+			fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
+			destinationFile=request.zos.sharedPath&"mls-images/"&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+			if(fileexists(destinationFile)){
+				photosFound++;
+			}
+		}
+	}
+	if(arguments.photoCount NEQ 0 and (arguments.forcePhotoRedownload or photosFound NEQ arguments.photoCount)){
+		// throw('photo download: #arguments.listing_id# | #arguments.forcePhotoRedownload# | photosFound:#photosFound# | photoCount:#arguments.photoCount#');
 		// download images for 1 listing to fix the missing data once
 		skip=0;
 		count=false;
@@ -457,6 +466,10 @@ has enums with individual plain text name and id value pairs - do i need them?
 		filter=urlencodedformat("MlgCanView eq true and ResourceRecordID eq '#listgetat(arguments.listing_id, 2, "-")#'");
 		nextLink="https://api.mlsgrid.com/Media?$filter=#filter#&$top=#top#&$skip=#skip#&$count=#count#";
 		js=downloadData(nextLink);   
+		// savecontent variable="out"{
+		// 	writedump(js);
+		// }
+		// throw(out);
 
 		for(i=1;i<=arraylen(js.value);i++){
 			application.currentMLSGridStatus="Process Media Row ###i# for listing_id: #arguments.listing_id#";
@@ -466,13 +479,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 	 		}
 			ds=js.value[i];
 			if(ds["MlgCanView"] EQ "false"){
-				db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
-				set 
-				mlsgrid_media_url=#db.param("")# 
-				WHERE mls_id=#db.param(this.mls_id)# and 
-				mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
-				mlsgrid_media_deleted=#db.param(0)# ";
-				db.execute("qUpdate");
+				// db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+				// set 
+				// mlsgrid_media_url=#db.param("")# 
+				// WHERE mls_id=#db.param(this.mls_id)# and 
+				// mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
+				// mlsgrid_media_deleted=#db.param(0)# ";
+				// db.execute("qUpdate");
 			}else{
 				ns=processMedia(ds);
 				db.sql="select mlsgrid_media_id from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
@@ -507,25 +520,26 @@ has enums with individual plain text name and id value pairs - do i need them?
 				}
 			}
 		}
-		db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
-		WHERE
-		listing_id=#db.param(arguments.listing_id)#  and 
-		mlsgrid_media_deleted=#db.param(0)# 
-		ORDER BY mlsgrid_media_order ASC";
-		qMedia=db.execute("qMedia", "", 10000, "query", false);
+		// db.sql="select * from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+		// WHERE
+		// listing_id=#db.param(arguments.listing_id)#  and 
+		// mlsgrid_media_deleted=#db.param(0)# 
+		// ORDER BY mlsgrid_media_order ASC";
+		// qMedia=db.execute("qMedia", "", 10000, "query", false);
 	}
-	for(row in qMedia){
-		if(row.mlsgrid_media_url NEQ ""){
-			// if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
-			// 	link=row.mlsgrid_media_url;
-			// }else{
-			// 	link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
-			// }
-			// arrayAppend(arrPhoto,  link);
-			arrayAppend(arrPhoto, row.mlsgrid_media_url);
-		}
-	}
-	return arrPhoto;
+	// for(row in qMedia){
+	// 	if(row.mlsgrid_media_url NEQ ""){
+	// 		// if(row.mlsgrid_media_url CONTAINS "/zimageproxy/"){
+	// 		// 	link=row.mlsgrid_media_url;
+	// 		// }else{
+	// 		// 	link="/zimageproxy/"&replace(replace(row.mlsgrid_media_url,"http://",""),"https://","");
+	// 		// }
+	// 		// arrayAppend(arrPhoto,  link);
+	// 		arrayAppend(arrPhoto, row.mlsgrid_media_url);
+	// 	}
+	// }
+	// return arrPhoto;
+	return true;
 	</cfscript>
 </cffunction>
 
@@ -721,13 +735,13 @@ has enums with individual plain text name and id value pairs - do i need them?
 			mediaCount++;
 
 			if(ds["MlgCanView"] EQ "false"){
-				db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
-				set 
-				mlsgrid_media_url=#db.param("")# 
-				WHERE mls_id=#db.param(this.mls_id)# and 
-				mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
-				mlsgrid_media_deleted=#db.param(0)# ";
-				db.execute("qUpdate");
+				// db.sql="update #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
+				// set 
+				// mlsgrid_media_url=#db.param("")# 
+				// WHERE mls_id=#db.param(this.mls_id)# and 
+				// mlsgrid_media_key=#db.param("#ds["MediaKey"]#")# and 
+				// mlsgrid_media_deleted=#db.param(0)# ";
+				// db.execute("qUpdate");
 			}else{
 				ns=processMedia(ds);
 				db.sql="select mlsgrid_media_id from #db.table("mlsgrid_media", request.zos.zcoreDatasource)# 
@@ -1249,6 +1263,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfargument name="ds" type="struct" required="yes">
 	<cfargument name="excludeDs" type="struct" required="yes">
 	<cfscript>
+	db=request.zos.queryObject;
 	ds=arguments.ds; 
 	startTime=gettickcount('nano');
 
@@ -1395,12 +1410,6 @@ has enums with individual plain text name and id value pairs - do i need them?
 	}
 	local.listing_parking=arraytolist(arrT2, ",");
 	
-	if(structkeyexists(ds,'ListingContractDate')){
-		arguments.ss.listing_track_datetime=dateformat(ds["ListingContractDate"],"yyyy-mm-dd")&" "&timeformat(ds["ListingContractDate"], "HH:mm:ss");
-	}
-	arguments.ss.listing_track_updated_datetime=dateformat(ds["ModificationTimestamp"],"yyyy-mm-dd")&" "&timeformat(ds["ModificationTimestamp"], "HH:mm:ss"); 
-	arguments.ss.listing_track_price=ds["ListPrice"];
-	arguments.ss.listing_track_price_change=ds["ListPrice"];
 	liststatus=ds["StandardStatus"];
 	s2=structnew();
 	/*
@@ -1499,7 +1508,6 @@ has enums with individual plain text name and id value pairs - do i need them?
 	rs.listing_pool=local.listing_pool;
 	rs.listing_photocount=application.zcore.functions.zso(ds, "PhotosCount");
 	rs.listing_coded_features="";
-	rs.listing_updated_datetime=arguments.ss.listing_track_updated_datetime;
 	rs.listing_primary="0";
 	rs.listing_mls_id=this.mls_id;
 	rs.listing_address=trim(address);
@@ -1521,7 +1529,41 @@ has enums with individual plain text name and id value pairs - do i need them?
 	rs.VirtualTourURLUnbranded=application.zcore.functions.zso(ds, "VirtualTourURLUnbranded");
 
 	// make sure we have all the images before importing the listing.
-	rs.arrPhoto=getMediaByListingId(this.mls_id&"-"&ds["ListingID"]);
+	forcePhotoRedownload=false;
+
+	if(not structkeyexists(ds, "PhotosChangeTimestamp")){
+		ds.PhotosChangeTimestamp=ds.ModificationTimestamp;
+	}
+	// force the timestamp fields to not be empty for older listings
+	if(dateformat(ds["PhotosChangeTimestamp"], "yyyymmdd")<20200520){
+		db.sql="UPDATE #db.table("listing_track", request.zos.zcoreDatasource)#
+		SET listing_track_external_timestamp=#db.param(ds["ModificationTimestamp"])#,
+		listing_track_external_photo_timestamp=#db.param(ds["PhotosChangeTimestamp"])# 
+		 WHERE 
+		listing_id=#db.param(rs.listing_id)# and 
+		listing_track_deleted=#db.param(0)#";
+		db.execute("qUpdate");
+	}
+	db.sql="SELECT * FROM #db.table("listing_track", request.zos.zcoreDatasource)# WHERE 
+	listing_id=#db.param(rs.listing_id)# and 
+	listing_track_deleted=#db.param(0)#";
+	qTrack=db.execute("qTrack", "", 10000, "query", false);
+	
+	if(structkeyexists(ds,'ListingContractDate')){
+		rs.listing_track_datetime=dateformat(ds["ListingContractDate"],"yyyy-mm-dd")&" "&timeformat(ds["ListingContractDate"], "HH:mm:ss");
+	}
+	rs.listing_track_updated_datetime=dateformat(ds["ModificationTimestamp"],"yyyy-mm-dd")&" "&timeformat(ds["ModificationTimestamp"], "HH:mm:ss"); 
+	rs.listing_track_price=ds["ListPrice"];
+	rs.listing_track_price_change=ds["ListPrice"];
+	rs.listing_track_external_timestamp=ds["ModificationTimestamp"];
+	rs.listing_track_external_photo_timestamp=ds["PhotosChangeTimestamp"];
+	rs.listing_updated_datetime=rs.listing_track_updated_datetime;
+	// if the date
+	if(qTrack.recordcount EQ 0 or qTrack.listing_track_external_photo_timestamp NEQ rs.listing_track_external_photo_timestamp){
+		forcePhotoRedownload=true; 
+	}
+	//rs.arrPhoto=
+	getMediaByListingId(this.mls_id&"-"&ds["ListingID"], ds["PhotosCount"], forcePhotoRedownload);
 	// for(i=1;i<=arrayLen(arrPhoto);i++){
 	// 	rs["photo#i#"]=arrPhoto[i];
 	// } 
