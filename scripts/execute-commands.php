@@ -31,9 +31,9 @@ $processorCount=`/bin/cat /proc/cpuinfo | /bin/grep processor | /usr/bin/wc -l`;
 $commandGroups=array();
 $commandGroups["image"]=max(4, intval($processorCount));
 $commandGroups["imageidentify"]=max(8, intval($processorCount)*3);
-$commandGroups["login"]=max(4, intval($processorCount));
-$commandGroups["http"]=max(8, intval($processorCount)*2);
-$commandGroups["serveradministrator"]=max(4, intval(intval($processorCount)/2));
+$commandGroups["login"]=max(8, intval($processorCount));
+$commandGroups["http"]=max(16, intval($processorCount)*2);
+$commandGroups["serveradministrator"]=max(50, intval(intval($processorCount)/2));
 
 $commandQueue=array();
 $commandActive=array();

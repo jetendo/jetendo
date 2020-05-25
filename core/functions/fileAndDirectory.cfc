@@ -1071,6 +1071,7 @@ if(application.zcore.functions.zMergeImages(ts)){
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	var result=0; 
+	setting requesttimeout="20000";
 	arguments.ss.destinationFilePath=replace(arguments.ss.destinationFilePath, chr(9), "", "all"); 
 	for(tempImage in arguments.ss.arrImagePath){
 		if(not fileexists(tempImage)){
