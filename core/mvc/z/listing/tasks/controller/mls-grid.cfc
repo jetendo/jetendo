@@ -1032,6 +1032,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	ts["OriginatingSystemName"]=application.zcore.functions.zso(ds, "OriginatingSystemName");
 	ts["MlgCanView"]=application.zcore.functions.zso(ds, "MlgCanView");
 
+	// if any of the images change their order, all images have to redownload, could be improved, but not possible to fix with current sequential filenames
 	if(ts["MediaURL"] NEQ ""){
 		fNameTemp1=this.mls_id&"-"&ts["ResourceRecordID"]&"-"&(ts["Order"]+1)&".jpeg";
 		fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
