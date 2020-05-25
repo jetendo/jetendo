@@ -1940,8 +1940,8 @@ if(rs.success){
 	<cfargument name="filePath" required="yes" type="string">
 	<cfscript>
 	// fileexists ensures the path is within sandbox
-	try{
-		lock name="#request.zos.installPath#|file|#arguments.filePath#" timeout="100" throwontimeout="yes" type="exclusive"{
+	// try{
+	// 	lock name="#request.zos.installPath#|file|#arguments.filePath#" timeout="100" throwontimeout="yes" type="exclusive"{
 			if(fileexists(arguments.filePath)){
 				result=application.zcore.functions.zSecureCommand("convertFileCharsetISO88591toUTF8"&chr(9)&arguments.filePath, 30);
 				arrResult=listToArray(result, "|");
@@ -1955,10 +1955,14 @@ if(rs.success){
 				request.convertFileCharsetErrorMessage="File doesn't exist: #arguments.filePath#";
 				return false;
 			} 
-		}
-	}catch(Any e){ 
-		return false;
-	}
+	// 	}
+	// }catch(Any e){ 
+	// 	savecontent variable="out"{
+	// 		writedump(e);
+	// 	}
+	// 	request.convertFileCharsetErrorMessage="Exclusive lock timeout: #out#";
+	// 	return false;
+	// }
 	</cfscript>
 </cffunction>
 

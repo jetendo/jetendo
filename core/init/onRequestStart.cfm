@@ -402,11 +402,12 @@
 				}
 			}
 			structDelete(application, 'onInternalApplicationStartRunning');
-			echo('Init Complete');
-			if(zos.isTestServer){
-				echo('<br>Want to test loading all sites? <a href="/z/server-manager/tasks/sync-sessions/index?testInitAllSites=1">Click here</a>');
-			}
-			abort;
+			// echo('Init Complete');
+			// if(zos.isTestServer){
+			// 	echo('<br>Want to test loading all sites? <a href="/z/server-manager/tasks/sync-sessions/index?testInitAllSites=1">Click here</a>');
+			// }
+			// abort;
+			site_id=getSiteId();
 		}else{
 			site_id=getSiteId();
 		}
