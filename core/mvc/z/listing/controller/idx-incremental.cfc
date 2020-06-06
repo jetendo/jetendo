@@ -156,10 +156,7 @@ this.inited=false;
 
 				// imports the one record.
 				arrLine=listToArray(line, chr(9), true);
-				r22=this.import(arrLine);
-				if(r22 EQ false){
-					break;	
-				}
+				this.import(arrLine);
 				if(fileIsEOF(request.zos.idxFileHandle)){
 					fileComplete=true;
 					break;
@@ -167,9 +164,10 @@ this.inited=false;
 			}
 		}
 		fileClose(request.zos.idxFileHandle); 
-		if(fileComplete){
-			writeoutput('File import, '&this.optionstruct.filepath&',  is complete<br />');
-			application.zcore.functions.zDeleteFile(this.optionstruct.filepath);	
+		writeoutput('File import, '&this.optionstruct.filepath&',  is complete<br />');
+		application.zcore.functions.zDeleteFile(this.optionstruct.filepath);	
+		if(fileexists(this.optionstruct.filepath)){
+			throw('File: #this.optionstruct.filepath# exists after processing completed successfully.');
 		}
 	}catch(Any e){
 		if(structkeyexists(request.zos, 'fileHandle')){
@@ -185,10 +183,17 @@ this.inited=false;
 	where mls_id = #db.param(this.optionstruct.mls_id)# and 
 	mls_deleted=#db.param(0)#";
 	db.execute("q");
-	if(structkeyexists(request, 'newListingCitiesCreated')){
-		cc=application.zcore.functions.zcreateobject("component","zcorerootmapping.mvc.z.listing.controller.listing");
-		cc.updateDistanceCache();
-	} 
+
+	// it works, so disabling this for now:
+	// emailStruct={};
+	// emailStruct.subject='Completed Incremental RETS Update';
+	// emailStruct.html='<!DOCTYPE html><html><head></head><body><h2>Completed Incremental RETS Update</h2>
+	// <p>File: #this.optionstruct.filepath#</p>
+	// </body></html>';
+	// emailStruct.to=request.zos.developerEmailTo;
+	// emailStruct.from=request.zos.developerEmailFrom;
+	// rCom=application.zcore.email.send(emailStruct);
+	
 	</cfscript>
 </cffunction>
 

@@ -272,29 +272,6 @@ while(true){
 }
 
 
-// run only once
-// open dir on mls-data
-foreach($arrRetsConfig as $mls_id=>$config){
-	if(isset($config["enableDataDownload"]) && $config["enableDataDownload"]){
-		$path=get_cfg_var("jetendo_share_path")."mls-data/".$mls_id."/";
-		$handle=opendir($path);
-		if($handle){
-			while (false !== ($entry = readdir($handle))) {
-				if(strstr($entry, "-incremental") != FALSE){
-					// rename and execute
-					$newPath=str_replace("-incremental", "-processing", $entry);
-					rename($path.$entry, $path.$newPath);
-					$link=$domain."/z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".urlencode($newPath);
-					$cmd="/usr/bin/wget -O /dev/null -o /dev/null ".escapeshellarg($link).$background;
-					echo $cmd."\n";
-					`$cmd`;
-					fwrite($logFile, date("Y-m-d H:i:s")."\t".$cmd."\n"); 
-				}
-			}
-			closedir($handle);
-		}
-	}
-}
 fclose($logFile);
 if(filesize($executeLog) > '5000000'){
 	@unlink($executeLog.".previous");
