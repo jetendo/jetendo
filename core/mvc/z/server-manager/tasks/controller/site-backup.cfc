@@ -67,6 +67,8 @@ TODO: figure out why site backup doesn't get compressed.
 		"newsletter_email":true,
 		"keyword_ranking":true,
 		"ga_month":true,
+		"lead_parse_config":true,
+		"imap_account":true,
 		"ga_month_keyword":true,
 		"facebook_post":true,
 		"facebook_page_month":true,

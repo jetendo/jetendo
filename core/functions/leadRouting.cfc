@@ -107,7 +107,9 @@ application.zcore.functions.zRecordLead();
 	ss.contact_assigned_user_id=application.zcore.functions.zso(ss, 'contact_assigned_user_id', true);
 	ss.contact_assigned_user_id_siteIdType=application.zcore.functions.zso(ss, 'contact_assigned_user_id_siteIdType'); 
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
-	ss.site_id = request.zOS.globals.id; 
+	if(not structkeyexists(ss, "site_id")){
+		ss.site_id = request.zOS.globals.id; 
+	}
 
 	if(structkeyexists(request.zos, 'enableNewLeadManagement')){
 		ss.contact_id=application.zcore.functions.zso(ss, 'contact_id', true);
@@ -148,7 +150,9 @@ application.zcore.functions.zInsertLead();
 	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
 	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
-	form.site_id = request.zOS.globals.id; 
+	if(not structkeyexists(form, "site_id")){
+		form.site_id = request.zOS.globals.id; 
+	}
 	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
 		form.inquiries_datetime=dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss");
 	}
@@ -228,7 +232,9 @@ application.zcore.functions.zImportLead(ts); --->
 	form.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone2'));
 	form.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(form, 'inquiries_phone3'));
 	form.inquiries_priority=application.zcore.functions.zso(form, 'inquiries_priority', true, 5);
-	form.site_id = request.zOS.globals.id; 
+	if(not structkeyexists(form, "site_id")){
+		form.site_id = request.zOS.globals.id; 
+	}
 
 
 	if(not structkeyexists(form, 'inquiries_datetime') or not isdate(form.inquiries_datetime)){
@@ -289,7 +295,9 @@ application.zcore.functions.zUpdateLead();
 	ss.inquiries_phone2_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone2'));
 	ss.inquiries_phone3_formatted=application.zcore.functions.zFormatInquiryPhone(application.zcore.functions.zso(ss, 'inquiries_phone3'));
 	ss.inquiries_priority=application.zcore.functions.zso(ss, 'inquiries_priority', true, 5);
-	ss.site_id = request.zOS.globals.id; 
+	if(not structkeyexists(ss, "site_id")){
+		ss.site_id = request.zOS.globals.id; 
+	}
 
 	application.zcore.functions.zBeforeInquiryInsertUpdate(ss);  
 
@@ -301,7 +309,7 @@ application.zcore.functions.zUpdateLead();
 
 
 	inquiriesCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
-	inquiriesCom.indexInquiry(ss.inquiries_id, request.zos.globals.id); 
+	inquiriesCom.indexInquiry(ss.inquiries_id, ss.site_id); 
 	return result;
 	</cfscript>
 </cffunction>

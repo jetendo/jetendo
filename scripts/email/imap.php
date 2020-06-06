@@ -1,4 +1,7 @@
 <?php 
+// this is meant to run with crontab config like this:
+// */5 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/email/imap.php > /dev/null 2>&1
+
 // note gmail accounts have imap disabled by default, you must go to settings and forwarding/imap to enable.  the other gmail settings left as default are fine.
 
 // gmail also has an allow lesssecureapps feature now that must be enabled https://myaccount.google.com/lesssecureapps

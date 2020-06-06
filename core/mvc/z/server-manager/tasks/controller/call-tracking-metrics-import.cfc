@@ -332,7 +332,7 @@
 				application.zcore.functions.zUpdateLead(form);
 			}else{ 
 				insertCount++;
-				application.zcore.functions.zInsertLead();
+				application.zcore.functions.zImportLead(form);
 			}
 			application.callTrackingMetricsImportProgress="Importing | insertCount: #insertCount# | updateCount: #updateCount# | total: #js.total_entries#";
 		}  

@@ -181,19 +181,19 @@ enable round robin for users - need a new option to disable for staff.
 		<table style="width:100%;" class="table-list">
 			<tr>
 				<th style="width:1%;">Lead Type</th>
-				<td><cfsavecontent variable="db.sql"> 
-					SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("site_id"))# siteIDType 
+				<td>
+					<cfscript>
+					db.sql="SELECT *, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL("site_id"))# siteIDType 
 					from #db.table("inquiries_type", request.zos.zcoreDatasource)# inquiries_type 
 					WHERE site_id IN (#db.param(0)#,#db.param(request.zOS.globals.id)#) and 
-					inquiries_type_deleted = #db.param(0)#
-					<cfif not application.zcore.app.siteHasApp("listing")>
-						and inquiries_type_realestate = #db.param(0)#
-					</cfif>
-					<cfif not application.zcore.app.siteHasApp("rental")>
-						and inquiries_type_rentals = #db.param(0)#
-					</cfif>
-					ORDER BY inquiries_type_name </cfsavecontent>
-					<cfscript>
+					inquiries_type_deleted = #db.param(0)#";
+					if(not application.zcore.app.siteHasApp("listing")){
+						db.sql&=" and inquiries_type_realestate = #db.param(0)# ";
+					}
+					if(not application.zcore.app.siteHasApp("rental")){
+						db.sql&=" and inquiries_type_rentals = #db.param(0)# ";
+					}
+					db.sql&=" ORDER BY inquiries_type_name ";
 					qType=db.execute("qType");
 					form.inquiries_type_id=form.inquiries_type_id&"|"&form.inquiries_type_id_siteIDType;
 					selectStruct = StructNew();

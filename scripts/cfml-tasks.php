@@ -68,6 +68,15 @@ function getTasks(){
 	$t->url=$adminDomain."/z/listing/tasks/generateData/index";
 	array_push($arrTask, $t);
 
+
+	$t=new stdClass();
+	$t->logName="imap-import-queue.html";
+	$t->type="every";
+	$t->interval=120;
+	$t->startTimeOffsetSeconds=1020;
+	$t->url=$adminDomain."/z/_com/app/queue-pop?method=index";
+	array_push($arrTask, $t);
+
 	$t=new stdClass();
 	$t->logName="listing-lookup-builder.html";
 	$t->interval=3600;

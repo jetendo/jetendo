@@ -2582,6 +2582,7 @@ User's IP: #request.zos.cgi.remote_addr#
 	| <a href="/z/server-manager/admin/download-site-backup/index?zid=#arguments.zid#&amp;sid=#form.sid#">Backup</a>
 	| <a href="/z/server-manager/admin/user/index?zid=#arguments.zid#&amp;sid=#form.sid#">Users</a> 
 	| <a href="/z/_com/zos/app?method=instanceSiteList&amp;zid=#arguments.zid#&amp;sid=#form.sid#">Applications</a>
+	| <a href="/z/server-manager/admin/lead-parse-config/index?zid=#arguments.zid#&amp;sid=#form.sid#">Lead Import Parse Config</a>
 	| <a href="/z/server-manager/admin/imap-account/index?zid=#arguments.zid#&amp;sid=#form.sid#">IMAP Accounts</a>
 	| <a href="/z/server-manager/admin/rewrite-rules/edit?zid=#arguments.zid#&amp;sid=#form.sid#">Rewrite Rules</a>
 	| <a href="/z/server-manager/admin/robots/edit?zid=#arguments.zid#&amp;sid=#form.sid#">Robots.txt</a>

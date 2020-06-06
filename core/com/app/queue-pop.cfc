@@ -126,7 +126,7 @@
 						scheduledDatetime=dateformat(scheduledDatetime, 'yyyy-mm-dd')&' '&timeformat(scheduledDatetime, 'HH:mm:ss'); 
 						// the from address was tampered with, may be spam.
 						echo('reschedule queue_pop:#row.queue_pop_id#<br>');
-						/*
+						
 						db.sql = 'UPDATE #db.table( 'queue_pop', request.zos.zcoreDatasource )# 
 						SET queue_pop_scheduled_processing_datetime = #db.param(scheduledDatetime)#, 
 						queue_pop_process_fail_count=#db.param(row.queue_pop_process_fail_count+1)#, 
@@ -135,22 +135,21 @@
 						queue_pop_deleted = #db.param( 0 )# and 
 						queue_pop_scheduled_processing_datetime < #db.param(nowDate)# ';
 						db.execute( 'qUpdate' );
-						*/
 					}else{
-						echo('delete queue_pop:#row.queue_pop_id#<br>');
-						/*
+						// echo('delete queue_pop:#row.queue_pop_id#<br>');
+						
 						// This message was successfully processed, and we can safely delete the queue_pop record now.
 						db.sql="delete from #db.table( 'queue_pop', request.zos.zcoreDatasource )#  
 						WHERE site_id = #db.param(row.site_id)# and 
 						queue_pop_deleted = #db.param( 0 )# and 
-						queue_pop_id = #db.param(row.queue_pop_id)# ';
+						queue_pop_id = #db.param(row.queue_pop_id)# ";
 						db.execute( 'qDelete' );
 
-						*/
+						
 					} 
-					echo('<hr>only processed first queue_pop<br>');
+					// echo('<hr>only processed first queue_pop<br>');
 					// writedump(rs);
-					abort;
+					// abort;
 					processCount++;
 
 				}  
@@ -172,6 +171,7 @@
 	<cfargument name="messageStruct" type="struct" required="yes">
 	<cfargument name="jsonStruct" type="struct" required="yes">
 	<cfscript>
+	var db = request.zos.queryObject;
 	jsonStruct=arguments.jsonStruct;
 	rs={
 		success:true,
@@ -181,7 +181,7 @@
 		messageStruct:arguments.messageStruct,
 		jsonStruct:arguments.jsonStruct,
 		filterContacts:{},
-		parseEmailMatched:""
+		parseRow:{}
 	}; 
 	// process and route based on jsonStruct.plusId
 	if(jsonStruct.plusId EQ ""){
@@ -219,25 +219,32 @@
 			// here we can import this as a new lead.
 
 			// determine if one of the to or cc addresses match our site lead parse configuration, hardcoded for now
-			lead_parse_config_email="zgraphleads@gmail.com";
- 
+			if(not structkeyexists(request, "parseEmailStruct")){
+				request.parseEmailStruct={};
+				db.sql="SELECT * FROM #db.table("inquiries_parse_config", request.zos.zcoreDatasource)# WHERE 
+				inquiries_parse_config_deleted=#db.param(0)# and 
+				site_id <> #db.param(-1)#";
+				qParse=db.execute("qParse");
+				for(row in qParse){
+					request.parseEmailStruct[row.inquiries_parse_config_email]=row;
+				}
+			}
 			for(emailStruct in rs.jsonStruct.to){
-				if(emailStruct.email EQ lead_parse_config_email){
-					// found match
-					rs.parseEmailMatched=lead_parse_config_email;
+				if(structkeyexists(request.parseEmailStruct, emailStruct.originalEmail)){
+					rs.parseRow=request.parseEmailStruct[emailStruct.originalEmail];
 					break;
 				}
 			}
-			if(rs.parseEmailMatched EQ ""){
+			if(structcount(rs.parseRow) EQ 0){
 				for(emailStruct in rs.jsonStruct.cc){
-					if(emailStruct.email EQ lead_parse_config_email){
-						// found match
-						rs.parseEmailMatched=lead_parse_config_email;
+					if(structkeyexists(request.parseEmailStruct, emailStruct.originalEmail)){
+						rs.parseRow=request.parseEmailStruct[emailStruct.originalEmail];
+						rs.parseRow=parseRow;
 						break;
 					}
 				}
 			} 
-			if(rs.parseEmailMatched NEQ ""){
+			if(structcount(rs.parseRow) NEQ 0){
 				return parseEmailToLead(rs);
 			}else{
 				// The email did not match any plus address, and it will be deleted from queue on purpose.
@@ -253,7 +260,9 @@
 <cffunction name="parseEmailToLead" localmode="modern" access="public">
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
-	echo(ss.jsonStruct.html);
+	ss=arguments.ss;
+	db = request.zos.queryObject;
+	
 
 	html=ss.jsonStruct.html;
 
@@ -266,10 +275,10 @@
 		"name": "inquiries_first_name",
 		"email": "inquiries_email",
 		"email address": "inquiries_email",
+		"email_address": "inquiries_email",
 		"phone": "inquiries_phone1",
-		"cell phone": "inquiries_phone1",
-		"work phone": "inquiries_phone1",
-		"home phone": "inquiries_phone1",
+		"phone number": "inquiries_phone1",
+		"phone_number": "inquiries_phone1",
 		"comments": "inquiries_comments",
 		"message": "inquiries_comments",
 		"notes": "inquiries_comments",
@@ -281,40 +290,62 @@
 	html=rereplacenocase(html,"<(#badTagList#).*?</\1>", " ", 'ALL');
 	html=rereplacenocase(html,"<([A-Za-z]*) (^[>]*)>", "<$1>", 'ALL');
 	html=replace(html, chr(13), chr(10), "all");
+	html=replace(html, chr(9), " ", "all");
+
+	arrSubjectExclude=listToArray(replace(ss.parseRow.inquiries_parse_config_subject_exclude, chr(13), chr(10), "all"), chr(10), false);
+	arrBodyExclude=listToArray(replace(ss.parseRow.inquiries_parse_config_body_exclude, chr(13), chr(10), "all"), chr(10), false); 
+	for(phrase in arrSubjectExclude){
+		phrase=trim(phrase);
+		if(phrase NEQ "" and ss.jsonStruct.subject CONTAINS phrase){
+			return {success:true};
+		}
+	}
+	for(phrase in arrBodyExclude){
+		phrase=trim(phrase);
+		if(phrase NEQ "" and ss.jsonStruct.html CONTAINS phrase){
+			return {success:true};
+		}
+		if(phrase NEQ "" and ss.jsonStruct.text CONTAINS phrase){
+			return {success:true};
+		}
+	}
+	
+	
+
 	if(html CONTAINS "<table"){
-		// process table rows with this format: <tr><td>Field</td><td>Value</td></tr>
-		html=rereplacenocase(html,"<tr", chr(10)&":StartRow:<tr", 'ALL');
-		html=rereplacenocase(html,"<td", ":StartField:<td", 'ALL');
-		html=rereplacenocase(html,"</td>", ":EndField:", 'ALL');
-		html=rereplacenocase(html,"</tr>", ":EndRow:"&chr(10), 'ALL');
+		// detect table rows with this format: <tr><td>Field</td><td>Value</td></tr>
+		html=rereplacenocase(html,"<tr", chr(10)&chr(9)&"StartRow#chr(9)#<tr", 'ALL');
+		html=rereplacenocase(html,"<td", "#chr(9)#StartField#chr(9)#<td", 'ALL');
+		html=rereplacenocase(html,"</td>", "#chr(9)#EndField#chr(9)#", 'ALL');
+		html=rereplacenocase(html,"</tr>", "#chr(9)#EndRow#chr(9)#"&chr(10), 'ALL');
 	}
 	// for debugging force some p tags
-	html&='<p>ParagraphColonField: Value1</p>  <p>ParagraphColonField2 : Value2</p> <p>ParagraphEqualField= Value3</p> <p>ParagraphEqualField = Value4</p>';
+	// html&='<p>ParagraphColonField: Value1</p>  <p>ParagraphColonField2 : Value2</p> <p>ParagraphEqualField= Value3</p> <p>ParagraphEqualField = Value4</p>';
 
 	if(html CONTAINS "</p>"){
-		html=rereplacenocase(html,"<p", chr(10)&":StartParagraphRow:<p", 'ALL');
-		html=rereplacenocase(html,"</p>", ":EndParagraphRow:</p>"&chr(10), 'ALL');
+		html=rereplacenocase(html,"<p", chr(10)&"#chr(9)#StartParagraphRow#chr(9)#<p", 'ALL');
+		html=rereplacenocase(html,"</p>", "#chr(9)#EndParagraphRow#chr(9)#</p>"&chr(10), 'ALL');
 	}
 
 	html=rereplacenocase(html,"(</|<)[^>]*>", " ", 'ALL');
 	html=replacenocase(html,"&nbsp;", " ", 'ALL'); 
-	html=replacenocase(html, chr(9), " ", 'ALL'); 
 	arrLine=listToArray(html, chr(10));
-	arrLineNew=[];
-	for(i=1;i<=arraylen(arrLine);i++){
-		arrLine[i]=trim(arrLine[i]);
-		if(arrLine[i] NEQ ""){
-			arrayAppend(arrLineNew, arrLine[i]);
-		}
-	}
-	html=arrayToList(arrLineNew, chr(10));
+	// arrLineNew=[];
+	// for(i=1;i<=arraylen(arrLine);i++){
+	// 	arrLine[i]=trim(arrLine[i]);
+	// 	if(arrLine[i] NEQ ""){
+	// 		arrayAppend(arrLineNew, arrLine[i]);
+	// 	}
+	// }
+	// html=arrayToList(arrLineNew, chr(10));
 	for(i=1;i LTE 10;i++){
 		html=replacenocase(html,"  ", " ", 'ALL'); 
 	}
-	extractedFields={};
+	// stored as an array to preserve the original order of any custom fields
+	arrExtractedFields=[];
 	// this is temporary for debugging this parsing
-	forceTextDebug=true;
-	ss.jsonStruct.text='TextField: Value#chr(10)#TextField2= Value2#chr(10)#TextField3: Value3#chr(10)#';
+	forceTextDebug=false;
+	// ss.jsonStruct.text='TextField: Value#chr(10)#TextField2= Value2#chr(10)#TextField3: Value3#chr(10)#';
 	if(forceTextDebug or (html EQ "" and ss.jsonStruct.text NEQ "")){
 		// split the lines
 		arrLine=listToArray(replace(ss.jsonStruct.text, chr(13), chr(10), "all"), chr(10));
@@ -324,7 +355,7 @@
 			if(line CONTAINS ":"){
 				arrLine=listToArray(line, ":");
 				if(arrayLen(arrLine) EQ 2){
-					extractedFields[trim(arrLine[1])]=trim(arrLine[2]);
+					arrayAppend(arrExtractedFields, {label:trim(arrLine[1]), value:trim(arrLine[2])});
 					matchLine=true;
 				}
 			}
@@ -332,23 +363,160 @@
 			if(line CONTAINS "=" and not matchLine){
 				arrLine=listToArray(line, "=");
 				if(arrayLen(arrLine) EQ 2){
-					extractedFields[trim(arrLine[1])]=trim(arrLine[2]);
+					arrayAppend(arrExtractedFields, {label:trim(arrLine[1]), value:trim(arrLine[2])});
 				}
 			}
 
 		}
 	}
-	// detect this format like <p>Field: Value</p> with optional spaces
-	// :StartParagraphRow: and :EndParagraphRow: with : in between
+	html=replace(html, chr(10), " ", "all");
+	arrData=listToArray(html, chr(9), true);
+	inStartRow=false;
+	inField=false;
+	firstField=true;
+	fieldLabel="";
+	fieldValue="";
+	inStartParagraphRow=false;
+	// writedump(arrData);
+	for(i=1;i<=arrayLen(arrData);i++){
+		value=trim(arrData[i]);
+		if(inStartRow){
+			if(value EQ "EndRow"){
+				arrayAppend(arrExtractedFields, {label:trim(fieldLabel), value:trim(fieldValue)});
+				fieldLabel="";
+				fieldValue="";
+				inStartRow=false;
+				firstField=true;
+				inField=false;
+			}
+			// ignore p tags in a table row:
+			if(value EQ "StartParagraphRow" or value EQ "EndParagraphRow"){
+				continue;
+			}
+			if(value EQ "StartRow"){
+				// invalid format, continue to next row before parsing more data
+				inStartRow=false;
+				firstField=true;
+				inField=false;
+				continue;
+			}
+			if(inField){
+				if(value EQ "StartField"){
+					// invalid format, continue to next row before parsing more data
+					inStartRow=false;
+					continue;
+				}
+				if(value EQ "EndField"){
+					inField=false;
+					firstField=false;
+				}else if(firstField){
+					fieldLabel&=value;
+					// echo("label: "&value&"<br>");
+				}else{
+					// echo("value: "&value&"<br>");
+					fieldValue&=value; 
+				}
+			}else{
+				if(value EQ "StartField"){
+					inField=true;
+				}
+			}
+		}else if(inStartParagraphRow){
+			// also detect invalid format words like above
 
-	// detect this format like <p>Field= Value</p> with optional spaces
-	// :StartParagraphRow: and :EndParagraphRow: with = in between
-	echo('<p><textarea style="width:100%; height:350px;">#html#</textarea></p>');
-	echo(paragraphformat(html));
-	writedump(extractedFields);
-	abort;
-	writedump(ss);
-	abort;
+
+			if(value EQ "EndParagraphRow"){
+				// split on : or = here and store field and value
+				matchColon=false;
+				// detect this format like <p>Field: Value</p> with optional spaces
+				if(fieldLabel CONTAINS ":"){
+					arrLabel=listToArray(fieldLabel, ":");
+					if(arrayLen(arrLabel) EQ 2){
+						arrayAppend(arrExtractedFields, {label:trim(arrLabel[1]), value:trim(arrLabel[2])});
+						matchColon=true;
+					}
+				}
+				// detect this format like <p>Field= Value</p> with optional spaces
+				if(not matchColon and fieldLabel CONTAINS "="){
+					arrLabel=listToArray(fieldLabel, "=");
+					if(arrayLen(arrLabel) EQ 2){
+						arrayAppend(arrExtractedFields, {label:trim(arrLabel[1]), value:trim(arrLabel[2])});
+					}
+				}
+				fieldLabel="";
+				fieldValue="";
+				inStartParagraphRow=false;
+			}else{
+				fieldLabel&=value;
+			}
+		}else{ 
+			if(value EQ "StartRow"){ 
+				inStartRow=true;
+				firstField=true;
+				inField=false;
+				inStartParagraphRow=false;
+				// detect correct format: lookahead for 2 fields and an endrow
+			}else if(value EQ "StartParagraphRow"){
+				inStartParagraphRow=true;
+				firstField=true;
+				// detect correct format: lookahead for 2 fields and an endrow
+			}
+		}
+	}
+	// echo(ss.jsonStruct.html);
+	// echo('<p><textarea style="width:100%; height:350px;">#html#</textarea></p>');
+
+	// remap field names to built in names if there is a match
+	js={arrCustom:{}};
+	ds={};
+	for(i=1;i<=arrayLen(arrExtractedFields);i++){
+		fs=arrExtractedFields[i];
+		if(structkeyexists(request.fieldLookup, fs.label)){
+			// map to built in field
+			ds[request.fieldLookup[fs.label]]=fs.value;
+		}else{
+			// add to custom field array
+			arrayAppend(js.arrCustom, {label:fs.label, value:fs.value});
+		}
+	}
+	ds.inquiries_custom_json=serializeJson(js);
+	ds.site_id=ss.parseRow.site_id; // TODO: need to get the site_id somehow
+	ds.inquiries_updated_datetime=request.zos.mysqlnow;
+	ds.inquiries_datetime=ss.jsonStruct.date; 
+	ds.inquiries_type_id=ss.parseRow.inquiries_parse_config_inquiries_type_id; 
+	ds.inquiries_type_id_siteIDType=ss.parseRow.inquiries_parse_config_inquiries_type_id_siteidtype;
+	ds.inquiries_status_id=1;
+	ds.inquiries_deleted=0;
+	ds.inquiries_external_id="externalemail: "&ss.messageStruct.queue_pop_message_uid; // TODO: find uid variable in the arguments
+	// refer to import calltrackingmetric code for more ideas.
+
+	db.sql="select * from #db.table("inquiries", request.zos.zcoreDatasource)# 
+	WHERE inquiries_deleted=#db.param(0)# and 
+	inquiries_external_id = #db.param(ds.inquiries_external_id)# and 
+	inquiries_type_id = #db.param(ds.inquiries_type_id)# and 
+	inquiries_type_id_siteIDType=#db.param(ds.inquiries_type_id_siteIDType)# and 
+	site_id = #db.param(ds.site_id)# ";
+	qId=db.execute("qId", "", 10000, "query", false);
+	// backup form scope to avoid bleeding data between leads
+	formBackup=duplicate(form);
+	structclear(form);
+	for(row in qId){
+		structappend(form, row, false);
+	}
+
+	// writedump(arrExtractedFields);
+	// writedump(ss);
+	// writedump(ds);abort;
+	structappend(form, ds , true);
+	if(qId.recordcount){
+		form.inquiries_id=qId.inquiries_id;
+		structdelete(form, 'inquiries_status_id'); 
+		application.zcore.functions.zUpdateLead(form);
+	}else{ 
+		application.zcore.functions.zImportLead(form);
+	}
+	// restore original form scope
+	structappend(form, formBackup, true);
 	return {success:true};
 	</cfscript>
 </cffunction>
