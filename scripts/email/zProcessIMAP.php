@@ -167,6 +167,7 @@ class zProcessIMAP{
 		$arrIMAP=array();
 		while(true){
 			$siteResult=$cmysql->query("select * from site, imap_account WHERE 
+				imap_account_active=1 and 
 				site.site_id = imap_account.site_id and 
 				site.site_active=1 and 
 				site_deleted=0 and 
@@ -214,7 +215,7 @@ class zProcessIMAP{
 					$rsLogin=$myIMAP->login($host, $port, $user, $pass, $folder, $ssl, $this->readonly);  
 					if(!$rsLogin["success"]){
 						$this->logIMAPError($rsLogin["errorMessage"]." host:".$host." user:".$user."\n");
-						continue;
+						exit;
 					}
 					$messageRange="";
 				}else{
@@ -297,10 +298,11 @@ class zProcessIMAP{
 							$mysqlMessageDate=$messageDate->format( 'Y-m-d H:i:s');
 						}
 					}
-					$message=$rsMessage["message"];
+					// there are sometimes invalid UTF-8 characters, which had to be converted like this:
+					$message=mb_convert_encoding($rsMessage["message"], "UTF-8", "UTF-8");
 			  		$message=$this->processEmailData($message, $account);
 
-					//var_dump($message);exit; 
+					// var_dump($message);exit; 
 					$dataObj=new stdClass(); 
 					$dataObj->headers=$message["headers"];
 					$dataObj->from=$message['from'];
@@ -314,6 +316,7 @@ class zProcessIMAP{
 					$dataObj->plusId=$message['plusId']; 
 					$dataObj->size=$message['size'];
 					$dataObj->date=$mysqlMessageDate;
+
 					/*
 					// possibly useful someday:
 					$msg["flagged"]
@@ -322,9 +325,13 @@ class zProcessIMAP{
 				    $msg["seen"]
 				    $msg["draft"]
 					*/
-
+				    // var_dump($dataObj);
 					$messageJson=json_encode($dataObj,  JSON_PRETTY_PRINT); 
-					//echo($messageJson);		//exit; 
+					if($messageJson===FALSE){
+						zEmailErrorAndExit("json_encode failed on imap import", "json_encode failed on imap import.  Error message was: #json_last_error_msg()#.  IMAP Email importing will continue to fail for all sites until the developer addresses the reason json_encode is failing in order to avoid data loss.  No lead emails were marked for deletion.", false);
+					}
+					// var_dump(json_last_error_msg());exit;
+					// var_dump($messageJson);		exit; 
 					$sql="INSERT INTO queue_pop SET site_id='".$cmysql->real_escape_string($account["site_id"])."',
 					imap_account_id='".$cmysql->real_escape_string($account["imap_account_id"])."',
 					queue_pop_message_uid='".$cmysql->real_escape_string($uid)."',

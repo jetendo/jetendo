@@ -18,7 +18,7 @@ class zMailClient{
 			$flags="/readonly";
 		}
 		if($ssl){
-			$path="{"."$host:$port/imap/ssl".$flags."}$folder";
+			$path="{"."$host:$port/imap/novalidate-cert/ssl".$flags."}$folder";
 		}else{
 			$path="{"."$host:$port/imap".$flags."}$folder"; 
 		} 

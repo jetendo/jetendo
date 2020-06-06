@@ -1,5 +1,7 @@
 <cfcomponent>
 <cfoutput>
+<!--- /z/_com/app/queue-pop/index --->
+
 <cffunction name="init" localmode="modern" access="private">
 	<cfscript>
 	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){ 
@@ -46,6 +48,7 @@
 	init();
 	var db = request.zos.queryObject;
 	setting requesttimeout="100";
+ 
 
 	numberOfQueuePops = 5; // process X emails at a time. 
  	request.contactCom = createObject( 'component', 'zcorerootmapping.com.app.contact' ); 
@@ -98,8 +101,8 @@
 					nowDate=dateformat(now(), 'yyyy-mm-dd')&' '&timeformat(now(), 'HH:mm:ss');
 					// Get email message JSON
 					jsonStruct = deserializeJSON( row.queue_pop_message_json );
-					//writedump(row);
-					//writedump(jsonStruct);
+					// writedump(row);
+					// writedump(jsonStruct);
 					//abort;
 
 
@@ -112,7 +115,7 @@
 					jsonStruct.humanReplyStruct=isHumanReply(jsonStruct); 
  
 					// to debug, this is a valid plusId with des limit 16 applied and a real inquiries_id on test site
-					jsonStruct.plusId="1.C15.0B0D3C80B74E4B0E.16318";
+					// jsonStruct.plusId="1.C15.0B0D3C80B74E4B0E.16318";
 					rs=processPlusId(row, jsonStruct);
 					if(not rs.success){
 						if(row.queue_pop_process_retry_interval_seconds EQ 0){
@@ -146,7 +149,7 @@
 						*/
 					} 
 					echo('<hr>only processed first queue_pop<br>');
-					writedump(rs);
+					// writedump(rs);
 					abort;
 					processCount++;
 
@@ -177,7 +180,8 @@
 		enableCopyToSelf:false,
 		messageStruct:arguments.messageStruct,
 		jsonStruct:arguments.jsonStruct,
-		filterContacts:{}
+		filterContacts:{},
+		parseEmailMatched:""
 	}; 
 	// process and route based on jsonStruct.plusId
 	if(jsonStruct.plusId EQ ""){
@@ -187,6 +191,7 @@
 		arrPlus=listToArray(jsonStruct.plusId, ".");
 
 		if(arrPlus[1] EQ "1"){
+			// this is probably an reply to a jetendo lead email
 			request.contactCom = createObject( 'component', 'zcorerootmapping.com.app.contact' );
  
 			if(arraylen(arrPlus) NEQ 4){
@@ -211,17 +216,142 @@
 			}  
 			return request.contactCom.processMessage(rs); 
 		}else{
-			// TODO: haven't implemented this routing yet - add a site option to allow a catch all address for emails that can't be automatically routed.
-			// route to default or discard...
-			//return {success:false, errorMessage:"Plus address appId=#arrPlus[1]# is not implemented."};
-			// this forces discard of the email:
-			return {success:true};
+			// here we can import this as a new lead.
+
+			// determine if one of the to or cc addresses match our site lead parse configuration, hardcoded for now
+			lead_parse_config_email="zgraphleads@gmail.com";
+ 
+			for(emailStruct in rs.jsonStruct.to){
+				if(emailStruct.email EQ lead_parse_config_email){
+					// found match
+					rs.parseEmailMatched=lead_parse_config_email;
+					break;
+				}
+			}
+			if(rs.parseEmailMatched EQ ""){
+				for(emailStruct in rs.jsonStruct.cc){
+					if(emailStruct.email EQ lead_parse_config_email){
+						// found match
+						rs.parseEmailMatched=lead_parse_config_email;
+						break;
+					}
+				}
+			} 
+			if(rs.parseEmailMatched NEQ ""){
+				return parseEmailToLead(rs);
+			}else{
+				// The email did not match any plus address, and it will be deleted from queue on purpose.
+				// TODO: someday, we might want some kind of catch all option, but this is probably just spam and replies we don't need to process.
+				return {success:true};
+			}
 		}
 	}
 	return {success:true};
 	</cfscript>
 </cffunction>
 
+<cffunction name="parseEmailToLead" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfscript>
+	echo(ss.jsonStruct.html);
+
+	html=ss.jsonStruct.html;
+
+	request.fieldLookup={
+		"first_name": "inquiries_first_name",
+		"last_name": "inquiries_last_name",
+		"first name": "inquiries_first_name",
+		"last name": "inquiries_last_name",
+		"full name": "inquiries_first_name",
+		"name": "inquiries_first_name",
+		"email": "inquiries_email",
+		"email address": "inquiries_email",
+		"phone": "inquiries_phone1",
+		"cell phone": "inquiries_phone1",
+		"work phone": "inquiries_phone1",
+		"home phone": "inquiries_phone1",
+		"comments": "inquiries_comments",
+		"message": "inquiries_comments",
+		"notes": "inquiries_comments",
+		"details": "inquiries_comments",
+	};
+
+	// remove html elements
+	var badTagList="style|script|embed|base|input|textarea|button|object|iframe|form";
+	html=rereplacenocase(html,"<(#badTagList#).*?</\1>", " ", 'ALL');
+	html=rereplacenocase(html,"<([A-Za-z]*) (^[>]*)>", "<$1>", 'ALL');
+	html=replace(html, chr(13), chr(10), "all");
+	if(html CONTAINS "<table"){
+		// process table rows with this format: <tr><td>Field</td><td>Value</td></tr>
+		html=rereplacenocase(html,"<tr", chr(10)&":StartRow:<tr", 'ALL');
+		html=rereplacenocase(html,"<td", ":StartField:<td", 'ALL');
+		html=rereplacenocase(html,"</td>", ":EndField:", 'ALL');
+		html=rereplacenocase(html,"</tr>", ":EndRow:"&chr(10), 'ALL');
+	}
+	// for debugging force some p tags
+	html&='<p>ParagraphColonField: Value1</p>  <p>ParagraphColonField2 : Value2</p> <p>ParagraphEqualField= Value3</p> <p>ParagraphEqualField = Value4</p>';
+
+	if(html CONTAINS "</p>"){
+		html=rereplacenocase(html,"<p", chr(10)&":StartParagraphRow:<p", 'ALL');
+		html=rereplacenocase(html,"</p>", ":EndParagraphRow:</p>"&chr(10), 'ALL');
+	}
+
+	html=rereplacenocase(html,"(</|<)[^>]*>", " ", 'ALL');
+	html=replacenocase(html,"&nbsp;", " ", 'ALL'); 
+	html=replacenocase(html, chr(9), " ", 'ALL'); 
+	arrLine=listToArray(html, chr(10));
+	arrLineNew=[];
+	for(i=1;i<=arraylen(arrLine);i++){
+		arrLine[i]=trim(arrLine[i]);
+		if(arrLine[i] NEQ ""){
+			arrayAppend(arrLineNew, arrLine[i]);
+		}
+	}
+	html=arrayToList(arrLineNew, chr(10));
+	for(i=1;i LTE 10;i++){
+		html=replacenocase(html,"  ", " ", 'ALL'); 
+	}
+	extractedFields={};
+	// this is temporary for debugging this parsing
+	forceTextDebug=true;
+	ss.jsonStruct.text='TextField: Value#chr(10)#TextField2= Value2#chr(10)#TextField3: Value3#chr(10)#';
+	if(forceTextDebug or (html EQ "" and ss.jsonStruct.text NEQ "")){
+		// split the lines
+		arrLine=listToArray(replace(ss.jsonStruct.text, chr(13), chr(10), "all"), chr(10));
+		for(line in arrLine){
+			matchLine=false;
+			// detect plain text like Field: Value on each line
+			if(line CONTAINS ":"){
+				arrLine=listToArray(line, ":");
+				if(arrayLen(arrLine) EQ 2){
+					extractedFields[trim(arrLine[1])]=trim(arrLine[2]);
+					matchLine=true;
+				}
+			}
+			// detect plain text like Field= Value on each line
+			if(line CONTAINS "=" and not matchLine){
+				arrLine=listToArray(line, "=");
+				if(arrayLen(arrLine) EQ 2){
+					extractedFields[trim(arrLine[1])]=trim(arrLine[2]);
+				}
+			}
+
+		}
+	}
+	// detect this format like <p>Field: Value</p> with optional spaces
+	// :StartParagraphRow: and :EndParagraphRow: with : in between
+
+	// detect this format like <p>Field= Value</p> with optional spaces
+	// :StartParagraphRow: and :EndParagraphRow: with = in between
+	echo('<p><textarea style="width:100%; height:350px;">#html#</textarea></p>');
+	echo(paragraphformat(html));
+	writedump(extractedFields);
+	abort;
+	writedump(ss);
+	abort;
+	return {success:true};
+	</cfscript>
+</cffunction>
 
 <cffunction name="isHumanReply" localmode="modern" access="public">
 	<cfargument name="message" type="struct" required="yes">
@@ -271,7 +401,7 @@
 		}
 	}
 
-	writedump(message);
+	// writedump(message);
 	// check for pass or neutral spf 
 	if(structkeyexists(message.headers.parsed, 'Authentication-Results')){
 		var spf=message.headers.parsed["Authentication-Results"];
