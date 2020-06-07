@@ -149,7 +149,7 @@ class zProcessIMAP{
 		$logPath=get_cfg_var("jetendo_log_path")."imap-process-errors.txt";
 		$this->logFilePointer=fopen($logPath, "w");
 		$this->messageLimit=5; // only download X messages every 30 seconds per imap account.
-		$this->timeout=300; // seconds
+		$this->timeout=250; // seconds
 		$this->timeStart=microtimeFloat();
 		$this->imapCheckTimeout=30; // seconds
 		if(zIsTestServer()){
@@ -253,6 +253,8 @@ class zProcessIMAP{
 				$rsMessages=$myIMAP->listMessages($messageRange, $this->messageLimit); // TODO: delete number when done    // test 4 which has no attachments.  and test plain text only email and html only email
 				if(!$rsMessages["success"]){
 					$this->logIMAPError("listMessages failed: ".$rsMessages["errorMessage"]);
+					$stopChecking=true;
+					break;
 				}
 				//var_dump($rsMessages["messages"]);exit;
 				foreach($rsMessages["messages"] as $msgId=>$msg){  
@@ -384,11 +386,17 @@ class zProcessIMAP{
 					$stopChecking=true;
 				}
 			}  
+			// there needs to be an another loop to force this script to check accounts multiple times.
+			sleep(10); // wait to avoid too many operations
+			// echo microtimeFloat() - $this->timeStart;exit;
+			if(microtimeFloat() - $this->timeStart > $this->timeout){
+				//echo "Script timeout reached: ".$this->timeout. " seconds\n";
+				$stopChecking=true;
+				break;
+			} 
 			if($stopChecking){
 				break;
 			}
-			// there needs to be an another loop to force this script to check accounts multiple times.
-			sleep(1); // wait 10 seconds 
 		}
 		foreach($arrIMAP as $id=>$connection){
 			$connection->close();

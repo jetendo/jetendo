@@ -91,6 +91,10 @@ function zCheckRetsLogin($arrRetsConnections, $mls_id, $arrConfig){
 function zDownloadRetsData($inputMLSID, $incremental=false){
 	global $arrRetsConnections, $arrRetsConfig, $imageRootPath; 
 
+	if($incremental && !zIsTestServer() && date("Hi") < 400){
+		echo "Incremental updates don't run until 4:00am to avoid multiple concurrent connections";
+		exit;
+	}
 	// prevent multiple simultaneous executions
 	$cmd="ps aux";
 	$r=`$cmd`;
@@ -206,9 +210,10 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 				}
 			}else{
 				// do this on the first request only.
-				$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($finalDataPath."metadata.1.xml");
-				system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($finalDataPath."metadata.1.xml"));
-				system("/bin/chmod 777 ".escapeshellarg($finalDataPath."metadata.1.xml"));
+				$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."tempmetadata.xml"); 
+				system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath."tempmetadata.xml"));
+				system("/bin/chmod 777 ".escapeshellarg($dataPath."tempmetadata.xml"));
+				rename($dataPath."tempmetadata.xml", $finalDataPath."metadata.1.xml");
 				echo "metadata xml saved\n";
 			}
 		}
@@ -239,13 +244,14 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 
 			$maxrows = true;
 			$offset = $startOffset;
-			$limit = 30;
+			$limit = 100;
 			$fields_order = array();
 			if($offset==1){
 				$fh = fopen($dataPath.$file_name.".tmp", "w"); // append to the file because we may need to resume. creates if doesn't exist.
 			}else{
 				$fh = fopen($dataPath.$file_name.".tmp", "a"); // append to the file because we may need to resume. creates if doesn't exist.
 			}
+			$totalRows=0;
 
 			$photoKeyFieldIndex=-1;
 			$photoDateFieldIndex=-1;
@@ -282,7 +288,27 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 
 				// run RETS search
 				// echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
-				$search = $arrRetsConnections[$mls_id]->SearchQuery("Property", $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+
+				for($n6=0;$n6<=5;$n6++){
+					$search = $arrRetsConnections[$mls_id]->SearchQuery("Property", $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+					if($search !== false){
+						break;
+					}else{
+						if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
+							echo "This class, ".$class.", has no records found right now.\n";
+							break;
+						}
+						echo "SearchQuery failed ".($n6+1)." times. Records Found: ".$arrRetsConnections[$mls_id]->TotalRecordsFound().". Retrying in 3 seconds\n";
+						sleep(3);
+					}
+				}
+				if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
+					break;
+				}
+				if($search == false){
+					fclose($fh); 
+					zEmailErrorAndExit("RETS Server ".$mls_id." failed to download listings 5 times and import was aborted", "RETS Server ".$mls_id." failed to download listings 5 times");
+				} 
 
 				if($offset == 1){
 					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}\n";
@@ -290,8 +316,9 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 
 				echo "Processing ".$arrRetsConnections[$mls_id]->NumRows()." rows | offset: ".$offset."\n";
 
-				if ($arrRetsConnections[$mls_id]->NumRows() > 0) {
-
+				if ($arrRetsConnections[$mls_id]->NumRows() == 0) {
+					echo "No rows returned\n";
+				}else{
 					if ($offset == 1) {
 						// print filename headers as first line
 						$fields_order = $arrRetsConnections[$mls_id]->SearchGetFields($search);
@@ -301,6 +328,7 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 					$arrListing=array(); 
 
 					while ($record = $arrRetsConnections[$mls_id]->FetchRow($search)) {
+						$totalRows++;
 						$this_record = array();
 						foreach ($fields_order as $fo) { 
 							$this_record[] = $record[$fo]; 
@@ -537,13 +565,25 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 									echo "Photo download completed, but verification failed for listing id: ".$listing["listingID"]."\n";
 								}
 							}else{
-								echo "Photos up to date for listing id: ".$listing["listingID"]."\n";
+								// echo "Photos up to date for listing id: ".$listing["listingID"]."\n";
 							}
 						}
 					}
 				}
 
-				$maxrows = $arrRetsConnections[$mls_id]->IsMaxrowsReached();
+				if($totalRows >= $arrRetsConnections[$mls_id]->TotalRecordsFound()){
+					echo "All rows downloaded: ".$totalRows."\n";
+					break;
+				}
+				// $maxrows = $arrRetsConnections[$mls_id]->IsMaxrowsReached();
+				// if($maxrows){
+				// 	echo "Max Rows reached at offset: ".$offset."\n";
+				// 	if($totalRows != $arrRetsConnections[$mls_id]->TotalRecordsFound()){
+				// 		echo "Total Rows: ".$totalRows." did not match num rows: ".$arrRetsConnections[$mls_id]->TotalRecordsFound()."\n";
+				// 	}else{
+				// 		echo "Total Rows: ".$totalRows." matched num rows: ".$arrRetsConnections[$mls_id]->TotalRecordsFound()."\n";
+				// 	}
+				// }
 
 				$arrRetsConnections[$mls_id]->FreeResult($search);
 

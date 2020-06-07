@@ -227,12 +227,12 @@
 			<tr>
 				<th>Subject Text Exclude</th>
 				<td><textarea name="inquiries_parse_config_subject_exclude" style="width:40%; height:300px;">#htmlEditFormat( form.inquiries_parse_config_subject_exclude )#</textarea><br>
-				Optionally add one phrase per line to exclude email with subjects containing these phrases.</td>
+				Optionally add one phrase per line to exclude emails with the subject containing these phrases.</td>
 			</tr> 
 			<tr>
 				<th>Body Text Exclude</th>
 				<td><textarea name="inquiries_parse_config_body_exclude" style="width:40%; height:300px;">#htmlEditFormat( form.inquiries_parse_config_body_exclude )#</textarea><br>
-				Optionally add one phrase per line to exclude email with body text containing these phrases.</td>
+				Optionally add one phrase per line to exclude emails with the body text containing these phrases.</td>
 			</tr> 
 			<tr>
 				<th style="width: 1%;">&nbsp;</th>

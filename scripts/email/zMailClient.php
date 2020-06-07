@@ -43,7 +43,7 @@ class zMailClient{
 		} 
 		$result=array();
 		if($MC->Nmsgs == 0){
-			array("success"=>true, $messages=>$result);
+			return array("success"=>true, "messages"=>$result);
 		}
 		$range = $start.":".min(max($start, $start+$limit), $MC->Nmsgs); 
 		$response = imap_fetch_overview($this->connection,$range); 
@@ -69,7 +69,7 @@ class zMailClient{
 				return $this->returnError("imap_check failed");
 			} 
 			if($MC->Nmsgs == 0){
-				array("success"=>true, $messages=>$result);
+				return array("success"=>true, "messages"=>$result);
 			}
 			$range = "1:".min(max(1, $limit), $MC->Nmsgs); 
 		} 
