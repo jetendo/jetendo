@@ -1632,7 +1632,8 @@ class phRETS {
 			curl_setopt($this->ch, CURLOPT_FILE, null); 
 			curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 		}
-
+		curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 0); 
+		curl_setopt($this->ch, CURLOPT_TIMEOUT, 1000); //timeout in seconds
 		// update request method on each request
 		if ($this->use_post_method) {
 			// setup cURL for POST requests

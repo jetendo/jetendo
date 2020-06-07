@@ -210,11 +210,23 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 				}
 			}else{
 				// do this on the first request only.
-				$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."tempmetadata.xml"); 
-				system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath."tempmetadata.xml"));
-				system("/bin/chmod 777 ".escapeshellarg($dataPath."tempmetadata.xml"));
-				rename($dataPath."tempmetadata.xml", $finalDataPath."metadata.1.xml");
-				echo "metadata xml saved\n";
+				for($n6=0;$n6<=10;$n6++){
+					echo "Download MetaData Attempt ".$n6."\n";
+					$result=$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."tempmetadata.xml"); 
+					if($result!=false){
+
+						system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath."tempmetadata.xml"));
+						system("/bin/chmod 777 ".escapeshellarg($dataPath."tempmetadata.xml"));
+						rename($dataPath."tempmetadata.xml", $finalDataPath."metadata.1.xml");
+						echo "metadata xml saved\n";
+						break;
+					}else{
+						$e=$arrRetsConnections[$mls_id]->Error();
+						var_dump($e);
+						echo "GetMetadata failed ".($n6+1)." times. Retrying in 150 seconds\n";
+						sleep(150);
+					}
+				}
 			}
 		}
 		$lastTimestampFile=$dataPath."download-rets-".$mls_id."-last-timestamp.log";
@@ -286,20 +298,23 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 					$query.=$arrRetsConfig[$mls_id]["dataQuery"];
 				}
 
-				// run RETS search
-				// echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
-
-				for($n6=0;$n6<=5;$n6++){
+				for($n6=0;$n6<=10;$n6++){
+					echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
 					$search = $arrRetsConnections[$mls_id]->SearchQuery("Property", $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
-					if($search !== false){
-						break;
+					$e=$arrRetsConnections[$mls_id]->Error();
+
+					if($e !== false){
+						var_dump($e);
+						echo "SearchQuery failed ".($n6+1)." times. Records Found: ".$arrRetsConnections[$mls_id]->TotalRecordsFound().". Retrying in 150 seconds\n";
+						sleep(150);
 					}else{
+						if($arrRetsConnections[$mls_id]->NumRows() != 0){
+							break;
+						}
 						if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
 							echo "This class, ".$class.", has no records found right now.\n";
 							break;
 						}
-						echo "SearchQuery failed ".($n6+1)." times. Records Found: ".$arrRetsConnections[$mls_id]->TotalRecordsFound().". Retrying in 3 seconds\n";
-						sleep(3);
 					}
 				}
 				if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
