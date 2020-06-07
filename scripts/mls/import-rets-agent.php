@@ -167,8 +167,25 @@ function zDownloadRetsAgentData($inputMLSID){
 				}
 
 				// run RETS search
-				// echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
-				$search = $arrRetsConnections[$mls_id]->SearchQuery($arrConfig["officeResource"], $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+				for($n6=0;$n6<=10;$n6++){
+					echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
+					$search = $arrRetsConnections[$mls_id]->SearchQuery($arrConfig["officeResource"], $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2')); 
+					$e=$arrRetsConnections[$mls_id]->Error();
+
+					if($e !== false){
+						var_dump($e);
+						echo "SearchQuery failed ".($n6+1)." times. Records Found: ".$arrRetsConnections[$mls_id]->TotalRecordsFound().". Retrying in 150 seconds\n";
+						sleep(150);
+					}else{
+						if($arrRetsConnections[$mls_id]->NumRows() != 0){
+							break;
+						}
+						if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
+							echo "This class, ".$class.", has no records found right now.\n";
+							break;
+						}
+					}
+				}
 
 				if($offset == 1){
 					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}\n";
@@ -243,6 +260,7 @@ function zDownloadRetsAgentData($inputMLSID){
 
 			$photoKeyFieldIndex=-1;
 			$photoDateFieldIndex=-1;
+			$totalRows=0;
 			while ($maxrows) { 
 
 				// TODO: add field with the query to use for each class.
@@ -253,8 +271,26 @@ function zDownloadRetsAgentData($inputMLSID){
 				}
 
 				// run RETS search
-				// echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
-				$search = $arrRetsConnections[$mls_id]->SearchQuery($arrConfig["agentResource"], $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+				for($n6=0;$n6<=10;$n6++){
+					echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
+					$search = $arrRetsConnections[$mls_id]->SearchQuery($arrConfig["agentResource"], $class, $query, array('Limit' => $limit, 'Offset' => $offset, 'Format' => $arrRetsConfig[$mls_id]["dataFormat"], 'Count' => 1, 'QueryType' => 'DMQL2'));
+					$e=$arrRetsConnections[$mls_id]->Error();
+
+					if($e !== false){
+						var_dump($e);
+						echo "SearchQuery failed ".($n6+1)." times. Records Found: ".$arrRetsConnections[$mls_id]->TotalRecordsFound().". Retrying in 150 seconds\n";
+						sleep(150);
+					}else{
+						if($arrRetsConnections[$mls_id]->NumRows() != 0){
+							break;
+						}
+						if($arrRetsConnections[$mls_id]->TotalRecordsFound()==0){
+							echo "This class, ".$class.", has no records found right now.\n";
+							break;
+						}
+					}
+				}
+				
 
 				if($offset == 1){
 					echo "Total found: {$arrRetsConnections[$mls_id]->TotalRecordsFound()}\n";
@@ -273,6 +309,7 @@ function zDownloadRetsAgentData($inputMLSID){
 					$arrListing=array(); 
 
 					while ($record = $arrRetsConnections[$mls_id]->FetchRow($search)) {
+						$totalRows++;
 						$this_record = array();
 						foreach ($fields_order as $fo) { 
 							$this_record[] = $record[$fo]; 
@@ -320,7 +357,19 @@ function zDownloadRetsAgentData($inputMLSID){
 
 							if($locationEnabled){
 								// location=1 only works with a "*" multipart request and I had to download them individually after that.
-								$arrPhoto=$arrRetsConnections[$mls_id]->GetObject($arrRetsConfig[$mls_id]["agentResource"], $arrRetsConfig[$mls_id]["agentMediaField"], $listing["photoKey"], "*", $locationEnabled);
+								for($n6=0;$n6<=10;$n6++){
+									echo "GetObject: ".$arrRetsConfig[$mls_id]["agentMediaField"]." ID: ".$listing["photoKey"]." Attempt ".$n6."\n";
+									$arrPhoto=$arrRetsConnections[$mls_id]->GetObject($arrRetsConfig[$mls_id]["agentResource"], $arrRetsConfig[$mls_id]["agentMediaField"], $listing["photoKey"], "*", $locationEnabled);
+									if($arrPhoto==false){
+										$e=$arrRetsConnections[$mls_id]->Error();
+										var_dump($e);
+										echo "GetObject failed ".($n6+1)." times. Retrying in 150 seconds\n";
+										sleep(150);
+									}else{
+										break;
+									}
+								}
+								
 								$arrLine=explode("\n",$arrPhoto[0]["Data"]);
 								$photoCountIndex=1;
  
@@ -390,7 +439,11 @@ function zDownloadRetsAgentData($inputMLSID){
 					}
 				}
 
-				$maxrows = $arrRetsConnections[$mls_id]->IsMaxrowsReached();
+				if($totalRows >= $arrRetsConnections[$mls_id]->TotalRecordsFound()){
+					echo "All rows downloaded: ".$totalRows."\n";
+					break;
+				}
+				// $maxrows = $arrRetsConnections[$mls_id]->IsMaxrowsReached();
 
 				$arrRetsConnections[$mls_id]->FreeResult($search);
 
