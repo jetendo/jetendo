@@ -421,7 +421,18 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 
 								if($locationEnabled){
 									// location=1 only works with a "*" multipart request and I had to download them individually after that.
-									$arrPhoto=$arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], $listing["photoKey"], "*", $locationEnabled);
+
+									for($n6=0;$n6<=10;$n6++){
+										$arrPhoto=$arrRetsConnections[$mls_id]->GetObject("Property", $arrRetsConfig[$mls_id]["listingMediaField"], $listing["photoKey"], "*", $locationEnabled);
+										if($arrPhoto==false){
+											$e=$arrRetsConnections[$mls_id]->Error();
+											var_dump($e);
+											echo "GetObject failed ".($n6+1)." times. Retrying in 150 seconds\n";
+											sleep(150);
+										}else{
+											break;
+										}
+									}
 									$arrLine=explode("\n",$arrPhoto[0]["Data"]);
 									$photoCountIndex=1;
 
