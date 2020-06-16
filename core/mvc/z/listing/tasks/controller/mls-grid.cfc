@@ -1050,10 +1050,10 @@ has enums with individual plain text name and id value pairs - do i need them?
 				HTTP METHOD="GET" URL="#link#" path="#path#" file="#fNameTemp1#" result="cfhttpresult" redirect="yes" timeout="30" resolveurl="no" charset="utf-8" useragent="Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3 GoogleToolbarFF 3.1.20080730 Jetendo CMS" getasbinary="auto" throwonerror="yes"{
 				}
 			}catch(Any e2){
-				if(cfhttpresult.status_code NEQ "403"){
+				if(structkeyexists(local, "cfhttpresult") EQ false or structkeyexists(cfhttpresult, "status_code") EQ false or cfhttpresult.status_code NEQ "403"){
 					savecontent variable="out"{
 						echo("Image download failed: "&link&"<br><br>");
-						writedump(cfhttpresult);
+						writedump(application.zcore.functions.zso(local, "cfhttpresult"));
 						writedump(e2);
 					}
 					throw(out);

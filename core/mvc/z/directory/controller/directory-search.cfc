@@ -626,13 +626,17 @@ This is the structure of the renderMethod function
 
 						first = true;
 
-						for ( searchField in field['searchFields'] ) {
-							if ( not first ) {
-								db.sql &= ' or ';
-							}
-							first = false;
+						if(arrayLen(field['searchFields']) NEQ 0){
+							for ( searchField in field['searchFields'] ) {
+								if ( not first ) {
+									db.sql &= ' or ';
+								}
+								first = false;
 
-							db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & " ) ";
+								db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & " ) ";
+							}
+						}else{
+							db.sql&=" #db.param(1)# = #db.param(1)# ";
 						}
 					} else {
 						// 7500-10000
@@ -643,31 +647,39 @@ This is the structure of the renderMethod function
 
 							first = true;
 
-							for ( searchField in field['searchFields'] ) {
-								if ( not first ) {
-									db.sql &= ' or ';
-								}
-								first = false;
+							if(arrayLen(field['searchFields']) NEQ 0){
+								for ( searchField in field['searchFields'] ) {
+									if ( not first ) {
+										db.sql &= ' or ';
+									}
+									first = false;
 
-								db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
-									AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
+									db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
+										AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
+								}
+							}else{
+								db.sql&=" #db.param(1)# = #db.param(1)# ";
 							}
 						}
 					}
 
 					db.sql &= ' ) ';
 				} else {
-					// exact 
-					db.sql&=" ( ";
-					first=true;
-					for ( searchField in field['searchFields'] ) {
-						if(not first){
-							db.sql&=" or ";
+					// exact  
+					if(arrayLen(field['searchFields']) NEQ 0){
+						db.sql&=" ( ";
+						first=true;
+						for ( searchField in field['searchFields'] ) {
+							if(not first){
+								db.sql&=" or ";
+							}
+							first=false;
+							db.sql &= "`"&searchField & '` = ' & db.param( value );
 						}
-						first=false;
-						db.sql &= "`"&searchField & '` = ' & db.param( value );
+						db.sql&=' ) ';
+					}else{
+						db.sql&=" #db.param(1)# = #db.param(1)# ";
 					}
-					db.sql&=' ) ';
 				}
 				first2=false;
 			}

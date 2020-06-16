@@ -212,12 +212,12 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 				// do this on the first request only.
 				for($n6=0;$n6<=10;$n6++){
 					echo "Download MetaData Attempt ".$n6."\n";
-					$result=$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."tempmetadata.xml"); 
+					$result=$arrRetsConnections[$mls_id]->GetMetadataXMLAsFile($dataPath."metadata.xml"); 
 					if($result!=false){
 
-						system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath."tempmetadata.xml"));
-						system("/bin/chmod 777 ".escapeshellarg($dataPath."tempmetadata.xml"));
-						rename($dataPath."tempmetadata.xml", $finalDataPath."metadata.1.xml");
+						system("/bin/chown ".get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($dataPath."metadata.xml"));
+						system("/bin/chmod 777 ".escapeshellarg($dataPath."metadata.xml"));
+						rename($dataPath."metadata.xml", $finalDataPath."metadata.1.xml");
 						echo "metadata xml saved\n";
 						break;
 					}else{
@@ -363,7 +363,7 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 						);
 						$sql="select * from listing_track where listing_id = '".$db->real_escape_string($mls_id."-".$listing["listingID"])."'";
 						$r=$db->query($sql);
-						if($r->num_rows==0){
+						if($r == FALSE || $r->num_rows==0){
 							$listing["new"]=true; // not used for anything yet
 							$listing["update"]=true; // not used for anything yet
 							$listing["updatePhotos"]=true;

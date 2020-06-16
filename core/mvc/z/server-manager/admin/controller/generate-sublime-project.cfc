@@ -133,7 +133,11 @@
     [
         {
             "name": "Rsync",
-            "cmd": ["#request.zos.sambaInstallPath#sites/#arguments.shortDomainPath#/rsync-publish.bat"]
+            "cmd": ["${project_path}/rsync-publish.bat"]
+        },
+        {
+            "name": "RsyncMac",
+            "cmd": ["${project_path}/rsync-publish.sh"]
         }
     ]
 } 
