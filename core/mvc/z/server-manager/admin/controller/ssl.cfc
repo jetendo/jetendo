@@ -236,7 +236,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 			// 	}
 			// 	application.zcore.status.setStatus(request.zsid, "Lets Encrypt Secure Certificate Can't Be Installed on the Test Environment. Debugging info for testing purposes: "&out, form, true);
 			// 	application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid="&request.zsid);
-			// }
+			// } 
 			if(not resultStruct.success){
 				savecontent variable="out"{
 					if(structkeyexists(resultStruct, 'output') and isArray(resultStruct.output)){
@@ -248,7 +248,7 @@ TODO: consider preventing installation of certificates due to duplicate IP addre
 				application.zcore.functions.zRedirect("/z/server-manager/admin/ssl/index?sid=#form.sid#&zsid="&request.zsid);
 			}
 			if(structkeyexists(resultStruct, 'ssl_expiration_datetime')){
-				d=resultStruct.ssl_expiration_datetime;
+				d=resultStruct.ssl_expiration_datetime;  
 				form.ssl_expiration_datetime=createdatetime(d.year, d.month, d.day, d.hour, d.minute, d.second);
 				form.ssl_expiration_datetime=dateformat(form.ssl_expiration_datetime, "yyyy-mm-dd")&" "&timeformat(form.ssl_expiration_datetime, "HH:mm:ss");
 			}

@@ -369,8 +369,8 @@ function sslInstallLetsEncryptCertificate($a){
 		array_push($rs->output, $r2);
 
 		//echo $cmd."\n\n".$r2."\n\n";
-		if(zIsTestServer()){
-			// can't finish on test server
+		if(strstr($js->commonName, "local.zsite.info") != false){
+			// can't finish on local test server, only the remote servers with public dns.
 			$rs->success=true;
 			$rs->ssl_private_key=$letsEncryptPrivateKey;
 			$rs->ssl_csr=$letsEncryptCSR;
