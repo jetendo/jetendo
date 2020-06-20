@@ -155,7 +155,7 @@
 	                <cfelse>
 	                <a href="##" onclick="zOS_mode_submit('time','true');return false;" >Off</a>
 	              </cfif>
-	              <br />Var Dump:
+	              <br /><label for="zOS_modeVarDumpName">Var Dump</label>:
 	              <cfif isDefined('request.zsession.modes.varDump')>
 	#request.zsession.modes.varDumpName#                                                                            &nbsp; <a href="##" onclick="zOS_mode_submit('varDump','false');return false;" >On</a>
 	                <input type="hidden" name="zOS_modeVarDumpName" id="zOS_modeVarDumpName" value="" class="zOS_modeInput" />

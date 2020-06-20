@@ -18,7 +18,12 @@
 
 	if(qCheck.inquiries_autoresponder_main_image NEQ ""){
 		application.zcore.functions.zDeleteFile(request.zos.globals.privateHomeDir&removechars(request.zos.autoresponderImagePath, 1, 1)&qCheck.inquiries_autoresponder_main_image);
-	} 
+	}  
+	db.sql="DELETE FROM #db.table("inquiries_autoresponder_subscriber", request.zos.zcoreDatasource)# WHERE 
+	inquiries_autoresponder_id= #db.param(application.zcore.functions.zso(form, 'inquiries_autoresponder_id'))# and 
+	site_id=#db.param(request.zos.globals.id)# and 
+	inquiries_autoresponder_subscriber_deleted = #db.param(0)#   ";
+	q=db.execute("q");
 
 	db.sql="DELETE FROM #db.table("inquiries_autoresponder", request.zos.zcoreDatasource)# WHERE 
 	inquiries_autoresponder_id= #db.param(application.zcore.functions.zso(form, 'inquiries_autoresponder_id'))# and 

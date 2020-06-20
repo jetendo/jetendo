@@ -462,7 +462,12 @@
 	}else if(arguments.forcePosition EQ "last"){
 		templateTagFunction="prependTag";
 		templateTagName="meta";
-	} 
+	}  
+	// if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
+	// 	s='<link rel="stylesheet" type="text/css"  media="none" onload="if(media!==''all'')media=''all''" href="#request.zos.currentHostName##checkPath#" />'; 
+	// }else{
+	// 	s='<link rel="stylesheet" type="text/css"  media="none" onload="if(media!==''all'')media=''all''" href="#checkPath#" />'; 
+	// }
 	if(left(checkPath, 1) EQ '/' and left(checkPath, 2) NEQ "//"){
 		s='<link rel="stylesheet" type="text/css" href="#request.zos.currentHostName##checkPath#" />'; 
 	}else{

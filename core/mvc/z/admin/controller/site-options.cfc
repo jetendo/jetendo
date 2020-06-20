@@ -5097,7 +5097,7 @@ Define this function in another CFC to override the default email format
 							//<th style="vertical-align:top; ">&nbsp;</th>
 							echo('
 							<td colspan="2">');
-							echo('<div style="padding-bottom:0px;float:left; width:100%;">'&application.zcore.functions.zOutputToolTip(row.site_option_display_name, row.site_option_tooltip)&'<a id="soid_#row.site_option_id#" style="display:block; float:left;"></a> ');
+							echo('<div style="padding-bottom:0px;float:left; width:100%;"><label for="newvalue#row.site_option_id#">'&application.zcore.functions.zOutputToolTip(row.site_option_display_name, row.site_option_tooltip)&'</label><a id="soid_#row.site_option_id#" style="display:block; float:left;"></a> ');
 
 							if(row.site_option_required and row.site_option_hide_label EQ 0){
 								writeoutput(' <span style="font-size:80%;">*</span> ');
@@ -5109,7 +5109,7 @@ Define this function in another CFC to override the default email format
 							if(row.site_option_small_width EQ 1){
 								tdOutput=' width:1%; white-space:nowrap; ';
 							}
-							writeoutput('<th style="vertical-align:top;#tdOutput#"><div style="padding-bottom:0px;float:left;">'&application.zcore.functions.zOutputToolTip(row.site_option_display_name, row.site_option_tooltip)&'<a id="soid_#row.site_option_id#" style="display:block; float:left;"></a> ');
+							writeoutput('<th style="vertical-align:top;#tdOutput#"><div style="padding-bottom:0px;float:left;"><label for="newvalue#row.site_option_id#">'&application.zcore.functions.zOutputToolTip(row.site_option_display_name, row.site_option_tooltip)&'</label><a id="soid_#row.site_option_id#" style="display:block; float:left;"></a> ');
 
 							if(row.site_option_required and row.site_option_hide_label EQ 0){
 								writeoutput(' <span style="font-size:80%;">*</span> ');

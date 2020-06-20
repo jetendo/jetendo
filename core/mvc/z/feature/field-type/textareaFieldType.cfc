@@ -154,7 +154,7 @@
 	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
-	return { label: true, hidden: false, value:'<textarea #required# cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.typeStruct, 'editorheight2',false,200)#px;" name="#arguments.prefixString##arguments.row["feature_field_id"]#">#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])#</textarea>'};  
+	return { label: true, hidden: false, value:'<textarea #required# cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.typeStruct, 'editorheight2',false,200)#px;" name="#arguments.prefixString##arguments.row["feature_field_id"]#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#">#htmleditformat(arguments.dataStruct[arguments.prefixString&arguments.row["feature_field_id"]])#</textarea>'};  
 	</cfscript> 
 </cffunction>
 
@@ -164,7 +164,7 @@
 	<cfargument name="typeStruct" type="struct" required="yes">
 	<cfargument name="fieldName" type="string" required="yes">
 	<cfsavecontent variable="out">
-	<textarea cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.typeStruct, 'editorheight2',false,200)#px;" name="#arguments.fieldName#">##htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))##</textarea>
+	<textarea cols="10" rows="5" style="width:#application.zcore.functions.zso(arguments.typeStruct, 'editorwidth2',false,500)#px; height:#application.zcore.functions.zso(arguments.typeStruct, 'editorheight2',false,200)#px;" name="#arguments.fieldName#" id="#arguments.prefixString##arguments.row["#variables.type#_option_id"]#">##htmleditformat(application.zcore.functions.zso(form, "#arguments.fieldName#"))##</textarea>
 	</cfsavecontent>
 	<cfscript>
 	return out;

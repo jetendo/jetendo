@@ -165,6 +165,8 @@
 				'drips': autoresponder_drips
 			};
 		}
+		arrAutoResponderId=structkeyarray(autoresponders);
+		arrayAppend(arrAutoResponderId, -1);
 
 		// Now that we have the autoresponder object populated with their
 		// respective drips, we can loop through the subscribers and
@@ -198,7 +200,8 @@
 			db.sql&=' ) and 
 			user_active=#db.param(1)# and 
 			user_pref_email=#db.param(1)# 
-			WHERE
+			WHERE 
+			inquiries_autoresponder_subscriber.inquiries_autoresponder_id IN (#db.trustedsql(arrayToList(arrAutoResponderId, ", "))#) and 
 			inquiries_autoresponder_subscriber_fail_count<#db.param(3)# and 
 			inquiries_autoresponder_subscriber.site_id = #db.param( request.zos.globals.id )# and 
 			inquiries_autoresponder_subscriber.inquiries_autoresponder_subscriber_completed = #db.param( 0 )# and 
