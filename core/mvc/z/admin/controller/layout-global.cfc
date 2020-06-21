@@ -431,6 +431,7 @@
 		limit=2; 
 
 		arrOffsetCSS=[];
+		// grid
 		for(i2=2;i2<=16;i2++){
 			if(limit GT 7 and limit NEQ 12 and limit NEQ 16){
 				limit++;
@@ -481,7 +482,7 @@
 			} 
 			for(n2=1;n2<=limit;n2++){
 				width=percent*n2; 
-				widthNoMargin=width;
+				widthNoMargin=min(100,width);
 
 				// need to calculate the total margin based on number of columns.  i.e. 3 column with 3% column gap is (3-1)*3
 				if(breakpoint > 992){
@@ -511,7 +512,7 @@
 					}
 					disableFirstLast=true;
 					width=n2*percent;
-					widthNoMargin=width;
+					widthNoMargin=min(100,width);
 					margin=dataStruct.columnGapSidePercent/2; 
 					totalMargin=dataStruct.columnGapSidePercent*columnCount;
 					maxWidth=100-totalMargin;
@@ -528,7 +529,7 @@
 					}
 					disableFirstLast=true;
 					width=n2*percent;
-					widthNoMargin=width;
+					widthNoMargin=min(100,width);
 					margin=dataStruct.columnGapSidePercent/2; 
 					totalMargin=dataStruct.columnGapSidePercent*columnCount;
 					maxWidth=100-totalMargin;
@@ -536,6 +537,7 @@
 					width-=percentMargin; 
 					width=min(maxWidth, int(width*100)/100);  
 				}  
+				// writedump("percent:"&percent&" widthNoMargin:"&widthNoMargin&" n2:"&n2); 
 				padding=' padding-left:#dataStruct.columnPaddingSidePercent#%; padding-right:#dataStruct.columnPaddingSidePercent#%; padding-top:#dataStruct.columnPaddingTopPercent#%; padding-bottom:#dataStruct.columnPaddingBottomPercent#%;'; 
 				if(isSingleColumn){
 					v='.z-#n2#of#limit#{ float:left; margin-left:#numberformat(margin, '_.___')#%; margin-right:#numberformat(margin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-height:1px; max-width:100%; width:#numberformat(100-dataStruct.columnGapSidePercent, '_.___')#%; margin-left:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%;  margin-right:#numberformat(dataStruct.columnGapSidePercent/2, '_.___')#%; display:block; }'; 
@@ -585,52 +587,52 @@
 					fullwidthNoMargin=(fullpercent*n2);
 					fullwidth=(fullpercent*n2)-dataStruct.columnGapSidePercent;
 					fullmaxWidth=100;  
+					// writedump(fullwidthNoMargin&" : "&numberformat(fullwidthNoMargin, '_.___'));
 					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#{ float:left; margin-left:#numberformat(fullmargin, '_.___')#%; margin-right:#numberformat(fullmargin, '_.___')#%; #padding# margin-bottom:#numberformat(dataStruct.columnGapBottomPercent, '_.___')#%; min-width:auto; max-width:#fullmaxWidth#%; width:#numberformat(fullwidth, '_.___')#%; }");
 					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#.z-m-0{ margin-left:0px; margin-right:0px; margin-bottom:0px; width:#numberformat(fullwidthNoMargin, '_.___')#%; }");
 					arrayAppend(arrCSSLast, ".z"&breakExtraStruct[breakpoint]&"-#n2#of#limit#.z-mh-0{ margin-left:0px; margin-right:0px; width:#numberformat(fullwidthNoMargin, '_.___')#%; }");
 				}  
 				// offset classes
-				if(isSingleColumn){
-					v='.z-offset-#n2#of#limit#{ margin-left:0px; }';
-				}else{
-					if(breakpoint > 992){ 
-						v='.z-offset-#n2#of#limit#{ margin-left:#numberformat(margin+width, '_.___')#%; }';
-					}else{
-						v='.z-offset-#n2#of#limit#{ margin-left:#numberformat(margin, '_.___')#%; }';
-					}
-				}
+				// if(isSingleColumn){
+				// 	v='.z-offset-#n2#of#limit#{ margin-left:0px; }';
+				// }else{
+				// 	if(breakpoint > 992){ 
+				// 		v='.z-offset-#n2#of#limit#{ margin-left:#numberformat(margin+width, '_.___')#%; }';
+				// 	}else{
+				// 		v='.z-offset-#n2#of#limit#{ margin-left:#numberformat(margin, '_.___')#%; }';
+				// 	}
+				// }
 				arrayAppend(arrOffsetCSS, v);
 			} 
 			limit++;
 		}
 		for(i=1;i<=arraylen(arrOffsetCSS);i++){
 			arrayAppend(arrCSS, arrOffsetCSS[i]);
-		}
-
+		} 
 		for(i=startFontSize;i<=70;i++){ 
 			tempScaleHeading=max(round(i*dataStruct.headingScale), dataStruct.headingMinimumFontSize);
 			tempScaleText=max(round(i*dataStruct.textScale), dataStruct.textMinimumFontSize); 
-			if(n EQ 1){
-				v='.z-fh-#i#{font-size:#i#px !important;  padding-bottom:#round(max(dataStruct.minimumPadding, i*0.45))#px !important;}';
-				if(not structkeyexists(uniqueStruct, v)){
-					uniqueStruct[v]=true;
-					arrayAppend(arrCSS, v);
-				}
-				v='.z-ft-#i#{font-size:#i#px !important; }';
-				if(not structkeyexists(uniqueStruct, v)){
-					uniqueStruct[v]=true;
-					arrayAppend(arrCSS, v);
-				} 
-			}
+			// if(n EQ 1){
+			// 	v='.z-fh-#i#{font-size:#i#px !important;  padding-bottom:#round(max(dataStruct.minimumPadding, i*0.45))#px !important;}';
+			// 	if(not structkeyexists(uniqueStruct, v)){
+			// 		uniqueStruct[v]=true;
+			// 		arrayAppend(arrCSS, v);
+			// 	}
+			// 	v='.z-ft-#i#{font-size:#i#px !important; }';
+			// 	if(not structkeyexists(uniqueStruct, v)){
+			// 		uniqueStruct[v]=true;
+			// 		arrayAppend(arrCSS, v);
+			// 	} 
+			// }
 
-			v='.z-h-#i#{font-size:#tempScaleHeading#px;  padding-bottom:#round(max(dataStruct.minimumPadding, tempScaleHeading*0.45))#px;}';
-			breakTemp=v&chr(10);
-			if(not structkeyexists(uniqueStruct, v)){
-				uniqueStruct[v]=true;
-				arrayAppend(arrCSS, v);
-			}
-			v='.z-t-#i#{font-size:#tempScaleText#px; }';
-			breakTemp&=v&chr(10);
+			// v='.z-h-#i#{font-size:#tempScaleHeading#px;  padding-bottom:#round(max(dataStruct.minimumPadding, tempScaleHeading*0.45))#px;}';
+			// breakTemp=v&chr(10);
+			// if(not structkeyexists(uniqueStruct, v)){
+			// 	uniqueStruct[v]=true;
+			// 	arrayAppend(arrCSS, v);
+			// }
+			v='.z-h-#i#, .z-t-#i#{font-size:#tempScaleText#px; }';
+			breakTemp=v;//&chr(10);
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
@@ -661,6 +663,7 @@
 		}
 		breakStruct.css[breakpoint]=arrayMerge(arrCSS, arrCSSLast); 
 	}   
+	// abort;
 	savecontent variable="out"{
 		for(i=1;i<=arraylen(breakStruct.arrBreak);i++){
 			breakpoint=breakStruct.arrBreak[i];  
@@ -692,7 +695,7 @@
 		 		mb=dataStruct.boxMarginBottomPercent*multiplier;
 		 		mh=dataStruct.boxMarginSidePercent*multiplier;
 				arrTemp=[];
-		 		v='.z-p-#g*10#{ padding-left:#ph#px; padding-right:#ph#px; padding-top:#pt#px; padding-bottom:#pb#px; }';
+		 		v='.z-p-#g*10#{ padding:#pb#px; }';
 				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
@@ -734,7 +737,7 @@
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
-				v='.z-m-#g*10#{ margin-left:#ph#px; margin-right:#ph#px; margin-top:#pt#px; margin-bottom:#pb#px; }';
+				v='.z-m-#g*10#{ margin:#pb#px; }';
 				arrayAppend(arrTemp, v);
 				if(not structkeyexists(uniqueStruct, v)){
 					uniqueStruct[v]=true;
@@ -776,18 +779,18 @@
 					uniqueStruct[v]=true;
 					arrayAppend(arrCSS2, v);
 				} 
-				v='.z-mv-#g*10#-auto{ margin-top:#pt#px; margin-bottom:#pb#px; margin-left:auto; margin-right:auto; }';
-				arrayAppend(arrTemp, v);
-				if(not structkeyexists(uniqueStruct, v)){
-					uniqueStruct[v]=true;
-					arrayAppend(arrCSS2, v);
-				} 
-				v='.z-mh-#g*10#-auto{ margin-left:#ph#px; margin-right:#ph#px; margin-top:auto; margin-bottom:auto; }';
-				arrayAppend(arrTemp, v);
-				if(not structkeyexists(uniqueStruct, v)){
-					uniqueStruct[v]=true;
-					arrayAppend(arrCSS2, v);
-				} 
+				// v='.z-mv-#g*10#-auto{ margin-top:#pt#px; margin-bottom:#pb#px; margin-left:auto; margin-right:auto; }';
+				// arrayAppend(arrTemp, v);
+				// if(not structkeyexists(uniqueStruct, v)){
+				// 	uniqueStruct[v]=true;
+				// 	arrayAppend(arrCSS2, v);
+				// } 
+				// v='.z-mh-#g*10#-auto{ margin-left:#ph#px; margin-right:#ph#px; margin-top:auto; margin-bottom:auto; }';
+				// arrayAppend(arrTemp, v);
+				// if(not structkeyexists(uniqueStruct, v)){
+				// 	uniqueStruct[v]=true;
+				// 	arrayAppend(arrCSS2, v);
+				// } 
 				if(structkeyexists(breakExtraStruct, breakpoint)){
 					arrayAppend(arrCSSLast2, replace(arrayToList(arrTemp, chr(10)), ".z-", ".z"&breakExtraStruct[breakpoint]&"-", "all"));
 				}
@@ -807,7 +810,7 @@
 				echo(arrayToList(arrCSS2, chr(10))&chr(10)); 
 			}
 		}  
-		echo('.z-width-fill, .z-fill-width{display:table-cell; direction:ltr; width:10000px; float:none;}');
+		// echo('.z-width-fill, .z-fill-width{display:table-cell; direction:ltr; width:10000px; float:none;}');
 	}
 	if(breakStruct.layout_setting_instance_id NEQ 0){
 		application.zcore.functions.zWriteFile(request.zos.globals.privateHomeDir&"zupload/layout-setting-instance-#breakStruct.layout_setting_instance_id#.css", out);
