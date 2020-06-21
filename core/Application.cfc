@@ -150,7 +150,7 @@
 	</cfscript>
 </cffunction> 
 </cfcomponent> --->
-<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfif (cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info" or cgi.http_host EQ "jet.test.zsite.info") and structkeyexists(form, '_zsa3_path') and left(form._zsa3_path, 7) EQ '/front/'><cfif cgi.http_host EQ "jet.zsite.info"><cfinclude template="/jet_zsite_info/core/config.cfm"><cfelse><cfinclude template="/jet/core/config.cfm"></cfif><cfreturn></cfif><cfscript>
+<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfif (cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info" or cgi.http_host EQ "jet.test.zsite.info") and structkeyexists(form, '_zsa3_path') and (left(form._zsa3_path, 7) EQ '/front/' or left(form._zsa3_path, 18) EQ '/serviceWorker.cfc')><cfif cgi.http_host EQ "jet.zsite.info"><cfinclude template="/jet_zsite_info/core/config.cfm"><cfelse><cfinclude template="/jet/core/config.cfm"></cfif><cfreturn></cfif><cfscript>
 if(structkeyexists(form, 'firstlineabort')){
 	if(structkeyexists(form, 'stopWebServer')){ 
 		jetendo.stopWebServer();
