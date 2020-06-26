@@ -1708,7 +1708,7 @@
 		</tr>
 		<tr>
 			<td style="vertical-align:top; width:140px;">&nbsp;</td>
-			<td><input name="site_enable_plus_email_routing" type="checkbox" value="1" <cfif form.site_enable_plus_email_routing EQ 1 or form.site_enable_plus_email_routing EQ "">checked="checked"</cfif> style="background:none; border:none;"> Enable Plus Email Routing?</td>
+			<td><input name="site_enable_plus_email_routing" type="checkbox" value="1" <cfif form.site_enable_plus_email_routing EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Enable Plus Email Routing?</td>
 		</tr>
 
 		<tr>

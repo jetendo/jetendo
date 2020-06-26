@@ -538,7 +538,7 @@
               <div style="float:left; width:220px; clear:both; padding-bottom:10px; ">
             <cfscript>
                 selectStruct = StructNew();
-                selectStruct="How long have you been looking?";
+                selectStruct.ariaLabel="How long have you been looking?";
                 selectStruct.name = "inquiries_look_time";
                 selectStruct.selectLabel = "-- Select --";
                 selectStruct.listValues = "Less than 30 days,1 Month,2 Months,3 Months,4 Months +";
