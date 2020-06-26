@@ -264,6 +264,7 @@ USAGE
 	ts = StructNew();
 	ts.name = "name";
 	ts.label="Name: ";
+	ts.ariaLabel=""; // for accessibility, you can use this and avoid use of label element
 	ts.labelStyle="";
 	ts.size = 1; // more for multiple select
 	ts.multiple = false; // allow multiple selections (hold CTRL)
@@ -314,6 +315,7 @@ USAGE
 	ts.multiple = false;
 	ts.enumerate = "";
 	ts.inlineStyle="";
+	ts.ariaLabel="";
 	ts.labelStyle="";
 	ts.output = true;
 	ts.required=false;
@@ -385,6 +387,9 @@ USAGE
 		echo(' ');
 		if(structkeyexists(ss,'style')){
 			echo('class="#ss.style#"');
+		}
+		if(ss.ariaLabel NEQ ""){
+			echo(' aria-label="#htmleditformat(ss.ariaLabel)#" ');
 		}
 		echo(' ');
 		if(ss.inlineStyle NEQ ""){
@@ -2104,6 +2109,7 @@ zFormData["#arguments.ss.name#"].contentType="application/x-www-form-urlencoded"
 <!--- 
 this is not accurate
 	ts = StructNew();
+	ts.ariaLabel=""; // for accessibility instead of label element
 	ts.groupLabel = "group name";
 	ts.name = "name";
 	ts.type="checkbox";
@@ -2178,6 +2184,7 @@ this is not accurate
 	ts.listValuesDelimiter=chr(9);
 	ts.listURLsDelimiter=chr(9);
 	ts.friendlyName="";
+	ts.ariaLabel="";
 	ts.enableTyping=false;
 	ts.overrideOnKeyUp=false;
 	ts.disableSpiderAfter=0;
@@ -2344,6 +2351,7 @@ this is not accurate
 	t9.selectedValues="~~noselection~~";
 	t9.onchange="if(this.selectedIndex!=0){zSetInput('#arguments.ss.name#_zmanual', this.options[this.selectedIndex].text, true); zSetInput('#arguments.ss.name#_zmanualv',this.options[this.selectedIndex].value, true);this.selectedIndex=0; zInputSetSelectedOptions(true,#zOffset#,'#arguments.ss.name#','#id#',#arguments.ss.allowAnyText#,#arguments.ss.onlyOneSelection#);#scripts#zCLink(this);zSetInput('#arguments.ss.name#_zmanual','');zSetInput('#arguments.ss.name#_zmanualv','');} var z1=document.getElementById('zExpOption#zOffset+7#_contents'); if(z1){ z1.style.height='auto';  var z=zGetAbsPosition(z1);z1.style.height=z.height+'px';}";
 	nameBackup=arguments.ss.name;
+	t9.ariaLabel=arguments.ss.ariaLabel;
 	t9.selectLabel=arguments.ss.selectLabel;
 	t9.inlineStyle=" width:100%;";
 	t9.name="zLinkBoxSelectBox"&zOffset;
@@ -2520,6 +2528,8 @@ zArrDeferredFunctions.push(function(){
 <!--- 
 <cfscript>
 ts=StructNew();
+ts.ariaLabel="";
+ts.ariaLabel2="";
 ts.name="price_low";
 ts.name2="price_high";
 ts.range=true;
@@ -2559,6 +2569,8 @@ zInputSlider(ts);
 	var ts =StructNew();	
 	// set defaults
 	ts.width=150;
+	ts.ariaLabel="";
+	ts.ariaLabel2="";
 	ts.leftLabel="";
 	ts.rightLabel="";
 	ts.middleLabel="";
@@ -2683,14 +2695,14 @@ zInputSlider(ts);
 <div style="float:left; width:100%;" class="zSliderInputDiv">
 <div style="float:left; width:50%;"><input type="hidden" name="zInputHiddenValues#zValue#" id="zInputHiddenValues#zValue#" onchange="#arguments.ss.onchange#" value="" />
 <cfif arguments.ss.leftLabel NEQ "">#arguments.ss.leftLabel#</cfif>
-<input type="text" style="width:#arguments.ss.fieldWidth#px;" name="#arguments.ss.name#_label" id="#arguments.ss.name#_label" value="#htmleditformat(label1value)#" onkeyup="zExpShowUpdateBar(#zValue+6#, 'block');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" onclick="zCacheSliderValues[this.id]=this.value;this.value='';" onblur="if(this.value==''){this.value=zCacheSliderValues[this.id];} zExpShowUpdateBar(#zValue+6#, 'none');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" />
+<input type="text" <cfif arguments.ss.ariaLabel NEQ "">aria-label="#htmleditformat(arguments.ss.ariaLabel)#"</cfif> style="width:#arguments.ss.fieldWidth#px;" name="#arguments.ss.name#_label" id="#arguments.ss.name#_label" value="#htmleditformat(label1value)#" onkeyup="zExpShowUpdateBar(#zValue+6#, 'block');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" onclick="zCacheSliderValues[this.id]=this.value;this.value='';" onblur="if(this.value==''){this.value=zCacheSliderValues[this.id];} zExpShowUpdateBar(#zValue+6#, 'none');zInputSliderSetValue('#arguments.ss.name#',#zValue#,#zValue+2#,this.value,#zValue+6#, 1);" />
 <input type="hidden" name="#arguments.ss.name#" id="#arguments.ss.name#" value="#htmleditformat(selectedValue1)#" /> 
 
 </div>
 
 <div style="float:right; text-align:right; width:50%;"><cfif arguments.ss.range><cfif arguments.ss.middleLabel NEQ "">#arguments.ss.middleLabel#</cfif>
 
-<input type="text" onkeyup="zExpShowUpdateBar(#zValue+7#, 'block');zInputSliderSetValue('#arguments.ss.name2#',#zValue+1#,#zValue+3#,this.value,#zValue+6#, 2);" onclick="zCacheSliderValues[this.id]=this.value;this.value='';" onblur="if(this.value==''){this.value=zCacheSliderValues[this.id];} zExpShowUpdateBar(#zValue+7#, 'none');zInputSliderSetValue('#arguments.ss.name2#',#zValue+1#,#zValue+3#,this.value,#zValue+6#, 2);" style="width:#arguments.ss.fieldWidth#px;" name="#arguments.ss.name2#_label" value="#htmleditformat(label2value)#" id="#arguments.ss.name2#_label" />
+<input type="text" <cfif arguments.ss.ariaLabel2 NEQ "">aria-label="#htmleditformat(arguments.ss.ariaLabel2)#"</cfif> onkeyup="zExpShowUpdateBar(#zValue+7#, 'block');zInputSliderSetValue('#arguments.ss.name2#',#zValue+1#,#zValue+3#,this.value,#zValue+6#, 2);" onclick="zCacheSliderValues[this.id]=this.value;this.value='';" onblur="if(this.value==''){this.value=zCacheSliderValues[this.id];} zExpShowUpdateBar(#zValue+7#, 'none');zInputSliderSetValue('#arguments.ss.name2#',#zValue+1#,#zValue+3#,this.value,#zValue+6#, 2);" style="width:#arguments.ss.fieldWidth#px;" name="#arguments.ss.name2#_label" value="#htmleditformat(label2value)#" id="#arguments.ss.name2#_label" />
 
 <input type="hidden" name="#arguments.ss.name2#" id="#arguments.ss.name2#" value="#htmleditformat(selectedValue2)#" />
 
@@ -3541,6 +3553,37 @@ echo('
     
 <cffunction name="zFakeFormFieldsNotEmpty" localmode="modern" output="yes" access="public" returntype="any">
 	<cfscript>
+	if(cgi.http_accept_language EQ ""){ 
+		/* may be headless user agent */ 
+		return false;
+	}
+	form.form_filling_data=application.zcore.functions.zso(form, "form_filling_data");
+	arrData=listToArray(form.form_filling_data, ",");
+	// formChangeEvents+","+formFocusEvents+","+formFillingTime+","+window.scrollY
+	if(form.form_filling_data NEQ ""){
+		if(arrayLen(arrData) NEQ 7){
+			return false; // invalid data
+		}
+		if(arrData[1] EQ 0){
+			return false; // changes - bigger number is better.
+		}
+		if(arrData[2] EQ 0){
+			return false; // focus - indicates real user
+		}
+		if(arrData[3] < 4){
+			return false; // time - more then 3 seconds is good
+		}
+		if(arrData[4] EQ 1){
+			return false; // hasWebDriver (1 = headless chrome)
+		}
+		if(arrData[5] EQ 0){
+			return false; // hasLanguages (0 = headless chrome)
+		}
+		if(arrData[6] EQ 0){
+			return false; // hasPlugins (0 = headless chrome)
+		}
+	}
+
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){
 		application.zcore.functions.z404("Invalid request - Robot lead submission detected");
 		return true;
@@ -3566,6 +3609,7 @@ echo('
             <td><textarea name="form_comments" cols="50" rows="5"></textarea></td>
         </tr>
     </table>
+    <input type="hidden" name="form_filling_data" class="form_filling_data" value="">
     <script>
     var tFN32=document.getElementById("zInqTheF"+"ormNames#local.tick#");tFN34="ne";tFN32.style.display="no"+tFN34;
     tFN32.parentNode.removeChild(tFN32);

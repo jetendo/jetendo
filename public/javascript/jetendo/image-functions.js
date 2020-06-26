@@ -45,9 +45,9 @@ var zGalleryReloadTimeoutId=0;
 		// TODO: someday figure out how to make crop always work, for now, i gave up.
 		// if((zMSIEBrowser!==-1 && zMSIEVersion<=9) || window.location.href.indexOf("disableCanvasCrop=") != -1){
 			if(height===10000){
-				obj.innerHTML='<img src="'+imageURL+'" style="max-width:100%;" />';
+				obj.innerHTML='<img src="'+imageURL+'" alt="Image" style="max-width:100%;" />';
 			}else{
-				obj.innerHTML='<img src="'+imageURL+'" width="'+width+'" style="max-width:100%;" />';
+				obj.innerHTML='<img src="'+imageURL+'" alt="Image" width="'+width+'" style="max-width:100%;" />';
 			}
 
 			//return;	

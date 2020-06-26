@@ -457,7 +457,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 			ts.struct.image_id				= arguments.image_id;
 			application.zcore.functions.zInsert(ts);  
 			if(zdebug){
-				writeoutput('image resized: /#destination&newFileName#<br /><img src="/#destination&newFileName#" />');
+				writeoutput('image resized: /#destination&newFileName#<br /><img src="/#destination&newFileName#" alt="Image" />');
 				application.zcore.functions.zabort();
 			}
 			ext=application.zcore.functions.zGetFileExt(qImage.image_file);
@@ -1151,6 +1151,8 @@ application.zcore.imageLibraryCom.displayImageFromSQL(ts);
 					writeoutput('<img src="#application.zcore.imageLibraryCom.getImageLink(arguments.ss.image_library_id, arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrUpdatedDate[g])#" ');
 					if(image_caption NEQ ""){
 						writeoutput('alt="#htmleditformat(arrCaption[g2])#"');
+					}else{
+						echo('  alt="Image" ');
 					}
 					echo('style="border:none;" />');
 					if(arrCaption[g2] NEQ ""){
@@ -1242,6 +1244,8 @@ application.zcore.imageLibraryCom.displayImageFromSQL(ts);
 				writeoutput('<img src="#application.zcore.imageLibraryCom.getImageLink(arguments.ss.image_library_id, arrId[g2], arguments.ss.size, arguments.ss.crop, true, arrCaption[g2], arrImageFile[g2], arrUpdatedDate[g])#" ');
 				if(image_caption NEQ ""){
 					writeoutput('alt="#htmleditformat(arrCaption[g2])#"');
+				}else{
+					echo(' alt="Image" ');
 				}
 				echo('style="border:none;" />');
 				if(arrCaption[g2] NEQ ""){
@@ -1806,7 +1810,7 @@ application.zcore.imageLibraryCom.displayImages(ts);
 							caption=arguments.ss.defaultAltText;
 						}
 						</cfscript>
-						<li><img data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#" title=""</cfif> data-description="" /></li>
+						<li><img data-frame="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, '160x80', 1, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#" src="#application.zcore.imageLibraryCom.getImageLink(qImages.image_library_id, qImages.image_id, arguments.ss.size, arguments.ss.crop, true, qImages.image_caption, qImages.image_file, qImages.image_updated_datetime, arguments.ss.pregenerate)#"  <cfif qImages.image_caption NEQ ""><cfset hasCaptions=true>alt="#htmleditformat(caption)#" title="#htmleditformat(caption)#"<cfelse>alt="#caption#"</cfif> data-description="" /></li>
 					</cfloop>
 					</ul> 
 				</div>

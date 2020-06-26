@@ -65,12 +65,16 @@
 				"*.otf",
 				"*.woff",
 				"*.eot",
-				"*.png"
+				"*.png",
+				"*.min.css",
+				"*.min.js",
+				"package-lock.json"
 			],
 			"folder_exclude_patterns":
 			[
 				"*/images",
-				"zcompiled"
+				"zcompiled",
+				"node_modules"
 			],
 			"follow_symlinks": true,
 			"path": "."

@@ -780,7 +780,7 @@ if(application.zcore.functions.zso(form, 'search_result_layout') EQ ""){
  <cfsavecontent variable="startFormTagHTML">
 
 <cfif structkeyexists(request,'theSearchFormTemplate') EQ false>
- <div id="searchFormTopDiv" style="<!--- height:<cfif isDefined('request.contentEditor')>90<cfelse>130</cfif>px; --->float:left;  width:100%; clear:both;"></div><br style="clear:both;" /></cfif><cfif structkeyexists(form, 'searchId') and form.searchFormEnabledDropDownMenus EQ false><div class="zls-saveSearchFormButton"><br /><a href="##" onclick="zModalSaveSearch(#form.searchId#);return false;" class="zls-saveThisSearchLink"></a><br style="clear:both;" /></div>
+ <div id="searchFormTopDiv" style="<!--- height:<cfif isDefined('request.contentEditor')>90<cfelse>130</cfif>px; --->float:left;  width:100%; clear:both;"></div><br style="clear:both;" /></cfif><cfif structkeyexists(form, 'searchId') and form.searchFormEnabledDropDownMenus EQ false><div class="zls-saveSearchFormButton"><br /><a href="##" onclick="zModalSaveSearch(#form.searchId#);return false;" title="Save This Search" class="zls-saveThisSearchLink"></a><br style="clear:both;" /></div>
  <cfif request.zos.listing.functions.hasSavedSearches()>
  	<div class="zSearchFormText"><a href="/z/listing/property/your-saved-searches" class="zls-viewSavedSearchesLink">View Saved Searches</a></div><br />
  </cfif><br />
@@ -1029,7 +1029,8 @@ if(form.searchFormEnabledDropDownMenus){
 
  
 ts = StructNew();
-ts.name="search_city_id";
+ts.ariaLabel="City";
+ts.name="search_city_id"; 
 ts.enableTyping=false;
 ts.enableClickSelect=false;
 //ts.overrideOnKeyUp=true;
@@ -1143,6 +1144,7 @@ ts.output=false;
 	}else{
 		ts.label="Price&nbsp;From:&nbsp;$";
 	}
+	ts.ariaLabel="Min Price";
 	ts.labelStyle="display:block; float:left;width:75px; padding-right:5px; text-align:right;";
 	application.zcore.functions.zInputSelectBox(ts);
 	</cfscript></cfsavecontent><cfscript>
@@ -1150,6 +1152,7 @@ sfSortStruct["search_rate_low"]=theCriteriaHTML2;
 </cfscript>
 <cfsavecontent variable="theCriteriaHTML3"><cfscript>
 	ts.name="search_rate_high";
+	ts.ariaLabel="Max Price";
 	ts.output=true;
 	if(form.searchFormLabelOnInput){
 		ts.selectLabel="Max Price";
@@ -1174,6 +1177,8 @@ writeoutput(theCriteriaHTML2);
 writeoutput('</div><div class="zmlsformdiv">');
 writeoutput(theCriteriaHTML3);
 </cfscript><cfelse><cfscript>
+	ts.ariaLabel="Min Price";
+	ts.ariaLabel2="Max Price";
 	rs=application.zcore.functions.zInputSlider(ts);
 	
 	/*ts.name="search_rate_low";
@@ -1275,6 +1280,7 @@ ts.listValuesDelimiter="|";
 ts.listLabels =arraytolist(arrL,"|");
 ts.listLabelsDelimiter="|";
 ts.output=false;
+ts.ariaLabel="Property Type";
 if(form.searchFormEnabledDropDownMenus){
 	ts.output=true;
 	if(form.searchFormLabelOnInput){
@@ -1500,6 +1506,7 @@ application.zcore.searchFormCache[request.zos.globals.id].search_parking=tv299;
 <cfscript>
 ts = StructNew();
 ts.name="search_parking";
+ts.ariaLabel="Parking";
 ts.listValues =arraytolist(arrV,"|");
 ts.listValuesDelimiter="|";
 ts.listLabels =arraytolist(arrL,"|");
@@ -1901,6 +1908,8 @@ application.zcore.searchFormCache[request.zos.globals.id].search_bedrooms=tv299;
 <div class="zmlsformdiv">
 <cfscript>
 ts=StructNew();
+ts.ariaLabel="Bedrooms Low";
+ts.ariaLabel2="Bedrooms High";
 ts.name="search_bedrooms_low";
 ts.name2="search_bedrooms_high";
 ts.range=true;
@@ -1980,6 +1989,8 @@ application.zcore.searchFormCache[request.zos.globals.id].search_bathrooms=tv299
 <div class="zmlsformdiv">
 <cfscript>
 ts=StructNew();
+ts.ariaLabel="Bathrooms Low";
+ts.ariaLabel2="Bathrooms High";
 ts.name="search_bathrooms_low";
 ts.name2="search_bathrooms_high";
 ts.range=true;
@@ -2064,6 +2075,8 @@ application.zcore.searchFormCache[request.zos.globals.id].search_sqfoot=tv299;
 <div class="zmlsformdiv">
 <cfscript>
 ts=StructNew();
+ts.ariaLabel="Minimum Square Feet";
+ts.ariaLabel2="Maximum Square Feet";
 ts.name="search_sqfoot_low";
 ts.name2="search_sqfoot_high";
 ts.range=true;
@@ -2358,6 +2371,7 @@ application.zcore.searchFormCache[request.zos.globals.id].search_county=tv299;
 <!---<cfdump var="#arrL#">--->
 <cfscript>
 ts = StructNew();
+ts.ariaLabel="County";
 ts.name="search_county";
 ts.listValues =arraytolist(arrV,"|");
 ts.listValuesDelimiter="|";
@@ -2465,6 +2479,7 @@ application.zcore.searchFormCache[request.zos.globals.id].search_view=tv299;
 <cfscript>
 ts = StructNew();
 ts.name="search_view";
+ts.ariaLabel="View";
 ts.listValues =arraytolist(arrV,"|");
 ts.listValuesDelimiter="|";
 ts.listLabels =arraytolist(arrL,"|");
@@ -2955,6 +2970,7 @@ application.zcore.searchFormCache[request.zos.globals.id].search_frontage=tv299;
 <cfscript>
 	ts = StructNew();
 	ts.name="search_frontage";
+	ts.ariaLabel="Water/Frontage";
 	ts.listValues =arraytolist(arrV,"|");
 	ts.listValuesDelimiter="|";
 	ts.listLabels =arraytolist(arrL,"|");
@@ -3034,14 +3050,15 @@ application.zcore.functions.zRequireGoogleMaps();
 </cfscript>
 
 
-<input data-address-coordinates="search_near_coordinates" type="text" name="searchNearLocation" id="searchNearLocation" size="15" value="<cfif application.zcore.functions.zso(form, 'searchNearLocation') NEQ "">#searchNearLocation#<cfelse>#application.zcore.functions.zso(form, 'search_near_location')#</cfif>" class="zGoogleAddressAutoComplete" data-disable-geolocate="1" />
+<input aria-label="Enter A Location" data-address-coordinates="search_near_coordinates" type="text" name="searchNearLocation" id="searchNearLocation" size="15" value="<cfif application.zcore.functions.zso(form, 'searchNearLocation') NEQ "">#searchNearLocation#<cfelse>#application.zcore.functions.zso(form, 'search_near_location')#</cfif>" class="zGoogleAddressAutoComplete" data-disable-geolocate="1" />
 <div class="zsearchformhr"></div>
 <br style="clear:both;" />
-Set Radius Distance: <br style="clear:both;" />
+Set Distance Radius: <br style="clear:both;" />
 
 <cfscript>
 ts = StructNew();
 ts.name="search_near_radius";
+ts.ariaLabel="Set Distance Radios In Miles";
 ts.hideselect=true;
 ts.listValuesDelimiter="|";
 ts.listValues ="5|10|25|50|75|100";
@@ -3501,6 +3518,7 @@ LIST DATE:<br />
 	<cfscript>
     addHeight+=55;
     ts = StructNew();
+    ts.ariaLabel="List Date";
     ts.name="search_listdate";
     ts.hideselect=true;
     ts.listValuesDelimiter="|";
@@ -3523,6 +3541,7 @@ LIST DATE:<br />
 	<cfscript>
 	addHeight+=55;
 	ts = StructNew();
+	ts.ariaLabel="## of Results";
 	ts.name="search_result_limit";
 	ts.hideselect=true;
 	ts.listValuesDelimiter="|";
@@ -3533,8 +3552,7 @@ LIST DATE:<br />
 	}
 	ts.listLabels =ts.listValues;
 	ts.listLabelsDelimiter="|";
-	ts.output=true;
-	ts.selectLabel="List Date";
+	ts.output=true; 
 	//ts.inlineStyle="width:#replace(form.searchFormSelectWidth,"px","")-20#px;";
 		application.zcore.functions.zInputSelectBox(ts);
 	</cfscript>
@@ -3552,6 +3570,7 @@ GROUP BY:<br />
 addHeight+=55;
 ts = StructNew();
 ts.name="search_group_by";
+ts.ariaLabel="Group By";
 ts.hideselect=true;
 ts.listValuesDelimiter="|";
 ts.listValues ="0|1";
@@ -3569,6 +3588,7 @@ LAYOUT:<br />
 addHeight+=55;
 ts = StructNew();
 ts.name="search_result_layout";
+ts.ariaLabel="Layout";
 ts.hideselect=true;
 ts.listValuesDelimiter="|";
 ts.listValues ="0|1|2";
@@ -3588,6 +3608,7 @@ SORT BY:<br />
 addHeight+=55;
 ts = StructNew();
 ts.name="search_sort";
+ts.ariaLabel="Sort By";
 ts.hideselect=true;
 ts.listValuesDelimiter="|";
 if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_rentals_only EQ 1){

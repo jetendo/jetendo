@@ -2,10 +2,7 @@
 <cfoutput>
 <cffunction name="zHTMLDoctype" localmode="modern" output="no" returntype="string">
 	<cfsavecontent variable="output">	<!DOCTYPE html>
-	<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-	<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-	<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-	<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+	<html lang="en-us">
 	</cfsavecontent>
 	<cfreturn output>
 </cffunction>

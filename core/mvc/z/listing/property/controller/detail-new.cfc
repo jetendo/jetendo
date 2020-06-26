@@ -385,7 +385,7 @@ if(form.listing_sub_type_id NEQ "" and form.listing_sub_type_id NEQ 0){
 		<h3>#form.agentName#</h3>
 
 		<cfif application.zcore.functions.zso(form, 'agentPhoto') NEQ "">
-			<p><img src="#form.agentPhoto#" alt=""></p>
+			<p><img src="#form.agentPhoto#" alt="#htmleditformat(form.agentName)#"></p>
 		</cfif>
 
 		<cfif form.officeName NEQ "">
@@ -525,7 +525,7 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 								<div class="z-float">
 							</cfif>
 							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:200px; float:left; margin-right:1%; margin-bottom:2%;">
-								<a href="#idx['photo'&i]#"><img src="#idx['photo'&i]#" alt="" class="z-fluid"></a>
+								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="#idx['photo'&i]#" alt="Listing Photo" class="z-fluid"></a>
 							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 							</div>
 							<cfscript>
@@ -546,7 +546,7 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 								<div class="z-float">
 							</cfif>
 							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:48%; float:left; margin-right:1%; margin-bottom:2%;">
-								<a href="#idx['photo'&i]#"><img src="#idx['photo'&i]#" alt="" class="z-fluid"></a>
+								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="#idx['photo'&i]#" alt="Listing Photo" class="z-fluid"></a>
 							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 							</div>
 							<cfscript>

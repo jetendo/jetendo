@@ -50,30 +50,30 @@
 	<cfelse>
             <tr>
                 <th>First Name: *</th>
-                <td><input name="inquiries_first_name" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_first_name') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#application.zcore.functions.zso(form,'inquiries_first_name')#</cfif>" /></td>
+                <td><input name="inquiries_first_name" aria-label="First Name" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_first_name') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#application.zcore.functions.zso(form,'inquiries_first_name')#</cfif>" /></td>
             </tr>
             <tr>
                 <th>Last Name: *</th>
-                <td><input name="inquiries_last_name" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_last_name') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#application.zcore.functions.zso(form, 'inquiries_last_name')#</cfif>" /></td>
+                <td><input name="inquiries_last_name" aria-label="Last Name" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_last_name') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#application.zcore.functions.zso(form, 'inquiries_last_name')#</cfif>" /></td>
             </tr>
 		<tr><td style="vertical-align:top;">Email Address: *</td>
-		<td><input type="text" name="saved_search_email" style="max-width:300px;" value="<cfif isDefined('request.zsession.saved_search_email')>#request.zsession.saved_search_email#<cfelseif not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#</cfif>" />
+		<td><input type="text" name="saved_search_email" aria-label="Email Address" style="max-width:300px;" value="<cfif isDefined('request.zsession.saved_search_email')>#request.zsession.saved_search_email#<cfelseif not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#</cfif>" />
 		</td>
 		</tr>
             <tr>
                 <th>Phone: <cfif application.zcore.app.getAppData("content").optionStruct.content_config_phone_required EQ 1>*</cfif></th>
-                <td><input name="inquiries_phone1" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_phone1') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#application.zcore.functions.zso(form, 'inquiries_phone1')#</cfif>" /></td>
+                <td><input name="inquiries_phone1" aria-label="Phone" type="text" style="max-width:300px;" maxlength="50" value="<cfif application.zcore.functions.zso(form,'inquiries_phone1') EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#application.zcore.functions.zso(form, 'inquiries_phone1')#</cfif>" /></td>
             </tr>
 	</cfif> 
 	<tr>
 	<td>Format:</td>
-	<td><input type="radio" name="saved_search_format" value="1" style="background:none; border:0px; " <cfif application.zcore.functions.zso(form, 'saved_search_format') EQ '1' or application.zcore.functions.zso(form, 'saved_search_format') EQ ''>checked="checked"</cfif> /> HTML Text w/Photos 
-		<input type="radio" name="saved_search_format" value="0" <cfif application.zcore.functions.zso(form, 'saved_search_format') EQ '0'>checked="checked"</cfif> style="background:none; border:0px; " /> Plain Text</td>
+	<td><input type="radio" aria-label="Format" name="saved_search_format" value="1" style="background:none; border:0px; " <cfif application.zcore.functions.zso(form, 'saved_search_format') EQ '1' or application.zcore.functions.zso(form, 'saved_search_format') EQ ''>checked="checked"</cfif> /> <label for="saved_search_format1">HTML Text w/Photos</label> 
+		<input type="radio" name="saved_search_format" id="saved_search_format0" value="0" <cfif application.zcore.functions.zso(form, 'saved_search_format') EQ '0'>checked="checked"</cfif> style="background:none; border:0px; " /> <label for="saved_search_format0">Plain Text</label></td>
 	</tr>
 	<tr>
 	<td>Frequency:</td>
-	<td><input type="radio" name="saved_search_frequency" value="0" style="background:none; border:0px; " <cfif application.zcore.functions.zso(form, 'saved_search_frequency') EQ '0' or application.zcore.functions.zso(form, 'saved_search_frequency') EQ ''>checked="checked"</cfif> /> Every Day 
-		<input type="radio" name="saved_search_frequency" value="1" <cfif application.zcore.functions.zso(form, 'saved_search_frequency') EQ '1'>checked="checked"</cfif> style="background:none; border:0px; " /> Fridays</td>
+	<td><input type="radio" name="saved_search_frequency" id="saved_search_frequency0" value="0" style="background:none; border:0px; " <cfif application.zcore.functions.zso(form, 'saved_search_frequency') EQ '0' or application.zcore.functions.zso(form, 'saved_search_frequency') EQ ''>checked="checked"</cfif> /> <label for="saved_search_frequency0">Every Day</label> 
+		<input type="radio" name="saved_search_frequency" id="saved_search_frequency1" value="1" <cfif application.zcore.functions.zso(form, 'saved_search_frequency') EQ '1'>checked="checked"</cfif> style="background:none; border:0px; " /> <label for="saved_search_frequency1">Fridays</label></td>
 	</tr>
 	</table><!--- <h3>EMAIL ADDRESS:</h3>  <input type="text" name="inquiries_email" style="width:100%; max-width:300px; float:left;" value="#htmleditformat(form.inquiries_email)#" /> --->
 	</div>

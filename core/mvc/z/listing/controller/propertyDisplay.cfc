@@ -829,10 +829,10 @@ propertyDisplayCom.init(ts);
 	<div class="zls-list-grid-listingdiv" style="width:33%; box-sizing:border-box; ">
 		<input type="hidden" name="m#arguments.idx.listing_id#_mlstempimagepaths" id="m#arguments.idx.listing_id#_mlstempimagepaths" value="#htmleditformat(replace(thePaths,'&amp;','&','all'))#" />
 		<cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_image_enlarge',false,0) EQ 0>
-			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3" style="overflow:hidden; height:#iheight#px; float:left; width:100%;" onmousemove="zImageMouseMove('m#arguments.idx.listing_id#',event);" onmouseout="setTimeout('zImageMouseReset(\'m#arguments.idx.listing_id#\')',100);"><a href="#propertyLink#" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>>
-			<img src="#arguments.idx.photo1#" alt="" class="z-fluid"><!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})# 		 --->		</a></div>
+			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3" style="overflow:hidden; height:#iheight#px; float:left; width:100%;" onmousemove="zImageMouseMove('m#arguments.idx.listing_id#',event);" onmouseout="setTimeout('zImageMouseReset(\'m#arguments.idx.listing_id#\')',100);"><a href="#propertyLink#" title="View Listing" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>>
+			<img src="#arguments.idx.photo1#" alt="View Listing" class="z-fluid"><!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})# 		 --->		</a></div>
 			<cfelse>
-			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3"><a href="#propertyLink#" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>><img src="#arguments.idx.photo1#" alt="" class="z-fluid"> <!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})#  --->
+			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3"><a href="#propertyLink#" title="View Listing" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>><img src="#arguments.idx.photo1#" alt="View Listing" class="z-fluid"> <!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})#  --->
 				</a></div>
 		</cfif>
 		<div class="zls-grid-summary-text">
@@ -1330,9 +1330,9 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 	</cfscript>
 	<table style="width:100%; border-spacing:0px; margin-bottom:10px;">
 		<tr>
-			<td style="vertical-align:top;padding:5px;width:100px;border-bottom:none;"><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="   font-weight:normal;  ">
+			<td style="vertical-align:top;padding:5px;width:100px;border-bottom:none;"><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" title="View Page" style="   font-weight:normal;  ">
 				<cfif fileexists(request.zos.globals.homedir&'images/content/'&arguments.query.content_thumbnail)>
-					<img src="#request.zos.currentHostName&'/images/content/'##arguments.query.content_thumbnail#" class="listing-d-img" id="zclistingdimg#arguments.query.content_id#" width="100" height="78">
+					<img src="#request.zos.currentHostName&'/images/content/'##arguments.query.content_thumbnail#" class="listing-d-img" id="zclistingdimg#arguments.query.content_id#" alt="Listing Image" width="100" height="78">
 				<cfelse>
 					Image N/A
 				</cfif>
@@ -1340,7 +1340,7 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 				<cfif contentConfig.showmlsnumber EQ false and arguments.query.content_mls_number NEQ "">
 					ID ###listgetat(arguments.query.content_mls_number,2,'-')#
 				</cfif></td>
-			<td style="vertical-align:top;padding:5px;text-align:left;border-bottom:none;"><h3><a target="_parent" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="text-decoration:none;">#arguments.query.content_name#</a>
+			<td style="vertical-align:top;padding:5px;text-align:left;border-bottom:none;"><h3><a target="_parent" title="View Page" href="<cfif arguments.query.content_url_only NEQ ''>#application.zcore.functions.zForceAbsoluteUrl(request.zos.currentHostName,arguments.query.content_url_only)#<cfelse>#request.zos.currentHostName#<cfif arguments.query.content_unique_name NEQ ''>#arguments.query.content_unique_name#<cfelse>/#application.zcore.functions.zURLEncode(arguments.query.content_name,'-')#-#application.zcore.app.getAppData("content").optionstruct.content_config_url_article_id#-#arguments.query.content_id#.html</cfif></cfif>" style="text-decoration:none;">#arguments.query.content_name#</a>
 					<cfif arguments.query.content_price NEQ 0>
 						<br />
 						$#numberformat(arguments.query.content_price)#
@@ -1423,7 +1423,7 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 	</cfscript>
 	<table style="border-spacing:0px;">
 		<tr>
-			<td style="vertical-align:top;padding:5px;"><a href="#propertyLink#" target="_parent" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>> #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:100,height:70, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})# 
+			<td style="vertical-align:top;padding:5px;"><a href="#propertyLink#" title="View" target="_parent" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>> #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:100,height:70, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})# 
 				<!--- <img id="m#arguments.idx.listing_id#_img" src="#application.zcore.listingCom.getThumbnail(arguments.idx.photo1, request.lastPhotoId, 1, 100, 70, 1)#" alt="Listing Photo" width="100" /> ---></a><br />
 				<cfif isDefined('this.optionStruct.hideMLSNumber') EQ false or this.optionStruct.hideMLSNumber EQ false>
 					ID###listgetat(arguments.idx.listing_id,2,'-')#
@@ -1495,7 +1495,7 @@ tempName=application.zcore.functions.zurlencode(lcase("#agentStruct.member_first
 	<table style="width:100%; border-spacing:0px;">
 		<tr>
 			<td style="width:100px;padding:5px; vertical-align:top; padding-right:10px;border-right:1px solid ##999;"><cfif image neq false>
-					<a href="##" onclick="#propertyLink#" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif> target="_top"><img src="#application.zcore.listingCom.getThumbnail(image, request.lastPhotoId, 1, 100, 78, 1)#" width="100" height="78" onerror="this.style.display='none';document.getElementById('zmaptemplateimagena').style.display='block';" /></a>
+					<a href="##" onclick="#propertyLink#" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif> target="_top"><img src="#application.zcore.listingCom.getThumbnail(image, request.lastPhotoId, 1, 100, 78, 1)#" width="100" alt="Listing Image" height="78" onerror="this.style.display='none';document.getElementById('zmaptemplateimagena').style.display='block';" /></a>
 					<cfelse>
 					Image N/A
 				</cfif>

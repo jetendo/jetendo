@@ -1928,6 +1928,43 @@ var zLastAjaxVarName=""; */
 				return zCheckFormDataForChangesByObj(this);
 			});
 		} 
+
+		var formChangeEvents=0;
+		var formFocusEvents=0;
+		var formFillingNormal=false;
+		var formFillingTime=0;
+		setInterval(function(){
+			$("input").on("focus", function(e){
+				var previousValue=$(this).attr("data-previous-value");
+				if(this.value != previousValue && this.name !="form_filling_data"){
+					formChangeEvents++;
+				}
+			});
+			$("input").on("keyup", function(e){
+				formFocusEvents++;
+			});
+			$("input").on("paste", function(e){
+				formChangeEvents++;
+			});
+			formFillingTime++;
+			if(formChangeEvents > 0 && formFocusEvents > 0 && formFillingTime > 3){
+				formFillingNormal=true;
+				var hasWebDriver=0;
+				if(navigator.webdriver) {
+					hasWebDriver=1; // headless
+				}
+				var hasLanguages=1;
+				if(navigator.languages === "") {
+				    hasLanguages=0;
+				}
+				var hasPlugins=1;
+				if(navigator.plugins.length === 0){
+					hasPlugins=0;
+				}
+				$(".form_filling_data").val(formChangeEvents+","+formFocusEvents+","+formFillingTime+","+hasWebDriver+","+hasLanguages+","+hasPlugins);
+			}
+			// console.log(formChangeEvents, formFocusEvents, formFillingTime);
+		}, 1000);
 		$(window).bind("hashchange", function() {
 
 			if (window.location.hash.indexOf(zCurrentHash) == -1){ 

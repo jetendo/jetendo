@@ -37,15 +37,15 @@ mortgageCom.sidebarPaymentCalculator();
 	
 	<div class="zMortgagePaymentFieldDiv">
 		Home Price<br />
-		$<input type="text" size="12" name="homeprice" onchange="zCalculateMonthlyPayment();" id="homeprice" value="#htmleditformat(arguments.price)#" />
+		$<input aria-label="Home Price" type="text" size="12" name="homeprice" onchange="zCalculateMonthlyPayment();" id="homeprice" value="#htmleditformat(arguments.price)#" />
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Percent Down<br />
-		<input type="text" size="4" name="percentdown" onchange="zCalculateMonthlyPayment();" id="percentdown" value="20" />%
+		<input aria-label="Percent Down" type="text" size="4" name="percentdown" onchange="zCalculateMonthlyPayment();" id="percentdown" value="20" />%
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Loan Type:<br />
-		<select name="loantype" id="loantype" onchange="zCalculateMonthlyPayment();" size="1">
+		<select aria-label="Loan Type" name="loantype" id="loantype" onchange="zCalculateMonthlyPayment();" size="1">
 		<option value="30.5" selected="selected">5/1 ARM</option>
 		<option value="40">40 Year Fixed</option>
 		<option value="30" selected="selected">30 Year Fixed</option>
@@ -57,21 +57,21 @@ mortgageCom.sidebarPaymentCalculator();
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Current Rate<br />
-		<input type="text" size="4" name="currentrate" onchange="zCalculateMonthlyPayment();" id="currentrate" value="4.5" />%
+		<input aria-label="Current Rate" type="text" size="4" name="currentrate" onchange="zCalculateMonthlyPayment();" id="currentrate" value="4.5" />%
 	
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Annual Taxes<br />
-		$<input type="text" size="7" name="hometax" onchange="zCalculateMonthlyPayment();" id="hometax" value="#htmleditformat(arguments.taxes)#" />
+		$<input aria-label="Annual Taxes" type="text" size="7" name="hometax" onchange="zCalculateMonthlyPayment();" id="hometax" value="#htmleditformat(arguments.taxes)#" />
 	
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Annual Insurance<br />
-		$<input type="text" size="7" name="homeinsurance" onchange="zCalculateMonthlyPayment();" id="homeinsurance" value="1200" />
+		$<input aria-label="Annual Insurance" type="text" size="7" name="homeinsurance" onchange="zCalculateMonthlyPayment();" id="homeinsurance" value="1200" />
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		Annual HOA Dues<br />
-		$<input type="text" size="7" name="homehoa" onchange="zCalculateMonthlyPayment();" id="homehoa" value="500" />
+		$<input aria-label="Annual HOA Dues" type="text" size="7" name="homehoa" onchange="zCalculateMonthlyPayment();" id="homehoa" value="500" />
 	</div>
 	<div class="zMortgagePaymentFieldDiv">
 		<button name="calcbutton1">Estimate Payment</button>

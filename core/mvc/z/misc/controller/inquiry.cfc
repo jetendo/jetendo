@@ -271,7 +271,7 @@
             <table class="zinquiry-form-table">
             <tr>
                 <th>First Name: *</th>
-                <td><input name="inquiries_first_name" id="inquiries_first_name" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_first_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" />
+                <td><input aria-label="First Name" name="inquiries_first_name" id="inquiries_first_name" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_first_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" />
         <cfif structkeyexists(form, 'content_id') or structkeyexists(form, 'selected_content_id') or isDefined('request.zos.zPrimaryContentId')>
 			<cfscript>
             if(application.zcore.functions.zso(form, 'content_id') NEQ ''){
@@ -284,24 +284,24 @@
             </tr>
             <tr>
                 <th>Last Name: *</th>
-                <td><input name="inquiries_last_name" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_last_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#form.inquiries_last_name#</cfif>" /></td>
+                <td><input aria-label="Last Name" name="inquiries_last_name" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_last_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#form.inquiries_last_name#</cfif>" /></td>
             </tr>
-          <tr id="zInquiryFormTRCompany"><th>Company:</th><td><input type="text" class="textinput" name="inquiries_company" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_company')#" /></td></tr>
+          <tr id="zInquiryFormTRCompany"><th>Company:</th><td><input aria-label="Company" type="text" class="textinput" name="inquiries_company" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_company')#" /></td></tr>
             <tr>
                 <th>Email: <cfif structkeyexists(application.zcore.app.getAppData("content").optionStruct,'content_config_email_required') EQ false or application.zcore.app.getAppData("content").optionStruct.content_config_email_required EQ 1>*</cfif></th>
-                <td><input name="inquiries_email" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_email EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#<cfelse>#form.inquiries_email#</cfif>" /></td>
+                <td><input aria-label="Email" name="inquiries_email" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_email EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#<cfelse>#form.inquiries_email#</cfif>" /></td>
             </tr>
             <tr>
                 <th>Phone: <cfif application.zcore.app.getAppData("content").optionStruct.content_config_phone_required EQ 1>*</cfif></th>
-                <td><input name="inquiries_phone1" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_phone1 EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#form.inquiries_phone1#</cfif>" /></td>
+                <td><input aria-label="Phone" name="inquiries_phone1" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_phone1 EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#form.inquiries_phone1#</cfif>" /></td>
             </tr>
             
-          <tr id="zInquiryFormTRAddress"><th>Address:</th><td><input type="text" class="textinput" name="inquiries_address" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_address')#" /></td></tr>
-          <tr id="zInquiryFormTRCity"><th>City:</th><td><input type="text" class="textinput" name="inquiries_city" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_city')#" /></td></tr>
-          <tr id="zInquiryFormTRState"><th>State:</th><td><input type="text" class="textinput" name="inquiries_state" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_state')#" /></td></tr>
-          <tr id="zInquiryFormTRCountry"><th>Country:</th><td><input type="text" class="textinput" name="inquiries_country" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_country')#" /></td></tr>
+          <tr id="zInquiryFormTRAddress"><th>Address:</th><td><input aria-label="Address" type="text" class="textinput" name="inquiries_address" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_address')#" /></td></tr>
+          <tr id="zInquiryFormTRCity"><th>City:</th><td><input aria-label="City" type="text" class="textinput" name="inquiries_city" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_city')#" /></td></tr>
+          <tr id="zInquiryFormTRState"><th>State:</th><td><input aria-label="State" type="text" class="textinput" name="inquiries_state" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_state')#" /></td></tr>
+          <tr id="zInquiryFormTRCountry"><th>Country:</th><td><input aria-label="Country" type="text" class="textinput" name="inquiries_country" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_country')#" /></td></tr>
 
-          <tr id="zInquiryFormTRZip"><th>Zip:</th><td><input type="text" class="textinput" name="inquiries_zip" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_zip')#" /></td></tr>
+          <tr id="zInquiryFormTRZip"><th>Zip:</th><td><input aria-label="Zip" type="text" class="textinput" name="inquiries_zip" style="width:96%;" maxlength="100" value="#application.zcore.functions.zso(form, 'inquiries_zip')#" /></td></tr>
           
           <cfif application.zcore.app.siteHasApp("listing") and application.zcore.app.getAppData("content").optionstruct.content_config_inquiry_qualify EQ 1>
           </table><br />
@@ -341,6 +341,7 @@
                 
                 <cfscript>
                 selectStruct = StructNew();
+                selectStruct.ariaLabel="Property Type";
                 selectStruct.name = "inquiries_property_type";
                 selectStruct.listValues = "Acreage,Apartments,Business,Commercial,Commercial Lot,Condominium,Duplex,Farm,Industrial,Lake Access Lot,Lake Front Lot,Mobile Home Lot,Multi-Family Home,River Access Lot,Single Family Home,Townhouse,Vacant Lot";
                 selectStruct.listValuesDelimiter = ",";
@@ -348,6 +349,7 @@
                 </cfscript></td><td colspan="3"> 
                   <cfscript>
                     selectStruct = StructNew();
+                	selectStruct.ariaLabel="Minimum Price";
                     selectStruct.name = "inquiries_price_low";
                     selectStruct.hideSelect = true;
                     selectStruct.selectedValues = application.zcore.functions.zso(form, 'inquiries_price_low',true,"0");
@@ -359,6 +361,7 @@
                     application.zcore.functions.zInputSelectBox(selectStruct);
                   </cfscript>and<cfscript>
                     selectStruct = StructNew();
+                	selectStruct.ariaLabel="Maximum Price";
                     selectStruct.name = "inquiries_price_high";
                     selectStruct.hideSelect = true;
                     selectStruct.selectedValues = application.zcore.functions.zso(form, 'inquiries_price_high',false,"100000000");
@@ -434,6 +437,7 @@
         ts.listValues =rs2.values;
         
                 selectStruct = StructNew();
+                selectStruct.ariaLabel="City";
                 selectStruct.name = "inquiries_property_city";
                 //selectStruct.listLabels=rs2.labels;
                 selectStruct.listValues =rs2.labels;;//rs2.values;
@@ -443,6 +447,7 @@
                 </cfscript></td><td> 
                   <cfscript>
                     selectStruct = StructNew();
+                	selectStruct.ariaLabel="Bedrooms";
                     selectStruct.name = "inquiries_bedrooms";
                     selectStruct.selectLabel = "Any";
                     selectStruct.listValues = "1,2,3,4,5,6,7,8,9,10";
@@ -451,6 +456,7 @@
                  </td><td>
                   <cfscript>
                     selectStruct = StructNew();
+                	selectStruct.ariaLabel="Bathrooms";
                     selectStruct.name = "inquiries_bathrooms";
                     selectStruct.selectLabel = "Any";
                     selectStruct.listValues = "1,2,3,4,5,6,7,8,9,10";
@@ -459,6 +465,7 @@
                  </td><td>
             <cfscript>
             selectStruct = StructNew();
+            selectStruct.ariaLabel="SQFoot";
             selectStruct.name = "inquiries_sqfoot";
             selectStruct.selectLabel = "Any";
             selectStruct.listLabels="< 1000,1000 - 1500,1500 - 2000,2000 - 2500,2500 - 3000,3000 - 3500,3500 - 4000,4000 - 4500,4500 - 5000,5000 - 6000,6000 - 7000,7000 - 8000,8000 - 9000,9000 - 10000,10000 +";
@@ -468,11 +475,11 @@
         </tr>
         <tr><td> Want a Pool? 
             
-              <input type="radio" name="inquiries_pool" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_pool') EQ 1>checked="checked"</cfif> /> Yes
-              <input type="radio" name="inquiries_pool" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_pool',true) EQ 0>checked="checked"</cfif> /> No 
+              <input aria-label="Yes" type="radio" name="inquiries_pool" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_pool') EQ 1>checked="checked"</cfif> /> Yes
+              <input aria-label="No" type="radio" name="inquiries_pool" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_pool',true) EQ 0>checked="checked"</cfif> /> No 
               </td><td colspan="3">
               View/Frontage: 
-              <select name="inquiries_view" size="1">
+              <select aria-label="View/Frontage" name="inquiries_view" size="1">
               <option value="">Any</option>
               <option>Canalfront</option>
               <option>Garden view</option>
@@ -507,6 +514,7 @@
                 <div style="float:left; clear:both; width:220px; padding-bottom:10px; ">
               <cfscript>
                 selectStruct = StructNew();
+                selectStruct.ariaLabel="When do you want to move?";
                 selectStruct.name = "inquiries_when_move";
                 selectStruct.selectLabel = "-- Select --";
                 selectStruct.listValues = "Less than 30 days,1 Month,2 Months,3 Months,4 Months,5 Months,6 Months,7 Months,8 Months,9 Months,10 Months,11 Months,12 Months +";
@@ -516,8 +524,8 @@
               
               <div style="float:left; width:240px; padding-bottom:10px; ">
             Yes
-              <input type="radio" name="inquiries_other_realtors" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_other_realtors') EQ 1>checked="checked"</cfif> /> No
-              <input type="radio" name="inquiries_other_realtors" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_other_realtors',true) EQ 0>checked="checked"</cfif> />
+              <input aria-label="Yes" type="radio" name="inquiries_other_realtors" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_other_realtors') EQ 1>checked="checked"</cfif> /> No
+              <input aria-label="No" type="radio" name="inquiries_other_realtors" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_other_realtors',true) EQ 0>checked="checked"</cfif> />
               </div>
               
               <br style="clear:both;" />
@@ -530,6 +538,7 @@
               <div style="float:left; width:220px; clear:both; padding-bottom:10px; ">
             <cfscript>
                 selectStruct = StructNew();
+                selectStruct="How long have you been looking?";
                 selectStruct.name = "inquiries_look_time";
                 selectStruct.selectLabel = "-- Select --";
                 selectStruct.listValues = "Less than 30 days,1 Month,2 Months,3 Months,4 Months +";
@@ -541,8 +550,8 @@
                 <div style="float:left; width:220px; padding-bottom:10px; ">
                 
             Yes
-              <input type="radio" name="inquiries_prequalified" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_prequalified') EQ 1>checked="checked"</cfif> /> No
-              <input type="radio" name="inquiries_prequalified" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_prequalified',true) EQ 0>checked="checked"</cfif> /> 
+              <input aria-label="Yes" type="radio" name="inquiries_prequalified" class="input-plain" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_prequalified') EQ 1>checked="checked"</cfif> /> No
+              <input aria-label="No" type="radio" name="inquiries_prequalified" class="input-plain" value="0" <cfif application.zcore.functions.zso(form, 'inquiries_prequalified',true) EQ 0>checked="checked"</cfif> /> 
             </div>
             
             </td>
@@ -562,13 +571,13 @@
 			<cfelse>#htmleditformat(application.zcore.functions.zso(form, 'inquiries_comments'))#
 			</cfif>
 		</cfsavecontent>
-        <textarea name="inquiries_comments" cols="50" rows="5" style="width:96%; height:100px;">#trim(content2)#</textarea>
+        <textarea aria-label="Comments" name="inquiries_comments" cols="50" rows="5" style="width:96%; height:100px;">#trim(content2)#</textarea>
         
         </td></tr>
  
     <tr class="znewslettercheckbox">
 		<th>&nbsp;</th>
-		<td><input type="checkbox" name="inquiries_email_opt_in" id="inquiries_email_opt_in" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_email_opt_in',false,0) EQ "1">checked="checked"</cfif> style="background:none; border:none;" /> <label for="inquiries_email_opt_in"><cfif application.zcore.functions.zvarso("Newsletter Signup Text") EQ "">
+		<td><input aria-label="Email Opt In" type="checkbox" name="inquiries_email_opt_in" id="inquiries_email_opt_in" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_email_opt_in',false,0) EQ "1">checked="checked"</cfif> style="background:none; border:none;" /> <label for="inquiries_email_opt_in"><cfif application.zcore.functions.zvarso("Newsletter Signup Text") EQ "">
 				Please check the box to join our mailing list.
 			<cfelse>
 				#application.zcore.functions.zvarso("Newsletter Signup Text")#

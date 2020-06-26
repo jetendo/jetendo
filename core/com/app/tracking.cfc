@@ -424,6 +424,7 @@ USER WAS PERMANENTLY BLOCKED.');
     track_user_ppc=#db.param(request.zsession.tracking.track_user_ppc)#, 
     track_user_keywords=#db.param(request.zsession.tracking.track_user_keywords)#, 
     track_user_updated_datetime=#db.param(request.zos.mysqlnow)#,
+	track_user_filling_data=#db.param(application.zcore.functions.zso(form, "form_filling_data"))#, 
 	track_user_source=#db.param(local.tempSource)#, 
 	track_user_deleted=#db.param(0)#, 
     zemail_campaign_id=#db.param(request.zsession.tracking.zemail_campaign_id)#, 

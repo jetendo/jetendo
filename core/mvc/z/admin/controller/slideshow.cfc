@@ -1967,7 +1967,7 @@
 			</cfscript>
 			<tr #variables.queueSortCom.getRowHTML(qTabs.slideshow_tab_id)# <cfif qTabs.currentrow MOD 2 EQ 0>class="table-bright"<cfelse>class="table-white"</cfif>>
 				<td><cfif trim(qTabs.slideshow_tab_url) NEQ ''>
-						<img src="/zupload/slideshow/#qTabs.slideshow_id#/tabs/#qTabs.slideshow_tab_url#" width="100" />
+						<img src="/zupload/slideshow/#qTabs.slideshow_id#/tabs/#qTabs.slideshow_tab_url#" alt="Image" width="100" />
 					<cfelse>
 						&nbsp;
 					</cfif></td>

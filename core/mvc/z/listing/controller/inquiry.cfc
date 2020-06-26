@@ -369,12 +369,12 @@
 		<div style="border-spacing:0px; width:98%;" class="zinquiry-form-table table">
 			<div class="tr">
 				<div class="th" style="width:90px;">First Name:<span class="highlight"> *</span></div>
-				<div class="td"><input name="inquiries_first_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_first_name EQ ''>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" /></div>
+				<div class="td"><input aria-label="First Name" name="inquiries_first_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_first_name EQ ''>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" /></div>
 			
 			</div>
 			<div class="tr">
 				<div class="th" style="width:90px;">Last Name:<span class="highlight"> *</span></div>
-				<div class="td"><input name="inquiries_last_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_last_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#form.inquiries_last_name#</cfif>" /></div>
+				<div class="td"><input aria-label="Last Name" name="inquiries_last_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_last_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#form.inquiries_last_name#</cfif>" /></div>
 			
 			</div>
 			<div class="tr">
@@ -383,7 +383,7 @@
 					<cfif structkeyexists(application.zcore.app.getAppData("content").optionStruct,'content_config_email_required') EQ false or application.zcore.app.getAppData("content").optionStruct.content_config_email_required EQ 1>
 						<span class="highlight"> *</span>
 					</cfif></div>
-				<div class="td"><input name="inquiries_email" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_email EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#<cfelse>#form.inquiries_email#</cfif>" /></div>
+				<div class="td"><input aria-label="Email" name="inquiries_email" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_email EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#<cfelse>#form.inquiries_email#</cfif>" /></div>
 			
 			</div>
 			<div class="tr">
@@ -392,22 +392,22 @@
 					<cfif application.zcore.app.getAppData("content").optionStruct.content_config_phone_required EQ 1>
 						<span class="highlight"> * </span>
 					</cfif></div>
-				<div class="td"><input name="inquiries_phone1" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_phone1 EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#form.inquiries_phone1#</cfif>" /></div>
+				<div class="td"><input aria-label="Phone" name="inquiries_phone1" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_phone1 EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_phone1')#<cfelse>#form.inquiries_phone1#</cfif>" /></div>
 			
 			</div>
 			<div class="tr">
 			
 				<div class="th" style="vertical-align:top; ">Comments:</div>
-				<div class="td"><textarea name="inquiries_comments" cols="50" style="width:100%" rows="5"><cfif structkeyexists(form, 'inquiries_comments')>#form.inquiries_comments#<cfelse>#form.inquiries_comments#</cfif></textarea></div>
+				<div class="td"><textarea aria-label="Comments" name="inquiries_comments" cols="50" style="width:100%" rows="5"><cfif structkeyexists(form, 'inquiries_comments')>#form.inquiries_comments#<cfelse>#form.inquiries_comments#</cfif></textarea></div>
 			</div>
 			<div class="tr">
 			
 			
 				<div class="th" style="vertical-align:top; ">You are:</div>
-				<div class="td"><input type="radio" name="inquiries_buyer" value="1" style="background:none; border:0px; " checked="checked" />
-					Buying
-					<input type="radio" name="inquiries_buyer" value="0" style="background:none; border:0px; " />
-					Selling </div>
+				<div class="td"><input type="radio" name="inquiries_buyer" id="inquiries_buyer1" value="1" style="background:none; border:0px; " checked="checked" />
+					<label for="inquiries_buyer1">Buying</label>
+					<input type="radio" name="inquiries_buyer" id="inquiries_buyer0" value="0" style="background:none; border:0px; " />
+					<label for="inquiries_buyer0">Selling</label> </div>
 			
 			</div>
 			<div class="tr">
