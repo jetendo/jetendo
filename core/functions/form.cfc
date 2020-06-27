@@ -3549,12 +3549,32 @@ echo('
 	</cfsavecontent>
 	<cfreturn tempString>
 </cffunction>
-    
-    
+
+<cffunction name="zLogSpamEmail" localmode="modern" access="public">
+	<cfscript>
+    savecontent variable="out"{
+		echo('<h3>Lead Form Submission Blocked As Spam</h3>');
+		writedump(cgi);
+		writedump(form); 
+	}
+	ts={
+		type:"Custom",
+		errorHTML:out,
+		scriptName:'/spamblock',
+		url:request.zos.originalURL,
+		exceptionMessage:'Blocked spam form submission',
+		// optional
+		lineNumber:'3567'
+	}
+	application.zcore.functions.zLogError(ts);
+    </cfscript>
+</cffunction>
+
 <cffunction name="zFakeFormFieldsNotEmpty" localmode="modern" output="yes" access="public" returntype="any">
 	<cfscript>
 	if(cgi.http_accept_language EQ ""){ 
-		/* may be headless user agent */ 
+		/* may be headless user agent */
+		application.zcore.functions.zLogSpamEmail(); 
 		echo("Thank you, we have received your inquiry.");abort;
 		return true;
 	}
@@ -3564,6 +3584,7 @@ echo('
 	if(structkeyexists(application.zcore.spamIpBlocks, ipBlock)){
 		// probably spam
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
+			application.zcore.functions.zLogSpamEmail(); 
 			echo("Thank you for your submission");abort;
 		}
 	}
@@ -3588,6 +3609,7 @@ echo('
 		}
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
 			if(arrData[3] < 25){
+				application.zcore.functions.zLogSpamEmail(); 
 				echo("Thank you for submitting the form.");abort; // always spammer
 			}
 		}
@@ -3606,11 +3628,13 @@ echo('
 	if(form.form_session_id NEQ ""){ 
 		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)*1.2)/3;
 		if(form.form_email EQ "" or form.form_email NEQ "admin#sessionId#@webdev.com"){
+			application.zcore.functions.zLogSpamEmail(); 
 			echo("Thank you for submitting our form."); abort;
 		}
 	}
 
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){
+		application.zcore.functions.zLogSpamEmail(); 
 		echo("Thank you very much for contacting us."); abort; // always a spammer
 		// return true;
 	}else{

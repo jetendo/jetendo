@@ -1312,11 +1312,7 @@ if(application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_opt
         <cfscript>
 		var db=request.zos.queryObject;
 		
-		application.zcore.functions.zDisbleEndFormCheck();
-		if(application.zcore.functions.zFakeFormFieldsNotEmpty()){
-			writeoutput('.<!-- stop spamming -->');
-			application.zcore.functions.zabort();
-		}
+		application.zcore.functions.zDisbleEndFormCheck(); 
 		 if(request.zos.originalURL EQ request.zos.listing.functions.getSearchFormLink()){
 		 application.zcore.template.settag("title","Search Results");
 		 application.zcore.template.settag("pagetitle","");

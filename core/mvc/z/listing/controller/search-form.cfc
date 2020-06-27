@@ -117,11 +117,7 @@ SELECT zipcode.*,
 	if(structkeyexists(form,'showLastSearch') and isDefined('request.zsession.tempVars.zListingSearchId')){
 		form.searchId=request.zsession.tempVars.zListingSearchId;
 		form.zIndex=application.zcore.status.getField(form.searchId, "zIndex",1);
-	}
-	if(application.zcore.functions.zFakeFormFieldsNotEmpty()){
-		writeoutput('.<!-- stop spamming -->');
-		application.zcore.functions.zabort();
-	}
+	} 
 	if(request.cgi_script_name EQ '/z/listing/search-form/index'){
 		application.zcore.template.settag("title","Search Results");
 		application.zcore.template.settag("pagetitle","Search Results");

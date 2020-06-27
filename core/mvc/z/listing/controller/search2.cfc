@@ -767,11 +767,7 @@
     
     <cffunction name="initSearchForm" localmode="modern" access="private" output="yes" returntype="any">
 		<cfscript>
-		application.zcore.functions.zDisbleEndFormCheck();
-		if(application.zcore.functions.zFakeFormFieldsNotEmpty()){
-			writeoutput('.<!-- stop spamming -->');
-			application.zcore.functions.zabort();
-		}
+		application.zcore.functions.zDisbleEndFormCheck(); 
 		if(request.zos.originalURL EQ request.zos.listing.functions.getSearchFormLink()){
 			application.zcore.template.settag("title","Search Results");
 			application.zcore.template.settag("pagetitle","");
