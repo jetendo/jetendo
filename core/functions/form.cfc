@@ -3555,38 +3555,64 @@ echo('
 	<cfscript>
 	if(cgi.http_accept_language EQ ""){ 
 		/* may be headless user agent */ 
-		return false;
+		echo("Thank you, we have received your inquiry.");abort;
+		return true;
 	}
+
+	// anything from amsterdam ip range is bad
+	ipBlock=listDeleteAt(request.zos.cgi.remote_addr, 4, ".");
+	if(structkeyexists(application.zcore.spamIpBlocks, ipBlock)){
+		// probably spam
+		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
+			echo("Thank you for your submission");abort;
+		}
+	}
+
+	if(structkeyexists(form, "inquiries_comments") and form.inquiries_comments NEQ "" and form.inquiries_comments DOES NOT CONTAIN " "){
+		// 1 word comment is spam.
+		return true; // it is probably spam, but we're not blocking it.
+	}
+
 	form.form_filling_data=application.zcore.functions.zso(form, "form_filling_data");
 	arrData=listToArray(form.form_filling_data, ",");
 	// formChangeEvents+","+formFocusEvents+","+formFillingTime+","+window.scrollY
 	if(form.form_filling_data NEQ ""){
-		if(arrayLen(arrData) NEQ 7){
-			return false; // invalid data
+		if(arrayLen(arrData) NEQ 6){
+			return true; // invalid data
 		}
 		if(arrData[1] EQ 0){
-			return false; // changes - bigger number is better.
+			return true; // form change events - bigger number is better.
 		}
 		if(arrData[2] EQ 0){
-			return false; // focus - indicates real user
+			return true; // focus changes
 		}
-		if(arrData[3] < 4){
-			return false; // time - more then 3 seconds is good
+		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
+			if(arrData[3] < 25){
+				echo("Thank you for submitting the form.");abort; // always spammer
+			}
 		}
-		if(arrData[4] EQ 1){
-			return false; // hasWebDriver (1 = headless chrome)
-		}
-		if(arrData[5] EQ 0){
-			return false; // hasLanguages (0 = headless chrome)
-		}
-		if(arrData[6] EQ 0){
-			return false; // hasPlugins (0 = headless chrome)
+		// if(arrData[4] EQ 1){
+		// 	return false; // hasWebDriver (1 = headless chrome) - not helpful
+		// }
+		// if(arrData[5] EQ 0){
+		// 	return false; // hasLanguages (0 = headless chrome) - not helpful
+		// }
+		// if(arrData[6] EQ 0){
+		// 	return false; // hasPlugins (0 = headless chrome) - not helpful
+		// }
+	}
+	form.form_email=application.zcore.functions.zso(form, "form_email");
+	form.form_session_id=application.zcore.functions.zso(form, "form_session_id");
+	if(form.form_session_id NEQ ""){ 
+		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)*1.2)/3;
+		if(form.form_email EQ "" or form.form_email NEQ "admin#sessionId#@webdev.com"){
+			echo("Thank you for submitting our form."); abort;
 		}
 	}
 
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){
-		application.zcore.functions.z404("Invalid request - Robot lead submission detected");
-		return true;
+		echo("Thank you very much for contacting us."); abort; // always a spammer
+		// return true;
 	}else{
 		return false;
 	}
@@ -3595,24 +3621,39 @@ echo('
 
 <cffunction name="zFakeFormFields" localmode="modern" output="yes" access="public" returntype="any">
 	<cfset local.tick=gettickcount()>
+
+	<div id="formEmailDiv#local.tick#">
+		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="text" maxlength="50" value="" required /> * Required
+	</div>
 	<table id="zInqTheFormNames#local.tick#">
         <tr>
             <td>First Name</td>
-            <td><input name="form_first_name" type="text" maxlength="50" value="" /><span class="highlight"> * Required</span></td>
+            <td><input aria-label="First Name" name="form_first_name" type="text" maxlength="50" value="" /><span class="highlight"> * Required</span></td>
         </tr>
         <tr>
             <td>Last Name</td>
-            <td><input name="form_last_name" type="text" maxlength="50" value="" /></td>
+            <td><input aria-label="Last Name" name="form_last_name" type="text" maxlength="50" value="" /></td>
         </tr>
         <tr>
             <td>Comments</td>
-            <td><textarea name="form_comments" cols="50" rows="5"></textarea></td>
+            <td><textarea aria-label="Comments" name="form_comments" cols="50" rows="5"></textarea></td>
         </tr>
     </table>
+    <cfscript>
+    sessionId=gettickcount();
+	</cfscript>
     <input type="hidden" name="form_filling_data" class="form_filling_data" value="">
+    <input type="hidden" name="form_session_id" autocomplete="no" value="3#(sessionId*3)/1.2#1">
     <script>
     var tFN32=document.getElementById("zInqTheF"+"ormNames#local.tick#");tFN34="ne";tFN32.style.display="no"+tFN34;
     tFN32.parentNode.removeChild(tFN32);
+    var tFN33=document.getElementById("formEmailDiv#local.tick#");tFN33.style.overflow='hidden';tFN33.style.height="1px";tFN33.style.width="100%";tFN33.style.opacity="0";
+    document.getElementById("formEmailField#local.tick#").setAttribute("autocomplete","no"); 
+    if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1){
+    	setTimeout(function(){ document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com'; }, 1000);
+    }else{
+    	document.getElementById("formEmailField#local.tick#").oninvalid=function(e){this.value='admin#sessionId#@webdev.com';};
+    }
     </script>
     <noscript>
     	<div class="z-float" style="font-size:24px;">Warning: JavaScript is disabled on your browser.</div>
