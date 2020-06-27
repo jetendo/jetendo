@@ -1899,19 +1899,19 @@ formString = userCom.loginForm(inputStruct);
 		if(not structkeyexists(form, 'select_office_id')){
 			form.select_office_id=request.zsession.selectedOfficeId;
 		}
-		echo('<form action="/z/_com/user/user?method=selectOfficeSave" method="post">
-			<input type="hidden" name="redirectURL" value="#request.zos.originalURL#?#request.zos.cgi.query_string#">
-		');
+		// echo('<form action="/z/_com/user/user?method=selectOfficeSave" method="post">
+		// 	<input type="hidden" name="redirectURL" value="#request.zos.originalURL#?#request.zos.cgi.query_string#">
+		// ');
 		selectStruct = StructNew();
 		selectStruct.hideSelect=true;
 		selectStruct.name = "select_office_id";
 		selectStruct.arrData = arrOffice;
 		selectStruct.queryParseLabelVars=true;
+		selectStruct.onchange="window.location.href='/z/_com/user/user?redirectURL=#urlencodedformat('#request.zos.originalURL#?#request.zos.cgi.query_string#')#&method=selectOfficeSave&select_office_id='+this.options[this.selectedIndex].value;";
 		selectStruct.queryLabelField = "##office_name##, ##office_address##";
 		selectStruct.queryValueField = "office_id";
 		application.zcore.functions.zInputSelectBox(selectStruct);
-		echo(' <input type="submit" name="select1" value="Select"> 
-		</form>');
+		//echo('</form>'); // <input type="submit" name="select1" value="Select"> 
 	}
 	</cfscript>
 </cffunction>
