@@ -3558,7 +3558,7 @@ echo('
 		writedump(form); 
 		echo('<form action="#request.zos.originalURL#" method="post">');
 		for(i in form){
-			if(i NEQ "form_session_id" and i NEQ "form_email" and isSimpleValue(form[i]) and form_filling_data NEQ ""){
+			if(i NEQ "form_session_id" and i NEQ "form_email" and isSimpleValue(form[i]) and i NEQ "form_filling_data"){
 				echo('<input type="hidden" name="#i#" value="#htmleditformat(form[i])#">');
 			}
 		}
