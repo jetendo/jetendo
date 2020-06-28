@@ -196,7 +196,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 		image_id = #db.param(arguments.image_id)# and 
 		image_deleted = #db.param(0)# and 
 		site_id = #db.param(request.zos.globals.id)#";
-		qImage=db.execute("qImage");
+		qImage=db.execute("qImage", "", 10000, "query", false);
 	}
 	if(qImage.recordcount EQ 0){
 		return false;	
@@ -226,7 +226,7 @@ SCHEDULE DAILY TASK: /z/_com/app/image-library?method=deleteInactiveImageLibrari
 		if(arguments.pregenerate){
 			rs=generateImage(arguments.image_library_id, arguments.image_id, arguments.size, arguments.crop, true);
 			if(rs.success){
-				return "/"&filePath;
+				return "/"&filePath&"?ztv=#dateformat(qImage.image_updated_datetime, "yyyymmdd")&timeformat(qImage.image_updated_datetime, "HHmmss")#";
 			}else{
 				// ignore rs.errorMessage and return not available image instead
 				return '/z/a/listing/images/image-not-available.jpg';
@@ -2255,7 +2255,7 @@ application.zcore.imageLibraryCom.getViewOriginalImagesURL(image_library_id, ima
 	} 
 	for(row in qImages){ 
 		p=request.zos.globals.privateHomedir&"zupload/library/#row.image_library_id#/#row.image_file#";
-		p2="/zupload/library/#row.image_library_id#/#row.image_file#";
+		p2="/zupload/library/#row.image_library_id#/#row.image_file#?ztv=#dateformat(row.image_updated_datetime, "yyyymmdd")&timeformat(row.image_updated_datetime, "HHmmss")#";
 		if(fileexists(p)){
 			arrayAppend(arrFile, { file:p2, caption: row.image_caption}); 
 		}

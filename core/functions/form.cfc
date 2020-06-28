@@ -3556,7 +3556,7 @@ echo('
 		echo('<h3>Lead Form Submission Blocked As Spam</h3>');
 		writedump(cgi);
 		writedump(form); 
-		echo('<form action="#request.zos.originalURL#" method="post">');
+		echo('<form action="#request.zos.globals.domain##request.zos.originalURL#" method="post">');
 		for(i in form){
 			if(i NEQ "form_session_id" and i NEQ "form_email" and isSimpleValue(form[i]) and i NEQ "form_filling_data"){
 				echo('<input type="hidden" name="#i#" value="#htmleditformat(form[i])#">');
