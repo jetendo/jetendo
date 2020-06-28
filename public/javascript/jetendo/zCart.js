@@ -81,7 +81,9 @@ options:
 				}
 				return false;
 			}); 
-			$(document).on("touchstart click", ".zcart-item-quantity-input", function(e){this.select(); });
+			$(document).on("touchstart click", ".zcart-item-quantity-input", function(e){this.select(); }, {
+			passive:true 
+		});
 			$(".zcart-item-quantity-input").on('keyup paste blur', setQuantity);
 			$(".zcart-remove."+options.name).bind('click', function(){
 				var offset=this.getAttribute("data-zcart-id");

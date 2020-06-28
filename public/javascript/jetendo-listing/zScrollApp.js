@@ -366,6 +366,8 @@ zScrollApp.listingSearchLoad=function() {
 				zScrollApp.startYTouch = event.targetTouches[0].pageY;
 				zScrollApp.startXTouch = event.targetTouches[0].pageX;
 				zScrollApp.startTouchCount=event.targetTouches.length;
+			}, {
+				passive:true 
 			});
 			b.addEventListener('touchmove', function (event) {
 				if(zScrollApp.startTouchCount !== 1 || event.targetTouches.length !== 1){ return true;}
@@ -376,6 +378,8 @@ zScrollApp.listingSearchLoad=function() {
 				var h3 = parent.document.getElementById("zSearchJsNewDivIframe");
 				var sty = $(h3).contents().scrollTop();
 				$(h3).contents().scrollTop(sty-(posy - zScrollApp.startYTouch));
+			}, {
+				passive:true 
 			});
 		}, 500);
 	}

@@ -549,12 +549,15 @@ zArrDeferredFunctions.push(function(){
 	if(zIsTouchscreen()){
 		$(document).on('touchstart', ".zPhoneLink", function() {
 		    this.documentClick = true;
+		}, {
+			passive:true 
 		});
 		$(document).on('touchmove', ".zPhoneLink", function() {
 		    this.documentClick = false;
+		}, {
+			passive:true 
 		});
-		$(document).on('click touchend', ".zPhoneLink", function(e) {
-			e.preventDefault();
+		function clickLink(e) {
 		    if (e.type == "click") this.documentClick = true;
 		    if (typeof this.documentClick != "undefined" && this.documentClick){
 				var p=formatPhoneNumberForURI(this.innerText);
@@ -562,6 +565,10 @@ zArrDeferredFunctions.push(function(){
 					window.location.href="tel:"+p;
 				}
 		    }
+		}
+		$(document).on('click', ".zPhoneLink", function(e){ e.preventDefault(); clickLink(e); });  
+		$(document).on('touchend', ".zPhoneLink", clickLink, {
+			passive:true 
 		});  
 	}
 });

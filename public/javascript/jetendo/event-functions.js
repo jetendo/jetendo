@@ -114,6 +114,8 @@ var zHumanMovement=false;
 		zMLSonScrollBackup(ev);
 		return zWindowOnScroll(ev);
 
+	}, {
+		passive:true 
 	});
 	if(typeof window.onmousewheel === "function"){
 		var zMLSonScrollBackup2=window.onmousewheel;

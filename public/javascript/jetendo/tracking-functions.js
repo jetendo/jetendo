@@ -221,10 +221,14 @@
 	// track all outbound links in google analytics events
 	$(document).on('touchstart', "a", function() {
 	    this.documentClick = true;
-	});
+	}, {
+			passive:true 
+		});
 	$(document).on('touchmove', "a", function() {
 	    this.documentClick = false;
-	});
+	}, {
+			passive:true 
+		});
 	$(document).on('click touchend', "a", function(e) { 
 	    if (e.type == "click") this.documentClick = true;
 	    if (typeof this.documentClick == "undefined" || !this.documentClick){
