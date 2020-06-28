@@ -3551,9 +3551,10 @@ echo('
 </cffunction>
 
 <cffunction name="zLogSpamEmail" localmode="modern" access="public">
+	<cfargument name="cause" type="string" required="yes">
 	<cfscript>
     savecontent variable="out"{
-		echo('<h3>Lead Form Submission Blocked As Spam</h3>');
+		echo('<h3>Lead Form Submission Blocked As Spam Case: #arguments.cause#</h3>');
 		writedump(cgi);
 		writedump(form); 
 		echo('<form action="#request.zos.globals.domain##request.zos.originalURL#" method="post">');
@@ -3583,7 +3584,7 @@ echo('
 	<cfscript>
 	if(cgi.http_accept_language EQ ""){ 
 		/* may be headless user agent */
-		application.zcore.functions.zLogSpamEmail(); 
+		application.zcore.functions.zLogSpamEmail("HTTP Accept Language was empty"); 
 		echo("Thank you, we have received your inquiry.");abort;
 		return true;
 	}
@@ -3593,7 +3594,7 @@ echo('
 	if(structkeyexists(application.zcore.spamIpBlocks, ipBlock)){
 		// probably spam
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
-			application.zcore.functions.zLogSpamEmail(); 
+			application.zcore.functions.zLogSpamEmail("Linux X11 on IP block list"); 
 			echo("Thank you for your submission");abort;
 		}
 	}
@@ -3618,7 +3619,7 @@ echo('
 		}
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
 			if(arrData[3] < 25){
-				application.zcore.functions.zLogSpamEmail(); 
+				application.zcore.functions.zLogSpamEmail("Linux X11 submitted in less then 25 seconds"); 
 				echo("Thank you for submitting the form.");abort; // always spammer
 			}
 		}
@@ -3636,14 +3637,14 @@ echo('
 	form.form_session_id=application.zcore.functions.zso(form, "form_session_id");
 	if(form.form_session_id NEQ ""){ 
 		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)/2)*4;
-		if(form.form_email EQ "" or form.form_email NEQ "admin#sessionId#@webdev.com"){
-			application.zcore.functions.zLogSpamEmail(); 
+		if(form.form_email NEQ "" and form.form_email NEQ "admin#sessionId#@webdev.com"){
+			application.zcore.functions.zLogSpamEmail("Session ID didn't match form_email"); 
 			echo("Thank you for submitting our form."); abort;
 		}
 	}
 
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){
-		application.zcore.functions.zLogSpamEmail(); 
+		application.zcore.functions.zLogSpamEmail("Fake fields not empty"); 
 		echo("Thank you very much for contacting us."); abort; // always a spammer
 		// return true;
 	}else{
