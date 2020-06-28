@@ -3556,6 +3556,15 @@ echo('
 		echo('<h3>Lead Form Submission Blocked As Spam</h3>');
 		writedump(cgi);
 		writedump(form); 
+		echo('<form action="#request.zos.originalURL#" method="post">');
+		for(i in form){
+			if(i NEQ "form_session_id" and i NEQ "form_email" and isSimpleValue(form[i]) and form_filling_data NEQ ""){
+				echo('<input type="hidden" name="#i#" value="#htmleditformat(form[i])#">');
+			}
+		}
+		echo('
+		<input type="submit" name="submit1111" value="Force Submit Lead">
+		</form>');
 	}
 	ts={
 		type:"Custom",
@@ -3626,7 +3635,7 @@ echo('
 	form.form_email=application.zcore.functions.zso(form, "form_email");
 	form.form_session_id=application.zcore.functions.zso(form, "form_session_id");
 	if(form.form_session_id NEQ ""){ 
-		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)*1.2)/3;
+		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)/2)*4;
 		if(form.form_email EQ "" or form.form_email NEQ "admin#sessionId#@webdev.com"){
 			application.zcore.functions.zLogSpamEmail(); 
 			echo("Thank you for submitting our form."); abort;
@@ -3667,16 +3676,17 @@ echo('
     sessionId=gettickcount();
 	</cfscript>
     <input type="hidden" name="form_filling_data" class="form_filling_data" value="">
-    <input type="hidden" name="form_session_id" autocomplete="no" value="3#(sessionId*3)/1.2#1">
+    <input type="hidden" name="form_session_id" autocomplete="no" value="3#(sessionId/4)*2#1">
     <script>
     var tFN32=document.getElementById("zInqTheF"+"ormNames#local.tick#");tFN34="ne";tFN32.style.display="no"+tFN34;
     tFN32.parentNode.removeChild(tFN32);
     var tFN33=document.getElementById("formEmailDiv#local.tick#");tFN33.style.overflow='hidden';tFN33.style.height="1px";tFN33.style.width="100%";tFN33.style.opacity="0";
     document.getElementById("formEmailField#local.tick#").setAttribute("autocomplete","no"); 
-    if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1){
+    document.getElementById("formEmailField#local.tick#").value='';
+    if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1 || navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
     	setTimeout(function(){ document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com'; }, 1000);
     }else{
-    	document.getElementById("formEmailField#local.tick#").oninvalid=function(e){this.value='admin#sessionId#@webdev.com';};
+    	document.getElementById("formEmailField#local.tick#").oninvalid=function(e){var self=this;this.value='admin#sessionId#@webdev.com'; setTimeout(function(){  if(self.parentNode.parentNode.id == ""){ self.parentNode.parentNode.id="formId#local.tick#"; } $("##"+self.parentNode.parentNode.id).trigger("submit");  }, 1000);   };
     }
     </script>
     <noscript>
