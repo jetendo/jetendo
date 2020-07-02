@@ -150,7 +150,7 @@
 	</cfscript>
 </cffunction> 
 </cfcomponent> --->
-<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfif (cgi.http_host EQ "peak.zsite.info" or cgi.http_host EQ "peak.local.zsite.info" or cgi.http_host EQ "peak.test.zsite.info")><cfif cgi.http_host EQ "peak.zsite.info"><cfinclude template="/peak_zsite_info/config.cfm"><cfelse><cfinclude template="/peak/config.cfm"></cfif><cfreturn></cfif><cfscript>
+<cfcomponent displayname="Application" output="no" hint="Handle the application."><cfif (cgi.http_host EQ "jet.zsite.info" or cgi.http_host EQ "jet.local.zsite.info" or cgi.http_host EQ "jet.test.zsite.info")><cfif cgi.http_host EQ "jet.zsite.info"><cfinclude template="/jet_zsite_info/core/config.cfm"><cfelse><cfinclude template="/jet/core/config.cfm"></cfif><cfreturn></cfif><cfif (cgi.http_host EQ "peak.zsite.info" or cgi.http_host EQ "peak.local.zsite.info" or cgi.http_host EQ "peak.test.zsite.info")><cfif cgi.http_host EQ "peak.zsite.info"><cfinclude template="/peak_zsite_info/config.cfm"><cfelse><cfinclude template="/peak/config.cfm"></cfif><cfreturn></cfif><cfscript>
 if(structkeyexists(form, 'firstlineabort')){
 	if(structkeyexists(form, 'stopWebServer')){ 
 		jetendo.stopWebServer();

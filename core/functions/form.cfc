@@ -3584,8 +3584,8 @@ echo('
 	<cfscript>
 	if(cgi.http_accept_language EQ ""){ 
 		/* may be headless user agent */
-		application.zcore.functions.zLogSpamEmail("HTTP Accept Language was empty"); 
-		echo("Thank you, we have received your inquiry.");abort;
+		// application.zcore.functions.zLogSpamEmail("HTTP Accept Language was empty"); 
+		echo("Thank you, we have received your inquiry.");abort; // always block
 		return true;
 	}
 
@@ -3594,7 +3594,7 @@ echo('
 	if(structkeyexists(application.zcore.spamIpBlocks, ipBlock)){
 		// probably spam
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
-			application.zcore.functions.zLogSpamEmail("Linux X11 on IP block list"); 
+			// application.zcore.functions.zLogSpamEmail("Linux X11 on IP block list"); // always block
 			echo("Thank you for your submission");abort;
 		}
 	}
@@ -3619,8 +3619,8 @@ echo('
 		}
 		if(request.zos.cgi.http_user_agent CONTAINS "Linux" and request.zos.cgi.http_user_agent CONTAINS "X11"){
 			if(arrData[3] < 25){
-				application.zcore.functions.zLogSpamEmail("Linux X11 submitted in less then 25 seconds"); 
-				echo("Thank you for submitting the form.");abort; // always spammer
+				// application.zcore.functions.zLogSpamEmail("Linux X11 submitted in less then 25 seconds"); // always spammer
+				echo("Thank you for submitting the form.");abort; 
 			}
 		}
 		// if(arrData[4] EQ 1){
@@ -3636,6 +3636,10 @@ echo('
 	form.form_email=application.zcore.functions.zso(form, "form_email");
 	form.form_session_id=application.zcore.functions.zso(form, "form_session_id");
 	if(form.form_session_id NEQ ""){ 
+		if(not isnumeric(form.form_session_id)){
+			// application.zcore.functions.zLogSpamEmail("Session ID was not numeric"); // always block
+			echo("Thank you for submitting our form."); abort;
+		}
 		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)/2)*4;
 		if(form.form_email NEQ "" and form.form_email NEQ "admin#sessionId#@webdev.com"){
 			application.zcore.functions.zLogSpamEmail("Session ID didn't match form_email"); 
@@ -3657,7 +3661,7 @@ echo('
 	<cfset local.tick=gettickcount()>
 
 	<div id="formEmailDiv#local.tick#">
-		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="text" maxlength="50" value="" required /> * Required
+		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="email" maxlength="50" value="" required /> * Required
 	</div>
 	<table id="zInqTheFormNames#local.tick#">
         <tr>
@@ -3683,6 +3687,7 @@ echo('
     tFN32.parentNode.removeChild(tFN32);
     var tFN33=document.getElementById("formEmailDiv#local.tick#");tFN33.style.overflow='hidden';tFN33.style.height="1px";tFN33.style.width="100%";tFN33.style.opacity="0";
     document.getElementById("formEmailField#local.tick#").setAttribute("autocomplete","no"); 
+    document.getElementById("formEmailField#local.tick#").setAttribute("tabindex","-1"); 
     document.getElementById("formEmailField#local.tick#").value='';
     if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1 || navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
     	setTimeout(function(){ document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com'; }, 1000);

@@ -1902,12 +1902,15 @@ var zLastAjaxVarName=""; */
 			var newData=zGetFormDataByFormId(obj.id);
 			var changed=false;
 			for(var i in cachedData){
+				console.log(i);
 				if(typeof newData[i]== "undefined"){
 					changed=true;
 					break;
 				}else if(newData[i] != cachedData[i]){
-					changed=true;
-					break;
+					if(i != "form_filling_data" && i != "form_email" && i != "form_session_id"){
+						changed=true;
+						break;	
+					}
 				}
 			}
 			for(var i in newData){
@@ -1915,7 +1918,7 @@ var zLastAjaxVarName=""; */
 					changed=true;
 					break;
 				}
-			} 
+			}  
 			if(changed){
 				formDirtyTempCache[obj.id]=true;
 				formDataCache[obj.id]=newData;

@@ -558,8 +558,14 @@ has enums with individual plain text name and id value pairs - do i need them?
 		if(currentDate-previousDate <= 500){
 			echo("Cron is already running.  You must wait 5 minutes before running this again if there was an error, or add ?force=1 to the url.");
 			abort;
+		}else if(currentDate-previousDate >= 6000){
+			structdelete(application, "cancelMLSGridImport");
+			structdelete(application, "mlsGridImportRunning");
+			structdelete(application, "mlsGridDownloadRunning");
+			structdelete(application, "currentMLSGridStatus");
+			structdelete(application, "mlsgridCronRunning");
 		}
-	}
+	} 
 
 	application.mlsgridCronRunning=request.zos.now;
 
@@ -688,7 +694,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	mediaCount=0;
 	mediaFileCount=0;
 
-	qFiles=application.zcore.functions.zReadDirectory(request.zos.globals.privateHomeDir&"mlsgrid/");
+	directory name="qFiles" action="list" directory="#request.zos.globals.privateHomeDir#mlsgrid/" sort="datelastmodified asc";
 
 	// process all the media files first so we can add the image urls to the listing_data record
 	loop query="qFiles"{
