@@ -3648,7 +3648,7 @@ echo('
 	}
 
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){
-		application.zcore.functions.zLogSpamEmail("Fake fields not empty"); 
+		// application.zcore.functions.zLogSpamEmail("Fake fields not empty"); 
 		echo("Thank you very much for contacting us."); abort; // always a spammer
 		// return true;
 	}else{

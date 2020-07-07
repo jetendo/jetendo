@@ -1285,7 +1285,9 @@
 					}
 				}
 				for(i=1;i LTE arraylen(ipStruct.arrIp);i++){
-					ipStruct2[ipStruct.arrIp[i]]=true;
+					if(ipStruct.arrIp[i] NEQ "127.0.0.1"){ // excluding this ip because it needs to be 127.0.0.2 by default on test server
+						ipStruct2[ipStruct.arrIp[i]]=true;
+					}
 				}
 				arrIp=structkeyarray(ipStruct2);
 				arraysort(arrIp, "text", "asc");
