@@ -3039,6 +3039,7 @@ configCom.includeContentByName(ts);
 		beginEditLink(contentConfig, ts994824713.content_id, true);
 		if(ts994824713.content_image_library_layout NEQ 11 and (not application.zcore.imageLibraryCom.isBottomLayoutType(ts994824713.content_image_library_layout) or application.zcore.imageLibraryCom.isAlwaysDisplayedLayoutType(ts994824713.content_image_library_layout))){
 			ts =structnew();
+			ts.defaultAltText=ts994824713.content_name;
 			ts.image_library_id=ts994824713.content_image_library_id;
 			ts.size="#request.zos.globals.maximagewidth#x2000";
 			ts.crop=0; 
@@ -3216,6 +3217,7 @@ configCom.includeContentByName(ts);
 			echo('<div style="clear:both; width:100%; float:left;">');
 			if(ts994824713.content_image_library_layout EQ 7 or ts994824713.content_image_library_layout EQ 9){ 
 				ts =structnew();
+				ts.defaultAltText=ts994824713.content_name;
 				ts.image_library_id=ts994824713.content_image_library_id;
 				ts.size="#request.zos.globals.maximagewidth#x2000";
 				ts.crop=0;  
@@ -3224,6 +3226,7 @@ configCom.includeContentByName(ts);
 				application.zcore.imageLibraryCom.displayImages(ts);  
 			}else{
 				ts =structnew();
+				ts.defaultAltText=ts994824713.content_name;
 				ts.image_library_id=ts994824713.content_image_library_id;
 				ts.size="#request.zos.globals.maximagewidth#x2000";
 				ts.crop=0; 
@@ -3247,6 +3250,7 @@ configCom.includeContentByName(ts);
 	if(ts994824713.content_image_library_layout EQ 11){
 		echo('</div><div class="z-1of2 z-fluid-at-992 z-p-0">');
 		ts =structnew();
+		ts.defaultAltText=ts994824713.content_name;
 		ts.image_library_id=ts994824713.content_image_library_id;
 		ts.size="960x2000";
 		ts.crop=0; 

@@ -457,13 +457,13 @@ if (typeof Object.create !== 'function') {
 					dom.gv_infobar.fadeOut(1000);
 				});
 		},
-		
 		initImages: function() {
 			var self = this,
 				dom = this.dom;
 			$.each(this.gvImages,function(i,gvImage) {
 				var img = $('<img/>');
 				img.css('visibility','hidden').data('index',i);
+				img.attr("alt", gvImage.attrs.title);
 				img.bind('load.galleryview',function() {
 					var _img = $(this),
 						index = _img.data('index'),
