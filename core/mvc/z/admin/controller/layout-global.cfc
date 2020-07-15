@@ -1064,7 +1064,7 @@ if(form.method EQ "settingsInstance"){
 }
 	echo('<table class="table-list">
 	<tr>
-	<th>&nbsp;</th>');
+	<td>&nbsp;</td>');
 for(n=1;n<=arraylen(breakStruct.arrBreak);n++){
 	breakpoint=breakStruct.arrBreak[n]; 
 	dataStruct=breakStruct.data[breakpoint];
@@ -1107,7 +1107,7 @@ for(i in arrKey){
 
 minimum_column_width=application.zcore.functions.zso(breakStruct, 'minimum_column_width');
 echo('<tr>
-	<th>&nbsp;</th>
+	<td>&nbsp;</td>
 	<td colspan="#structcount(defaultBreakPoint)#">
 	Column width that triggers single column below 992: <input type="text" name="minimum_column_width" style="font-size:14px; max-width:100px; min-width:100px;" value="#htmleditformat(minimum_column_width)#"><br />
 	Enable z-breakpoint: Checkbox
@@ -1120,7 +1120,7 @@ if(form.method EQ "settingsInstance"){
 }
 
 echo('<tr>
-	<th>&nbsp;</th>
+	<td>&nbsp;</td>
 	<td colspan="#structcount(defaultBreakPoint)#">
 	<input type="submit" name="save1" value="Save" class="z-manager-search-button"> 
 	<input type="button" name="save2" value="Restore Defaults" class="z-manager-search-button" onclick="if(window.confirm(''Are you sure you want to restore defaults? You should make a backup of the current settings in case they are important.'')){ window.location.href=''#link#''; } "> ');

@@ -223,7 +223,7 @@
 		required="required";
 	}
 	application.zcore.skin.addDeferredScript('$( "###arguments.prefixString##arguments.row["#variables.type#_option_id"]#_date" ).datepicker(#initValues#);');
-	return { label: true, hidden: false, value:'<input type="text" #required# name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
+	return { label: true, hidden: false, value:'<input type="text" aria-label="#arguments.row["#variables.type#_option_name"]# - Enter Date" #required# name="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" id="#arguments.prefixString&arguments.row["#variables.type#_option_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
 	</cfscript>
 </cffunction>
 

@@ -213,11 +213,11 @@ add options for:
 				<td><input type="text" name="childCFCDeleteMethod" value="#htmleditformat(form.childCFCDeleteMethod?:'deleteRow')#"></td>
 			</tr> 
 			<!--- <tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td>The fields below are not implemented yet</td>
 			</tr> --->
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><input type="submit" name="submit1" value="Submit"></td>
 			</tr>
 		</table>

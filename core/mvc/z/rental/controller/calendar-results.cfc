@@ -359,8 +359,8 @@ zQueryToStruct(qprop);
         <tr>
           <th colspan="2">Cabin Rental</th>
           <th>BR/BA/Sleeps</th>
-          <th>&nbsp;</th>
-          <th>&nbsp;</th>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
         </tr>
         <cfscript>
 /*startDate=dateadd("d",3,now());

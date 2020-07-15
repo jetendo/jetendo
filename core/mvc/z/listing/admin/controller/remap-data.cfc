@@ -182,7 +182,7 @@ update `app_x_mls` set mls_id = '26' where mls_id='4' and site_id <> '-1';
 	selectStruct.listValuesDelimiter = ",";
 	application.zcore.functions.zInputSelectBox(selectStruct);
 	
-	writeoutput('</td></tr><tr><th>&nbsp;</th><td class="table-white"><input type="submit" name="submit1" value="Submit" /></td></tr></table>
+	writeoutput('</td></tr><tr><td>&nbsp;</td><td class="table-white"><input type="submit" name="submit1" value="Submit" /></td></tr></table>
 	</form>');
 	</cfscript>
 

@@ -1477,6 +1477,7 @@ configCom.includeContent(ts);
 	ts.hideTitle=false;
 	ts.disableLinks=false;
 	ts.simpleFormat=false;
+	ts.forceH1=false;
 	structappend(arguments.ss,ts,false);
 	if(arguments.ss.simpleFormat){
 		ts19156.contentSimpleFormat=true;	
@@ -1485,6 +1486,9 @@ configCom.includeContent(ts);
 	}
 	if(arguments.ss.hideTitle){
 		ts19156.contentHideTitle=true;
+	}
+	if(arguments.ss.forceH1){
+		ts19156.forceH1=true;
 	}
 	if(arguments.ss.disableLinks){
 		ts19156.contentDisableLinks=true;
@@ -1831,7 +1835,11 @@ configCom.includeContentByName(ts);
 	echo('<div class="z-content-text-div" style="">');
 	if(application.zcore.functions.zso(form, 'content_id') NEQ row.content_id or contentConfig.contentForceOutput){
 		if(application.zcore.functions.zso(form, 'contentHideTitle',false,false) EQ false){
-			echo('<h2>');
+			if(application.zcore.functions.zso(contentConfig, "forceH1", false, false)){
+				echo('<h1>');
+			}else{
+				echo('<h2>');
+			}
 			if(contentConfig.contentDisableLinks EQ false){
 				echo('<a href="#propertyLink#">');
 			}
@@ -1839,7 +1847,11 @@ configCom.includeContentByName(ts);
 			if(contentConfig.contentDisableLinks EQ false){
 				echo('</a>');
 			}
-			echo('</h2>');
+			if(application.zcore.functions.zso(contentConfig, "forceH1", false, false)){
+				echo('</h1>');
+			}else{
+				echo('</h2>');
+			}
 		}
 	}
 	if(contentConfig.disableChildContentSummary EQ false){

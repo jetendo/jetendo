@@ -281,7 +281,7 @@
 				</tr>
 			</cfif>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><button type="submit" name="submitForm" class="z-manager-search-button">
 					<cfif currentMethod EQ 'add'>
 						Add

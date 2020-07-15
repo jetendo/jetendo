@@ -173,7 +173,7 @@
 				<td><input type="text" name="inquiries_type_name" value="#form.inquiries_type_name#" /></td>
 			</tr>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><button type="submit" name="submitForm" class="z-manager-search-button">
 				<cfif currentMethod EQ 'add'>
 					Add

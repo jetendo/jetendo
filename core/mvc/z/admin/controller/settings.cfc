@@ -141,7 +141,7 @@ Consider creation of setting table.
 				<td><input type="text" name="setting_phone" id="setting_phone" value="#htmleditformat(form.setting_phone)#"></td>
 			</tr>  --->
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><input type="submit" name="submit1" value="Save" class="z-manager-search-button" /></td>
 			</tr>
 		</table>

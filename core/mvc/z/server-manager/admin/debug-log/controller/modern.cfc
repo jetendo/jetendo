@@ -1365,7 +1365,7 @@ group("Debugging Tab","Debugging tag includes execution time,Custom debugging ou
 								<cfif hasCachetype><td>#isEmpty(row.cacheType)?"none":row.cacheType#</td></cfif>
 			                    </tr>
 			                    <tr id="-lucee-debug-qrygroup-#i#" class="#isOpen ? '' : 'collapsed'#">
-			                    <th>&nbsp;</th><td colspan="8">
+			                    <td>&nbsp;</td><td colspan="8">
 					                #row.firstValue#
 	                			</td></tr>
 							</cfloop>

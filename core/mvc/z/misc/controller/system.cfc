@@ -122,7 +122,7 @@
 	    </td></tr>
 		<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
 			<tr>
-			<th>&nbsp;</th>
+			<td>&nbsp;</td>
 				<td>
 				#application.zcore.functions.zDisplayRecaptcha()#
 				</td>
@@ -130,7 +130,7 @@
 		</cfif>
 	
 		<tr>
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 			<td><button type="submit" name="submit">Submit</button></td>
 	        </tr>
 		</table>

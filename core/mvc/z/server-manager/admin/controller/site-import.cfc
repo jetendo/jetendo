@@ -73,6 +73,7 @@
 				for(i=1;i LTE arraylen(ipStruct.arrIp);i++){
 					ipStruct2[ipStruct.arrIp[i]]=true;
 				}
+				structdelete(ipStruct2, "127.0.0.1");
 				arrIp=structkeyarray(ipStruct2);
 				arraySort(arrIp, "text", "asc");
 				selectStruct = StructNew();

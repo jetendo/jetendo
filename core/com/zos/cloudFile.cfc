@@ -812,7 +812,7 @@ cloudFileCom.downloadFile(path);
 		<form action="#application.zcore.functions.zVar("domain", form.sid)#/z/server-manager/admin/cloud-admin/processContainers" method="post">
 		<table class="table-list">
 		<tr>
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 		<th>Container</th>
 		<th>## of Files</th>
 		<th>Local Total</th>

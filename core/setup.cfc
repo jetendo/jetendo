@@ -81,7 +81,7 @@
 						<td><input type="text" name="user_confirm_password" value="#htmleditformat(application.zcore.functions.zso(form, "user_confirm_password", false, pw))#" /></td>
 					</tr>
 					<tr>
-						<th>&nbsp;</th>
+						<td>&nbsp;</td>
 						<td><input type="submit" name="submit1" value="Complete Installation" style="padding:5px; font-size:14px;" /></td>
 					</tr>
 				</table>

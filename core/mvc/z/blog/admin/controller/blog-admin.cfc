@@ -2774,7 +2774,7 @@ tabCom.enableSaveButtons();
 			disableAuthor=application.zcore.functions.zso(application.zcore.app.getAppData("blog").optionStruct, 'blog_config_disable_author', true, 0);
 			</cfscript>
 			<cfif disableAuthor EQ 0>
-				<tr><th>&nbsp;</th><td>
+				<tr><td>&nbsp;</td><td>
 				Note: Author is required and can be a user or typed in the "Other Author" field. If you don't want to show authors, contact the web developer.</td></tr>
 				<tr>
 					<th style="width:120px;">#application.zcore.functions.zOutputHelpToolTip("Author","member.blog.edit uid")#</th>

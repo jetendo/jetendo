@@ -1000,7 +1000,7 @@
 		<table style="width:100%; border-spacing:0px;" class="table-list">
 	</cfif>
 	<tr>
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 		<td><button type="submit" name="tab_submit" value="Save">Save</button>
 			<button type="button" name="cancel" value="Cancel" onclick="window.location.href ='/z/admin/slideshow/manageTabs?slideshow_id=#form.slideshow_id#&amp;zsid=#request.zsid#';">Cancel</button></td>
 	</tr>
@@ -1385,7 +1385,7 @@
 			</tr>
 		</cfif>
 		<tr>
-			<th>&nbsp;</th>
+			<td>&nbsp;</td>
 			<td><input type="submit" name="image_submit" value="Upload Image">
 				<input type="button" name="cancel" value="Cancel" onclick="window.location.href ='/z/admin/slideshow/managephoto?slideshow_id=#form.slideshow_id#&amp;slideshow_tab_id=#form.slideshow_tab_id#&amp;zsid=#request.zsid#';" /></td>
 		</tr>
@@ -1948,7 +1948,7 @@
 	<table id="sortRowTable" style="border-spacing:0px; width:100%;" class="table-list">
 		<thead>
 		<tr>
-			<th>&nbsp;</th>
+			<td>&nbsp;</td>
 			<th>Tab Caption</th>
 			<th>Tab Link</th>
 			<th>Sort</th>

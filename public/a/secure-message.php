@@ -222,7 +222,7 @@ Please do not close your browser until the confirmation message is displayed.</p
 			<textarea name="content_summary" cols="50" rows="10"></textarea>
 		 </td>
 		</tr>
-		<tr><th>&nbsp;</th>
+		<tr><td>&nbsp;</td>
 		<td>
         <script>
 		/* <![CDATA[ */ function hideSubmitButton(){

@@ -1179,7 +1179,7 @@
 				</cfscript></td>
 			</tr>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><input type="submit" name="submitForm" value="Submit" class="z-manager-search-button" />
 					<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onClick="window.location.href = '/z/feature/admin/features/manageFields?feature_id=#form.feature_id#&feature_schema_id=#application.zcore.functions.zso(form, 'feature_schema_id')#&amp;feature_schema_parent_id=#application.zcore.functions.zso(form, 'feature_schema_parent_id')#';" /></td>
 			</tr>

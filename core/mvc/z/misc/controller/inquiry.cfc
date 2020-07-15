@@ -225,6 +225,7 @@
                     ts.content_unique_name='/z/misc/inquiry/index';
                     ts.disableContentMeta=false;
                     ts.disableLinks=true;
+                    ts.forceH1=true; 
                     if(form[request.zos.urlRoutingParameter] EQ '/z/misc/inquiry/index'){
                         r1=application.zcore.app.getAppCFC("content").includePageContentByName(ts);
                         application.zcore.template.prependTag('meta','<meta name="robots" content="noindex,follow" />');
@@ -245,7 +246,7 @@
                     application.zcore.template.setTag("title","Contact Us");
                     application.zcore.template.setTag("pagetitle","Contact Us");
                 }else{
-                    writeoutput('<h2>Contact Us</h2>');
+                    writeoutput('<h1>Contact Us</h1>');
                 }
                 </cfscript>
                 <p>Please fill out the form below and we will respond to your inquiry shortly.</p>
@@ -576,7 +577,7 @@
         </td></tr>
  
     <tr class="znewslettercheckbox">
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 		<td><input aria-label="Email Opt In" type="checkbox" name="inquiries_email_opt_in" id="inquiries_email_opt_in" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_email_opt_in',false,0) EQ "1">checked="checked"</cfif> style="background:none; border:none;" /> <label for="inquiries_email_opt_in"><cfif application.zcore.functions.zvarso("Newsletter Signup Text") EQ "">
 				Please check the box to join our mailing list.
 			<cfelse>
@@ -586,14 +587,14 @@
 	
 	<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
 		<tr>
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 			<td>
 			#application.zcore.functions.zDisplayRecaptcha()#
 			</td>
 		</tr>
 	</cfif>
 	<tr>
-	<th>&nbsp;</th>
+	<td>&nbsp;</td>
 		<td><button type="submit" name="submit">Send Inquiry</button>&nbsp;&nbsp; <a href="/z/user/privacy/index" class="zPrivacyPolicyLink" target="_blank">Privacy Policy</a><br /><br /> 
         <div class="zPrivacyPolicyMessage">
    			#application.zcore.functions.zvarso("Form Privacy Message")#

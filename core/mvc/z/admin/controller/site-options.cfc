@@ -1417,7 +1417,7 @@
 				</cfscript></td>
 			</tr>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><input type="submit" name="submitForm" value="Submit" class="z-manager-search-button" />
 					<input type="button" name="cancel" value="Cancel" class="z-manager-search-button" onClick="window.location.href = '/z/admin/site-options/manageOptions?site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#application.zcore.functions.zso(form, 'site_option_group_id')#&amp;site_option_group_parent_id=#application.zcore.functions.zso(form, 'site_option_group_parent_id')#';" /></td>
 			</tr>

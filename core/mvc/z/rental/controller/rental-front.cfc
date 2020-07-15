@@ -1495,7 +1495,7 @@ Rate</th>
             <th>Fast Internet</th>
             <th>Fireplace</th>
             <th>Hot Tub</th>
-            <th>&nbsp;</th>
+            <td>&nbsp;</td>
           </tr>
           
 <cfscript>
@@ -2075,8 +2075,8 @@ application.zcore.app.getAppCFC("rental").onRentalPage();
           <tr>
             <th style="width:302px;">Rental</th>
             <th>BR/BA/Sleeps</th>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
           </tr>
         </table>
         </cfif>

@@ -253,7 +253,7 @@
 	if(arguments.row.feature_field_required EQ 1){
 		required="required";
 	}
-	return { label: true, hidden: false, value:'<input #required# type="text" name="#arguments.prefixString&arguments.row["feature_field_id"]#_date" id="#arguments.prefixString&arguments.row["feature_field_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
+	return { label: true, hidden: false, value:'<input #required# aria-label="#arguments.row["#variables.type#_option_name"]# - Enter Date" type="text" name="#arguments.prefixString&arguments.row["feature_field_id"]#_date" id="#arguments.prefixString&arguments.row["feature_field_id"]#_date" style="width:auto; min-width:auto;" value="#curDate#" size="9" />'};
 	</cfscript>
 </cffunction>
 

@@ -896,7 +896,7 @@
 				echo('</td></tr>');
 
 				if(allowDeploy and application.zcore.user.hasDeployAdminAccess(false)){
-					echo('<tr><th>&nbsp;</th><td><span id="deployButtonsId" class="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#&amp;preview=1" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Preview Changes</a></span></td></tr>');
+					echo('<tr><td>&nbsp;</td><td><span id="deployButtonsId" class="deployButtonsId"><a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Deploy</a> <a href="/z/server-manager/admin/deploy/deploySite?deploy_server_group=#urlencodedformat(row.deploy_server_group)#&sid=#form.sid#&amp;preview=1" onclick="$(''.deployButtonsId'').hide();$(''.deployStatusId'').show();" class="z-manager-search-button">Preview Changes</a></span></td></tr>');
 				}
 			}
 			echo ('</table> ');

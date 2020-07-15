@@ -761,7 +761,7 @@
 			</tr>
 			<cfif currentMethod EQ "add">
 				<tr>
-					<th>&nbsp;</th>
+					<td>&nbsp;</td>
 					<td>
 						<div class="z-float z-mb-10">
 						<input type="radio" name="user_invited" id="user_invited1" value="1" onclick="$('##inviteUserDiv1').show();$('##setPasswordTable1').hide();" checked="checked"> <label for="user_invited1">Invite User</label>
@@ -779,7 +779,7 @@
 					</td>
 				</tr>
 				<tr>
-					<th>&nbsp;</th>
+					<td>&nbsp;</td>
 					<td><table id="setPasswordTable1" class="table-list" style="display:none;">
 						<tr>
 							<th>Password</th>

@@ -73,7 +73,7 @@
 	if(not structcount(setStruct)){
 		application.zcore.functions.z404("form.site_x_option_group_set_id, #form.site_x_option_group_set_id#, doesn't exist.");
 	} 
-	echo('<div id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/admin/site-options/editGroup?site_option_app_id=#setStruct.site_option_app_id#&site_option_group_id=#setStruct.site_option_group_id#&site_x_option_group_set_id=#setStruct.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#setStruct.site_x_option_group_set_parent_id#&returnURL=#urlencodedformat(request.zos.originalURL)#">');
+	echo('<div id="zcidspangroup#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit" data-editurl="/z/admin/site-options/editGroup?site_option_app_id=#setStruct.site_option_app_id#&site_option_group_id=#setStruct.site_option_group_id#&site_x_option_group_set_id=#setStruct.site_x_option_group_set_id#&site_x_option_group_set_parent_id=#setStruct.site_x_option_group_set_parent_id#&returnURL=#urlencodedformat(request.zos.originalURL)#">');
 	if(setStruct.site_option_group_enable_meta EQ "1"){
 		if(setStruct.site_x_option_group_set_metatitle EQ ""){
 			application.zcore.template.setTag("title", setStruct.site_x_option_group_set_title);

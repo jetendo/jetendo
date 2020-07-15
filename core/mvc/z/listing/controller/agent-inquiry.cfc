@@ -105,7 +105,7 @@ agentCom.displayAgentInquiryForm(user_id, user_id_siteIdType);
         </td></tr>
  
     <tr class="znewslettercheckbox">
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 		<td><input type="checkbox" name="inquiries_email_opt_in" id="inquiries_email_opt_in" value="1" <cfif application.zcore.functions.zso(form, 'inquiries_email_opt_in',false,0) EQ "1">checked="checked"</cfif> style="background:none; border:none;" /> <label for="inquiries_email_opt_in"><cfif application.zcore.functions.zvarso("Newsletter Signup Text") EQ "">
 				Please check the box to join our mailing list.
 			<cfelse>
@@ -115,14 +115,14 @@ agentCom.displayAgentInquiryForm(user_id, user_id_siteIdType);
 	
 	<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
 		<tr>
-		<th>&nbsp;</th>
+		<td>&nbsp;</td>
 			<td>
 			#application.zcore.functions.zDisplayRecaptcha()#
 			</td>
 		</tr>
 	</cfif>
 	<tr>
-	<th>&nbsp;</th>
+	<td>&nbsp;</td>
 		<td><button type="submit" name="submit">Send Inquiry</button>&nbsp;&nbsp; <a href="/z/user/privacy/index" target="_blank" class="zPrivacyPolicyLink">Privacy Policy</a><br /><br />
         
         <div class="zPrivacyPolicyMessage">

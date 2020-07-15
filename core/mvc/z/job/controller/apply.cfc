@@ -243,7 +243,7 @@
 						<td><textarea name="cover_letter" cols="60" rows="8">#htmlEditFormat( application.zcore.functions.zso( form, 'cover_letter' ) )#</textarea></td>
 					</tr>
 					<tr>
-						<th>&nbsp;</th>
+						<td>&nbsp;</td>
 						<td><input type="submit" name="submit1" value="Submit Resume" class="z-button z-job-apply-submit" /></td>
 					</tr>
 				</table>

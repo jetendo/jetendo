@@ -410,7 +410,7 @@
 				</td>
 			</tr>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td><button type="submit" name="submitForm" class="z-manager-search-button">Save</button>
 				<button type="button" name="cancel" class="z-manager-search-button" onclick="window.location.href = '/z/inquiries/admin/review-autoresponder-settings/index';">Cancel</button></td>
 			</tr>

@@ -696,7 +696,7 @@
 		<input type="radio" name="action" value="upgrade" /> Upgrade (Warning: No backups are made)
 		</td>
 		</tr> 
-		<tr><th>&nbsp;</th><td>
+		<tr><td>&nbsp;</td><td>
 		<input type="submit" name="submit1" value="Submit" /></td></tr>
 		</table>
 	</form>

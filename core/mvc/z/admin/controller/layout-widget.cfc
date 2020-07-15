@@ -412,7 +412,7 @@
 	}
 	</cfscript>
 			<tr>
-				<th>&nbsp;</th>
+				<td>&nbsp;</td>
 				<td>
 					#arraytolist(arrEnd, '')# 
 					<button type="submit" name="submitForm">Save</button>
