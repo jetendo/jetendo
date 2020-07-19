@@ -297,6 +297,10 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 					}
 					$query.=$arrRetsConfig[$mls_id]["dataQuery"];
 				}
+				// if($mls_id == "26"){
+				// 	$query.=",(LIST_105=1068950)";
+				// 	$offset=1;
+				// }
 
 				for($n6=0;$n6<=10;$n6++){
 					echo "Query: {$query}  Limit: {$limit}  Offset: {$offset}\n";
@@ -351,8 +355,8 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 						$listingCount++;
 						$listing=array(
 							"record"=>$record,
-							"timestamp"=>$record[$arrRetsConfig[$mls_id]["photoTimestampField"]],
-							"photoTimestamp"=>$record[$arrRetsConfig[$mls_id]["photoKeyField"]],
+							"timestamp"=>$record[$arrRetsConfig[$mls_id]["dataTimestampField"]],
+							"photoTimestamp"=>$record[$arrRetsConfig[$mls_id]["photoTimestampField"]],
 							"listingID"=>$record[$arrRetsConfig[$mls_id]["listingIDField"]],
 							"photoKey"=>$record[$arrRetsConfig[$mls_id]["photoKeyField"]],
 							"photoCount"=>$record[$arrRetsConfig[$mls_id]["photoCountField"]],
@@ -390,6 +394,11 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 								}
 							}
 						}
+				// if($mls_id==26){
+				// 	var_dump($listing);
+				// 	echo "stopped";
+				// 	exit;
+				// }
 						// if($listing["new"]){
 						// 	// insert listing
 						// }else if($listing["update"]){

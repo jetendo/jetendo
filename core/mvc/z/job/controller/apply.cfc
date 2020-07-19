@@ -62,6 +62,10 @@
 		}
 
 		form.resumeFile  = application.zcore.functions.zso( form, 'resumeFile' );
+		if ( form.resumeFile EQ "" ) {
+			application.zcore.status.setStatus( request.zsid, "Application / Resume is required", form, true );
+			application.zcore.functions.zRedirect( "/z/job/apply/index?jobId=#jobId#&zsid=#request.zsid#" );
+		}
 		form.coverLetter = application.zcore.functions.zRemoveHTMLForSearchIndexer( application.zcore.functions.zso( form, 'coverLetter' ) );
 
 		ts = {};
@@ -218,23 +222,23 @@
 					</tr>
 					<tr>
 						<th>First Name:</th>
-						<td><input type="text" name="first_name" value="#htmlEditFormat( application.zcore.functions.zso( form, 'first_name' ) )#" /> <span style="color: ##FF0000;">*</span></td>
+						<td><input type="text" name="first_name" required value="#htmlEditFormat( application.zcore.functions.zso( form, 'first_name' ) )#" /> <span style="color: ##FF0000;">*</span></td>
 					</tr>
 					<tr>
 						<th>Last Name:</th>
-						<td><input type="text" name="last_name" value="#htmlEditFormat( application.zcore.functions.zso( form, 'last_name' ) )#" /> <span style="color: ##FF0000;">*</span></td>
+						<td><input type="text" name="last_name" required value="#htmlEditFormat( application.zcore.functions.zso( form, 'last_name' ) )#" /> <span style="color: ##FF0000;">*</span></td>
 					</tr>
 					<tr>
 						<th>Email Address:</th>
-						<td><input type="email" name="email" value="#htmlEditFormat( application.zcore.functions.zso( form, 'email' ) )#" /> <span style="color: ##FF0000;">*</span></td>
+						<td><input type="email" name="email" required value="#htmlEditFormat( application.zcore.functions.zso( form, 'email' ) )#" /> <span style="color: ##FF0000;">*</span></td>
 					</tr>
 					<tr>
 						<th>Phone Number:</th>
-						<td><input type="text" name="phone" value="#htmlEditFormat( application.zcore.functions.zso( form, 'phone' ) )#" /> <span style="color: ##FF0000;">*</span></td>
+						<td><input type="text" name="phone" required value="#htmlEditFormat( application.zcore.functions.zso( form, 'phone' ) )#" /> <span style="color: ##FF0000;">*</span></td>
 					</tr>
 					<tr>
-						<th>Resume:</th>
-						<td><input type="file" name="resume_file" /><br />
+						<th>Application / Resume:</th>
+						<td><input type="file" name="resume_file" required /> <span style="color: ##FF0000;">*</span><br />
 							<span style="color: ##999999;">Note: Please submit TXT, DOC, DOCX, RTF or PDF file. HTML and other formats may be blocked.</span>
 						</td>
 					</tr>
@@ -244,7 +248,7 @@
 					</tr>
 					<tr>
 						<td>&nbsp;</td>
-						<td><input type="submit" name="submit1" value="Submit Resume" class="z-button z-job-apply-submit" /></td>
+						<td><input type="submit" name="submit1" value="Submit" class="z-button z-job-apply-submit" /></td>
 					</tr>
 				</table>
 			</form>

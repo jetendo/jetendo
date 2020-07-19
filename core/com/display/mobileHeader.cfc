@@ -101,7 +101,7 @@ request.mobileHeaderCom.displayMobileMenu(ts); // run where you want it to outpu
 			</cfif>
 		</div>
 
-		<nav class="z-mobile-menu">
+		<nav role="navigation" class="z-mobile-menu">
 			<div class="z-mobile-menu-spacer">
 				<cfif ss.menuTopHTML NEQ "">
 					<div class="z-mobile-menu-top">

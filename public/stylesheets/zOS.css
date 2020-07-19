@@ -15,6 +15,17 @@ box-sizing: content-box;
 }
 div.time-picker li{ height:16px !important;}
 
+
+
+.zScreenReaderOnly {
+position:absolute;
+left:-10000px;
+top:auto;
+width:1px;
+height:1px;
+overflow:hidden;
+}
+
 .zMenuWrapper{visibility:hidden;}
 #cboxLoadedContent{border:none !important; margin-top:5px !important;}
 
