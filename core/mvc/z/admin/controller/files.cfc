@@ -904,7 +904,40 @@
 	if(!window.parent.zInsertGalleryImage){
 	    alert('HTML Editor is missing');
 	}
+	var escapeChars = {
+	  '¢' : 'cent',
+	  '£' : 'pound',
+	  '¥' : 'yen',
+	  '€': 'euro',
+	  '©' :'copy',
+	  '®' : 'reg',
+	  '<' : 'lt',
+	  '>' : 'gt',
+	  '"' : 'quot',
+	  '&' : 'amp',
+	  '\'' : '##39'
+	};
+
+	var regexString = '[';
+	for(var key in escapeChars) {
+	  regexString += key;
+	}
+	regexString += ']';
+
+	var regex = new RegExp( regexString, 'g');
+
+	function escapeHTML(str) {
+	  return str.replace(regex, function(m) {
+	    return '&' + escapeChars[m] + ';';
+	  });
+	};
+
 	function setImage(){
+		var alttext1=document.getElementById('alttext1');
+		if(alttext1.value == ""){
+			alert("You must describe the image.");
+			return;
+		}
 	    var radioGrp = document.iaform.image_align;
 	    var a="";
 	    for (var i = 0; i< radioGrp.length; i++) {
@@ -914,13 +947,13 @@
 	    }
 	    var theHTML="";
 	    if(a==0){// left
-		theHTML='<img src="#viewLink#" class="zImageLeft">';
+		theHTML='<img src="#viewLink#" alt="'+escapeHTML(alttext1.value)+'" class="zImageLeft">';
 	    }else if(a==3){ // default - none
-		theHTML='<img src="#viewLink#" class="zImageDefault">';
+		theHTML='<img src="#viewLink#" alt="'+escapeHTML(alttext1.value)+'" class="zImageDefault">';
 	    }else if(a==2){ // right
-		theHTML='<img src="#viewLink#" class="zImageRight">';
+		theHTML='<img src="#viewLink#" alt="'+escapeHTML(alttext1.value)+'" class="zImageRight">';
 	    }else if(a==1){ // center
-		theHTML='<div style="width:100%; float:none; text-align:center;"><img src="#viewLink#"></div>';
+		theHTML='<div style="width:100%; float:none; text-align:center;"><img src="#viewLink#" alt="'+escapeHTML(alttext1.value)+'"></div>';
 	    }
 
 		window.parent.zInsertGalleryImage(theHTML); 
@@ -935,9 +968,11 @@
 			<cfscript> 
 			echo('Resolution: '&variables.currentFile.virtual_file_image_width&"x"&variables.currentFile.virtual_file_image_height);
 			</cfscript>
-			<br />
+			<br /><br>
 
-			How do you want this image to align with the text on this page?<br /> 
+			<h3>Describe the Image (required):</h3>
+			<p><input type="text" name="alttext" id="alttext1" value="" style="width:100%;"></p>
+			<h3>Select Image Alignment</h3>
 			<form action="" name="iaform" id="iaform" method="get">
 
 				<table style="margin-left:auto; margin-right:auto; border-spacing:0px;">
