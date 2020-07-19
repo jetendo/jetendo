@@ -270,8 +270,8 @@
 					}
 
 					if ( settings.pager ) {
-						$( 'span', pager ).removeClass( 'active' );
-						$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
+						$( 'a', pager ).removeClass( 'active' );
+						$( 'a[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
 					}
 
 					if ( settings.videoSlides ) {
@@ -351,8 +351,8 @@
 								videoObj = null;
 
 								if ( settings.pager ) {
-									$( 'span', pager ).removeClass( 'active' );
-									$( 'span[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
+									$( 'a', pager ).removeClass( 'active' );
+									$( 'a[data-slide-index="' + slideIndex + '"]', pager ).addClass( 'active' );
 								}
 
 								slides.removeClass( 'active' );
@@ -368,10 +368,10 @@
 					pager = $( '.slider-pager', slider );
 
 					slides.each( function( slideIndex ) {
-						pager.append( '<span data-slide-index="' + slideIndex + '"></span>' );
+						pager.append( '<a href="#" title="Go to slide '+slideIndex+'" aria-label="Go to slide '+slideIndex+'" data-slide-index="' + slideIndex + '"></a>' );
 					} );
 
-					pager.on( 'click', 'span', function( event ) {
+					pager.on( 'click', 'a', function( event ) {
 						event.preventDefault();
 
 						if ( slider.hasClass( 'animating' ) ) {
@@ -427,8 +427,8 @@
 					}
 				},
 				attachNextPreviousButtons: function() {
-					slider.append( '<div class="slider-previous-button">' + settings.previousButton + '</div>' );
-					slider.append( '<div class="slider-next-button">' + settings.nextButton + '</div>' );
+					slider.append( '<a href="#" class="slider-previous-button">' + settings.previousButton + '</a>' );
+					slider.append( '<a href="#" class="slider-next-button">' + settings.nextButton + '</a>' );
 
 					previousButton = $( '.slider-previous-button', slider );
 					nextButton     = $( '.slider-next-button', slider );

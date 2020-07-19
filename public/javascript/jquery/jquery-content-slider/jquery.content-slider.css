@@ -85,7 +85,7 @@
 	z-index: 102;
 	line-height: 40px;
 }
-.content-slider .slider-pager span {
+.content-slider .slider-pager a {
 	display: inline-block;
 	background: #CCCCCC;
 	cursor: pointer;
@@ -93,12 +93,12 @@
 	-o-transition: background 0.5s ease;
 	transition: background 0.5s ease;
 }
-.content-slider .slider-pager span.active {
+.content-slider .slider-pager a.active {
 	background: #333333;
 }
 
 /* SQUARES */
-.content-slider .slider-pager.squares span {
+.content-slider .slider-pager.squares a {
 	width: 16px;
 	height: 16px;
 	margin: 0 2px;
@@ -106,7 +106,7 @@
 /**/
 
 /* CIRCLES */
-.content-slider .slider-pager.circles span {
+.content-slider .slider-pager.circles a {
 	width: 16px;
 	height: 16px;
 	border-radius: 8px;
@@ -115,7 +115,7 @@
 /**/
 
 /* LINES */
-.content-slider .slider-pager.lines span {
+.content-slider .slider-pager.lines a {
 	width: 24px;
 	height: 4px;
 	margin: 0 3px;

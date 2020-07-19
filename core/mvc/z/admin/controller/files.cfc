@@ -990,8 +990,8 @@
 				<input type="radio" name="image_align" id="image_align" value="2"  style="background:none; border:none;" />Right</a>
 				</td>
 				</tr>
-				<tr><td colspan="3" style="text-align:center"><a href="##" onclick="document.iaform.image_align[3].checked=true;setImage();" style="text-decoration:none;"><input type="radio" name="image_align" id="image_align" value="3"  style="background:none; border:none;" /> 
-				Click here for no alignment (<strong>recommended</strong>)</a></td></tr>
+				<tr><td colspan="3" style="text-align:center">&nbsp;<br><a href="##" onclick="document.iaform.image_align[3].checked=true;setImage();" style="text-decoration:none;"><input type="radio" name="image_align" id="image_align" value="3"  style="background:none; border:none;" /> 
+				Click here for no alignment (<strong>recommended</strong>)</a></td></tr> 
 				</table>
 			</form>
 			</div>
