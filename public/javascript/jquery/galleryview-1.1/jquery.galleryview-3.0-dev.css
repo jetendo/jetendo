@@ -112,15 +112,16 @@
 .gv_navNext,
 .gv_navPrev {
 	
-	opacity: 0.3;
-	-moz-opacity: 0.3;
-	-khtml-opacity: 0.3;
-	filter:alpha(opacity=30);
+	opacity: 1;
+	-moz-opacity: 1;
+	-khtml-opacity: 1;
+	filter:alpha(opacity=100);
 	display:-moz-inline-stack;
 	display:inline-block;
 	zoom:1;
 	*display:inline;
 	vertical-align: middle;
+
 }
 .gv_navPlay:hover,
 .gv_navPause:hover,
@@ -130,6 +131,12 @@
 	-moz-opacity: 0.8;
 	-khtml-opacity: 0.8;
 	filter:alpha(opacity=80);
+}
+.gv_navPlay:focus,
+.gv_navPause:focus,
+.gv_navNext:focus,
+.gv_navPrev:focus {
+	outline:2px solid #999;
 }
 
 .gv_panelNavPrev,
