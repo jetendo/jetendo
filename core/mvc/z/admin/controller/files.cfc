@@ -123,7 +123,7 @@
 		arrayAppend(arrLinks, '<a href="/z/admin/files/#form.curListMethod#?virtual_folder_id=#row.virtual_folder_id#">#row.virtual_folder_name#</a> / ');
 	}
 	if(form.virtual_folder_id NEQ 0){
-		arrayAppend(arrLinks, variables.currentFolder.virtual_folder_name);
+		arrayAppend(arrLinks, '<a href="/z/admin/files/#form.curListMethod#?virtual_folder_id=#variables.currentFolder.virtual_folder_id#">'&variables.currentFolder.virtual_folder_name&'</a>');
 	}
 	arrRoot=listToArray(request.zos.fileImage.forceRootFolder, "/");
 	for(i=2;i<=arraylen(arrRoot);i++){
@@ -894,7 +894,7 @@
 	viewLink=request.zos.siteVirtualFileCom.getViewLink(variables.currentFile);
 	downloadLink=request.zos.siteVirtualFileCom.getDownloadLink(variables.currentFile);
 	</cfscript>
-	<a href="##" onclick="history.back(); return false;">Back</a>
+	<!--- <a href="##" onclick="history.back(); return false;">Back</a> --->
 	<table style="margin-left:auto; margin-right:auto; border-spacing:0px;width:100%;">
 		<tr>
 		<td>
@@ -971,7 +971,7 @@
 			<br /><br>
 
 			<h3>Describe the Image (required):</h3>
-			<p><input type="text" name="alttext" id="alttext1" value="" style="width:100%;"></p>
+			<p><input type="text" name="alttext" id="alttext1" value="#htmleditformat(application.zcore.functions.zso(form, 'alttext'))#" style="width:100%;"></p>
 			<h3>Select Image Alignment</h3>
 			<form action="" name="iaform" id="iaform" method="get">
 

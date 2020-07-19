@@ -49,6 +49,13 @@ function zInsertGalleryImage(content){
 		setIframeHeight();
 	});
 	setIframeHeight();
+	var a=window.originalImage.src.split("/-vf");
+	if(a.length > 1){
+		var a=a[1].split(".");
+		var link='/z/admin/files/align?galleryMode=true&virtual_file_id='+a[4]+'&alttext='+escape(window.originalImage.alt);
+		var iframe=document.getElementById('iframeGalleryId');
+		iframe.src=link;
+	}
 	</script>
 </body>
 </html>
