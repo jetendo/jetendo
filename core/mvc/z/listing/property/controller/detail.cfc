@@ -166,7 +166,7 @@ if(pos NEQ 0){
 	theEnd=removeChars(theEnd, 1, pos);
 }
 </cfscript>
-<h3 class="zls-detail-random-title" style="opacity:0.7;">#titleStruct.title#</h3>
+<h2 class="zls-detail-random-title" style="opacity:0.7;">#titleStruct.title#</h2>
 <cfif hideSearchBar EQ false>
 
 	<cfscript>

@@ -103,8 +103,9 @@
 .zls-quick-search-list-container{
 	position:absolute; top:0px; left:0px; z-index:1000000; 
 }
-.zls-quick-search-autocomplete-container{width:100%; float:left; position:absolute; top:0px; left:0px;z-index:1000000;}
-.zls-quick-search-autocomplete{display:none; text-align:left;  height:200px; width:500px; max-width:100%; overflow:auto;padding-left:175px;}
+
+.zls-quick-search-autocomplete-container{  float:left; position:absolute; top:0px; left:0px;z-index:1000000;}
+.zls-quick-search-autocomplete{display:none; text-align:left;  height:200px; width:500px; max-width:100%; overflow:hidden; overflow-y:auto;padding-left:175px;}
 .zls-quick-search-autocomplete-heading{ width:100%; padding:5px; float:left; background-color:#EEE; font-weight:bold; font-size:100%;}
 .zls-quick-search-autocomplete-values{ background-color:#FFF; width:100%; float:left;}
 .zls-quick-search-autocomplete-value:link, .zls-quick-search-autocomplete-value:visited{text-decoration:none; font-size:90%; padding:5px; background-color:#FFF; color:#000; width:100%; float:left;}

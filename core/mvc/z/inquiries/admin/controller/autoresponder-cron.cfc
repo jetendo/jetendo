@@ -65,6 +65,7 @@
 	var db = request.zos.queryObject;
 	init();
 
+	setting requesttimeout="10000";
 	//application.zcore.template.setTemplate( 'root.templates.empty', true, true );
 
 	// PER SITE_ID REQUEST

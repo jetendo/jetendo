@@ -61,8 +61,8 @@
 			application.zcore.functions.zRedirect( "/z/job/apply/index?jobId=#jobId#&zsid=#request.zsid#" );
 		}
 
-		form.resumeFile  = application.zcore.functions.zso( form, 'resumeFile' );
-		if ( form.resumeFile EQ "" ) {
+		form.resume_file  = application.zcore.functions.zso( form, 'resume_file' );
+		if ( form.resume_file EQ "" ) {
 			application.zcore.status.setStatus( request.zsid, "Application / Resume is required", form, true );
 			application.zcore.functions.zRedirect( "/z/job/apply/index?jobId=#jobId#&zsid=#request.zsid#" );
 		}

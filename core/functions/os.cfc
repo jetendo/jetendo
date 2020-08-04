@@ -2438,7 +2438,17 @@ User's IP: #request.zos.cgi.remote_addr#
 	<cfscript>
 	if(not structkeyexists(application,'onInternalApplicationStartRunning')){
 		componentCacheClear();
-		pagePoolClear();
+		running=true;
+		while(running){
+			try{
+				pagePoolClear();
+				running=false;
+			}catch(e){
+				if(e.message CONTAINS "ConcurrentModificationException"){
+					sleep(2000);
+				}
+			}
+		}
 		// ctCacheClear(); // custom tag cache
 		//objectcache action="clear"; // query cache
 	}

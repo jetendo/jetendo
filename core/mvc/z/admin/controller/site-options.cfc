@@ -1253,7 +1253,10 @@
 			</tr>
 				<tr>
 					<th style="vertical-align:top; white-space:nowrap;">Allow Public?</th>
-					<td>#application.zcore.functions.zInput_Boolean("site_option_allow_public")#</td>
+					<td> 
+
+					<input name="site_option_allow_public" id="site_option_allow_public1" style="border:none; background:none;" type="radio" value="1" <cfif application.zcore.functions.zso(form, 'site_option_allow_public', true, 0) EQ 1>checked="checked"</cfif> onclick="document.getElementById('site_option_label_on_top1').checked=true;  " /> Yes
+					<input name="site_option_allow_public" id="site_option_allow_public0" style="border:none; background:none;" type="radio" value="0" <cfif application.zcore.functions.zso(form, 'site_option_allow_public', true, 0) EQ 0>checked="checked"</cfif>   /> No</td>
 				</tr>
 			<!--- <cfif form.site_option_group_id NEQ '' and form.site_option_group_id NEQ 0> --->
 				<tr>

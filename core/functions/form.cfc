@@ -3661,7 +3661,7 @@ echo('
 	<cfset local.tick=gettickcount()>
 
 	<div id="formEmailDiv#local.tick#">
-		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="email" maxlength="50" value="" required /> * Required
+		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="email" maxlength="50" value="" /> * Required
 	</div>
 	<table id="zInqTheFormNames#local.tick#">
         <tr>
@@ -3689,12 +3689,16 @@ echo('
     document.getElementById("formEmailField#local.tick#").setAttribute("autocomplete","no"); 
     document.getElementById("formEmailField#local.tick#").setAttribute("tabindex","-1"); 
     document.getElementById("formEmailField#local.tick#").value='';
-    if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1 || navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
+    setTimeout(function(){
+	    document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com';
+	}, 1000);
+    
+    </script>
+    <!--- if(navigator.userAgent.toLowerCase().indexOf('safari/') > -1 || navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
     	setTimeout(function(){ document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com'; }, 1000);
     }else{
     	document.getElementById("formEmailField#local.tick#").oninvalid=function(e){var self=this;this.value='admin#sessionId#@webdev.com'; setTimeout(function(){  if(self.parentNode.parentNode.id == ""){ self.parentNode.parentNode.id="formId#local.tick#"; } $("##"+self.parentNode.parentNode.id).trigger("submit");  }, 1000);   };
-    }
-    </script>
+    } --->
     <noscript>
     	<div class="z-float" style="font-size:24px;">Warning: JavaScript is disabled on your browser.</div>
     	<div class="z-float" style="font-size:18px;">Please enable JavaScript and reload this page or call us instead.</div>

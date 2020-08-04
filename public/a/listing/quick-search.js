@@ -66,6 +66,7 @@
 				"top":(p.y+p.height)+"px",
 				"left":(p.x)+"px"
 			});
+			// console.log("y:"+p.y, "height:"+p.height, this, $('.zls-quick-search-autocomplete-container')[0]);
 
 			$(".zls-quick-search-autocomplete").slideDown('fast');
  
@@ -84,14 +85,21 @@
 			}
 		});
 		var cancelBlur=false;
-		$(".zls-quick-search-mode-input").on("blur", function(){
-			setTimeout(function(){
-	  			if(!cancelBlur){
-					$(".zls-quick-search-autocomplete").slideUp('fast');
-					cancelBlur=false;
-				}
-			}, 500);
-		});
+		// $(".zls-quick-search-mode-input").on("blur", function(){
+		// 	setTimeout(function(){
+	 //  			if(!cancelBlur){
+		// 			$(".zls-quick-search-autocomplete").slideUp('fast');
+		// 			cancelBlur=false;
+		// 		}
+		// 	}, 500);
+		// });
+
+		// remove after debugging placement
+		// $(".zls-quick-search-mode-input").val("DAYTONA");
+		// setTimeout(function(){
+		// 	$(".zls-quick-search-mode-input").trigger("focus");
+		// 	$(".zls-quick-search-mode-input").trigger("keyup");
+		// }, 1000);
 
 		$(".zls-quick-search-mode-input").on("keyup", function(e){ 
 			if(e.which == 9 || e.which == 40 || e.which == 38){

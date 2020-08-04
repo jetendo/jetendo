@@ -1828,6 +1828,7 @@ application.zcore.searchFormCache[request.zos.globals.id].search_listing_sub_typ
 <cfscript>
 ts = StructNew();
 ts.name="search_listing_sub_type_id";
+ts.ariaLabel="Property Sub Type";
 ts.listValues =arraytolist(arrV,"|");
 ts.listValuesDelimiter="|";
 ts.listLabels =arraytolist(arrL,"|");
@@ -2161,6 +2162,8 @@ sfSortStruct["search_sqfoot"]=theCriteriaHTML;
 ts=StructNew();
 ts.name="search_year_built_low";
 ts.name2="search_year_built_high";
+ts.ariaLabel="Year Built Low";
+ts.ariaLabel2="Year Built High";
 ts.range=true;
 ts.middleLabel=" to ";
 ts.fieldWidth="42";
@@ -2253,6 +2256,8 @@ application.zcore.searchFormCache[request.zos.globals.id].search_acreage=tv299;
 ts=StructNew();
 ts.name="search_acreage_low";
 ts.name2="search_acreage_high";
+ts.ariaLabel="Acreage Low";
+ts.ariaLabel2="Acreage High";
 ts.range=true;
 ts.middleLabel=" to ";
 ts.fieldWidth="30";
@@ -2867,6 +2872,7 @@ ts.listValues =arraytolist(arrV,"|");
 ts.listValuesDelimiter="|";
 ts.listLabels =arraytolist(arrL,"|");
 ts.listLabelsDelimiter="|";
+ts.ariaLabel="Style";
 ts.output=false;
 if(form.searchFormEnabledDropDownMenus){
 	ts.output=true;

@@ -1563,6 +1563,11 @@ application.zcore.functions.zDisplayMapWithMarker(ts);
 							zoom: mapDefaultZoom
 						})
 					});  
+					setTimeout(function(){
+						$("##zOpenLayerMap#request.zos.openLayerMapIndex# .ol-attribution img").each(function(){
+							this.alt="OpenStreetMap Icon";
+						});
+					}, 10);
 					$mapContainer=$("##zOpenLayerMap#request.zos.openLayerMapIndex#");
 					$popup=$('##zOpenLayerMapPopup#request.zos.openLayerMapIndex#')
 					$mapContainer.on('mousedown', function(evt) {
