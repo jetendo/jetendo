@@ -932,10 +932,10 @@
 						}
 					}
 					if(zos.domainAliasMatchFound EQ false){
-						application.zcore.functions.z404("Secure domain doesn't match http_host and domain alias match not found");
+						application.zcore.functions.z404("Secure domain: #zos.globals.securedomain# doesn't match http_host: #zos.cgi.http_host# and domain alias match not found");
 					}
 				}else{
-					application.zcore.functions.z404("Secure domain doesn't match http_host.");	
+					application.zcore.functions.z404("Secure domain: #zos.globals.securedomain# doesn't match http_host: #zos.cgi.http_host#.");	
 				}
 			}
 			zos.currentHostName='https://'&lcase(zos.cgi.http_host); 

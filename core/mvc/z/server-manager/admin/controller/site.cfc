@@ -881,6 +881,33 @@
 	if((structkeyexists(form, 'site_system_user_modified') and form.site_system_user_modified EQ 1) or (structkeyexists(form, 'site_system_user_created') and form.site_system_user_created EQ 0)){
 		updateMessage="You may need to wait up to 10 seconds for the system to update.  If there are problems after 10 seconds, debug ""php #request.zos.scriptDirectory#newsite.php"" on the command line.  It is a cron job.";
 	}
+
+	ts={};
+	ts.subject="Jetendo site globals changed for #form.site_domain#";
+	savecontent variable="output"{
+		echo('#application.zcore.functions.zHTMLDoctype()#
+		<head>
+		<meta charset="utf-8" />
+		<title></title>
+		</head>
+		
+		<body>
+			<h2>Jetendo site globals changed for #form.site_domain#</h2>
+			<p>User: #request.zsession.user.email#</p>
+			<p>IP Address: #request.zos.cgi.remote_addr#</p>
+		</body>
+		</html>');
+	}
+	ts.html=output;
+	ts.to=request.zos.developerEmailTo;
+	ts.from=request.zos.developerEmailFrom;
+	rCom=application.zcore.email.send(ts);
+	if(rCom.isOK() EQ false){
+		rCom.setStatusErrors(request.zsid);
+		application.zcore.functions.zstatushandler(request.zsid);
+		application.zcore.functions.zabort();
+	}
+
 	application.zcore.status.setStatus(Request.zsid, "Saved. "&updateMessage);
 	application.zcore.functions.zRedirect('/z/server-manager/admin/site-select/index?action=select&sid=#form.site_id#&zid='&form.zid&'&zsid='&request.zsid);
 	</cfscript>
