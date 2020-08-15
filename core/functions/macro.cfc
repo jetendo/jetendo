@@ -518,21 +518,104 @@ application.zcore.template.appendTag("meta",'<script src="/z/javascript/jscolor.
 </cfscript>
 </cffunction>
 
+
+<cffunction name="cookieStringNeedsEncoding">
+	<cfargument name="str" type="string" required="yes">
+	<cfargument name="allowPlus" type="boolean" required="yes">
+	<Cfscript>
+	str=arguments.str;
+	if (str == "") return false;
+	len = len(str);
+	for (i = 1; i <= len; i++) {
+	    c = mid(str, i, 1);
+	    if (c >= '0' && c <= '9') continue;
+	    if (c >= 'a' && c <= 'z') continue;
+	    if (c >= 'A' && c <= 'Z') continue;
+
+	    // _-.*
+	    if (c == '-') continue;
+	    if (c == '_') continue;
+	    if (c == '.') continue;
+	    if (c == '*') continue;
+	    if (c == '/') continue;
+	    if (arguments.allowPlus && c == '+') continue;
+
+	    if (c == '%') {
+			if (i + 2 > len) return true;
+			if(!isNumeric(mid(str, i+1, 2))){
+				return true;
+			}
+			i += 3;
+			continue;
+	    }
+	    return true;
+	}
+	return false;
+	</cfscript>
+</cffunction>
+
+<cffunction name="cookieEncodeString">
+	<cfargument name="str" type="string" required="yes">
+	<cfscript>
+	if(cookieStringNeedsEncoding(arguments.str, false)){
+		return urlencodedformat(arguments.str);
+	}else{
+		return arguments.str;
+	}
+	</cfscript>
+</cffunction>
 <!--- 
-application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never", httponly:"false" });
+application.zcore.functions.zCookie({ name:"name", value:"test", expires:"never", httponly:"false", samesite:"" });
  --->
 <cffunction name="zCookie" localmode="modern" returntype="any" output="no">
 	<cfargument name="ss" type="struct" required="yes">
     <cfscript>
 	var ts=structnew();
 	ts.expires="never";
-	structappend(arguments.ss,ts,false);
+	ts.path="/";
+	ts.domain="";
+	ts.secure=false;
+	ts.httpOnly=false;
+	ts.samesite="";
+	ss=arguments.ss;
+	structappend(ss,ts,false);
+
+	if(ss.samesite NEQ ""){
+		
+		arrCookie=[];
+		arrayAppend(arrCookie, cookieEncodeString(ucase(ss.name))&"="&cookieEncodeString(ss.value));
+		arrayAppend(arrCookie, "Path="&cookieEncodeString(ss.path));
+		if(ss.domain NEQ ""){
+			arrayAppend(arrCookie, "Domain="&cookieEncodeString(ss.domain));
+		}
+		// needs to be this format: YYYY-MM-DDTHH-MM-SS.MMMZ
+		if(isnumeric(ss.expires)){
+			d=dateadd("s", ss.expires, now());
+			d = dateConvert( "local2utc", d);
+			arrayAppend(arrCookie, "Expires="&dateformat(d, "ddd, dd-mmm-yyyy")&" "&timeformat(d, "HH:MM:SS")&" UTC"); // might have to convert the time somehow
+		}else if(ss.expires EQ "NEVER"){
+			d=dateadd("d", 365, now());
+			d = dateConvert( "local2utc", d);
+			arrayAppend(arrCookie, "Expires="&dateformat(d, "ddd, dd-mmm-yyyy")&" "&timeformat(d, "HH:MM:SS")&" UTC"); // might have to convert the time somehow
+		}
+		if(ss.secure){
+			arrayAppend(arrCookie, "Secure");
+		}
+		if(ss.httpOnly){
+			arrayAppend(arrCookie, "HTTPOnly");
+		}
+		if(ss.samesite NEQ ""){
+			arrayAppend(arrCookie, "SameSite="&cookieEncodeString(ss.samesite));
+		}
+		header name="Set-Cookie" value="#arrayToList(arrCookie, ";")#";
+	}else{
+		if(structkeyexists(ss, 'httponly') and ss.httponly){
+	    	cookie name="#ss.name#" value="#ss.value#" expires="#ss.expires#" httponly="#ss.httponly#";
+		}else{
+	    	cookie name="#ss.name#" value="#ss.value#" expires="#ss.expires#";
+	    }
+	}
 	</cfscript>
-	<cfif structkeyexists(arguments.ss, 'httponly')>
-    	<cfcookie name="#arguments.ss.name#" value="#arguments.ss.value#" expires="#arguments.ss.expires#" httponly="#arguments.ss.httponly#">
-	<cfelse>
-    	<cfcookie name="#arguments.ss.name#" value="#arguments.ss.value#" expires="#arguments.ss.expires#">
-	</cfif>
 </cffunction>
 
 

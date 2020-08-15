@@ -1438,6 +1438,7 @@ formString = userCom.loginForm(inputStruct);
 	ts9.httponly=true;
 	ts9.value=request.zsession.ztoken;
 	ts9.expires="never";
+	setSameSite(ts9, "None");
 	application.zcore.functions.zcookie(ts9);
 	ts9=structnew();
 	ts9.name="ztokenset";
@@ -1482,6 +1483,7 @@ formString = userCom.loginForm(inputStruct);
 			ts9.httponly=true;
 			ts9.value=request.zsession.ztoken;
 			ts9.expires="never";
+			setSameSite(ts9, "None");
 			application.zcore.functions.zcookie(ts9);
 			ts9=structnew();
 			ts9.name="ztokenset";
@@ -1525,6 +1527,7 @@ formString = userCom.loginForm(inputStruct);
 		ts9.value="";
 		ts9.httponly=true;
 		ts9.expires="now";
+		setSameSite(ts9, "None");
 		application.zcore.functions.zcookie(ts9);
 		ts9=structnew();
 		ts9.name="ztokenset";
@@ -1554,6 +1557,7 @@ formString = userCom.loginForm(inputStruct);
 		ts9.value="";
 		ts9.httponly=true;
 		ts9.expires="now";
+		setSameSite(ts9, "None");
 		application.zcore.functions.zcookie(ts9);
 		ts9=structnew();
 		ts9.name="ztokenset";
@@ -1620,6 +1624,7 @@ formString = userCom.loginForm(inputStruct);
 			ts9.value=request.zsession.ztoken;
 			ts9.expires="never";
 			ts9.httponly=true;
+			setSameSite(ts9, "None");
 			application.zcore.functions.zcookie(ts9);
 			ts9=structnew();
 			ts9.name="ztokenset";
@@ -1636,6 +1641,7 @@ formString = userCom.loginForm(inputStruct);
 			ts9.value="";
 			ts9.httponly=true;
 			ts9.expires="now";
+			setSameSite(ts9, "None");
 			application.zcore.functions.zcookie(ts9);
 			ts9=structnew();
 			ts9.name="ztokenset";
@@ -1667,6 +1673,7 @@ formString = userCom.loginForm(inputStruct);
 	ts9.value="";
 	ts9.httponly=true;
 	ts9.expires="now";
+	setSameSite(ts9, "None");
 	application.zcore.functions.zcookie(ts9);
 	ts9=structnew();
 	ts9.name="ztokenset";
@@ -1678,6 +1685,27 @@ formString = userCom.loginForm(inputStruct);
 	}
 	return false;
     </cfscript>
+</cffunction>
+
+
+<cffunction name="setSameSite" localmode="modern" access="public">
+	<cfargument name="ss" type="struct" required="yes">
+	<cfargument name="value" type="string" required="yes">
+	<cfscript>
+	if(request.zos.globals.domain CONTAINS "https:"){
+		found=false;
+		if(structkeyexists(request.zos, "sameSiteDomains") and ","&request.zos.sameSiteDomains&"," CONTAINS ","&request.zos.globals.domain&","){
+			found=true;
+		}
+		if(request.zos.globals.domain EQ request.zos.globals.serverdomain){
+			found=true;
+		}
+		if(found){
+			arguments.ss.samesite=arguments.value;
+			arguments.ss.secure=true;
+		}
+	}
+	</cfscript>
 </cffunction>
 
 <cffunction name="checkAllCompanyAccess" localmode="modern" access="public">
