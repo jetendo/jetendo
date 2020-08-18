@@ -220,6 +220,13 @@ this.inited=false;
 	listing_track_deleted = #db.param(0)#";
 	qTrack=db.execute("qTrack", "", 10000, "query", false);  
 
+	// check memory table:
+	db.sql="select *
+	from #db.table("listing_memory", request.zos.zcoreDatasource)# 
+	where listing_id = #db.param(listing_id)# and 
+	listing_deleted = #db.param(0)#";
+	qMemory=db.execute("qMemory", "", 10000, "query", false);  
+
 	dataStruct={
 		arrData:arrData,
 		listing_id:listing_id,
@@ -333,6 +340,13 @@ this.inited=false;
 			struct:rs
 		};
 		ts4.struct.listing_track_deleted='0'; 
+		ts5={
+			debug:true,
+			datasource:request.zos.zcoreDatasource,
+			table:"listing_memory",
+			struct:rs
+		};
+		ts5.struct.listing_deleted='0';
 
 		transaction action="begin"{
 			try{ 
@@ -354,6 +368,14 @@ this.inited=false;
 					application.zcore.functions.zInsert(ts2); 
 
 					application.zcore.functions.zInsert(ts3);  
+				}
+				if(qMemory.recordcount EQ 0){
+					// insert
+					application.zcore.functions.zInsert(ts5); 
+
+				}else{
+					// update
+					application.zcore.functions.zUpdate(ts5); 
 				}
 				transaction action="commit"; 
 
