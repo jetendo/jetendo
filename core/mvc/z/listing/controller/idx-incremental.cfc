@@ -375,6 +375,7 @@ this.inited=false;
 
 				}else{
 					// update
+					ts5.forceWhereFields="listing_id";
 					application.zcore.functions.zUpdate(ts5); 
 				}
 				transaction action="commit"; 
