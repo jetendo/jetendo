@@ -374,6 +374,10 @@ if(isset($_GET['p']) && $_GET['p'] != "" && $_GET['p'] != "0"){
 	$_GET['p']="";
 } 
 $h=md5($_GET['m']."-".$_GET['f']);
+if(!is_numeric($_GET['m']) || !is_dir($serverRootPath.$_GET['m']."/")){
+	z404();
+	exit;
+}
 $filename=$_GET['m']."/".substr($h,0,2)."/".substr($h, 2, 1)."/".$_GET['m']."-".$_GET['f'];
 if($debug) echo "new path: ".$serverRootPath.$filename."<br />";
 if(!file_exists($serverRootPath.$filename)){

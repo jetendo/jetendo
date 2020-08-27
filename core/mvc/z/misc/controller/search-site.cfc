@@ -472,6 +472,9 @@ search sql generator has to be able to search on child group data for paging to 
 	application.zcore.functions.zNoCache();
 	form.groupId=application.zcore.functions.zso(form, 'groupId', true);
 	form.clearCache=application.zcore.functions.zso(form, 'clearCache', false, false);
+	if(not isBoolean(form.clearCache)){
+		form.clearCache=false;
+	}
 	request.zsession.searchLastGroupId=form.groupId;
 	form.zIndex=application.zcore.functions.zso(form, 'zIndex', true, 1);
 	if(not structkeyexists(request.zsession, 'searchGroupStructCache')){
