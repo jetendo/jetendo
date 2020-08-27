@@ -5,9 +5,7 @@
 	var qD=0;
 	var path=0;
 	// this script may crash server due to running out of memory is the xml is too big.  Increase java server xmx to prevent this.
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developers and server ips can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if(request.zos.isDeveloper){
 		form.forceMetaDataRebuild=true;  
 	}

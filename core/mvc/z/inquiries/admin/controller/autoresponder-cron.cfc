@@ -6,9 +6,7 @@
  	/*if(not request.zos.istestserver){
  		echo('Disabled on live server');abort;
  	}*/
-	if ( NOT request.zos.isDeveloper AND NOT request.zos.isServer AND NOT request.zos.isTestServer ) {
-		application.zcore.functions.z404( 'Can''t be executed except on test server or by server/developer ips.' );
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	</cfscript>
 </cffunction>
 
@@ -16,9 +14,7 @@
     <cfscript>
 	init(); 
 	var db=request.zos.queryObject; 
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}  
+	application.zcore.functions.checkIfCronJobAllowed();
 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)#, 
 	#db.table("inquiries_autoresponder_drip", request.zos.zcoreDatasource)#

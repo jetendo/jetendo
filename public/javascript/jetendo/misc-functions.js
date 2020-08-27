@@ -7,7 +7,25 @@ if (typeof window.console === "undefined") {
     };  
 }
 
+function maintenanceModeDisableForms(){
+	$("form").each(function(){
+		if($("input", this).length<=2){
+			$(this).after("Temporarily unavailable").remove();
+		}else{
+			$(this).after('<span style="font-size:140%;">Sorry, this form is temporarily disabled. Please contact us via phone or email and we\'d be happy to assist you.</span>').remove();
+		}
+
+	});
+}
+
 zArrDeferredFunctions.push(function(){
+	if(typeof zMaintenanceMode!="undefined" && zMaintenanceMode){
+		maintenanceModeDisableForms();
+		setTimeout(function(){
+			maintenanceModeDisableForms();
+		}, 1000);
+	}
+
 	$(".zGetWeather").each(function(){
 		var $self=$(this);
 		var showHTML=$(this).attr("data-show-html");

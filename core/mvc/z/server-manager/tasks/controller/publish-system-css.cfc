@@ -3,9 +3,7 @@
 <cffunction name="autoPublishAll" localmode="modern" access="remote">
 	<cfscript> 
 	var db=request.zos.queryObject; 
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	setting requesttimeout="5000";
 	db.sql="select site.site_id, site_domain 
@@ -32,9 +30,7 @@
 
 <cffunction name="updateGlobalBreakpointCSS" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	layoutGlobalCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.layout-global");
 	layoutGlobalCom.updateGlobalBreakpointCSS();
 	echo('Done');
@@ -47,9 +43,7 @@
 	setting requesttimeout="4000";
 	var db=request.zos.queryObject;
 	
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	db.sql="SELECT * 
 	FROM  
 	#db.table("site", request.zos.zcoreDatasource)# 

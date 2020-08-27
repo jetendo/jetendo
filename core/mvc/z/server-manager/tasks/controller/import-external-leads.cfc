@@ -38,9 +38,7 @@ Message: System Test
   */
 
   setting requesttimeout="1000";
-  if(not request.zos.isServer and not request.zos.isDeveloper){
-    application.zcore.functions.z404("Only developer or server can access this");
-  }
+  application.zcore.functions.checkIfCronJobAllowed();
   db=request.zos.queryObject; 
   
   count=0;

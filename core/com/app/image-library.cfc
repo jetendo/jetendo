@@ -2319,9 +2319,7 @@ application.zcore.imageLibraryCom.getViewOriginalImagesURL(image_library_id, ima
 	<cfscript>
 	var db=request.zos.queryObject;
 	var qLibrary=0;
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	var i=0; db.sql="SELECT * FROM #db.table("image_library", request.zos.zcoreDatasource)# image_library, 
 	#db.table("site", request.zos.zcoreDatasource)# site 
 	WHERE site.site_active = #db.param(1)# and 

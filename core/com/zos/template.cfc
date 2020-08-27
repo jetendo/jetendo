@@ -77,6 +77,11 @@
 		</cfif>
 	<cfscript> 
 	savecontent variable="ts44"{
+		if(request.zos.maintenance or structkeyexists(form, "zMaintenanceMode")){
+			echo("var zMaintenanceMode=true;");
+		}else{
+			echo("var zMaintenanceMode=false;");
+		}
 		if(request.zos.istestserver){
 			echo("var zThisIsTestServer=true;");
 		}else{

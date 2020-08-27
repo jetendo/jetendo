@@ -7,9 +7,7 @@ To debug call this url on a client domain where you know there was a new blog ar
 <cffunction name="send" localmode="modern" access="remote" returntype="any">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if((request.zos.istestserver EQ false or structkeyexists(form, 'forceEmail')) and not structkeyexists(form, 'forceDebug')){
 		form.debug=false;
 	}else{
@@ -244,9 +242,7 @@ To debug call this url on a client domain where you know there was a new blog ar
 	var alertsPerLoop=10;
 	var db=request.zos.queryObject;
 	var nowDate=request.zos.mysqlnow;
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if((request.zos.istestserver EQ false or structkeyexists(form, 'forceEmail')) and not structkeyexists(form, 'forceDebug')){
 		form.debug=false;
 	}else{

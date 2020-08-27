@@ -22,9 +22,7 @@
 	var qM=0;
 	var i=0;
 	
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	var city_x_mls_updated_datetime=0;
 	setting requesttimeout="5000";
 	local.c=application.zcore.db.getConfig();

@@ -3690,7 +3690,7 @@ echo('
     document.getElementById("formEmailField#local.tick#").setAttribute("tabindex","-1"); 
     document.getElementById("formEmailField#local.tick#").value='';
     setTimeout(function(){
-	    document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com';
+	    if(document.getElementById("formEmailField#local.tick#")) document.getElementById("formEmailField#local.tick#").value='admin#sessionId#@webdev.com';
 	}, 1000);
     
     </script>

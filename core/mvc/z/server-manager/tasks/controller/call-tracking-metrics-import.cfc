@@ -1,9 +1,7 @@
 <cfcomponent>
 <cffunction name="progress" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	m=application.zcore.functions.zso(application, 'callTrackingMetricsImportProgress');
 	//echo('<h2>CallTrackingMetrics Import Progress</h2>');
 	if(m EQ ""){
@@ -17,9 +15,7 @@
 
 <cffunction name="cancel" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	m=application.zcore.functions.zso(application, 'callTrackingMetricsImportProgress');
 	//echo('<h2>CallTrackingMetrics Import Progress</h2>');
 	if(m NEQ ""){
@@ -40,9 +36,7 @@
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	 
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="80000";
 	request.ignoreSlowScript=true;
 	db=request.zos.queryobject; 
@@ -87,9 +81,7 @@
 		debug=true;
 	}*/
 	form.sid=application.zcore.functions.zso(form, 'sid', true, request.zos.globals.id);
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	setting requesttimeout="10000";
 	db=request.zos.queryobject; 

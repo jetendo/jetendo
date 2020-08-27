@@ -1849,5 +1849,15 @@ if(rs.success){
 	</cfscript>
 </cffunction>
 
+<cffunction name="checkIfCronJobAllowed" localmode="modern" access="public">
+	<cfscript>
+	if(request.zos.maintenance){
+		application.zcore.functions.z404("Scheduled tasks can't be run when request.zos.maintenance=true in config.cfc.");
+	}
+	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
+		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+	}
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

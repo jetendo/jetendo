@@ -6,9 +6,7 @@
 	echo('disabled');abort;
 	/*
 	// the live server uses too much memory, and runs out of space if we enable memory-dump.
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="350";
 	// lock all requests so that the object dumps are consistent
 	lock type="exclusive" timeout="300" throwontimeout="no" name="#request.zos.installPath#-zDeployExclusiveLock"{
@@ -28,9 +26,7 @@
 
 <cffunction name="logRecentRequestsError" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isdeveloper and not request.zos.istestserver and not request.zos.isserver){
-		application.zcore.functions.z404("Only for servers / developers to run");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	t9=duplicate(application.zcore.runningScriptStruct); 
 	form.returnResults=application.zcore.functions.zso(form, 'returnResults', true, 0);
 	if(form.returnResults EQ 1){

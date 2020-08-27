@@ -118,9 +118,7 @@
 
 <cffunction name="searchReindex" localmode="modern" access="remote" roles="serveradministrator">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	form.sid=request.zos.globals.id;
 	application.zcore.siteOptionCom.searchReindex();
 	</cfscript>

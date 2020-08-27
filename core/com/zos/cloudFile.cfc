@@ -401,9 +401,7 @@ cloudFileCom.downloadFile(path);
 
 <cffunction name="syncToServer" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer and server ips can access this");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 
 	form.cloud_file_id=application.zcore.functions.zso(form, 'cloud_file_id', true, 0);
 	db=request.zos.queryObject;
@@ -701,9 +699,7 @@ cloudFileCom.downloadFile(path);
 <cffunction name="executePurgeOldFiles" localmode="modern" access="remote">
 	<cfscript>
 	var db=request.zos.queryObject; 
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	setting requesttimeout="5000";
 
@@ -739,9 +735,7 @@ cloudFileCom.downloadFile(path);
 <cffunction name="purgeOldFiles" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer and server ips can access this");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 
 	oldDate=dateadd("d", -1, now()); 
 

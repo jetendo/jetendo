@@ -10,9 +10,7 @@ this.inited=false;
 <cffunction name="reimport" localmode="modern" access="remote" returntype="any" output="yes">
 	<cfscript>
 
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	var db=request.zos.queryObject;
 	if(request.zos.istestserver){
 		p="#request.zos.sharedPath#mls-data/";	

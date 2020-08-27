@@ -17,10 +17,7 @@
 		if(arguments.datasource EQ ""){
 			arguments.datasource=request.zos.zcoreDatasource;
 		}
-
-		if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-			application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-		}
+		application.zcore.functions.checkIfCronJobAllowed();
 		 
 		setting requesttimeout="3000";
 		//for(i=1;i LTE arraylen(application.zcore.arrGlobalDatasources);i++){

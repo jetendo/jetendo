@@ -656,9 +656,7 @@ application.zcore.gridCom.getGridForm(ts); --->
 	<cfargument name="dontAbort" type="string" required="no" default="#false#">
 	<cfscript>
 	var db=request.zos.queryObject; 
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	var i=0; db.sql="SELECT grid.grid_id, grid.site_id FROM #db.table("grid", request.zos.zcoreDatasource)# grid, 
 	#db.table("site", request.zos.zcoreDatasource)# site 
 	WHERE site.site_active = #db.param(1)# and 

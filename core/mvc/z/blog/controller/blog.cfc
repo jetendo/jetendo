@@ -473,9 +473,7 @@ this.app_id=10;
 	var pingData3='';
 	request.znotemplate=1;
 	
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-			application.zcore.functions.z404("Force ping can only be run by developers and the server itself.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	writeoutput('Remote ping doesn''t actually execute on test server<br />');
 	// The key numbers are hardcoded unique ids for each ping server url  Don't re-number the keys when adding/deleting from pingStruct.
 	//pingStruct[1]="http://api.moreover.com/ping";

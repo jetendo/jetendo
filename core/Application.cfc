@@ -373,6 +373,10 @@ this.onCoreRequest();
             zos.isServer=true;	
         } 
     }
+    // force log out if not developer in maintenance mode
+    if(zos.maintenance and not zos.isDeveloper){
+        form.zlogout=1;
+    }
 	if(zos.isTestServer and zcgi.HTTP_USER_AGENT CONTAINS 'Mozilla/' and zcgi.HTTP_USER_AGENT DOES NOT CONTAIN 'Jetendo'){
         zos.isDeveloper=true;
         zos.isServer=false;	

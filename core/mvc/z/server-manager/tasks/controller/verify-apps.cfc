@@ -2,9 +2,7 @@
 <cfoutput>
 <cffunction name="index" access="remote" localmode="modern">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	db=request.zos.queryObject;
 	db.sql="select * from #db.table("app_x_mls", request.zos.zcoreDatasource)# app_x_mls, 
 	#db.table("site", request.zos.zcoreDatasource)# site WHERE 
@@ -23,9 +21,7 @@
 <!--- /z/server-manager/tasks/verify-apps/clearOldTempData --->
 <cffunction name="clearOldTempData" access="remote" localmode="modern">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	// delete 404's older then 30 days 
 	if(request.zos.disable404Log){
 

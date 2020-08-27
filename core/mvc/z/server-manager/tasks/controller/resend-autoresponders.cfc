@@ -4,9 +4,7 @@
 	<cfscript>
 	setting requesttimeout="10000";
 	request.ignoreSlowScript=true;
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	application.zcore.functions.zSendMailUserAutoresponder();
 	application.zcore.functions.zSendUserAutoresponder();
 	</cfscript>
@@ -15,9 +13,7 @@
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	var db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	setting requesttimeout="10000"; 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 

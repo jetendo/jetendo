@@ -2,9 +2,7 @@
 <cfoutput>
 <cffunction name="checkImportTimer" localmode="modern" access="remote">
 	<cfscript>  
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	if(structkeyexists(application, 'idxImportTimerStruct')){
 		echo('<h2>Import MLS Timer (total time for each sub-task)</h2>');
 		for(i in application.idxImportTimerStruct){
@@ -29,9 +27,7 @@
 	var myloops=0;
 	var idxCom=0;
 	var r=0;
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="15000";
 	request.ignoreslowscript=true;
 	myloops=46;

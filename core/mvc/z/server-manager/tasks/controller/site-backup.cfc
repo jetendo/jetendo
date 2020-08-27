@@ -137,9 +137,7 @@ TODO: figure out why site backup doesn't get compressed.
  	if(form.method EQ "getSiteDatabaseBackup" or form.method EQ "getSiteUploadsBackup"){
 
  	}else{
-		if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-			application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-		}
+		application.zcore.functions.checkIfCronJobAllowed();
 	}
 	// forces clean up even on local server to save space.
 	savecontent variable="out"{
@@ -473,8 +471,8 @@ TODO: figure out why site backup doesn't get compressed.
 	setting requesttimeout="5000"; 
  	if(application.zcore.user.checkServerAccess()){
 
- 	}else if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
+ 	}else{
+ 		application.zcore.functions.checkIfCronJobAllowed();
 	}
 	path="#request.zos.backupDirectory#site-archives/";
  	directory name="qDir" directory="#path#" recurse="no" action="list"; 

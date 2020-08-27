@@ -820,9 +820,7 @@ not important yet: create contacts at same time as create lead (use same functio
 
 <cffunction name="importAll" access="remote" localmode="modern"> 
 	<cfscript> 
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="10000";
 	request.ignoreSlowScript=true;
 	db=request.zos.queryObject;   
@@ -851,9 +849,7 @@ not important yet: create contacts at same time as create lead (use same functio
 
 <cffunction name="import" access="remote" localmode="modern"> 
 	<cfscript> 
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	init();
 	// must guarantee only one is ever running.  It may need to be able to resume to achieve that, with small 1 to 5 minute runtimes.

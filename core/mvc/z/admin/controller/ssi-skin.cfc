@@ -54,9 +54,7 @@
 	</cffunction>
 	<cffunction name="taskPublish" localmode="modern" access="remote">
 		<cfscript>
-		if(not request.zos.isserver and not request.zos.isdeveloper){
-			application.zcore.functions.z404();
-		}
+		application.zcore.functions.checkIfCronJobAllowed();
 		this.index();
 		application.zcore.functions.zabort();
 		</cfscript>

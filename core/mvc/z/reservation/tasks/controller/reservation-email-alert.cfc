@@ -16,9 +16,7 @@
 <cffunction name="sendReminderEmail" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	application.zcore.functions.zNoCache();
 	form.reservation_id=application.zcore.functions.zso(form, 'reservation_id');
 	db.sql="select * from #db.table("reservation", request.zos.zcoreDatasource)# WHERE 

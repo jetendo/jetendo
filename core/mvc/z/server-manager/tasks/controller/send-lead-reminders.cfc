@@ -11,9 +11,7 @@
 	if(request.zos.isTestServer){
 		debug=true;
 	}
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}  
+	application.zcore.functions.checkIfCronJobAllowed();
 	db=request.zos.queryObject;
 
 	leadReminderStartDate=application.zcore.functions.zso(request.zos.globals, 'leadReminderStartDate');
@@ -306,9 +304,7 @@
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	var db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="10000"; 
 	db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# WHERE 
 	site_id <> #db.param(-1)# and 

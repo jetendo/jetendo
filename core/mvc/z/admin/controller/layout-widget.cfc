@@ -805,9 +805,7 @@ getWidgetInstanceSQL(ts);
 	if(request.zos.isTestServer){
 		throw("This should only run on a production server");
 	}
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer/server can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	// force compile all widget instances (has to be done on live server only because the data is site specific and editable by user)
 	</cfscript>
 </cffunction>

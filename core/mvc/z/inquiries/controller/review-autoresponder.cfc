@@ -22,9 +22,7 @@ on live server only, this should run once a day or a minute
  --->
 <cffunction name="cron" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="80000";
 	request.ignoreSlowScript=true;
 	db=request.zos.queryobject; 
@@ -63,9 +61,7 @@ on live server only, this should run once a day or a minute
  --->
 <cffunction name="cronSend" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="80000";
 	request.ignoreSlowScript=true;
 	db=request.zos.queryobject; 

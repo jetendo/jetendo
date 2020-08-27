@@ -136,9 +136,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <!--- <cffunction name="viewMetadata" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	init();
 	writedump(variables.metaData);
 	abort;
@@ -147,9 +145,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="displayFields" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	index();
 	</cfscript>
 </cffunction>
@@ -157,9 +153,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="cancel" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	application.cancelMLSGridImport=true;
 	sleep(7000);
 	structdelete(application, "cancelMLSGridImport");
@@ -174,9 +168,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="index" localmode="modern" access="remote" roles="administrator"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	</cfscript>
 	<h1>MLS Grid Import</h1>
 	<h2>Current Status: #application.zcore.functions.zso(application, "currentMLSGridStatus")#</h2>
@@ -198,9 +190,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="testDownload" localmode="modern" access="remote"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="100000";  
 	request.ignoreSlowScript=true;
 	resourceIndex=0; // leave as 0 when not debugging
@@ -266,9 +256,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="download" localmode="modern" access="remote"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	// echo("incomplete - disabled for now");abort;
 	setting requesttimeout="100000"; 
 	if(structkeyexists(application, "mlsGridDownloadRunning")){
@@ -545,9 +533,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="cron" localmode="modern" access="remote"> 
 	<cfscript> 
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="100000";
 	request.ignoreSlowScript=true;
 
@@ -637,9 +623,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 	<cfargument name="fileName" type="string" required="yes">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 
 	fileName=arguments.fileName;
@@ -1074,9 +1058,7 @@ has enums with individual plain text name and id value pairs - do i need them?
 
 <cffunction name="downloadAllMedia" localmode="modern" access="remote"> 
 	<cfscript>	
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only the developer and server can access this feature.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
 	init();
 	form.order=application.zcore.functions.zso(form, "order");
 	setting requesttimeout="100000";

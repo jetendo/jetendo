@@ -24,9 +24,7 @@
 	var link2=0;
 	var nowDate=request.zos.mysqlnow;
 	var rCom=0; 
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="10000";
 	if((request.zos.istestserver EQ false or structkeyexists(form, 'forceEmail')) and not structkeyexists(form, 'forceDebug')){
 		form.debug=false;
@@ -231,9 +229,7 @@
         }else{
             form.debug=true;
         } 
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	} 
+	application.zcore.functions.checkIfCronJobAllowed();
         db.sql="select * from #db.table("site", request.zos.zcoreDatasource)# site, 
 	#db.table("app_x_site", request.zos.zcoreDatasource)# app_x_site, 
 	#db.table("mls_option", request.zos.zcoreDatasource)# mls_option, 

@@ -667,9 +667,7 @@ update `app_x_mls` set mls_id = '26' where mls_id='4' and site_id <> '-1';
 <cffunction name="siteRemap" localmode="modern" access="remote">
 	<cfscript>
 	db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer / server ips can access this.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if(not application.zcore.app.siteHasApp("listing")){
 		application.zcore.functions.z404("This site doesn't have the listing app.");
 	}

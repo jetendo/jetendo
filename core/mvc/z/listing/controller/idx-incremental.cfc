@@ -11,9 +11,7 @@ this.inited=false;
 <!--- /z/listing/idx-incremental/index?mls_id=".$mls_id."&filename=".$filename --->
 <cffunction name="index" localmode="modern" access="remote" returntype="any"> 
 	<cfscript> 
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server or developer can access this url.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	form.mls_id=application.zcore.functions.zso(form, "mls_id", true);
 	form.filename=application.zcore.functions.zso(form, "filename");
 	if(form.filename EQ "" or form.filename CONTAINS ".." or form.filename CONTAINS "/" or form.filename CONTAINS "\"){

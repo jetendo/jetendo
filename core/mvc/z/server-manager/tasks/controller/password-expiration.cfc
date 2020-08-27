@@ -4,9 +4,7 @@
 	<cfscript>
 	db=request.zos.queryObject;
 	
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	pastDate=application.zcore.functions.zAddTimespanToDate(-request.zos.passwordExpirationTimeSpan, now());
 
 	db.sql="SELECT site_id FROM #db.table("site", request.zos.zcoreDatasource)# 

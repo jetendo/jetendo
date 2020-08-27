@@ -558,9 +558,7 @@
 	var q=0;
 	var ts=0;
 	var ts1=0;
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("This feature requires developer or server access permissions.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if(request.zos.isDeveloper and not application.zcore.user.checkAllCompanyAccess()){
 		application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
 		application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index?zsid=#request.zsid#");

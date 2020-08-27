@@ -84,9 +84,7 @@ if(rs.status EQ "error"){
 <!--- Example of getGeocode's callbackURL function for a client site --->
 <cffunction name="testUpdateCoordinates" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer or server can access this url");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	siteOptionCom=createobject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
 
 	id=application.zcore.functions.zso(form, 'id');
@@ -121,9 +119,7 @@ if(rs.status EQ "error"){
 
 <cffunction name="index" localmode="modern" access="remote"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer or server can access this url");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	</cfscript>
 	<h2>Testing Geocoding Features</h2>
 	<ul>
@@ -203,9 +199,7 @@ if(rs.status EQ "error"){
 <!--- /z/misc/geocode/testClientGeocode --->
 <cffunction name="testClientGeocode" localmode="modern" access="remote" roles="serveradministrator"> 
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer or server can access this url");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	geocodeCom=this;
 	form.mode=application.zcore.functions.zso(form, 'mode', false, 'client');
 
@@ -265,9 +259,7 @@ if(rs.status EQ "error"){
 <cffunction name="testSearchZipCode" localmode="modern" access="remote">
 	<cfscript>
 	// this is an example of how to search a table using this cfc
-	if(not request.zos.isDeveloper and not request.zos.isServer){
-		application.zcore.functions.z404("Only developer or server can access this url");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	geocodeCom=this;
 	ts={
 		fields:{

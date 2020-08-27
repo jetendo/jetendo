@@ -4,9 +4,7 @@
 	<!--- this should be a scheduled task that runs every 15 minutes --->
 	<!--- grab 1 url that hasn't pinged since last update --->
 	<cfscript>
-	if(not request.zos.isServer and not request.zos.isDeveloper){
-		application.zcore.functions.z404("Only server and developer ip addresses can access this url.");	
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	if(request.zos.isDeveloper and not application.zcore.user.checkAllCompanyAccess()){
 		application.zcore.status.setStatus(request.zsid, "Access denied.", form, true);
 		application.zcore.functions.zRedirect("/z/server-manager/admin/server-home/index?zsid=#request.zsid#");

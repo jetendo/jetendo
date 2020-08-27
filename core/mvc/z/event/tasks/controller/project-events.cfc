@@ -11,9 +11,7 @@ all sites
 	<cfscript>
 	db=request.zos.queryObject;
 	
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
 	setting requesttimeout="5000";
 

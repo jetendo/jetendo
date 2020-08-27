@@ -2,9 +2,7 @@
 <cfoutput>
 <cffunction name="status" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	echo("<h2>Let's Renew Status</h2>");
 	echo(application.zcore.functions.zso(application, 'letsRenewRenewStatus'));
 
@@ -14,9 +12,7 @@
 
 <cffunction name="cancelRenew" localmode="modern" access="remote">
 	<cfscript>
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	
 	application.cancelLetsRenewRenew=true;
 	echo("Cancelling renew");
@@ -28,9 +24,7 @@
 <cffunction name="index" localmode="modern" access="remote">
 	<cfscript>
 	var db=request.zos.queryObject;
-	if(not request.zos.isDeveloper and not request.zos.isServer and not request.zos.isTestServer){
-		application.zcore.functions.z404("Can't be executed except on test server or by server/developer ips.");
-	}
+	application.zcore.functions.checkIfCronJobAllowed();
 	setting requesttimeout="5000";
 	form.sid=application.zcore.functions.zso(form, 'sid', true);
 	request.ignoreSlowScript=true;
