@@ -258,7 +258,19 @@ select * from static_cache where static_cache_processed ='2' limit 0,10000;
 		if(left(link, 7) EQ "mailto:"){
 			continue;
 		}
+		if(left(link, 2) EQ "//"){
+			continue;
+		}
 		if(left(link, 4) EQ "tel:"){
+			continue;
+		}
+		if(left(link, 7) EQ "/z/-df."){
+			continue;
+		}
+		if(left(link, 7) EQ "/z/-vf."){
+			continue;
+		}
+		if(left(link, 8) EQ "/zupload/"){
 			continue;
 		}
 		// remove domain prefix
