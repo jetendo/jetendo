@@ -79,18 +79,19 @@
 	savecontent variable="ts44"{
 		if(request.zos.maintenance or structkeyexists(form, "zMaintenanceMode")){
 			echo("var zMaintenanceMode=true;");
+			echo("var zThisIsDeveloper=false;");
 		}else{
 			echo("var zMaintenanceMode=false;");
+			if(request.zos.isdeveloper){
+				echo("var zThisIsDeveloper=true;");
+			}else{
+				echo("var zThisIsDeveloper=false;");
+			}
 		}
 		if(request.zos.istestserver){
 			echo("var zThisIsTestServer=true;");
 		}else{
 			echo("var zThisIsTestServer=false;");
-		}
-		if(request.zos.isdeveloper){
-			echo("var zThisIsDeveloper=true;");
-		}else{
-			echo("var zThisIsDeveloper=false;");
 		}
 		if(application.zcore.functions.zso(request.zos.globals, "disableUpgradeMessage", true, 0) EQ 1){
 			echo("var zDisableUpgradeMessage=true;"); 

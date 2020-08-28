@@ -14,14 +14,14 @@
 	tempFile=request.zos.globals.privatehomedir&"tempHTMLFile"&gettickcount()&".html";
 	application.zcore.functions.zwritefile(tempFile, trim(arguments.html));
 	secureCommand="convertHTMLTOPDF"&chr(9)&request.zos.globals.shortDomain&chr(9)&tempFile&chr(9)&arguments.pdfFile&chr(9)&arguments.javascriptDelay&chr(9)&arguments.pageWidthInches&chr(9)&arguments.pageHeightInches&chr(9)&arguments.marginPixels&chr(9)&arguments.dpi;
-	output=application.zcore.functions.zSecureCommand(secureCommand, 35);
+	output1=application.zcore.functions.zSecureCommand(secureCommand, 35);
 	application.zcore.functions.zDeleteFile(tempFile);
-	returnCode=left(trim(output), 1);
+	returnCode=left(trim(output1), 1);
 	if(returnCode EQ 1 and fileexists(arguments.pdfFile)){
 		return true;
 	}else{
-		if(output CONTAINS "|"){
-			request.zos.htmlToPDFErrorMessage=listgetat(trim(output), 2, "|");
+		if(output1 CONTAINS "|"){
+			request.zos.htmlToPDFErrorMessage=listgetat(trim(output1), 2, "|");
 		}else{
 			request.zos.htmlToPDFErrorMessage="Unknown error: #output#";
 		}

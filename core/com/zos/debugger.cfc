@@ -98,6 +98,10 @@
 		if(returnStruct.urlString NEQ ""){
 			link&="?#htmleditformat(replacenocase(returnStruct.urlString,'zdisablesystemcaching=','ztv=','all'))#";
 		}
+
+		if(request.zos.maintenance or structkeyexists(form, "zMaintenanceMode")){
+			return {returnString:"", returnString2:""};
+		}
 		</cfscript>
   <cfsavecontent variable="returnString">
 	<cfif request.zos.isdeveloper or request.zos.isTestserver>
