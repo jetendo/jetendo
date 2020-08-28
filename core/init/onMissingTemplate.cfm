@@ -63,7 +63,7 @@
 			<cfscript>
 			
 			if(qsite.recordcount NEQ 0){
-				p=request.zos.globals.privatehomedir&'_cache/html/404.html';
+				p=request.zos.globals.privatehomedir&'zupload/statichtml/404.html';
 				if(fileexists(p)){
 					f=getfileinfo(p);
 					ndate=dateadd("d",-7,now());

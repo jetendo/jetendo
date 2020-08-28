@@ -3,11 +3,14 @@
 <!--- 
 // it will take 8 hours to publish 48,000 in single thread, 4 threads would be 2 hours.
 // priority is the home page urls though which should be done in 1 to 2 hours each time. 
-// TODO: need to move 404.html publishing from zcache to /zupload/statichtml, so nginx and backblaze can serve it
-// done: parse links from home page to augment and crawl first before crawling the rest.  exclude external and # links.
-// done: maybe home page more often
 // TODO: individual site publish feature due to programmer wanting to force an update faster.
 // TODO: maybe delete cache feature - to empty statichtml directory except for 404.html and empty statichtml table
+
+to delete cache manually run this query on jetendo database:
+UPDATE static_cache SET static_cache_processed='0', static_cache_hash='';
+
+check for bad urls:
+select * from static_cache where static_cache_processed ='2' limit 0,10000;
 
  --->
 <cffunction name="init" localmode="modern" access="private">
@@ -66,7 +69,6 @@
 	<cfscript>
 	link=request.zos.globals.domain&"/?zMaintenanceMode=1";
 	rs=application.zcore.functions.zDownloadLink(link);
-
 	db=request.zos.queryObject;
 	db.sql="SELECT * FROM #db.table("static_cache", request.zos.zcoreDatasource)# WHERE 
 	site_id = #db.param(request.zos.globals.id)# and 
@@ -97,7 +99,12 @@
 		if(structkeyexists(cacheLookup, request.zos.globals.domain&"/")){
 			if(ts.struct.static_cache_hash NEQ cacheLookup[request.zos.globals.domain&"/"].static_cache_hash){
 				ts.struct.static_cache_id=cacheLookup[request.zos.globals.domain&"/"].static_cache_id;
-				application.zcore.functions.zWriteFile(staticCachePath&ts.struct.static_cache_filename_md5&".html", rs.cfhttp.filecontent);
+				if(rs.cfhttp.filecontent DOES NOT CONTAIN ":404missingpage:"){
+					application.zcore.functions.zWriteFile(staticCachePath&ts.struct.static_cache_filename_md5&".html", rs.cfhttp.filecontent);
+				}else{
+					ts.struct.static_cache_processed=2;
+					ts.struct.static_cache_hash="";
+				}
 				application.zcore.functions.zUpdate(ts);
 			}
 		}else{ 
@@ -120,8 +127,13 @@
 	// }
 	siteMapCom=createobject("component", "zcorerootmapping.mvc.z.misc.controller.site-map");
 	arrLinks=siteMapCom.getLinks();  
-	for(i=1;i<=arraylen(arrLinks);i++){
-		link=replace(arrLinks[i].url, request.zos.globals.domain, ""); 
+	arrLinkNew=[];
+	for(link in arrLinks){
+		arrayAppend(arrLinkNew, link.url);
+	}
+	arrLinkNew=getInternalLinks(arrLinkNew, request.zos.globals.domain);
+	for(i=1;i<=arraylen(arrLinkNew);i++){
+		link=replace(arrLinkNew[i], request.zos.globals.domain, ""); 
 		ext=application.zcore.functions.zGetFileExt(link);
 		if(ext EQ "xml" or ext EQ "gz"){
 			continue;
@@ -243,11 +255,18 @@
 		if(left(link, 11) EQ "javascript:"){
 			continue;
 		}
+		if(left(link, 7) EQ "mailto:"){
+			continue;
+		}
+		if(left(link, 4) EQ "tel:"){
+			continue;
+		}
 		// remove domain prefix
 		link=replace(link, d, "");
 		link=replace(link, d2, "");
 		link=replace(link, d3, "");
 		link=replace(link, d4, "");
+		link=replace(link, '&amp;', '&', 'all');
 		if(left(link, 6) EQ "https:" or left(link, 5) EQ "http:"){
 			continue;
 		}
@@ -403,15 +422,21 @@
 	for(row in qCache){
 		staticCachePath=application.zcore.functions.zvar("privateHomeDir", row.site_id)&"zupload/statichtml/";
 		try{
-			rs=application.zcore.functions.zDownloadLink(application.zcore.functions.zURLAppend(row.static_cache_url, "?zMaintenanceMode=1"));
+			rs=application.zcore.functions.zDownloadLink(application.zcore.functions.zURLAppend(row.static_cache_url, "zMaintenanceMode=1"));
 			if(rs.success){
 				static_cache_hash=hash(rs.cfhttp.filecontent);
+				processed=1;
 				if(static_cache_hash NEQ row.static_cache_hash){
-					application.zcore.functions.zWriteFile(staticCachePath&row.static_cache_filename_md5&".html", rs.cfhttp.filecontent);
+					if(rs.cfhttp.filecontent DOES NOT CONTAIN ":404missingpage:"){
+						application.zcore.functions.zWriteFile(staticCachePath&row.static_cache_filename_md5&".html", rs.cfhttp.filecontent);
+					}else{
+						static_cache_hash="";
+						processed=2;
+					}
 				}
 				db.sql="UPDATE #db.table("static_cache", request.zos.zcoreDatasource)# 
 				SET 
-				static_cache_processed=#db.param(1)#, 
+				static_cache_processed=#db.param(processed)#, 
 				static_cache_hash=#db.param(static_cache_hash)#, 
 				static_cache_updated_datetime=#db.param(dateformat(now(), "yyyy-mm-dd")&" "&timeformat(now(), "HH:mm:ss"))# 
 				WHERE 

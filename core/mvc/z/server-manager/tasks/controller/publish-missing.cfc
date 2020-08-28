@@ -18,8 +18,8 @@
 	for(row in qS){
 		local.tempPath=application.zcore.functions.zGetDomainWritableInstallPath(row.site_short_domain);
 		if(directoryexists(local.tempPath)){
-			application.zcore.functions.zCreateDirectory(local.tempPath&'_cache/html/');
-			r=application.zcore.functions.zhttptofile("#row.site_domain#/z/misc/system/missing", local.tempPath&'_cache/html/404.html');
+			application.zcore.functions.zCreateDirectory(local.tempPath&'zupload/statichtml/');
+			r=application.zcore.functions.zhttptofile("#row.site_domain#/z/misc/system/missing", local.tempPath&'zupload/statichtml/404.html');
 		}
 	}
 	writeoutput('missing published');

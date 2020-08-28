@@ -279,6 +279,7 @@ if(structkeyexists(form, 'zforceapplicationurlrewriteupdate')){
 		echo('Please browse our site or go back and try a different link.<br /><br />');
 	}
 	</cfscript>
+	<!-- :404missingpage: -->
 </cffunction>
 
 

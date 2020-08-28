@@ -3,7 +3,7 @@
 if(isset($_GET['_zsa3_path'])){
 	$a=array();
 	foreach($_GET as $key=>$val){
-		if($key != "method" && $key != "_zsa3_path" && $key != "zMaintenanceMode"){
+		if($key != "method" && $key != "_zsa3_path" && $key != "zMaintenanceMode" && $key != "_zdebug"){
 			array_push($a, $key."=".$val);
 		}
 	}
@@ -15,7 +15,12 @@ if(isset($_GET['_zsa3_path'])){
 	// echo $cacheLink."<br>";
 	// echo md5($cacheLink);
 	// exit;
-	header('X-Accel-Redirect: /zupload/statichtml/'.md5($cacheLink).'.html');
+	if(isset($_GET['_zdebug'])){
+		echo('URL: '.$_GET['_zsa3_path'].'<br>');
+		echo('X-Accel-Redirect: /zupload/statichtml/'.strtoupper(md5($cacheLink)).'.html');
+		exit;	
+	}
+	header('X-Accel-Redirect: /zupload/statichtml/'.strtoupper(md5($cacheLink)).'.html');
 	exit;
 }else{
 	if(!isset($_GET['method'])){
