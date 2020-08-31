@@ -23,7 +23,8 @@ if (typeof Object.create !== 'function') {
 
 		this.src = { 
 			panel: img.attr('src'),
-			frame: img.data('frame') || img.attr('src')
+			frame: img.data('frame') || img.attr('src'),
+			full: img.data("full") || img.attr('src'),
 		};
 		this.scale = {
 			panel: null,
@@ -568,8 +569,39 @@ if (typeof Object.create !== 'function') {
 					frame_i = dom.gv_panels.length - 1;
 				}
 			}
-			
+			 
 			panel = dom.gv_panels.eq(i);
+			var gvImage=this.gvImages[i];
+
+			// bruce added to have asyncronous loading of secondary images
+			// panel src
+			//console.log('nextslide', panel, frame_i, this.gvImages[frame_i].src.full);
+			var _img=$("img", panel);
+			// _img[0].style.width="auto";
+			// _img[0].style.height="auto";
+			_img[0].onload=function(){
+				var width=_img[0].naturalWidth;
+				var height=_img[0].naturalHeight;
+				var parent = panel,//dom[(_img.data('parent')).type].eq((_img.data('parent')).index),
+							widthFactor = gv.innerWidth(parent) / width,
+							heightFactor = gv.innerHeight(parent) / height,
+							parentType = parent.hasClass('gv_panel') ? 'panel' : 'frame',
+							heightOffset = 0, widthOffset = 0;
+				gvImage.scale[parentType]=self.opts[parentType+'_scale'] === 'fit' ? Math.min(widthFactor,heightFactor) : Math.max(widthFactor,heightFactor);
+				var scale=gvImage.scale[parentType]; 
+				widthOffset = Math.round((gv.innerWidth(parent) - (width * scale)) / 2);
+				heightOffset = Math.round((gv.innerHeight(parent) - (height * scale)) / 2);	
+				// console.log(widthFactor, heightFactor, scale, "innerWidth", gv.innerWidth(parent), "innerHeight", gv.innerHeight(parent), "width", width * scale, "height", height * scale, "widthOffset", widthOffset, "heightOffset", heightOffset);
+				_img.css({
+					width: Math.round(width * scale),
+					height: Math.round(height * scale),
+					top: heightOffset+"px",
+					left: widthOffset+"px"
+				});
+			}
+			_img[0].src=gvImage.src.full; 
+			// _img[0].width=width * gvImage.scale[parentType];
+			// _img[0].height=height * gvImage.scale[parentType];
 			
 			playing = this.playing;
 			

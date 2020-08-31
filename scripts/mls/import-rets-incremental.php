@@ -583,8 +583,23 @@ function zDownloadRetsData($inputMLSID, $incremental=false){
 				  					}
 				  				}
 			  					// delete any images that exceed the current photo count to avoid waste
+			  					for($f=1;$f<=$listing["photoCount"];$f++){
+			  						// resize all of the images
+			  						$fp=getImageHashPath($mls_id, $listing["listingID"]."-".$f.".jpeg");
+			  						$afp=explode("/", $fp);
+			  						$filename=$afp[count($afp)-1];
+			  						unset($afp[count($afp)-1]);
+			  						$tempPath=implode("/", $afp)."/";
+			  						if(file_exists($fp)){
+			  							zIDXImageResize($tempPath, $filename);
+			  						}
+			  					}
 			  					for($f=$listing["photoCount"]+1;$f<=80;$f++){
-									@unlink(getImageHashPath($mls_id, $listing["listingID"]."-".$f.".jpeg"));
+			  						$fp=getImageHashPath($mls_id, $listing["listingID"]."-".$f.".jpeg");
+									@unlink($fp);
+									@unlink(str_replace(".jpeg", "-large.jpeg", $fp));
+									@unlink(str_replace(".jpeg", "-medium.jpeg", $fp));
+									@unlink(str_replace(".jpeg", "-small.jpeg", $fp));
 								}
 								$listing["photoVerifiedCount"]=0;
 			 					for($g=1;$g<=$listing["photoCount"];$g++){

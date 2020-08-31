@@ -3,6 +3,8 @@
 // 5 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/rets-download-missing-images.php >/dev/null 2>&1
 require("library.php");
 
+echo "not in use currently";
+exit;
 
 // zDownloadRetsImages("25-O5317775", "160634400", 0);exit;
 error_reporting(E_ALL);

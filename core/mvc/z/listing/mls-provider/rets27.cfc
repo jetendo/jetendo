@@ -460,7 +460,12 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 		for(i=1;i LTE idx.listing_photocount;i++){
 			fNameTemp1="27-"&idx.urlMlsPid&"-"&i&".jpeg";
 			fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
-			idx["photo"&i]=request.zos.retsPhotoPath&'27/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+			p=request.zos.sharedPath&'mls-images/27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+			if(fileexists(p)){
+				idx["photo"&i]=request.zos.retsPhotoPath&'27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+			}else{
+				idx["photo"&i]=request.zos.retsPhotoPath&'27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+			}
 		}
 	} 
 	idx["agentName"]="";
@@ -498,10 +503,14 @@ variables.tableLookup["G"]="G"; // Commercial For Lease
 	<cfargument name="num" type="numeric" required="no" default="#1#">
 	<cfscript>
 	request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
-	local.fNameTemp1="26-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
+	local.fNameTemp1="27-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 	local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
-	return request.zos.retsPhotoPath&'26/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
-	
+	p=request.zos.sharedPath&'mls-images/27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+	if(fileexists(p)){
+		return request.zos.retsPhotoPath&'27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+	}else{
+		return request.zos.retsPhotoPath&'27/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+	}
 	// request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 	// if(structkeyexists(request.zos, 'listingImageURLCache')){
 	// 	if(structkeyexists(request.zos.listingImageURLCache, this.mls_id&"-"&arguments.mls_pid)){

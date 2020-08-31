@@ -5,6 +5,7 @@
 var temp=structnew();
 request.zos.currentURLISAListingPage=true;
 request.zos.tempObj.listingDetailPage=true;
+application.zcore.skin.includeJS("/z/javascript/jquery/jquery-lazyload/jquery.lazyload.min.js"); 
 
 if(isDefined('request.zsession.zlistingdetailhitcount2') EQ false){
 	request.zsession.zlistingdetailhitcount2=1;
@@ -330,17 +331,40 @@ d3=application.zcore.listingCom.listingLookupValue("listing_type",variables.list
 <h3>All Available Photos</h3>
 
 <div class="zmls-listing-detail-photos" style="overflow:hidden;">
-<cfloop from="#firstImageToShow#" to="#variables.listing_photocount#" index="i">
-<cfif structkeyexists(idx,'photo'&i)>
-<!--- <cfif variables.listing_mls_id EQ 17>width:100%;</cfif>  --->
-#application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto#i#",width:10000,height:10000, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})#
-<!--- 
-<img id="zmlslistingphoto#i#" src="#application.zcore.listingCom.getThumbnail(idx['photo'&i], request.lastPhotoId, i, 10000, 10000, 0)#<!--- #idx["photo#i#"]# --->" alt="<cfif structkeyexists(idx, 'photo_description'&i)>#htmleditformat(idx['photo_description'&i])#<cfelse>Listing Photo #i#</cfif>" style="margin-bottom:5px; clear:both; " /> --->
-<!--- <script>/* <![CDATA[ */
-document.getElementById("zmlslistingphoto#i#").onerror=function(){this.style.display="none";/*zImageOnError(this);*/};
-/* ]]> */</script> --->
+
+	 <div id="listingLightboxContainer" class="z-float">
+		<div class="z-float">
+			<cfscript>
+			count=0;
+			</cfscript>
+			<cfloop from="1" to="#form.listing_photocount#" index="i">
+				<cfif structkeyexists(idx,'photo'&i)>
+					<cfif count MOD 3 EQ 0 and count NEQ 1>
+						</div>
+						<div class="z-float">
+					</cfif>
+					<cfscript>
+					p=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
+					</cfscript> 
+					<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:200px; float:left; margin-right:1%; margin-bottom:2%;">
+						<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="/z/a/images/s.gif" data-lazy-src="default~#p#" alt="Listing Photo" class="z-fluid zLazyLoadImage"></a>
+					<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
+					</div>
+					<cfscript>
+					count++;
+					</cfscript>
+				</cfif>
+			</cfloop>
+		</div>
+	</div>
+	<cfscript>
+	application.zcore.functions.zSetupLightbox("listingLightboxContainer"); 
+	</cfscript>
+<!--- <cfloop from="#firstImageToShow#" to="#variables.listing_photocount#" index="i">
+<cfif structkeyexists(idx,'photo'&i)>  
+#application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto#i#",width:10000,height:10000, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# 
 </cfif>
-</cfloop>
+</cfloop> --->
 </div>
 <cfif structkeyexists(idx, 'officeName')><!--- isOfficeListing EQ false and  --->
 	<cfif os.mls_option_compliantIDX EQ 1>

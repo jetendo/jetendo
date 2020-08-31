@@ -7,6 +7,7 @@ var temp=structnew();
 application.zcore.template.setTag("title","Property Detail"); 
 ts=StructNew();
 ts.list=''; 
+application.zcore.skin.includeJS("/z/javascript/jquery/jquery-lazyload/jquery.lazyload.min.js"); 
 if(structkeyexists(form, 'searchId') EQ false and isDefined('request.zsession.tempVars.zListingSearchId')){
 	form.searchId=request.zsession.tempVars.zListingSearchId;
 }
@@ -260,9 +261,17 @@ infobar_opacity: 1<!--- 				//FLOAT - transparency for info bar --->
 		<cfset hasPhotos=false>
 		<cfloop from="1" to="#form.listing_photocount#" index="i">
 			<cfif structkeyexists(idx,'photo'&i)>
+				<cfscript>
+				full=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
+				if(not hasPhotos){
+					src=full;
+				}else{
+					src="/z/a/images/s.gif";
+				}
+				</cfscript>
 				<cfset hasPhotos=true>
-				<cfset curPhoto=application.zcore.listingCom.getThumbnail(idx['photo'&i], request.lastPhotoId, i, 10000, 10000, 0)> 
-				<li><img id="zmlslistingphoto#i#" data-frame="#curPhoto#" src="#curPhoto#" alt="<cfif structkeyexists(idx, 'photo_description'&i)>
+				<cfset curPhoto=application.zcore.listingCom.getThumbnail(idx['photo'&i], request.lastPhotoId, i, 100, 70, 0)> 
+				<li><img id="zmlslistingphoto#i#" data-frame="#curPhoto#" data-full="#full#" src="#src#" alt="<cfif structkeyexists(idx, 'photo_description'&i)>
 					#htmleditformat(idx['photo_description'&i])#<cfelse>Listing Photo #i#</cfif>" />
 				</li>
 			</cfif>
@@ -524,8 +533,11 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 								</div>
 								<div class="z-float">
 							</cfif>
+							<cfscript>
+							p=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
+							</cfscript> 
 							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:200px; float:left; margin-right:1%; margin-bottom:2%;">
-								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="#idx['photo'&i]#" alt="Listing Photo" class="z-fluid"></a>
+								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="/z/a/images/s.gif" data-lazy-src="default~#p#" alt="Listing Photo" class="z-fluid zLazyLoadImage"></a>
 							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 							</div>
 							<cfscript>
@@ -541,12 +553,15 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 				<div class="z-float">
 					<cfloop from="1" to="#form.listing_photocount#" index="i">
 						<cfif structkeyexists(idx,'photo'&i)>
+							<cfscript>
+							p=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
+							</cfscript> 
 							<cfif count MOD 2 EQ 0 and count NEQ 1>
 								</div>
 								<div class="z-float">
 							</cfif>
 							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:48%; float:left; margin-right:1%; margin-bottom:2%;">
-								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="#idx['photo'&i]#" alt="Listing Photo" class="z-fluid"></a>
+								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img  src="/z/a/images/s.gif" data-lazy-src="default~#p#" alt="Listing Photo" class="z-fluid zLazyLoadImage"></a>
 							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 							</div>
 							<cfscript>

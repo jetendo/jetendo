@@ -8,6 +8,8 @@ if (typeof window.console === "undefined") {
 }
 
 function maintenanceModeDisableForms(){
+	$(".zHideMaintenanceMode").hide();
+	$(".table-searchresults").hide();
 	$("form").each(function(){
 		if($("input", this).length<=2){
 			$(this).after("Temporarily unavailable").remove();

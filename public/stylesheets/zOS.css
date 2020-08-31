@@ -1005,7 +1005,8 @@ a.z-manager-assign:hover span{ color:#369;}
 	.z-content-text-div{vertical-align:top; width:70% !important; max-width:100% !important; display:block; float:left;}
 
 	.zEditorHTML img{ height:auto !important; width:auto !important; max-width:50%; min-width:150px; }
-	.gv_panel img{ width: auto !important;   max-width:100%;  height: 100% !important;}
+	.gv_panel img{  max-width:100%; }
+
 	.zImageLeft{ height:auto !important; width:auto !important; max-width:50%; }
 	.zImageDefault{height:auto !important; width:auto !important; max-width:100% !important; }
 	.zImageRight{height:auto !important; width:auto !important; max-width:50%; }
@@ -1083,8 +1084,7 @@ a.z-manager-assign:hover span{ color:#369;}
 	.zcontent-imagethumbwidth{width:100% !important; min-width:280px; float:left; display:block; padding-bottom:10px;}
 	.z-content-text-div{vertical-align:top; width:100% !important; max-width:100% !important;  display:block; float:left;}
 
-	.zEditorHTML img{padding-left:0px; padding-right:0px;  height:auto !important; width:auto !important; max-width:100%;  float:none !important; min-width:auto;}
-	.gv_panel img{ width: auto !important;     height: 100% !important;}
+	.zEditorHTML img{padding-left:0px; padding-right:0px;  height:auto !important; width:auto !important; max-width:100%;  float:none !important; min-width:auto;} 
 	.zImageLeft{ margin-left:0px; margin-right:0px;  height:auto !important; width:auto !important; max-width:100%; float:none !important; }
 	.zImageDefault{float:none !important;}
 	.zImageRight{ margin-left:0px; height:auto !important; width:auto !important; max-width:100%; float:none !important; }

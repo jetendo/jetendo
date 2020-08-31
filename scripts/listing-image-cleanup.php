@@ -24,7 +24,7 @@ function deleteMissingListingId($arrId, $arrFile){
 		return;
 	}
 	$sql="select listing_id as id from `listing_track` WHERE listing_id IN ('".implode("','", $arrId)."') and listing_track_deleted='0'";
-	echo $sql."\n";
+	//echo $sql."\n";
 	$result=$cmysql->query($sql, MYSQLI_USE_RESULT);
 	if($cmysql->error != ""){
 		echo "Failed to run query in listing-image-cleanup.php\n".$cmysql->error."\n\n".$sql;
@@ -45,7 +45,10 @@ function deleteMissingListingId($arrId, $arrFile){
 				$file=$c[$n];
 				$deleteCount++;
 				if($enableDelete){
-					unlink($file);
+					@unlink($file);
+					@unlink(str_replace(".jpeg", "-large.jpeg", $file));
+					@unlink(str_replace(".jpeg", "-medium.jpeg", $file));
+					@unlink(str_replace(".jpeg", "-small.jpeg", $file));
 				}
 			}
 		}
@@ -54,7 +57,8 @@ function deleteMissingListingId($arrId, $arrFile){
 	usleep(10000);
 }
 
-$arrPhoto=array(3, 4, 9, 12, 15, 16, 19, 20, 21, 22, 24, 25, 28, 30, 31);
+// the mls ids with images
+$arrPhoto=array(25, 26, 27, 30, 31, 32);
 
 $mp=get_cfg_var("jetendo_share_path")."mls-images/";
 $arrHex=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");
@@ -74,6 +78,7 @@ for($g=0;$g<count($arrPhoto);$g++){
 				}
 				$curPath=$mp.$key."/".$arrHex[$i7].$arrHex[$i8]."/".$arrHex[$i9]."/";
 				if (is_dir($curPath) && $handle = opendir($curPath)) {
+					echo $curPath."\n";
 					$arrId=array();
 					$arrFile=array();
 					while (false !== ($entry = readdir($handle))) {

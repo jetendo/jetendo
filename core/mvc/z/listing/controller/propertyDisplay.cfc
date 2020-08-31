@@ -825,14 +825,15 @@ propertyDisplayCom.init(ts);
 			}
 		}
 	} 
+	photo1small=application.zcore.listingCom.getThumbnail(arguments.idx['photo1'], request.lastPhotoId, i, 450, 300, 0);
 	</cfscript>
 	<div class="zls-list-grid-listingdiv" style="width:33%; box-sizing:border-box; ">
 		<input type="hidden" name="m#arguments.idx.listing_id#_mlstempimagepaths" id="m#arguments.idx.listing_id#_mlstempimagepaths" value="#htmleditformat(replace(thePaths,'&amp;','&','all'))#" />
 		<cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_image_enlarge',false,0) EQ 0>
 			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3" style="overflow:hidden; height:#iheight#px; float:left; width:100%;" onmousemove="zImageMouseMove('m#arguments.idx.listing_id#',event);" onmouseout="setTimeout('zImageMouseReset(\'m#arguments.idx.listing_id#\')',100);"><a href="#propertyLink#" title="View Listing" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>>
-			<img src="#arguments.idx.photo1#" alt="View Listing" class="z-fluid"><!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})# 		 --->		</a></div>
+			<img src="#photo1small#" alt="View Listing" class="z-fluid"><!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:photo1small, style:"", canvasStyle:"", crop:true})# 		 --->		</a></div>
 			<cfelse>
-			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3"><a href="#propertyLink#" title="View Listing" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>><img src="#arguments.idx.photo1#" alt="View Listing" class="z-fluid"> <!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:arguments.idx.photo1, style:"", canvasStyle:"", crop:true})#  --->
+			<div id="m#arguments.idx.listing_id#" class="zls-list-grid-imagediv z-preserve-ratio" data-ratio="4:3"><a href="#propertyLink#" title="View Listing" <cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_detail_indexing',true,0) EQ 1>rel="nofollow"</cfif>><img src="#photo1small#" alt="View Listing" class="z-fluid"> <!--- #application.zcore.functions.zLoadAndCropImage({id:"m#arguments.idx.listing_id#_img",width:400,height:300, url:photo1small, style:"", canvasStyle:"", crop:true})#  --->
 				</a></div>
 		</cfif>
 		<div class="zls-grid-summary-text">

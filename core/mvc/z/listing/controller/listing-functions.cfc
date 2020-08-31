@@ -423,7 +423,7 @@ zGetLatLong(ts);
 			</cfscript> 
 			<cfif application.zcore.functions.zso(application.zcore.app.getAppData("listing").sharedStruct.optionStruct, 'mls_option_disable_search',true) EQ 0>
 				<cfif isDefined('returnstruct.count') and returnstruct.count GT returnstruct.perpage>
-					<table style="margin-left:auto; margin-right:auto; border-spacing:10px; width:100%;"><tr><td style="line-height:24px;font-size:18px; font-weight:bold; text-align:center;"><a href="#application.zcore.functions.zblockurl(request.zos.listing.functions.getSearchFormLink()&'?mls_saved_search_id=#arguments.mls_saved_search_id#&zIndex=2')#">Go to Next Page of Listings (Page 2)<br /><br /> or refine this search</a></td></tr></table>
+					<table class="zHideMaintenanceMode" style="margin-left:auto; margin-right:auto; border-spacing:10px; width:100%;"><tr><td style="line-height:24px;font-size:18px; font-weight:bold; text-align:center;"><a href="#application.zcore.functions.zblockurl(request.zos.listing.functions.getSearchFormLink()&'?mls_saved_search_id=#arguments.mls_saved_search_id#&zIndex=2')#">Go to Next Page of Listings (Page 2)<br /><br /> or refine this search</a></td></tr></table>
 				</cfif>
 			</cfif>
 		

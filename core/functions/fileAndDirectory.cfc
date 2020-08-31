@@ -1616,7 +1616,7 @@ ts={
 	alt:"",
 	style:"",
 	href:"",
-	target=""
+	target:""
 };
 application.zcore.functions.zDisplayLazyResponsiveImage(ts);
  ---> 
@@ -1651,7 +1651,7 @@ application.zcore.functions.zDisplayLazyResponsiveImage(ts);
 		throw("There must be a default image defined in the arguments.ss.src struct.");
 	}
 	if(ss.lazy){
-		img='<img src="/z/a/images/s.gif" data-lazy-src="#arrayToList(arrSrc, ":")#" class="#ss.class# zLazyLoadImage" style="#ss.style#" alt="#htmleditformat(ss.alt)#" />';
+		img='<img src="/z/a/images/s.gif" data-lazy-src="#arrayToList(arrSrc, "~")#" class="#ss.class# zLazyLoadImage" style="#ss.style#" alt="#htmleditformat(ss.alt)#" />';
 		if(ss.href != ""){
 			echo('<a href="#ss.href#" target="#ss.target#">#img#</a>');
 		}else{

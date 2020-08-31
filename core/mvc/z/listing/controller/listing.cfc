@@ -172,12 +172,22 @@ this.app_id=11;
 <cfargument name="height" type="numeric" required="no" default="#165#">
 <cfargument name="autocrop" type="numeric" required="no" default="#0#">
 <cfscript>
-
 // check for same domain or domainalias
 local.c=replace(arguments.photourl, request.zos.currentHostName&"/", "/");
 if(arguments.photourl contains "/z/index.php?method=size"){
 	return arguments.photourl;
 } 
+if(arguments.photourl CONTAINS "-large.jpeg"){
+	if(arguments.width <= 400){
+		c=replace(c, "-large.jpeg", "-small.jpeg");
+	}else if(arguments.width <= 800){
+		c=replace(c, "-large.jpeg", "-medium.jpeg");
+	}
+	return c;
+}else{
+	arguments.width=10000;
+	arguments.height=10000;
+}
 if(compare(arguments.photourl, local.c) NEQ 0){
 	if(left(local.c, 12) EQ "/zretsphotos"){
 		if(arguments.width EQ 10000 or arguments.height EQ 10000){ 

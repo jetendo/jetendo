@@ -110,7 +110,7 @@
 				if(src == null){
 					throw("img tag is missing data-lazy-src attribute");
 				}
-				var a=src.split(":");
+				var a=src.split("~");
 				var arrSrc=[];
 				var arrBreakpoint=[];
 				var lastValue="";
@@ -257,6 +257,10 @@
 
 	
 	zArrResizeFunctions.push({functionName:zSetupLazyLoadImages});
+	setTimeout(function(){
+		zSetupLazyLoadImages();
+	}, 1000);
+
 
 	// add class="z-equal-heights" data-column-count="2" to any element and all the children will have heights made equal for each row. You can change 480 to something else with this optional attribute: data-single-column-width="768"
 	// if data-children-class is specified, the equal heights will be performed on the elements matching the class instead of the children of the container.

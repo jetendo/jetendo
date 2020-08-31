@@ -3,6 +3,7 @@
 <cffunction name="index" access="remote" localmode="modern">
 	<cfscript>
 	db=request.zos.queryObject;
+	setting requesttimeout="20000";
 	
 	application.zcore.functions.checkIfCronJobAllowed();
 	pastDate=application.zcore.functions.zAddTimespanToDate(-request.zos.passwordExpirationTimeSpan, now());
@@ -54,6 +55,22 @@
 	user_token_deleted = #db.param(0)# and 
 	site_id <> #db.param(-1)#";
 	db.execute("qDeleteToken");
+
+	yearAgo=dateadd("d", -365, now());
+
+
+	db.sql="delete from #db.table("log", request.zos.zcoreDatasource)# WHERE 
+	log_updated_datetime <= #db.param(dateformat(yearAgo, "yyyy-mm-dd")&" "&timeformat(yearAgo, "HH:mm:ss"))# and 
+	log_deleted = #db.param(0)#";
+	db.execute("qDelete");
+	db.sql="delete from #db.table("login_log", request.zos.zcoreDatasource)# WHERE 
+	login_log_updated_datetime <= #db.param(dateformat(yearAgo, "yyyy-mm-dd")&" "&timeformat(yearAgo, "HH:mm:ss"))# and 
+	login_log_deleted = #db.param(0)#";
+	db.execute("qDelete");
+	db.sql="delete from #db.table("audit", request.zos.zcoreDatasource)# WHERE 
+	audit_updated_datetime <= #db.param(dateformat(yearAgo, "yyyy-mm-dd")&" "&timeformat(yearAgo, "HH:mm:ss"))# and 
+	audit_deleted = #db.param(0)#";
+	db.execute("qDelete");
 	abort;
 	</cfscript>
 </cffunction>

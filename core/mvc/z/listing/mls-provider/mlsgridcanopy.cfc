@@ -72,7 +72,13 @@
 			for(i=1;i LTE idx.listing_photocount;i++){
 				fNameTemp1=this.mls_id&"-"&idx.urlMlsPid&"-"&i&".jpeg";
 				fNameTempMd51=lcase(hash(fNameTemp1, 'MD5'));
-				idx["photo"&i]=request.zos.retsPhotoPath&this.mls_id&'/'&left(fNameTempMd51,2)&"/"&mid(fNameTempMd51,3,1)&"/"&fNameTemp1;
+				
+				p=request.zos.sharedPath&'mls-images/32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+				if(fileexists(p)){
+					idx["photo"&i]=request.zos.retsPhotoPath&'32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+				}else{
+					idx["photo"&i]=request.zos.retsPhotoPath&'32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+				}
 			}
 			// if(structkeyexists(js, "arrPhoto")){
 			// 	for(i=1;i<=arraylen(js.arrPhoto);i++){
@@ -128,7 +134,13 @@
 		request.lastPhotoId=this.mls_id&"-"&arguments.mls_pid;
 		local.fNameTemp1=this.mls_id&"-"&arguments.mls_pid&"-"&arguments.num&".jpeg";
 		local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
-		return request.zos.retsPhotoPath&this.mls_id&'/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+
+		p=request.zos.sharedPath&'mls-images/32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+		if(fileexists(p)){
+			return request.zos.retsPhotoPath&'32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+		}else{
+			return request.zos.retsPhotoPath&'32/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
+		}
 		
 
 

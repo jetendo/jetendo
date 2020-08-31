@@ -348,7 +348,7 @@
 			</cfif>
 			<p><a href="/z/server-manager/admin/site/publishNginxAllSitesConfig" target="_blank">Publish Nginx Config For All Sites</a></p>
 			<h3>Scheduled Tasks</h3>
-			<p><a href="/z/server-manager/tasks/password-expiration/index" target="_blank">Delete passwords for inactive accounts</a></p>
+			<p><a href="/z/server-manager/tasks/password-expiration/index" target="_blank">Delete passwords for inactive accounts and old db logs</a></p>
 			<p><a href="/z/server-manager/tasks/verify-tables/index" target="_blank">Verify Table Structure</a></p>
 			<p>Verify Sites: 
 			<cfscript>
@@ -364,7 +364,7 @@
 			<p><a href="/z/server-manager/tasks/update-exchange-rate/index" target="_blank">Update Exchange Rates</a></p>
 			<p><a href="/z/server-manager/tasks/send-lead-reminders/index" target="_blank">Send Lead Reminders</a></p>
 			<p><a href="/z/server-manager/tasks/execute-http-queue/index" target="_blank">Execute HTTP Queue</a> (<a href="/z/server-manager/tasks/execute-http-queue/viewErrors" target="_blank">View errors</a>)</p>
-			<p><a href="/z/server-manager/tasks/publish-missing/index" target="_blank">Publish 404 pages</a></p>
+			<p><a href="/z/server-manager/tasks/publish-missing/index" target="_blank">Publish 404/500 pages</a></p>
 			<p><a href="/z/server-manager/tasks/verify-conventions/index" target="_blank">Verify Conventions</a></p>
 			<p><a href="/z/server-manager/tasks/update-sitemap/index" target="_blank">Update Sitemaps</a></p>
 			<p><a href="/z/server-manager/tasks/resend-autoresponders/index" target="_blank">Resend Autoresponders / Confirm Opt-in</a></p>

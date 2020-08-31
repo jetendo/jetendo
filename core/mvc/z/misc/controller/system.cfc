@@ -2,7 +2,8 @@
 <cfoutput> 
 <cffunction name="index" localmode="modern" access="remote"><cfscript> 
 	writeoutput('1 is OK');
-	// This function is used for monitoring
+	// echo("is the monitoring working?");
+	// This function is used for monitoring 
 	application.zcore.functions.zabort();
 	</cfscript>
 </cffunction>
@@ -282,6 +283,27 @@ if(structkeyexists(form, 'zforceapplicationurlrewriteupdate')){
 	<!-- :404missingpage: -->
 </cffunction>
 
+<cffunction name="error" localmode="modern" access="remote">
+	
+	<cfscript>
+	application.zcore.template.setTag("title",'Sorry, this page is temporarily unavailable.');
+	application.zcore.template.setTag("pagetitle",'Sorry, this page is temporarily unavailable.');
+	//application.zcore.template.setTag("meta",tempMeta);
+	//application.zcore.template.setTag("pagenav",tempPageNav);
+
+	if(application.zcore.app.siteHasApp("content")){
+		ts=structnew();
+		ts.content_unique_name='/z/misc/system/error'; 
+		r1=application.zcore.app.getAppCFC("content").includePageContentByName(ts);
+		if(not r1){
+			echo('Please browse our site or go back and try a different link.<br /><br />');
+		}
+	}else{
+		echo('Please browse our site or go back and try a different link.<br /><br />');
+	}
+	</cfscript>
+	<!-- :500errorpage: -->
+</cffunction>
 
 <cffunction name="checkHealth" localmode="modern" access="remote">
 	<cfscript>

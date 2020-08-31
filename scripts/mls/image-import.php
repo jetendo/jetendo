@@ -1,4 +1,7 @@
 <?php
+echo "not in use now, disabled. it doesn't implement large/medium/small yet";
+exit;
+
 require(get_cfg_var("jetendo_scripts_path")."library.php");
 set_time_limit (3500); // 1 hour timeout | schedule task to run hourly.
 error_reporting(E_ALL);

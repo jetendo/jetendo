@@ -11,28 +11,34 @@ var zGalleryReloadTimeoutId=0;
 		var e=zGetElementsByClassName("zLoadAndCropImage");
 		var time=new Date().getTime();
 		for(var i=0;i<e.length;i++){
-			if(e[i].getAttribute("data-imageloaded")==="1"){
-				c=$("canvas", e[i]);
-				c[0].style.maxWidth="99%";
+			var a=e[i];
+			if(typeof a == "undefined" || typeof a.style == "undefined"){
 				continue;
 			}
-			e[i].setAttribute("data-imageloaded", "1");
-			var url=e[i].getAttribute("data-imageurl");
-			var style=e[i].getAttribute("data-imagestyle");
-			var width=parseInt(e[i].getAttribute("data-imagewidth"));
-			var height=parseInt(e[i].getAttribute("data-imageheight"));
+			if(a.getAttribute("data-imageloaded")==="1"){
+				c=$("canvas", a);
+				if(c.length>0){
+					c[0].style.maxWidth="99%";
+				}
+				continue;
+			}
+			a.setAttribute("data-imageloaded", "1");
+			var url=a.getAttribute("data-imageurl");
+			var style=a.getAttribute("data-imagestyle");
+			var width=parseInt(a.getAttribute("data-imagewidth"));
+			var height=parseInt(a.getAttribute("data-imageheight"));
 			var crop=false;
-			if(e[i].getAttribute("data-imagecrop")==="1"){
+			if(a.getAttribute("data-imagecrop")==="1"){
 				crop=true;
 			}
-			if(typeof e[i].style.maxWidth !== "undefined" && e[i].style.maxWidth !== ""){
-				var tempWidth=parseInt(e[i].style.maxWidth);
+			if(typeof a.style.maxWidth != "undefined" && a.style.maxWidth != ""){
+				var tempWidth=parseInt(a.style.maxWidth);
 				if(tempWidth<width){
 					width=tempWidth;
 					height=width;
 				}
 			}
-			zLoadAndCropImage(e[i], url, debug, width, height, crop, style);
+			zLoadAndCropImage(a, url, debug, width, height, crop, style);
 		}
 	}
 	function zLoadAndCropImagesDefer(){
@@ -42,6 +48,7 @@ var zGalleryReloadTimeoutId=0;
 
 	zArrLoadFunctions.push({functionName:zLoadAndCropImagesDefer});
 	function zLoadAndCropImage(obj, imageURL, debug, width, height, crop, style){ 
+		if(typeof obj=="undefined") return;
 		// TODO: someday figure out how to make crop always work, for now, i gave up.
 		// if((zMSIEBrowser!==-1 && zMSIEVersion<=9) || window.location.href.indexOf("disableCanvasCrop=") != -1){
 			if(height===10000){

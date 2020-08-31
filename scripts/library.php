@@ -94,6 +94,14 @@ function zGetBackupPath(){
 	}
 }
 
+function zIDXImageResize($path, $filename){
+	$a=explode(".", $filename);
+	$name=$a[0];
+	$cmd="/usr/local/bin/convert ".escapeshellarg($path.$name.".jpeg")." -limit thread 4 -quiet -strip -interlace Plane -sampling-factor 4:2:0 -auto-orient -quality 50 -resize 1920x1080 -write ".escapeshellarg($path.$name.".jpeg")." -resize 800x500 -write ".$path.$name."-large.jpeg -resize 400x250 -write ".escapeshellarg($path.$name."-medium.jpeg")." -resize 200x125 ".escapeshellarg($path.$name."-small.jpeg");
+	`$cmd`;
+	return true;
+}
+
 // zEmail("", "")
 function zEmail($subject, $message){
 	$host=`hostname`;
@@ -312,6 +320,9 @@ require_once($configPath);
 require_once("phrets.php");
 function zDownloadRetsImages($listingId, $sysId, $photoIndex){
 	global $arrRetsConnections, $arrRetsConfig;
+
+	echo "this doesn't implement large/medium/small images yet, so i've disabled it to avoid accidental use.";
+	exit;
 
 	$arrId=explode("-", $listingId);
 	$mls_id=$arrId[0];

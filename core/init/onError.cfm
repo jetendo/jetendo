@@ -57,6 +57,18 @@
 		form.z_tmppassword2='Password removed for security';
 	}
 	</cfscript>
+
+	<cftry>
+	<cfif request.zos.isDeveloper>
+		<!--- return 520 to bypass the proxy intercept errors nginx code --->
+		<cfheader statuscode="520" statustext="Internal Server Error">
+	<cfelse>
+		<cfheader statuscode="500" statustext="Internal Server Error">
+	</cfif>
+	<cfcatch type="any">
+	<!--- already output headers! ---->
+	</cfcatch>
+	</cftry>
 	<cftry>
 		<cfscript>
 		request.zos.inOnErrorFunction=true;
@@ -156,8 +168,7 @@
 				</cfcatch>
 			</cftry>
 		<!--- </cfif> --->
-		<cfcatch type="any">
-			<cfheader statuscode="500" statustext="Internal Server Error">
+		<cfcatch type="any"> 
 			<cfdump var="#cfcatch#">
 			<cfdump var="#arguments#">
 			<cfabort>
@@ -253,12 +264,6 @@
 		variables.error.rootcause=duplicate(evaluate('variables.catch'));
 		</cfscript>
 	</cfif>
-	<cftry>
-	<cfheader statuscode="500" statustext="Internal Server Error">
-	<cfcatch type="any">
-	<!--- already output headers! ---->
-	</cfcatch>
-	</cftry>
 	<cfif findnocase('[PLM=0] GET', request.cgi_script_name) NEQ 0>
 		Access Denied<cfabort>
 	</cfif>

@@ -574,6 +574,9 @@ var zLastAjaxVarName=""; */
 		
 	}
 	function zFormOnChange(formName, fieldIndex){
+		if(typeof zFormData[formName] =="undefined" || typeof zFormData[formName].arrFields == "undefined"){
+			return;
+		}
 		var f=zFormData[formName].arrFields[fieldIndex];
 		var o=document.getElementById(f.id);
 		if(zFormData[formName].error){

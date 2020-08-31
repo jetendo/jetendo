@@ -49,7 +49,7 @@ if ($handle = opendir($mp)) {
     while (false !== ($entry = readdir($handle))) {
 		if($entry !="." && $entry !=".."){
 			if($entry != $today){
-				$cmd="rm -rf ".get_cfg_var("jetendo_share_path")."mls-images-temp/".$entry."/";
+				$cmd="rm -rf ".escapeshellarg(get_cfg_var("jetendo_share_path")."mls-images-temp/".$entry."/");
 				//echo $cmd."\n";
 				echo "deleting ".get_cfg_var("jetendo_share_path")."mls-images-temp/".$entry."/\n";
 				`$cmd`;

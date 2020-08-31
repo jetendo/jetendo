@@ -27,6 +27,7 @@ function zImageMouseReset(id,mev){
 	if(d2===null) return;
 	var dpos=zGetAbsPosition(d2);
 	var dimg=document.getElementById(id+"_img");
+	if(!dimg) return;
 	if(
 		(zMousePosition.x > dpos.x)                &&
 		(zMousePosition.x < (dpos.x + dpos.width))  &&
@@ -43,7 +44,7 @@ function zImageMouseReset(id,mev){
 	}
 	zIArrMST[id]=false;
 	zIArrM5[id]=-1;
-	zIArrM2[id]=new Array();
+	zIArrM2[id]=new Array(); 
 	dimg.style.display="block";
 	zImageForceCloseEnlarger();
 	if(typeof zIArrOriginal[id] !== "undefined"){
