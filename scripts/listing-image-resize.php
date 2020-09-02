@@ -13,7 +13,7 @@ $totalCount=0;
 $skipCount=0;
  
 // the mls ids with images, 25 is last because its too big
-$arrPhoto=array(26, 31, 32, 25, 27, 30);
+$arrPhoto=array(27, 26, 31, 32, 25, 30);
 
 $mp=get_cfg_var("jetendo_share_path")."mls-images/";
 $arrHex=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");

@@ -111,6 +111,12 @@
 		customStruct={};
 		sortStruct={};
 
+		db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# ";
+		qstatus=db.execute("qstatus");
+		statusName={};
+		loop query="qstatus"{
+			statusName[qstatus.inquiries_status_id]=qstatus.inquiries_status_name;
+		}
 
 		for(i2=1;i2 LTE 2;i2++){
 			doffset=0;
@@ -122,7 +128,7 @@
 				structdelete(fieldStruct, 'inquiries_type_id');
 				structdelete(fieldStruct, 'inquiries_type_id_siteIdType');
 				structdelete(fieldStruct, 'inquiries_type_other');
-				structdelete(fieldStruct, 'inquiries_deleted');
+				structdelete(fieldStruct, 'inquiries_deleted'); 
 				structdelete(fieldStruct, 'inquiries_status_id');
 				structdelete(fieldStruct, 'inquiries_assign_email');
 				structdelete(fieldStruct, 'user_id');
@@ -130,6 +136,7 @@
 				structdelete(fieldStruct, 'inquiries_readonly');
 				structdelete(fieldStruct, 'inquiries_external_id');
 				structdelete(fieldStruct, 'site_id');
+				fieldStruct.status="";
 				arrF=structkeyarray(fieldStruct);
 				arrayAppend(arrF, 'zsource');
 				arrF2=structkeyarray(customStruct);
@@ -323,6 +330,7 @@
 						echo('<td>Zip</td>');
 						echo('<td>Country</td>');
 						echo('<td>Company</td>');
+						echo('<td>Status</td>');
 						echo('</tr>'&chr(10));
 					}else{
 						echo('"Type",');
@@ -338,10 +346,10 @@
 						echo('"Zip",');
 						echo('"Country",');
 						echo('"Company",'); 
+						echo('"Status",'); 
 						echo(chr(13)&chr(10));
 					} 
 				}
-
 				db.sql=theSQL&" LIMIT #db.param(doffset)#, #db.param(100)# ";
 				qInquiries=db.execute("qInquiries");
 				// writedump(qInquiries);abort;
@@ -357,6 +365,11 @@
 						if(structkeyexists(typeStruct, tid)){
 							typeName=typeStruct[tid];
 						} 
+						if(row.inquiries_status_id NEQ ""){
+							status=statusName[row.inquiries_status_id];
+						}else{
+							status="";
+						}
 						dateTime=dateformat(row.inquiries_datetime, "m/dd/yyyy")&" "&Timeformat(row.inquiries_datetime, "h:mm tt");
 						if(form.format EQ 'html'){
 							if(currentrow MOD 2 EQ 0){
@@ -378,6 +391,7 @@
 							echo('<td>'&row.inquiries_zip&'</td>');
 							echo('<td>'&row.inquiries_country&'</td>');
 							echo('<td>'&row.inquiries_company&'</td>');
+							echo('<td>'&status&'</td>');
 							echo('</tr>'&chr(10));
 						}else{
 							echo('"'&replace(typeName, '"', '', 'all')&'",');
@@ -393,6 +407,7 @@
 							echo('"'&replace(row.inquiries_zip, '"', '', 'all')&'",');
 							echo('"'&replace(row.inquiries_country, '"', '', 'all')&'",');
 							echo('"'&replace(row.inquiries_company, '"', '', 'all')&'",'); 
+							echo('"'&status&'",');
 							echo(chr(13)&chr(10));
 						}
 						currentRow++;
@@ -428,6 +443,11 @@
 					}else{
 						currentRow=1;
 						for(row in qInquiries){
+							if(row.inquiries_status_id NEQ ""){
+								row.status=statusName[row.inquiries_status_id];
+							}else{
+								row.status="";
+							}
 							arrLink=arraynew(1);
 							if(application.zcore.app.siteHasApp("content")){
 								if(row.content_id NEQ 0 and row.content_id NEQ ""){
