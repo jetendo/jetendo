@@ -178,7 +178,7 @@ if(arguments.photourl contains "/z/index.php?method=size"){
 	return arguments.photourl;
 } 
 if(arguments.photourl CONTAINS "-large.jpeg"){
-	if(arguments.width <= 400){
+	if(arguments.width <= 200){
 		c=replace(c, "-large.jpeg", "-small.jpeg");
 	}else if(arguments.width <= 800){
 		c=replace(c, "-large.jpeg", "-medium.jpeg");

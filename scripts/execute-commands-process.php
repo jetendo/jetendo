@@ -1636,7 +1636,7 @@ function getImageMagickConvertApplyMask($a){
 	}else if($ext == '.gif'){
 		// do nothing
 	}else{
-		$compress=' -strip -interlace Plane -sampling-factor 4:2:0 -quality '.$compressQuality.'% ';
+		$compress=' -interlace Plane -sampling-factor 4:2:0 -quality '.$compressQuality.'% ';
 	}
 	$cmd="/usr/bin/convert ".$compress." ".escapeshellarg($absImageInputPath)." ".escapeshellarg($absImageMaskPath)." -alpha Off -compose CopyOpacity -composite ".$pngColorFix.escapeshellarg($absImageOutputPath);
 	$r=`$cmd`;
@@ -1967,7 +1967,7 @@ function getImageMagickConvertResize($a){
 	}else if($ext == '.gif'){
 		// do nothing.
 	}else{
-		$compress=' -strip -interlace Plane -sampling-factor 4:2:0 -quality '.$compressQuality.'% ';
+		$compress=' -interlace Plane -sampling-factor 4:2:0 -quality '.$compressQuality.'% ';
 	}
 	// TODO - auto-orient or manual rotations to fix -auto-orient
 	$cmd.=' -auto-orient '.escapeshellarg($sourceFilePath).' '.$compress.' '.$pngColorFix.escapeshellarg($destinationFilePath); 

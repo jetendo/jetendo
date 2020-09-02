@@ -97,7 +97,7 @@ function zGetBackupPath(){
 function zIDXImageResize($path, $filename){
 	$a=explode(".", $filename);
 	$name=$a[0];
-	$cmd="/usr/local/bin/convert ".escapeshellarg($path.$name.".jpeg")." -limit thread 4 -quiet -strip -interlace Plane -sampling-factor 4:2:0 -auto-orient -quality 50 -resize 1920x1080 -write ".escapeshellarg($path.$name.".jpeg")." -resize 800x500 -write ".$path.$name."-large.jpeg -resize 400x250 -write ".escapeshellarg($path.$name."-medium.jpeg")." -resize 200x125 ".escapeshellarg($path.$name."-small.jpeg");
+	$cmd="/usr/local/bin/convert ".escapeshellarg($path.$name.".jpeg")." -limit thread 4 -quiet -interlace Plane -sampling-factor 4:2:0 -auto-orient -quality 50 -resize 1920x1080 -write ".escapeshellarg($path.$name.".jpeg")." -resize 800x500 -write ".$path.$name."-large.jpeg -resize 400x250 -write ".escapeshellarg($path.$name."-medium.jpeg")." -resize 200x125 ".escapeshellarg($path.$name."-small.jpeg");
 	`$cmd`;
 	return true;
 }

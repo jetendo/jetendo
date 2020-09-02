@@ -262,7 +262,7 @@ infobar_opacity: 1<!--- 				//FLOAT - transparency for info bar --->
 		<cfloop from="1" to="#form.listing_photocount#" index="i">
 			<cfif structkeyexists(idx,'photo'&i)>
 				<cfscript>
-				full=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
+				full=idx['photo'&i];
 				if(not hasPhotos){
 					src=full;
 				}else{
