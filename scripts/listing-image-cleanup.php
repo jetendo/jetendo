@@ -97,7 +97,8 @@ for($g=0;$g<count($arrPhoto);$g++){
 									continue;
 								}
 								$arrId9=explode("-", $entry);
-								if(count($arrId9) == 3){
+								if(count($arrId9) >= 3){
+									// the number of hypens can be 3 or 4, because of -large, -medium, -small new feature.
 									$listing_id=$arrId9[0]."-".$arrId9[1];
 								}else if(count($arrId9) == 2){
 									$listing_id=$key."-".$arrId9[0];

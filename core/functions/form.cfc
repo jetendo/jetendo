@@ -3661,7 +3661,7 @@ echo('
 	<cfset local.tick=gettickcount()>
 
 	<div id="formEmailDiv#local.tick#">
-		<label for="formEmailField#local.tick#">Email</label> <input name="form_email" id="formEmailField#local.tick#" type="email" maxlength="50" value="" /> * Required
+		<label for="formEmailField#local.tick#">Work Email</label> <input name="form_email" id="formEmailField#local.tick#" type="email" maxlength="50" value="" /> * Required
 	</div>
 	<table id="zInqTheFormNames#local.tick#">
         <tr>

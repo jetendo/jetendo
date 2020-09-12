@@ -1642,21 +1642,18 @@ function getImageMagickConvertApplyMask($a){
 	$r=`$cmd`;
 	echo $cmd."\n".$r."\n";
 	if(file_exists($absImageOutputPath)){
-		if(!zIsTestServer()){
-
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageInputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($absImageInputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageOutputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($absImageOutputPath);
-			echo $cmd."\n";
-			`$cmd`;
-		}
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageInputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($absImageInputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageOutputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($absImageOutputPath);
+		echo $cmd."\n";
+		`$cmd`;
 		return "1";
 	}
 	echo "Failed to apply image to image\n";
@@ -1795,21 +1792,19 @@ function getImageMagickMergeImages($a){
 	$r=`$cmd`;
 	echo $cmd."\n".$r."\n"; 
 	if(file_exists($absImageOutputPath)){
-		if(!zIsTestServer()){
 
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageInputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($absImageInputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageOutputPath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($absImageOutputPath);
-			echo $cmd."\n";
-			`$cmd`;
-		}
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageInputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($absImageInputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($absImageOutputPath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($absImageOutputPath);
+		echo $cmd."\n";
+		`$cmd`;
 		return "1";
 	}
 	echo "Failed to apply image to image\n";
@@ -1943,20 +1938,18 @@ function getImageMagickConvertResize($a){
 			copy($sourceFilePath, $destinationFilePath);
 			if(file_exists($destinationFilePath)){
 
-				if(!zIsTestServer()){
-					$cmd1='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
-					echo $cmd1."\n";
-					`$cmd1`;
-					$cmd1='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
-					echo $cmd1."\n";
-					`$cmd1`;
-					$cmd1='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationFilePath);
-					echo $cmd1."\n";
-					`$cmd1`;
-					$cmd1='/bin/chmod 660 '.escapeshellarg($destinationFilePath);
-					echo $cmd1."\n";
-					`$cmd1`;
-				}
+				$cmd1='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
+				echo $cmd1."\n";
+				`$cmd1`;
+				$cmd1='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
+				echo $cmd1."\n";
+				`$cmd1`;
+				$cmd1='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationFilePath);
+				echo $cmd1."\n";
+				`$cmd1`;
+				$cmd1='/bin/chmod 660 '.escapeshellarg($destinationFilePath);
+				echo $cmd1."\n";
+				`$cmd1`;
 			}
 			return "1";
 		}
@@ -1992,20 +1985,18 @@ function getImageMagickConvertResize($a){
 			unlink($tempDestination);
 		}
 
-		if(!zIsTestServer()){
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationFilePath);
-			echo $cmd."\n";
-			`$cmd`;
-			$cmd='/bin/chmod 660 '.escapeshellarg($destinationFilePath);
-			echo $cmd."\n";
-			`$cmd`;
-		}
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationFilePath);
+		echo $cmd."\n";
+		`$cmd`;
+		$cmd='/bin/chmod 660 '.escapeshellarg($destinationFilePath);
+		echo $cmd."\n";
+		`$cmd`;
 		return "1";
 	}else{ 
 		if($renamed){
@@ -2085,20 +2076,18 @@ function saveFaviconSet($a){
 	$cmd='/usr/bin/convert '.escapeshellarg($sourceFilePath).' -resize 192x192 '.escapeshellarg($destinationPath.'/apple-touch-icon.png'); 
 	//echo $cmd."\n";
 	$r=`$cmd`;   
-	if(!zIsTestServer()){
-		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
-		echo $cmd."\n";
-		`$cmd`;
-		$cmd='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
-		echo $cmd."\n";
-		`$cmd`;
-		$cmd='/bin/chown -R '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationPath."/*");
-		echo $cmd."\n";
-		`$cmd`;
-		$cmd='/bin/chmod -R 660 '.escapeshellarg($destinationPath."/*");
-		echo $cmd."\n";
-		`$cmd`;
-	}
+	$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($sourceFilePath);
+	echo $cmd."\n";
+	`$cmd`;
+	$cmd='/bin/chmod 660 '.escapeshellarg($sourceFilePath);
+	echo $cmd."\n";
+	`$cmd`;
+	$cmd='/bin/chown -R '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($destinationPath."/*");
+	echo $cmd."\n";
+	`$cmd`;
+	$cmd='/bin/chmod -R 660 '.escapeshellarg($destinationPath."/*");
+	echo $cmd."\n";
+	`$cmd`;
 	//echo "Success\n\n";
 	return "1"; 
 }
@@ -2288,15 +2277,13 @@ function tarZipSiteUploadPath($a){
 	echo $cmd."\n";
 	`$cmd`;
 
-	if(!zIsTestServer()){
 
-		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($tarPath);
-		echo $cmd."\n";
-		`$cmd`;
-		$cmd='/bin/chmod 440 '.escapeshellarg($tarPath);
-		echo $cmd."\n";
-		`$cmd`;
-	}
+	$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($tarPath);
+	echo $cmd."\n";
+	`$cmd`;
+	$cmd='/bin/chmod 440 '.escapeshellarg($tarPath);
+	echo $cmd."\n";
+	`$cmd`;
 	if(file_exists($tarPath)){
 		return "1";
 	}else{
@@ -2442,14 +2429,12 @@ function tarZipSitePath($a){
 	}
 	echo $cmd."\n";
 	`$cmd`;
-	if(!zIsTestServer()){
-		$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($tarPath);
-		echo $cmd."\n";
-		`$cmd`;
-		$cmd='/bin/chmod 440 '.escapeshellarg($tarPath);
-		echo $cmd."\n";
-		`$cmd`;
-	}
+	$cmd='/bin/chown '.get_cfg_var("jetendo_www_user").":".get_cfg_var("jetendo_www_user")." ".escapeshellarg($tarPath);
+	echo $cmd."\n";
+	`$cmd`;
+	$cmd='/bin/chmod 440 '.escapeshellarg($tarPath);
+	echo $cmd."\n";
+	`$cmd`;
 	if(file_exists($tarPath)){
 		return "1";
 	}else{

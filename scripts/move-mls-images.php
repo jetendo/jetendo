@@ -2,6 +2,9 @@
 require("library.php");
 error_reporting(E_ALL);
 
+echo "No longer used, aborting";
+exit;
+
 $runningFilePath=get_cfg_var("jetendo_scripts_path")."move-mls-images-running.txt";
 if(file_exists($runningFilePath)){
 	$d=filemtime($runningFilePath);

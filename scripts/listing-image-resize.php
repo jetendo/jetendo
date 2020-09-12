@@ -1,6 +1,8 @@
 <?php
-// run every 60 minutes for up to 60 minutes in crontab.
-// */5 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/listing-image-resize.php >/dev/null 2>&1
+// run every 60 minutes for up to 60 minutes in crontab.  
+// 15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/listing-image-resize2.php >/dev/null 2>&1
+// 15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/listing-image-resize3.php >/dev/null 2>&1
+// 15 * * * * /usr/bin/php /var/jetendo-server/jetendo/scripts/listing-image-resize4.php >/dev/null 2>&1
 require("library.php");
 error_reporting(E_ALL);
 set_time_limit(3600);
@@ -13,7 +15,11 @@ $totalCount=0;
 $skipCount=0;
  
 // the mls ids with images, 25 is last because its too big
-$arrPhoto=array(27, 26, 31, 32, 25, 30);
+//$arrPhoto=array(32, 27, 26, 31, 30, 25);
+if(!isset($arrPhoto)){
+	echo "You can't run this script directly";
+	exit;
+}
 
 $mp=get_cfg_var("jetendo_share_path")."mls-images/";
 $arrHex=array(0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f");
@@ -26,7 +32,10 @@ for($g=0;$g<count($arrPhoto);$g++){
 		for($i8=0;$i8<16;$i8++){
 			if($fastDebug && $i8 != 0){
 				continue;
-			}
+			} 
+			// if($key==25 && ($i7*10)+$i8 <=145){
+			// 	continue;
+			// }
 			for($i9=0;$i9<16;$i9++){
 				if($fastDebug && $i9 != 0){
 					continue;
