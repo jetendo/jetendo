@@ -374,7 +374,7 @@ for($i4=0;$i4 < 62;$i4++){
 		}else{
 		}
 		// only run on remote
-		if(($isSharedTestServer || !$isTestServer) && file_exists($siteInstallPath."__zdeploy-complete.txt")){
+		if(file_exists($siteInstallPath."__zdeploy-complete.txt")){
 			// fix file chown and chmod permissions
 			$preview=false;
 			$arrError=array();
