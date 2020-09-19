@@ -2008,7 +2008,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 					throw("Infinite loop detected in group heirarchy");
 				}
 			}
-		}
+		} 
 		if(not found){
 			parentId=0;
 		} 
@@ -2119,7 +2119,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 				}
 			}
 			for(n in ds){
-				arrKey=structsort(ds[n], "text", "asc", "sort");
+				arrKey=structsort(ds[n], "text", "asc", "label");
 				for(f=1;f LTE arraylen(arrKey);f++){
 					arrayAppend(ds2[n], ds[n][arrKey[f]]);
 				}
