@@ -763,6 +763,12 @@ has enums with individual plain text name and id value pairs - do i need them?
 					mlsgrid_media_deleted=#db.param(0)# ";
 					db.execute("qInsert");
 				}
+				db.sql="DELETE FROM #db.table("mlsgrid_media", request.zos.zcoreDatasource)#  WHERE 
+				mlsgrid_media_updated_datetime<#db.param(request.zos.mysqlnow)# and 
+				mls_id=#db.param(this.mls_id)# and 
+				mlsgrid_media_key=#db.param("#ns["MediaKey"]#")# and 
+				mlsgrid_media_deleted=#db.param(0)# ";
+				db.execute("qDelete");
 			}  
 		}
 		mediaFileCount++;

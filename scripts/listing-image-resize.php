@@ -75,7 +75,13 @@ for($g=0;$g<count($arrPhoto);$g++){
 	  							// echo "stopped\n";
 	  							// exit;
 	  						}else{
-								$skipCount++;
+								// check if the original filemtime is newer then the resized image filemtime
+								if(filemtime($curPath.$entry) > filemtime(str_replace(".jpeg", "-large.jpeg", $curPath.$entry))){
+									echo "New image, resizing again: ".$curPath.$entry."\n";
+	  								zIDXImageResize($curPath, $entry);
+								}else{
+									$skipCount++;
+								}
 	  						}
 						}
 					}

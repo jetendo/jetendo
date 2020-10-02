@@ -1,5 +1,5 @@
 <?php
-$arrPhoto=array(31, 30, 32, 27);
+$arrPhoto=array(32, 31, 30, 27);
 require("listing-image-resize.php");
 
 ?>

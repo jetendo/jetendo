@@ -230,6 +230,7 @@ select * from static_cache where static_cache_processed ='2' limit 0,10000;
 <cffunction name="getSiteContentCount" localmode="modern" access="remote">
 	<cfscript>
 	init();
+	setting requesttimeout="1000";
 	arrCache=getSiteLinks(); 
 	rs={ success:true, count: arraylen(arrCache) };
 	application.zcore.functions.zReturnJson(rs);

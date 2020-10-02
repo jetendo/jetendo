@@ -509,18 +509,18 @@ DELETE FROM `#request.zos.zcoreDatasource#`.`listing_memory` WHERE listing_id LI
 				
 				local.fNameTemp1=arguments.ss.listing_id&"-"&i&".jpeg";
 				local.fNameTempMd51=lcase(hash(local.fNameTemp1, 'MD5'));
-				local.absPath='#request.zos.sharedPath#mls-images/25/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
-				//if(fileexists(local.absPath)){
+				local.absPath='#request.zos.sharedPath#mls-images/25/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+				if(fileexists(local.absPath)){
 					if(i EQ 1){
 						request.lastPhotoId=arguments.ss.listing_id;
 					}
-					idx["photo"&i]=request.zos.retsPhotoPath&'25/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&local.fNameTemp1;
-				/*}else{
+					idx["photo"&i]=request.zos.retsPhotoPath&'25/'&left(local.fNameTempMd51,2)&"/"&mid(local.fNameTempMd51,3,1)&"/"&replace(local.fNameTemp1, ".jpeg", "-large.jpeg");
+				}else{
 					idx["photo"&i]='/z/a/listing/images/image-not-available.gif';
 					if(i EQ 1){
 						request.lastPhotoId="";
 					}
-				}*/
+				}
 			}
 		}
 			idx["agentName"]=arguments.ss["rets25_listagentfullname"];
