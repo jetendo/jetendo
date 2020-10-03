@@ -2471,7 +2471,7 @@ and (rental_rate <> '0' and rental_rate<=#db.param(form.search_rate_high)#)
 		</cfscript>
 <!--- 
 working example from gravity forms
-<cfmail from="#request.zos.developerEmailTo#" to="inquiry-1@lodgix.com" type="html" charset="utf-8" subject="Inquiry" >Property ID: 1
+<cfdisabledmail from="#request.zos.developerEmailTo#" to="inquiry-1@lodgix.com" type="html" charset="utf-8" subject="Inquiry" >Property ID: 1
 Name: Test Name
 Email: developer@your-company.com
 Phone: (123)123-1234
@@ -2494,6 +2494,29 @@ Comments: Testing inquiry - please ignore.
 <cfset defaultLodgixUsed=false>
 <cfscript>
 </cfscript>
+<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" to="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_to#" from="#form.inquiries_email#" charset="utf-8" subject="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_subject#">Property ID: <cfif application.zcore.functions.zso(form, 'lodgix_property_id') EQ "">#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_property_id#<cfset defaultLodgixUsed=true><cfelse>#form.lodgix_property_id#</cfif><!--- {Property ID:21:value} --->
+Name: #form.inquiries_first_name# #form.inquiries_last_name#
+Email: <cfif structkeyexists(form, 'inquiries_email')>#form.inquiries_email#</cfif>
+Phone: <cfif structkeyexists(form, 'inquiries_phone1')>#form.inquiries_phone1#</cfif>
+
+Date Format: mm/dd/yyyy
+Start Date: <cfif structkeyexists(form, 'inquiries_start_date')>#dateformat(form.inquiries_start_date,'mm/dd/yyyy')#</cfif>
+End Date: <cfif structkeyexists(form, 'inquiries_end_date')>#dateformat(form.inquiries_end_date,'mm/dd/yyyy')#</cfif>
+Number of Adults: <cfif structkeyexists(form, 'inquiries_adults')>#form.inquiries_adults#</cfif>
+Number of Children: <cfif structkeyexists(form, 'inquiries_children')>#form.inquiries_children#</cfif>
+
+Address1: <cfif structkeyexists(form, 'inquiries_address')>#form.inquiries_address#</cfif>
+Address2: 
+City: <cfif structkeyexists(form, 'inquiries_city')>#form.inquiries_city#</cfif>
+State: <cfif structkeyexists(form, 'inquiries_state')>#form.inquiries_state#</cfif>
+Zip: <cfif structkeyexists(form, 'inquiries_zip')>#form.inquiries_zip#</cfif>
+Country: <cfif structkeyexists(form, 'inquiries_country')>#form.inquiries_country#</cfif>
+
+Comments: <cfif defaultLodgixUsed>No rental was selected. A default property ID was set in order to integrate with Lodgix.com inquiry system. | </cfif><cfif structkeyexists(form, 'inquiries_comments')>#replace(replace(form.inquiries_comments,chr(10), " ","all"),chr(13)," ","all")# <cfif structkeyexists(form, 'inquiries_company')>#form.inquiries_company#</cfif></cfif>
+</cfmail>
+<cfelse>
 <cfmail to="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_to#" from="#form.inquiries_email#" charset="utf-8" subject="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_subject#">Property ID: <cfif application.zcore.functions.zso(form, 'lodgix_property_id') EQ "">#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_property_id#<cfset defaultLodgixUsed=true><cfelse>#form.lodgix_property_id#</cfif><!--- {Property ID:21:value} --->
 Name: #form.inquiries_first_name# #form.inquiries_last_name#
 Email: <cfif structkeyexists(form, 'inquiries_email')>#form.inquiries_email#</cfif>
@@ -2514,6 +2537,7 @@ Country: <cfif structkeyexists(form, 'inquiries_country')>#form.inquiries_countr
 
 Comments: <cfif defaultLodgixUsed>No rental was selected. A default property ID was set in order to integrate with Lodgix.com inquiry system. | </cfif><cfif structkeyexists(form, 'inquiries_comments')>#replace(replace(form.inquiries_comments,chr(10), " ","all"),chr(13)," ","all")# <cfif structkeyexists(form, 'inquiries_company')>#form.inquiries_company#</cfif></cfif>
 </cfmail>
+</cfif>
     </cffunction>
     
     </cfoutput>

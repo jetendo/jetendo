@@ -359,7 +359,7 @@ if(r_approved EQ 'APPROVED'){
 	  <cfscript>
 		local.tempEmail=application.zcore.functions.zvarso('zofficeemail');
 		</cfscript>
-<cfmail  charset="utf-8" from="#local.tempEmail#" to="#local.tempEmail#" subject="#subject#">
+<cfdisabledmail  charset="utf-8" from="#local.tempEmail#" to="#local.tempEmail#" subject="#subject#">
 <cfif structkeyexists(form, 'secure')>This person has already paid the #DollarFormat(security_deposit)# deposit and the availability calendar has been updated.  Please send them a confirmation email with the final total of their stay listed.#chr(10)##chr(10)#</cfif>
 <!--- <cfif isDefined('inquiries_reservation') and inquiries_reservation EQ 1>This person is interested in making a reservation, please contact them immediately.#chr(10)#</cfif> --->
 <cfif isDefined('inquiries_reservation_status') and inquiries_reservation_status EQ 1>Total charged to credit card: #DollarFormat(security_deposit)# 

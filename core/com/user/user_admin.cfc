@@ -384,7 +384,9 @@
 			<!--- notify site owner that a new user was added. --->
 			<cfif application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false>
 	        	<cftry>
-<cfmail   charset="utf-8" from="#trim(request.fromemail)#" to="#trim(request.officeEmail)#" subject="New User on #request.zos.globals.shortdomain#">
+<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(request.officeEmail)#" subject="New User on #request.zos.globals.shortdomain#">
 New User on #request.zos.globals.shortdomain#
 
 User E-Mail Address: #str.user_username#
@@ -394,8 +396,22 @@ This user has signed up for a service on your web site.   This is not a direct s
 To view more info about this new user, click the following link:
 #request.zos.currentHostName#/z/admin/member/edit?user_id=#str.user_id#
 </cfmail>	
+<cfelse>
+<cfmail  charset="utf-8" from="#trim(request.fromemail)#" to="#trim(request.officeEmail)#" subject="New User on #request.zos.globals.shortdomain#">
+New User on #request.zos.globals.shortdomain#
+
+User E-Mail Address: #str.user_username#
+
+This user has signed up for a service on your web site.   This is not a direct sales inquiry.
+
+To view more info about this new user, click the following link:
+#request.zos.currentHostName#/z/admin/member/edit?user_id=#str.user_id#
+</cfmail>	
+</cfif>
 				<cfcatch type="any">
-<cfmail   charset="utf-8" from="#request.zos.developerEmailTo#" to="#request.zos.developerEmailTo#" subject="Failed: New User on #request.zos.globals.shortdomain#">
+<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#request.zos.developerEmailTo#" to="#request.zos.developerEmailTo#" subject="Failed: New User on #request.zos.globals.shortdomain#">
 This is an alert that the new user email failed.
 request.fromemail: #request.fromemail#
 request.officeEmail: #request.officeEmail#
@@ -409,6 +425,22 @@ This user has signed up for a service on your web site.   This is not a direct s
 To view more info about this new user, click the following link:
 #request.zos.currentHostName#/z/admin/member/edit?user_id=#str.user_id#
 </cfmail>	
+<cfelse>
+<cfmail  charset="utf-8" from="#request.zos.developerEmailTo#" to="#request.zos.developerEmailTo#" subject="Failed: New User on #request.zos.globals.shortdomain#">
+This is an alert that the new user email failed.
+request.fromemail: #request.fromemail#
+request.officeEmail: #request.officeEmail#
+
+New User on #request.zos.globals.shortdomain#
+
+User E-Mail Address: #str.user_username#
+
+This user has signed up for a service on your web site.   This is not a direct sales inquiry.
+
+To view more info about this new user, click the following link:
+#request.zos.currentHostName#/z/admin/member/edit?user_id=#str.user_id#
+</cfmail>	
+</cfif>
 				</cfcatch></cftry>
 			</cfif>
 		</cfif>
@@ -499,6 +531,24 @@ To view more info about this new user, click the following link:
         	return false;
         } 
         </cfscript>
+<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(qUser.user_email)#" subject="Invitation to join #request.zos.globals.shortdomain#">
+Hi<cfif qUser.user_first_name NEQ ""> #trim(qUser.user_first_name&" "&qUser.user_last_name)#</cfif>, 
+
+You've been invited by <cfif request.zsession.user.first_name NEQ "">#trim(request.zsession.user.first_name&" "&request.zsession.user.last_name)#, </cfif>#request.zsession.user.email#, to create an account at #request.zos.globals.shortdomain#
+
+<cfif qUser.user_welcome_message NEQ "">#qUser.user_welcome_message&chr(10)&chr(10)#</cfif>Your account's email address is:
+#qUser.user_username#
+
+Click the following link to create a password and login to our web site.
+#request.zos.currentHostName#/z/user/invited?uid=#qUser.user_id#&key=#urlencodedformat(qUser.user_reset_key)#
+
+This invitation will expire in 7 days.  If you need a new invitation, please contact the site owner.
+
+Thank you from #request.zos.globals.shortdomain#
+</cfmail>	
+<cfelse>
 <cfmail   charset="utf-8" from="#trim(request.fromemail)#" to="#trim(qUser.user_email)#" subject="Invitation to join #request.zos.globals.shortdomain#">
 Hi<cfif qUser.user_first_name NEQ ""> #trim(qUser.user_first_name&" "&qUser.user_last_name)#</cfif>, 
 
@@ -514,6 +564,7 @@ This invitation will expire in 7 days.  If you need a new invitation, please con
 
 Thank you from #request.zos.globals.shortdomain#
 </cfmail>	
+</cfif>
 		<cfscript>
 		return true;
 		</cfscript>

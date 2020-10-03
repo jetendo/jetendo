@@ -322,92 +322,6 @@
 	}
 	</cfscript>
 </cffunction>
-<!--- 
-<cffunction name="resetPasswordUpdate" localmode="modern" access="private">
-	<cfscript>
-	var qP=0;
-	var db=request.zos.queryObject;
-	if(len(trim(application.zcore.functions.zso(form, 'user_password'))) LT 8){
-		if(structkeyexists(form, 'x_ajax_id')){
-			writeoutput('{success:false,errorMessage:"Please type your new password before clicking \"Reset Password\". Your password must be 8 or more characters."}');
-			application.zcore.functions.zabort();		
-		}else{
-			application.zcore.status.setStatus(request.zsid, "Please type your new password before clicking ""Reset Password"". Your password must be 8 or more characters.",form,true);
-			application.zcore.functions.zRedirect("/z/user/preference/form?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(form.e)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
-		}
-	}
-	form.user_password_new_salt=application.zcore.functions.zGenerateStrongPassword(256,256);
-	form.user_password_new_version=request.zos.defaultPasswordVersion;
-	if(request.zos.globals.plainTextPassword EQ 0){
-		form.user_password=application.zcore.user.convertPlainTextToSecurePassword(form.user_password, form.user_password_new_salt, form.user_password_new_version, false);
-	}else{
-		form.user_password_new_version=0;
-		form.user_password_new_salt="";
-	}
-	if(trim(form.user_password) EQ variables.qcheckemail.user_password){
-		form.zusername=variables.qcheckemail.user_username;
-		form.zpassword=form.user_password;
-		inputStruct = StructNew();
-		inputStruct.user_group_name = "user";
-		inputStruct.noRedirect=true;
-		inputStruct.noLoginForm=true;
-		
-		if(isDefined('request.zsession.user.site_id')){
-			inputStruct.site_id = request.zsession.user.site_id;
-		}else{
-			inputStruct.site_id=request.zos.globals.id;
-		}
-		// perform check 
-		application.zcore.user.checkLogin(inputStruct); 
-		application.zcore.status.setStatus(request.zsid, "The new password is the same as the old password and no change has been made.");
-		if(structkeyexists(request.zos.userSession.groupAccess, "user")){
-			application.zcore.status.setStatus(request.zsid, "Login successful");
-			variables.secureLogin=true;
-		}
-		if(structkeyexists(form, 'x_ajax_id')){
-			writeoutput('{success:false,errorMessage:"The new password is the same as the old password and no change has been made."}');
-			application.zcore.functions.zabort();		
-		}else{
-			application.zcore.functions.zRedirect("/z/user/preference/form?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(form.e)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
-		}
-	}
-	var user_key=hash(application.zcore.functions.zGenerateStrongPassword(80,200),'sha-256'); 
-	db.sql="UPDATE #db.table("user", request.zos.zcoreDatasource)# user 
-	SET user_password_new = #db.param(form.user_password)#, 
-	user_password_new_salt= #db.param(form.user_password_new_salt)#, 
-	user_password_new_version= #db.param(form.user_password_new_version)#, 
-	user_confirm_count=#db.param(1)#, 
-	user_key=#db.param(user_key)#,
-	user_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	WHERE user_username = #db.param(form.e)# and 
-	user_deleted = #db.param(0)# and
-	#db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# ";
-	qP=db.execute("qP");
-	db.sql="select * from  #db.table("user", request.zos.zcoreDatasource)# user 
-	WHERE user_id = #db.param(variables.qcheckemail.user_id)# and 
-	site_id= #db.param(variables.qcheckemail.site_id)# and
-	user_deleted = #db.param(0)# ";
-	variables.qcheckemail=db.execute("qcheckemail");
-	mail  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Reset Password for #application.zcore.functions.zvar('shortdomain')#"{
-		writeoutput('Hello,
-
-A request to reset the password for #form.e# has been made from #request.zos.currentHostName#.
-
-If you agree to reset the password, please click the link below. 
-
-#request.zos.currentHostName#/z/-erp#variables.qcheckemail.user_id#.#variables.qcheckemail.user_key# 
-
-If the link does not work, please copy and paste the entire link in your browser''s address bar and hit enter.    If you did not make this request, you can ignore this email.');
-	}
-	if(structkeyexists(form, 'x_ajax_id')){
-		writeoutput("{success:true}");
-		application.zcore.functions.zabort();		
-	}else{
-		application.zcore.status.setStatus(request.zsid, "An email was sent to #form.e#.  Please check your email and click the link in that email in order to update your password.");
-		application.zcore.functions.zRedirect("/z/user/preference/form?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&zsid=#request.zsid#&e=#urlencodedformat(form.e)#");
-	}
-	</cfscript>
-</cffunction> --->
 
 <cffunction name="updatePreferences" localmode="modern" access="private">
 	<cfscript>
@@ -632,7 +546,9 @@ If the link does not work, please copy and paste the entire link in your browser
 		rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 
 		if(application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false){
-			mail   charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
+			if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
+				smtpAuth=request.zos.smtpAuth[arguments.ss.from];
+				mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
 writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username#
 
 This user has signed up as a user on your web site. Public users can signup on the web site. It doesn''t pose a security risk.  Some websites are built to give this kind of user additional access.
@@ -642,6 +558,19 @@ This is not a direct sales inquiry.  We notify you of new users to let you know 
 To view more info about this new user, click the following link: 
 
 #request.zos.currentHostName#/z/admin/member/edit?user_id=#form.user_id#');
+				}
+			}else{
+				mail charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
+writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username#
+
+This user has signed up as a user on your web site. Public users can signup on the web site. It doesn''t pose a security risk.  Some websites are built to give this kind of user additional access.
+
+This is not a direct sales inquiry.  We notify you of new users to let you know about how people are using the web site.  This message can be disabled if you contact the web developer.
+
+To view more info about this new user, click the following link: 
+
+#request.zos.currentHostName#/z/admin/member/edit?user_id=#form.user_id#');
+				}
 			}
 		}
 	}
@@ -666,7 +595,9 @@ To view more info about this new user, click the following link:
 		form.user_key = variables.qcheckemail.user_key;
 	}
 	if(sendEmailChangeEmail){
-		mail  charset="utf-8" to="#form.user_email_new#" cc="#form.user_email#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+		if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
+			smtpAuth=request.zos.smtpAuth[arguments.ss.from];
+			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" to="#form.user_email_new#" cc="#form.user_email#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
 			writeoutput('Hello,
 
 You''ve asked to change your email address from #form.user_email# to #form.user_email_new#.  In order to ensure your privacy, we request that you confirm your change by clicking the link below. 
@@ -674,10 +605,24 @@ You''ve asked to change your email address from #form.user_email# to #form.user_
 #request.zos.currentHostName#/z/-ece#form.user_id#.#form.user_key# 
 
 If the link does not work, please copy and paste the entire link in your browser''s address bar and hit enter.  If you did not make this request, you can ignore this email.');
+			}
+		}else{
+			mail  charset="utf-8" to="#form.user_email_new#" cc="#form.user_email#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+			writeoutput('Hello,
+
+You''ve asked to change your email address from #form.user_email# to #form.user_email_new#.  In order to ensure your privacy, we request that you confirm your change by clicking the link below. 
+
+#request.zos.currentHostName#/z/-ece#form.user_id#.#form.user_key# 
+
+If the link does not work, please copy and paste the entire link in your browser''s address bar and hit enter.  If you did not make this request, you can ignore this email.');
+			}
 		}
 	}else if(sendConfirmEmail and variables.qcheckemail.recordcount EQ 0 or (variables.qcheckemail.user_pref_list EQ '0' and application.zcore.functions.zso(form, 'user_pref_list',false,0) EQ '1')){
 		// send a confirmation email if the mailing list status has changed or if this is a new user. 
-		mail  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+
+		if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
+			smtpAuth=request.zos.smtpAuth[arguments.ss.from];
+			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#"  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
 			writeoutput('Hello,
 
 Thank you for you interest in joining our mailing list.  In order to ensure your privacy, we request that you confirm your request by clicking the link below. 
@@ -685,6 +630,18 @@ Thank you for you interest in joining our mailing list.  In order to ensure your
 #request.zos.currentHostName#/z/-ein#form.user_id#.#form.user_key# 
 
 If the link does not work, please copy and paste the entire link in your browser''s address bar and hit enter.    If you did not make this request, you can ignore this email.');
+			}
+		}else{
+
+			mail  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+			writeoutput('Hello,
+
+Thank you for you interest in joining our mailing list.  In order to ensure your privacy, we request that you confirm your request by clicking the link below. 
+
+#request.zos.currentHostName#/z/-ein#form.user_id#.#form.user_key# 
+
+If the link does not work, please copy and paste the entire link in your browser''s address bar and hit enter.    If you did not make this request, you can ignore this email.');
+			}
 		}
 	}
 	if(form.reloadOnNewAccount EQ 1){
