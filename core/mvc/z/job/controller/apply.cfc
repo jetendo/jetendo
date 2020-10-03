@@ -71,8 +71,24 @@
 		ts = {};
 		ts.to = application.zcore.functions.zvarso( 'zofficeemail' );
 
+		// get the leading routing for job resume if it exists.
+
+		leadStruct=application.zcore.functions.zGetLeadRouteForInquiriesTypeId(ts.to, 17, 4);
+
+		if(structkeyexists(leadStruct, 'bcc')){
+			ts.bcc=leadStruct.bcc;
+		}
+		if(leadStruct.user_id NEQ "0"){
+			ts.user_id=leadStruct.user_id;
+			ts.user_id_siteIDType=leadStruct.user_id_siteIDType;
+			ts.to="";
+		}
+		if(leadStruct.assignEmail NEQ ""){
+			ts.to=leadStruct.assignEmail;
+		}
 		if ( request.zos.istestserver or ts.to EQ "" ) {
 			ts.to = request.zos.developerEmailTo;
+			ts.bcc="";
 		}
 
 		link = job.__url;
