@@ -384,9 +384,9 @@
 			<!--- notify site owner that a new user was added. --->
 			<cfif application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false>
 	        	<cftry>
-<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
-	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
-	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(request.officeEmail)#" subject="New User on #request.zos.globals.shortdomain#">
+<cfif structkeyexists(request.zos.smtpAuth, request.fromemail)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[request.fromemail];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(request.officeEmail)#" subject="New User on #request.zos.globals.shortdomain#">
 New User on #request.zos.globals.shortdomain#
 
 User E-Mail Address: #str.user_username#
@@ -409,9 +409,9 @@ To view more info about this new user, click the following link:
 </cfmail>	
 </cfif>
 				<cfcatch type="any">
-<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
-	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
-	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#request.zos.developerEmailTo#" to="#request.zos.developerEmailTo#" subject="Failed: New User on #request.zos.globals.shortdomain#">
+<cfif structkeyexists(request.zos.smtpAuth, request.zos.developerEmailTo)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[request.zos.developerEmailTo];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" charset="utf-8" from="#request.zos.developerEmailTo#" to="#request.zos.developerEmailTo#" subject="Failed: New User on #request.zos.globals.shortdomain#">
 This is an alert that the new user email failed.
 request.fromemail: #request.fromemail#
 request.officeEmail: #request.officeEmail#
@@ -531,9 +531,9 @@ To view more info about this new user, click the following link:
         	return false;
         } 
         </cfscript>
-<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
-	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
-	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(qUser.user_email)#" subject="Invitation to join #request.zos.globals.shortdomain#">
+<cfif structkeyexists(request.zos.smtpAuth, request.fromemail)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[request.fromemail];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" charset="utf-8" from="#trim(request.fromemail)#" to="#trim(qUser.user_email)#" subject="Invitation to join #request.zos.globals.shortdomain#">
 Hi<cfif qUser.user_first_name NEQ ""> #trim(qUser.user_first_name&" "&qUser.user_last_name)#</cfif>, 
 
 You've been invited by <cfif request.zsession.user.first_name NEQ "">#trim(request.zsession.user.first_name&" "&request.zsession.user.last_name)#, </cfif>#request.zsession.user.email#, to create an account at #request.zos.globals.shortdomain#

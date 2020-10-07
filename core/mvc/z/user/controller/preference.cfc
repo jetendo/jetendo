@@ -546,9 +546,9 @@
 		rs=application.zcore.functions.zGetNewMemberLeadRouteStruct(ts);
 
 		if(application.zcore.functions.zso(request.zos.globals, 'disableNewUserEmail', true, 0) NEQ 1 and structkeyexists(request, 'fromemail') and structkeyexists(request, 'officeemail') and structkeyexists(request, 'zDisableNewMemberEmail') EQ false){
-			if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
-				smtpAuth=request.zos.smtpAuth[arguments.ss.from];
-				mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
+			if(structkeyexists(request.zos.smtpAuth, request.fromemail)){
+				smtpAuth=request.zos.smtpAuth[request.fromemail];
+				mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" charset="utf-8" from="#request.fromemail#" to="#rs.assignEmail#" cc="#rs.cc#" subject="New User on #request.zos.globals.shortdomain#"{
 writeoutput('New User on #request.zos.globals.shortdomain# User E-Mail Address: #form.user_username#
 
 This user has signed up as a user on your web site. Public users can signup on the web site. It doesn''t pose a security risk.  Some websites are built to give this kind of user additional access.
@@ -595,9 +595,9 @@ To view more info about this new user, click the following link:
 		form.user_key = variables.qcheckemail.user_key;
 	}
 	if(sendEmailChangeEmail){
-		if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
-			smtpAuth=request.zos.smtpAuth[arguments.ss.from];
-			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" charset="utf-8" to="#form.user_email_new#" cc="#form.user_email#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+		if(structkeyexists(request.zos.smtpAuth, variables.emailfrom1)){
+			smtpAuth=request.zos.smtpAuth[variables.emailfrom1];
+			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" charset="utf-8" to="#form.user_email_new#" cc="#form.user_email#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
 			writeoutput('Hello,
 
 You''ve asked to change your email address from #form.user_email# to #form.user_email_new#.  In order to ensure your privacy, we request that you confirm your change by clicking the link below. 
@@ -620,9 +620,9 @@ If the link does not work, please copy and paste the entire link in your browser
 	}else if(sendConfirmEmail and variables.qcheckemail.recordcount EQ 0 or (variables.qcheckemail.user_pref_list EQ '0' and application.zcore.functions.zso(form, 'user_pref_list',false,0) EQ '1')){
 		// send a confirmation email if the mailing list status has changed or if this is a new user. 
 
-		if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
-			smtpAuth=request.zos.smtpAuth[arguments.ss.from];
-			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#"  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
+		if(structkeyexists(request.zos.smtpAuth, variables.emailfrom1)){
+			smtpAuth=request.zos.smtpAuth[variables.emailfrom1];
+			mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#"  charset="utf-8" to="#form.e#" from="#variables.emailfrom1#" subject="Please confirm your registration."{
 			writeoutput('Hello,
 
 Thank you for you interest in joining our mailing list.  In order to ensure your privacy, we request that you confirm your request by clicking the link below. 

@@ -2494,9 +2494,9 @@ Comments: Testing inquiry - please ignore.
 <cfset defaultLodgixUsed=false>
 <cfscript>
 </cfscript>
-<cfif structkeyexists(request.zos.smtpAuth, arguments.ss.from)>
-	<cfscript>smtpAuth=request.zos.smtpAuth[arguments.ss.from];</cfscript>
-	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" to="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_to#" from="#form.inquiries_email#" charset="utf-8" subject="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_subject#">Property ID: <cfif application.zcore.functions.zso(form, 'lodgix_property_id') EQ "">#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_property_id#<cfset defaultLodgixUsed=true><cfelse>#form.lodgix_property_id#</cfif><!--- {Property ID:21:value} --->
+<cfif structkeyexists(request.zos.smtpAuth, request.fromemail)>
+	<cfscript>smtpAuth=request.zos.smtpAuth[request.fromemail];</cfscript>
+	<cfmail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" to="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_to#" from="#request.fromemail#" replyto="#form.inquiries_email#" charset="utf-8" subject="#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_email_subject#">Property ID: <cfif application.zcore.functions.zso(form, 'lodgix_property_id') EQ "">#application.zcore.app.getAppData("rental").optionstruct.rental_config_lodgix_property_id#<cfset defaultLodgixUsed=true><cfelse>#form.lodgix_property_id#</cfif><!--- {Property ID:21:value} --->
 Name: #form.inquiries_first_name# #form.inquiries_last_name#
 Email: <cfif structkeyexists(form, 'inquiries_email')>#form.inquiries_email#</cfif>
 Phone: <cfif structkeyexists(form, 'inquiries_phone1')>#form.inquiries_phone1#</cfif>
