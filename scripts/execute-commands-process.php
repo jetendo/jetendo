@@ -2273,7 +2273,7 @@ function tarZipSiteUploadPath($a){
 	if(file_exists($tarPath)){
 		@unlink($tarPath);
 	}
-	$cmd='/bin/tar -cvzf '.escapeshellarg($tarPath).' -C '.escapeshellarg(get_cfg_var("jetendo_sites_writable_path").$siteDomain).' zupload zuploadsecure';
+	$cmd='/bin/tar --exclude=\'zupload/statichtml\' -cvzf '.escapeshellarg($tarPath).' -C '.escapeshellarg(get_cfg_var("jetendo_sites_writable_path").$siteDomain).' zupload zuploadsecure';
 	echo $cmd."\n";
 	`$cmd`;
 
