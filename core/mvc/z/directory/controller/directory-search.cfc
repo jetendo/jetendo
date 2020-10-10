@@ -660,6 +660,8 @@ This is the structure of the renderMethod function
 							}else{
 								db.sql&=" #db.param(1)# = #db.param(1)# ";
 							}
+						}else{
+							db.sql&=" #db.param(1)# = #db.param(1)# ";
 						}
 					}
 
