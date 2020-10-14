@@ -638,7 +638,7 @@ This is the structure of the renderMethod function
 						}else{
 							db.sql&=" #db.param(1)# = #db.param(1)# ";
 						}
-					} else {
+					} else if (value CONTAINS "-"){
 						// 7500-10000
 						range = listToArray( value, '-' );
 						if(arrayLen(range) EQ 2){
@@ -663,6 +663,8 @@ This is the structure of the renderMethod function
 						}else{
 							db.sql&=" #db.param(1)# = #db.param(1)# ";
 						}
+					}else{
+						db.sql&=" #db.param(1)#=#db.param(1)# ";
 					}
 
 					db.sql &= ' ) ';
@@ -798,7 +800,7 @@ This is the structure of the renderMethod function
 
 							db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & " ) ";
 						}
-					} else {
+					} else if(value CONTAINS "-") {
 						// 7500-10000
 						range = listToArray( value, '-' );
 
@@ -807,15 +809,21 @@ This is the structure of the renderMethod function
 
 						first = true;
 
-						for ( searchField in field['searchFields'] ) {
-							if ( not first ) {
-								db.sql &= ' or ';
-							}
-							first = false;
+						if(arrayLen(field['searchFields']) NEQ 0){
+							for ( searchField in field['searchFields'] ) {
+								if ( not first ) {
+									db.sql &= ' or ';
+								}
+								first = false;
 
-							db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
-								AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
+								db.sql &= " ( `" & searchField & "` >= " & db.param( rangeMinimum ) & "
+									AND `" & searchField & "` <= " & db.param( rangeMaximum ) & " ) ";
+							}
+						}else{
+							db.sql&=" #db.param(1)#=#db.param(1)# ";
 						}
+					}else{
+						db.sql&=" #db.param(1)#=#db.param(1)# ";
 					}
 
 					db.sql &= ' ) ';

@@ -525,7 +525,7 @@
 									}else{
 										v="";
 									} 
-									v=left(replace(replace(replace(rereplace(v, '<.*?>', '', 'all'), chr(13), "", "all"), chr(10), " ", "all"), '"', "", 'all'), 100);
+									v=replace(replace(replace(rereplace(v, '<.*?>', '', 'all'), chr(13), "", "all"), chr(10), " ", "all"), '"', "", 'all');
 									if(v EQ ""){
 										v="&nbsp;";
 									}
@@ -557,7 +557,7 @@
 									}else{
 										v="";
 									} 
-									v=left(replace(replace(replace(rereplace(v, '<.*?>', '', 'all'), chr(13), "", "all"), chr(10), " ", "all"), '"', "", 'all'), 100);
+									v=replace(replace(replace(rereplace(v, '<.*?>', '', 'all'), chr(13), "", "all"), chr(10), " ", "all"), '"', "", 'all');
 									if(i3 NEQ 1){
 										echo(",");
 									}
