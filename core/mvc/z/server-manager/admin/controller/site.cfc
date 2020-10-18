@@ -1616,6 +1616,10 @@
 			<td >#application.zcore.functions.zInput_Boolean("site_disable_new_user_email")#</td>
 		</tr>
 		<tr>
+			<td style="vertical-align:top; width:140px;">Disable Public User Registration?:</td>
+			<td >#application.zcore.functions.zInput_Boolean("site_disable_public_user_create")#</td>
+		</tr>
+		<tr>
 			<td style="vertical-align:top; width:140px;">Enable Lead User Reminder:</td>
 			<td >#application.zcore.functions.zInput_Boolean("site_enable_lead_user_reminder")# (Users with access to leads that don't have access to the site manager)</td>
 		</tr>

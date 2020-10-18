@@ -787,10 +787,13 @@ If the link does not work, please copy and paste the entire link in your browser
 		      </cfscript>
 		</div> --->
 	</div>
-	<div class="zUserLoginCreateAccount zmember-openid-buttons" style="float:left; width:100%; padding-bottom:15px;width:100%;border-top:1px solid ##999; padding-top:15px;">
-		<h3>If you don't have an account:</h3>
-		<button type="submit" name="submitPref" value="Unsubscribe" onclick="window.location.href='/z/user/preference/register?modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#'">Create Free Account</button>
-	</div>
+
+	<cfif application.zcore.functions.zso(request.zos.globals, "disablePublicUserCreate", false, 0) NEQ 1>
+		<div class="zUserLoginCreateAccount zmember-openid-buttons" style="float:left; width:100%; padding-bottom:15px;width:100%;border-top:1px solid ##999; padding-top:15px;">
+			<h3>If you don't have an account:</h3>
+			<button type="submit" name="submitPref" value="Unsubscribe" onclick="window.location.href='/z/user/preference/register?modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#'">Create Free Account</button>
+		</div>
+	</cfif>
 	<div class="zUserLoginUnsubscribe" style="float:left;width:100%; border-top:1px solid ##999; padding-top:15px;">
 		<form class="zFormCheckDirty" name="getEmailUnsubscribe" action="/z/user/preference/update?modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#" method="post">
 			<h3>Unsubscribe From Our Mailing List</h3>
@@ -1203,6 +1206,9 @@ If the link does not work, please copy and paste the entire link in your browser
 	var theMeta=0;
 	var c2=0;
 	
+	if(application.zcore.functions.zso(request.zos.globals, "disablePublicUserCreate", false, 0) EQ 1){
+		application.zcore.functions.z404("Public user registration is disabled on this site.");
+	}
 
 	customURL=application.zcore.functions.zso(request.zos.globals, 'customCreateAccountURL');
 	if(customURL NEQ ""){
