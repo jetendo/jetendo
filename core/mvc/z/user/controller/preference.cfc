@@ -224,6 +224,10 @@
 	init();
 	form.submitPref=application.zcore.functions.zso(form, 'submitPref',false,'Update Communication Preferences');
 	form.returnurl=application.zcore.functions.zso(form, 'returnurl');
+	if(not isSimpleValue(form.redirectOnLogin)){
+		echo("Invalid request");
+		abort;
+	}
 
 	arrError=variables.metaCom.validate("user", form);
 	if(arrayLen(arrError)){

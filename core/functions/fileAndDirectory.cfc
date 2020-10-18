@@ -460,6 +460,8 @@ rs=zGetHashPath(dir, id);
 					fullFileName = GetFileFromPath(result);
 					if(not application.zcore.functions.zIsSafeFileExt(fullFileName)){
 						application.zcore.functions.zdeletefile("#arguments.destination##fullFileName#");
+						echo("This file type is not allowed.");
+						abort;
 						application.zcore.template.fail("Extremely dangerous file upload attempted with name: #fullFileName#<br /><br />It has been automatically deleted with a 500 error displayed to the user.");
 					}
 					request.zos.lastUploadFileName=getfilefrompath(result);
@@ -476,6 +478,8 @@ rs=zGetHashPath(dir, id);
 	}
 	if(not application.zcore.functions.zIsSafeFileExt(cffileresult.clientfile)){
 		application.zcore.functions.zdeletefile("#arguments.destination##cffileresult.serverfile#");
+		echo("This file type is not allowed.");
+		abort;
 		application.zcore.template.fail("Extremely dangerous file upload attempted with name: #cffileresult.serverfile#<br /><br />It has been automatically deleted with a 500 error displayed to the user.");
 		return false;
 	}

@@ -3635,6 +3635,11 @@ echo('
 	}
 	form.form_email=application.zcore.functions.zso(form, "form_email");
 	form.form_session_id=application.zcore.functions.zso(form, "form_session_id");
+	for(i in form){
+		if(isSimpleValue(form[i]) AND form[i] CONTAINS "@domstat.su"){
+			echo("Thank you for submitting our form."); abort;
+		}
+	}
 	if(form.form_session_id NEQ ""){ 
 		if(not isnumeric(form.form_session_id)){
 			// application.zcore.functions.zLogSpamEmail("Session ID was not numeric"); // always block

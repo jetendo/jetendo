@@ -86,7 +86,7 @@
 		echo('END:VEVENT#chr(13)##chr(10)#');
 		echo('END:VCALENDAR');
 	}
-	path=request.zos.globals.privateHomeDir&"/zupload/#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
+	path=request.zos.globals.privateHomeDir&"zupload/#Replace(replace("Event-#row.event_id#-#application.zcore.functions.zURLEncode(row.event_name, "-")#", ",", " ", "all"), " ",  "_", "all")#.ics";
 	application.zcore.functions.zWriteFile(path, out);
  
 

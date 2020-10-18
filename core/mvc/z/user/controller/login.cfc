@@ -167,7 +167,7 @@
     <cffunction name="parentToken" localmode="modern" access="remote" returntype="any">
         <cfscript>
         application.zcore.functions.zNoCache();
-	application.zcore.functions.zheader("content-type", "application/javascript");
+	content type="application/javascript"; 
 	application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, 'x_ajax_id'));
 	if(structkeyexists(cookie, 'ztoken') and application.zcore.user.checkGroupAccess("user")){
 		application.zcore.tempTokenCache[cookie.ztoken]={date:now(), user_id:request.zsession.user.id, site_id:request.zsession.user.site_id};
@@ -186,7 +186,7 @@
     <cffunction name="serverToken" localmode="modern" access="remote" returntype="any">
         <cfscript>
         application.zcore.functions.zNoCache();
-	application.zcore.functions.zheader("content-type", "application/javascript");
+	content type="application/javascript";
 	application.zcore.functions.zheader("x_ajax_id", application.zcore.functions.zso(form, 'x_ajax_id'));
 	if(structkeyexists(cookie, 'ztoken') and application.zcore.user.checkGroupAccess("user")){
 		application.zcore.tempTokenCache[cookie.ztoken]={date:now(), user_id:request.zsession.user.id, site_id:request.zsession.user.site_id};

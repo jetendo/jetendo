@@ -106,10 +106,23 @@
 				sid=4;
 			}
 			typeStruct[row.inquiries_type_id&"|"&sid]=row.inquiries_type_name;
-		}
+		} 
 		fieldStruct={};
 		customStruct={};
 		sortStruct={};
+		userGroupCom = application.zcore.functions.zcreateobject("component","zcorerootmapping.com.user.user_group_admin");
+		db.sql="SELECT user_id, user_username, member_company, user_first_name, user_last_name, site_id, #db.trustedSQL(application.zcore.functions.zGetSiteIdSQL('user.site_id'))# as siteIdType 
+		FROM #db.table("user", request.zos.zcoreDatasource)# user 
+		WHERE #db.trustedSQL(application.zcore.user.getUserSiteWhereSQL())# and 
+		user_group_id <> #db.param(userGroupCom.getGroupId('user',request.zos.globals.id))#  
+		 and (user_server_administrator=#db.param(0)# ) and 
+		 user_deleted = #db.param(0)#
+		ORDER BY member_first_name ASC, member_last_name ASC";
+		qAgents=db.execute("qAgents", "", 10000, "query", false);
+		userLookup={};
+		for(row in qAgents){
+			userLookup[row.user_id&"|"&application.zcore.functions.zGetSiteIdType(row.site_id, request.zos.globals.id)]=row;
+		}
 
 		db.sql="SELECT * from #db.table("inquiries_status", request.zos.zcoreDatasource)# ";
 		qstatus=db.execute("qstatus");
@@ -147,6 +160,7 @@
 				for(i3=1;i3 LTE arraylen(arrF);i3++){
 					sortStruct[i3]={field:arrF[i3]};
 				}
+				sortStruct[10000]={field:"Assigned User"};
 				arrFieldSort=structsort(sortStruct, "text", "asc", "field");
 				
 				if(form.whichfields EQ 1){
@@ -157,7 +171,7 @@
 							f=replace(replace(c, 'inquiries_', ''), '_', ' ', 'all');
 							echo('<td>'&f&'</td>');
 						}
-						echo('<td colspan="40">Associated Links</td></tr>'&chr(10));
+						echo('<td colspan="40">Associated Links</td><td>Assigned User</td></tr>'&chr(10));
 					}else if(form.format EQ 'csv'){
 						echo('"Type","Date Received",');
 						for(i3=1;i3 LTE arraylen(arrFieldSort);i3++){ 
@@ -165,7 +179,7 @@
 							f=replace(replace(c, 'inquiries_', ''), '_', ' ', 'all');
 							echo('"'&replace(f, '"', '', 'all')&'",');
 						}
-						echo('"Associated Links"'&chr(13)&chr(10));
+						echo('"Associated Links","Assigned User"'&chr(13)&chr(10));
 					}  
 				}
 			}
@@ -331,6 +345,7 @@
 						echo('<td>Country</td>');
 						echo('<td>Company</td>');
 						echo('<td>Status</td>');
+						echo('<td>Assigned User</td>');
 						echo('</tr>'&chr(10));
 					}else{
 						echo('"Type",');
@@ -347,6 +362,7 @@
 						echo('"Country",');
 						echo('"Company",'); 
 						echo('"Status",'); 
+						echo('"Assigned User",');
 						echo(chr(13)&chr(10));
 					} 
 				}
@@ -392,6 +408,14 @@
 							echo('<td>'&row.inquiries_country&'</td>');
 							echo('<td>'&row.inquiries_company&'</td>');
 							echo('<td>'&status&'</td>');
+							if(structkeyexists(userLookup, row.user_id&"|"&row.user_id_siteidtype)){
+								currentUser=userLookup[row.user_id&"|"&row.user_id_siteidtype];
+								echo('<td>#currentUser.user_username#</td>');
+							}else if(row.inquiries_assign_email NEQ ""){
+								echo('<td>#row.inquiries_assign_email#</td>');
+							}else{
+								echo('<td>None</td>');
+							}
 							echo('</tr>'&chr(10));
 						}else{
 							echo('"'&replace(typeName, '"', '', 'all')&'",');
@@ -408,6 +432,14 @@
 							echo('"'&replace(row.inquiries_country, '"', '', 'all')&'",');
 							echo('"'&replace(row.inquiries_company, '"', '', 'all')&'",'); 
 							echo('"'&status&'",');
+							if(structkeyexists(userLookup, row.user_id&"|"&row.user_id_siteidtype)){
+								currentUser=userLookup[row.user_id&"|"&row.user_id_siteidtype];
+								echo('"#currentUser.user_username#"');
+							}else if(row.inquiries_assign_email NEQ ""){
+								echo('"#row.inquiries_assign_email#"');
+							}else{
+								echo('"None"');
+							}
 							echo(chr(13)&chr(10));
 						}
 						currentRow++;
@@ -507,6 +539,16 @@
 							}else{
 								j.zsource="";
 							}
+
+							if(structkeyexists(userLookup, row.user_id&"|"&row.user_id_siteidtype)){
+								currentUser=userLookup[row.user_id&"|"&row.user_id_siteidtype];
+								j["Assigned User"]=currentUser.user_username;
+							}else if(row.inquiries_assign_email NEQ ""){
+								j["Assigned User"]=row.inquiries_assign_email;
+							}else{
+								j["Assigned User"]="None";
+							}
+							
 
 
 							if(form.format EQ 'html'){

@@ -1460,22 +1460,27 @@ formString = userCom.loginForm(inputStruct);
 			debug=true;
 		}
 	}
+	// if(request.zos.cgi.remote_addr EQ "75.49.164.97" and request.zos.originalURL CONTAINS "serverToken"){
+	// 	content type="application/javascript";
+	// 	writeoutput('console.log("loaded servertoken");'&chr(10)); 
+	// 	debug=true;
+	// }
 	
 	if(not structkeyexists(cookie, 'ztoken') or len(cookie.ztoken) EQ 0){
 		if(debug){ 
-			writeoutput('cookie.ztoken is not defined.<br />'); 
+			writeoutput('// cookie.ztoken is not defined.<br />'); 
 			abort;
 		}
 		return false;
 	}else{
 		if(debug){ 
-			writeoutput('Verifying cookie.ztoken: #cookie.ztoken#<br />'); 
+			writeoutput('// Verifying cookie.ztoken: #cookie.ztoken#<br />'); 
 		}
 	}
 	if(structkeyexists(request.zsession, 'ztoken') and structkeyexists(request.zsession, 'user')){
 		if(compare(request.zsession.ztoken, cookie.ztoken) NEQ 0){
 			if(debug){ 
-				writeoutput('current login doesn''t match the cookie, override it<br />'); 
+				writeoutput('// current login doesn''t match the cookie, override it<br />'); 
 				abort;
 			}
 			ts9=structnew();
@@ -1493,8 +1498,8 @@ formString = userCom.loginForm(inputStruct);
 			return false;
 		}else{
 			if(debug){ 
-				writeoutput('user is logged in and ztoken matches - do no further work.<br />Dumping session:'); 
-				writedump(request.zsession);
+				writeoutput('// user is logged in and ztoken matches - do no further work.');//<br />Dumping session:'); 
+				// writedump(request.zsession);
 				abort;
 			}
 			return true;
@@ -1503,9 +1508,12 @@ formString = userCom.loginForm(inputStruct);
 	if(debug){ 
 		//writedump(application.zcore.session.isSessionEnabled());
 		//writedump(request.zsession);
-		writeoutput('user not logged in, check if cookie.ztoken is still valid<br />'); 
+		writeoutput('// user not logged in, check if cookie.ztoken is still valid<br />'); 
 	}
 	arrToken=listtoarray(cookie.ztoken,"|");
+	if(arrayLen(arrToken) NEQ 4){
+		arrToken=["-1", "-1", "-1", "-1"];
+	}
 	db.sql="select * from #db.table("user_token", request.zos.zcoreDatasource)# user_token 
 	WHERE 
 	user_token_version=#db.param(arrToken[1])# and 
@@ -1518,8 +1526,17 @@ formString = userCom.loginForm(inputStruct);
 	qUserToken=db.execute("qUserToken"); 
 	if(qUserToken.recordcount EQ 0){
 		if(debug){ 
-			writedump(request.zos.arrQueryLog);
-			writeoutput('no token exists<br />');
+			// writedump(request.zos.arrQueryLog);
+			writeoutput('/*
+			 no token exists : 
+			 select * from user_token 
+	WHERE 
+	user_token_version=#arrToken[1]# and 
+	user_token_deleted = #0# and 
+	user_token_id=#arrToken[2]# and 
+	user_token_username=''#arrToken[3]#'' and 
+	user_token_datetime>=''#dateformat(dateadd("d",-30,now()),"yyyy-mm-dd")&" 00:00:00"#'' and 
+	site_id=''#request.zos.globals.id#'' <br />*/');
 			abort; 
 		}
 		ts9=structnew();
@@ -1571,7 +1588,7 @@ formString = userCom.loginForm(inputStruct);
 	keyIsValid=application.zcore.user.verifySecurePassword(arrToken[4], qUserToken.user_token_salt, qUserToken.user_token_key, arrToken[1]);
 	if(keyIsValid){
 		if(debug){ 
-			writeoutput('token is valid, perform an secure user login<br />'); 
+			writeoutput('// token is valid, perform an secure user login<br />'); 
 		}
 		form.zpassword="password";
 		inputStruct = StructNew();
@@ -1587,8 +1604,8 @@ formString = userCom.loginForm(inputStruct);
 			structdelete(form,'zpassword');
 			structdelete(form,'zusername');
 			if(debug){ 
-				writeoutput('token secure login was successful.  issuing new token.<br />');
-				writedump(request.zsession.user);
+				writeoutput('// token secure login was successful.  issuing new token.<br />');
+				// writedump(request.zsession.user);
 			}
 			thread action="join" name="#request.zos.currentTokenName#" timeout="30000";
 			if(cfthread[request.zos.currentTokenName].status NEQ "completed"){
@@ -1616,7 +1633,7 @@ formString = userCom.loginForm(inputStruct);
 			";
 			db.execute("q");  
 			if(debug){ 
-				writeoutput('token updated:'&request.zsession.ztoken&'<br />'); 
+				writeoutput('// token updated:'&request.zsession.ztoken&'<br />'); 
 			}
 			//new permanent token cookie is set
 			ts9=structnew();
@@ -1649,14 +1666,14 @@ formString = userCom.loginForm(inputStruct);
 			ts9.expires="now";
 			application.zcore.functions.zcookie(ts9);
 			if(debug){ 
-				writeoutput('invalid login - account may be throttled or inactive.<br />'); 
+				writeoutput('// invalid login - account may be throttled or inactive.<br />'); 
 				abort;
 			}
 			return false;
 		}
 	}
 	if(debug){ 
-		writeoutput(qUserToken.user_token_key&'<br />'&tempTokenKey&'<br />invalid token key - should log and throttle these. for now, just delete and clear cookie<br />'); 
+		writeoutput("// "&qUserToken.user_token_key&'<br />'&tempTokenKey&'<br />invalid token key - should log and throttle these. for now, just delete and clear cookie<br />'); 
 	}
 	setLoginLog(0);
 	db.sql="delete from #db.table("user_token", request.zos.zcoreDatasource)#  
