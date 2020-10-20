@@ -1176,6 +1176,7 @@
  
 
 	if(currentMethod EQ "add"){
+		form.site_disable_public_user_create=1;
 		form.site_sitename=replace(form.newdomain,"www.","");
 		form.site_homedir=application.zcore.functions.zGetDomainInstallPath(form.newdomain);
 		form.site_privatehomedir=application.zcore.functions.zGetDomainWritableInstallPath(form.newdomain);

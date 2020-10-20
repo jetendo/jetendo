@@ -179,7 +179,7 @@
 </cffunction>
 	
 
-<cffunction name="parseRule" localmode="modern" access="remote" returntype="any">
+<cffunction name="parseRule" localmode="modern" access="public" returntype="any">
 	<cfargument name="rule" type="string" required="yes">
 	<cfscript>
 	ts=structnew();
@@ -244,7 +244,7 @@
 </cffunction>
 
 
-<cffunction name="getIcalRuleAsPlainEnglishAsJson" localmode="modern" access="remote">
+<cffunction name="getIcalRuleAsPlainEnglishAsJson" localmode="modern" access="public">
 	<cfscript>
 	rs={
 		success:true,
@@ -373,7 +373,7 @@
 </cffunction>
 
 	
-<cffunction name="getRecurringDates" localmode="modern" access="remote" returntype="any">
+<cffunction name="getRecurringDates" localmode="modern" access="public" returntype="any">
 	<cfargument name="startDate" type="date" required="yes">
 	<cfargument name="rule" type="string" required="yes">
 	<cfargument name="excludeDateList" type="string" required="yes">
@@ -538,6 +538,7 @@
 	for(i=1;i LTE futureDaysToProject+1;i++){
 		if(i EQ 50000){
 			if(debug) echo('Infinite loop detected<br>');
+			throw("infinite loop detected for: #arguments.rule#");
 			abort;
 		} 
 		currentMonth=dateformat(curDate, "m");
@@ -714,9 +715,11 @@
 						}
 					}
 				}
-				if(i EQ 5){
-					if(debug) echo('stop33');abort;
-				}
+				// if(i EQ 5){
+				// 	if(debug){
+				// 		echo('stop33');abort;
+				// 	}
+				// }
 			}
 		}
 		if(curDate==startDate){

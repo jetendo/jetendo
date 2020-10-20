@@ -13,7 +13,7 @@ all sites
 	
 	application.zcore.functions.checkIfCronJobAllowed();
 	request.ignoreSlowScript=true;
-	setting requesttimeout="5000";
+	setting requesttimeout="50000";
 
 	request.ical=createobject("component", "zcorerootmapping.com.ical.ical");
 	request.ical.init("");
@@ -23,9 +23,13 @@ all sites
 
 	offset=0;
 	while(true){
-		db.sql="select * from #db.table("event", request.zos.zcoreDatasource)#, 
-		#db.table("event_config", request.zos.zcoredatasource)#
+		db.sql="select * from (#db.table("event", request.zos.zcoreDatasource)#, 
+		#db.table("event_config", request.zos.zcoredatasource)#, 
+		#db.table("site", request.zos.zcoreDatasource)#) 
 		WHERE 
+		event.site_id=site.site_id and 
+		site.site_active=#db.param(1)# and 
+		site_deleted=#db.param(0)# and 
 		event.site_id = event_config.site_id and 
 		event_config_deleted=#db.param(0)# and 
 		event.site_id <> #db.param(-1)# and ";
@@ -45,12 +49,19 @@ all sites
 		db.sql&="  
 		event_deleted=#db.param(0)# 
 		LIMIT #db.param(offset)#, #db.param(30)#";
-		qEvent=db.execute("qEvent");
+		qEvent=db.execute("qEvent", "", 10000, "query", false);
 		if(qEvent.recordcount EQ 0){
+			echo("No recurring events found");
 			break;
 		}
 
 		for(row in qEvent){
+			// if(row.event_id NEQ "19" or row.site_id NEQ '615'){
+			// 	continue;
+			// }
+			// if(row.event_id NEQ "5732" or row.site_id NEQ '794'){
+			// 	continue;
+			// }
 			projectDays=row.event_config_project_recurrence_days;
 			if(not isnumeric(projectDays)){
 				projectDays=0;
@@ -103,6 +114,7 @@ all sites
 					event_recur_id <> #db.param(form.event_recur_id)# ";
 					qDelete=db.execute("qDelete");
 				}
+				// echo("event_id:"&row.event_id&" site_id:"&row.site_id&" notrecurring<br>");
 			}else{
 				daysAfterStartDate=datediff("d", row.event_start_datetime, now());
 				tempProjectDays=projectDays;
@@ -110,10 +122,19 @@ all sites
 					tempProjectDays+=daysAfterStartDate;
 				}
 
+				// echo("before event_id:"&row.event_id&" site_id:"&row.site_id&" projectDays:"&tempProjectDays&"<br>");
+// 19	Happy Fourth of July - FUTURES Offices Closed	{ts '2018-07-04 00:00:00'}	{ts '2018-07-04 00:00:00'}	BYMONTH=6;BYMONTHDAY=4;COUNT=0;FREQ=YEARLY;INTERVAL=1	DC9672FB-6311-4966-BA524EC30A3E1560
 				arrDate=request.ical.getRecurringDates(row.event_start_datetime, row.event_recur_ical_rules, row.event_excluded_date_list, tempProjectDays); 
 				//echo('supposed to be :<br>8/9<br>8/23<br>9/6<br>9/20');
 				//writedump(arrDate);abort;
 				minutes=datediff("n", row.event_start_datetime, row.event_end_datetime); 
+				// writedump(recurStruct);
+				// writedump(arrDate);
+				// writedump(projectDays&"<br>"&tempProjectDays);
+				// writedump(row);
+				// abort;
+
+				// echo("event_id:"&row.event_id&" site_id:"&row.site_id&" projectDays:"&tempProjectDays&"<br>");
 				for(i=1;i LTE arraylen(arrDate);i++){
 					startDate=arrDate[i];
 					endDate=dateadd("n", minutes, startDate);

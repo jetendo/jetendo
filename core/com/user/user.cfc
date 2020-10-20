@@ -1511,8 +1511,13 @@ formString = userCom.loginForm(inputStruct);
 		writeoutput('// user not logged in, check if cookie.ztoken is still valid<br />'); 
 	}
 	arrToken=listtoarray(cookie.ztoken,"|");
-	if(arrayLen(arrToken) NEQ 4){
-		arrToken=["-1", "-1", "-1", "-1"];
+	if(arrayLen(arrToken) LT 3){
+		if(debug){ 
+			writeoutput('// invalid request.');//<br />Dumping session:'); 
+			// writedump(request.zsession);
+			abort;
+		}
+		return false;
 	}
 	db.sql="select * from #db.table("user_token", request.zos.zcoreDatasource)# user_token 
 	WHERE 

@@ -681,44 +681,89 @@ mimetype=filegetmimetype(arguments.ss.attachments[count]);
  	
 		if(structkeyexists(request.zos.smtpAuth, arguments.ss.from)){
 			smtpAuth=request.zos.smtpAuth[arguments.ss.from];
-			if(arraylen(arguments.ss.arrCID)){
-				mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="html" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#arguments.ss.spoolenable#"{
-					for(count=1;count LTE arraylen(arguments.ss.arrCID);count++){
-						mimetype=filegetmimetype(arguments.ss.arrCID[count]);
-						mailparam file="#arguments.ss.arrCID[count]#" disposition="inline" contentID="zcorecid#count#" type="#mimetype#";
-					}
-					mailpart type="text/html"{
-						echo(newhtml);
-					}
-					for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
-						mimetype=filegetmimetype(arguments.ss.attachments[count]);
-						mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
+			if(smtpAuth.lock){
+				lock type="exclusive" name="zemail-#smtpAuth.username#" timeout="200" throwontimeout="yes"{
+					if(arraylen(arguments.ss.arrCID)){
+						mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="html" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#false#"{
+							for(count=1;count LTE arraylen(arguments.ss.arrCID);count++){
+								mimetype=filegetmimetype(arguments.ss.arrCID[count]);
+								mailparam file="#arguments.ss.arrCID[count]#" disposition="inline" contentID="zcorecid#count#" type="#mimetype#";
+							}
+							mailpart type="text/html"{
+								echo(newhtml);
+							}
+							for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
+								mimetype=filegetmimetype(arguments.ss.attachments[count]);
+								mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
+							}
+						}
+					}else{
+						mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="#cfmailType#" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#false#"{
+							if(emailType EQ 'text+html'){
+								mailpart wraptext="74" charset="utf-8" type="text/plain"{
+									echo(arguments.ss.text);
+								}
+							}
+							if(emailType EQ 'text+html' or emailType EQ 'html'){
+								mailpart  charset="utf-8" type="text/html"{
+									echo(newhtml);
+								}
+							}
+							if(emailType EQ 'html'){
+								echo(newhtml);
+							}else if(emailType EQ 'text'){
+								mailpart charset="utf-8" type="text/plain"{
+									echo(arguments.ss.text);
+								}
+							}
+							for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
+								mimetype=filegetmimetype(arguments.ss.attachments[count]);
+								mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
+							}
+						}
 					}
 				}
 			}else{
-				mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="#cfmailType#" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#arguments.ss.spoolenable#"{
-					if(emailType EQ 'text+html'){
-						mailpart wraptext="74" charset="utf-8" type="text/plain"{
-							echo(arguments.ss.text);
+				if(arraylen(arguments.ss.arrCID)){
+					mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="html" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#false#"{
+						for(count=1;count LTE arraylen(arguments.ss.arrCID);count++){
+							mimetype=filegetmimetype(arguments.ss.arrCID[count]);
+							mailparam file="#arguments.ss.arrCID[count]#" disposition="inline" contentID="zcorecid#count#" type="#mimetype#";
 						}
-					}
-					if(emailType EQ 'text+html' or emailType EQ 'html'){
-						mailpart  charset="utf-8" type="text/html"{
+						mailpart type="text/html"{
 							echo(newhtml);
 						}
-					}
-					if(emailType EQ 'html'){
-						echo(newhtml);
-					}else if(emailType EQ 'text'){
-						mailpart charset="utf-8" type="text/plain"{
-							echo(arguments.ss.text);
+						for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
+							mimetype=filegetmimetype(arguments.ss.attachments[count]);
+							mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
 						}
 					}
-					for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
-						mimetype=filegetmimetype(arguments.ss.attachments[count]);
-						mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
+				}else{
+					mail server="#smtpAuth.host#" username="#smtpAuth.username#" password="#smtpAuth.password#" port="#smtpAuth.port#" ssl="#smtpAuth.ssl#" usetls="#smtpAuth.usetls#" TO="#arguments.ss.to#" CC="#arguments.ss.cc#" BCC="#arguments.ss.bcc#" FROM="#arguments.ss.from#" replyto="#arguments.ss.replyto#" SUBJECT= "#arguments.ss.subject#" type="#cfmailType#" priority="#arguments.ss.priority#" mailerid="Web Mailer" charset="utf-8" failto="#arguments.ss.failto#" spoolenable="#false#"{
+						if(emailType EQ 'text+html'){
+							mailpart wraptext="74" charset="utf-8" type="text/plain"{
+								echo(arguments.ss.text);
+							}
+						}
+						if(emailType EQ 'text+html' or emailType EQ 'html'){
+							mailpart  charset="utf-8" type="text/html"{
+								echo(newhtml);
+							}
+						}
+						if(emailType EQ 'html'){
+							echo(newhtml);
+						}else if(emailType EQ 'text'){
+							mailpart charset="utf-8" type="text/plain"{
+								echo(arguments.ss.text);
+							}
+						}
+						for(count=1;count LTE arraylen(arguments.ss.attachments);count++){
+							mimetype=filegetmimetype(arguments.ss.attachments[count]);
+							mailparam file="#arguments.ss.attachments[count]#" disposition="attachment";
+						}
 					}
 				}
+			
 			}
 		}else{
 
