@@ -180,6 +180,7 @@
 	}
 	echo ( ' Lead Import Parse Config</h2>' );
 	</cfscript>
+	<p>Important: Make sure a folder named "importarchive" in lowercase exists in the mailbox you specify below before completing this form.</p>
 	<p>* Denotes required field.</p>
 	<form class="zFormCheckDirty" action="#action#" method="post" enctype="multipart/form-data">
 		<table style="width: 100%;" class="table-list">

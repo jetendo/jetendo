@@ -120,6 +120,13 @@ class zMailClient{
 		}
 		return array("success"=>true, $response=>$response); 
 	} 
+	function moveMessage($messageId, $mailbox){ 
+		$response=imap_mail_move($this->connection,$messageId, $mailbox);
+		if($response===FALSE){
+			return $this->returnError("imap_mail_move failed");
+		}
+		return array("success"=>true, $response=>$response); 
+	} 
 	function mail_parse_headers($headers){ 
 		$headers=preg_replace('/\r\n\s+/m', '',$headers); 
 		preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)?\r\n/m', $headers, $matches); 

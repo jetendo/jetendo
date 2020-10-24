@@ -1737,7 +1737,7 @@
 			<td style="vertical-align:top; width:140px;">Plus Email Address:</td>
 			<td><input name="site_plus_email_address" type="text" size="70" maxlength="100" value="#htmleditformat(form.site_plus_email_address)#"> 
 			<br> 
-			<strong>WARNING: The part before @, must be less then 17 characters for max email client compatibility.</strong> | Lead replies will be sent from this email, which must support plus addressing on the RECEIVING side only.  Google Apps is recommended.
+			<strong>Note: This is the incomplete email reply system, not lead parse IMAP import.  WARNING: The part before @, must be less then 17 characters for max email client compatibility.</strong> | Lead replies will be sent from this email, which must support plus addressing on the RECEIVING side only.  Google Apps is recommended.
 			</td>
 		</tr>
 		<tr>

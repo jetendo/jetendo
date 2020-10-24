@@ -157,7 +157,10 @@
 		}
 	}catch(Any e){
 		structdelete(application, 'queuePopRunning'); 
-		writedump(e);
+		savecontent variable="out"{
+			writedump(e);
+		}
+		throw(out);
 	}
 	structdelete(application, 'queuePopRunning');
 	echo('Processed #processCount# emails.');
@@ -174,6 +177,7 @@
 	rs={
 		success:true,
 		debug:false,
+		inquiries_id:"",
 		privateMessage:false,
 		enableCopyToSelf:false,
 		messageStruct:arguments.messageStruct,
@@ -237,7 +241,6 @@
 				for(emailStruct in rs.jsonStruct.cc){
 					if(structkeyexists(request.parseEmailStruct, emailStruct.originalEmail)){
 						rs.parseRow=request.parseEmailStruct[emailStruct.originalEmail];
-						rs.parseRow=parseRow;
 						break;
 					}
 				}
@@ -309,6 +312,7 @@
 	}
 	
 	
+	html=rereplacenocase(html,"<br([^>]*)>", chr(10)&chr(9)&"StartRow#chr(9)#", 'ALL');
 
 	if(html CONTAINS "<table"){
 		// detect table rows with this format: <tr><td>Field</td><td>Value</td></tr>
@@ -378,6 +382,13 @@
 	// writedump(arrData);
 	for(i=1;i<=arrayLen(arrData);i++){
 		value=trim(arrData[i]);
+		if(value CONTAINS ":"){
+			arrLabel=listToArray(value, ":");
+			if(arrayLen(arrLabel) EQ 2 and trim(arrLabel[1]) NEQ "" and trim(arrLabel[2]) NEQ ""){
+				arrayAppend(arrExtractedFields, {label:trim(arrLabel[1]), value:trim(arrLabel[2])});
+				continue;
+			}
+		}
 		if(inStartRow){
 			if(value EQ "EndRow"){
 				arrayAppend(arrExtractedFields, {label:trim(fieldLabel), value:trim(fieldValue)});
@@ -422,6 +433,10 @@
 		}else if(inStartParagraphRow){
 			// also detect invalid format words like above
 
+			if(value EQ "StartRow"){
+				// skip extra line
+				continue;
+			}
 
 			if(value EQ "EndParagraphRow"){
 				// split on : or = here and store field and value
@@ -461,6 +476,7 @@
 			}
 		}
 	}
+	// writedump(arrExtractedFields);abort;
 	// echo(ss.jsonStruct.html);
 	// echo('<p><textarea style="width:100%; height:350px;">#html#</textarea></p>');
 

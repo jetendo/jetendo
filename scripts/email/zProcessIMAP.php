@@ -1,6 +1,6 @@
 <?php
 class zProcessIMAP{
-	var $messageLimit; // only download 5 messages every 3 seconds per imap account.
+	var $messageLimit; // only download 5 messages every 30 seconds per imap account.
 	var $timeout; // seconds
 	var $timeStart;
 	var $logDir;
@@ -16,12 +16,14 @@ class zProcessIMAP{
 				$arrEnd=explode(">", $arrCurrentList[1]);
 				$temp=array(
 					"name"=>trim($arrCurrentList[0]),
-					"email"=>trim($arrEnd[0])
+					"email"=>trim($arrEnd[0]),
+					"originalEmail"=>trim($arrEnd[0])
 				);
 			}else{ 
 				$temp=array(
 					"name"=>"",
-					"email"=>trim($arrList[$i])
+					"email"=>trim($arrList[$i]),
+					"originalEmail"=>trim($arrList[$i])
 				);
 			}
 	 
@@ -37,6 +39,11 @@ class zProcessIMAP{
 					$temp["originalEmail"]=$temp["email"];
 					$temp["email"]=$tempEmail;
 				}
+				// var_dump($temp);
+				// echo("\n");
+				// var_dump($arrPart2);
+				// echo("\n");
+				// var_dump($accountEmail);
 			}
 			array_push($arrEmail, $temp);
 		}
@@ -58,12 +65,39 @@ class zProcessIMAP{
 			$tempFrom=$this->processEmailAddressList($message["headers"]["parsed"]["From"], $account["imap_account_user"]);
 			$message["from"]=$tempFrom[0];
 		}
+		if(isset($message["headers"]["parsed"]["FROM"])){
+			$tempFrom=$this->processEmailAddressList($message["headers"]["parsed"]["FROM"], $account["imap_account_user"]);
+			$message["from"]=$tempFrom[0];
+		}
 		if(isset($message["headers"]["parsed"]["To"])){
 			$message["to"]=$this->processEmailAddressList($message["headers"]["parsed"]["To"], $account["imap_account_user"]);
+		}
+		if(isset($message["headers"]["parsed"]["TO"])){
+			$message["to"]=$this->processEmailAddressList($message["headers"]["parsed"]["TO"], $account["imap_account_user"]);
 		}
 		if(isset($message["headers"]["parsed"]["Cc"])){
 			$message["cc"]=$this->processEmailAddressList($message["headers"]["parsed"]["Cc"], $account["imap_account_user"]);
 		}
+		// some email servers send this case instead
+		if(isset($message["headers"]["parsed"]["CC"])){
+			$message["cc"]=$this->processEmailAddressList($message["headers"]["parsed"]["CC"], $account["imap_account_user"]);
+		}
+		// this wasn't needed after fixing delivered-to below
+		// if(isset($message["headers"]["parsed"]["Delivered-To"])){
+		// 	$arrDelivered=$this->processEmailAddressList($message["headers"]["parsed"]["Delivered-To"], $account["imap_account_user"]);
+		// 	for($g=0;$g<count($arrDelivered);$g++){
+		// 		$found=false;
+		// 		for($g2=0;$g2<count($message["cc"]);$g2++){
+		// 			if($arrDelivered[$g]["email"] == $message["cc"][$g2]["email"]){
+		// 				$found=true;
+		// 				break;
+		// 			}
+		// 		}
+		// 		if(!$found){
+		// 			array_push($message["cc"], $arrDelivered[$g]);
+		// 		}
+		// 	}
+		// }
 		/*
 		if(isset($message["headers"]["parsed"]["Bcc"])){
 			$message["bcc"]=$this->processEmailAddressList($message["headers"]["parsed"]["Bcc"]);
@@ -73,8 +107,11 @@ class zProcessIMAP{
 
 		if(isset($message["headers"]["parsed"]["Delivered-To"])){
 			$deliveredTo=$this->processEmailAddressList($message["headers"]["parsed"]["Delivered-To"], $account["imap_account_user"]);
-			if(isset($deliveredTo["plusId"])){
-				$message['plusId']=$deliveredTo["plusId"];
+			for($g=0;$g<count($deliveredTo);$g++){
+				if(isset($deliveredTo[$g]["plusId"])){
+					$message['plusId']=$deliveredTo[$g]["plusId"];
+					break;
+				}
 			}
 		}
 		if($message['plusId']==''){
@@ -359,20 +396,27 @@ class zProcessIMAP{
 						}
 					} 
 					if(!$this->readonly && $deleteMessage){
-						$rsDelete=$myIMAP->deleteMessage($msgId);
+						$rsDelete=$myIMAP->moveMessage($msgId, "importarchive");
 						//echo("delete:".$msgId); var_dump($rsDelete);
 						if(!$rsDelete["success"]){
 							$this->logIMAPError("Failed to deleteMessage: ".$rsDelete["errorMessage"]);
 						}
 					}
+					// if(!$this->readonly && $deleteMessage){
+					// 	$rsDelete=$myIMAP->deleteMessage($msgId);
+					// 	//echo("delete:".$msgId); var_dump($rsDelete);
+					// 	if(!$rsDelete["success"]){
+					// 		$this->logIMAPError("Failed to deleteMessage: ".$rsDelete["errorMessage"]);
+					// 	}
+					// }
 				}
-				if(!$this->readonly){
-					$rsExpunge=$myIMAP->expungeMessages();
-					//echo("expunge");	var_dump($rsExpunge);
-					if(!$rsExpunge["success"]){
-						$this->logIMAPError("Failed to deleteMessage: ".$rsExpunge["errorMessage"]);
-					}
-				}
+				// if(!$this->readonly){
+				// 	$rsExpunge=$myIMAP->expungeMessages();
+				// 	//echo("expunge");	var_dump($rsExpunge);
+				// 	if(!$rsExpunge["success"]){
+				// 		$this->logIMAPError("Failed to deleteMessage: ".$rsExpunge["errorMessage"]);
+				// 	}
+				// }
 				
 				$arrIMAP[$account["imap_account_id"]]=$myIMAP;  
 
