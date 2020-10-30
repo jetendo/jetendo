@@ -2064,10 +2064,11 @@
 			</td>
 		</tr> 
 		<tr >
-			<td style="vertical-align:top; width:140px;">Google Analytics<br>View ID:</td>
+			<td style="vertical-align:top; width:140px;">Google Analytics<br>ViewID or PropertyID:StreamID:</td>
 			<td #application.zcore.status.getErrorStyle(Request.zsid, "site_google_analytics_view_id", "table-error","")#>
 				<input name="site_google_analytics_view_id" type="text" size="70" value="#htmleditformat(form.site_google_analytics_view_id)#"><br />
-				You can get the View Id from google analytics admin, view settings page.
+				You can get the View Id from google analytics admin, view settings page.<br>
+				On new google analytics V4 properties, you must use both the property id and the stream id which are displayed at the top of each settings page in google analytics admin.  When you enter this here you must separate them with a colon, like PROPERTYID:STREAMID which would be 2 numbers: 12341231:58324235.   If you don't do this jetendo will assume it is a view id, and the data will fail to import.
 			</td>
 		</tr> 
 		<tr >
