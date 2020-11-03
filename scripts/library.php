@@ -951,7 +951,7 @@ function zCheckDirectoryPermissions($dir, $user, $group, $fileChmodWithNoZeroPre
 	}
 	$correct=true;
 	if($recursive){
-		if(!$isTestServer){
+		// if(!$isTestServer){
 			$r=system("find ".escapeshellarg($dir)." -type f \! -perm 0".$fileChmodWithNoZeroPrefix." -print -quit");
 			if($r!==""){
 				array_push($arrLog, "Self-healing notice: chmod permissions reset to ".$fileChmodWithNoZeroPrefix." for files in ".$dir);
@@ -985,9 +985,9 @@ function zCheckDirectoryPermissions($dir, $user, $group, $fileChmodWithNoZeroPre
 					$correct=false;
 				}
 			}
-		}
+		// }
 	}else{
-		if(!$isTestServer){
+		// if(!$isTestServer){
 			if(fileperms($dir) != "2".$dirChmodWithNoZeroPrefix){
 				array_push($arrLog, "Self-healing notice: permissions reset to ".$dirChmodWithNoZeroPrefix." for: ".$dir);
 				if(!$preview){
@@ -1006,7 +1006,7 @@ function zCheckDirectoryPermissions($dir, $user, $group, $fileChmodWithNoZeroPre
 					chown($dir, $user);
 				}
 			}
-		}
+		// }
 
 	}
 	return $correct;

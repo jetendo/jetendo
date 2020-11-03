@@ -28,6 +28,35 @@
 	];
 	</cfscript>
 </cffunction>
+
+<!--- 
+<cffunction name="fixCustom" localmode="modern" access="remote">
+	<cfscript>
+	init();
+	var db = request.zos.queryObject;
+	db.sql="SELECT site_id, inquiries_id, inquiries_custom_json FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE site_id > #db.param(862)# AND site_id <= #db.param(873)#";
+	qInquiry=db.execute("qInquiry");
+	for(row in qInquiry){
+		js={arrCustom:[]};
+		oldjs=deserializeJson(row.inquiries_custom_json);
+		if(isstruct(oldjs.arrCustom)){
+			for(i in oldjs.arrCustom){
+				arrayAppend(js.arrCustom, oldjs.arrCustom[i]);
+			}
+			// writedump(oldjs);
+			c=serializeJson(js);
+			// writedump(c);abort;
+			db.sql="update #db.table("inquiries", request.zos.zcoreDatasource)# 
+			SET inquiries_custom_json=#db.param(c)# 
+			where site_id = #db.param(row.site_id)# and 
+			inquiries_id=#db.param(row.inquiries_id)# ";
+			db.execute("qUpdate");
+		}
+	}
+	</cfscript>	
+	fixed<cfabort>
+</cffunction> --->
+
 <cffunction name="cancel" localmode="modern" access="remote">
 	<cfscript>
 	init();
@@ -481,7 +510,7 @@
 	// echo('<p><textarea style="width:100%; height:350px;">#html#</textarea></p>');
 
 	// remap field names to built in names if there is a match
-	js={arrCustom:{}};
+	js={arrCustom:[]};
 	ds={};
 	for(i=1;i<=arrayLen(arrExtractedFields);i++){
 		fs=arrExtractedFields[i];
