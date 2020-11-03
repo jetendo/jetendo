@@ -1935,7 +1935,7 @@ configCom.includeContentByName(ts);
 		if(row.content_is_listing EQ 1){
 			echo('<div style="font-weight:bold; font-size:13px;">');
 			detailShown=false;
-			if(contentConfig.contentDisableLinks EQ false and row.content_id NEQ application.zcore.functions.zso(form, 'content_id') and shortSummary NEQ ""){
+			if(contentConfig.contentDisableLinks EQ false and row.content_id NEQ application.zcore.functions.zso(form, 'content_id')){
 				echo('<a href="#propertyLink#" class="zcontent-readmore-link">Read More</a>');
 				detailShown=true;
 			}
@@ -1951,7 +1951,7 @@ configCom.includeContentByName(ts);
 				echo(' | <a href="#application.zcore.functions.zblockurl(row.content_virtual_tour)#" rel="nofollow" onclick="window.open(this.href); return false;">View 360&deg; Virtual Tour</a>');
 			}
 			echo('</div>');
-		}else if(contentConfig.contentDisableLinks EQ false and shortSummary NEQ ""){
+		}else if(contentConfig.contentDisableLinks EQ false){
 			echo('<p class="zcontent-readmore-link"><strong><a href="#propertyLink#">Read More</a></strong></p>');
 		}
 	}
