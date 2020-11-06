@@ -595,6 +595,7 @@ When making a version the primary record, it will have option to preserve the or
 <cffunction name="versionList" localmode="modern" access="remote" roles="member">
 	<cfargument name="struct" type="struct" required="no" default="#{}#">
 	<cfscript>
+	echo("disabled");abort;
 	application.zcore.functions.zStatusHandler(request.zsid);
 	siteOptionCom=createObject("component", "zcorerootmapping.mvc.z.admin.controller.site-options");
 	defaultStruct=siteOptionCom.getDefaultStruct(); 
@@ -734,7 +735,7 @@ When making a version the primary record, it will have option to preserve the or
 		<p>A deep copy will force the URL to be unique, but all other data including text, files And sub-records will be fully cloned.</p>
 		<h3><a href="/z/admin/site-options/addGroup?site_option_app_id=#qSet.site_option_app_id#&amp;site_option_group_id=#qSet.site_option_group_id#&amp;site_x_option_group_set_id=#form.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#qSet.site_x_option_group_set_parent_id#">Shallow Copy</a></h3>
 		<p>Shallow copy prefills the form for creating a new record with only this record's text.  All files and sub-records will be left blank on the new record.</p>
-		<cfif request.zos.istestserver>
+		<!--- <cfif request.zos.istestserver>
 			<cfif isVersionLimitReached(form.site_x_option_group_set_id, qSet.site_id)>
 				<h3>Version limit reached.  You must delete a previous version before creating a new one.</h3>
 				<p><a href="/z/admin/site-option-group-deep-copy/versionList?site_x_option_group_set_id=#form.site_x_option_group_set_id#">List versions</a></p>
@@ -742,7 +743,7 @@ When making a version the primary record, it will have option to preserve the or
 				<h3><a href="##" onclick="doDeepCopy('/z/admin/site-option-group-deep-copy/createVersion?site_x_option_group_set_id=#form.site_x_option_group_set_id#'); return false;">Create new version</a></h3>
 				<p>A version is a deep copy that is linked with the original record.  The new record will be invisible to the public until finalized.  You will be able to preserve the URL and existing relationships that the original record had when you set the version to be the primary record.</p>
 			</cfif>
-		</cfif>
+		</cfif> --->
 		<h3><a href="/z/admin/site-options/manageGroup?site_option_app_id=#qSet.site_option_app_id#&amp;site_option_group_id=#qSet.site_option_group_id#">Cancel</a></h3>
 	</div>
 	 <!--- ajax for /z/admin/site-option-group-deep-copy/getCopyMessage until it returns "", then refresh page... --->
