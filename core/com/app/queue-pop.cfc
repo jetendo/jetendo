@@ -274,6 +274,11 @@
 					}
 				}
 			} 
+			if(structkeyexists(rs.jsonStruct["headers"]["parsed"], "Delivered-To")){
+				if(structkeyexists(request.parseEmailStruct, rs.jsonStruct["headers"]["parsed"]["Delivered-To"])){
+					rs.parseRow=request.parseEmailStruct[rs.jsonStruct["headers"]["parsed"]["Delivered-To"]];
+				}
+			}
 			if(structcount(rs.parseRow) NEQ 0){
 				return parseEmailToLead(rs);
 			}else{
@@ -346,6 +351,8 @@
 	if(html CONTAINS "<table"){
 		// detect table rows with this format: <tr><td>Field</td><td>Value</td></tr>
 		html=rereplacenocase(html,"<tr", chr(10)&chr(9)&"StartRow#chr(9)#<tr", 'ALL');
+		html=rereplacenocase(html,"<th", "#chr(9)#StartField#chr(9)#<th", 'ALL');
+		html=rereplacenocase(html,"</th>", "#chr(9)#EndField#chr(9)#", 'ALL');
 		html=rereplacenocase(html,"<td", "#chr(9)#StartField#chr(9)#<td", 'ALL');
 		html=rereplacenocase(html,"</td>", "#chr(9)#EndField#chr(9)#", 'ALL');
 		html=rereplacenocase(html,"</tr>", "#chr(9)#EndRow#chr(9)#"&chr(10), 'ALL');
@@ -361,6 +368,7 @@
 	html=rereplacenocase(html,"(</|<)[^>]*>", " ", 'ALL');
 	html=replacenocase(html,"&nbsp;", " ", 'ALL'); 
 	arrLine=listToArray(html, chr(10));
+	// writedump(html);
 	// arrLineNew=[];
 	// for(i=1;i<=arraylen(arrLine);i++){
 	// 	arrLine[i]=trim(arrLine[i]);

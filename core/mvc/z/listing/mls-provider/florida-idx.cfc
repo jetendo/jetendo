@@ -345,6 +345,7 @@
 		}else{
 			photo=replace(js.far_photo_url,'.jpg','_'&arguments.num&'.jpg');
 		}
+		photo=replace(replace(photo, "https://", "/zimageproxy/"), "http://", "/zimageproxy/");
 		return photo;
 		</cfscript>
     </cffunction>
@@ -422,6 +423,7 @@
 			idx["photo1"]=application.zcore.functions.zso(arguments.ss, 'far_photo_url');
 			for(i=2;i LTE application.zcore.functions.zso(arguments.ss, 'far_photo_quantity');i++){
 				idx["photo"&i]=replace(application.zcore.functions.zso(arguments.ss, 'far_photo_url'),'.jpg','_'&i&'.jpg');
+				idx["photo"&i]=replace(replace(idx["photo"&i], "https://", "/zimageproxy/"), "http://", "/zimageproxy/");
 			}
 		}
 		idx["officeName"]=application.zcore.functions.zso(arguments.ss, 'far_mls_office_name');

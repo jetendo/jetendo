@@ -308,7 +308,7 @@
 		db.execute("qDelete");
 
 	} 
-	if(form.clearCustomGroupFieldsAndData EQ 1){
+	if(form.clearCustomGroupData EQ 1 or form.clearCustomGroupFieldsAndData EQ 1){
 		db.sql="DELETE FROM #db.table("site_x_option_group", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and site_x_option_group_deleted=#db.param(0)#";
 		db.execute("qDelete");
 		db.sql="DELETE FROM #db.table("site_x_option_group_set", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and site_x_option_group_set_deleted=#db.param(0)#";
@@ -325,7 +325,7 @@
 		application.zcore.functions.zDeleteDirectory(privateHomeDir&"/zupload/site-options/");
 		application.zcore.functions.zDeleteDirectory(privateHomeDir&"/zuploadsecure/site-options/");
 	}
-	if(form.clearCustomGroupData EQ 1 or form.clearCustomGroupFieldsAndData EQ 1){
+	if(form.clearCustomGroupFieldsAndData EQ 1){
 		db.sql="DELETE FROM #db.table("site_option_group", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and site_option_group_deleted=#db.param(0)#";
 		db.execute("qDelete");
 		db.sql="DELETE FROM #db.table("site_option", request.zos.zcoreDatasource)# WHERE site_id = #db.param(form.sid)# and site_option_deleted=#db.param(0)#";

@@ -208,6 +208,9 @@
 			
 			for(row in qS){
 				id=row.site_x_option_group_set_id;
+				if(not structkeyexists(sog, "optionLookup")){
+					sog.optionLookup={};
+				}
 				if(structkeyexists(sog.optionLookup, row.groupSetOptionId)){
 					var typeId=sog.optionLookup[row.groupSetOptionId].type;
 					if(typeId EQ 2){
