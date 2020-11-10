@@ -3546,11 +3546,16 @@ Define this function in another CFC to override the default email format
 		// these are groups that children of mainGroupStruct
 		// we also get the count of those children's set records
 		arrChildGroup=[];
+		tempGroupStruct={};
 		for(groupId in sog.optionGroupLookup){
 			group=sog.optionGroupLookup[groupId];
 			if(group.site_option_group_parent_id EQ form.site_option_group_id){
-				arrayAppend(arrChildGroup, group);
+				tempGroupStruct[group.site_option_group_id]=group;
 			}
+		}
+		arrSortTemp=structsort(tempGroupStruct, "text", "asc", "site_option_group_display_name");
+		for(key in arrSortTemp){
+			arrayAppend(arrChildGroup, tempGroupStruct[key]);
 		}
 		// db.sql="select * 
 		// from #db.table("site_option_group", request.zos.zcoreDatasource)# site_option_group  
@@ -4429,7 +4434,7 @@ Define this function in another CFC to override the default email format
 								if(mainGroupStruct.site_option_group_limit EQ 0 or qSCount.recordcount LT mainGroupStruct.site_option_group_limit){
 									if(mainGroupStruct.site_option_group_enable_versioning EQ 1 and row.site_x_option_group_set_parent_id EQ 0){
 										copyLink=application.zcore.functions.zURLAppend(arguments.struct.copyURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#"); 
-										echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.versionURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#")#">Versions</a>');
+										// echo('<a href="#application.zcore.functions.zURLAppend(arguments.struct.versionURL, "site_x_option_group_set_id=#row.site_x_option_group_set_id#")#">Versions</a>');
 										hasMultipleEditFeatures=true;
 									}else{
 										copyLink=application.zcore.functions.zURLAppend(arguments.struct.addURL, "site_option_app_id=#form.site_option_app_id#&amp;site_option_group_id=#row.site_option_group_id#&amp;site_x_option_group_set_id=#row.site_x_option_group_set_id#&amp;site_x_option_group_set_parent_id=#row.site_x_option_group_set_parent_id#");
@@ -4991,7 +4996,7 @@ Define this function in another CFC to override the default email format
 	if(methodBackup EQ "publicAddGroup" or methodBackup EQ "publicEditGroup"){
 		echo('onsubmit="zSet9(''zset9_#form.set9#''); ');
 		if(methodBackup EQ "publicAddGroup" and qCheck.site_option_group_ajax_enabled EQ 1){
-			echo('zSiteOptionGroupPostForm(''siteOptionGroupForm#qCheck.site_option_group_id#''); return false;');
+			echo('zOptionGroupPostForm(''siteOptionGroupForm#qCheck.site_option_group_id#''); return false;');
 		}
 		echo('"');
 	}else if(methodBackup EQ "addGroup" or methodBackup EQ "userAddGroup" or methodBackup EQ "editGroup" or methodBackup EQ "userEditGroup"){

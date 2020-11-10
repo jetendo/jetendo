@@ -205,13 +205,13 @@ var zLastAjaxVarName=""; */
 
 	function zOptionGroupErrorCallback(){
 		alert("There was a problem with the submission. Please try again later.");
-		$(".zOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).show();
-		$(".zOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).hide();
+		$(".zSiteOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).show();
+		$(".zSiteOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).hide();
 	}
 	function zOptionGroupCallback(d){
 		var rs=eval("("+d+")");
-		$(".zOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).show();
-		$(".zOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).hide();
+		$(".zSiteOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).show();
+		$(".zSiteOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).hide();
 		if(zOptionGroupLastFormID != ""){
 			$("#"+zOptionGroupLastFormID+" input, #"+zOptionGroupLastFormID+" textarea, #"+zOptionGroupLastFormID+" select").bind("change", function(){
 				if(zGetFormFieldDataById(this.id) != ""){
@@ -242,10 +242,11 @@ var zLastAjaxVarName=""; */
 			alert("Please correct the following errors and submit the form again\n"+rs.errorMessage);
 		}
 	}
+	var zOptionGroupLastFormID="";
 	function zOptionGroupPostForm(formId){
 		zOptionGroupLastFormID=formId;
-		$(".zOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).hide();
-		$(".zOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).show();
+		$(".zSiteOptionGroupSubmitButton", $("#"+zOptionGroupLastFormID)).hide();
+		$(".zSiteOptionGroupWaitDiv", $("#"+zOptionGroupLastFormID)).show();
 		var postObj=zGetFormDataByFormId(formId);
 		var obj={
 			id:"ajaxOptionGroup",
