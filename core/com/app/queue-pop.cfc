@@ -29,12 +29,11 @@
 	</cfscript>
 </cffunction>
 
-<!--- 
-<cffunction name="fixCustom" localmode="modern" access="remote">
+<!--- <cffunction name="fixCustom" localmode="modern" access="remote">
 	<cfscript>
 	init();
 	var db = request.zos.queryObject;
-	db.sql="SELECT site_id, inquiries_id, inquiries_custom_json FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE site_id > #db.param(862)# AND site_id <= #db.param(873)#";
+	db.sql="SELECT site_id, inquiries_id, inquiries_custom_json FROM #db.table("inquiries", request.zos.zcoreDatasource)# WHERE (site_id >= #db.param(862)# AND site_id <= #db.param(873)#) or site_id = #db.param(553)# ";
 	qInquiry=db.execute("qInquiry");
 	for(row in qInquiry){
 		js={arrCustom:[]};
@@ -55,7 +54,7 @@
 	}
 	</cfscript>	
 	fixed<cfabort>
-</cffunction> --->
+</cffunction>  --->
 
 <cffunction name="cancel" localmode="modern" access="remote">
 	<cfscript>
