@@ -3454,6 +3454,9 @@ Define this function in another CFC to override the default email format
 	var arrVal=arraynew(1);
 	var arrType=arraynew(1);
 	var arrRow=arraynew(1);
+	if(not structkeyexists(form, "site_option_group_id")){
+		application.zcore.functions.zRedirect("/manager/");
+	}
 
 	fakeRow={};
 	fakePrimaryId=0;	

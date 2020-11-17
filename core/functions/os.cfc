@@ -879,13 +879,13 @@ if(not rs.success){
 	zos=request.zos;
 	if(structkeyexists(zos,'JavascriptRequiredGoogleMaps') EQ false){
 		if(zos.globals.googleMapsApiKey NEQ ""){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.globals.googleMapsApiKey#";
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=zMapInit&key=#zos.globals.googleMapsApiKey#";
 		}else if(right(zos.globals.domain, len(zos.productionTestDomain)) EQ zos.productionTestDomain){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#"; 
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#"; 
 		}else if(right(zos.globals.domain, len(zos.testDomain)) EQ zos.testDomain){
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#";   
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=zMapInit&key=#zos.googleMapsApiServerKeyTestDomain#";   
 		}else{
-			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=false&callback=zMapInit";
+			link="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=zMapInit";
 		}
 		application.zcore.skin.includeJS(link);
 

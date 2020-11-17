@@ -244,7 +244,7 @@ zGetLatLong(ts);
 	structappend(arguments.ss,ts,false);
 
 	if(arguments.ss.debug EQ false){
-		theLink='http://maps.google.com/maps/geo?q=#urlencodedformat(arguments.ss.address)#&output=csv&oe=utf8&sensor=false&key=#request.zos.globals.googlemapsapikey#';
+		theLink='http://maps.google.com/maps/geo?q=#urlencodedformat(arguments.ss.address)#&output=csv&oe=utf8&key=#request.zos.globals.googlemapsapikey#';
 		r1=application.zcore.functions.zDownloadLink(theLink);
 		if(r1.success){
 			r2=r1.cfhttp.FileContent;
