@@ -57,7 +57,7 @@
 	<cfif textMissing>
 		<h2>Public User Disclaimers</h2>
 		<ul>
-			<li><a href="/z/user/privacy/index" class="zPrivacyPolicyLink">Privacy Policy</a></li>
+			<li><a href="/z/user/privacy/index">Privacy Policy</a></li>
 			<li><a href="/z/user/terms-of-use/index">Terms of Use</a></li>
 		</ul>
 

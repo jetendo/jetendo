@@ -229,17 +229,17 @@
 				ts.link="/z/admin/member/showPublicUsers";
 				arguments.sharedStruct["Users"].children["Public Users"]=ts;
 			}
-			if(structkeyexists(arguments.sharedStruct["Users"].children,"Offices") EQ false){
+			if(structkeyexists(arguments.sharedStruct["Users"].children,"Locations") EQ false){
 				ts=structnew();
-				ts.featureName="Offices";
+				ts.featureName="Locations";
 				ts.link="/z/admin/office/index";
-				arguments.sharedStruct["Users"].children["Offices"]=ts;
+				arguments.sharedStruct["Users"].children["Locations"]=ts;
 			}
-			if(structkeyexists(arguments.sharedStruct["Users"].children,"Add Office") EQ false){
+			if(structkeyexists(arguments.sharedStruct["Users"].children,"Add Location") EQ false){
 				ts=structnew();
-				ts.featureName="Offices";
+				ts.featureName="Locations";
 				ts.link="/z/admin/office/index?zManagerAddOnLoad=1";
-				arguments.sharedStruct["Users"].children["Add Office"]=ts;
+				arguments.sharedStruct["Users"].children["Add Location"]=ts;
 			}
 			if(structkeyexists(arguments.sharedStruct["Users"].children,"Add User") EQ false){
 				ts=structnew();

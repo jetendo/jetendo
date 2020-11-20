@@ -1142,13 +1142,13 @@
 			selectStruct.queryValueField = 'office_id';
 
 			if(arrayLen(arrOffice) GT 3){
-				echo('Office:<br>
-					Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+				echo('Location:<br>
+					Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Location:<br>');
 				application.zcore.functions.zInputSelectBox(selectStruct);
 		   		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 	   		}else{
 	   			selectStruct.size=1;
-				echo('<div style="width:60px; float:left;">Office:</div><div style="width:200px;float:left;">');
+				echo('<div style="width:60px; float:left;">Location:</div><div style="width:200px;float:left;">');
 				application.zcore.functions.zInputSelectBox(selectStruct);
 				echo('</div>');
 	   		}

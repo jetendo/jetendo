@@ -104,7 +104,7 @@
 
 	ms["Manage Users"]={ parent:'', value:'Users', label:"Users"};
 	ms["Users"]={ parent:'Manage Users', value:'Users', label:chr(9)&"Users"};
-	ms["Offices"]={ parent:'Manage Users', value:'Offices', label:chr(9)&"Offices"};
+	ms["Locations"]={ parent:'Manage Users', value:'Locations', label:chr(9)&"Locations"};
 
 	return ms;
 	</cfscript>

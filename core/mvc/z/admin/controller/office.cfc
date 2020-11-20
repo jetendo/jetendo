@@ -4,17 +4,17 @@
 	<cfscript>
 	links=[];
 	variables.hasUserAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Users");
-	variables.hasOfficeAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Offices");
+	variables.hasOfficeAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Locations");
 	variables.hasLeadsAccess=application.zcore.adminSecurityFilter.checkFeatureAccess("Leads");
 	if(variables.hasOfficeAccess){
-		arrayAppend(links, { link:"/z/admin/office/index?zManagerAddOnLoad=1", label:"Add Office" }); 
+		arrayAppend(links, { link:"/z/admin/office/index?zManagerAddOnLoad=1", label:"Add Location" }); 
 	}
 	if(variables.hasUserAccess){
 		arrayAppend(links, { link:"/z/admin/member/add", label:"Add User" });
 		arrayAppend(links, { link:"/z/admin/member/import", target:"_blank", label:"Import Users" });
 	}
 	if(variables.hasOfficeAccess){
-		arrayAppend(links, { link:"/z/admin/office/index", label:"Offices" });
+		arrayAppend(links, { link:"/z/admin/office/index", label:"Locations" });
 	}
 	if(variables.hasUserAccess){
 		arrayAppend(links, { link:"/z/admin/member/showPublicUsers", label:"Public Users" });
@@ -39,8 +39,8 @@
 	variables.displayPath="/zupload/office/";
 	ts={
 		// required 
-		label:"Office",
-		pluralLabel:"Offices",
+		label:"Location",
+		pluralLabel:"Locations",
 		tableName:"office",
 		datasource:request.zos.zcoreDatasource,
 		deletedField:"office_deleted",
@@ -77,12 +77,12 @@
 		imageFields:[],
 		fileFields:[],
 		// optional
-		requireFeatureAccess:"Offices",
+		requireFeatureAccess:"Locations",
 		pagination:true,
 		paginationIndex:"zIndex",
 		pageZSID:"zPageId",
 		perpage:10,
-		title:"Offices",
+		title:"Locations",
 		prefixURL:"/z/admin/office/",
 		navLinks:[],
 		titleLinks:[],
@@ -354,7 +354,7 @@
 	savecontent variable="field"{
 		echo('<input type="text" name="office_name" value="#htmleditformat(form.office_name)#" />');
 	}
-	arrayAppend(fs, {label:'Office Name', required:true, field:field});
+	arrayAppend(fs, {label:'Location Name', required:true, field:field});
 	savecontent variable="field"{
 		echo('<input type="text" name="office_manager_email_list" value="#htmleditformat(form.office_manager_email_list)#" />');
 		if(application.zcore.functions.zso(request.zos.globals, 'enableLeadReminderOfficeManagerCC', true, 0) EQ 1){
@@ -374,6 +374,17 @@
 		htmlEditor.create();
 	}
 	arrayAppend(fs, {label:'Description', field:field});
+	savecontent variable="field"{
+		htmlEditor = application.zcore.functions.zcreateobject("component", "/zcorerootmapping/com/app/html-editor");
+		htmlEditor.instanceName	= "office_hours";
+		htmlEditor.value			= form.office_hours;
+		htmlEditor.basePath		= '/';
+		htmlEditor.width			= "100%";
+		htmlEditor.height		= 200;
+		htmlEditor.config.EditorAreaCSS=request.zos.globals.editorStylesheet;
+		htmlEditor.create();
+	}
+	arrayAppend(fs, {label:'Hours', field:field});
 				
 	savecontent variable="field"{
 		echo('<input type="text" name="office_phone" value="#htmleditformat(form.office_phone)#" />');
@@ -392,17 +403,17 @@
 
 
 	savecontent variable="field"{
-		echo('<input type="text" name="office_address" value="#htmleditformat(form.office_address)#" />');
+		echo('<input type="text" name="office_address" id="office_address" value="#htmleditformat(form.office_address)#" />');
 	}
 	arrayAppend(fs, {label:'Address', field:field});
 
 	savecontent variable="field"{
-		echo('<input type="text" name="office_address2" value="#htmleditformat(form.office_address2)#" />');
+		echo('<input type="text" name="office_address2" id="office_address2" value="#htmleditformat(form.office_address2)#" />');
 	}
 	arrayAppend(fs, {label:'Address 2', field:field});
 
 	savecontent variable="field"{
-		echo('<input type="text" name="office_city" value="#htmleditformat(form.office_city)#" />');
+		echo('<input type="text" name="office_city" id="office_city" value="#htmleditformat(form.office_city)#" />');
 	}
 	arrayAppend(fs, {label:'City', field:field});
 
@@ -412,14 +423,27 @@
 	arrayAppend(fs, {label:'State', field:field});
 
 	savecontent variable="field"{
-		echo('<input type="text" name="office_zip" value="#htmleditformat(form.office_zip)#" />');
+		echo('<input type="text" name="office_zip" id="office_zip" value="#htmleditformat(form.office_zip)#" />');
 	}
 	arrayAppend(fs, {label:'Postal Code', field:field});
 	savecontent variable="field"{
 		echo(application.zcore.functions.zCountrySelect("office_country", application.zcore.functions.zso(form,'office_country')));
 	}
 	arrayAppend(fs, {label:'Country', field:field});
-
+	savecontent variable="field"{
+		ts={
+			name:"office_map_location",
+			fields:{
+				address:"office_address",
+				city:"office_city",
+				state:"office_state",
+				zip:"office_zip",
+				country:"office_country",
+			}
+		};
+		echo(application.zcore.functions.zMapLocationPicker(ts)); 
+	}
+	arrayAppend(fs, {label:'Map Location', field:field}); 
   
 	savecontent variable="field"{
 		ts=structnew();
@@ -533,7 +557,7 @@
 	savecontent variable="field"{
 		displayRowSortButton(row.office_id);
 		editLinks=[{
-					label:"Edit Office",
+					label:"Edit Location",
 					link:variables.prefixURL&"edit?office_id=#row.office_id#&modalpopforced=1",
 					enableEditAjax:true // only possible for the link that replaces the current row
 				}];

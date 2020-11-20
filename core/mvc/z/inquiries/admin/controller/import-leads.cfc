@@ -348,7 +348,7 @@ not important yet: create contacts at same time as create lead (use same functio
 		<!--- office and user --->
 		<cfif application.zcore.functions.zso(request.zos.globals, 'enableUserOfficeAssign', true, 0) EQ 1>  
 			<cfif arrayLen(request.arrOffice) GT 0> 
-				<h3>Select Office (Optional)</h3>
+				<h3>Select Location (Optional)</h3>
 				<cfscript> 
 				selectStruct = StructNew();
 				selectStruct.name = "office_id"; 
@@ -360,7 +360,7 @@ not important yet: create contacts at same time as create lead (use same functio
 				selectStruct.queryValueField = 'office_id';
 
 				if(arrayLen(request.arrOffice) GT 3){
-					echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+					echo('Type to filter locations: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Location:<br>');
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 				}else{

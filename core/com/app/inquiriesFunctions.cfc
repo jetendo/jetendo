@@ -847,7 +847,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 
 		<cfif t.office_id NEQ 0>
 			<tr>
-				<th style="#thstyle# text-align:left;" >Assigned&nbsp;Office:</th>
+				<th style="#thstyle# text-align:left;" >Assigned&nbsp;Location:</th>
 				<td style="#tdstyle#"> 
 					<cfscript>
 				    db=request.zos.queryObject;
@@ -856,7 +856,7 @@ inquiriesCom.indexInquiry(form.inquiries_id, request.zos.globals.id);
 					};
 				    arrOffice=application.zcore.user.getOffices(ts);
 				    if(arrayLen(arrOffice) EQ 0){
-				    	echo('(Office deleted)');
+				    	echo('(Location deleted)');
 				    }else{
 				    	for(office in arrOffice){
 					    	echo('<strong>'&office.office_name&'</strong>');

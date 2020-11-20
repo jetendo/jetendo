@@ -569,7 +569,7 @@ a version of index list with divs for the table instead of <table>
 <!--- 
 ts={
 	links:[{
-		label:"Edit Office",
+		label:"Edit Location",
 		link:"/z/admin/new-interface/edit?office_id=#row.office_id#&modalpopforced=1",
 		enableEditAjax:true // only possible for the link that replaces the current row
 	},{

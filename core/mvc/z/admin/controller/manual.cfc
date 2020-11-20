@@ -336,11 +336,11 @@ zdoc css style documentation
 	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Users")){
 		arrayAppend(arrS, { id:"__5.3", url:"/import-users.html", title:"Import Users"});
 	}
-	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Offices")){
-		arrayAppend(arrS, { id:"__5.4", url:"/manage-offices.html", title:"Offices"});
+	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Locations")){
+		arrayAppend(arrS, { id:"__5.4", url:"/manage-locations.html", title:"Locations"});
 	}
-	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Offices")){
-		arrayAppend(arrS, { id:"__5.5", url:"/add-edit-office.html", title:"Add/Edit Office"});
+	if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Locations")){
+		arrayAppend(arrS, { id:"__5.5", url:"/add-edit-location.html", title:"Add/Edit Locations"});
 	}
 	if(showAll or application.zcore.app.siteHasApp("listing")){
 		if(showAll or application.zcore.adminSecurityFilter.checkFeatureAccess("Listings")){

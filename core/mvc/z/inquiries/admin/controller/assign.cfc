@@ -41,10 +41,10 @@
 			</cfscript> 
 			<cfif arrayLen(arrOffice) GT 0>
 		 		<div class="z-float">
-		 			<h3 style="color:##369; font-weight:normal;">1) Select An Office:</h3>
+		 			<h3 style="color:##369; font-weight:normal;">1) Select A Location:</h3>
 		 		</div>
 
-				<p>An office is a group of 1 or more users who will be able to access this lead.</p>
+				<p>An location is a group of 1 or more users who will be able to access this lead.</p>
 				<div style="float:left; max-width:100%; padding-right:10px; padding-bottom:10px; ">
 					<cfscript> 
 					selectStruct = StructNew();
@@ -57,12 +57,12 @@
 					selectStruct.queryValueField = 'office_id';
 
 					if(arrayLen(arrOffice) GT 3){
-						echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+						echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Location:<br>');
 						application.zcore.functions.zInputSelectBox(selectStruct);
 						application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 					}else{
 						selectStruct.size=1;
-						echo('<div style="width:50px; float:left;">Office:</div><div style="width:200px;float:left;">');
+						echo('<div style="width:50px; float:left;">Location:</div><div style="width:200px;float:left;">');
 						application.zcore.functions.zInputSelectBox(selectStruct);
 						echo('</div>');
 					}
@@ -234,10 +234,10 @@
 			</cfscript> 
 			<cfif arrayLen(arrOffice) GT 0>
 		 		<div class="z-float">
-		 			<h3 style="color:##369; font-weight:normal;">1) Select An Office:</h3>
+		 			<h3 style="color:##369; font-weight:normal;">1) Select A Location:</h3>
 		 		</div>
 
-				<p>An office is a group of 1 or more users who will be able to access this lead.</p>
+				<p>An location is a group of 1 or more users who will be able to access this lead.</p>
 				<div style="float:left; max-width:100%; padding-right:10px; padding-bottom:10px; ">
 					<cfscript> 
 					selectStruct = StructNew();
@@ -250,12 +250,12 @@
 					selectStruct.queryValueField = 'office_id';
 
 					if(arrayLen(arrOffice) GT 3){
-						echo('Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignLeadSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+						echo('Type to filter locations: <input type="text" name="#selectStruct.name#_InputField" onkeyup="setTimeout(function(){ assignLeadSelectOffice();}, 100); " id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Location:<br>');
 						application.zcore.functions.zInputSelectBox(selectStruct);
 						application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 					}else{
 						selectStruct.size=1;
-						echo('<div style="width:50px; float:left;">Office:</div><div style="width:200px;float:left;">');
+						echo('<div style="width:50px; float:left;">Location:</div><div style="width:200px;float:left;">');
 						application.zcore.functions.zInputSelectBox(selectStruct);
 						echo('</div>');
 					}
@@ -529,7 +529,7 @@
 				arrOffice=application.zcore.user.getOffices(ts);
 				if(arrayLen(arrOffice)){
 					echo('<tr>
-					<th>Office:</th>
+					<th>Location:</th>
 					<td>#arrOffice[1].office_name#</td>
 					</tr>');
 				}

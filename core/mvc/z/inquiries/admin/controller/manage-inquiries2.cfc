@@ -114,7 +114,7 @@
 		},{
 			label:'Phone'
 		},{
-			label:'Assigned User / Office'
+			label:'Assigned User / Location'
 		},{
 			label:'Priority',
 			field:'inquiries_priority',
@@ -2436,7 +2436,7 @@ zArrDeferredFunctions.push(function(){
 		}else{
 			arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 		}
-		arrayPrepend(arrOffice, {office_name:"No Office", office_id:"0"});
+		arrayPrepend(arrOffice, {office_name:"No Location", office_id:"0"});
 		arrOffice=application.zcore.user.getOfficesByOfficeIdList(request.zsession.user.office_id, request.zos.globals.id); 
 		if(application.zcore.user.checkGroupAccess("administrator") or arrayLen(arrOffice)){
 			savecontent variable="officeField"{
@@ -2449,13 +2449,13 @@ zArrDeferredFunctions.push(function(){
 				selectStruct.queryValueField = 'office_id';
 
 				if(arrayLen(arrOffice) GT 3){
-					echo('Office:<br>
-						Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Office:<br>');
+					echo('Location:<br>
+						Type to filter offices: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="min-width:auto;width:200px; max-width:100%; margin-bottom:5px;"><br />Select Location:<br>');
 					application.zcore.functions.zInputSelectBox(selectStruct);
 			   		application.zcore.skin.addDeferredScript("  $('###selectStruct.name#').filterByText($('###selectStruct.name#_InputField'), true); ");
 		   		}else{
 		   			selectStruct.size=1;
-					echo('<div style="width:60px; float:left;">Office:</div><div style="width:200px;float:left;">');
+					echo('<div style="width:60px; float:left;">Location:</div><div style="width:200px;float:left;">');
 					application.zcore.functions.zInputSelectBox(selectStruct);
 					echo('</div>');
 		   		}

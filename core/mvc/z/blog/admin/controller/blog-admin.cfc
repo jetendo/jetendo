@@ -3088,7 +3088,7 @@ tabCom.enableSaveButtons();
 			</cfscript>
 			<cfif qOffice.recordcount>
 				<tr>
-					<th style="width:120px;">#application.zcore.functions.zOutputHelpToolTip("Office","member.blog.edit office_id")#</th>
+					<th style="width:120px;">#application.zcore.functions.zOutputHelpToolTip("Location","member.blog.edit office_id")#</th>
 					<td><cfscript>
 						selectStruct = StructNew();
 						selectStruct.name = "office_id";
