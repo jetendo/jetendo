@@ -201,7 +201,7 @@ TODO: getEditData and down are not complete yet.
 	WHERE event_id= #db.param(application.zcore.functions.zso(form,'event_id'))# and 
 	event_deleted = #db.param(0)# and
 	site_id = #db.param(request.zos.globals.id)#";
-	rs.qData=db.execute("qData");
+	rs.qData=db.execute("qData", "", 10000, "query", false);
 	return rs;
 	</cfscript>
 </cffunction>

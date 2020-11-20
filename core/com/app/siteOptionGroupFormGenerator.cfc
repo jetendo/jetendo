@@ -935,7 +935,7 @@ echo('<cfcomponent extends="zcorerootmapping.com.app.manager-base">
 		site_id=##db.param(request.zos.globals.id)## ')
 	}
 	echo('";
-	rs.qData=db.execute("qData");
+	rs.qData=db.execute("qData", "", 10000, "query", false);
 	return rs;
 	</cfscript>
 </cffunction>

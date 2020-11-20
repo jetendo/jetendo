@@ -22,7 +22,7 @@ displayMetaForm("office", "Basic", "last");
 displayMetaForm("office", "Advanced", "last");
 displayMetaForm("office", "Advanced", "last");
 
-form=validateMetaForm("office", form);
+form=validateMeta("office", form);
 ts.office_meta_json=saveMetaForm("office", form);
 
  --->
@@ -141,6 +141,7 @@ if(arrayLen(arrError)){
 <cffunction name="validate" localmode="modern" returntype="array" access="public">
 	<cfargument name="formName" type="string" required="yes">
 	<cfargument name="dataStruct" type="struct" required="yes">
+	<cfargument name="qOldData" type="query" required="no">
 	<cfscript>
 	ds=arguments.dataStruct;
 	if(not structkeyexists(application.siteStruct[request.zos.globals.id], 'metaCache')){
@@ -163,7 +164,11 @@ if(arrayLen(arrError)){
 		return arrError;
 	}
 	tempCom=createObject("component", ss.metaObjectCache[arguments.formName].cfcPath);
-	arrError=tempCom.validateMeta(ds, arrError);
+	if(structkeyexists(arguments, "qOldData")){
+		arrError=tempCom.validateMeta(ds, arrError, arguments.qOldData);
+	}else{
+		arrError=tempCom.validateMeta(ds, arrError, queryNew("fake", "varchar"));
+	}
 	return arrError;
 	</cfscript>
 </cffunction>

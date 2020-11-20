@@ -690,6 +690,9 @@ displayAdminEditMenu(ts);
  
 
 	if(variables.metaField NEQ ""){
+		for(row in rs.qData){
+			structappend(form, row, true);
+		}
 		structappend(form, variables.metaCom.getData(variables.tableName, form), false); 
 		rsDelete=variables.metaCom.delete(variables.tableName, form); 
 		if(not rsDelete.success){
@@ -775,9 +778,20 @@ displayAdminEditMenu(ts);
 	if(not rsUpdate.success or not rsInsert.success){	
 		application.zcore.status.displayReturnJson(request.zsid);
 	}   
+	if(form.method EQ "update"){
+		if(variables.methods.beforeUpdate NEQ ""){
+			if(not structkeyexists(rsUpdate, 'qData')){
+				throw("variables.methods.beforeUpdate function must return a struct with this structure: {success:true, qData:qData} ");
+			}
+		}
+	} 
 
 	if(variables.metaField NEQ ""){
-		arrError=variables.metaCom.validate(variables.tableName, form);
+		if(form.method EQ "update" and variables.methods.beforeUpdate NEQ ""){
+			arrError=variables.metaCom.validate(variables.tableName, form, rsUpdate.qData);
+		}else{
+			arrError=variables.metaCom.validate(variables.tableName, form);
+		}
 		if(arrayLen(arrError)){
 			fail=true;
 			for(e in arrError){
@@ -786,13 +800,6 @@ displayAdminEditMenu(ts);
 		}
 	}
 	
-	if(form.method EQ "update"){
-		if(variables.methods.beforeUpdate NEQ ""){
-			if(not structkeyexists(rsUpdate, 'qData')){
-				throw("variables.methods.beforeUpdate function must return a struct with this structure: {success:true, qData:qData} ");
-			}
-		}
-	} 
 	newFileStruct={};
 	for(fs in variables.imageFields){
 		application.zcore.functions.zCreateDirectory(fs.uploadPath);

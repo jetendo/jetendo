@@ -220,7 +220,7 @@
 	WHERE section_link_id= #db.param(application.zcore.functions.zso(form,"section_link_id"))# and  
 	section_link_deleted = #db.param(0)#   and 
 		site_id=#db.param(request.zos.globals.id)# ";
-	rs.qData=db.execute("qData");
+	rs.qData=db.execute("qData", "", 10000, "query", false);
 	return rs;
 	</cfscript>
 </cffunction>

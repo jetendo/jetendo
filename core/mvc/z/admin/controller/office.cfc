@@ -232,7 +232,7 @@
 	WHERE office_id= #db.param(application.zcore.functions.zso(form,'office_id'))# and 
 	office_deleted = #db.param(0)# and
 	site_id = #db.param(request.zos.globals.id)#";
-	rs.qData=db.execute("qData");
+	rs.qData=db.execute("qData", "", 10000, "query", false);
 	return rs;
 	</cfscript>
 </cffunction>
