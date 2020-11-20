@@ -176,6 +176,10 @@
 	if(form.event_end_datetime_time NEQ "" and isdate(form.event_end_datetime_time)){
 		form.event_end_datetime=form.event_end_datetime&" "&timeformat(form.event_end_datetime_time, 'HH:mm:ss');
 	} 
+	if(form.event_end_datetime EQ ""){
+		application.zcore.status.setStatus(request.zsid, "End Date is required", form, true);
+		application.zcore.functions.zRedirect("/z/event/suggest-an-event/index?zsid=#request.zsid#");
+	}
 
 	if(datediff("d", form.event_start_datetime, form.event_end_datetime) LT 0){
 		application.zcore.status.setStatus(request.zsid, "The end date must be after the start date", form, true);
