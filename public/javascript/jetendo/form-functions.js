@@ -1884,7 +1884,7 @@ var zLastAjaxVarName=""; */
 
 	(function(){
 		// prevent losing work when navigating away from a page, except when submitting a form.
-		var ignoreDirtyCheck=false;
+		window.ignoreDirtyCheck=false;
 		var formDataCache={};  
 		var unloadCalled=false;
 		var formDirtyTempCache={};
@@ -1990,7 +1990,7 @@ var zLastAjaxVarName=""; */
 		});
 		$(window).bind("beforeunload", function(e){
 			zCheckFormDataForChanges(); 
-			if(!zIsDirty || ignoreDirtyCheck){
+			if(!zIsDirty || window.ignoreDirtyCheck){
 				return;
 			}  
 			if(unloadCalled){
@@ -2021,7 +2021,7 @@ var zLastAjaxVarName=""; */
 					delete formDirtyTempCache[this.id];
 				}
 				formDataCache[this.id]={};
-				ignoreDirtyCheck=true;
+				window.ignoreDirtyCheck=true;
 			});
 		});
 

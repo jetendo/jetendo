@@ -127,6 +127,7 @@ var zLoggedIn=false;
 				// this was a login protected page, we must redirect away for security.
 				document.body.innerHTML='Your session has expired.';
 				var isAdmin=zGetCookie("ZISADMIN");
+				window.ignoreDirtyCheck=true;
 				if(isAdmin=="1"){
 					window.location.replace('/z/expired-admin.htm');
 				}else{
