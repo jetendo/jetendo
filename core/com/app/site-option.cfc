@@ -2456,6 +2456,7 @@ if(not rs.success){
      <cfscript>
 	 var start="";
 	 var end="";
+	 var endSuffix="";
 	 if(arguments.site_id EQ "" and structkeyexists(request.zos, 'globals') and structkeyexists(request.zos.globals, 'id')){
 	 	arguments.site_id=request.zos.globals.id;
 	 }
@@ -2466,6 +2467,11 @@ if(not rs.success){
 		 contentConfig.contentEmailFormat=false;
 	 }
 	 if(arguments.name EQ 'Visitor Tracking Code'){
+	 	if(structkeyexists(request.zos.globals, "enableAudioeye") and request.zos.globals.enableAudioeye EQ 1){
+	 		endSuffix&='<script type="text/javascript">
+!function(){var t=function(){var t=document.createElement("script");t.src="https://ws.audioeye.com/ae.js",t.type="text/javascript",t.setAttribute("async",""),document.getElementsByTagName("body")[0].appendChild(t)};"complete"!==document.readyState?window.addEventListener?window.addEventListener("load",t):window.attachEvent&&window.attachEvent("onload",t):t()}()
+</script>';
+	 	}
 	 	disabled=false;
 	 	if(structkeyexists(request.zos.userSession.groupAccess, "member") or request.zos.istestserver){
 			disabled=true;
@@ -2488,9 +2494,9 @@ if(not rs.success){
 				end="";
 			}
 			if(arguments.site_id EQ request.zos.globals.id){
-				return start&Request.zOS.globals.site_options[arguments.name]&end;
+				return start&Request.zOS.globals.site_options[arguments.name]&end&endSuffix;
 			}else{
-				return start&application.siteStruct[arguments.site_id].globals.site_options[arguments.name]&end;
+				return start&application.siteStruct[arguments.site_id].globals.site_options[arguments.name]&end&endSuffix;
 			}
 		}else{
 			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a site option.");
@@ -2503,9 +2509,9 @@ if(not rs.success){
 				end="";
 			}
 			if(arguments.site_id EQ request.zos.globals.id){
-				return start&Request.zOS.globals.site_option_app[arguments.site_option_app_id][arguments.name]&end;
+				return start&Request.zOS.globals.site_option_app[arguments.site_option_app_id][arguments.name]&end&endSuffix;
 			}else{
-				return start&application.siteStruct[arguments.site_id].globals.site_option_app[arguments.site_option_app_id][arguments.name]&end;
+				return start&application.siteStruct[arguments.site_id].globals.site_option_app[arguments.site_option_app_id][arguments.name]&end&endSuffix;
 			}
 		}else{
 			//application.zcore.template.fail("zVarSO: `#arguments.name#`, is not a site option.");

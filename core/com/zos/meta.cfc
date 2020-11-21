@@ -92,6 +92,7 @@ ts.office_meta_json=saveMetaForm("office", form);
 				// render each field
 				ts={
 					label:fieldStruct.label,
+					id:fieldStruct.id,
 					field:tempCom[fieldStruct.formRenderMethod](),
 					required:false,
 					hideLabel:fieldStruct.hideLabel?:false
@@ -108,7 +109,7 @@ ts.office_meta_json=saveMetaForm("office", form);
 		if(structkeyexists(ss.arrFieldCache, arguments.tabName&"-"&arguments.position)){ 
 			for(fieldStruct in ss.arrFieldCache[arguments.tabName&"-"&arguments.position]){
 				// render each field
-				if(not structkeyexists(field, "hideLabel") or field.hideLabel EQ false){
+				if(not structkeyexists(fieldStruct, "hideLabel") or fieldStruct.hideLabel EQ false){
 					arrayAppend(arrField, '<tr><th>'&fieldStruct.label&'</th><td>'&tempCom[fieldStruct.formRenderMethod]());
 					if(structkeyexists(fieldStruct, 'required') and fieldStruct.required){
 						arrayAppend(arrField, ' *');
@@ -197,8 +198,8 @@ if(arrayLen(arrError)){
 		throw("metaStruct.version was older then jsonStruct.version in database.  The source code must be updated to the latest version before running this again.");
 	}else if(metaStruct.config.version NEQ jsonStruct.version){
 		jsonStruct=tempCom.upgrade(tempCom, ds, jsonStruct);
-		structappend(jsonStruct, variables.defaultStruct, false);
 	}
+	structappend(jsonStruct.data, metaStruct.config.defaultStruct, false);
 	return jsonStruct.data;
 	</cfscript>
 </cffunction>

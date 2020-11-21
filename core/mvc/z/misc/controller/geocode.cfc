@@ -529,7 +529,7 @@ ts={
 };
 geocodeCom=application.zcore.functions.zcreateObject("component", "zcorerootmapping.mvc.z.misc.controller.geocode");
 rs=geocodeCom.getGeocode(ts);
-if(rs.success){
+if(rs.status EQ "complete"){
 	/* returns this structure
 	rs.exact=true or false
 	rs.latitude

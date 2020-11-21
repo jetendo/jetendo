@@ -424,6 +424,10 @@
 	if(not structkeyexists(form, 'site_drip_campaign_subscribe_index')){
 		form.site_drip_campaign_subscribe_index=0;
 	}
+	
+	if(not structkeyexists(form, 'site_enable_audioeye')){
+		form.site_enable_audioeye=0;
+	}
 	if(not structkeyexists(form, 'site_enable_user_stats')){
 		form.site_enable_user_stats=0;
 	}
@@ -1752,6 +1756,10 @@
 			<input name="site_drip_campaign_subscribe_index" type="radio" value="2" <cfif form.site_drip_campaign_subscribe_index EQ 2>checked="checked"</cfif> style="background:none; border:none;"> Email + Lead Type
 			<input name="site_drip_campaign_subscribe_index" type="radio" value="3" <cfif form.site_drip_campaign_subscribe_index EQ 3>checked="checked"</cfif> style="background:none; border:none;"> Email + Lead Type + Interested In Model<br><br>
 			This index determines whether a user will receive multiple drip autoresponders or not.</td>
+		</tr>
+		<tr>
+			<td style="vertical-align:top; width:140px;">&nbsp;</td>
+			<td><input name="site_enable_audioeye" type="checkbox" value="1" <cfif form.site_enable_audioeye EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Enable Audioeye?</td>
 		</tr>
 		<tr>
 			<td style="vertical-align:top; width:140px;">&nbsp;</td>

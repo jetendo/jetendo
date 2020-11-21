@@ -103,12 +103,15 @@
 			label:'Phone',
 			field:'office_phone'
 		},{
+			label:'Has Coordinates',
+			field:'office_map_location'
+		},{
 			label:'Updated',
 			field:'office_updated_datetime'
 		},{
 			label:'Admin'
 		}]
-	};
+};
 	super.init(ts); 
 	</cfscript>
 </cffunction>	 
@@ -553,6 +556,11 @@
 	}
 	arrayAppend(columns, {field: field});
 	arrayAppend(columns, {field: row.office_phone});  
+	if(row.office_map_location EQ ""){
+		arrayAppend(columns, {field: "No"});  
+	}else{
+		arrayAppend(columns, {field: "Yes"});  
+	}
 	arrayAppend(columns, {field: application.zcore.functions.zTimeSinceDate(row.office_updated_datetime)}); 
 	savecontent variable="field"{
 		displayRowSortButton(row.office_id);
