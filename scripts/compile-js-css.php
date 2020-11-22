@@ -1,6 +1,6 @@
 <?php  
 function recursiveSearchForSiteCompile($folder, $pattern) {
-	$filter = array('.git', 'zcompiled', 'tinymce', 'tiny_mce');
+	$filter = array('.git', 'zcompiled', 'tinymce', 'tiny_mce', "node_modules");
     //$ite = new RecursiveIteratorIterator($dir);
     $ite = new RecursiveIteratorIterator(
 		new RecursiveCallbackFilterIterator(

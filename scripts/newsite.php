@@ -207,7 +207,7 @@ for($i4=0;$i4 < 62;$i4++){
 					$appendString=" 2>&1";
 				}
 				//-avz --chmod=Do=,Fo=,Du=rwx,Dg=rwx,Fu=rw,Fg=rw
-				$cmd='rsync -rtLvz '.$sourceOnlyList.' --exclude=\'share/database/backup/\' --exclude=\'share/database/jetendo-schema-current.json\' --include=\'share/database/\' --exclude=\'.DS_Store\' --exclude=\'.git*\' --exclude=\'settings.xml\' --exclude=\'.project\' --exclude=\'*.sublime-*\' --exclude=\'lost+found/\' --exclude=sites-writable --exclude=\'sites-writable/\' --exclude=\'sites/\' --exclude=\'share/*\' --exclude=\'logs/\' --exclude=\'execute/\' --exclude=\'phptemp/\' --exclude=\'luceevhosts/\' --exclude=\'.idea\' --exclude=\'railovhosts/\' --exclude=\'compile/\' --exclude=\'rsync-publish.bat/\' --exclude=\'.git/\' --exclude=_notes --exclude=\'*/_notes\' --delay-updates --delete -e "'.$sshCommand.'" '.$rootPath.' '.$remoteUsername.'@'.$remoteHost.':'.$rootPath.$appendString; 
+				$cmd='rsync -rtLvz '.$sourceOnlyList.' --exclude=\'share/database/backup/\' --exclude=\'share/database/jetendo-schema-current.json\' --include=\'share/database/\' --exclude=\'.DS_Store\' --exclude=\'.git*\' --exclude=\'settings.xml\' --exclude=\'.project\' --exclude=\'*.sublime-*\' --exclude=\'lost+found/\' --exclude=sites-writable --exclude=\'sites-writable/\' --exclude=\'sites/\' --exclude=\'share/*\' --exclude=\'logs/\' --exclude=\'execute/\' --exclude=\'phptemp/\' --exclude=\'luceevhosts/\' --exclude=\'.idea\' --exclude=\'node_modules/\' --exclude=\'railovhosts/\' --exclude=\'compile/\' --exclude=\'rsync-publish.bat/\' --exclude=\'.git/\' --exclude=_notes --exclude=\'*/_notes\' --delay-updates --delete -e "'.$sshCommand.'" '.$rootPath.' '.$remoteUsername.'@'.$remoteHost.':'.$rootPath.$appendString; 
 				echo $cmd."\n";
 				$result=$cmd."\n".`$cmd`;
 
@@ -354,7 +354,7 @@ for($i4=0;$i4 < 62;$i4++){
 							}
 						}
 						// --chmod=Do=,Fo=,Du=rwx,Dg=rwx,Fu=rw,Fg=rw
-						$cmd='rsync -rtLvz '.$sourceOnlyList.$excludeString.' --exclude=\'.git\' --exclude=\'.DS_Store\' --exclude=\'*/.git\' --exclude=\'.git*\' --exclude=\'*/.git*\' --exclude=\'WEB-INF\' --exclude=\'_notes\' --exclude=\'*/_notes\' --delay-updates --delete -e "'.$sshCommand.'" '.$siteInstallPath.' '.$remoteUsername.'@'.$remoteHost.':'.$remotePath.$appendString; 
+						$cmd='rsync -rtLvz '.$sourceOnlyList.$excludeString.' --exclude=\'.git\' --exclude=\'.DS_Store\' --exclude=\'*/.git\' --exclude=\'.git*\' --exclude=\'*/.git*\' --exclude=\'WEB-INF\' --exclude=\'_notes\' --exclude=\'node_modules/\' --exclude=\'.idea/\' --exclude=\'package.json/\' --exclude=\'package-lock.json/\' --exclude=\'tsconfig.json/\' --exclude=\'*/_notes\' --delay-updates --delete -e "'.$sshCommand.'" '.$siteInstallPath.' '.$remoteUsername.'@'.$remoteHost.':'.$remotePath.$appendString; 
 						echo $cmd."\n";
 						$result=$cmd."\n".`$cmd`;
 						$handle=fopen($siteWritableInstallPath."__zdeploy-changes.txt", "w");
