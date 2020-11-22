@@ -68,13 +68,16 @@
 				"*.png",
 				"*.min.css",
 				"*.min.js",
-				"package-lock.json"
+				"package-lock.json",
+				"*.ts",
+				"*.js.map"
 			],
 			"folder_exclude_patterns":
 			[
 				"*/images",
 				"zcompiled",
-				"node_modules"
+				"node_modules",
+				"js-build"
 			],
 			"follow_symlinks": true,
 			"path": "."
