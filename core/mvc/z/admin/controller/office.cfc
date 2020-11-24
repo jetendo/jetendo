@@ -78,10 +78,10 @@
 		fileFields:[],
 		// optional
 		requireFeatureAccess:"Locations",
-		pagination:true,
+		pagination:false,
 		paginationIndex:"zIndex",
 		pageZSID:"zPageId",
-		perpage:10,
+		perpage:10000,
 		title:"Locations",
 		prefixURL:"/z/admin/office/",
 		navLinks:[],
@@ -105,6 +105,9 @@
 		},{
 			label:'Has Coordinates',
 			field:'office_map_location'
+		},{
+			label:'Manager Email List',
+			field:'office_manager_email_list'
 		},{
 			label:'Updated',
 			field:'office_updated_datetime'
@@ -496,7 +499,7 @@
 	}else{
 		db.sql&=" order by office_sort, office_name ";
 	}
-	db.sql&=" LIMIT #db.param((form.zIndex-1)*variables.perpage)#, #db.param(variables.perpage)# ";
+	// db.sql&=" LIMIT #db.param((form.zIndex-1)*variables.perpage)#, #db.param(variables.perpage)# ";
 	rs={};
 	rs.searchFields=[{
 		fields:[{
@@ -561,6 +564,7 @@
 	}else{
 		arrayAppend(columns, {field: "Yes"});  
 	}
+	arrayAppend(columns, {field: row.office_manager_email_list});
 	arrayAppend(columns, {field: application.zcore.functions.zTimeSinceDate(row.office_updated_datetime)}); 
 	savecontent variable="field"{
 		displayRowSortButton(row.office_id);
