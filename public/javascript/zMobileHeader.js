@@ -8,6 +8,7 @@ function setupMobileHeader(){
 	var mobileHeader = $( '.z-mobile-header');  
 	var mobileHeaderMobileMenu        = $( '.z-mobile-menu', mobileHeader );
 	var mobileHeaderMobileMenuIcon    = $( '.z-mobile-menu-icon' );
+	var mobileHeaderDesktopMenuIcon=$('.z-desktop-mobile-menu-icon');
 	var mobileHeaderMobileMenuOverlay = $( '.z-mobile-header-overlay', mobileHeader );
 	var mobileHeaderMobileMenuClosedLinks        = $( '.z-mobile-menu li.closed > a', mobileHeader );
 
@@ -108,6 +109,9 @@ function setupMobileHeader(){
 	} );
 
 	mobileHeaderMobileMenuOverlay.on( 'click', function() { 
+		toggleMenu();
+	} );
+	mobileHeaderDesktopMenuIcon.on( 'click', function() {
 		toggleMenu();
 	} );
 }
