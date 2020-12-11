@@ -1802,7 +1802,7 @@ arr1=application.zcore.siteOptionCom.optionGroupSetFromDatabaseBySearch(ts, requ
 	for(row in qGroup){ 
 		arr1=optionGroupStruct(row.site_option_group_name, 0, row.site_id, {__groupId=0,__setId=0}, row.site_option_name);
 		for(i=1;i LTE arraylen(arr1);i++){
-			if(arr1[i].__approved EQ 1){
+			if(isstruct(arr1[i]) and application.zcore.functions.zso(arr1[i], "__approved", true, 1) EQ 1){
 				t2=StructNew();
 				t2.groupName=row.site_option_group_display_name;
 				t2.url=request.zos.currentHostName&arr1[i].__url;
