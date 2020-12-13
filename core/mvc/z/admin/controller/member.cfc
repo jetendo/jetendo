@@ -829,7 +829,7 @@
 				</tr>
 			</cfif>
 			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Hide Public Email?","member.member.edit user_hide_public_email")#</th>
+				<th style="white-space:nowrap; width:1%;">#application.zcore.functions.zOutputHelpToolTip("Hide Public Email?","member.member.edit user_hide_public_email")#</th>
 				<td><input type="radio" name="user_hide_public_email" value="1" style="border:none; background:none;" <cfif form.user_hide_public_email EQ '1'>checked="checked"</cfif> />
 					Yes |
 					<input type="radio" name="user_hide_public_email" value="0" style="border:none; background:none;" <cfif form.user_hide_public_email EQ 0 or form.user_hide_public_email EQ ''>checked="checked"</cfif> />
