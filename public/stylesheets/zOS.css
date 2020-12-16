@@ -180,7 +180,8 @@ display:table-cell; padding:3px;
 .zresponsive-scroller{width:100%; overflow:auto;}
 .zinquiry-form-table{ width:100%;border-spacing:0px;}
 .zinquiry-form-table td{ padding:3px;vertical-align:top;}
-.zinquiry-form-table th{ width:1%; text-align:left; font-weight:normal;white-space:nowrap; padding:3px; vertical-align:top;}
+.zinquiry-form-table th{ text-align:left; font-weight:normal;padding:3px; vertical-align:top;}
+
 .zinquiry-form-table input, .zinquiry-form-table select, .zinquiry-form-table textarea{ max-width:300px;}
 .ui-mobile-viewport .zinquiry-form-table input, .ui-mobile-viewport .zinquiry-form-table select,.ui-mobile-viewport  .zinquiry-form-table textarea{ max-width:100%;}
 /* begin blog */

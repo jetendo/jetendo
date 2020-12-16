@@ -396,6 +396,26 @@
 			}
 		}
 	}
+	StructDelete(variables,'member_photo');
+	arrList=ArrayNew(1);
+	if(form.method EQ 'insert'){
+		arrList = application.zcore.functions.zUploadResizedImagesToDb("member_photo", application.zcore.functions.zVar('privatehomedir')&removechars(request.zos.memberImagePath,1,1), '165x300');
+	}else{
+		arrList = application.zcore.functions.zUploadResizedImagesToDb("member_photo", application.zcore.functions.zVar('privatehomedir')&removechars(request.zos.memberImagePath,1,1), '165x300', 'user', 'user_id', "member_photo_delete",request.zos.zcoreDatasource);
+	}
+	if(isarray(arrList) EQ false){
+		application.zcore.status.setStatus(request.zsid, '<strong>PHOTO ERROR:</strong> invalid format or corrupted.  Please upload a small to medium size JPEG (i.e. a file that ends with ".jpg").');	
+		StructDelete(form,'member_photo');
+		StructDelete(variables,'member_photo');
+		fail=true;
+	}else if(ArrayLen(arrList) NEQ 0){
+		form.member_photo=arrList[1];
+	}else{
+		StructDelete(form,'member_photo');
+	}
+	if(application.zcore.functions.zso(form,'member_photo_delete',true) EQ 1){
+		form.member_photo='';	
+	}
 	if(fail){
 		application.zcore.functions.zRedirect("/z/user/preference/form?modalpopforced=#form.modalpopforced#&redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#&e=#urlencodedformat(form.e)#&k=#urlencodedformat(form.k)#&zsid=#request.zsid#");
 	}
@@ -837,7 +857,7 @@ If the link does not work, please copy and paste the entire link in your browser
 		<br />
 	</cfif>
 	
-	<form class="zFormCheckDirty" name="defineContact" action="/z/user/preference/update?e=#urlencodedformat(form.e)#&amp;k=#urlencodedformat(form.k)#&amp;modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#" method="post">
+	<form class="zFormCheckDirty" name="defineContact" action="/z/user/preference/update?e=#urlencodedformat(form.e)#&amp;k=#urlencodedformat(form.k)#&amp;modalpopforced=#form.modalpopforced#&amp;redirectOnLogin=#urlencodedformat(form.redirectOnLogin)#&reloadOnNewAccount=#form.reloadOnNewAccount#" method="post" enctype="multipart/form-data">
 		<div style=" width:100%; float:left;">
 		<cfif structkeyexists(form, 'custommarketingmessage')>
 			<div style="width:100%;float:left;">#form.custommarketingmessage#</div>
@@ -942,7 +962,7 @@ If the link does not work, please copy and paste the entire link in your browser
 					<td><input type="password" style=" width:100%;" onclick="tempValue=this.value;this.value='';" onblur="if(this.value == ''){ this.value='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';}" name="user_password" value="<cfif len(form.user_password) NEQ 0>#(replace(ljustify('',8),' ','&nbsp;','ALL'))#</cfif>" /></td>
 				</tr>
 				<tr class="zUserPreferenceOptionalProfile zUserPreferenceField alternateemail">
-					<td><span style=" font-weight:bold;">Alternative Email(s)</span></td>
+					<td style=" font-weight:bold; white-space:nowrap; width:1%;"><span>Alternative Email(s)</span></td>
 					<td><input type="text" name="user_alternate_email" style=" width:100%;" value="#htmleditformat(form.user_alternate_email)#" /><br />Note: you can separate multiple emails with commas.</td>
 				</tr> 
 				<tr class=" zUserPreferenceField firstname">
@@ -952,6 +972,10 @@ If the link does not work, please copy and paste the entire link in your browser
 				<tr class=" zUserPreferenceField lastname">
 					<td>Last Name</td>
 					<td><input type="text" name="user_last_name" value="#htmleditformat(form.user_last_name)#" style=" width:100%;" /></td>
+				</tr>
+				<tr>
+					<td>Photo</td>
+					<td>#application.zcore.functions.zInputImage('member_photo', application.zcore.functions.zVar('privatehomedir')&removechars(request.zos.memberImagePath,1,1), request.zos.globals.siteroot&request.zos.memberImagePath)# </td>
 				</tr>
 				<tr class="zUserPreferenceOptionalProfile zUserPreferenceField company">
 					<td>Company</td>
