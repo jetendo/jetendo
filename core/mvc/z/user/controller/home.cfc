@@ -82,7 +82,8 @@
 				echo('</div>');
 			}
 			</cfscript>
-		<hr />
+
+		<hr style="clear:both;" />
 		<div class="zUserDashboardDefaultLinks">
 		<ul style="line-height:150%; font-size:120%;">
 		<cfif application.zcore.user.checkGroupAccess("member")>

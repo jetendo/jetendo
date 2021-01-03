@@ -175,7 +175,7 @@ if(result){
 				}
 			}
 		}else{
-			if(fieldValue EQ ""){
+			if(isSimpleValue(fieldValue) and fieldValue EQ ""){
 				error = friendlyName & " required";
 				errorCount = errorCount + 1;
 				StructInsert(tempErrorStruct, i, error, true);

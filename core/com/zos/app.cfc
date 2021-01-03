@@ -1126,7 +1126,7 @@
 			}
 			return request.zos.tempRequestCom[id];
 		}else{
-			throw("arguments.app_name, ""#arguments.app_name#"", is not installed on this site, but it is installed globally. Add it to this site in the Server Manager.");
+			application.zcore.functions.z404("arguments.app_name, ""#arguments.app_name#"", is not installed on this site, but it is installed globally. Add it to this site in the Server Manager.");
 		}
 	}else{
 		throw("arguments.app_name, ""#arguments.app_name#"", is not installed on this installation.");

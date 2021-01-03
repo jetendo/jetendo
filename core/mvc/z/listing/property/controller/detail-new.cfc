@@ -537,7 +537,7 @@ This listing was first listed on this web site on #dateformat(form.listing_track
 							p=replace(idx['photo'&i], "-large.jpeg", "-medium.jpeg");
 							</cfscript> 
 							<div <!--- class="z-preserve-ratio" data-ratio="4:3" ---> style="width:32%; min-width:200px; float:left; margin-right:1%; margin-bottom:2%;">
-								<a href="#idx['photo'&i]#" title="Enlarge Listing Photo"><img src="/z/a/images/s.gif" data-lazy-src="default~#p#" alt="Listing Photo" class="z-fluid zLazyLoadImage"></a>
+								<a href="#replace(idx['photo'&i], '-large.jpeg', '.jpeg')#" title="Enlarge Listing Photo"><img src="/z/a/images/s.gif" data-lazy-src="default~#p#" alt="Listing Photo" class="z-fluid zLazyLoadImage"></a>
 							<!--- #application.zcore.functions.zLoadAndCropImage({id:"zmlslistingphoto2_#i#",width:nw,height:nh, url:idx['photo'&i], style:"margin-bottom:5px; clear:both; width:100%; max-width:#request.zos.globals.maximagewidth#px;", canvasStyle:"", crop:false})# --->
 							</div>
 							<cfscript>

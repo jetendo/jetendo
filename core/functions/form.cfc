@@ -3646,10 +3646,10 @@ echo('
 			echo("Thank you for submitting our form."); abort;
 		}
 		sessionId=(mid(form.form_session_id, 2, len(form.form_session_id)-2)/2)*4;
-		if(form.form_email NEQ "" and form.form_email NEQ "admin#sessionId#@webdev.com"){
-			application.zcore.functions.zLogSpamEmail("Session ID didn't match form_email"); 
-			echo("Thank you for submitting our form."); abort;
-		}
+		// if(form.form_email NEQ "" and form.form_email NEQ "admin#sessionId#@webdev.com"){
+		// 	application.zcore.functions.zLogSpamEmail("Session ID didn't match form_email"); 
+		// 	echo("Thank you for submitting our form."); abort;
+		// }
 	}
 
 	if(trim(application.zcore.functions.zso(form, 'form_first_name')&application.zcore.functions.zso(form, 'form_last_name')&application.zcore.functions.zso(form, 'form_comments')) NEQ ""){

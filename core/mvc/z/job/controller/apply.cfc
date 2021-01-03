@@ -336,7 +336,7 @@
 		</cfscript>
 
 		<p>Thank you for applying for the #job.job_title# position.<br />
-			We have receieved your resume and will review your application.
+			We have received your resume and will review your application.
 		</p>
 		<p><a href="#jobCom.getJobsHomePageLink()#" class="z-button z-job-apply-view-more">View More Jobs</a></p>
 		<div class="z-clear"></div>
