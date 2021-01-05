@@ -1,5 +1,35 @@
 <cfcomponent>
 <cfoutput>
+<cffunction name="getSchemaJobType" localmode="modern" access="public">
+	<cfargument name="job_type" type="string" required="yes">
+	<cfscript>
+	job_type=arguments.job_type;
+	if(job_type EQ 1){
+		return "FULL_TIME";
+	}else if(job_type EQ 2){
+		return "PART_TIME";
+	}else if(job_type EQ 3){
+		return "OTHER";
+	}else if(job_type EQ 4){
+		return "TEMPORARY";
+	}else if(job_type EQ 5){
+		return "OTHER";
+	}else if(job_type EQ 6){
+		return "CONTRACTOR";
+	}else if(job_type EQ 7){
+		return "OTHER";
+	}else if(job_type EQ 8){
+		return "INTERN";
+	}else if(job_type EQ 9){
+		return "VOLUNTEER";
+	}else if(job_type EQ 10){
+		return "PER_DIEM";
+	}
+	return "OTHER";
+	</cfscript>
+</cffunction>
+
+
 <cffunction name="displayJob" localmode="modern" access="private">
 	<cfargument name="struct" type="struct" required="yes">
 	<cfscript>
@@ -60,6 +90,81 @@
 		}
 	countryName=application.zcore.functions.zCountryAbbrToFullName(job.job_country);
 	</cfscript>
+<cfif application.zcore.functions.zso(jobComData.optionStruct, "job_config_enable_schema_data", true, 0) EQ 1>
+	<cfsavecontent variable="meta">
+		<script type="application/ld+json">
+		<!--- required --->
+		{
+			"@context": "https://schema.org",
+			"@type": "JobPosting",
+			"datePosted": "#dateformat(job.job_posted_datetime, "YYYY-MM-DD")#",
+			"description": "#jsstringformat(application.zcore.email.convertHTMLToText(job.job_summary))#",
+			"hiringOrganization": {
+			  "@type": "Organization",
+			  "name": "#jobComData.optionStruct.job_config_schema_company#",
+			  "sameAs": "#jobComData.optionStruct.job_config_schema_website#",
+			  "logo": "#request.zos.globals.domain#/zupload/settings/#jobComData.optionStruct.job_config_schema_logo#"
+			},
+			"jobLocation": {
+			  "@type": "Place",
+			  "address": {
+			    "@type": "PostalAddress",
+			    "streetAddress": "#job.job_address#<cfif job.job_address2 NEQ "">, #job.job_address2#</cfif>",
+			    "addressLocality": "#job.job_city#",
+			    "addressRegion": "#job.job_state#",
+			    "postalCode": "#job.job_zip#",
+			    "addressCountry": "#job.job_country#"
+			  }
+			},
+			"title": "#job.job_title#",
+			<cfif job.job_closed_datetime NEQ "">
+			"validThrough": "#dateformat(job.job_closed_datetime, "YYYY-MM-DD")#T00:00",
+			<cfelse>
+			"validThrough": "#dateformat(dateadd("d", 365, now()), "YYYY-MM-DD")#T00:00",
+			</cfif>
+
+
+			<!--- optional --->
+			<cfif job.job_work_hours NEQ "">
+				"workHours": "#job.job_work_hours#",
+			</cfif>
+			<cfif job.job_telecommute EQ 1>
+				"jobLocationType": "TELECOMMUTE",
+			</cfif>
+
+			"employmentType": "#getSchemaJobType(job.job_type)#",
+			<!--- FULL_TIME|PART_TIME|CONTRACTOR|TEMPORARY|INTERN|VOLUNTEER|PER_DIEM|OTHER --->
+
+			"identifier": {
+			  "@type": "PropertyValue",
+			  "name": "#jobComData.optionStruct.job_config_schema_company#",
+			  "value": "job-#job.job_id#"
+			}
+
+			<!--- 
+			skip these:
+			"applicantLocationRequirements": {
+			    "@type": "Country",
+			    "name": "United States"
+			 }, 
+
+			"baseSalary": {
+			  "@type": "MonetaryAmount",
+			  "currency": "USD",
+			  "value": {
+			    "@type": "QuantitativeValue",
+			    "value": 40.00,
+			    "unitText": "HOUR"
+			  }
+			}
+			--->
+		}
+</script>
+	</cfsavecontent>
+	<cfscript>
+	application.zcore.template.appendTag("meta", meta);
+	</cfscript>
+</cfif>
 
 	<div id="zcidspan#application.zcore.functions.zGetUniqueNumber()#" class="zOverEdit zEditorHTML" data-editurl="/z/job/admin/manage-jobs/edit?job_id=#job.job_id#&amp;return=1">
 		<div class="z-job">
@@ -72,6 +177,11 @@
 						</cfif>
 						<span class="z-job-posted">Posted <span class="z-job-posted-date">#application.zcore.functions.zTimeSinceDate( job.job_posted_datetime, true )#</span></span> 
 					</div>
+					<cfif job.job_telecommute EQ 1>
+						<div class="z-job-view-row z-bold">
+						Telecommute Position
+						</div>
+					</cfif>
 
 					<cfif showCompanyName EQ true AND job.job_company_name NEQ ''>
 						<div class="z-job-view-row">
@@ -102,6 +212,11 @@
 							</div>
 						</div>
 					</cfif> 
+					<cfif job.job_work_hours NEQ "">
+						<div class="z-job-view-row">
+						Work Hours: #job.job_work_hours#
+						</div>
+					</cfif>
 					<cfif job.job_phone NEQ "">
 						<div class="z-job-view-row">Phone: <a class="zPhoneLink">#htmleditformat(job.job_phone)#</a></div> 
 					</cfif>

@@ -869,6 +869,7 @@ This allows avoiding remaps more easily.  Less code when importing.
 	<cfargument name="sourceStruct" type="struct" required="yes">
 	<cfargument name="destinationStruct" type="struct" required="yes">
 	<cfscript>
+	setting requesttimeout="1000";
 	db=request.zos.queryObject;
 	fieldChangeStruct=arguments.fieldChangeStruct;
 	sourceStruct=arguments.sourceStruct;

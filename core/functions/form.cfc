@@ -560,7 +560,7 @@ USAGE
 	var tempText=""; 
 	</cfscript>
 	<cfsavecontent variable="tempText">
-	<cfif structkeyexists(form, arguments.field) and form[arguments.field] NEQ '' and fileexists(arguments.abspath&form[arguments.field])>
+	<cfif structkeyexists(form, arguments.field) and form[arguments.field] NEQ ''>
         <img src="#arguments.path##form[arguments.field]#" alt="Uploaded Image" <cfif arguments.maxwidth NEQ 0>style="max-width:#arguments.maxWidth#px;"</cfif> /><br />
 		<cfif arguments.allowDelete>
 			<input type="checkbox" name="#arguments.field#_delete" id="#arguments.field#_delete" value="1" style="background:none; border:none;height:15px; " /> <label for="#arguments.field#_delete">Check to delete image and then submit form.</label><br />

@@ -541,8 +541,8 @@
 						ts.labelStyle="";
 						ts.size = 1; // more for multiple select
 						ts.hideSelect = true;
-						ts.listLabels = "Not provided,Full-time,Part-time,Commission,Temporary,Temporary to hire,Contract,Contract to hire,Internship";
-						ts.listValues = "0,1,2,3,4,5,6,7,8";
+						ts.listLabels = "Not provided,Full-time,Part-time,Commission,Temporary,Temporary to hire,Contract,Contract to hire,Internship,Volunteer,Per Diem";
+						ts.listValues = "0,1,2,3,4,5,6,7,8,9,10";
 						ts.listLabelsDelimiter = ","; 
 						ts.listValuesDelimiter = ",";
 						
@@ -635,6 +635,20 @@
 					}
 					</cfscript>   
 				</td>
+			</tr> 
+			<tr>
+				<th>Work Hours</th>
+				<td><input type="text" name="job_work_hours" id="job_work_hours" style="width:95%;" value="#htmleditformat(form.job_work_hours)#" /> (i.e. 40 hours per week)</td>
+			</tr> 
+			<tr>
+				<th>Telecommute</th>
+				<td>
+					<cfscript>
+					if(form.job_telecommute EQ ""){
+						form.job_telecommute='0';
+					} 
+					</cfscript>#application.zcore.functions.zInput_Boolean("job_telecommute")# 
+					<br>Only click yes if this job is exclusively a remote telecommuting position</td>
 			</tr> 
 			<tr>
 				<th>Location Name</th>

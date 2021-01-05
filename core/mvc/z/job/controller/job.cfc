@@ -2,21 +2,6 @@
 <cfoutput>
 <cfscript>
 this.app_id=18;
-
-
-// Public job form and related functionality is disabled through 404.
-
-
-// Job type legend
-// 0 = Not provided
-// 1 = Full-time
-// 2 = Part-time
-// 3 = Commission
-// 4 = Temporary
-// 5 = Temporary to hire
-// 6 = Contract
-// 7 = Contract to hire
-// 8 = Internship
 </cfscript>
 
 <cffunction name="jobTypeToString" localmode="modern" output="no" returntype="any">
@@ -34,6 +19,8 @@ this.app_id=18;
 			6: 'Contract',
 			7: 'Contract to Hire',
 			8: 'Internship',
+			9: 'Volunteer',
+			10:'Per Diem'
 		};
 
 		if ( ! structKeyExists( jobTypes, jobTypeId ) ) {
@@ -60,6 +47,8 @@ this.app_id=18;
 			'Contract':6,
 			'Contract to Hire':7,
 			'Internship':8,
+			'Volunteer':9,
+			'Per Diem':10
 		};
 
 		if ( ! structKeyExists( jobTypes, jobType ) ) {
@@ -712,6 +701,27 @@ this.app_id=18;
 
 	rCom=application.zcore.app.reserveAppUrlId(ts);
 
+
+	// job_config_schema_logo
+	StructDelete(variables,'job_config_schema_logo');
+	arrList=ArrayNew(1);
+	if(form.method EQ 'insert'){
+		arrList = application.zcore.functions.zUploadResizedImagesToDb("job_config_schema_logo", application.zcore.functions.zVar('privatehomedir', form.site_id)&'zupload/settings/', '165x300');
+	}else{
+		arrList = application.zcore.functions.zUploadResizedImagesToDb("job_config_schema_logo", application.zcore.functions.zVar('privatehomedir', form.site_id)&'zupload/settings/', '165x300', 'job_config', 'job_config_id', "job_config_schema_logo_delete",request.zos.zcoreDatasource);
+	}
+	if(isarray(arrList) EQ false){
+		application.zcore.status.setStatus(request.zsid, '<strong>PHOTO ERROR:</strong> invalid format or corrupted.  Please upload a small to medium size JPEG (i.e. a file that ends with ".jpg").');	
+		StructDelete(form,'job_config_schema_logo');
+		StructDelete(variables,'job_config_schema_logo');
+	}else if(ArrayLen(arrList) NEQ 0){
+		form.job_config_schema_logo=arrList[1];
+	}else{
+		StructDelete(form,'job_config_schema_logo');
+	}
+	if(application.zcore.functions.zso(form,'job_config_schema_logo_delete',true) EQ 1){
+		form.job_config_schema_logo='';	
+	} 
 	if(rCom.isOK() EQ false){
 		return rCom;
 		application.zcore.functions.zstatushandler(request.zsid);
@@ -866,6 +876,39 @@ this.app_id=18;
 		}
 		echo(application.zcore.functions.zInput_Boolean("job_config_company_names_hidden"));
 		echo('<br /><br />Set to "Yes" to hide all job listing company names globally (only applies if "this company only?" is set to "No"). Default: "No"</td>
+		</tr>
+		<tr>
+		<th>Enable Schema Data?</th>
+		<td>');
+
+		if(form.job_config_enable_schema_data EQ ""){
+			form.job_config_enable_schema_data=0;
+		}
+
+		echo(application.zcore.functions.zInput_Boolean("job_config_enable_schema_data"));
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Schema Company</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "job_config_schema_company";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Schema Website</th>
+		<td>');
+		ts = StructNew();
+		ts.name = "job_config_schema_website";
+		application.zcore.functions.zInput_Text(ts);
+		echo('</td>
+		</tr>
+		<tr>
+		<th>Schema Logo</th>
+		<td>');
+		echo(application.zcore.functions.zInputImage('job_config_schema_logo', application.zcore.functions.zVar('privatehomedir', form.sid)&'settings/', application.zcore.functions.zvar('domain', form.sid)&'/zupload/settings/'));
+		echo('</td>
 		</tr>
 		');
 		echo('</table>');

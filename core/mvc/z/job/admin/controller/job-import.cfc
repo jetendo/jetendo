@@ -104,7 +104,7 @@
 		<p>Posted Datetime and Closed Datetime should be in this format: yyyy-mm-dd HH:mm:ss</p>
 		<p>Summary should be HTML format</p>
 		<p>Full Description should be HTML format</p>
-		<p>Type must be one of these values: Not provided,Full-time,Part-time,Commission,Temporary,Temporary to hire,Contract,Contract to hire,Internship</p>
+		<p>Type must be one of these values: Not provided,Full-time,Part-time,Commission,Temporary,Temporary to hire,Contract,Contract to hire,Internship,Volunteer,Per Diem</p>
 	 
 	</form>
 </cffunction>
