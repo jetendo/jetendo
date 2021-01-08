@@ -216,7 +216,7 @@
 		if(arguments.row.site_option_required EQ 1){
 			required="required";
 		}
-		value='Search: <input type="text" #required# name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value; 
+		value='Search: <input type="text" name="#selectStruct.name#_InputField" id="#selectStruct.name#_InputField" value="" style="width:200px; min-width:auto; margin-bottom:5px;"><br />Select:<br />'&value; 
 	} 
 	return { label: true, hidden: false, value:value};  
 	</cfscript>

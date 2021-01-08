@@ -719,7 +719,7 @@
 			</cfif>
 			<cfif application.zcore.user.checkGroupAccess("administrator")>
 				<tr>
-					<th>#application.zcore.functions.zOutputHelpToolTip("Location","member.member.edit office_id")#</th>
+					<th>Location</th>
 					<td><cfscript>
 						db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
 						WHERE site_id = #db.param(request.zos.globals.id)# and 
@@ -1538,7 +1538,7 @@
 		<thead>
 		<tr>
 			<th>ID</th>
-			<th>Office(s)</th>
+			<th>Location(s)</th>
 			<th>Company</th>
 			<th>Name</th>
 			<th>Email</th>

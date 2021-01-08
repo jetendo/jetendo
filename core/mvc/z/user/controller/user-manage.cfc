@@ -606,7 +606,7 @@ finish simplifying this script.
 				</cfscript></td>
 			</tr> 
 			<tr>
-				<th>#application.zcore.functions.zOutputHelpToolTip("Location","member.member.edit office_id")#</th>
+				<th>Location</th>
 				<td><cfscript>
 					db.sql="SELECT * FROM #db.table("office", request.zos.zcoreDatasource)# office 
 					WHERE site_id = #db.param(request.zos.globals.id)# and 
@@ -1191,7 +1191,7 @@ finish simplifying this script.
 		<thead>
 		<tr>
 			<th>ID</th>
-			<th>Office</th> 
+			<th>Location</th> 
 			<th>Name/Access Rights</th>
 			<th>Status</th>
 			<!--- <th>Sort</th> --->
