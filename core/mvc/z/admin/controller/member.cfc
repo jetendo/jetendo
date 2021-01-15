@@ -764,10 +764,10 @@
 					<td>&nbsp;</td>
 					<td>
 						<div class="z-float z-mb-10">
-						<input type="radio" name="user_invited" id="user_invited1" value="1" onclick="$('##inviteUserDiv1').show();$('##setPasswordTable1').hide();" checked="checked"> <label for="user_invited1">Invite User</label>
-						<input type="radio" name="user_invited" id="user_invited2" value="0" onclick="$('##inviteUserDiv1').hide();$('##setPasswordTable1').show();"> <label for="user_invited2">Set Password</label>
+						<input type="radio" name="user_invited" id="user_invited2" value="0" onclick="$('##inviteUserDiv1').hide();$('##setPasswordTable1').show();" checked="checked"> <label for="user_invited2">Set Password</label>
+						<input type="radio" name="user_invited" id="user_invited1" value="1" onclick="$('##inviteUserDiv1').show();$('##setPasswordTable1').hide();"> <label for="user_invited1">Invite User</label>
 						</div>
-						<div id="inviteUserDiv1" class="z-float">
+						<div id="inviteUserDiv1" class="z-float" style="display:none;">
 						<p>For better security, it is recommended to invite users instead of setting the password for them.</p>
 						<h2>Invite Info</h2> 
 						<p>The user will receive a welcome email instructing them to finish creating their account.</p>
@@ -780,7 +780,7 @@
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
-					<td><table id="setPasswordTable1" class="table-list" style="display:none;">
+					<td><table id="setPasswordTable1" class="table-list">
 						<tr>
 							<th>Password</th>
 							<td><input type="password" name="member_password" id="member_password" value="" size="30" /> *</td>
