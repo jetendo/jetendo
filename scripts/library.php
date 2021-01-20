@@ -1118,6 +1118,9 @@ function zGetGps($exifCoord)
 	$degrees 	= count($exifCoord) > 0 ? zGpsInfo($exifCoord[0]) : 0;
 	$minutes 	= count($exifCoord) > 1 ? zGpsInfo($exifCoord[1]) : 0;
 	$seconds	= count($exifCoord) > 2 ? zGpsInfo($exifCoord[2]) : 0;
+	if(!is_numeric($degrees)){ $degrees=0; }
+	if(!is_numeric($minutes)){ $minutes=0; }
+	if(!is_numeric($seconds)){ $seconds=0; }
 	$ref		= count($exifCoord) > 3 ? $exifCoord[3] : "";
 	$flip = ($ref == 'W' OR $ref == 'West' OR $ref == 'S' OR $ref == 'South') ? -1 : 1;
     return $flip * ($degrees + $minutes / 60 + $seconds / 3600);

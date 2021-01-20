@@ -368,12 +368,12 @@
 		#application.zcore.functions.zFakeFormFields()#
 		<div style="border-spacing:0px; width:98%;" class="zinquiry-form-table table">
 			<div class="tr">
-				<div class="th" style="width:90px;">First Name:<span class="highlight"> *</span></div>
+				<div class="th" style="width:125px;">First Name:<span class="highlight"> *</span></div>
 				<div class="td"><input aria-label="First Name" name="inquiries_first_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_first_name EQ ''>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" /></div>
 			
 			</div>
 			<div class="tr">
-				<div class="th" style="width:90px;">Last Name:<span class="highlight"> *</span></div>
+				<div class="th" style="width:125px;">Last Name:<span class="highlight"> *</span></div>
 				<div class="td"><input aria-label="Last Name" name="inquiries_last_name" type="text" size="30" style="width:100%" maxlength="50" value="<cfif form.inquiries_last_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_last_name')#<cfelse>#form.inquiries_last_name#</cfif>" /></div>
 			
 			</div>

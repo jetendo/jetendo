@@ -271,7 +271,7 @@
             <input type="hidden" name="inquiries_referer" value="#HTMLEditFormat(request.zos.cgi.http_referer)#" />
             <table class="zinquiry-form-table">
             <tr>
-                <th>First Name: *</th>
+                <th style="width:115px;">First Name: *</th>
                 <td><input aria-label="First Name" name="inquiries_first_name" id="inquiries_first_name" type="text" style="width:96%;" maxlength="50" value="<cfif form.inquiries_first_name EQ '' and not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_first_name')#<cfelse>#form.inquiries_first_name#</cfif>" />
         <cfif structkeyexists(form, 'content_id') or structkeyexists(form, 'selected_content_id') or isDefined('request.zos.zPrimaryContentId')>
 			<cfscript>

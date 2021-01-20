@@ -343,7 +343,7 @@
 
 <cffunction name="getTypeName" output="no" localmode="modern" access="public">
 	<cfscript>
-	return 'Office Picker';
+	return 'Location Picker';
 	</cfscript>
 </cffunction>
 
@@ -393,7 +393,7 @@
 		}
 		</script>
 	<input type="radio" name="feature_field_type_id" value="27" onClick="setType(27);" <cfif value EQ "27">checked="checked"</cfif>/>
-	Office Picker<br />
+	Location Picker<br />
 		<div id="typeFields27" style="display:none;padding-left:30px;"> 
 			<table style="border-spacing:0px;"> 
 			<tr><td>Multiple Selections: </td><td>

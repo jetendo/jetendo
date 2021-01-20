@@ -341,14 +341,14 @@
 
 		if(frameworkEnabled){
 			if(breakpoint EQ "default"){
-				arrayAppend(arrCSS, 'body{ margin:0px; line-height:1.5;  }'&chr(10)&
+				arrayAppend(arrCSS, 'body{ margin:0px; line-height:1.3;  }'&chr(10)&
 				'form{ margin:0px; padding:0px;}'&chr(10)&
 				'img{border-style:none;}'&chr(10)&
 				'*, img{ -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing:border-box; }'&chr(10)&
 				'header, nav, section, aside, article, footer, .z-section, .z-row{ width:100%; float:left; min-height:1px; }'&chr(10));
 			}
 
-			v='body { line-height:#numberformat(dataStruct.textLineHeightScale*1.5, '_._')#; } ';
+			v='body { line-height:#numberformat(dataStruct.textLineHeightScale*1.3, '_._')#; } ';
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
@@ -363,7 +363,7 @@
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
 			} 
-			v='h1,h2,h3,h4,h5,h6{ line-height:#numberformat(dataStruct.headingLineHeightScale*1.5, '_._')#; margin:0px; padding:0px; }';
+			v='h1,h2,h3,h4,h5,h6{ line-height:#numberformat(dataStruct.headingLineHeightScale*1.3, '_._')#; margin:0px; padding:0px; }';
 			//v='.z-container h1,.z-container h2,.z-container h3,.z-container h4,.z-container h5,.z-container h6{ line-height:#numberformat(dataStruct.headingLineHeightScale*1.5, '_._')#; margin:0px; padding:0px; }';
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
@@ -371,21 +371,21 @@
 			} 
 		}else{
 			if(breakpoint EQ "default"){
-				arrayAppend(arrCSS, 'section, z-container, header, section *, z-container *, header *{ line-height:1.5; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing:border-box; }'&chr(10));
+				arrayAppend(arrCSS, 'section, z-container, header, section *, z-container *, header *{ line-height:1.3; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing:border-box; }'&chr(10));
 			}
 		}
 		if(breakpoint EQ "992"){
 			// margin / padding / text / heading over classes for mobile
 
 
-			v='textarea, select, button, input{font-size:#max(16,tempScaleText)#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.5, '_._')#; }';
+			v='textarea, select, button, input{font-size:#max(16,tempScaleText)#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.3, '_._')#; }';
 			if(not structkeyexists(uniqueStruct, v)){
 				uniqueStruct[v]=true;
 				arrayAppend(arrCSS, v);
 			} 
-			v='.z-container textarea, .z-container select, .z-container button, .z-container input{ font-size:#max(16,tempScaleText)#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.5, '_._')#; }';
+			v='.z-container textarea, .z-container select, .z-container button, .z-container input{ font-size:#max(16,tempScaleText)#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.3, '_._')#; }';
 		}else{
-			v='.z-container textarea, .z-container select, .z-container button, .z-container input{ font-size:#tempScaleText#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.5, '_._')#; }';
+			v='.z-container textarea, .z-container select, .z-container button, .z-container input{ font-size:#tempScaleText#px; line-height:#numberformat(dataStruct.headingLineHeightScale*1.3, '_._')#; }';
 		}
 		if(not structkeyexists(uniqueStruct, v)){
 			uniqueStruct[v]=true;
