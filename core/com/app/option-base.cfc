@@ -796,8 +796,10 @@ used to do search for a list of values
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes"> 
 	<cfscript>
-	deleteOptionGroupSetIdCacheInternal(arguments.site_id, arguments.setId, false);
-	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
+	lock name="#request.zos.installPath#-siteGroupCacheSerialize-#arguments.site_id#" type="exclusive" timeout="1000"{
+		deleteOptionGroupSetIdCacheInternal(arguments.site_id, arguments.setId, false);
+		application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
+	}
 	</cfscript>
 </cffunction>
 

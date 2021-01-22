@@ -1229,44 +1229,45 @@ arr1=application.zcore.featureCom.featureSchemaSetFromDatabaseBySearch(ts, reque
 	<cfargument name="site_id" type="string" required="yes">
 	<cfargument name="isDisabledByUser" type="boolean" required="yes">
 	<cfscript>
-	// nothing calls this function?
-	var db=request.zos.queryObject;
-	if(arguments.isDisabledByUser){
-		approved=2;
-	}else{
-		approved=0;
-	}
-	db.sql="UPDATE #db.table("feature_data", request.zos.zcoreDatasource)# 
-	SET 
-	feature_data_approved=#db.param(approved)#,
-	feature_data_updated_datetime=#db.param(request.zos.mysqlnow)# 
-	WHERE site_id =#db.param(arguments.site_id)# and 
-	feature_data_deleted = #db.param(0)# and 
-	feature_data_id = #db.param(arguments.setId)# ";
-	db.execute("qUpdate");
-	db.sql="select feature_schema_id, feature_data_image_library_id from #db.table("feature_data", request.zos.zcoreDatasource)# 
-	WHERE site_id =#db.param(arguments.site_id)# and 
-	feature_data_deleted = #db.param(0)# and 
-	feature_data_id = #db.param(arguments.setId)# ";
-	qSet=db.execute("qSet");
-	if(qSet.recordcount){
-		schemaId=qSet.feature_schema_id;
-		if(qSet.feature_data_image_library_id NEQ 0){
-			application.zcore.imageLibraryCom.unapproveLibraryId(qSet.feature_data_image_library_id);
+	lock name="#request.zos.installPath#-siteGroupCacheSerialize-#arguments.site_id#" type="exclusive" timeout="1000"{
+		// nothing calls this function?
+		var db=request.zos.queryObject;
+		if(arguments.isDisabledByUser){
+			approved=2;
+		}else{
+			approved=0;
 		}
-		typeStruct=getTypeData(arguments.site_id);
-		t9=getSiteData(arguments.site_id);
-		var schemaStruct=typeStruct.featureSchemaLookup[schemaId]; 
+		db.sql="UPDATE #db.table("feature_data", request.zos.zcoreDatasource)# 
+		SET 
+		feature_data_approved=#db.param(approved)#,
+		feature_data_updated_datetime=#db.param(request.zos.mysqlnow)# 
+		WHERE site_id =#db.param(arguments.site_id)# and 
+		feature_data_deleted = #db.param(0)# and 
+		feature_data_id = #db.param(arguments.setId)# ";
+		db.execute("qUpdate");
+		db.sql="select feature_schema_id, feature_data_image_library_id from #db.table("feature_data", request.zos.zcoreDatasource)# 
+		WHERE site_id =#db.param(arguments.site_id)# and 
+		feature_data_deleted = #db.param(0)# and 
+		feature_data_id = #db.param(arguments.setId)# ";
+		qSet=db.execute("qSet");
+		if(qSet.recordcount){
+			schemaId=qSet.feature_schema_id;
+			if(qSet.feature_data_image_library_id NEQ 0){
+				application.zcore.imageLibraryCom.unapproveLibraryId(qSet.feature_data_image_library_id);
+			}
+			typeStruct=getTypeData(arguments.site_id);
+			t9=getSiteData(arguments.site_id);
+			var schemaStruct=typeStruct.featureSchemaLookup[schemaId]; 
 
-		deleteSchemaSetIndex(qSet.feature_data, qSet.site_id);
+			deleteSchemaSetIndex(qSet.feature_data, qSet.site_id);
 
-		if(request.zos.enableSiteOptionGroupCache and schemaStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.setId)){
-			schemaStruct=t9.featureSchemaSet[arguments.setId];
-			schemaStruct.__approved=approved;
-			application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
+			if(request.zos.enableSiteOptionGroupCache and schemaStruct.feature_schema_enable_cache EQ 1 and structkeyexists(t9.featureSchemaSet, arguments.setId)){
+				schemaStruct=t9.featureSchemaSet[arguments.setId];
+				schemaStruct.__approved=approved;
+				application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]); 
+			}
 		}
 	}
-	
 	</cfscript>
 </cffunction>
 
@@ -2628,8 +2629,10 @@ used to do search for a list of values
 	<cfargument name="site_id" type="numeric" required="yes">
 	<cfargument name="setId" type="numeric" required="yes"> 
 	<cfscript>
-	deleteSchemaSetIdCacheInternal(arguments.feature_id, arguments.site_id, arguments.setId, false);
-	application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
+	lock name="#request.zos.installPath#-siteGroupCacheSerialize-#arguments.site_id#" type="exclusive" timeout="1000"{
+		deleteSchemaSetIdCacheInternal(arguments.feature_id, arguments.site_id, arguments.setId, false);
+		application.zcore.functions.zCacheJsonSiteAndUserGroup(arguments.site_id, application.zcore.siteGlobals[arguments.site_id]);
+	}
 	</cfscript>
 </cffunction>
 
