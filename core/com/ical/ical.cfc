@@ -244,7 +244,7 @@
 </cffunction>
 
 
-<cffunction name="getIcalRuleAsPlainEnglishAsJson" localmode="modern" access="public">
+<cffunction name="getIcalRuleAsPlainEnglishAsJson" localmode="modern" access="remote">
 	<cfscript>
 	rs={
 		success:true,
