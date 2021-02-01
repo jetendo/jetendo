@@ -1081,15 +1081,17 @@ finish simplifying this script.
 	user.site_id = #db.param(request.zos.globals.id)# and 
 	user_server_administrator = #db.param('0')# and 
 	user.user_group_id IN (#db.trustedSQL(request.managedUserGroupList)#) ";
-	db.sql&=" and ( ";
-	for(i=1;i<=arraylen(request.arrLoggedInUserOffice);i++){
-		office_id=request.arrLoggedInUserOffice[i];
-		if(i NEQ 1){
-			db.sql&=" or ";
+	if(arrayLen(request.arrLoggedInUserOffice) > 0){
+		db.sql&=" and ( ";
+		for(i=1;i<=arraylen(request.arrLoggedInUserOffice);i++){
+			office_id=request.arrLoggedInUserOffice[i];
+			if(i NEQ 1){
+				db.sql&=" or ";
+			}
+			db.sql&=" user.office_id = #db.param(request.arrLoggedInUserOffice[i])# ";
 		}
-		db.sql&=" user.office_id = #db.param(request.arrLoggedInUserOffice[i])# ";
+		db.sql&=" ) "; 
 	}
-	db.sql&=" ) "; 
 	if(structkeyexists(form, 'ugid') and trim(form.ugid) NEQ ''){
 		db.sql&=" and user.user_group_id = #db.param(form.ugid)# ";
 	}
@@ -1109,14 +1111,16 @@ finish simplifying this script.
 	user.site_id = #db.param(request.zos.globals.id)# and 
 	user_server_administrator = #db.param('0')# and 
 	user.user_group_id IN (#db.trustedSQL(request.managedUserGroupList)#) ";
-	db.sql&=" and ( ";
-	for(i=1;i<=arraylen(request.arrLoggedInUserOffice);i++){
-		if(i NEQ 1){
-			db.sql&=" or ";
+	if(arrayLen(request.arrLoggedInUserOffice) > 0){
+		db.sql&=" and ( ";
+		for(i=1;i<=arraylen(request.arrLoggedInUserOffice);i++){
+			if(i NEQ 1){
+				db.sql&=" or ";
+			}
+			db.sql&=" user.office_id = #db.param(request.arrLoggedInUserOffice[i])# ";
 		}
-		db.sql&=" user.office_id = #db.param(request.arrLoggedInUserOffice[i])# ";
+		db.sql&=" ) "; 
 	}
-	db.sql&=" ) "; 
 	if(structkeyexists(form, 'ugid') and trim(form.ugid) NEQ ''){
 		db.sql&=" and user.user_group_id = #db.param(form.ugid)# ";
 	}
