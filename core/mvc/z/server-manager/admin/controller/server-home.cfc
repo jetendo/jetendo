@@ -389,6 +389,7 @@
 				
 				)</p>
 			<p><a href="/z/server-manager/tasks/verify-apps/index" target="_blank">Verify Apps</a></p>
+			<p><a href="/z/server-manager/tasks/verify-memory/index" target="_blank">Verify Memory</a></p>
 			<p><a href="/z/_com/zos/cloudFile?method=executePurgeOldFiles">Cloud Files - Purge Old Files</a></p>
 			<p><a href="/z/server-manager/tasks/send-mailing-list-alerts/index?forceDebug=1" target="_blank">Debug Mailing List Alerts (Won't Send Email)</a></p>
 			<cfif request.zos.istestserver>

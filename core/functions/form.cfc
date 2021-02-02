@@ -31,8 +31,13 @@
 	for(i=1;i<=arraylen(a);i++){
 		a[i].arrParentLabel=arguments.arrParentLabel; 
 		arrayAppend(arguments.arrData, a[i]);
-		if(arrayLen(arguments.arrData) GT 100){
-			throw("Possible infinite loop for this data set.");
+		if(arrayLen(arguments.arrData) GT 255){
+			savecontent variable="out"{
+				echo("<h2>Possible infinite loop for this data set - there are more then 255 site option groups.</h2>");
+				writedump("parentId:"&arguments.parentId);
+				writedump(arguments.arrData);
+			}
+			throw(out);
 		}
 		if(a[i].value NEQ 0 and structkeyexists(arguments.parentStruct, a[i].value)){
 			a2=duplicate(a[i].arrParentLabel);
