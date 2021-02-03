@@ -246,7 +246,9 @@ border-left:none !important;
 
 
 
-
+.zblog-story img {
+    max-width: 100%;
+}
 
 .rss-summary-text{font-size:120%; line-height:1.6;} 
 .zblog-image-box{ background-color:#FFF !important; overflow:hidden; color:#000 !important; border-radius:5px; min-width:195px; border:1px solid rgba(128,128,128, 0.5); margin-right:2%; margin-bottom:2%; width:23%; }

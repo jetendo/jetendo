@@ -209,7 +209,7 @@
 			fieldStruct={};
 			for(n in t9.optionGroupFieldLookup[groupStruct.site_option_group_id]){
 				optionStruct=t9.optionLookup[n];
-				f=indent&chr(9)&'###groupNameInstance#["'&replace(replace(optionStruct.site_option_name, "##", "####", "all"), '"', '""', 'all')&'"]##'&chr(10);
+				f=indent&chr(9)&'###groupNameInstance#['''&replace(replace(optionStruct.site_option_name, "##", "####", "all"), "'", "''", 'all')&"']##"&chr(10);
 
 				ts={
 					html: f,

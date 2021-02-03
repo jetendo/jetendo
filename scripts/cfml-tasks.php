@@ -236,7 +236,7 @@ doesn't work anymore
 	$t=new stdClass();
 	$t->logName="verify-memory.html";
 	$t->interval=3600;
-	$t->startTimeOffsetSeconds=0;
+	$t->startTimeOffsetSeconds=25200;
 	$t->url=$adminDomain."/z/server-manager/tasks/verify-memory/index";
 	array_push($arrTask, $t);
 	return $arrTask;
