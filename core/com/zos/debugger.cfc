@@ -125,6 +125,7 @@
 						<a href="/z/server-manager/admin/deploy/index?sid=#request.zos.globals.id#" class="z-manager-search-button" style="color:##FFF;" target="_blank">Deploy Site</a> 
 					</cfif>
 
+
 					Reset: 
 					<a href="##" class="z-manager-search-button" style="color:##FFF;" onclick="zOS_mode_submit('reset','true','site');return false;"  >Site</a> 
 					<a href="##" onclick="zOS_mode_submit('reset','true','code');return false;"  class="zOS_mode_link">Code</a> | 
@@ -141,6 +142,9 @@
 				<cfelse>
 					Reset: <a href="##" class="z-manager-search-button" style="color:##FFF;" onclick="zOS_mode_submit('reset','true','site');return false;"  >Site</a> 
 
+				</cfif>
+				<cfif not request.zos.isTestServer>
+					&nbsp;&nbsp;<a href="#replace(request.zos.globals.domain, 'https:', 'http:')#.local.zsite.info/" target="_blank"  class="z-manager-search-button" style="color:##FFF;">Test Site</a> 
 				</cfif>
 			</div>
           	<cfif request.zos.isTestServer or (structkeyexists(application.zcore, 'user') and application.zcore.user.hasSourceAdminAccess())>
