@@ -526,6 +526,32 @@ rs=zGetHashPath(dir, id);
 	</cfscript>
 </cffunction>
 
+<!--- 
+link="dataurl";
+path="/path/to/output/image.png";
+if(application.zcore.functions.zIsBase64ImageURL(link)){
+	application.zcore.functions.zWriteFile(path, application.zcore.functions.zDecodeBase64Png(link));
+}else{
+	// regular image
+}
+ --->
+<cffunction name="zIsBase64ImageURL" localmode="modern" returntype="boolean" output="false">
+	<cfargument name="data" required="yes" type="string">
+    <cfscript>
+    if(left(arguments.data, len("data:image/png;base64,")) EQ "data:image/png;base64,"){
+    	return true;
+    }
+    return false;
+	</cfscript>
+</cffunction>
+
+<cffunction name="zDecodeBase64Png" localmode="modern" returntype="boolean" output="false">
+	<cfargument name="data" required="yes" type="string">
+    <cfscript>
+	return binaryDecode(replace(removeChars(arguments.data, 1, len("data:image/png;base64,")), " ", "+", "all"), "base64");
+	</cfscript>
+</cffunction>
+
 
 <!--- FUNCTION: zWriteFile(filePath, srcString) --->
 <cffunction name="zWriteFile" localmode="modern" returntype="boolean" output="false">

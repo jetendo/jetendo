@@ -68,7 +68,9 @@
 	<cfargument name="ss" type="struct" required="yes">
 	<cfscript>
 	ss=arguments.ss;
-
+ 	if(not structkeyexists(ss, "excludeGroupStruct")){
+ 		ss.excludeGroupStruct={};
+ 	}
 
 	db=request.zos.queryObject;
 
@@ -89,7 +91,7 @@
 		siteStruct[row.site_id]={
 			domain:row.site_domain,
 			groups:{},
-			groupNames:{},
+			groupNameLookup:{},
 			groupLookup:{},
 			options:{}
 		};
@@ -105,15 +107,23 @@
 	site_option_group_deleted=#db.param(0)# ";
 	qGroup=db.execute("qGroup", "", 10000, "query", false);
 
-
+	arrError=["<h2>It's ok to ignore some of the differences, since the sites might be different on purpose and orphaned fields don't break anything.</h2>"];
+	tempGroupNameLookup={};
 	for(group in qGroup){
+		tempGroupNameLookup[group.site_option_group_id&":"&group.site_id]=group.site_option_group_name;
+		if(structkeyexists(ss.excludeGroupStruct, group.site_option_group_name)){
+			continue; // skip
+		}
 		groups=siteStruct[group.site_id].groups;
 		group.arrGroupName=[];
 		groups[group.site_option_group_id]=group;
-		siteStruct[group.site_id].groupNames["0"]="(no group)";
+		siteStruct[group.site_id].groupNameLookup["0"]="(no group)";
 		
 	}
 	for(group in qGroup){
+		if(structkeyexists(ss.excludeGroupStruct, group.site_option_group_name)){
+			continue; // skip
+		}
 		groups=siteStruct[group.site_id].groups;
 		currentGroup=groups[group.site_option_group_id];
 		i=0;
@@ -122,19 +132,24 @@
 			if(currentGroup.site_option_group_parent_id EQ 0){
 				break;
 			}
-			currentGroup=groups[currentGroup.site_option_group_parent_id];
-			i++;
-			if(i GT 50){
-				throw("Detected infinite loop for #currentGroup.site_option_group_id# parent ids");
+			if(not structkeyexists(groups, currentGroup.site_option_group_parent_id)){
+				arrayAppend(arrError, currentGroup.site_option_group_name&" with site_option_group_id:"&currentGroup.site_option_group_id&" may be orphaned in site_id:#group.site_id# | #siteStruct[group.site_id].domain# - loop was broken to avoid infinite loop<br>");
+				break;
+			}else{
+				currentGroup=groups[currentGroup.site_option_group_parent_id];
+				i++;
+				if(i GT 50){
+					throw("Detected infinite loop for #currentGroup.site_option_group_id# parent ids");
+				}
 			}
 		}
 		siteStruct[group.site_id].groups[group.site_option_group_id].groupName=arrayToList(groups[group.site_option_group_id].arrGroupName, " -> "); 
-		siteStruct[group.site_id].groupNames[group.site_option_group_id]=currentGroup.groupName;
+		siteStruct[group.site_id].groupNameLookup[group.site_option_group_id]=siteStruct[group.site_id].groups[group.site_option_group_id].groupName;
 		siteStruct[group.site_id].groupLookup[siteStruct[group.site_id].groups[group.site_option_group_id].groupName]=group;
 	} 
 	/*for(i in siteStruct){
-	 for(n in siteStruct[i].groupNames){
-	 	writedump(siteStruct[i].groupNames[n]);
+	 for(n in siteStruct[i].groupNameLookup){
+	 	writedump(siteStruct[i].groupNameLookup[n]);
 	 }
 	}*/ 
 
@@ -146,7 +161,18 @@
 	qOption=db.execute("qOption");
 
 	for(option in qOption){ 
-		groupName=siteStruct[option.site_id].groupNames[option.site_option_group_id];
+		if(not structkeyexists(tempGroupNameLookup, option.site_option_group_id&":"&option.site_id)){
+			arrayAppend(arrError, "a) option.site_id: #option.site_id# has missing group: site_option_group_id: #option.site_option_group_id# is missing for option name: #option.site_option_name#<br>");
+			continue;
+		}
+		if(structkeyexists(ss.excludeGroupStruct, tempGroupNameLookup[option.site_option_group_id&":"&option.site_id])){
+			continue; // skip
+		}
+		if(not structkeyexists(siteStruct[option.site_id].groupNameLookup, option.site_option_group_id)){
+			arrayAppend(arrError, "b) option.site_id: #option.site_id# has missing group: site_option_group_id: #option.site_option_group_id# is missing for option name: #option.site_option_name#<br>");
+			continue;
+		}
+		groupName=siteStruct[option.site_id].groupNameLookup[option.site_option_group_id];
 		if(not structkeyexists(siteStruct[option.site_id].options, groupName)){
 			siteStruct[option.site_id].options[groupName]={};
 		}
@@ -154,8 +180,7 @@
 	}
 
 	primarySite=siteStruct[primarySiteId];
-	structdelete(siteStruct, primarySiteId);
-	arrError=[];
+	structdelete(siteStruct, primarySiteId); 
 
 	ignoreGroupSettings={
 		"arrGroupName":true,
@@ -201,6 +226,10 @@
 			for(optionName in site.options[groupName]){
 				option=site.options[groupName][optionName]; 
 				currentGroup=siteStruct[group.site_id].groupLookup[groupName];
+				if(not structkeyexists(primarySite.groupLookup, groupName)){
+					arrayAppend(arrError, "groupName: #groupName# is missing in primarySite: primarySite: #primarySite.domain#");
+					continue;
+				}
 
 				// get the primary group and options: 
 				primaryGroup=primarySite.groupLookup[groupName];
