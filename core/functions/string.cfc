@@ -1650,5 +1650,47 @@ abort;
 		</script>
 	</cfif>
 </cffunction>
+
+
+<!--- 
+jwtResult=application.zcore.functions.zJWTEncode(serializeJson({ test:true}), "secret", "HS256");
+if(not jwtResult.success){
+	throw("Problem encoding jwt:"&jwt);
+} --->
+<cffunction name="zJWTEncode" localmode="modern" access="public" returntype="boolean">
+	<cfargument name="jsonString" type="string" required="yes">
+	<cfargument name="key" type="string" required="yes">
+	<cfargument name="algorithm" type="string" required="yes">
+	<cfscript>
+	result=application.zcore.functions.zSecureCommand("jwtEncode"&chr(9)&arguments.jsonString&chr(9)&arguments.key&chr(9)&arguments.algorithm, 20);
+	if(result EQ "0"){
+		return {success:false};
+	}else{
+		return {success:true, jwt:result};
+	}
+	</cfscript>
+</cffunction>
+
+<!--- 
+jwtResult=application.zcore.functions.zJWTEncode(serializeJson({ test:true}), "secret", "HS256");
+decodedResult=application.zcore.functions.zJWTDecode(jwtResult.jwt, "secret", "HS256");
+if(not decodedResult.success){
+	throw("Problem decoding jwt:"&jwt);
+}
+writedump(decodedResult.json);
+ --->
+<cffunction name="zJWTDecode" localmode="modern" access="public" returntype="boolean">
+	<cfargument name="jwtString" type="string" required="yes">
+	<cfargument name="key" type="string" required="yes">
+	<cfargument name="algorithm" type="string" required="yes">
+	<cfscript>
+	result=application.zcore.functions.zSecureCommand("jwtDecode"&chr(9)&arguments.jwtString&chr(9)&arguments.key&chr(9)&arguments.algorithm, 20);
+	if(result EQ "0"){
+		return {success:false};
+	}else{
+		return {success:true, json:deserializeJson(result)};
+	}
+	</cfscript>
+</cffunction>
 </cfoutput>
 </cfcomponent>

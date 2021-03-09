@@ -1,4 +1,7 @@
 <?php
+
+require("php-jwt/src/JWT.php");
+use \Firebase\JWT\JWT;
 require("library.php");
 set_time_limit(70);
 ini_set('memory_limit', '512M');
@@ -42,6 +45,8 @@ saveFaviconSet#chr(9)#sourceFilePath#chr(9)#destinationPath
 convertFileCharsetISO88591toUTF8#chr(9)#sourceFilePath
 gitClone#chr(9)#cloneLink#chr(9)#homedir
 installSublimeProjectFiles#chr(9)#listOfShortDomainPaths
+jwtEncode#chr(9)#jsonString#chr(9)#key
+jwtDecode#chr(9)#jsonString#chr(9)#key#chr(9)#algorithm  (usually HS256)
 */
 
 function processContents($contents){
@@ -141,6 +146,10 @@ function processContents($contents){
 		return gitClone($a);
 	}else if($contents =="installSublimeProjectFiles"){
 		return installSublimeProjectFiles($a);
+	}else if($contents =="jwtEncode"){
+		return jwtEncode($a);
+	}else if($contents =="jwtDecode"){
+		return jwtDecode($a);
 	}
 	return "";
 }
@@ -1517,6 +1526,40 @@ function installSublimeProjectFiles($a){
 		}
 	}
 	return "1";
+}
+function jwtEncode($a){
+	if(count($a) != 3){
+		return "0";
+	}
+	$key = $a[1];
+	JWT::$leeway = 60; // $leeway in seconds
+	$payload=json_decode($a[0]);
+	$algorithm=$a[2];
+	$jwt = JWT::encode($payload, $key, $algorithm);
+ 	return $jwt;
+}
+// $a=array('{"test":true}',	'secret',	'HS256');
+// $jwt=jwtEncode($a);
+// echo $jwt;
+// $a=array($jwt,	'secret',	'HS256');
+// var_dump( jwtDecode($a));
+// exit;
+function jwtDecode($a){
+	if(count($a) != 3){
+		return "0";
+	}
+	$key = $a[1];
+	JWT::$leeway = 60; // $leeway in seconds
+	$jwt=$a[0];
+	$algorithm = $a[2];
+	/**
+	 * IMPORTANT:
+	 * You must specify supported algorithms for your application. See
+	 * https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40
+	 * for a list of spec-compliant algorithms.
+	 */
+	$decoded = JWT::decode($jwt, $key, array($algorithm));
+	return json_encode($decoded); 
 }
 function getImageMagickConvertApplyMask($a){
 	set_time_limit(100);

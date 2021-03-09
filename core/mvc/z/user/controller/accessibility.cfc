@@ -17,11 +17,6 @@
 	application.zcore.template.setTag("pagenav",zpagenav);
 	</cfscript>
 
-	<cfif application.zcore.user.checkGroupAccess("administrator")>
-		<div class="z-float" style="border:1px solid ##900; padding:10px;">
-			Note for administrators: If you wish to override the content of this page, please create a page in the manager and override the url to be "/z/user/accessibility/index".
-		</div>
-	</cfif>
 	<cfif application.zcore.app.siteHasApp("content")>
 		<cfscript>
 		ts=structnew();
@@ -37,6 +32,11 @@
 		<cfset textMissing=true>
 	</cfif>
 	<cfif textMissing> 
+		<cfif application.zcore.user.checkGroupAccess("administrator")>
+			<div class="z-float" style="border:1px solid ##900; padding:10px;">
+				Note for administrators: If you wish to override the content of this page, please create a page in the manager and override the url to be "/z/user/accessibility/index".
+			</div>
+		</cfif>
 		<p>We wish to provide an online experience that works well for everyone and we continue to improve our web site to work according to best practices. If you have any trouble using our web site, please contact us and help us improve.</p>
 
 		<cfscript>

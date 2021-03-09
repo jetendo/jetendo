@@ -91,6 +91,8 @@ $commandTypeLookup["notifyBindZone"]="serveradministrator";
 $commandTypeLookup["reloadBindZone"]="serveradministrator";
 $commandTypeLookup["renameSite"]="serveradministrator";
 $commandTypeLookup["tarZipGlobalDatabase"]="serveradministrator";
+$commandTypeLookup["jwtEncode"]="serveradministrator";
+$commandTypeLookup["jwtDecode"]="serveradministrator";
 
 $runningThreads=0;
 

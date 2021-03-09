@@ -729,7 +729,7 @@
 	}
 	savecontent variable="htmlWeb"{ 
 		echo('<p>&nbsp;</p>');
-		echo(form.inquiries_admin_comments);
+		echo(application.zcore.functions.zso(form, "inquiries_admin_comments"));
 	} 
 	savecontent variable="emailHTML"{
 		iemailCom=application.zcore.functions.zcreateobject("component", "zcorerootmapping.com.app.inquiriesFunctions");
