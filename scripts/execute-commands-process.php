@@ -1,6 +1,6 @@
 <?php
 
-require("php-jwt/src/JWT.php");
+require("php-jwt/JWT.php");
 use \Firebase\JWT\JWT;
 require("library.php");
 set_time_limit(70);
