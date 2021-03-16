@@ -37,6 +37,12 @@
 		form.inquiries_spam_description="zset9 was wrong";
 		//application.zcore.functions.zredirect('/');
 	}*/
+	if(application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1){
+		if(not application.zcore.functions.zVerifyRecaptcha()){
+			application.zcore.status.setStatus(request.zsid, "The ReCaptcha security phrase wasn't entered correctly. Please try again.", form, true);
+			application.zcore.functions.zRedirect("/z/listing/inquiry-pop/index?modalpopforced=#form.modalpopforced#&zsid=#Request.zsid#&content_id=#form.content_id#");
+		}
+	}
 	if(application.zcore.functions.zso(form, 'js3811') NEQ "j219"){
 		form.inquiries_spam=1; 
 		form.inquiries_spam_description="js3811 value not set"; 
@@ -336,6 +342,14 @@
 	<input name="Email" type="text" class="formtxt" id="Email" value="<cfif application.zcore.functions.zso(form, 'email') NEQ "">#form.email#<cfelseif not application.zcore.user.checkGroupAccess("administrator")>#application.zcore.functions.zso(request.zsession, 'inquiries_email')#</cfif>" />
 	</td>
 	</tr>
+	<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
+		<tr>
+		<td>&nbsp;</td>
+			<td>
+			#application.zcore.functions.zDisplayRecaptcha()#
+			</td>
+		</tr>
+	</cfif>
 	<tr><td colspan="4"><input type="submit" style="font-size:14px; padding:5px; line-height:14px;" name="search1" value="Submit" /> 
 	<cfif application.zcore.app.getAppData("listing").sharedStruct.optionStruct.mls_option_inquiry_pop_forced EQ 0>
 	<input type="button" name="cancel1" value="No Thanks" onclick="window.parent.zCloseModal();" /> </cfif> | 

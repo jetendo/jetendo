@@ -119,6 +119,12 @@
 			inquiries_property_city= qCity.city_name;
 		}
 	}
+	if(application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1){
+		if(not application.zcore.functions.zVerifyRecaptcha()){
+			application.zcore.status.setStatus(request.zsid, "The ReCaptcha security phrase wasn't entered correctly. Please try again.", form, true);
+			application.zcore.functions.zRedirect("/z/listing/inquiry/index?modalpopforced=#form.modalpopforced#&zsid=#Request.zsid#&content_id=#form.content_id#");
+		}
+	}
 	if(form.modalpopforced EQ 1){
 		if(application.zcore.functions.zso(form, 'js3811') NEQ "j219"){
 			form.inquiries_spam=1; 
@@ -410,6 +416,14 @@
 					<label for="inquiries_buyer0">Selling</label> </div>
 			
 			</div>
+		<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
+			<div class="tr">
+				<div class="th">&nbsp;</div>
+				<div class="td">
+					#application.zcore.functions.zDisplayRecaptcha()#
+				</div>
+			</div>
+		</cfif>
 			<div class="tr">
 				<div class="th">&nbsp;</div>
 				<div class="td"><button type="submit" name="submit">Send Inquiry</button>

@@ -1822,12 +1822,13 @@
 			<td><input name="site_require_captcha" type="checkbox" value="1" <cfif form.site_require_captcha EQ 1>checked="checked"</cfif> style="background:none; border:none;"> Require Captcha By Default on Public Forms?</td>
 		</tr>
 		<tr>
-			<td style="vertical-align:top; width:140px;">Recaptcha Secret Key</td>
-			<td><input name="site_recaptcha_secretkey" type="text" value="#htmleditformat(form.site_recaptcha_secretkey)#" /> (Must register each site <a href="https://www.google.com/recaptcha/admin" target="_blank">here</a></td>
+			<td style="vertical-align:top; width:140px;">Recaptcha Site Key</td>
+			<td><input name="site_recaptcha_sitekey" type="text" value="#htmleditformat(form.site_recaptcha_sitekey)#" /><br>
+			Only works with v2 checkbox method</td>
 		</tr>
 		<tr>
-			<td style="vertical-align:top; width:140px;">Recaptcha Site Key</td>
-			<td><input name="site_recaptcha_sitekey" type="text" value="#htmleditformat(form.site_recaptcha_sitekey)#" /></td>
+			<td style="vertical-align:top; width:140px;">Recaptcha Secret Key</td>
+			<td><input name="site_recaptcha_secretkey" type="text" value="#htmleditformat(form.site_recaptcha_secretkey)#" /><br>(Must register each site <a href="https://www.google.com/recaptcha/admin" target="_blank">here</a></td>
 		</tr>
 		<tr>
 			<td style="vertical-align:top; width:140px;">&nbsp;</td>

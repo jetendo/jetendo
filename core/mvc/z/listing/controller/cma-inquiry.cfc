@@ -37,6 +37,12 @@
 		myForm.inquiries_email.friendlyName = "Email Address";
 		myForm.inquiries_email.email = true;
 	}
+	if(application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1){
+		if(not application.zcore.functions.zVerifyRecaptcha()){
+			application.zcore.status.setStatus(request.zsid, "The ReCaptcha security phrase wasn't entered correctly. Please try again.", form, true);
+			application.zcore.functions.zRedirect("/z/listing/cma-inquiry/index?modalpopforced=#form.modalpopforced#&zsid=#Request.zsid#&content_id=#form.content_id#");
+		}
+	}
 	myForm.inquiries_city.required = true;
 	myForm.inquiries_city.friendlyName = "City";	
 	myForm.inquiries_property_address.required = true;
@@ -349,6 +355,14 @@
 				<td style="vertical-align:top; ">Comments:</td>
 				<td><textarea name="inquiries_comments" cols="50" rows="5">#form.inquiries_comments#</textarea></td>
 			</tr>
+			<cfif application.zcore.functions.zso(request.zos.globals, 'requireCaptcha', true, 0) EQ 1>
+				<tr>
+				<td>&nbsp;</td>
+					<td>
+					#application.zcore.functions.zDisplayRecaptcha()#
+					</td>
+				</tr>
+			</cfif>
 			<tr>
 				<td>&nbsp;</td>
 				<td><button type="submit" name="submit">Submit CMA Request</button>
